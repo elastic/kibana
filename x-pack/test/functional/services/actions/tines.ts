@@ -35,9 +35,9 @@ export function ActionsTinesServiceProvider(
 
     async setConnectorFields({ name, url, email, token }: ConnectorFormFields) {
       await testSubjects.setValue('nameInput', name);
-      await testSubjects.setValue('tinesUrlInput', url);
-      await testSubjects.setValue('tinesEmailInput', email);
-      await testSubjects.setValue('tinesTokenInput', token);
+      await testSubjects.setValue('config.url-input', url);
+      await testSubjects.setValue('secrets.email-input', email);
+      await testSubjects.setValue('secrets.token-input', token);
     },
 
     async updateConnectorFields(fields: ConnectorFormFields) {

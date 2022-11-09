@@ -42,6 +42,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
         '.jira',
         '.resilient',
         '.teams',
+        '.tines',
         '.opsgenie',
       ]);
     });

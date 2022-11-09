@@ -11,10 +11,13 @@ import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import { createConnector, getConnectorByName } from './utils';
 import {
-  TinesSimulator,
   tinesAgentWebhook,
   tinesStory1,
 } from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/tines_simulation';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -22,18 +25,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
   const actions = getService('actions');
   const browser = getService('browser');
-  const configService = getService('config');
   const comboBox = getService('comboBox');
   let objectRemover: ObjectRemover;
-  let url: string;
-
-  const simulator = new TinesSimulator({
-    proxy: {
-      config: configService.get('kbnTestServer.serverArgs'),
-    },
-  });
+  let simulatorUrl: string;
 
   // isEnabled helper uses "disabled" attribute, testSubjects.isEnabled() gives inconsistent results for comboBoxes.
   const isEnabled = async (selector: string) =>
@@ -42,11 +39,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Tines', () => {
     before(async () => {
       objectRemover = new ObjectRemover(supertest);
-      url = await simulator.start();
+      // url = await simulator.start();
+      simulatorUrl = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.TINES)
+      );
     });
 
     after(async () => {
-      simulator.close();
+      // simulator.close();
       await objectRemover.removeAll();
     });
 
@@ -60,7 +60,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await actions.tines.createNewConnector({
           name: connectorName,
-          url,
+          url: 'https://test.tines.com',
           email: 'test@foo.com',
           token: 'apiToken',
         });
@@ -96,7 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
         await actions.tines.updateConnectorFields({
           name: updatedConnectorName,
-          url,
+          url: 'https://test.tines.com',
           email: 'test@foo.com',
           token: 'apiToken',
         });
@@ -271,7 +271,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const createTinesConnector = async (name: string) => {
       return createConnector({
         name,
-        config: { url },
+        config: { url: simulatorUrl },
         secrets: { email: 'test@foo.com', token: 'apiToken' },
         connectorTypeId: '.tines',
         supertest,
