@@ -277,26 +277,27 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
           />
         </div>
 
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="inspect" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {i18n.translate('unifiedSearch.filter.filterBar.preview', {
-              defaultMessage: 'Preview',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="s" />
-
-        <FilterBadgeGroup
-          filters={filters}
-          dataViews={this.props.indexPatterns}
-          isRootLevel={true}
-        />
+        <EuiFormRow
+          fullWidth
+          hasEmptyLabelSpace={true}
+          label={
+            <strong>
+              <FormattedMessage
+                id="unifiedSearch.filter.filterBar.preview"
+                defaultMessage="{icon} Preview"
+                values={{
+                  icon: <EuiIcon type="inspect" size="s" />,
+                }}
+              />
+            </strong>
+          }
+        >
+          <FilterBadgeGroup
+            filters={filters}
+            dataViews={this.props.indexPatterns}
+            isRootLevel={true}
+          />
+        </EuiFormRow>
       </>
     );
   }

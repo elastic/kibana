@@ -11,6 +11,7 @@ import type { Filter, BooleanRelation } from '@kbn/es-query';
 import { EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { css } from '@emotion/css';
+import { FilterBadgeErrorBoundary } from './filter_badge_error_boundary';
 import { FilterExpressionBadge } from './filter_badge_expression';
 
 export interface FilterBadgeGroupProps {
@@ -43,7 +44,7 @@ export function FilterBadgeGroup({
   isRootCombinedFilterNegate,
 }: FilterBadgeGroupProps) {
   return (
-    <>
+    <FilterBadgeErrorBoundary>
       {filters.map((filter, index, acc) => (
         <>
           <FilterExpressionBadge
@@ -58,7 +59,7 @@ export function FilterBadgeGroup({
           ) : null}
         </>
       ))}
-    </>
+    </FilterBadgeErrorBoundary>
   );
 }
 

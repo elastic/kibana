@@ -16,6 +16,7 @@ import { css } from '@emotion/css';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { FilterContent } from './filter_content';
 import { getBooleanRelationType } from '../utils';
+import { FilterBadgeInvalidPlaceholder } from './filter_badge_invalid';
 
 export interface FilterBadgeExpressionProps {
   filter: Filter;
@@ -37,6 +38,11 @@ const FilterBadgeContent = ({ filter, dataViews, filterLabelStatus }: FilterBadg
     ? filterLabelStatus
     : getDisplayValueFromFilter(filter, dataViews);
   const fieldLabel = getFieldDisplayValueFromFilter(filter, dataViews);
+
+  if (!(valueLabel && filter)) {
+    return <FilterBadgeInvalidPlaceholder />;
+  }
+
   return <FilterContent filter={filter} valueLabel={valueLabel} fieldLabel={fieldLabel} />;
 };
 

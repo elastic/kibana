@@ -44,6 +44,8 @@ function updateField(filter: Filter, field?: DataViewField) {
     meta: {
       ...filter.meta,
       key: field?.name,
+      // @todo: check why we need to pass "key" and "field" with the same data
+      field: field?.name,
       params: { query: undefined },
       value: undefined,
       type: undefined,
