@@ -10,3 +10,4 @@ export * from './indicators';
 export * from './error_budget';
 export * from './duration';
 export * from './common';
+export * from './time_window';
