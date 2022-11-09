@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSideBar_Deprecated as EuiPageSideBar,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
@@ -42,6 +43,7 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../hooks/use_saved_search';
 
 const EMPTY_FIELD_LIST: DataViewField[] = [];
+const fieldSearchDescriptionId = htmlIdGenerator()();
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
@@ -358,6 +360,7 @@ export function DiscoverSidebarComponent({
               types={fieldTypes}
               presentFieldTypes={presentFieldTypes}
               isPlainRecord={isPlainRecord}
+              fieldSearchDescriptionId={fieldSearchDescriptionId}
             />
           </form>
         </EuiFlexItem>
@@ -374,6 +377,7 @@ export function DiscoverSidebarComponent({
             renderFieldItem={renderFieldItem}
             fieldsExistInIndex={Boolean(allFields?.length)}
             scrollToTopResetCounter={scrollToTopResetCounter}
+            screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
           />
         </EuiFlexItem>
         {!!editField && (

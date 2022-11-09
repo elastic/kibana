@@ -137,6 +137,19 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                           },
                         }
                       ),
+                    fieldGroups.PopularFields &&
+                      (!fieldGroups.PopularFields?.hideIfEmpty ||
+                        fieldGroups.PopularFields?.fields?.length > 0) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForPopularFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{popularFields} popular {popularFields, plural, one {field} other {fields}}.',
+                          values: {
+                            popularFields: fieldGroups.PopularFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
                     fieldGroups.AvailableFields?.fields &&
                       i18n.translate(
                         'unifiedFieldList.fieldListGrouped.fieldSearchForAvailableFieldsLiveRegion',
@@ -145,19 +158,6 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                             '{availableFields} available {availableFields, plural, one {field} other {fields}}.',
                           values: {
                             availableFields: fieldGroups.AvailableFields.fields.length,
-                          },
-                        }
-                      ),
-                    fieldGroups.PopularFields &&
-                      (!fieldGroups.PopularFields?.hideIfEmpty ||
-                        fieldGroups.PopularFields?.fields?.length > 0) &&
-                      i18n.translate(
-                        'unifiedFieldList.fieldListGrouped.fieldSearchForPopularFieldsLiveRegion',
-                        {
-                          defaultMessage:
-                            '{popularFields} empty {popularFields, plural, one {field} other {fields}}.',
-                          values: {
-                            popularFields: fieldGroups.PopularFields?.fields?.length || 0,
                           },
                         }
                       ),

@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiProgress } from '@elastic/eui';
-import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
+import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
@@ -31,6 +31,8 @@ import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public
 import { resetExistingFieldsCache } from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { type DataTableRecord } from '../../../../types';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -108,11 +110,11 @@ jest.mock('../../utils/calc_field_counts', () => ({
 
 jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
 
-function getCompProps(): DiscoverSidebarResponsiveProps {
+function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarResponsiveProps {
   const dataView = stubLogstashDataView;
   dataView.toSpec = jest.fn(() => ({}));
 
-  const hits = getDataTableRecords(dataView);
+  const hits = options?.hits ?? getDataTableRecords(dataView);
 
   for (const hit of hits) {
     for (const key of Object.keys(hit.flattened)) {
@@ -266,6 +268,10 @@ describe('discover responsive sidebar', function () {
       fields: ['extension'],
     });
 
+    expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+    );
+
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
   });
 
@@ -311,6 +317,10 @@ describe('discover responsive sidebar', function () {
       fetchStatus: 'complete',
       fields: ['bytes', 'extension', '_id', 'phpmemory'],
     });
+
+    expect(findTestSubject(compWithoutSelected, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+    );
   });
 
   it('should not calculate counts if documents are not fetched yet', async function () {
@@ -353,6 +363,10 @@ describe('discover responsive sidebar', function () {
     expect(emptyFieldsCount.text()).toBe('20');
     expect(metaFieldsCount.text()).toBe('2');
     expect(unmappedFieldsCount.exists()).toBe(false);
+
+    expect(findTestSubject(compWithoutDocuments, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+    );
 
     expect(mockCalcFieldCounts.mock.calls.length).toBe(0);
   });
@@ -397,13 +411,22 @@ describe('discover responsive sidebar', function () {
   });
   it('should allow filtering by string, and calcFieldCount should just be executed once', async function () {
     const comp = await mountComponent(props);
+
     expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('3');
+    expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+    );
+
     await act(async () => {
       await findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
         target: { value: 'bytes' },
       });
     });
+
     expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('1');
+    expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 popular field. 1 available field. 0 empty fields. 0 meta fields.'
+    );
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
 
@@ -457,6 +480,36 @@ describe('discover responsive sidebar', function () {
     expect(unmappedFieldsCount.exists()).toBe(false);
 
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+
+    expect(findTestSubject(compInViewerMode, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '2 selected fields. 4 available fields.'
+    );
+  });
+
+  it('should render correctly unmapped fields', async () => {
+    const propsWithUnmappedField = getCompProps({
+      hits: [
+        buildDataTableRecord(realHits[0], stubLogstashDataView),
+        buildDataTableRecord(
+          {
+            _index: 'logstash-2014.09.09',
+            _id: '1945',
+            _score: 1,
+            _source: {
+              extension: 'gif',
+              bytes: 10617.2,
+              test_unmapped: 'show me too',
+            },
+          },
+          stubLogstashDataView
+        ),
+      ],
+    });
+    const compWithUnmapped = await mountComponent(propsWithUnmappedField);
+
+    expect(findTestSubject(compWithUnmapped, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 selected field. 4 popular fields. 3 available fields. 1 unmapped field. 20 empty fields. 2 meta fields.'
+    );
   });
 
   it('should not show "Add a field" button in viewer mode', async () => {

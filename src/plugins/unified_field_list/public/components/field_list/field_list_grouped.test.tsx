@@ -413,4 +413,26 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       '2 selected fields. 25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.'
     );
   });
+
+  it('renders correctly when popular fields limit and custom selected fields are present', async () => {
+    const hookParams = {
+      dataViewId: dataView.id!,
+      allFields: manyFields,
+      popularFieldsLimit: 10,
+      sortedSelectedFields: [manyFields[0], manyFields[1]],
+    };
+    const wrapper = await mountGroupedList({
+      listProps: {
+        ...defaultProps,
+        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+      },
+      hookParams,
+    });
+
+    expect(
+      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
+    ).toBe(
+      '2 selected fields. 10 popular fields. 25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.'
+    );
+  });
 });

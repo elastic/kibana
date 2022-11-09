@@ -64,6 +64,11 @@ export interface Props {
    * is text base lang mode
    */
   isPlainRecord: boolean;
+
+  /**
+   * For a11y
+   */
+  fieldSearchDescriptionId?: string;
 }
 
 interface FieldTypeTableItem {
@@ -82,6 +87,7 @@ export function DiscoverFieldSearch({
   types,
   presentFieldTypes,
   isPlainRecord,
+  fieldSearchDescriptionId,
 }: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
@@ -328,6 +334,7 @@ export function DiscoverFieldSearch({
       <EuiFlexGroup responsive={false} gutterSize={'s'}>
         <EuiFlexItem>
           <EuiFieldSearch
+            aria-describedby={fieldSearchDescriptionId}
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
             fullWidth
