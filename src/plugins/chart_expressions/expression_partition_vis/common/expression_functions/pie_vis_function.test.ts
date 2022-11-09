@@ -30,6 +30,7 @@ describe('interpreter/functions#pieVis', () => {
 
   const visConfig: PieVisConfig = {
     addTooltip: true,
+    metricsToLabels: JSON.stringify({}),
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
     legendSize: LegendSize.SMALL,

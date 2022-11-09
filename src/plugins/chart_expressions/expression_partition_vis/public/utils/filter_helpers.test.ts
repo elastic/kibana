@@ -164,7 +164,11 @@ describe('getFilterClickData', () => {
       const { table: consolidatedTable } = consolidateMetricColumns(
         originalTable,
         ['0', '1'],
-        ['2', '3']
+        ['2', '3'],
+        {
+          2: 'metric1',
+          3: 'metric2',
+        }
       );
 
       it('generates the correct filters', () => {

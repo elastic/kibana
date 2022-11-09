@@ -126,6 +126,7 @@ Object {
           "type": "vis_dimension",
         },
       ],
+      "metricsToLabels": Object {},
       "nestedLegend": true,
       "palette": Object {
         "name": "kibana_palette",

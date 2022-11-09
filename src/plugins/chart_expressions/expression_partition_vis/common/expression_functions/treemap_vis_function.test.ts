@@ -34,6 +34,7 @@ describe('interpreter/functions#treemapVis', () => {
 
   const visConfig: TreemapVisConfig = {
     addTooltip: true,
+    metricsToLabels: JSON.stringify({}),
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
     nestedLegend: true,

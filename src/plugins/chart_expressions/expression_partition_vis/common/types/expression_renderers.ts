@@ -95,7 +95,7 @@ export interface TreemapVisConfig extends VisCommonConfig {
   nestedLegend: boolean;
 }
 
-export interface MosaicVisConfig extends Omit<VisCommonConfig, 'metrics' | 'metricToLabel'> {
+export interface MosaicVisConfig extends Omit<VisCommonConfig, 'metrics' | 'metricsToLabels'> {
   metric: ExpressionValueVisDimension | string;
   nestedLegend: boolean;
 }

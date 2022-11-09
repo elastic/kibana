@@ -17,6 +17,7 @@ import {
 export const config: RenderValue['visConfig'] = {
   addTooltip: true,
   legendDisplay: LegendDisplay.HIDE,
+  metricsToLabels: { percent_uptime: 'percent_uptime' },
   truncateLegend: true,
   respectSourceOrder: true,
   legendPosition: Position.Bottom,
