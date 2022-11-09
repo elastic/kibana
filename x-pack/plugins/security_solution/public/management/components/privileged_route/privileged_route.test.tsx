@@ -17,6 +17,9 @@ import { AdministrationSubTab } from '../../types';
 jest.mock('../../../common/hooks/use_experimental_features');
 
 describe('PrivilegedRoute', () => {
+  const superuserPattern = /must have the superuser role/;
+  const rbacPattern = /you must update privileges/;
+
   const componentTestId = 'component-to-render';
   let featureFlags: { endpointRbacEnabled: boolean; endpointRbacV1Enabled: boolean };
 
@@ -59,8 +62,8 @@ describe('PrivilegedRoute', () => {
       render();
 
       expect(renderResult.getByTestId(componentTestId)).toBeTruthy();
-      expect(renderResult.queryByText(/superuser/)).toBeNull();
-      expect(renderResult.queryByText(/privileges/)).toBeNull();
+      expect(renderResult.queryByText(superuserPattern)).toBeNull();
+      expect(renderResult.queryByText(rbacPattern)).toBeNull();
     });
 
     it('renders nothing if path is different', async () => {
@@ -69,8 +72,8 @@ describe('PrivilegedRoute', () => {
       render();
 
       expect(renderResult.queryByTestId(componentTestId)).toBeNull();
-      expect(renderResult.queryByText(/superuser/)).toBeNull();
-      expect(renderResult.queryByText(/privileges/)).toBeNull();
+      expect(renderResult.queryByText(superuserPattern)).toBeNull();
+      expect(renderResult.queryByText(rbacPattern)).toBeNull();
     });
   };
 
@@ -82,8 +85,9 @@ describe('PrivilegedRoute', () => {
 
       render();
 
-      expect(renderResult.getByText(/superuser/)).toBeTruthy();
+      expect(renderResult.getByText(superuserPattern)).toBeTruthy();
       expect(renderResult.queryByTestId(componentTestId)).toBeNull();
+      expect(renderResult.queryByText(rbacPattern)).toBeNull();
     });
   });
 
@@ -102,7 +106,8 @@ describe('PrivilegedRoute', () => {
 
         render();
 
-        expect(renderResult.getByText(/privileges/)).toBeTruthy();
+        expect(renderResult.getByText(rbacPattern)).toBeTruthy();
+        expect(renderResult.queryByText(superuserPattern)).toBeNull();
         expect(renderResult.queryByTestId(componentTestId)).toBeNull();
       });
 
@@ -111,7 +116,8 @@ describe('PrivilegedRoute', () => {
 
         render();
 
-        expect(renderResult.getByText(/superuser/)).toBeTruthy();
+        expect(renderResult.getByText(superuserPattern)).toBeTruthy();
+        expect(renderResult.queryByText(rbacPattern)).toBeNull();
         expect(renderResult.queryByTestId(componentTestId)).toBeNull();
       });
     });
@@ -129,7 +135,8 @@ describe('PrivilegedRoute', () => {
 
       render();
 
-      expect(renderResult.getByText(/privileges/)).toBeTruthy();
+      expect(renderResult.getByText(rbacPattern)).toBeTruthy();
+      expect(renderResult.queryByText(superuserPattern)).toBeNull();
       expect(renderResult.queryByTestId(componentTestId)).toBeNull();
     });
   });
