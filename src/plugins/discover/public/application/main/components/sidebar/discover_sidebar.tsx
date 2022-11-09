@@ -244,6 +244,21 @@ export function DiscoverSidebarComponent({
           }),
         };
       }
+      if (groupName === FieldsGroupNames.PopularFields) {
+        return {
+          helpText: i18n.translate('discover.fieldChooser.popularFieldsTooltip', {
+            defaultMessage: 'Add fields to the table that your organization frequently uses.',
+          }),
+        };
+      }
+      if (groupName === FieldsGroupNames.UnmappedFields) {
+        return {
+          helpText: i18n.translate('discover.fieldChooser.unmappedFieldsTooltip', {
+            defaultMessage:
+              "Add fields to the table that aren't explicitly mapped to a field data type.",
+          }),
+        };
+      }
     }, []);
   const fieldsExistenceReader = useExistingFieldsReader();
   const { fieldGroups, scrollToTopResetCounter } = useGroupedFields({
