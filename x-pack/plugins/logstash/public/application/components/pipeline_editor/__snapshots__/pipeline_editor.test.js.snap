@@ -259,10 +259,12 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={true}
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -275,8 +277,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -547,10 +551,12 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={true}
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -563,8 +569,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -835,10 +843,12 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={true}
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -851,8 +861,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -1094,10 +1106,12 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={false}
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -1110,8 +1124,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -1393,10 +1409,12 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={false}
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -1409,8 +1427,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -1652,10 +1672,12 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={false}
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -1668,8 +1690,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
