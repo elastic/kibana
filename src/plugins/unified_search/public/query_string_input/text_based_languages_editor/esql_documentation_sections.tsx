@@ -16,13 +16,12 @@ export const initialSection = (
       {
         defaultMessage: `## How it works
 
-Elasticsearch ESQL is a piped language where you can write aggregations, filters, transformations and projections in a single expression.
+Elasticsearch ESQL is a piped language where you can combine aggregations, filters, transformations, and projections in a single expression.
                     
-An example SQL query can be:
+ESQL query example:
                     
 \`\`\`
-from "index" 
-| stats average = avg("field")
+from "index" | stats average = avg("field") by "field2"
 \`\`\`
                                         
                                       `,
@@ -49,11 +48,13 @@ export const commands = {
             'unifiedSearch.query.textBasedLanguagesEditor.documentation.from.markdown',
             {
               defaultMessage: `### from
-The from command retrieves data from one or more datasets, such as an index. The from command must be the first command in a query or subquery and does not need a leading pipe.
-A dataset is a collection of data that you either want to search. For now, the only dataset that is supported is that of an index.
+Retrieves data from one or more datasets. A dataset is a collection of data that you want to search. The only supported dataset is an index. 
+In a query or subquery, you must use the from command first and it does not need a leading pipe.
+
+For example, to…
               
 \`\`\`
-from "test_emp" 
+from "index" 
 \`\`\`
             `,
               description:
@@ -73,9 +74,10 @@ from "test_emp"
             'unifiedSearch.query.textBasedLanguagesEditor.documentation.stats.markdown',
             {
               defaultMessage: `### stats...(by):
-Calculates aggregate statistics, such as average, count, and sum, over the incoming search results set. This is similar to SQL aggregation.
-If the stats command is used without a BY clause, only one row is returned, which is the aggregation over the entire incoming result set. If a BY clause is used, one row is returned for each distinct value in the field specified in the BY clause. The stats command is that the command returns only the fields used in the aggregation.
-You can use a wide range of statistical functions that you can use with the stats command. When you perform more than one aggregation, separate each aggregation with a comma.
+Calculates aggregate statistics, such as average, count, and sum, over the incoming search results set. Similar to SQL aggregation, if the stats command is used without a BY clause, only one row is returned, which is the aggregation over the entire incoming search results set. When you use a BY clause, one row is returned for each distinct value in the field specified in the BY clause. 
+The stats command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. When you perform more than one aggregation, separate each aggregation with a comma.
+
+For example, to…
               
 \`\`\`
 from "index" | stats average = avg("field")
@@ -97,8 +99,11 @@ from "index" | stats average = avg("field")
           markdown={i18n.translate(
             'unifiedSearch.query.textBasedLanguagesEditor.documentation.eval.markdown',
             {
-              defaultMessage: `### Eval
-The eval command calculates an expression and puts the resulting value into a search results field.
+              defaultMessage: `### eval
+Calculates an expression and puts the resulting value into a search results field.
+
+For example to...
+
 \`\`\`
 from "index" | stats average = avg("field") | eval new_average = average + 1
 \`\`\`
@@ -120,7 +125,9 @@ from "index" | stats average = avg("field") | eval new_average = average + 1
             'unifiedSearch.query.textBasedLanguagesEditor.documentation.sort.markdown',
             {
               defaultMessage: `### sort
-The sort command sorts all of the results by the specified fields. Results missing a given field are treated as having the smallest possible value of that field if descending or largest possible value of that field if ascending.
+Sorts all results by the specified fields. When in descending order, the results missing a field are considered the smallest possible value of the field, or the largest possible value of the field when in ascending order.
+
+For example to...
 
 \`\`\`
 from "index" | stats average = avg("field") | sort average desc
@@ -144,6 +151,9 @@ from "index" | stats average = avg("field") | sort average desc
             {
               defaultMessage: `### limit
 Returns the first search results, in search order, based on the <limit> specified.
+
+For example, to…
+              
 \`\`\`
 from "index" | limit 10
 \`\`\`
@@ -165,8 +175,10 @@ from "index" | limit 10
             'unifiedSearch.query.textBasedLanguagesEditor.documentation.where.markdown',
             {
               defaultMessage: `### where
-The where command uses <predicate-expressions> to filter search results. A predicate expression, when evaluated, returns either TRUE or FALSE. The where command only returns the results that evaluate to TRUE.
+Uses <predicate-expressions> to filter search results. A predicate expression, when evaluated, returns TRUE or FALSE. The where command only returns the results that evaluate to TRUE.
 
+For example, to…
+              
 \`\`\`
 from "index" where field="value"
 \`\`\`
@@ -205,7 +217,8 @@ export const mathematicalFunctions = {
             'unifiedSearch.query.textBasedLanguagesEditor.documentation.roundFunction.markdown',
             {
               defaultMessage: `### round
-Returns a number rounded to the decimal places specified by the precision. The default is to round to an integer.
+Returns a number rounded to the decimal, specified by the precision. The default is to round to an integer.
+
 \`\`\`
 from "index" where field="value" | 
 eval rounded = round("field", 3)
