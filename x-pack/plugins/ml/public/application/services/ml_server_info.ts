@@ -12,7 +12,6 @@ export interface CloudInfo {
   cloudId: string | null;
   isCloud: boolean;
   isCloudTrial: boolean;
-  trialEndDate: string | null;
   deploymentId: string | null;
 }
 
@@ -26,7 +25,6 @@ const cloudInfo: CloudInfo = {
   cloudId: null,
   isCloud: false,
   isCloudTrial: false,
-  trialEndDate: null,
   deploymentId: null,
 };
 
@@ -37,9 +35,9 @@ export async function loadMlServerInfo() {
     limits = resp.limits;
     cloudInfo.cloudId = resp.cloudId ?? null;
     cloudInfo.isCloud = resp.cloudId !== undefined;
-    cloudInfo.isCloudTrial = resp.trialEndDate !== undefined;
-    cloudInfo.trialEndDate = resp.trialEndDate ?? null;
+    cloudInfo.isCloudTrial = resp.isCloudTrial === true;
     cloudInfo.deploymentId = !resp.cloudId ? null : extractDeploymentId(resp.cloudId);
+
     return { defaults, limits, cloudId: cloudInfo };
   } catch (error) {
     return { defaults, limits, cloudId: cloudInfo };
