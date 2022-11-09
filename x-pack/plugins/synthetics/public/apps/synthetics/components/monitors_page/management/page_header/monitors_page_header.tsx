@@ -14,10 +14,7 @@ import { BETA_TOOLTIP_MESSAGE } from '../labels';
 export const MonitorsPageHeader = () => (
   <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
     <EuiFlexItem grow={false}>
-      <FormattedMessage
-        id="xpack.synthetics.monitors.pageHeader.title"
-        defaultMessage="Monitors"
-      />
+      <FormattedMessage id="xpack.synthetics.monitors.pageHeader.title" defaultMessage="Monitors" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <div>

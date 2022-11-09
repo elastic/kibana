@@ -13,27 +13,26 @@ import { MONITOR_ADD_ROUTE } from '../../../../../common/constants';
 import { SyntheticsSettingsContext } from '../../contexts/synthetics_settings_context';
 
 export const CreateMonitorButton: React.FC = () => {
+  const { basePath } = useContext(SyntheticsSettingsContext);
 
-    const { basePath } = useContext(SyntheticsSettingsContext);
-
-    const {
+  const {
     enablement: { isEnabled },
-    } = useEnablement();
+  } = useEnablement();
 
   return (
     <EuiButton
-          color="primary"
-          fill
-          iconSide="left"
-          iconType="plusInCircleFilled"
-          href={`${basePath}/app/synthetics${MONITOR_ADD_ROUTE}`}
-          isDisabled={!isEnabled}
-          data-test-subj="syntheticsAddMonitorBtn"
-        >
-        <FormattedMessage
+      color="primary"
+      fill
+      iconSide="left"
+      iconType="plusInCircleFilled"
+      href={`${basePath}/app/synthetics${MONITOR_ADD_ROUTE}`}
+      isDisabled={!isEnabled}
+      data-test-subj="syntheticsAddMonitorBtn"
+    >
+      <FormattedMessage
         id="xpack.synthetics.monitors.pageHeader.createButton.label"
         defaultMessage="Create Monitor"
-        />
+      />
     </EuiButton>
   );
 };

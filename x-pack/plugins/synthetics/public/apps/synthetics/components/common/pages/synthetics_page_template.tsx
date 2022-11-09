@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
@@ -30,7 +30,6 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
   } = useKibana<ClientPluginsStart>();
 
   const PageTemplateComponent = observability.navigation.PageTemplate;
-
 
   const { loading, error, hasData } = useSyntheticsDataView();
   const { inspectorAdapters } = useInspectorContext();

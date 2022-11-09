@@ -84,7 +84,7 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={items} style={{minWidth: 160}} />
+      <EuiContextMenuPanel size="s" items={items} style={{ minWidth: 160 }} />
     </EuiPopover>
   );
 };

@@ -114,7 +114,11 @@ export const OverviewGrid = memo(() => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {loaded && currentMonitors.length ? (
-        <EuiFlexGrid columns={4} gutterSize="m" data-test-subj="syntheticsOverviewGridItemContainer">
+        <EuiFlexGrid
+          columns={4}
+          gutterSize="m"
+          data-test-subj="syntheticsOverviewGridItemContainer"
+        >
           {currentMonitors.map((monitor) => (
             <EuiFlexItem
               key={`${monitor.id}-${monitor.location?.id}`}

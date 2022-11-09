@@ -46,10 +46,7 @@ export const MetricItem = ({
   const theme = useTheme();
 
   return (
-    <div
-      data-test-subj={`${monitor.name}-metric-item`}
-      style={{ height: '160px' }}
-    >
+    <div data-test-subj={`${monitor.name}-metric-item`} style={{ height: '160px' }}>
       {loaded ? (
         <EuiPanel
           paddingSize="none"

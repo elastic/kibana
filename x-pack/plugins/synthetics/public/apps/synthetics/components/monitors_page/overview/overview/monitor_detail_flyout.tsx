@@ -31,7 +31,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTitle,
-  useIsWithinMaxBreakpoint
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { SavedObject } from '@kbn/core/public';
 import { FetcherResult } from '@kbn/observability-plugin/public/hooks/use_fetcher';
@@ -181,21 +181,21 @@ function LocationSelect({
         <EuiDescriptionList compressed>
           <EuiDescriptionListTitle>{LOCATION_TITLE_TEXT}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-           
-            
             <EuiPopover
               button={
                 <>
                   <EuiLink
                     aria-label={LOCATION_SELECT_POPOVER_LINK_LABEL}
-                    onClick={() => setIsOpen(!isOpen)}>
+                    onClick={() => setIsOpen(!isOpen)}
+                  >
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>{currentLocation}</EuiFlexItem>
-                      <EuiFlexItem grow={false}><EuiIcon type="arrowDown" size="s" color="inherit" /></EuiFlexItem>
-                    </EuiFlexGroup>                    
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="arrowDown" size="s" color="inherit" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiLink>
                 </>
-                
               }
               isOpen={isOpen}
               closePopover={() => setIsOpen(false)}
@@ -250,15 +250,13 @@ function LocationSelect({
 
 function LoadingState() {
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%',}}>
+    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexItem>
     </EuiFlexGroup>
-  )
+  );
 }
-  
-
 
 export function MonitorDetailFlyout(props: Props) {
   const { id, onLocationChange } = props;
@@ -298,7 +296,12 @@ export function MonitorDetailFlyout(props: Props) {
   const isOverlay = useIsWithinMaxBreakpoint('xl');
 
   return (
-    <EuiFlyout size="600px" type={isOverlay ? "overlay" : "push"} onClose={props.onClose} paddingSize="none">
+    <EuiFlyout
+      size="600px"
+      type={isOverlay ? 'overlay' : 'push'}
+      onClose={props.onClose}
+      paddingSize="none"
+    >
       {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
       {status === FETCH_STATUS.LOADING && <LoadingState />}
       {status === FETCH_STATUS.SUCCESS && monitorSavedObject && (

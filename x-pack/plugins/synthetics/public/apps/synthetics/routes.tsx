@@ -7,14 +7,7 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPageHeaderProps,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiPageHeaderProps, useEuiTheme } from '@elastic/eui';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -157,9 +150,7 @@ const getRoutes = (
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {
         pageTitle: <MonitorsPageHeader />,
-        rightSideItems: [
-          <CreateMonitorButton />
-        ],
+        rightSideItems: [<CreateMonitorButton />],
         tabs: [
           {
             label: (
@@ -198,9 +189,7 @@ const getRoutes = (
       dataTestSubj: 'syntheticsMonitorManagementPage',
       pageHeader: {
         pageTitle: <MonitorsPageHeader />,
-        rightSideItems: [
-          <CreateMonitorButton />
-        ],
+        rightSideItems: [<CreateMonitorButton />],
         tabs: [
           {
             label: (
