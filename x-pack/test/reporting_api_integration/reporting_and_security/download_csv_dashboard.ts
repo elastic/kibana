@@ -394,6 +394,85 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('_id field is a big integer', () => {
+      before(async () => {
+        await Promise.all([
+          esArchiver.load('x-pack/test/functional/es_archives/reporting/big_int_id_field'),
+          kibanaServer.importExport.load(
+            'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field'
+          ),
+        ]);
+      });
+
+      after(async () => {
+        await Promise.all([
+          esArchiver.unload('x-pack/test/functional/es_archives/reporting/big_int_id_field'),
+          kibanaServer.importExport.unload(
+            'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field'
+          ),
+        ]);
+      });
+      it('passes through the value without mutation', async () => {
+        const { text } = (await generateAPI.getCSVFromSearchSource(
+          getMockJobParams({
+            browserTimezone: 'UTC',
+            version: '8.6.0',
+            searchSource: {
+              query: { query: '', language: 'kuery' },
+              fields: [{ field: '*', include_unmapped: 'true' }],
+              index: 'c424ce04-f440-4f48-aa0c-534da84d06f6',
+              sort: [{ timestamp: 'desc' }],
+              filter: [
+                {
+                  meta: {
+                    index: 'c424ce04-f440-4f48-aa0c-534da84d06f6',
+                    params: {},
+                    field: 'timestamp',
+                  },
+                  query: {
+                    range: {
+                      timestamp: {
+                        format: 'strict_date_optional_time',
+                        gte: '2007-10-25T21:18:23.905Z',
+                        lte: '2022-10-30T00:00:00.000Z',
+                      },
+                    },
+                  },
+                },
+              ],
+              parent: {
+                query: { query: '', language: 'kuery' },
+                filter: [],
+                parent: {
+                  filter: [
+                    {
+                      meta: {
+                        index: 'c424ce04-f440-4f48-aa0c-534da84d06f6',
+                        params: {},
+                        field: 'timestamp',
+                      },
+                      query: {
+                        range: {
+                          timestamp: {
+                            format: 'strict_date_optional_time',
+                            gte: '2007-10-25T21:18:23.905Z',
+                            lte: '2022-10-30T00:00:00.000Z',
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            columns: [],
+            title: 'testsearch',
+          })
+        )) as supertest.Response;
+        expectSnapshot(text).toMatch();
+      });
+    });
+
     describe('validation', () => {
       it('Return a 404', async () => {
         const { body } = (await generateAPI.getCSVFromSearchSource(

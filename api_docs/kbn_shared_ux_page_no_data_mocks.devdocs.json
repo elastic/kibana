@@ -34,7 +34,13 @@
             "text": "NoDataPageStorybookMock"
           },
           " extends ",
-          "AbstractStorybookMock",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
           "<",
           "NoDataPageProps",
           ", ",
@@ -248,7 +254,13 @@
             "label": "dependencies",
             "description": [],
             "signature": [
-              "NoDataCardStorybookMock",
+              {
+                "pluginId": "@kbn/shared-ux-card-no-data-mocks",
+                "scope": "common",
+                "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
+                "section": "def-common.StorybookMock",
+                "text": "StorybookMock"
+              },
               "[]"
             ],
             "path": "packages/shared-ux/page/no_data/mocks/src/storybook.ts",
@@ -445,9 +457,21 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "ArgumentParams",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.ArgumentParams",
+            "text": "ArgumentParams"
+          },
           "<PropArguments, {}> & ",
-          "NoDataCardStorybookParams"
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-mocks",
+            "scope": "common",
+            "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
+            "section": "def-common.Params",
+            "text": "Params"
+          }
         ],
         "path": "packages/shared-ux/page/no_data/mocks/src/storybook.ts",
         "deprecated": false,

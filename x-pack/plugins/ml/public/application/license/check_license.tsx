@@ -84,3 +84,13 @@ export function hasLicenseExpired() {
 export function isFullLicense() {
   return mlLicense !== null && mlLicense.isFullLicense();
 }
+
+/**
+ * Check to see if the current license is trial.
+ *
+ * @export
+ * @returns {boolean}
+ */
+export function isTrialLicense() {
+  return mlLicense !== null && mlLicense.isTrialLicense();
+}

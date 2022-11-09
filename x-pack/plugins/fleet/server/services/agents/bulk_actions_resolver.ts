@@ -94,7 +94,7 @@ export class BulkActionsResolver {
     this.taskManager = taskManager;
   }
 
-  getTaskId(actionId: string, type: string) {
+  public getTaskId(actionId: string, type: string) {
     return `${type}:${actionId}`;
   }
 
@@ -102,9 +102,9 @@ export class BulkActionsResolver {
     actionParams: ActionParams,
     retryParams: RetryParams,
     taskType: string,
+    taskId: string,
     runAt?: Date
   ) {
-    const taskId = this.getTaskId(actionParams.actionId!, taskType);
     await this.taskManager?.ensureScheduled({
       id: taskId,
       taskType,

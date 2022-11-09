@@ -51,6 +51,11 @@ export default function (providerContext: FtrProviderContext) {
       {
         data_stream: {
           dataset: monitorType,
+          elasticsearch: {
+            privileges: {
+              indices: ['auto_configure', 'create_doc', 'read'],
+            },
+          },
           type: 'synthetics',
         },
         id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[0]?.id}`,
@@ -81,6 +86,11 @@ export default function (providerContext: FtrProviderContext) {
             {
               data_stream: {
                 dataset: 'browser.network',
+                elasticsearch: {
+                  privileges: {
+                    indices: ['auto_configure', 'create_doc', 'read'],
+                  },
+                },
                 type: 'synthetics',
               },
               id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[1]?.id}`,
@@ -105,6 +115,11 @@ export default function (providerContext: FtrProviderContext) {
             {
               data_stream: {
                 dataset: 'browser.screenshot',
+                elasticsearch: {
+                  privileges: {
+                    indices: ['auto_configure', 'create_doc', 'read'],
+                  },
+                },
                 type: 'synthetics',
               },
               id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[2]?.id}`,

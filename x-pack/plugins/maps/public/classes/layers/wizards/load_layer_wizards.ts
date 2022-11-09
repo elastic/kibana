@@ -7,6 +7,7 @@
 
 import { registerLayerWizardInternal } from './layer_wizard_registry';
 import { uploadLayerWizardConfig } from './file_upload_wizard';
+import { layerGroupWizardConfig } from './layer_group_wizard';
 import {
   esDocumentsLayerWizardConfig,
   esTopHitsLayerWizardConfig,
@@ -36,6 +37,7 @@ export function registerLayerWizards() {
   }
 
   registerLayerWizardInternal(uploadLayerWizardConfig);
+  registerLayerWizardInternal(layerGroupWizardConfig);
   registerLayerWizardInternal(esDocumentsLayerWizardConfig);
   registerLayerWizardInternal(choroplethLayerWizardConfig);
   registerLayerWizardInternal(clustersLayerWizardConfig);

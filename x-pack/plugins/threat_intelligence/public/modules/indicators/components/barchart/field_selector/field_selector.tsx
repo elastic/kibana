@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { SecuritySolutionDataViewBase } from '../../../../../types';
-import { RawIndicatorFieldId } from '../../../types';
+import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
 import { useStyles } from './styles';
 
 export const DROPDOWN_TEST_ID = 'tiIndicatorFieldSelectorDropdown';

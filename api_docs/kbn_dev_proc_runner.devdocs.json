@@ -47,7 +47,13 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "ToolingLog"
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "server",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-server.ToolingLog",
+                    "text": "ToolingLog"
+                  }
                 ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
@@ -229,7 +235,13 @@
         ],
         "signature": [
           "(log: ",
-          "ToolingLog",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "server",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-server.ToolingLog",
+            "text": "ToolingLog"
+          },
           ", fn: (procs: ",
           {
             "pluginId": "@kbn/dev-proc-runner",
@@ -252,7 +264,13 @@
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
             ],
             "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
             "deprecated": false,

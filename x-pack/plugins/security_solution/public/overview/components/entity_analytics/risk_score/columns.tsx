@@ -27,7 +27,7 @@ type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskSc
 
 export const getRiskScoreColumns = (
   riskEntity: RiskScoreEntity,
-  openEntityInTimeline: (entityName: string) => void
+  openEntityInTimeline: (entityName: string, oldestAlertTimestamp?: string) => void
 ): HostRiskScoreColumns => [
   {
     field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
@@ -94,7 +94,12 @@ export const getRiskScoreColumns = (
       <EuiLink
         data-test-subj="risk-score-alerts"
         disabled={alertCount === 0}
-        onClick={() => openEntityInTimeline(get('host.name', risk) ?? get('user.name', risk))}
+        onClick={() =>
+          openEntityInTimeline(
+            get('host.name', risk) ?? get('user.name', risk),
+            risk.oldestAlertTimestamp
+          )
+        }
       >
         <FormattedCount count={alertCount} />
       </EuiLink>
