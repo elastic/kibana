@@ -124,12 +124,12 @@ export async function fetchFrequentItems(
                 }
                 return p;
               }, {})
-            ).map(([key, values]) => {
-              if (values.length === 1) {
-                return { term: { [key]: values[0] } };
+            ).reduce<Array<{ term: Record<string, string | number> }>>((p, [key, values]) => {
+              for (const value of values) {
+                p.push({ term: { [key]: value } });
               }
-              return { terms: { [key]: values } };
-            }),
+              return p;
+            }, []),
           },
         },
       },
