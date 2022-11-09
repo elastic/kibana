@@ -46,12 +46,11 @@ cd "$KIBANA_BUILD_LOCATION"
 --csp.disableUnsafeEval=true  \
 --csp.strict=false  \
 --csp.warnLegacyBrowsers=false  \
---elasticsearch.hosts=http://localhost:9220  \
+--elasticsearch.hosts=http://localhost:9200  \
 --elasticsearch.password=changeme  \
 --elasticsearch.username=kibana_system  \
 --env.name=development \
 --savedObjects.maxImportPayloadBytes=10485760  \
---no-base-path=true  \
 --server.maxPayload=1679958  \
 --server.port=5620  \
 --server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d  \
@@ -67,15 +66,21 @@ export kibPid=$!
 # wait until we can login to kibana
 curl 'http://localhost:5620/internal/security/login' \
   -H 'Content-Type: application/json' \
-  -H 'kbn-version: 8.6.0' \
+  -H 'kbn-version: 8.6.0-SNAPSHOT' \
   -H 'x-kbn-context: %7B%22name%22%3A%22security_login%22%2C%22url%22%3A%22%2Flogin%22%7D' \
   --fail \
   --silent \
   --retry 120 \
   --retry-delay 5 \
-  --data-raw '{"providerType":"basic","providerName":"basic","currentURL":"http://localhost:5620/login?msg=LOGGED_OUT","params":{"username":"elastic","password":"changeme"}}' \
+  --data-raw '{"providerType":"basic","providerName":"basic","currentURL":"http://localhost:5620/login?next=%2F","params":{"username":"elastic","password":"changeme"}}' \
   --compressed
   > /dev/null
+
+
+cd "$KIBANA_DIR"
+
+node scripts/es_archiver load test/functional/fixtures/es_archiver/stress_test --es-url "$TEST_ES_URL"
+node scripts/kbn_archiver load test/functional/fixtures/kbn_archiver/stress_test --kibana-url "http://elastic:changeme@localhost:5620/"
 
 
 echo "--- 🔎 Shutdown Kibana"
