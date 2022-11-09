@@ -22,23 +22,19 @@ import {
 import * as i18n from './translations';
 
 /** The list of operators to display in the `Operator` select  */
-export const operatorLabels = (type: DataProviderType): EuiComboBoxOptionOption[] => [
+export const operatorLabels: EuiComboBoxOptionOption[] = [
   {
     label: i18n.IS,
   },
   {
     label: i18n.IS_NOT,
   },
-  ...(type === DataProviderType.default
-    ? [
-        {
-          label: i18n.IS_ONE_OF,
-        },
-        {
-          label: i18n.IS_NOT_ONE_OF,
-        },
-      ]
-    : []),
+  {
+    label: i18n.IS_ONE_OF,
+  },
+  {
+    label: i18n.IS_NOT_ONE_OF,
+  },
   {
     label: i18n.EXISTS,
   },
@@ -84,9 +80,12 @@ export const selectionsAreValid = ({
   const operator = selectedOperator.length > 0 ? selectedOperator[0].label : '';
 
   const fieldIsValid = browserFields && getAllFieldsByName(browserFields)[fieldId] != null;
-  const operatorIsValid = findIndex((o) => o.label === operator, operatorLabels(type)) !== -1;
+  const operatorIsValid = findIndex((o) => o.label === operator, operatorLabels) !== -1;
+  const isOneOfOperatorSelectionWithTemplate =
+    type === DataProviderType.template &&
+    (operator === i18n.IS_ONE_OF || operator === i18n.IS_NOT_ONE_OF);
 
-  return fieldIsValid && operatorIsValid;
+  return fieldIsValid && operatorIsValid && !isOneOfOperatorSelectionWithTemplate;
 };
 
 /** Returns a `QueryOperator` based on the user's Operator selection */
