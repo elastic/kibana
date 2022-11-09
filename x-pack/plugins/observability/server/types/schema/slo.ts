@@ -38,9 +38,9 @@ const sloSchema = t.type({
 });
 
 export {
-  sloSchema,
   budgetingMethodSchema,
-  occurencesBudgetingMethodSchema,
-  timeslicesBudgetingMethodSchema,
   objectiveSchema,
+  occurencesBudgetingMethodSchema,
+  sloSchema,
+  timeslicesBudgetingMethodSchema,
 };
