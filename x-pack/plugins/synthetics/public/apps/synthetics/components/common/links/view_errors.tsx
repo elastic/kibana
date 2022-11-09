@@ -25,6 +25,6 @@ export const ErrorsLink = ({ disabled }: { disabled?: boolean }) => {
   );
 };
 
-const VIEW_ERRORS = i18n.translate('xpack.synthetics.monitorSummary.createNewMonitor', {
+const VIEW_ERRORS = i18n.translate('xpack.synthetics.monitorSummary.viewErrors', {
   defaultMessage: 'View errors',
 });
