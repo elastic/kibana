@@ -195,9 +195,30 @@ export const UPLOAD_ERROR = i18n.translate(
   }
 );
 
-export const IMPORT_EXCEPTION_LIST = i18n.translate(
-  'xpack.securitySolution.lists.importExceptionListButton',
+export const IMPORT_EXCEPTION_LIST_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.manageExceptions.importExceptionList',
   {
     defaultMessage: 'Import exception list',
+  }
+);
+
+export const CREATE_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.manageExceptions.create',
+  {
+    defaultMessage: 'Create',
+  }
+);
+
+export const CREATE_SHARED_LIST_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.manageExceptions.createSharedListButton',
+  {
+    defaultMessage: 'create shared list',
+  }
+);
+
+export const CREATE_BUTTON_ITEM_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.manageExceptions.createItemButton',
+  {
+    defaultMessage: 'create exception item',
   }
 );
