@@ -110,6 +110,7 @@ describe('Detection rules, machine learning', () => {
       // With the #1912 ML rule improvement changes we enable jobs on rule creation.
       // Though, in cypress jobs enabling does not work reliably and job can be started or stopped.
       // Thus, we disable next check till we fix the issue with enabling jobs in cypress.
+      // Relevant ticket: https://github.com/elastic/security-team/issues/5389
       // cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'StoppedStopped');
       cy.get(MACHINE_LEARNING_JOB_ID).should(
         'have.text',
