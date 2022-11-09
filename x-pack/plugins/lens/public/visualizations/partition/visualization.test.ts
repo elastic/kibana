@@ -16,7 +16,7 @@ import {
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { FramePublicAPI } from '../../types';
+import { FramePublicAPI, Visualization } from '../../types';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
@@ -26,6 +26,12 @@ import { PaletteOutput } from '@kbn/coloring';
 jest.mock('../../id_generator');
 
 const LAYER_ID = 'l1';
+
+const findPrimaryGroup = (config: ReturnType<Visualization['getConfiguration']>) =>
+  config.groups.find((group) => group.groupId === 'primaryGroups');
+
+const findMetricGroup = (config: ReturnType<Visualization['getConfiguration']>) =>
+  config.groups.find((group) => group.groupId === 'metric');
 
 const pieVisualization = getPieVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
@@ -216,7 +222,30 @@ describe('pie_visualization', () => {
       });
 
       // palette should be assigned to the first non-collapsed dimension
-      expect(configuration.groups[0].accessors).toMatchInlineSnapshot(`Array []`);
+      expect(configuration.groups[0].accessors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "columnId": "1",
+            "triggerIcon": "aggregate",
+          },
+          Object {
+            "columnId": "2",
+            "palette": Array [
+              "red",
+              "black",
+            ],
+            "triggerIcon": "colorBy",
+          },
+          Object {
+            "columnId": "3",
+            "triggerIcon": "aggregate",
+          },
+          Object {
+            "columnId": "4",
+            "triggerIcon": undefined,
+          },
+        ]
+      `);
 
       const mosaicState = getExampleState();
       mosaicState.shape = PieChartTypes.MOSAIC;
@@ -234,7 +263,6 @@ describe('pie_visualization', () => {
 
       expect(mosaicConfiguration.groups.map(({ accessors }) => accessors)).toMatchInlineSnapshot(`
         Array [
-          Array [],
           Array [
             Object {
               "columnId": "1",
@@ -259,6 +287,7 @@ describe('pie_visualization', () => {
               "triggerIcon": undefined,
             },
           ],
+          Array [],
         ]
       `);
     });
@@ -282,12 +311,12 @@ describe('pie_visualization', () => {
           layerId: state.layers[0].layerId,
         });
 
-      expect(getConfig(state).groups[1].supportsMoreColumns).toBeFalsy();
+      expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeFalsy();
 
       const stateWithCollapsed = cloneDeep(state);
       stateWithCollapsed.layers[0].collapseFns = { '1': 'sum' };
 
-      expect(getConfig(stateWithCollapsed).groups[1].supportsMoreColumns).toBeTruthy();
+      expect(findPrimaryGroup(getConfig(stateWithCollapsed))?.supportsMoreColumns).toBeTruthy();
     });
 
     it('counts multiple metrics toward the dimension limits when not mosaic', () => {
@@ -310,12 +339,14 @@ describe('pie_visualization', () => {
           layerId: state.layers[0].layerId,
         });
 
-      expect(getConfig(state).groups[1].supportsMoreColumns).toBeTruthy();
+      expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeTruthy();
 
       const stateWithMultipleMetrics = cloneDeep(state);
       stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
 
-      expect(getConfig(stateWithMultipleMetrics).groups[1].supportsMoreColumns).toBeFalsy();
+      expect(
+        findPrimaryGroup(getConfig(stateWithMultipleMetrics))?.supportsMoreColumns
+      ).toBeFalsy();
     });
 
     it('does NOT count multiple metrics toward the dimension limits when mosaic', () => {
@@ -334,12 +365,14 @@ describe('pie_visualization', () => {
           layerId: state.layers[0].layerId,
         });
 
-      expect(getConfig(state).groups[1].supportsMoreColumns).toBeTruthy();
+      expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeTruthy();
 
       const stateWithMultipleMetrics = cloneDeep(state);
       stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
 
-      expect(getConfig(stateWithMultipleMetrics).groups[1].supportsMoreColumns).toBeTruthy();
+      expect(
+        findPrimaryGroup(getConfig(stateWithMultipleMetrics))?.supportsMoreColumns
+      ).toBeTruthy();
     });
 
     it('reports too many metric dimensions if multiple not enabled', () => {
@@ -353,20 +386,24 @@ describe('pie_visualization', () => {
       state.layers[0].metrics = colIds;
       state.layers[0].allowMultipleMetrics = false;
       expect(
-        pieVisualization.getConfiguration({
-          state,
-          frame,
-          layerId: state.layers[0].layerId,
-        }).groups[0].dimensionsTooMany
+        findMetricGroup(
+          pieVisualization.getConfiguration({
+            state,
+            frame,
+            layerId: state.layers[0].layerId,
+          })
+        )?.dimensionsTooMany
       ).toBe(3);
 
       state.layers[0].allowMultipleMetrics = true;
       expect(
-        pieVisualization.getConfiguration({
-          state,
-          frame,
-          layerId: state.layers[0].layerId,
-        }).groups[0].dimensionsTooMany
+        findMetricGroup(
+          pieVisualization.getConfiguration({
+            state,
+            frame,
+            layerId: state.layers[0].layerId,
+          })
+        )?.dimensionsTooMany
       ).toBe(0);
     });
 
@@ -377,11 +414,13 @@ describe('pie_visualization', () => {
         state.layers[0].metrics.push('1', '2');
         state.layers[0].allowMultipleMetrics = true;
         expect(
-          pieVisualization.getConfiguration({
-            state,
-            frame: mockFrame(),
-            layerId: state.layers[0].layerId,
-          }).groups[1].fakeFinalAccessor
+          findPrimaryGroup(
+            pieVisualization.getConfiguration({
+              state,
+              frame: mockFrame(),
+              layerId: state.layers[0].layerId,
+            })
+          )?.fakeFinalAccessor
         ).toEqual({ label: '2 metrics' });
 
         // but not when multiple metrics aren't allowed
