@@ -152,6 +152,9 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
 
   const guideConfig = getGuideConfig(pluginState?.activeGuide?.guideId)!;
 
+  // TODO handle loading, error state
+  // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
+
   const stepsCompleted = getProgress(pluginState?.activeGuide);
   const isGuideReadyToComplete = pluginState?.activeGuide?.status === 'ready_to_complete';
   const telemetryGuideId = getTelemetryGuideId(pluginState?.activeGuide?.guideId);
