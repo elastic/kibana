@@ -57,6 +57,7 @@ describe('useCasesColumns ', () => {
             "field": "assignees",
             "name": "Assignees",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
@@ -136,6 +137,7 @@ describe('useCasesColumns ', () => {
             "field": "assignees",
             "name": "Assignees",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
@@ -206,6 +208,7 @@ describe('useCasesColumns ', () => {
             "field": "assignees",
             "name": "Assignees",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
