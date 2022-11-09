@@ -5,12 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ChangeEvent, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
+import { LabelStaticOptions } from '../../../../../../common/descriptor_types';
+import { StaticTextProperty } from '../../properties/static_text_property';
 
-export function StaticLabelForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {
-  const onValueChange = (event) => {
+interface Props {
+  onStaticStyleChange: (propertyName: VECTOR_STYLES, options: LabelStaticOptions) => void;
+  staticDynamicSelect?: ReactNode;
+  styleProperty: StaticTextProperty;
+}
+
+export function StaticLabelForm({
+  onStaticStyleChange,
+  staticDynamicSelect,
+  styleProperty,
+}: Props) {
+  const onValueChange = (event: ChangeEvent<HTMLInputElement>) => {
     onStaticStyleChange(styleProperty.getStyleName(), { value: event.target.value });
   };
 
