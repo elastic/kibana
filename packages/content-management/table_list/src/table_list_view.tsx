@@ -19,6 +19,7 @@ import {
   EuiTableActionsColumnType,
   CriteriaWithPagination,
   Query,
+  Ast,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -83,7 +84,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   fetchError?: IHttpFetchError<Error>;
   searchQuery: {
     text: string;
-    query: Query | null;
+    query: Query;
   };
   selectedIds: string[];
   totalItems: number;
@@ -105,6 +106,8 @@ export interface UserContentCommonSchema {
     description?: string;
   };
 }
+
+const ast = Ast.create([]);
 
 function TableListViewComp<T extends UserContentCommonSchema>({
   tableListTitle,
@@ -161,9 +164,10 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     showDeleteModal: false,
     hasUpdatedAtMetadata: false,
     selectedIds: [],
-    searchQuery: Boolean(initialQuery)
-      ? { text: initialQuery!, query: null }
-      : { text: '', query: null },
+    searchQuery:
+      initialQuery !== undefined
+        ? { text: initialQuery, query: new Query(ast, undefined, initialQuery) }
+        : { text: '', query: new Query(ast, undefined, '') },
     pagination: {
       pageIndex: 0,
       totalItemCount: 0,
@@ -190,7 +194,9 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     pagination,
     tableSort,
   } = state;
-  const hasNoItems = !isFetchingItems && items.length === 0 && searchQuery.query === null;
+
+  const hasQuery = searchQuery.text !== '';
+  const hasNoItems = !isFetchingItems && items.length === 0 && !hasQuery;
   const pageDataTestSubject = `${entityName}LandingPage`;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
@@ -208,7 +214,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     clearTagSelection,
     tagsToTableItemMap,
   } = useTags({
-    searchQuery,
+    query: searchQuery.query,
     updateQuery,
     items,
   });

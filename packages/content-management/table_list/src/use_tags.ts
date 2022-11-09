@@ -6,27 +6,22 @@
  * Side Public License, v 1.
  */
 import { useCallback, useMemo } from 'react';
-import { Query, Ast } from '@elastic/eui';
+import { Query } from '@elastic/eui';
 
 import type { Tag } from './types';
-import type { State, UserContentCommonSchema } from './table_list_view';
+import type { UserContentCommonSchema } from './table_list_view';
 
 type QueryUpdater = (query: Query, tag: Tag) => Query;
 
 export function useTags({
-  searchQuery,
+  query,
   updateQuery,
   items,
 }: {
-  searchQuery: State['searchQuery'];
+  query: Query;
   updateQuery: (query: Query) => void;
   items: UserContentCommonSchema[];
 }) {
-  const initializeQuery = useCallback(() => {
-    const ast = Ast.create([]);
-    return new Query(ast, undefined, searchQuery.text);
-  }, [searchQuery]);
-
   // Return a map of tag.id to an array of saved object ids having that tag
   // { 'abc-123': ['saved_object_id_1', 'saved_object_id_2', ...] }
   const tagsToTableItemMap = useMemo(() => {
@@ -49,23 +44,22 @@ export function useTags({
   const updateTagClauseGetter = useCallback(
     (queryUpdater: QueryUpdater) =>
       (tag: Tag, q?: Query, doUpdate: boolean = true) => {
-        const query = q !== undefined ? q : searchQuery.query ?? initializeQuery();
-        const updatedQuery = queryUpdater(query, tag);
+        const updatedQuery = queryUpdater(q !== undefined ? q : query, tag);
         if (doUpdate) {
           updateQuery(updatedQuery);
         }
         return updatedQuery;
       },
-    [searchQuery.query, initializeQuery, updateQuery]
+    [query, updateQuery]
   );
 
   const hasTagInClauseGetter = useCallback(
     (matchValue: 'must' | 'must_not') => (tag: Tag, _query?: Query) => {
-      const query = Boolean(_query) ? _query! : searchQuery.query ?? initializeQuery();
+      const q = Boolean(_query) ? _query! : query;
       const tagsClauses = query.ast.getFieldClauses('tag');
 
       if (tagsClauses) {
-        const mustHaveTagClauses = query.ast
+        const mustHaveTagClauses = q.ast
           .getFieldClauses('tag')
           .find(({ match }) => match === matchValue)?.value as string[];
 
@@ -75,27 +69,26 @@ export function useTags({
       }
       return false;
     },
-    [searchQuery.query, initializeQuery]
+    [query]
   );
 
   const addTagToIncludeClause = useMemo(
-    () => updateTagClauseGetter((query, tag) => query.addOrFieldValue('tag', tag.name, true, 'eq')),
+    () => updateTagClauseGetter((q, tag) => q.addOrFieldValue('tag', tag.name, true, 'eq')),
     [updateTagClauseGetter]
   );
 
   const removeTagFromIncludeClause = useMemo(
-    () => updateTagClauseGetter((query, tag) => query.removeOrFieldValue('tag', tag.name)),
+    () => updateTagClauseGetter((q, tag) => q.removeOrFieldValue('tag', tag.name)),
     [updateTagClauseGetter]
   );
 
   const addTagToExcludeClause = useMemo(
-    () =>
-      updateTagClauseGetter((query, tag) => query.addOrFieldValue('tag', tag.name, false, 'eq')),
+    () => updateTagClauseGetter((q, tag) => q.addOrFieldValue('tag', tag.name, false, 'eq')),
     [updateTagClauseGetter]
   );
 
   const removeTagFromExcludeClause = useMemo(
-    () => updateTagClauseGetter((query, tag) => query.removeOrFieldValue('tag', tag.name)),
+    () => updateTagClauseGetter((q, tag) => q.removeOrFieldValue('tag', tag.name)),
     [updateTagClauseGetter]
   );
 
@@ -104,19 +97,19 @@ export function useTags({
 
   const addOrRemoveIncludeTagFilter = useCallback(
     (tag: Tag) => {
-      let query: Query | undefined;
+      let q: Query | undefined;
 
       // Remove the tag in the "Exclude" list if it is there
       if (hasTagInExclude(tag)) {
-        query = removeTagFromExcludeClause(tag, undefined, false);
+        q = removeTagFromExcludeClause(tag, undefined, false);
       }
 
-      if (hasTagInInclude(tag, query)) {
+      if (hasTagInInclude(tag, q)) {
         // Already selected, remove the filter
-        removeTagFromIncludeClause(tag, query);
+        removeTagFromIncludeClause(tag, q);
         return;
       }
-      addTagToIncludeClause(tag, query);
+      addTagToIncludeClause(tag, q);
     },
     [
       hasTagInExclude,
@@ -129,20 +122,20 @@ export function useTags({
 
   const addOrRemoveExcludeTagFilter = useCallback(
     (tag: Tag) => {
-      let query: Query | undefined;
+      let q: Query | undefined;
 
       // Remove the tag in the "Include" list if it is there
       if (hasTagInInclude(tag)) {
-        query = removeTagFromIncludeClause(tag, undefined, false);
+        q = removeTagFromIncludeClause(tag, undefined, false);
       }
 
-      if (hasTagInExclude(tag, query)) {
+      if (hasTagInExclude(tag, q)) {
         // Already selected, remove the filter
-        removeTagFromExcludeClause(tag, query);
+        removeTagFromExcludeClause(tag, q);
         return;
       }
 
-      addTagToExcludeClause(tag, query);
+      addTagToExcludeClause(tag, q);
     },
     [
       hasTagInInclude,
@@ -154,13 +147,10 @@ export function useTags({
   );
 
   const clearTagSelection = useCallback(() => {
-    if (!searchQuery.query) {
-      return;
-    }
-    const updatedQuery = searchQuery.query.removeOrFieldClauses('tag');
+    const updatedQuery = query.removeOrFieldClauses('tag');
     updateQuery(updatedQuery);
     return updateQuery;
-  }, [searchQuery.query, updateQuery]);
+  }, [query, updateQuery]);
 
   return {
     addOrRemoveIncludeTagFilter,
