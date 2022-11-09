@@ -427,4 +427,25 @@ export function defineRoutes(
       }
     }
   );
+
+  router.get(
+    {
+      path: '/api/alerts_fixture/registered_connector_types',
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [_, { actions }] = await core.getStartServices();
+        return res.ok({
+          body: actions.getAllTypes(),
+        });
+      } catch (e) {
+        return res.badRequest({ body: e });
+      }
+    }
+  );
 }
