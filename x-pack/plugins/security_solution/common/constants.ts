@@ -257,6 +257,12 @@ export const LEGACY_NOTIFICATIONS_ID = `siem.notifications` as const;
 export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/notifications';
 
 /**
+ * Exceptions management routes
+ */
+
+export const SHARED_EXCEPTION_LIST_URL = `/api${EXCEPTIONS_PATH}/shared` as const;
+
+/**
  * Detection engine routes
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine' as const;
