@@ -90,7 +90,7 @@ export const ProcessTreeAlertsFilter = ({
       onClick={onButtonClick}
     >
       <FormattedMessage
-        id={`sessionView.alertDetailsEmptyButtonLabel`}
+        id="xpack.sessionView.alertDetailsEmptyButtonLabel"
         defaultMessage="View: {selectedProcessEventAlertCategory} alerts"
         values={{
           selectedProcessEventAlertCategory,
@@ -115,7 +115,7 @@ export const ProcessTreeAlertsFilter = ({
             onClick={onSelectedProcessEventAlertCategory}
           >
             <FormattedMessage
-              id={`sessionView.alertDetailsFilterItem-${processEventAlertCategory}`}
+              id="xpack.sessionView.alertDetailsFilterMenuItemLabel"
               defaultMessage="View {processEventAlertCategory} alerts"
               values={{
                 processEventAlertCategory,
@@ -133,11 +133,8 @@ export const ProcessTreeAlertsFilter = ({
         onClick={onSelectedProcessEventAlertCategory}
       >
         <FormattedMessage
-          id={`sessionView.alertDetailsDefaultFilterItem`}
-          defaultMessage="View {defaultAlertFilterValue} alerts"
-          values={{
-            defaultAlertFilterValue: DEFAULT_ALERT_FILTER_VALUE,
-          }}
+          id="xpack.sessionView.alertDetailsDefaultFilterMenuItemLabel"
+          defaultMessage="View all alerts"
         />
       </EuiContextMenuItem>,
       ...alertEventFilterMenuItems,
@@ -150,7 +147,7 @@ export const ProcessTreeAlertsFilter = ({
         <EuiFlexItem css={filterStatus} style={{ paddingLeft: '16px' }}>
           <EuiText size="s">
             <FormattedMessage
-              id="sessionView.alertDetailsCountStatusLabel"
+              id="xpack.sessionView.alertDetailsCountStatusLabel"
               defaultMessage="Showing {alertCountsStatusElem} alerts"
               values={{
                 alertCountsStatusElem: (
