@@ -11,7 +11,7 @@ import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/ser
 
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { doeArtifactHaveData } from './endpoint/services';
+import { doesArtifactHaveData } from './endpoint/services';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -101,7 +101,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     if (lists && !endpointAppContextService.getLicenseService().isPlatinumPlus()) {
       const listClient = getExceptionListClient();
       if (listClient) {
-        hasHostIsolationException = await doeArtifactHaveData(
+        hasHostIsolationException = await doesArtifactHaveData(
           listClient,
           ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
           logger

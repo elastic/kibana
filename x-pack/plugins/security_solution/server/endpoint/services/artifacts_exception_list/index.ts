@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { doeArtifactHaveData } from './does_artifact_have_data';
+export { doesArtifactHaveData } from './does_artifact_have_data';

@@ -48,7 +48,7 @@ import {
 } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
-import { doeArtifactHaveData } from './services';
+import { doesArtifactHaveData } from './services';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -186,7 +186,7 @@ export class EndpointAppContextService {
     }
 
     const hasExceptionsListItems = !isPlatinumPlus
-      ? await doeArtifactHaveData(listClient, ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID)
+      ? await doesArtifactHaveData(listClient, ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID)
       : false;
 
     return calculateEndpointAuthz(

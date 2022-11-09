@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/core/server';
  * @param listId
  * @param logger
  */
-export const doeArtifactHaveData = async (
+export const doesArtifactHaveData = async (
   listClient: ExceptionListClient,
   listId: string,
   logger?: Logger
