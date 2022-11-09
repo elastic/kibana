@@ -20,6 +20,12 @@ import { ExistenceFetchStatus, FieldListGroups, FieldsGroupNames } from '../type
 describe('UnifiedFieldList useGroupedFields()', () => {
   let mockedServices: GroupedFieldsParams<DataViewField>['services'];
   const allFields = dataView.fields;
+  // Added fields will be treated as Unmapped as they are not a part of the data view.
+  const allFieldsIncludingUnmapped = [...new Array(2)].flatMap((_, index) =>
+    allFields.map((field) => {
+      return new DataViewField({ ...field.toSpec(), name: `${field.name}${index || ''}` });
+    })
+  );
   const anotherDataView = createStubDataView({
     spec: {
       id: 'another-data-view',
@@ -65,6 +71,8 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'EmptyFields-0',
       'MetaFields-0',
     ]);
+
+    expect(fieldGroups).toMatchSnapshot();
   });
 
   it('should work correctly with fields', async () => {
@@ -96,31 +104,58 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   it('should work correctly when filtered', async () => {
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
-      initialProps: {
-        dataViewId: dataView.id!,
-        allFields,
-        services: mockedServices,
-        onFilterField: (field: DataViewField) => field.name.startsWith('@'),
-      },
+    const props: GroupedFieldsParams<DataViewField> = {
+      dataViewId: dataView.id!,
+      allFields: allFieldsIncludingUnmapped,
+      services: mockedServices,
+    };
+    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+      initialProps: props,
     });
 
     await waitForNextUpdate();
 
-    const fieldGroups = result.current.fieldGroups;
+    let fieldGroups = result.current.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        (key) =>
+          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
+            fieldGroups![key as FieldsGroupNames]?.fieldCount
+          }`
       )
     ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-0',
-      'AvailableFields-2',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-0',
+      'SpecialFields-0-0',
+      'SelectedFields-0-0',
+      'PopularFields-0-0',
+      'AvailableFields-25-25',
+      'UnmappedFields-28-28',
+      'EmptyFields-0-0',
+      'MetaFields-3-3',
+    ]);
+
+    rerender({
+      ...props,
+      onFilterField: (field: DataViewField) => field.name.startsWith('@'),
+    });
+
+    fieldGroups = result.current.fieldGroups;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) =>
+          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
+            fieldGroups![key as FieldsGroupNames]?.fieldCount
+          }`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0-0',
+      'SelectedFields-0-0',
+      'PopularFields-0-0',
+      'AvailableFields-2-25',
+      'UnmappedFields-2-28',
+      'EmptyFields-0-0',
+      'MetaFields-0-3',
     ]);
   });
 
@@ -187,7 +222,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     const { result } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: null,
-        allFields,
+        allFields: allFieldsIncludingUnmapped,
         services: mockedServices,
       },
     });
@@ -202,7 +237,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'SpecialFields-0',
       'SelectedFields-0',
       'PopularFields-0',
-      'AvailableFields-28',
+      'AvailableFields-56', // even unmapped fields fall into Available
       'UnmappedFields-0',
       'MetaFields-0',
     ]);
@@ -299,6 +334,112 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ]);
   });
 
-  // TODO: add a test for popular fields
-  // TODO: add a test for unmapped fields
+  it('should work correctly when popular fields limit is present', async () => {
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
+        dataViewId: dataView.id!,
+        allFields,
+        popularFieldsLimit: 10,
+        services: mockedServices,
+      },
+    });
+
+    await waitForNextUpdate();
+
+    const fieldGroups = result.current.fieldGroups;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0',
+      'SelectedFields-0',
+      'PopularFields-4',
+      'AvailableFields-25',
+      'UnmappedFields-0',
+      'EmptyFields-0',
+      'MetaFields-3',
+    ]);
+  });
+
+  it('should work correctly when global filters are set', async () => {
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
+        dataViewId: dataView.id!,
+        allFields: [],
+        isAffectedByGlobalFilter: true,
+        services: mockedServices,
+      },
+    });
+
+    await waitForNextUpdate();
+
+    const fieldGroups = result.current.fieldGroups;
+    expect(fieldGroups).toMatchSnapshot();
+  });
+
+  it('should work correctly and show unmapped fields separately', async () => {
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
+        dataViewId: dataView.id!,
+        allFields: allFieldsIncludingUnmapped,
+        services: mockedServices,
+      },
+    });
+
+    await waitForNextUpdate();
+
+    const fieldGroups = result.current.fieldGroups;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0',
+      'SelectedFields-0',
+      'PopularFields-0',
+      'AvailableFields-25',
+      'UnmappedFields-28',
+      'EmptyFields-0',
+      'MetaFields-3',
+    ]);
+  });
+
+  it('should work correctly and when custom selected fields are provided', async () => {
+    const customSortedFields = [
+      allFieldsIncludingUnmapped[allFieldsIncludingUnmapped.length - 1],
+      allFields[2],
+      allFields[0],
+    ];
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
+        dataViewId: dataView.id!,
+        allFields,
+        sortedSelectedFields: customSortedFields,
+        services: mockedServices,
+      },
+    });
+
+    await waitForNextUpdate();
+
+    const fieldGroups = result.current.fieldGroups;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0',
+      'SelectedFields-3',
+      'PopularFields-0',
+      'AvailableFields-25',
+      'UnmappedFields-0',
+      'EmptyFields-0',
+      'MetaFields-3',
+    ]);
+
+    expect(fieldGroups.SelectedFields?.fields).toBe(customSortedFields);
+  });
 });
