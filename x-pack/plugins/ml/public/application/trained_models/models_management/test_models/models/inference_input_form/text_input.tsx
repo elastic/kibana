@@ -10,12 +10,13 @@ import React, { FC, useState, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
-import { extractErrorMessage } from '../../../../../../common/util/errors';
-import { ErrorMessage } from '../inference_error';
-import { OutputLoadingContent } from '../output_loading';
-import { RUNNING_STATE } from './inference_base';
-import { RawOutput } from './raw_output';
-import type { InferrerType } from '.';
+
+import { ErrorMessage } from '../../inference_error';
+import { extractErrorMessage } from '../../../../../../../common';
+import type { InferrerType } from '..';
+import { OutputLoadingContent } from '../../output_loading';
+import { RUNNING_STATE } from '../inference_base';
+import { RawOutput } from '../raw_output';
 
 interface Props {
   inferrer: InferrerType;
@@ -26,7 +27,7 @@ enum TAB {
   RAW,
 }
 
-export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
+export const TextInput: FC<Props> = ({ inferrer }) => {
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [errorText, setErrorText] = useState<string | null>(null);
 

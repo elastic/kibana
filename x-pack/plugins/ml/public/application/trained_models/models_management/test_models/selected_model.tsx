@@ -26,7 +26,6 @@ import {
 } from '../../../../../common/constants/trained_models';
 import { useMlApiContext } from '../../../contexts/kibana';
 import { InferenceInputForm } from './models/inference_input_form';
-import { InferenceInputFormIndex } from './models/inference_input_form_index';
 import { InferrerType } from './models';
 import { INPUT_TYPE } from './models/inference_base';
 
@@ -71,11 +70,7 @@ export const SelectedModel: FC<Props> = ({ model, inputType }) => {
   }, [inputType, model, trainedModels]);
 
   if (inferrer !== undefined) {
-    return inputType === INPUT_TYPE.TEXT ? (
-      <InferenceInputForm inferrer={inferrer} />
-    ) : (
-      <InferenceInputFormIndex inferrer={inferrer} />
-    );
+    return <InferenceInputForm inferrer={inferrer} inputType={inputType} />;
   }
 
   return null;

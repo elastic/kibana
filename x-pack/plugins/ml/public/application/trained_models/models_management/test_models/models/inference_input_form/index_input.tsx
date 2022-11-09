@@ -20,17 +20,17 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { extractErrorMessage } from '../../../../../../common/util/errors';
-import { ErrorMessage } from '../inference_error';
-import { RUNNING_STATE } from './inference_base';
-import { InferenceInputFormIndexControls, useIndexInput } from './index_input';
-import type { InferrerType } from '.';
+import { ErrorMessage } from '../../inference_error';
+import { extractErrorMessage } from '../../../../../../../common';
+import type { InferrerType } from '..';
+import { useIndexInput, InferenceInputFormIndexControls } from '../index_input';
+import { RUNNING_STATE } from '../inference_base';
 
 interface Props {
   inferrer: InferrerType;
 }
 
-export const InferenceInputFormIndex: FC<Props> = ({ inferrer }) => {
+export const IndexInput: FC<Props> = ({ inferrer }) => {
   const data = useIndexInput({ inferrer });
   const { reloadExamples, selectedField } = data;
 
