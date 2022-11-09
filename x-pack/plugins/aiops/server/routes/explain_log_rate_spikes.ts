@@ -432,10 +432,6 @@ export const defineExplainLogRateSpikesRoute = (
               })
             );
 
-            // if (request.body.overrides === undefined) {
-            //   throw new Error('simulate error');
-            // }
-
             // To optimize the `frequent_items` query, we identify duplicate change points by count attributes.
             // Note this is a compromise and not 100% accurate because there could be change points that
             // have the exact same counts but still don't co-occur.
