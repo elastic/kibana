@@ -41,9 +41,8 @@ const AssigneesColumnComponent: React.FC<AssigneesColumnProps> = ({
     []
   );
 
-  const shouldShowExpandListButton = allAssignees.length > compressedDisplayLimit;
-
   const numHiddenAvatars = allAssignees.length - compressedDisplayLimit;
+  const shouldShowExpandListButton = numHiddenAvatars > 0;
 
   const avatarsToDisplay = useMemo(() => {
     if (isAvatarListExpanded || !shouldShowExpandListButton) {

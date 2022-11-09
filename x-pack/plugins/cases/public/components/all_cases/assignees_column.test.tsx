@@ -92,6 +92,17 @@ describe('AssigneesColumn', () => {
     expect(screen.queryByTestId('case-table-column-expand-button')).not.toBeInTheDocument();
   });
 
+  it('does not show the show more button when the limit is the same number of the assignees', async () => {
+    const props = {
+      ...defaultProps,
+      compressedDisplayLimit: userProfiles.length,
+    };
+
+    appMockRender.render(<AssigneesColumn {...props} />);
+
+    expect(screen.queryByTestId('case-table-column-expand-button')).not.toBeInTheDocument();
+  });
+
   it('displays the show less avatars button when the show more is clicked', async () => {
     const props = {
       ...defaultProps,
