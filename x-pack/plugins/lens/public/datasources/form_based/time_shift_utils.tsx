@@ -8,15 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import {
+  calcAutoIntervalNear,
   DatatableUtilitiesService,
   isAbsoluteTimeShift,
   parseAbsoluteTimeShift,
   parseTimeShift,
 } from '@kbn/data-plugin/common';
-import type { Duration } from 'moment';
 import type { DateRange } from '../../../common/types';
 import type { FormBasedLayer, FormBasedPrivateState } from './types';
 import type { FramePublicAPI, IndexPattern } from '../../types';
@@ -139,13 +140,6 @@ export function getDateHistogramInterval(
   return { canShift: true, hasDateHistogram: Boolean(dateHistogramColumn) };
 }
 
-// Due to absolute shifts the duration needs to be round to the seconds to avoid
-// too much complexity on the usability side. Relative shifts should be ok as they
-// are already bounded by the allowed units, where seconds is the smallest
-export function roundToSecondsShift(duration: Duration) {
-  return Math.floor(duration.asSeconds());
-}
-
 export function getLayerTimeShiftChecks({
   interval: dateHistogramInterval,
   hasDateHistogram,
@@ -166,9 +160,7 @@ export function getLayerTimeShiftChecks({
         dateHistogramInterval &&
         parsedValue &&
         typeof parsedValue === 'object' &&
-        !Number.isInteger(
-          (roundToSecondsShift(parsedValue) * 1000) / dateHistogramInterval.asMilliseconds()
-        )
+        !Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval.asMilliseconds())
       );
     },
     isInvalid: (parsedValue: ReturnType<typeof parseTimeShiftWrapper>) => {
@@ -325,4 +317,39 @@ export function getColumnTimeShiftWarnings(
     );
   }
   return warnings;
+}
+
+function closestMultipleOfInterval(duration: number, interval: number) {
+  if (duration % interval === 0) {
+    return duration;
+  }
+  return Math.ceil(duration / interval) * interval;
+}
+
+function roundAbsoluteInterval(timeShift: string, dateRange: DateRange, targetBars: number) {
+  // workout the interval (most probably matching the ES one)
+  const interval = calcAutoIntervalNear(
+    targetBars,
+    moment(dateRange.toDate).diff(moment(dateRange.fromDate))
+  );
+  const duration = parseTimeShiftWrapper(timeShift, dateRange);
+  if (typeof duration !== 'string') {
+    const roundingOffset = timeShift.startsWith('start') ? interval.asMilliseconds() : 0;
+    return `${
+      (closestMultipleOfInterval(duration.asMilliseconds(), interval.asMilliseconds()) -
+        roundingOffset) /
+      1000
+    }s`;
+  }
+}
+
+export function resolveTimeShift(
+  timeShift: string | undefined,
+  dateRange: DateRange,
+  targetBars: number
+) {
+  if (timeShift && isAbsoluteTimeShift(timeShift)) {
+    return roundAbsoluteInterval(timeShift, dateRange, targetBars);
+  }
+  return timeShift;
 }

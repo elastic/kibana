@@ -10,7 +10,6 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { type DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
-import type { DateRange } from '../../../../common/types';
 import {
   adjustTimeScaleLabelSuffix,
   GenericIndexPatternColumn,
@@ -22,7 +21,6 @@ import {
   getDateHistogramInterval,
   getLayerTimeShiftChecks,
   timeShiftOptions,
-  parseTimeShiftWrapper,
   getColumnTimeShiftWarnings,
 } from '../time_shift_utils';
 import type { IndexPattern } from '../../../types';
@@ -60,7 +58,6 @@ export function setTimeShift(
 
 export function TimeShift({
   datatableUtilities,
-  dateRange,
   selectedColumn,
   columnId,
   layer,
@@ -70,7 +67,6 @@ export function TimeShift({
   layerId,
 }: {
   datatableUtilities: DatatableUtilitiesService;
-  dateRange: DateRange;
   selectedColumn: GenericIndexPatternColumn;
   indexPattern: IndexPattern;
   columnId: string;
@@ -153,7 +149,7 @@ export function TimeShift({
                 defaultMessage: 'Type custom values (e.g. 8w)',
               })}
               options={timeShiftOptions.filter(({ value }) => {
-                const parsedValue = parseTimeShiftWrapper(value, dateRange);
+                const parsedValue = parseTimeShift(value);
                 return (
                   parsedValue &&
                   !isValueTooSmall(parsedValue) &&
@@ -165,7 +161,7 @@ export function TimeShift({
               singleSelection={{ asPlainText: true }}
               isInvalid={isLocalValueInvalid}
               onCreateOption={(val) => {
-                const parsedVal = parseTimeShiftWrapper(val, dateRange);
+                const parsedVal = parseTimeShift(val);
                 if (!isInvalid(parsedVal)) {
                   updateLayer(setTimeShift(columnId, layer, val));
                 } else {
@@ -180,7 +176,7 @@ export function TimeShift({
                 }
 
                 const choice = choices[0].value as string;
-                const parsedVal = parseTimeShiftWrapper(choice, dateRange);
+                const parsedVal = parseTimeShift(choice);
                 if (!isInvalid(parsedVal)) {
                   updateLayer(setTimeShift(columnId, layer, choice));
                 } else {

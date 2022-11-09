@@ -12,6 +12,14 @@ const allowedUnits = ['s', 'm', 'h', 'd', 'w', 'M', 'y'] as const;
 type AllowedUnit = typeof allowedUnits[number];
 const anchoredTimeShiftRegexp = /^(start|end)( - )(.+)$/;
 const durationRegexp = /^(\d+)\s*(\w)$/;
+const invalidDate = 'invalid';
+const previousDate = 'previous';
+
+// The ISO8601 format supports also partial date strings as described here:
+// https://momentjs.com/docs/#/parsing/string/
+// But in this specific case we want to enforce the full version of the ISO8601
+// which is build in this case with moment special HTML5 format + the timezone support
+const LONG_ISO8601_LIKE_FORMAT = moment.HTML5_FMT.DATETIME_LOCAL_MS + 'Z';
 
 /**
  * This method parses a string into a time shift duration.
@@ -20,24 +28,26 @@ const durationRegexp = /^(\d+)\s*(\w)$/;
  *  */
 export const parseTimeShift = (val: string): moment.Duration | 'previous' | 'invalid' => {
   const trimmedVal = val.trim();
-  if (trimmedVal === 'previous') {
-    return 'previous';
+  if (trimmedVal === previousDate) {
+    return previousDate;
   }
   const [, amount, unit] = trimmedVal.match(durationRegexp) || [];
   const parsedAmount = Number(amount);
   if (Number.isNaN(parsedAmount) || !allowedUnits.includes(unit as AllowedUnit)) {
-    return 'invalid';
+    return invalidDate;
   }
   return moment.duration(Number(amount), unit as AllowedUnit);
 };
 
 /**
- * Check function to detect an absolute time shift
+ * Check function to detect an absolute time shift.
+ * The check is performed only on the string format and the timestamp is not validated:
+ * use the validateAbsoluteTimeShift fucntion to perform more in depth checks
  * @param val the string to parse (it assumes it has been trimmed already)
  * @returns true if an absolute time shift
  */
-export const isAbsoluteTimeShift = (val: string | undefined) => {
-  return val && anchoredTimeShiftRegexp.test(val);
+export const isAbsoluteTimeShift = (val?: string) => {
+  return val != null && anchoredTimeShiftRegexp.test(val);
 };
 
 export const REASON_IDS = {
@@ -62,21 +72,21 @@ export const parseAbsoluteTimeShift = (
   const trimmedVal = val.trim();
   if (timeRange == null) {
     return {
-      value: 'invalid',
+      value: invalidDate,
       reason: REASON_IDS.missingTimerange,
     };
   }
   const error = validateAbsoluteTimeShift(trimmedVal, timeRange);
   if (error) {
     return {
-      value: 'invalid',
+      value: invalidDate,
       reason: error,
     };
   }
   const { anchor, timestamp } = extractTokensFromAbsTimeShift(trimmedVal);
   // the regexp test above will make sure anchor and timestamp are both strings
   // now be very strict on the format
-  const tsMoment = moment(timestamp, moment.ISO_8601, true);
+  const tsMoment = moment(timestamp, LONG_ISO8601_LIKE_FORMAT, true);
   // workout how long is the ref time range
   const duration = moment(timeRange.to).diff(moment(timeRange.from));
   // pick the end of the absolute range now
@@ -85,7 +95,12 @@ export const parseAbsoluteTimeShift = (
   return { value: moment.duration(moment(timeRange.to).diff(absRangeEnd)), reason: null };
 };
 
-export function extractTokensFromAbsTimeShift(val: string) {
+/**
+ * Fucntion to extract the anchor and timestamp tokens from an absolute time shift
+ * @param val absolute time shift string
+ * @returns the anchor and timestamp strings
+ */
+function extractTokensFromAbsTimeShift(val: string) {
   const [, anchor, , timestamp] = val.match(anchoredTimeShiftRegexp) || [];
   return { anchor, timestamp };
 }
@@ -98,7 +113,7 @@ export function extractTokensFromAbsTimeShift(val: string) {
  */
 export function validateAbsoluteTimeShift(
   val: string,
-  timeRange: TimeRange | undefined
+  timeRange?: TimeRange
 ): REASON_ID_TYPES | undefined {
   const trimmedVal = val.trim();
   if (!isAbsoluteTimeShift(trimmedVal)) {
@@ -107,7 +122,7 @@ export function validateAbsoluteTimeShift(
   const { timestamp } = extractTokensFromAbsTimeShift(trimmedVal);
   // the regexp test above will make sure anchor and timestamp are both strings
   // now be very strict on the format
-  const tsMoment = moment(timestamp, moment.ISO_8601, true);
+  const tsMoment = moment(timestamp, LONG_ISO8601_LIKE_FORMAT, true);
   if (!tsMoment.isValid()) {
     return REASON_IDS.invalidDate;
   }

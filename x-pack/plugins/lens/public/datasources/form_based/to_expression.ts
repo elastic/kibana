@@ -13,7 +13,7 @@ import type {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '@kbn/data-plugin/public';
-import { calcAutoIntervalNear, isAbsoluteTimeShift, queryToAst } from '@kbn/data-plugin/common';
+import { queryToAst } from '@kbn/data-plugin/common';
 import {
   buildExpression,
   buildExpressionFunction,
@@ -21,7 +21,6 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
-import moment from 'moment';
 import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
@@ -31,7 +30,7 @@ import { FormattedIndexPatternColumn } from './operations/definitions/column_typ
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
-import { parseTimeShiftWrapper } from './time_shift_utils';
+import { resolveTimeShift } from './time_shift_utils';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -52,37 +51,6 @@ const updatePositionIndex = (currentId: string, newIndex: number) => {
   idParts[1] = String(newIndex);
   return idParts.join('-') + (percentile ? `.${percentile}` : '');
 };
-
-function closestMultipleOfInterval(duration: number, interval: number) {
-  if (duration % interval === 0) {
-    return duration;
-  }
-  return Math.ceil(duration / interval) * interval;
-}
-
-function roundAbsoluteInterval(timeShift: string, dateRange: DateRange, targetBars: number) {
-  // workout the interval (most probably matching the ES one)
-  const interval = calcAutoIntervalNear(
-    targetBars,
-    moment(dateRange.toDate).diff(moment(dateRange.fromDate))
-  );
-  const duration = parseTimeShiftWrapper(timeShift, dateRange);
-  if (typeof duration !== 'string') {
-    const roundingOffset = timeShift.startsWith('start') ? interval.asMilliseconds() : 0;
-    return `${
-      (closestMultipleOfInterval(duration.asMilliseconds(), interval.asMilliseconds()) +
-        roundingOffset) /
-      1000
-    }s`;
-  }
-}
-
-function resolveTimeShift(timeShift: string | undefined, dateRange: DateRange, targetBars: number) {
-  if (timeShift && isAbsoluteTimeShift(timeShift)) {
-    return roundAbsoluteInterval(timeShift, dateRange, targetBars);
-  }
-  return timeShift;
-}
 
 function getExpressionForLayer(
   layer: FormBasedLayer,
