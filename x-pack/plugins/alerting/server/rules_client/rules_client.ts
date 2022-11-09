@@ -566,8 +566,7 @@ export class RulesClient {
       throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
-    const usesGlobalFreqParams = this.usesValidGlobalFreqParams(data);
-    await this.validateActions(ruleType, data.actions, usesGlobalFreqParams);
+    await this.validateActions(ruleType, data);
 
     // Throw error if schedule interval is less than the minimum and we are enforcing it
     const intervalInMs = parseDuration(data.schedule.interval);
@@ -1706,8 +1705,7 @@ export class RulesClient {
 
     // Validate
     const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
-    const usesGlobalFreqParams = this.usesValidGlobalFreqParams(data);
-    await this.validateActions(ruleType, data.actions, usesGlobalFreqParams);
+    await this.validateActions(ruleType, data);
 
     // Throw error if schedule interval is less than the minimum and we are enforcing it
     const intervalInMs = parseDuration(data.schedule.interval);
@@ -2234,8 +2232,7 @@ export class RulesClient {
             for (const operation of operations) {
               switch (operation.field) {
                 case 'actions':
-                  const usesGlobalFreqParams = this.usesValidGlobalFreqParams(attributes);
-                  await this.validateActions(ruleType, operation.value, usesGlobalFreqParams);
+                  await this.validateActions(ruleType, { ...attributes, actions: operation.value });
                   ruleActions = applyBulkEditOperation(operation, ruleActions);
                   break;
                 case 'snoozeSchedule':
@@ -3505,26 +3502,25 @@ export class RulesClient {
       : (rule as PartialRule<Params>);
   }
 
-  private usesValidGlobalFreqParams({
-    notifyWhen,
-    throttle,
-  }: Pick<RawRule, 'notifyWhen' | 'throttle'>) {
-    const hasNotifyWhen = typeof notifyWhen !== 'undefined';
-    const hasThrottle = typeof throttle !== 'undefined';
-    if (hasNotifyWhen && hasThrottle) return true;
-    if (!hasNotifyWhen && !hasThrottle) return false;
-    throw Boom.badRequest(
-      i18n.translate('xpack.alerting.rulesClient.usesValidGlobalFreqParams.oneUndefined', {
-        defaultMessage: 'Global notifyWhen and throttle must both be defined or both be undefined',
-      })
-    );
-  }
-
   private async validateActions(
     alertType: UntypedNormalizedRuleType,
-    actions: NormalizedAlertAction[],
-    usesGlobalFreqParams: boolean
+    data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertAction[] }
   ): Promise<void> {
+    const { actions, notifyWhen, throttle } = data;
+    const hasNotifyWhen = typeof notifyWhen !== 'undefined';
+    const hasThrottle = typeof throttle !== 'undefined';
+    let usesRuleLevelFreqParams;
+    if (hasNotifyWhen && hasThrottle) usesRuleLevelFreqParams = true;
+    else if (!hasNotifyWhen && !hasThrottle) usesRuleLevelFreqParams = false;
+    else {
+      throw Boom.badRequest(
+        i18n.translate('xpack.alerting.rulesClient.usesValidGlobalFreqParams.oneUndefined', {
+          defaultMessage:
+            'Rule-level notifyWhen and throttle must both be defined or both be undefined',
+        })
+      );
+    }
+
     if (actions.length === 0) {
       return;
     }
@@ -3568,14 +3564,14 @@ export class RulesClient {
       );
     }
 
-    // check for actions using frequency params if the rule has global frequency params defined
-    if (usesGlobalFreqParams) {
+    // check for actions using frequency params if the rule has rule-level frequency params defined
+    if (usesRuleLevelFreqParams) {
       const actionsWithFrequency = actions.filter((action) => Boolean(action.frequency));
       if (actionsWithFrequency.length) {
         throw Boom.badRequest(
           i18n.translate('xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams', {
             defaultMessage:
-              'Cannot mix and match per-action frequency params when notify_when or throttle are globally defined: {groups}',
+              'Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: {groups}',
             values: {
               groups: actionsWithFrequency.map((a) => a.group).join(', '),
             },
