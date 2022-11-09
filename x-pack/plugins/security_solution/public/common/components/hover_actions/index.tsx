@@ -218,7 +218,7 @@ export const HoverActions: React.FC<Props> = React.memo(
     const isCaseView = scopeId === TimelineId.casePage;
     const isTimelineView = scopeId === TimelineId.active;
     const isAlertDetailsView = scopeId === TimelineId.detectionsAlertDetailsPage;
-    // TODO it would be better to provide a list of disabled/enabled actions as props
+    // TODO Provide a list of disabled/enabled actions as props
     const isEntityAnalyticsPage = scopeId === SecurityPageName.entityAnalytics;
 
     const hideFilters = useMemo(
