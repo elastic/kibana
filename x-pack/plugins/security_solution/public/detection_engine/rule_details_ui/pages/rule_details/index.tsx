@@ -132,6 +132,7 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
 import type { NavTab } from '../../../../common/components/navigation/types';
 import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
+import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -183,6 +184,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   } = useKibana().services;
 
   const dispatch = useDispatch();
+  const { startMlJobs } = useStartMlJobs();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
@@ -579,9 +581,15 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [dispatch]
   );
 
-  const handleOnChangeEnabledRule = useCallback((enabled: boolean) => {
-    setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
-  }, []);
+  const handleOnChangeEnabledRule = useCallback(
+    async (enabled: boolean) => {
+      if (enabled) {
+        await startMlJobs(rule?.machine_learning_job_id);
+      }
+      setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
+    },
+    [rule?.machine_learning_job_id, startMlJobs]
+  );
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
     (newShowBuildingBlockAlerts: boolean) => {

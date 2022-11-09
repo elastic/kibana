@@ -9,10 +9,10 @@ import React, { useState } from 'react';
 import {
   EuiPopover,
   EuiText,
-  EuiIcon,
   EuiPopoverTitle,
   EuiSpacer,
   EuiPopoverFooter,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -49,7 +49,9 @@ const MlRuleErrorPopoverComponent: React.FC<MlRuleErrorPopoverComponentProps> = 
     return null;
   }
 
-  const button = <EuiIcon type={'alert'} onClick={onButtonClick} />;
+  const button = (
+    <EuiButtonIcon display={'empty'} color={'warning'} iconType={'alert'} onClick={onButtonClick} />
+  );
   const popoverTitle = getCapitalizedStatusText(rule.execution_summary?.last_execution.status);
 
   return (

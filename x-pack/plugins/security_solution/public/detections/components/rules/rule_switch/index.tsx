@@ -9,6 +9,7 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { useStartMlJobs } from '../../../../detection_engine/rule_management/logic/use_start_ml_jobs';
 import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -27,6 +28,7 @@ StaticSwitch.displayName = 'StaticSwitch';
 export interface RuleSwitchProps {
   id: string;
   enabled: boolean;
+  mlJobIds?: string[];
   isDisabled?: boolean;
   isLoading?: boolean;
   onChange?: (enabled: boolean) => void;
@@ -40,12 +42,14 @@ export const RuleSwitchComponent = ({
   isDisabled,
   isLoading,
   enabled,
+  mlJobIds,
   onChange,
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
   const rulesTableContext = useRulesTableContextOptional();
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: !rulesTableContext });
+  const { startMlJobs } = useStartMlJobs();
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
@@ -53,8 +57,12 @@ export const RuleSwitchComponent = ({
       startTransaction({
         name: enabled ? SINGLE_RULE_ACTIONS.DISABLE : SINGLE_RULE_ACTIONS.ENABLE,
       });
+      const enableRule = event.target.checked;
+      if (enableRule) {
+        await startMlJobs(mlJobIds);
+      }
       const bulkActionResponse = await executeBulkAction({
-        type: event.target.checked ? BulkActionType.enable : BulkActionType.disable,
+        type: enableRule ? BulkActionType.enable : BulkActionType.disable,
         ids: [id],
       });
       if (bulkActionResponse?.attributes.results.updated.length) {
@@ -63,7 +71,7 @@ export const RuleSwitchComponent = ({
       }
       setMyIsLoading(false);
     },
-    [enabled, executeBulkAction, id, onChange, startTransaction]
+    [enabled, executeBulkAction, id, mlJobIds, onChange, startMlJobs, startTransaction]
   );
 
   const showLoader = useMemo((): boolean => {
