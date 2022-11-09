@@ -112,7 +112,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;
@@ -146,10 +146,10 @@ export interface PackagePolicyClient {
     request: KibanaRequest
   ): Promise<
     A extends 'postPackagePolicyDelete'
-      ? void
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : NewPackagePolicy
+    ? void
+    : A extends 'packagePolicyPostCreate'
+    ? PackagePolicy
+    : NewPackagePolicy
   >;
 
   runDeleteExternalCallbacks(deletedPackagePolicies: DeletePackagePoliciesResponse): Promise<void>;
