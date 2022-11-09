@@ -30,7 +30,7 @@ import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
-import type { EuiButtonIconColor } from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
@@ -562,7 +562,7 @@ export interface LayerAction {
   description?: string;
   execute: () => void | Promise<void>;
   icon: IconType;
-  color?: EuiButtonIconColor;
+  color?: EuiButtonIconProps['color'];
   isCompatible: boolean;
   'data-test-subj'?: string;
 }
@@ -612,10 +612,12 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
+  isMetricDimension?: boolean;
   layerType: LayerType | undefined;
   supportStaticValue: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector: boolean;
+  dataSectionExtra?: React.ReactNode;
   formatSelectorOptions: FormatSelectorOptions | undefined;
 };
 
@@ -636,6 +638,7 @@ export interface DragDropOperation {
   filterOperations: (operation: OperationMetadata) => boolean;
   indexPatternId?: string;
   isNewColumn?: boolean;
+  isMetricDimension?: boolean;
   prioritizedOperation?: string;
 }
 
@@ -793,6 +796,8 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
   supportStaticValue?: boolean;
+  // used by text based datasource to restrict the field selection only to number fields for the metric dimensions
+  isMetricDimension?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
   formatSelectorOptions?: FormatSelectorOptions; // only relevant if supportFieldFormat is true
@@ -1127,7 +1132,7 @@ export interface Visualization<T = unknown, P = unknown> {
   ) => ((cleanupElement: Element) => void) | void;
 
   /**
-   * Additional editor that gets rendered inside the dimension popover.
+   * Additional editor that gets rendered inside the dimension popover in the "appearance" section.
    * This can be used to configure dimension-specific options
    */
   renderDimensionEditor?: (
@@ -1135,10 +1140,18 @@ export interface Visualization<T = unknown, P = unknown> {
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   /**
-   * Additional editor that gets rendered inside the dimension popover.
+   * Additional editor that gets rendered inside the dimension popover in an additional section below "appearance".
    * This can be used to configure dimension-specific options
    */
   renderDimensionEditorAdditionalSection?: (
+    domElement: Element,
+    props: VisualizationDimensionEditorProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+  /**
+   * Additional editor that gets rendered inside the data section.
+   * This can be used to configure dimension-specific options
+   */
+  renderDimensionEditorDataExtra?: (
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
