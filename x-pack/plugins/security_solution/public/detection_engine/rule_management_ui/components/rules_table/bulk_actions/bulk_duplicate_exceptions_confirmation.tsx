@@ -6,21 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import {
-  EuiButton,
-  EuiRadioGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiText,
-  EuiButtonEmpty,
-  EuiConfirmModal,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiRadioGroup, EuiText, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { DUPLICATE_OPTIONS } from '../../../../../../common/constants';
 
 import { bulkDuplicateRuleActions as i18n } from './translations';
