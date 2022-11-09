@@ -6,12 +6,12 @@ steps:
 
   - wait
 
-  - label: '🧑‍🏭 Build Kibana Distribution and Plugins'
-    command: .buildkite/scripts/steps/build_kibana.sh
-    agents:
-      queue: c2-16
-    key: build
-    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+  # - label: '🧑‍🏭 Build Kibana Distribution and Plugins'
+  #   command: .buildkite/scripts/steps/build_kibana.sh
+  #   agents:
+  #     queue: c2-16
+  #   key: build
+  #   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
   - label: '💪 Performance Tests with Playwright config'
     command: .buildkite/scripts/steps/functional/simple_performance.sh

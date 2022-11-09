@@ -11,8 +11,8 @@ if [[ ! -d "$KIBANA_BUILD_LOCATION/bin" ]]; then
 
   echo "BUILDKITE_BUILD_ID=$BUILDKITE_BUILD_ID"
 
-  download_artifact kibana-default.tar.gz . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-  download_artifact kibana-default-plugins.tar.gz . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact kibana-default.tar.gz . --build "${KIBANA_BUILD_ID:-01845cbe-f5dd-43bb-a25e-f94dcad6735f}"
+  download_artifact kibana-default-plugins.tar.gz . --build "${KIBANA_BUILD_ID:-01845cbe-f5dd-43bb-a25e-f94dcad6735f}"
 
   mkdir -p "$KIBANA_BUILD_LOCATION"
   tar -xzf kibana-default.tar.gz -C "$KIBANA_BUILD_LOCATION" --strip=1
