@@ -33,9 +33,9 @@ import {
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
-  'slo.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
-  'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
-  'slo.kql.custom': new KQLCustomTransformGenerator(),
+  'sli.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
+  'sli.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+  'sli.kql.custom': new KQLCustomTransformGenerator(),
 };
 
 const createSLORoute = createObservabilityServerRoute({
