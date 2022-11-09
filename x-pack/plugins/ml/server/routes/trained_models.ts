@@ -328,7 +328,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
   /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /api/ml/trained_models/:modelId/deployment/_update Start trained model deployment
+   * @api {post} /api/ml/trained_models/:modelId/deployment/_update Update trained model deployment
    * @apiName UpdateTrainedModelDeployment
    * @apiDescription Updates trained model deployment.
    */
