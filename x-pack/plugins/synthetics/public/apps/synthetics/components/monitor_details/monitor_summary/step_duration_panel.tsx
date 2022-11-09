@@ -11,10 +11,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 import { i18n } from '@kbn/i18n';
 
+import { Position } from '@elastic/charts/dist/utils/common';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { ClientPluginsStart } from '../../../../../plugin';
-export const StepDurationPanel = () => {
+
+export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Position }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -44,6 +46,7 @@ export const StepDurationPanel = () => {
         axisTitlesVisibility={{ yLeft: false, yRight: false, x: false }}
         customHeight={'300px'}
         reportType={ReportTypes.KPI}
+        legendPosition={legendPosition}
         attributes={[
           {
             name: DURATION_BY_STEP_LABEL,

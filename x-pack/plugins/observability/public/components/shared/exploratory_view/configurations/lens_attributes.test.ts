@@ -431,7 +431,7 @@ describe('Lens Attribute', () => {
         isVisible: true,
         showSingleSeries: true,
         position: 'right',
-        legendSize: 'large',
+        legendSize: 'auto',
         shouldTruncate: false,
       },
       preferredSeriesType: 'line',
