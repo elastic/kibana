@@ -18,16 +18,18 @@ import { FilterStateStore } from '@kbn/es-query';
 import { useUrlState } from '../../../../utils/use_url_state';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 
-const DEFAULT_FROM_MINUTES_VALUE = 15;
-
-const INITIAL_DATE = new Date();
-export const INITIAL_DATE_RANGE = { from: 'now-15m', to: 'now' };
-export const DEFAULT_QUERY = {
+const DEFAULT_QUERY = {
   language: 'kuery',
   query: '',
 };
+const DEFAULT_FROM_MINUTES_VALUE = 15;
+const INITIAL_DATE = new Date();
+export const INITIAL_DATE_RANGE = { from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`, to: 'now' };
+const CALCULATED_DATE_RANGE_FROM = new Date(
+  INITIAL_DATE.getMinutes() - DEFAULT_FROM_MINUTES_VALUE
+).getTime();
+const CALCULATED_DATE_RANGE_TO = INITIAL_DATE.getTime();
 
-// with this approach, all state will be in one variable in the url
 const INITIAL_HOSTS_STATE: HostsState = {
   query: DEFAULT_QUERY,
   filters: [],
@@ -35,8 +37,8 @@ const INITIAL_HOSTS_STATE: HostsState = {
   dateRange: { ...INITIAL_DATE_RANGE },
   // for useSnapshot
   dateRangeTimestamp: {
-    from: new Date(INITIAL_DATE.getMinutes() - DEFAULT_FROM_MINUTES_VALUE).getTime(),
-    to: INITIAL_DATE.getTime(),
+    from: CALCULATED_DATE_RANGE_FROM,
+    to: CALCULATED_DATE_RANGE_TO,
   },
 };
 
@@ -79,8 +81,8 @@ export const useHostsUrlState = () => {
   const [getTime] = useKibanaTimefilterTime(INITIAL_DATE_RANGE);
 
   const getRangeInTimestamp = useCallback(({ from, to }: TimeRange) => {
-    const fromTS = DateMath.parse(from)?.valueOf() ?? 0;
-    const toTS = DateMath.parse(to)?.valueOf() ?? 0;
+    const fromTS = DateMath.parse(from)?.valueOf() ?? CALCULATED_DATE_RANGE_FROM;
+    const toTS = DateMath.parse(to)?.valueOf() ?? CALCULATED_DATE_RANGE_TO;
 
     return {
       from: fromTS,

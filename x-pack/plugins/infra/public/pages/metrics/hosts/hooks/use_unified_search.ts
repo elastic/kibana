@@ -13,7 +13,7 @@ import { debounce } from 'lodash';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
-import { useHostsUrlState, INITIAL_DATE_RANGE, DEFAULT_QUERY } from './use_hosts_url_state';
+import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_hosts_url_state';
 
 export const useUnifiedSearch = () => {
   const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
@@ -41,8 +41,8 @@ export const useUnifiedSearch = () => {
         dispatch({
           type: 'setQuery',
           payload: {
-            query: query ? query : DEFAULT_QUERY,
-            filters: filters ? filterManager.getFilters() : undefined, // if here is undefined, reducer will handle what value the state needs to have
+            query,
+            filters: filters ? filterManager.getFilters() : undefined,
             dateRange: newDateRange,
             dateRangeTimestamp: getRangeInTimestamp(newDateRange),
           },
@@ -52,7 +52,7 @@ export const useUnifiedSearch = () => {
     [filterManager, getRangeInTimestamp, getTime, dispatch]
   );
 
-  // This won't prevent onSubmit from being fired when `clear filters` is clicked,
+  // This won't prevent onSubmit from being fired twice when `clear filters` is clicked,
   // that happens because both onQuerySubmit and onFiltersUpdated are internally triggered on same event by SearchBar.
   // This just delays potential duplicate onSubmit calls
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,7 +96,6 @@ export const useUnifiedSearch = () => {
     onSubmit: debounceOnSubmit,
     saveQuery,
     clearSavedQUery,
-    // we'll use the hooks state instad of unified search's
     unifiedSearchQuery: state.query,
     unifiedSearchDateRange: getTime(),
     unifiedSearchFilters: state.filters,
