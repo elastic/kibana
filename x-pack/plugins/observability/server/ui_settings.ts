@@ -57,7 +57,8 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.enableNewSyntheticsViewExperimentDescription',
       {
         defaultMessage:
-          'Enable new synthetic monitoring application in observability. Refresh the page to apply the setting.',
+          '{technicalPreviewLabel} Enable new synthetic monitoring application in observability. Refresh the page to apply the setting.',
+        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
       }
     ),
     schema: schema.boolean(),
