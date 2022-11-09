@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiTextColor, EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq } from 'lodash';
@@ -126,7 +126,7 @@ const accuracyModeDisabledWarning = (
       id="xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled"
       defaultMessage="{name} might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster. {learnMoreLink}"
       values={{
-        name: <EuiTextColor color="accent">{columnName}</EuiTextColor>,
+        name: <strong>{columnName}</strong>,
         learnMoreLink: (
           <EuiLink href={docLink} color="text" target="_blank" external={true}>
             <FormattedMessage
@@ -138,11 +138,11 @@ const accuracyModeDisabledWarning = (
       }}
     />
     <EuiSpacer size="s" />
-    <EuiButton data-test-subj="lnsPrecisionWarningEnableAccuracy" onClick={enableAccuracyMode}>
+    <EuiLink data-test-subj="lnsPrecisionWarningEnableAccuracy" onClick={enableAccuracyMode}>
       {i18n.translate('xpack.lens.indexPattern.enableAccuracyMode', {
         defaultMessage: 'Enable accuracy mode',
       })}
-    </EuiButton>
+    </EuiLink>
   </>
 );
 
@@ -151,22 +151,22 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
     id="xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled"
     defaultMessage="{name} might be an approximation. For more precise results, try increasing the number of {topValues} or using {filters} instead. {learnMoreLink}"
     values={{
-      name: <EuiTextColor color="accent">{columnName}</EuiTextColor>,
+      name: <strong>{columnName}</strong>,
       topValues: (
-        <EuiTextColor color="subdued">
+        <strong>
           <FormattedMessage
             id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
             defaultMessage="top values"
           />
-        </EuiTextColor>
+        </strong>
       ),
       filters: (
-        <EuiTextColor color="subdued">
+        <strong>
           <FormattedMessage
             id="xpack.lens.indexPattern.precisionErrorWarning.filters"
             defaultMessage="filters"
           />
-        </EuiTextColor>
+        </strong>
       ),
       learnMoreLink: (
         <EuiLink href={docLink} color="text" target="_blank" external={true}>
@@ -323,7 +323,7 @@ export function getPrecisionErrorWarningMessages(
                   id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning"
                   defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records. To learn more about this limit, {link}."
                   values={{
-                    name: <EuiTextColor color="accent">{column.name}</EuiTextColor>,
+                    name: <strong>{column.name}</strong>,
                     link: (
                       <EuiLink
                         href={docLinks.links.aggs.rare_terms}
@@ -340,7 +340,7 @@ export function getPrecisionErrorWarningMessages(
                   }}
                 />
                 <EuiSpacer size="s" />
-                <EuiButton
+                <EuiLink
                   onClick={() => {
                     setState((prevState) =>
                       mergeLayer({
@@ -365,7 +365,7 @@ export function getPrecisionErrorWarningMessages(
                   {i18n.translate('xpack.lens.indexPattern.switchToRare', {
                     defaultMessage: 'Rank by rarity',
                   })}
-                </EuiButton>
+                </EuiLink>
               </>
             );
           }

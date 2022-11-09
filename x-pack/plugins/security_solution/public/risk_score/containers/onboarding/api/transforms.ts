@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { RISK_SCORE_RESTART_TRANSFORMS } from '../../../../../common/constants';
 import {
   GET_TRANSFORM_STATE_ERROR_MESSAGE,
   GET_TRANSFORM_STATE_NOT_FOUND_MESSAGE,
-  RESTART_TRANSFORMS_ERROR_MESSAGE,
   START_TRANSFORMS_ERROR_MESSAGE,
   STOP_TRANSFORMS_ERROR_MESSAGE,
   TRANSFORM_CREATION_ERROR_MESSAGE,
@@ -22,8 +20,6 @@ import type {
   DeleteTransformsResult,
   GetTransformsState,
   GetTransformState,
-  RestartTransforms,
-  RestartTransformResult,
   StartTransforms,
   StartTransformsResult,
   StopTransforms,
@@ -316,52 +312,6 @@ export async function deleteTransforms({
           messageBody: e?.body?.message,
           renderDocLink,
         }),
-        toastLifeTimeMs,
-      });
-    });
-
-  return res;
-}
-
-export async function restartTransforms({
-  http,
-  notifications,
-  renderDocLink,
-  signal,
-  errorMessage,
-  riskScoreEntity,
-}: RestartTransforms) {
-  const res = await http
-    .post<RestartTransformResult[]>(`${RISK_SCORE_RESTART_TRANSFORMS}`, {
-      body: JSON.stringify({ riskScoreEntity }),
-      signal,
-    })
-    .then((result) => {
-      const failedIds = result.reduce<string[]>((acc, curr) => {
-        const [[key, val]] = Object.entries(curr);
-        return !val.success
-          ? [...acc, val?.error?.message ? `${key}: ${val?.error?.message}` : key]
-          : acc;
-      }, []);
-      const errorMessageTitle = errorMessage ?? RESTART_TRANSFORMS_ERROR_MESSAGE(failedIds.length);
-
-      if (failedIds.length > 0) {
-        notifications?.toasts?.addError(new Error(errorMessageTitle), {
-          title: errorMessageTitle,
-          toastMessage: getErrorToastMessage({
-            messageBody: failedIds.join(', '),
-            renderDocLink,
-          }),
-          toastLifeTimeMs,
-        });
-      }
-
-      return result;
-    })
-    .catch((e) => {
-      notifications?.toasts?.addError(e, {
-        title: errorMessage ?? RESTART_TRANSFORMS_ERROR_MESSAGE(),
-        toastMessage: getErrorToastMessage({ messageBody: e?.body?.message, renderDocLink }),
         toastLifeTimeMs,
       });
     });
