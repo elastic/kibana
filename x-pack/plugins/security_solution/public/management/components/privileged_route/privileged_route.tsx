@@ -10,7 +10,7 @@ import { Route } from '@kbn/kibana-react-plugin/public';
 import { NoPrivilegesPage } from '../../../common/components/no_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { NoPermissions } from '../no_permissons';
-import { AdministrationSubTab } from '../../types';
+import { MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH } from '../../common/constants';
 
 export interface PrivilegedRouteProps {
   path: string;
@@ -27,7 +27,7 @@ export const PrivilegedRoute = memo(({ component, hasPrivilege, path }: Privileg
   if (!hasPrivilege) {
     const shouldUseMissingPrivilegesScreen =
       isEndpointRbacEnabled ||
-      (isEndpointRbacV1Enabled && path.includes(AdministrationSubTab.responseActionsHistory));
+      (isEndpointRbacV1Enabled && path === MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH);
 
     componentToRender = shouldUseMissingPrivilegesScreen
       ? () => <NoPrivilegesPage />

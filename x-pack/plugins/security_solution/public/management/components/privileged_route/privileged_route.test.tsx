@@ -13,6 +13,8 @@ import { PrivilegedRoute } from './privileged_route';
 import type { PrivilegedRouteProps } from './privileged_route';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AdministrationSubTab } from '../../types';
+import { MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH } from '../../common/constants';
+import { MANAGEMENT_PATH } from '../../../../common/constants';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 
@@ -101,8 +103,8 @@ describe('PrivilegedRoute', () => {
     describe('no privileges', () => {
       it('renders `you need to have privileges` on Response actions history', async () => {
         renderProps.hasPrivilege = false;
-        renderProps.path = AdministrationSubTab.responseActionsHistory;
-        currentPath = AdministrationSubTab.responseActionsHistory;
+        renderProps.path = MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH;
+        currentPath = `${MANAGEMENT_PATH}/${AdministrationSubTab.responseActionsHistory}`;
 
         render();
 
