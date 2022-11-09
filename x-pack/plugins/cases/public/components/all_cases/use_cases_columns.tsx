@@ -69,6 +69,10 @@ const LineClampedEuiBadgeGroup = euiStyled(EuiBadgeGroup)`
   word-break: normal;
 `;
 
+const StyledEuiBadge = euiStyled(EuiBadge)`
+  max-width: 100px
+`; // to allow for ellipsis
+
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
@@ -194,8 +198,22 @@ export const useCasesColumns = ({
     name: i18n.TAGS,
     render: (tags: Case['tags']) => {
       if (tags != null && tags.length > 0) {
-        const badges = (
+        const clampedBadges = (
           <LineClampedEuiBadgeGroup data-test-subj="case-table-column-tags">
+            {tags.map((tag: string, i: number) => (
+              <StyledEuiBadge
+                color="hollow"
+                key={`${tag}-${i}`}
+                data-test-subj={`case-table-column-tags-${tag}`}
+              >
+                {tag}
+              </StyledEuiBadge>
+            ))}
+          </LineClampedEuiBadgeGroup>
+        );
+
+        const unclampedBadges = (
+          <EuiBadgeGroup data-test-subj="case-table-column-tags">
             {tags.map((tag: string, i: number) => (
               <EuiBadge
                 color="hollow"
@@ -205,22 +223,22 @@ export const useCasesColumns = ({
                 {tag}
               </EuiBadge>
             ))}
-          </LineClampedEuiBadgeGroup>
+          </EuiBadgeGroup>
         );
 
         return (
           <EuiToolTip
             data-test-subj="case-table-column-tags-tooltip"
             position="left"
-            content={badges}
+            content={unclampedBadges}
           >
-            {badges}
+            {clampedBadges}
           </EuiToolTip>
         );
       }
       return getEmptyTagValue();
     },
-    width: '10%',
+    width: '15%',
   });
 
   if (isAlertsEnabled) {
@@ -232,6 +250,7 @@ export const useCasesColumns = ({
         totalAlerts != null
           ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
           : getEmptyTagValue(),
+      width: '80px',
     });
   }
 
