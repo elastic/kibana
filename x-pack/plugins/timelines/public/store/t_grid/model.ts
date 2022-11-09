@@ -62,12 +62,15 @@ export interface TGridModel extends TGridModelSettings {
   sessionViewConfig: SessionViewConfig | null;
   /** updated saved object timestamp */
   updated?: number;
+  /** Total number of fetched events/alerts */
+  totalCount: number;
 }
 
 export type SubsetTGridModel = Readonly<
   Pick<
     TGridModel,
     | 'columns'
+    | 'selectAll'
     | 'defaultColumns'
     | 'dataViewId'
     | 'deletedEventIds'
@@ -86,5 +89,6 @@ export type SubsetTGridModel = Readonly<
     | 'sessionViewConfig'
     | 'queryFields'
     | 'title'
+    | 'totalCount'
   >
 >;

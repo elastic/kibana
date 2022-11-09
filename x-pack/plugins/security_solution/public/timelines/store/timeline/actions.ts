@@ -267,3 +267,7 @@ export const clearEventsLoading = actionCreator<{
 export const clearEventsDeleted = actionCreator<{
   id: string;
 }>('CLEAR_TGRID_EVENTS_DELETED');
+
+export const updateTotalCount = actionCreator<{ id: string; totalCount: number }>(
+  'UPDATE_TOTAL_COUNT'
+);
