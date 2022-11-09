@@ -22,6 +22,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./console'));
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./uptime'));
+    loadTestFile(require.resolve('./synthetics'));
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./security_solution'));
     loadTestFile(require.resolve('./transform'));
@@ -38,5 +39,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./monitoring_collection'));
     loadTestFile(require.resolve('./cloud_security_posture'));
+    loadTestFile(require.resolve('./guided_onboarding'));
   });
 }

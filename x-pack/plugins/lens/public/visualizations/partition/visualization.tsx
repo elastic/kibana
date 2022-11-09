@@ -36,7 +36,7 @@ import {
 } from '../../../common';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { DimensionEditor, PieToolbar } from './toolbar';
+import { DimensionDataExtraEditor, DimensionEditor, PieToolbar } from './toolbar';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
 
@@ -400,6 +400,16 @@ export const getPieVisualization = ({
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
         <I18nProvider>
           <DimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+  renderDimensionEditorDataExtra(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <DimensionDataExtraEditor {...props} paletteService={paletteService} />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement

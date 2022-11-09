@@ -577,7 +577,6 @@ export function LayerPanel(
                                       invalid: group.invalid,
                                       invalidMessage: group.invalidMessage,
                                       indexPatterns: dataViews.indexPatterns,
-                                      existingFields: dataViews.existingFields,
                                     }}
                                   />
                                 ) : (
@@ -639,6 +638,7 @@ export function LayerPanel(
                         filterOperations: group.filterOperations,
                         prioritizedOperation: group.prioritizedOperation,
                         isNewColumn: true,
+                        isMetricDimension: group?.isMetricDimension,
                         indexPatternId: layerDatasource
                           ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
                           : activeVisualization.getUsedDataView?.(visualizationState, layerId),
@@ -754,6 +754,7 @@ export function LayerPanel(
                   groupId: activeGroup.groupId,
                   hideGrouping: activeGroup.hideGrouping,
                   filterOperations: activeGroup.filterOperations,
+                  isMetricDimension: activeGroup?.isMetricDimension,
                   dimensionGroups,
                   toggleFullscreen,
                   isFullscreen,
@@ -764,8 +765,24 @@ export function LayerPanel(
                   formatSelectorOptions: activeGroup.formatSelectorOptions,
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                   indexPatterns: dataViews.indexPatterns,
-                  existingFields: dataViews.existingFields,
                   activeData: layerVisualizationConfigProps.activeData,
+                  dataSectionExtra: !isFullscreen &&
+                    !activeDimension.isNew &&
+                    activeVisualization.renderDimensionEditorDataExtra && (
+                      <NativeRenderer
+                        render={activeVisualization.renderDimensionEditorDataExtra}
+                        nativeProps={{
+                          ...layerVisualizationConfigProps,
+                          groupId: activeGroup.groupId,
+                          accessor: activeId,
+                          datasource,
+                          setState: props.updateVisualization,
+                          addLayer: props.addLayer,
+                          removeLayer: props.onRemoveLayer,
+                          panelRef,
+                        }}
+                      />
+                    ),
                 }}
               />
             )}

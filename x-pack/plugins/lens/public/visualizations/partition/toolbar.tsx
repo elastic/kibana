@@ -329,7 +329,24 @@ export function DimensionEditor(
           }}
         />
       )}
-      {[...currentLayer.primaryGroups, ...(currentLayer.secondaryGroups ?? [])].includes(
+    </>
+  );
+}
+
+export function DimensionDataExtraEditor(
+  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
+    paletteService: PaletteRegistry;
+  }
+) {
+  const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
+
+  if (!currentLayer) {
+    return null;
+  }
+
+  return (
+    <>
+      {![...currentLayer.primaryGroups, ...(currentLayer.secondaryGroups ?? [])].includes(
         props.accessor
       ) && (
         <CollapseSetting
