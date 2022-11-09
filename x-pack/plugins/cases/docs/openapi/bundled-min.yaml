@@ -120,7 +120,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -154,7 +154,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -309,7 +309,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -457,7 +457,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -565,7 +565,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -609,7 +609,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -631,7 +631,7 @@ paths:
       summary: Aggregates and returns a list of case tags.
       operationId: getCaseTags
       description: |
-        You must have read privileges for the **Cases*** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
+        You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
       tags:
         - cases
       parameters:
@@ -649,7 +649,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 type: array
                 items:
@@ -818,7 +818,7 @@ paths:
       summary: Retrieves a comment from a case.
       operationId: getCaseComment
       description: |
-        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security*** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
       tags:
         - cases
       parameters:
@@ -829,7 +829,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/alert_comment_response_properties'

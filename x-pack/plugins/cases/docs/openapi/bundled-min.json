@@ -200,7 +200,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -259,7 +259,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -480,7 +480,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
@@ -694,7 +694,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -851,7 +851,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -921,7 +921,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
@@ -961,7 +961,7 @@
       "get": {
         "summary": "Aggregates and returns a list of case tags.",
         "operationId": "getCaseTags",
-        "description": "You must have read privileges for the **Cases*** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "description": "You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
         "tags": [
           "cases"
         ],
@@ -992,7 +992,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -1293,7 +1293,7 @@
       "get": {
         "summary": "Retrieves a comment from a case.",
         "operationId": "getCaseComment",
-        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security*** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.\n",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.\n",
         "tags": [
           "cases"
         ],
@@ -1312,7 +1312,7 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "application/json; charset=utf-8": {
+              "application/json": {
                 "schema": {
                   "oneOf": [
                     {

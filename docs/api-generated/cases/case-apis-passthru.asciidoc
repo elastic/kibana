@@ -609,7 +609,7 @@ Any modifications made to this file will be overwritten.
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/comments/{commentId}</code></pre></div>
     <div class="method-summary">Retrieves a comment from a case. (<span class="nickname">getCaseComment</span>)</div>
-    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong>* section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
@@ -636,14 +636,14 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>null</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -686,7 +686,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "closure_type" : "close-by-user",
   "owner" : "cases",
@@ -726,7 +726,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -769,7 +769,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "full_name" : "full_name",
   "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
@@ -781,7 +781,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -824,7 +824,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "count_in_progress_cases" : 6,
   "count_open_cases" : 1,
@@ -835,7 +835,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -849,7 +849,7 @@ Any modifications made to this file will be overwritten.
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/tags</code></pre></div>
     <div class="method-summary">Aggregates and returns a list of case tags. (<span class="nickname">getCaseTags</span>)</div>
-    <div class="method-notes">You must have read privileges for the <strong>Cases</strong>* feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases you're seeking.</div>
+    <div class="method-notes">You must have read privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases you're seeking.</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
@@ -878,14 +878,14 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>""</code></pre>
 
     <h3 class="field-label">Produces</h3>
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -930,7 +930,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>[ {
   "id" : "06116b80-e1c3-11ec-be9b-9b1838238ee6",
   "title" : "security_case"
@@ -940,7 +940,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1117,7 +1117,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "closure_type" : "close-by-user",
   "owner" : "cases",
@@ -1157,7 +1157,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
@@ -1451,7 +1451,7 @@ Any modifications made to this file will be overwritten.
     <!--Todo: process Response Object and its headers, schema, examples -->
 
     <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json; charset=utf-8</div>
+    <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "closure_type" : "close-by-user",
   "owner" : "cases",
@@ -1491,7 +1491,7 @@ Any modifications made to this file will be overwritten.
     This API call produces the following media types according to the <span class="header">Accept</span> request header;
     the media type will be conveyed by the <span class="header">Content-Type</span> response header.
     <ul>
-      <li><code>application/json; charset=utf-8</code></li>
+      <li><code>application/json</code></li>
     </ul>
 
     <h3 class="field-label">Responses</h3>
