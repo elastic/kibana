@@ -3,7 +3,8 @@
   "extends": ["config:base"],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
   "enabledManagers": ["npm"],
-  "baseBranches": ["main", "7.16", "7.15"],
+  "baseBranches": ["main"],
+  "labels": ["release_note:skip"],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
   "separateMajorMinor": false,
@@ -27,7 +28,7 @@
       "matchPackageNames": ["@elastic/charts"],
       "reviewers": ["team:visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
+      "addLabels": ["Team:Visualizations"],
       "draftPR": true,
       "enabled": true,
       "assignAutomerge": true,
@@ -36,25 +37,9 @@
     {
       "groupName": "@elastic/elasticsearch",
       "matchPackageNames": ["@elastic/elasticsearch"],
-      "reviewers": ["team:kibana-operations", "team:kibana-core"],
+      "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Operations", "Team:Core"],
-      "enabled": true
-    },
-    {
-      "groupName": "@elastic/elasticsearch",
-      "matchPackageNames": ["@elastic/elasticsearch"],
-      "reviewers": ["team:kibana-operations", "team:kibana-core"],
-      "matchBaseBranches": ["8.1"],
-      "labels": ["release_note:skip", "Team:Operations", "Team:Core", "backport:skip"],
-      "enabled": true
-    },
-    {
-      "groupName": "@elastic/elasticsearch",
-      "matchPackageNames": ["@elastic/elasticsearch"],
-      "reviewers": ["team:kibana-operations", "team:kibana-core"],
-      "matchBaseBranches": ["7.17"],
-      "labels": ["release_note:skip", "Team:Operations", "Team:Core", "backport:skip"],
+      "addLabels": ["Team:Core"],
       "enabled": true
     },
     {
@@ -62,44 +47,16 @@
       "matchPackageNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "addLabels": ["Team:Core"],
       "enabled": true,
       "prCreation": "immediate"
-    },
-    {
-      "groupName": "babel",
-      "matchPackageNames": ["@types/babel__core"],
-      "matchPackagePatterns": ["^@babel", "^babel-plugin"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true
-    },
-    {
-      "groupName": "typescript",
-      "matchPackageNames": ["typescript", "prettier", "@types/jsdom"],
-      "matchPackagePatterns": ["^@typescript-eslint"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true
-    },
-    {
-      "groupName": "polyfills",
-      "matchPackageNames": ["core-js"],
-      "matchPackagePatterns": ["polyfill"],
-      "excludePackageNames": ["@loaders.gl/polyfills"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true
     },
     {
       "groupName": "vega related modules",
       "matchPackageNames": ["vega", "vega-lite", "vega-schema-url-parser", "vega-tooltip"],
       "reviewers": ["team:kibana-visualizations"],
       "matchBaseBranches": ["main"],
-      "labels": ["Feature:Vega", "Team:Visualizations"],
+      "addLabels": ["Feature:Vega", "Team:Visualizations"],
       "enabled": true
     },
     {
@@ -108,7 +65,7 @@
       "matchPackagePatterns": ["^cypress"],
       "reviewers": ["Team:apm", "Team: SecuritySolution"],
       "matchBaseBranches": ["main"],
-      "labels": ["buildkite-ci", "ci:all-cypress-suites"],
+      "addLabels": ["ci:all-cypress-suites"],
       "enabled": true
     },
     {
@@ -125,45 +82,7 @@
       ],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:Security", "release_note:skip", "backport:all-open"],
-      "enabled": true
-    },
-    {
-      "groupName": "ftr",
-      "packageNames": [
-        "@types/chromedriver",
-        "@types/selenium-webdriver",
-        "chromedriver",
-        "geckodriver",
-        "ms-chromium-edge-driver",
-        "selenium-webdriver"
-      ],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true
-    },
-    {
-      "groupName": "@testing-library",
-      "packageNames": [
-        "@testing-library/dom",
-        "@testing-library/jest-dom",
-        "@testing-library/react",
-        "@testing-library/react-hooks",
-        "@testing-library/user-event",
-        "@types/testing-library__jest-dom"
-      ],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true
-    },
-    {
-      "groupName": "@storybook",
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "matchPackagePatterns": ["^@storybook"],
-      "labels": ["Team:Operations", "release_note:skip"],
+      "addLabels": ["Team:Security", "backport:all-open"],
       "enabled": true
     },
     {
@@ -178,7 +97,7 @@
         "team:security-onboarding-and-lifecycle-mgt"
       ],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
+      "addLabels": ["ci:all-cypress-suites"],
       "enabled": true
     },
     {
@@ -189,7 +108,7 @@
         "team:uptime"
       ],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
+      "addLabels": ["ci:all-cypress-suites"],
       "enabled": true
     },
     {
@@ -205,7 +124,7 @@
         "team:security-solution"
       ],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
+      "addLabels": ["ci:all-cypress-suites"],
       "enabled": true
     },
     {
@@ -213,7 +132,6 @@
       "matchPackageNames": ["peggy", "@types/dagre"],
       "reviewers": ["team:profiling-ui"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip"],
       "enabled": true,
       "prCreation": "immediate"
     },
@@ -222,9 +140,75 @@
       "matchPackageNames": ["xterm", "byte-size", "@types/byte-size"],
       "reviewers": ["team:awp-viz"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
+      "addLabels": ["Team: AWP: Visualization"],
       "enabled": true,
       "prCreation": "immediate"
+    },
+    {
+      "addLabels": ["Team:Operations"],
+      "groupName": "ftr",
+      "packageNames": [
+        "@types/chromedriver",
+        "@types/selenium-webdriver",
+        "chromedriver",
+        "geckodriver",
+        "ms-chromium-edge-driver",
+        "selenium-webdriver"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "enabled": true
+    },
+    {
+      "addLabels": ["Team:Operations"],
+      "groupName": "testing-library",
+      "packageNames": [
+        "@testing-library/dom",
+        "@testing-library/jest-dom",
+        "@testing-library/react",
+        "@testing-library/react-hooks",
+        "@testing-library/user-event",
+        "@types/testing-library__jest-dom"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "enabled": true
+    },
+    {
+      "addLabels": ["Team:Operations"],
+      "groupName": "storybook",
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "matchPackagePatterns": ["^@storybook"],
+      "enabled": true
+    },
+    {
+      "addLabels": ["Team:Operations"],
+      "groupName": "babel",
+      "matchPackageNames": ["@types/babel__core"],
+      "matchPackagePatterns": ["^@babel", "^babel-plugin"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "enabled": true
+    },
+    {
+      "addLabels": ["Team:Operations"],
+      "groupName": "typescript",
+      "matchPackageNames": ["typescript", "prettier", "@types/jsdom"],
+      "matchPackagePatterns": ["^@typescript-eslint"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "enabled": true
+    },
+    {
+      "addLabels": ["Team:Operations"],
+      "groupName": "polyfills",
+      "matchPackageNames": ["core-js"],
+      "matchPackagePatterns": ["polyfill"],
+      "excludePackageNames": ["@loaders.gl/polyfills"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "enabled": true
     }
   ]
 }
