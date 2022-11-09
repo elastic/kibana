@@ -585,7 +585,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [dispatch]
   );
 
-  const handleOnChangeEnabledRule = useCallback(async (enabled: boolean) => {
+  const handleOnChangeEnabledRule = useCallback((enabled: boolean) => {
     setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
   }, []);
 
