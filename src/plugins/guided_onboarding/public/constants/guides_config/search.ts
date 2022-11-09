@@ -35,8 +35,8 @@ export const searchConfig: GuideConfig = {
         }),
       ],
       location: {
-        appID: 'enterpriseSearch',
-        path: '',
+        appID: 'enterpriseSearchContent',
+        path: '/search_indices/new_index',
       },
     },
     {
