@@ -13,7 +13,7 @@ import {
   EuiWindowEvent,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
