@@ -48,7 +48,6 @@ export const Main = (props: MainProps) => {
 
   useEffect(() => {
     const fetchGuidesState = async () => {
-      console.log('fetch data');
       const newGuidesState = await guidedOnboardingApi?.fetchAllGuidesState();
       setGuidesState(newGuidesState ? newGuidesState.state : []);
     };
