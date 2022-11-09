@@ -23,20 +23,32 @@ import {
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+const FILE_STORAGE_METADATA_AGENT_INDEX = '.fleet-agent-files';
+const FILE_STORAGE_DATA_AGENT_INDEX = '.fleet-agent-file-data';
+
 export async function getAgentUploads(
   esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentDiagnostics[]> {
   const getFile = async (fileId: string) => {
     if (!fileId) return;
-    const file = await esClient.get({
-      index: '.fleet-agent-files',
-      id: fileId,
-    });
-    return {
-      id: file._id,
-      ...(file._source as any)?.file,
-    };
+    try {
+      const file = await esClient.get({
+        index: FILE_STORAGE_METADATA_AGENT_INDEX,
+        id: fileId,
+      });
+      return {
+        id: file._id,
+        ...(file._source as any)?.file,
+      };
+    } catch (err) {
+      if (err.statusCode === 404) {
+        appContextService.getLogger().debug(err);
+        return;
+      } else {
+        throw err;
+      }
+    }
   };
 
   const actions = await _getRequestDiagnosticsActions(esClient, agentId);
@@ -137,8 +149,8 @@ export async function getAgentUploadFile(
 ): Promise<{ body: Readable; headers: ResponseHeaders }> {
   try {
     const fileClient = createEsFileClient({
-      blobStorageIndex: '.fleet-agent-file-data',
-      metadataIndex: '.fleet-agent-files',
+      blobStorageIndex: FILE_STORAGE_DATA_AGENT_INDEX,
+      metadataIndex: FILE_STORAGE_METADATA_AGENT_INDEX,
       elasticsearchClient: esClient,
       logger: appContextService.getLogger(),
     });
