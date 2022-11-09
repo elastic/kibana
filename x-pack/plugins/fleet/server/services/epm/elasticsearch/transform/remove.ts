@@ -41,18 +41,19 @@ export const deleteTransforms = async (esClient: ElasticsearchClient, transformI
       );
       logger.info(`Deleted: ${transformId}`);
       if (transformResponse?.transforms) {
+        // @TODO: remove deletion of destination index in 8.6
         // expect this to be 1
-        for (const transform of transformResponse.transforms) {
-          await esClient.transport.request(
-            {
-              method: 'DELETE',
-              path: `/${transform?.dest?.index}`,
-            },
-            {
-              ignore: [404],
-            }
-          );
-        }
+        // for (const transform of transformResponse.transforms) {
+        //   await esClient.transport.request(
+        //     {
+        //       method: 'DELETE',
+        //       path: `/${transform?.dest?.index}`,
+        //     },
+        //     {
+        //       ignore: [404],
+        //     }
+        //   );
+        // }
       } else {
         logger.warn(`cannot find transform for ${transformId}`);
       }

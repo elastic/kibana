@@ -92,6 +92,8 @@ export const prepareToInstallPipelines = (
     return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
   });
 
+  console.log('topLevelPipelineRefs', topLevelPipelineRefs);
+
   pipelineRefs = [...pipelineRefs, ...topLevelPipelineRefs];
 
   return {

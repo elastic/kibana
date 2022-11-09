@@ -150,12 +150,16 @@ const processTransformAssetsPerModule = (
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS) {
       const validFields = processFields(content);
       const mappings = generateMappings(validFields);
-
       packageAssets?.set('mappings', mappings);
     }
 
     if (fileName === TRANSFORM_SPECS_TYPES.TRANSFORM) {
+      const alias = { [content.dest.index]: {} };
+      content.dest.index = `${content.dest.index}-${installNameSuffix}`;
+
       transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
+      transformsSpecifications.get(transformModuleId)?.set('destinationIndexAlias', alias);
+
       transformsSpecifications.get(transformModuleId)?.set('transform', content);
       content._meta = getESAssetMetadata({ packageName: installablePackage.name });
       transforms.push({
@@ -192,6 +196,12 @@ const processTransformAssetsPerModule = (
       packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
     }
   });
+
+  // @TODO: keep track of aliases assets
+  const aliasesRefs = transforms.map((t) => ({
+    id: t.content.dest.index,
+    type: 'alias',
+  }));
 
   const indexTemplatesRefs = destinationIndexTemplates.map((template) => ({
     id: template.installationName,
@@ -267,17 +277,19 @@ const installTransformsAssets = async (
     await Promise.all(
       destinationIndexTemplates
         .map((destinationIndexTemplate) => {
-          const pipelineId = transformsSpecifications
-            .get(destinationIndexTemplate.transformModuleId)
-            ?.get('destinationIndex')?.pipeline;
-
-          const customMappings = transformsSpecifications
-            .get(destinationIndexTemplate.transformModuleId)
-            ?.get('mappings');
+          const transformSpec = transformsSpecifications.get(
+            destinationIndexTemplate.transformModuleId
+          );
+          const customMappings = transformSpec?.get('mappings') ?? {};
+          const pipelineId = transformSpec?.get('destinationIndex')?.pipeline;
           const registryElasticsearch: RegistryElasticsearch = {
             'index_template.settings': destinationIndexTemplate.template.settings,
             'index_template.mappings': destinationIndexTemplate.template.mappings,
           };
+          console.log(
+            "transformSpec?.get('destinationIndexAlias')",
+            transformSpec?.get('destinationIndexAlias')
+          );
 
           const componentTemplates = buildComponentTemplates({
             mappings: customMappings,
@@ -301,7 +313,12 @@ const installTransformsAssets = async (
                 // @ts-expect-error We don't need to pass data_stream property here
                 // as this template is applied to only an index and not a data stream
                 indexTemplate: {
-                  template: { settings: undefined, mappings: undefined },
+                  template: {
+                    settings: undefined,
+                    mappings: undefined,
+                    // @TODO: move this to component level buildComponentTemplates
+                    aliases: transformSpec?.get('destinationIndexAlias'),
+                  },
                   priority: DEFAULT_TRANSFORM_TEMPLATES_PRIORITY,
                   index_patterns: [
                     transformsSpecifications
@@ -322,6 +339,7 @@ const installTransformsAssets = async (
     await Promise.all(
       transforms.map(async (transform) => {
         const index = transform.content.dest.index;
+        console.log('---index', transform.content.dest.index);
 
         try {
           await retryTransientEsErrors(
@@ -334,6 +352,9 @@ const installTransformsAssets = async (
               ),
             { logger }
           );
+          console.log('---Created destination index', transform.content.dest.index);
+
+          logger.debug(`Created destination index: ${index}`);
         } catch (err) {
           throw new Error(err.message);
         }
@@ -445,6 +466,7 @@ async function handleTransformInstall({
         }),
       { logger }
     );
+    logger.debug(`Created transform: ${transform.installationName}`);
   } catch (err) {
     // swallow the error if the transform already exists.
     const isAlreadyExistError =
@@ -457,13 +479,13 @@ async function handleTransformInstall({
 
   // start transform by default if not set in yml file
   // else, respect the setting
-  if (startTransform === undefined || startTransform === true) {
-    await esClient.transform.startTransform(
-      { transform_id: transform.installationName },
-      { ignore: [409] }
-    );
-    logger.debug(`Started transform: ${transform.installationName}`);
-  }
+  // if (startTransform === undefined || startTransform === true) {
+  //   await esClient.transform.startTransform(
+  //     { transform_id: transform.installationName },
+  //     { ignore: [409] }
+  //   );
+  //   logger.debug(`Started transform: ${transform.installationName}`);
+  // }
 
   return { id: transform.installationName, type: ElasticsearchAssetType.transform };
 }
