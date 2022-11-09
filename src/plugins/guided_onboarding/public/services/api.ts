@@ -70,7 +70,6 @@ export class ApiService implements GuidedOnboardingApi {
    * Subsequently, the observable is updated automatically, when the state changes.
    */
   public fetchPluginState$(): Observable<PluginState | undefined> {
-    console.log('fetching state');
     if (!this.isCloudEnabled) {
       return of(undefined);
     }
@@ -122,8 +121,6 @@ export class ApiService implements GuidedOnboardingApi {
     state: { status?: PluginStatus; guide?: GuideState },
     panelState: boolean
   ): Promise<{ pluginState: PluginState } | undefined> {
-    console.log('updating state')
-    console.log({state});
     if (!this.isCloudEnabled) {
       return undefined;
     }
@@ -140,7 +137,6 @@ export class ApiService implements GuidedOnboardingApi {
       );
       // update the guide state in the plugin state observable
       this.pluginState$.next(response.pluginState);
-      console.log({panelState});
       this.isGuidePanelOpen$.next(panelState);
       return response;
     } catch (error) {
@@ -328,8 +324,6 @@ export class ApiService implements GuidedOnboardingApi {
     guideId: GuideId,
     stepId: GuideStepIds
   ): Promise<{ pluginState: PluginState } | undefined> {
-    console.log('complete step');
-    console.log({guideId, stepId});
     const pluginState = await firstValueFrom(this.fetchPluginState$());
     // For now, returning undefined if consumer attempts to complete a step for a guide that isn't active
     if (!isGuideActive(pluginState, guideId)) {
