@@ -76,7 +76,7 @@ export const useRulesTableActions = ({
           type: BulkActionType.duplicate,
           ids: [rule.id],
           duplicatePayload: {
-            include_exceptions: duplicateExceptions === DUPLICATE_OPTIONS.WITHOUT_EXCEPTIONS,
+            include_exceptions: duplicateExceptions === DUPLICATE_OPTIONS.WITH_EXCEPTIONS,
           },
         });
         const createdRules = result?.attributes.results.created;

@@ -17,6 +17,9 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiText,
+  EuiButtonEmpty,
+  EuiConfirmModal,
+  EuiSpacer,
 } from '@elastic/eui';
 import { DUPLICATE_OPTIONS } from '../../../../../../common/constants';
 
@@ -49,57 +52,31 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
   }, [onConfirm, selectedDuplicateOption]);
 
   return (
-    <EuiModal onClose={onCancel}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>{i18n.MODAL_TITLE}</h1>
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-
-      <EuiModalBody>
-        <EuiText>{i18n.MODAL_TEXT(rulesCount)}</EuiText>
-        <EuiRadioGroup
-          options={[
-            {
-              id: DUPLICATE_OPTIONS.WITH_EXCEPTIONS,
-              label: i18n.DUPLICATE_EXCEPTIONS_TEXT,
-            },
-            {
-              id: DUPLICATE_OPTIONS.WITHOUT_EXCEPTIONS,
-              label: i18n.DUPLICATE_WITHOUT_EXCEPTIONS_TEXT,
-            },
-          ]}
-          idSelected={selectedDuplicateOption}
-          onChange={handleRadioChange}
-          // name="radio group"
-          // legend={{
-          //   children: <span>This is a legend for a radio group</span>,
-          // }}
-        />
-
-        {/* <EuiCheckbox
-          id="duplicateExceptionsCheckbox"
-          label={i18n.DUPLICATE_EXCEPTIONS_TEXT}
-          checked={shouldDuplicateExceptions}
-          onChange={handleCheckboxChange}
-        /> */}
-      </EuiModalBody>
-
-      <EuiModalFooter>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiButton onClick={onCancel} fill>
-              {i18n.CANCEL_BUTTON}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButton onClick={handleConfirm} data-test-subj="confirmDuplicate" fill>
-              {i18n.CONTINUE_BUTTON}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiModalFooter>
-    </EuiModal>
+    <EuiConfirmModal
+      title={i18n.MODAL_TITLE}
+      onConfirm={handleConfirm}
+      cancelButtonText={i18n.CANCEL_BUTTON}
+      confirmButtonText={i18n.CONTINUE_BUTTON}
+      defaultFocusedButton="confirm"
+      onCancel={onCancel}
+    >
+      <EuiText>{i18n.MODAL_TEXT(rulesCount)}</EuiText>
+      <EuiSpacer />
+      <EuiRadioGroup
+        options={[
+          {
+            id: DUPLICATE_OPTIONS.WITH_EXCEPTIONS,
+            label: i18n.DUPLICATE_EXCEPTIONS_TEXT,
+          },
+          {
+            id: DUPLICATE_OPTIONS.WITHOUT_EXCEPTIONS,
+            label: i18n.DUPLICATE_WITHOUT_EXCEPTIONS_TEXT,
+          },
+        ]}
+        idSelected={selectedDuplicateOption}
+        onChange={handleRadioChange}
+      />
+    </EuiConfirmModal>
   );
 };
 
