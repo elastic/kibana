@@ -87,7 +87,6 @@ export async function fetchFrequentItems(
 
   const query = {
     bool: {
-      minimum_should_match: 2,
       filter: [
         searchQuery,
         {
@@ -99,9 +98,6 @@ export async function fetchFrequentItems(
           },
         },
       ],
-      should: sortedChangePoints.map((t) => {
-        return { term: { [t.fieldName]: t.fieldValue } };
-      }),
     },
   };
 
@@ -114,9 +110,28 @@ export async function fetchFrequentItems(
       // @ts-expect-error `frequent_items` is not yet part of `AggregationsAggregationContainer`
       frequent_items: {
         minimum_set_size: 2,
-        size: 200,
-        minimum_support: 0.1,
+        size: 50,
+        minimum_support: 0.01,
         fields: aggFields,
+        filter: {
+          bool: {
+            filter: Object.entries(
+              sortedChangePoints.reduce<Record<string, Array<string | number>>>((p, c) => {
+                if (p[c.fieldName]) {
+                  p[c.fieldName].push(c.fieldValue);
+                } else {
+                  p[c.fieldName] = [c.fieldValue];
+                }
+                return p;
+              }, {})
+            ).map(([key, values]) => {
+              if (values.length === 1) {
+                return { term: { [key]: values[0] } };
+              }
+              return { terms: { [key]: values } };
+            }),
+          },
+        },
       },
     },
   };
