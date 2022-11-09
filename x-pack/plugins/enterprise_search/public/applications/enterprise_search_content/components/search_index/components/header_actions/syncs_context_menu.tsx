@@ -91,7 +91,7 @@ export const SyncsContextMenu: React.FC = () => {
             : [
                 <EuiContextMenuItem
                   data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-startSync`}
-                  disabled={ingestionStatus === IngestionStatus.CONNECTED}
+                  disabled={ingestionStatus === IngestionStatus.INCOMPLETE}
                   key="Sync"
                   onClick={() => {
                     closePopover();

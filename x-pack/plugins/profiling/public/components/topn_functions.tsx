@@ -14,6 +14,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -55,6 +56,18 @@ function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU: number | undefined })
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+}
+
+function TotalDiff({ samples1, samples2 }: { samples1: number; samples2: number }) {
+  if (samples1 === samples2 || samples1 === 0) {
+    return <></>;
+  }
+
+  const diff = Math.abs(1 - samples2 / samples1) * 100;
+  const text = (samples1 < samples2 ? '+' : '-') + `${diff.toFixed(2)}%`;
+  const color = samples1 < samples2 ? 'danger' : 'success';
+
+  return <EuiTextColor color={color}> ({text})</EuiTextColor>;
 }
 
 export const TopNFunctionsTable = ({
@@ -228,6 +241,10 @@ export const TopNFunctionsTable = ({
     <>
       <EuiText size="xs">
         <strong>{totalSampleCountLabel}:</strong> {totalCount}
+        {TotalDiff({
+          samples1: comparisonTopNFunctions?.TotalCount ?? 0,
+          samples2: totalCount,
+        })}
       </EuiText>
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
