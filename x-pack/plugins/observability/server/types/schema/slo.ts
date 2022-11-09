@@ -6,7 +6,10 @@
  */
 
 import * as t from 'io-ts';
+import { dateType } from './common';
 import { durationType } from './duration';
+import { indicatorSchema } from './indicators';
+import { timeWindowSchema } from './time_window';
 
 const occurencesBudgetingMethodSchema = t.literal<string>('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal<string>('timeslices');
@@ -21,7 +24,21 @@ const objectiveSchema = t.intersection([
   t.partial({ timeslice_target: t.number, timeslice_window: durationType }),
 ]);
 
+const sloSchema = t.type({
+  id: t.string,
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  time_window: timeWindowSchema,
+  budgeting_method: budgetingMethodSchema,
+  objective: objectiveSchema,
+  revision: t.number,
+  created_at: dateType,
+  updated_at: dateType,
+});
+
 export {
+  sloSchema,
   budgetingMethodSchema,
   occurencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,

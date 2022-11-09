@@ -6,28 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import {
-  budgetingMethodSchema,
-  dateType,
-  indicatorSchema,
-  objectiveSchema,
-  timeWindowSchema,
-} from '../schema';
-
-const sloSchema = t.type({
-  id: t.string,
-  name: t.string,
-  description: t.string,
-  indicator: indicatorSchema,
-  time_window: timeWindowSchema,
-  budgeting_method: budgetingMethodSchema,
-  objective: objectiveSchema,
-  revision: t.number,
-  created_at: dateType,
-  updated_at: dateType,
-});
-
-export { sloSchema };
+import { sloSchema } from '../schema';
 
 type SLO = t.TypeOf<typeof sloSchema>;
 type StoredSLO = t.OutputOf<typeof sloSchema>;
