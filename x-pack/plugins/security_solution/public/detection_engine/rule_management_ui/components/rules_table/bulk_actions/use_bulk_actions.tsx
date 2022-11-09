@@ -12,7 +12,6 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
-import { useStartMlJobs } from '../../../../rule_management/logic/use_start_ml_jobs';
 import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import {
   BulkActionType,
@@ -69,7 +68,6 @@ export const useBulkActions = ({
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
-  const { startMlJobs } = useStartMlJobs();
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
@@ -99,16 +97,6 @@ export const useBulkActions = ({
         const mlRuleCount = disabledRules.length - disabledRulesNoML.length;
         if (!hasMlPermissions && mlRuleCount > 0) {
           toasts.addWarning(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount));
-        }
-
-        if (hasMlPermissions) {
-          const disabledRulesML = disabledRules.filter(({ type }) => isMlRule(type));
-          const allJobIds = disabledRulesML.reduce(
-            (allIds, rule) => [...allIds, ...(rule.machine_learning_job_id ?? [])],
-            [] as string[]
-          );
-          const uniqueJobIds = [...new Set(allJobIds)];
-          await startMlJobs(uniqueJobIds);
         }
 
         const ruleIds = hasMlPermissions
@@ -465,15 +453,14 @@ export const useBulkActions = ({
       executeBulkAction,
       filterQuery,
       toasts,
-      startMlJobs,
       clearRulesSelection,
       confirmDeletion,
       bulkExport,
       showBulkActionConfirmation,
-      downloadExportedRules,
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
+      downloadExportedRules,
     ]
   );
 

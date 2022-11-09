@@ -79,7 +79,6 @@ const useEnabledColumn = ({ hasCRUDPermissions }: ColumnsProps): TableColumn => 
           <RuleSwitch
             id={rule.id}
             enabled={rule.enabled}
-            mlJobIds={rule.machine_learning_job_id}
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
               !hasCRUDPermissions ||

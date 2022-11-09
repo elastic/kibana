@@ -20,7 +20,10 @@ import styled from 'styled-components';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
+import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
+import { isMlRule, isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -72,7 +75,6 @@ import {
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { PreviewFlyout } from '../../../../detections/pages/detection_engine/rules/preview';
-import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -208,7 +210,46 @@ const CreateRulePageComponent: React.FC = () => {
     [activeStep]
   );
 
-  const { startMlJobs } = useStartMlJobs();
+  const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
+  const { loading: isLoadingJobs, jobs: mlJobs } = useSecurityJobs();
+  const startMlJobsIfNeeded = useCallback(async () => {
+    let success = true;
+    if (!isMlRule(ruleType) || isLoadingJobs || isLoadingEnableDataFeed) {
+      return success;
+    }
+
+    const jobIds = defineRuleData.machineLearningJobId;
+    if (!jobIds.length) {
+      return success;
+    }
+
+    const ruleJobs = mlJobs.filter((job) => jobIds.includes(job.id));
+    try {
+      await Promise.all(
+        ruleJobs.map(async (job) => {
+          if (isJobStarted(job.jobState, job.datafeedState)) {
+            return;
+          }
+
+          const latestTimestampMs = job.latestTimestampMs ?? 0;
+          const enabled = await enableDatafeed(job, latestTimestampMs, true);
+          if (!enabled) {
+            success = false;
+          }
+        })
+      );
+    } catch (error) {
+      success = false;
+    }
+    return success;
+  }, [
+    defineRuleData.machineLearningJobId,
+    enableDatafeed,
+    isLoadingEnableDataFeed,
+    isLoadingJobs,
+    mlJobs,
+    ruleType,
+  ]);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -291,7 +332,7 @@ const CreateRulePageComponent: React.FC = () => {
           ) {
             let failedToStartMlJobs = false;
             if (actionsStep.data.enabled) {
-              failedToStartMlJobs = !(await startMlJobs(defineStep.data.machineLearningJobId));
+              failedToStartMlJobs = !(await startMlJobsIfNeeded());
             }
             const createdRule = await createRule(
               formatRule<RuleCreateProps>(
@@ -338,7 +379,7 @@ const CreateRulePageComponent: React.FC = () => {
       goToStep,
       createRule,
       navigateToApp,
-      startMlJobs,
+      startMlJobsIfNeeded,
       addWarning,
       addSuccess,
     ]
