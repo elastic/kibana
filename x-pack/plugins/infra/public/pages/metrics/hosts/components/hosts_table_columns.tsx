@@ -9,9 +9,11 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
+import { InfraFormatterType } from '../../../../lib/lib';
 import type { SnapshotNodeMetric } from '../../../../../common/http_api';
 import { scaleUpPercentage } from '../../../../components/infrastructure_node_metrics_tables/shared/hooks';
 import { NumberCell } from '../../../../components/infrastructure_node_metrics_tables/shared/components';
+import { createFormatter } from '../../../../../common/formatters';
 
 interface HostNodeRow extends HostMetics {
   os?: string | null;
@@ -27,6 +29,8 @@ export interface HostMetics {
   memory: SnapshotNodeMetric;
   memoryTotal: SnapshotNodeMetric;
 }
+
+const networkFormatter = createFormatter(InfraFormatterType.bits, '{{value}}/s');
 
 export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
   {
@@ -68,7 +72,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     }),
     field: 'tx.avg',
     sortable: true,
-    render: (avg: number) => <NumberCell value={avg} />,
+    render: (avg: number) => <div>{networkFormatter(avg)}</div>,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.averageRxColumnHeader', {
@@ -76,7 +80,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     }),
     field: 'rx.avg',
     sortable: true,
-    render: (avg: number) => <NumberCell value={avg} />,
+    render: (avg: number) => <div>{networkFormatter(avg)}</div>,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.averageMemoryTotalColumnHeader', {
