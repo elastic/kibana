@@ -46,6 +46,9 @@ import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/serv
 import { ExceptionsListCard } from '../../components/exceptions_list_card';
 
 import { ImportExceptionListFlyout } from '../../components/import_exceptions_list_flyout';
+import { CreateSharedListFlyout } from '../../components/create_shared_exception_list';
+
+import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 
 export type Func = () => Promise<void>;
 
@@ -356,6 +359,16 @@ export const SharedLists = React.memo(() => {
 
   const goToPage = (pageNumber: number) => setActivePage(pageNumber);
 
+  const [isCreatePopoverOpen, setIsCreatePopoverOpen] = useState(false);
+  const [displayAddExceptionItemFlyout, setDisplayAddExceptionItemFlyout] = useState(false);
+  const [displayCreateSharedListFlyout, setDisplayCreateSharedListFlyout] = useState(false);
+
+  const onCreateButtonClick = () => setIsCreatePopoverOpen((isOpen) => !isOpen);
+  const onCloseCreatePopover = () => {
+    setDisplayAddExceptionItemFlyout(false);
+    setIsCreatePopoverOpen(false);
+  };
+
   return (
     <>
       <MissingPrivilegesCallOut />
@@ -371,10 +384,66 @@ export const SharedLists = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType={'importAction'} onClick={() => setDisplayImportListFlyout(true)}>
-            {i18n.IMPORT_EXCEPTION_LIST}
+            {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
           </EuiButton>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            data-test-subj="manageExceptionListCreateButton"
+            button={
+              <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
+                {i18n.CREATE_BUTTON}
+              </EuiButton>
+            }
+            isOpen={isCreatePopoverOpen}
+            closePopover={onCloseCreatePopover}
+          >
+            <EuiContextMenuPanel
+              items={[
+                <EuiContextMenuItem
+                  key={'createList'}
+                  onClick={() => {
+                    onCloseCreatePopover();
+                    setDisplayCreateSharedListFlyout(true);
+                  }}
+                >
+                  {i18n.CREATE_SHARED_LIST_BUTTON}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key={'createItem'}
+                  onClick={() => {
+                    onCloseCreatePopover();
+                    setDisplayAddExceptionItemFlyout(true);
+                  }}
+                >
+                  {i18n.CREATE_BUTTON_ITEM_BUTTON}
+                </EuiContextMenuItem>,
+              ]}
+            />
+          </EuiPopover>
+        </EuiFlexItem>
       </EuiFlexGroup>
+
+      {displayCreateSharedListFlyout && (
+        <CreateSharedListFlyout
+          handleRefresh={handleRefresh}
+          http={http}
+          addSuccess={addSuccess}
+          addError={addError}
+          handleCloseFlyout={() => setDisplayCreateSharedListFlyout(false)}
+        />
+      )}
+
+      {displayAddExceptionItemFlyout && (
+        <AddExceptionFlyout
+          rules={null}
+          isEndpointItem={false}
+          isBulkAction={false}
+          showAlertCloseOptions
+          onCancel={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
+          onConfirm={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
+        />
+      )}
 
       {displayImportListFlyout && (
         <ImportExceptionListFlyout
