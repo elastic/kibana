@@ -22,6 +22,12 @@ function is_running {
   kill -0 "$1" &>/dev/null
 }
 
+function check_running_processes {
+  ps aux | grep -e 'java' -e 'node' -e 'chrome' || echo "failed to run 'ps aux'"
+}
+
+check_running_processes
+
 # `kill $esPid` doesn't work, seems that kbn-es doesn't listen to signals correctly, this does work
 trap 'killall node -q' EXIT
 
