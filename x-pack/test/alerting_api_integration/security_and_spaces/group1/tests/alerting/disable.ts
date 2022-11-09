@@ -75,7 +75,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -106,11 +105,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(204);
-              expect(response.body).to.eql('');
-
               // task should still exist but be disabled
               await retry.try(async () => {
+                const response2 = await alertUtils.getDisableRequest(createdAlert.id);
+                expect(response2.statusCode).to.eql(204);
+                expect(response2.body).to.eql('');
                 const taskRecord2 = await getScheduledTask(createdAlert.scheduled_task_id);
                 expect(taskRecord2.type).to.eql('task');
                 expect(taskRecord2.task.taskType).to.eql('alerting:test.noop');
@@ -149,7 +148,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -170,19 +168,22 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(204);
-              expect(response.body).to.eql('');
+              await retry.try(async () => {
+                const response2 = await alertUtils.getDisableRequest(createdAlert.id);
+                expect(response2.statusCode).to.eql(204);
+                expect(response2.body).to.eql('');
 
-              // task should still exist but be disabled
-              const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
-              expect(taskRecord.type).to.eql('task');
-              expect(taskRecord.task.taskType).to.eql('alerting:test.restricted-noop');
-              expect(JSON.parse(taskRecord.task.params)).to.eql({
-                alertId: createdAlert.id,
-                spaceId: space.id,
-                consumer: 'alertsRestrictedFixture',
+                // task should still exist but be disabled
+                const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
+                expect(taskRecord.type).to.eql('task');
+                expect(taskRecord.task.taskType).to.eql('alerting:test.restricted-noop');
+                expect(JSON.parse(taskRecord.task.params)).to.eql({
+                  alertId: createdAlert.id,
+                  spaceId: space.id,
+                  consumer: 'alertsRestrictedFixture',
+                });
+                expect(taskRecord.task.enabled).to.eql(false);
               });
-              expect(taskRecord.task.enabled).to.eql(false);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -204,7 +205,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -236,18 +236,21 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(204);
-              expect(response.body).to.eql('');
-              // task should still exist but be disabled
-              const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
-              expect(taskRecord.type).to.eql('task');
-              expect(taskRecord.task.taskType).to.eql('alerting:test.unrestricted-noop');
-              expect(JSON.parse(taskRecord.task.params)).to.eql({
-                alertId: createdAlert.id,
-                spaceId: space.id,
-                consumer: 'alertsFixture',
+              await retry.try(async () => {
+                const response2 = await alertUtils.getDisableRequest(createdAlert.id);
+                expect(response2.statusCode).to.eql(204);
+                expect(response2.body).to.eql('');
+                // task should still exist but be disabled
+                const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
+                expect(taskRecord.type).to.eql('task');
+                expect(taskRecord.task.taskType).to.eql('alerting:test.unrestricted-noop');
+                expect(JSON.parse(taskRecord.task.params)).to.eql({
+                  alertId: createdAlert.id,
+                  spaceId: space.id,
+                  consumer: 'alertsFixture',
+                });
+                expect(taskRecord.task.enabled).to.eql(false);
               });
-              expect(taskRecord.task.enabled).to.eql(false);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -269,7 +272,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -297,10 +299,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(204);
-              expect(response.body).to.eql('');
               // task should still exist but be disabled
               await retry.try(async () => {
+                const response2 = await alertUtils.getDisableRequest(createdAlert.id);
+                expect(response2.statusCode).to.eql(204);
+                expect(response2.body).to.eql('');
                 const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
                 expect(taskRecord.type).to.eql('task');
                 expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
@@ -311,6 +314,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 });
                 expect(taskRecord.task.enabled).to.eql(false);
               });
+
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -340,7 +344,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           });
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -371,10 +374,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(204);
-              expect(response.body).to.eql('');
               // task should still exist but be disabled
               await retry.try(async () => {
+                const response2 = await alertUtils.getDisableRequest(createdAlert.id);
+                expect(response2.statusCode).to.eql(204);
+                expect(response2.body).to.eql('');
                 const taskRecord2 = await getScheduledTask(createdAlert.scheduled_task_id);
                 expect(taskRecord2.type).to.eql('task');
                 expect(taskRecord2.task.taskType).to.eql('alerting:test.noop');
@@ -385,6 +389,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 });
                 expect(taskRecord2.task.enabled).to.eql(false);
               });
+
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -400,7 +405,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           objectRemover.add('other', createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           expect(response.statusCode).to.eql(404);
           switch (scenario.id) {
