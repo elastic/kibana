@@ -49,6 +49,7 @@ import {
 import { migratePackagePolicyToV850, migrateAgentPolicyToV850 } from './migrations/to_v8_5_0';
 import { migrateSettingsToV860, migrateInstallationToV860 } from './migrations/to_v8_6_0';
 
+// TODO: add migration to 8.7.0 for new shipper
 /*
  * Saved object types and mappings
  *
@@ -136,6 +137,8 @@ const getSavedObjectTypes = (
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
+        disk_queue_enabled: { type: 'boolean', index: false },
+        disk_queue_path: { type: 'keyword', index: false },
       },
     },
     migrations: {

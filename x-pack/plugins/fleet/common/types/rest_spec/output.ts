@@ -41,6 +41,8 @@ export interface PutOutputRequest {
       certificate?: string;
       key?: string;
     };
+    disk_queue_enabled?: boolean;
+    disk_queue_path?: string;
   };
 }
 
@@ -60,6 +62,8 @@ export interface PostOutputRequest {
       certificate?: string;
       key?: string;
     };
+    disk_queue_enabled?: boolean;
+    disk_queue_path?: string;
   };
 }
 

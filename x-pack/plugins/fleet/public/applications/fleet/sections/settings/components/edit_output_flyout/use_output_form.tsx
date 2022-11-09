@@ -32,6 +32,22 @@ import {
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
+export interface OutputFormInputs {
+  nameInput: ReturnType<typeof useInput>;
+  typeInput: ReturnType<typeof useInput>;
+  elasticsearchUrlInput: ReturnType<typeof useComboInput>;
+  diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
+  diskQueuePathInput: ReturnType<typeof useInput>;
+  logstashHostsInput: ReturnType<typeof useComboInput>;
+  additionalYamlConfigInput: ReturnType<typeof useInput>;
+  defaultOutputInput: ReturnType<typeof useSwitchInput>;
+  defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
+  caTrustedFingerprintInput: ReturnType<typeof useInput>;
+  sslCertificateInput: ReturnType<typeof useInput>;
+  sslKeyInput: ReturnType<typeof useInput>;
+  sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+}
+
 export function useOutputForm(onSucess: () => void, output?: Output) {
   const fleetStatus = useFleetStatus();
 
@@ -77,6 +93,13 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     validateESHosts,
     isPreconfigured
   );
+  // Shipper inputs - disk queue inputs are under this as well
+  // Handle case where shipper.disabled: true
+  const isShipperEnabled = !!output?.config_yaml?.includes('shipper');
+
+  const diskQueueEnabledInput = useSwitchInput(output?.disk_queue_enabled ?? false);
+  const diskQueuePathInput = useInput(output?.disk_queue_path ?? '');
+
   // Logstash inputs
   const logstashHostsInput = useComboInput(
     'logstashHostsComboxBox',
@@ -100,10 +123,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
   const isLogstash = typeInput.value === 'logstash';
 
-  const inputs = {
+  const inputs: OutputFormInputs = {
     nameInput,
     typeInput,
     elasticsearchUrlInput,
+    diskQueueEnabledInput,
+    diskQueuePathInput,
     logstashHostsInput,
     additionalYamlConfigInput,
     defaultOutputInput,
@@ -124,6 +149,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
+    const diskQueuePathValid = diskQueuePathInput.validate();
 
     if (isLogstash) {
       // validate logstash
@@ -140,18 +166,20 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         elasticsearchUrlsValid &&
         additionalYamlConfigValid &&
         nameInputValid &&
-        caTrustedFingerprintValid
+        caTrustedFingerprintValid &&
+        diskQueuePathValid
       );
     }
   }, [
-    isLogstash,
     nameInput,
-    sslCertificateInput,
-    sslKeyInput,
     elasticsearchUrlInput,
     logstashHostsInput,
     additionalYamlConfigInput,
     caTrustedFingerprintInput,
+    sslCertificateInput,
+    sslKeyInput,
+    diskQueuePathInput,
+    isLogstash,
   ]);
 
   const submit = useCallback(async () => {
@@ -185,6 +213,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
             is_default_monitoring: defaultMonitoringOutputInput.value,
             config_yaml: additionalYamlConfigInput.value,
             ca_trusted_fingerprint: caTrustedFingerprintInput.value,
+            disk_queue_enabled: diskQueueEnabledInput.value,
+            disk_queue_path: diskQueuePathInput.value,
           };
 
       if (output) {
@@ -217,24 +247,25 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       });
     }
   }, [
-    isLogstash,
     validate,
-    confirm,
-    additionalYamlConfigInput.value,
-    defaultMonitoringOutputInput.value,
-    defaultOutputInput.value,
-    elasticsearchUrlInput.value,
-    logstashHostsInput.value,
-    caTrustedFingerprintInput.value,
-    sslCertificateInput.value,
-    sslCertificateAuthoritiesInput.value,
-    sslKeyInput.value,
+    isLogstash,
     nameInput.value,
     typeInput.value,
-
-    notifications.toasts,
-    onSucess,
+    logstashHostsInput.value,
+    defaultOutputInput.value,
+    defaultMonitoringOutputInput.value,
+    additionalYamlConfigInput.value,
+    sslCertificateInput.value,
+    sslKeyInput.value,
+    sslCertificateAuthoritiesInput.value,
+    elasticsearchUrlInput.value,
+    caTrustedFingerprintInput.value,
+    diskQueueEnabledInput.value,
+    diskQueuePathInput.value,
     output,
+    onSucess,
+    confirm,
+    notifications.toasts,
   ]);
 
   return {
@@ -242,6 +273,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     submit,
     isLoading,
     hasEncryptedSavedObjectConfigured,
+    isShipperEnabled,
     isDisabled:
       isLoading ||
       isPreconfigured ||

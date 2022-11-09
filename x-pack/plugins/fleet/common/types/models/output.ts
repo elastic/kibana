@@ -25,6 +25,8 @@ export interface NewOutput {
     certificate?: string;
     key?: string;
   } | null;
+  disk_queue_enabled?: boolean;
+  disk_queue_path?: string;
 }
 
 export type OutputSOAttributes = NewOutput & {

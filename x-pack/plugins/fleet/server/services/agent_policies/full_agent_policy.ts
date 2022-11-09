@@ -217,6 +217,11 @@ export function transformOutputToFullPolicyOutput(
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl } = output;
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
+  //  what happens to the old configs (mem_queue), should be filtered out?
+  // if (configJs?.shipper || configJs.shipper?.enabled) {
+  //   // use the new configurations and write them to the agent policy
+  // }
+
   const newOutput: FullAgentPolicyOutput = {
     ...configJs,
     type,
