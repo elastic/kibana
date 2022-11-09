@@ -730,6 +730,23 @@ export function LayerPanel(
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                   indexPatterns: dataViews.indexPatterns,
                   activeData: layerVisualizationConfigProps.activeData,
+                  dataSectionExtra: !isFullscreen &&
+                    !activeDimension.isNew &&
+                    activeVisualization.renderDimensionEditorDataExtra && (
+                      <NativeRenderer
+                        render={activeVisualization.renderDimensionEditorDataExtra}
+                        nativeProps={{
+                          ...layerVisualizationConfigProps,
+                          groupId: activeGroup.groupId,
+                          accessor: activeId,
+                          datasource,
+                          setState: props.updateVisualization,
+                          addLayer: props.addLayer,
+                          removeLayer: props.onRemoveLayer,
+                          panelRef,
+                        }}
+                      />
+                    ),
                 }}
               />
             )}

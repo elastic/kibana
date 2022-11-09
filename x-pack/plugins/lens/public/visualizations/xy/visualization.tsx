@@ -29,7 +29,10 @@ import {
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
-import { DimensionEditor } from './xy_config_panel/dimension_editor';
+import {
+  DataDimensionEditorDataSectionExtra,
+  DimensionEditor,
+} from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI, Suggestion } from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
@@ -600,6 +603,45 @@ export const getXyVisualization = ({
             }}
           >
             {dimensionEditor}
+          </KibanaContextProvider>
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
+  renderDimensionEditorDataExtra(domElement, props) {
+    const allProps = {
+      ...props,
+      datatableUtilities: data.datatableUtilities,
+      formatFactory: fieldFormats.deserialize,
+      paletteService,
+    };
+    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+    if (isReferenceLayer(layer)) {
+      return;
+    }
+    if (isAnnotationsLayer(layer)) {
+      return;
+    }
+
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <KibanaContextProvider
+            services={{
+              appName: 'lens',
+              storage,
+              uiSettings: core.uiSettings,
+              data,
+              fieldFormats,
+              savedObjects: core.savedObjects,
+              docLinks: core.docLinks,
+              http: core.http,
+              unifiedSearch,
+            }}
+          >
+            <DataDimensionEditorDataSectionExtra {...allProps} />
           </KibanaContextProvider>
         </I18nProvider>
       </KibanaThemeProvider>,

@@ -25,7 +25,7 @@ import type {
   DatasourceLayers,
   Suggestion,
 } from '../../types';
-import { TableDimensionEditor } from './components/dimension_editor';
+import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import type { LayerType } from '../../../common';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
@@ -353,6 +353,17 @@ export const getDatatableVisualization = ({
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
           <TableDimensionEditorAdditionalSection {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
+  renderDimensionEditorDataExtra(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <TableDimensionDataExtraEditor {...props} paletteService={paletteService} />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement
