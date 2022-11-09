@@ -161,17 +161,24 @@ const serviceGroupCountsRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (resources): Promise<ServiceGroupCounts> => {
-    const { context } = resources;
+    const { context, logger, plugins, request } = resources;
     const {
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
 
-    const [serviceGroups, authorizedAlertsIndices, apmEventClient] =
-      await Promise.all([
-        getServiceGroups({ savedObjectsClient }),
-        getAlertsIndices(resources),
-        getApmEventClient(resources),
-      ]);
+    const spacesPluginStart = await plugins.spaces?.start();
+
+    const [
+      serviceGroups,
+      authorizedAlertsIndices,
+      apmEventClient,
+      activeSpace,
+    ] = await Promise.all([
+      getServiceGroups({ savedObjectsClient }),
+      getAlertsIndices(resources),
+      getApmEventClient(resources),
+      await spacesPluginStart?.spacesService.getActiveSpace(request),
+    ]);
 
     const [servicesCounts, serviceGroupAlertsCount] = await Promise.all([
       getServicesCounts({
@@ -184,6 +191,8 @@ const serviceGroupCountsRoute = createApmServerRoute({
         serviceGroups,
         authorizedAlertsIndices,
         context,
+        logger,
+        spaceId: activeSpace?.id,
       }),
     ]);
     const serviceGroupCounts: ServiceGroupCounts = serviceGroups.reduce(

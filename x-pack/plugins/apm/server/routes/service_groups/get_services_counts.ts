@@ -23,6 +23,9 @@ export async function getServicesCounts({
   end: number;
   serviceGroups: SavedServiceGroup[];
 }) {
+  if (!serviceGroups.length) {
+    return {};
+  }
   const serviceGroupsKueryMap: Record<string, QueryDslQueryContainer> =
     serviceGroups.reduce((acc, sg) => {
       return {

@@ -145,7 +145,7 @@ export class APMPlugin
                 dynamic: true,
               },
             },
-            true
+            'strict'
           ),
         },
       ],

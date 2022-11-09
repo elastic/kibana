@@ -13,17 +13,23 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { SavedServiceGroup } from '../../../common/service_groups';
+import { Logger } from '@kbn/core/server';
 
 export async function getServiceGroupAlerts({
   serviceGroups,
   authorizedAlertsIndices,
   context,
+  logger,
+  spaceId,
 }: {
   serviceGroups: SavedServiceGroup[];
   authorizedAlertsIndices?: string[];
   context: ApmPluginRequestHandlerContext;
+  logger: Logger;
+  spaceId?: string;
 }) {
   if (
+    !spaceId ||
     !authorizedAlertsIndices ||
     authorizedAlertsIndices.length === 0 ||
     serviceGroups.length === 0
@@ -37,8 +43,23 @@ export async function getServiceGroupAlerts({
         [sg.id]: kqlQuery(sg.kuery)[0],
       };
     }, {});
-
   const esClient = (await context.core).elasticsearch.client;
+  const securityHasPrivilegesResponse =
+    await esClient.asCurrentUser.security.hasPrivileges({
+      body: {
+        index: [
+          {
+            names: authorizedAlertsIndices, // ['.alerts-observability.apm.alerts-default']
+            privileges: ['read', 'view_index_metadata'],
+          },
+        ],
+      },
+    });
+
+  if (!securityHasPrivilegesResponse.has_all_requested) {
+    logger.debug('User must have read privileges for APM alerts.');
+    return {};
+  }
   const params = {
     index: authorizedAlertsIndices,
     size: 0,
@@ -47,6 +68,7 @@ export async function getServiceGroupAlerts({
         filter: [
           { term: { 'kibana.alert.rule.producer': 'apm' } },
           { term: { 'kibana.alert.status': 'active' } },
+          { term: { 'kibana.space_ids': spaceId } },
         ],
       },
     },
@@ -65,7 +87,7 @@ export async function getServiceGroupAlerts({
       },
     },
   };
-  const result = await esClient.asCurrentUser.search(params);
+  const result = await esClient.asInternalUser.search(params);
 
   interface ServiceGroupsAggResponse {
     buckets: Record<

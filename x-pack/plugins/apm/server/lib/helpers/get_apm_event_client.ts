@@ -32,7 +32,7 @@ export async function getApmEventClient({
     ]);
 
     return new APMEventClient({
-      esClient: coreContext.elasticsearch.client.asCurrentUser,
+      esClient: coreContext.elasticsearch.client.asInternalUser,
       debug: params.query._inspect,
       request,
       indices,
