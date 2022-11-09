@@ -32,7 +32,8 @@ function mountWith({ props: incomingProps }: { props?: DashboardListingProps }) 
   const wrappingComponent: React.FC<{
     children: React.ReactNode;
   }> = ({ children }) => {
-    const { application, notifications, savedObjectsTagging } = pluginServices.getServices();
+    const { application, notifications, savedObjectsTagging, overlays } =
+      pluginServices.getServices();
 
     return (
       <I18nProvider>
@@ -41,6 +42,7 @@ function mountWith({ props: incomingProps }: { props?: DashboardListingProps }) 
             application:
               application as unknown as TableListViewKibanaDependencies['core']['application'],
             notifications,
+            overlays,
           }}
           savedObjectsTagging={
             {

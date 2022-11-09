@@ -7,22 +7,20 @@
  */
 import React from 'react';
 import type { ComponentType } from 'react';
-import { from } from 'rxjs';
-import { InspectorProvider } from '@kbn/content-management-inspector';
 
-import { TagList } from '../mocks';
-import { TableListViewProvider, Services } from '../services';
+import { TagSelector, TagList } from '../mocks';
+import { InspectorProvider } from '../services';
+import type { Services } from '../services';
 
 export const getMockServices = (overrides?: Partial<Services>) => {
-  const services: Services = {
-    canEditAdvancedSettings: true,
-    getListingLimitSettingsUrl: () => 'http://elastic.co',
-    notifyError: () => undefined,
-    currentAppId$: from('mockedApp'),
-    navigateToUrl: () => undefined,
+  const services = {
+    openFlyout: jest.fn(() => ({
+      onClose: Promise.resolve(),
+      close: () => Promise.resolve(),
+    })),
     TagList,
-    itemHasTags: () => true,
-    getTagIdsFromReferences: () => [],
+    TagSelector,
+    notifyError: () => undefined,
     ...overrides,
   };
 
@@ -33,10 +31,8 @@ export function WithServices<P>(Comp: ComponentType<P>, overrides: Partial<Servi
   return (props: P) => {
     const services = getMockServices(overrides);
     return (
-      <InspectorProvider openFlyout={jest.fn()} notifyError={() => undefined}>
-        <TableListViewProvider {...services}>
-          <Comp {...(props as any)} />
-        </TableListViewProvider>
+      <InspectorProvider {...services}>
+        <Comp {...props} />
       </InspectorProvider>
     );
   };

@@ -24,6 +24,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { useOpenInspector } from '@kbn/content-management-inspector';
+import type { OpenInspectorParams } from '@kbn/content-management-inspector';
 
 import {
   Table,
@@ -37,6 +39,10 @@ import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './
 import type { Action } from './actions';
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
+
+interface InspectorConfig extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave'> {
+  enabled?: boolean;
+}
 
 export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
@@ -67,6 +73,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   editItem?(item: T): void;
+  inspector?: InspectorConfig;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -115,6 +122,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   getDetailViewLink,
   onClickTitle,
   id = 'userContent',
+  inspector = { enabled: false },
   children,
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
@@ -129,16 +137,25 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     );
   }
 
+  if (inspector.isReadonly === false && inspector.onSave === undefined) {
+    throw new Error(
+      `[TableListView] A value for [inspector.onSave()] must be provided when [inspector.isReadonly] is false.`
+    );
+  }
+
   const isMounted = useRef(false);
   const fetchIdx = useRef(0);
 
   const {
     canEditAdvancedSettings,
     getListingLimitSettingsUrl,
+    getTagIdsFromReferences,
     searchQueryParser,
     notifyError,
     DateFormatterComp,
   } = useServices();
+
+  const openInspector = useOpenInspector();
 
   const reducer = useMemo(() => {
     return getReducer<T>();
@@ -185,6 +202,26 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
+  const inspectItem = useCallback(
+    (item: T) => {
+      const tags = getTagIdsFromReferences(item.references).map((_id) => {
+        return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
+      });
+
+      openInspector({
+        item: {
+          id: item.id,
+          title: item.attributes.title,
+          description: item.attributes.description,
+          tags,
+        },
+        entityName,
+        ...inspector,
+      });
+    },
+    [openInspector, inspector, getTagIdsFromReferences, entityName]
+  );
+
   const tableColumns = useMemo(() => {
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
@@ -226,9 +263,11 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
 
     // Add "Actions" column
-    if (editItem) {
-      const actions: EuiTableActionsColumnType<T>['actions'] = [
-        {
+    if (editItem || inspector.enabled !== false) {
+      const actions: EuiTableActionsColumnType<T>['actions'] = [];
+
+      if (editItem) {
+        actions.push({
           name: (item) => {
             return i18n.translate('contentManagement.tableList.listing.table.editActionName', {
               defaultMessage: 'Edit {itemDescription}',
@@ -247,8 +286,30 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           type: 'icon',
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
-        },
-      ];
+        });
+      }
+
+      if (inspector.enabled !== false) {
+        actions.push({
+          name: (item) => {
+            return i18n.translate('contentManagement.tableList.listing.table.inspectActionName', {
+              defaultMessage: 'Inspect {itemDescription}',
+              values: {
+                itemDescription: get(item, 'attributes.title'),
+              },
+            });
+          },
+          description: i18n.translate(
+            'contentManagement.tableList.listing.table.inspectActionDescription',
+            {
+              defaultMessage: 'Inspect',
+            }
+          ),
+          icon: 'inspect',
+          type: 'icon',
+          onClick: inspectItem,
+        });
+      }
 
       columns.push({
         name: i18n.translate('contentManagement.tableList.listing.table.actionTitle', {
@@ -269,6 +330,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     onClickTitle,
     searchQuery,
     DateFormatterComp,
+    inspector,
+    inspectItem,
   ]);
 
   const itemsById = useMemo(() => {

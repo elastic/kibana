@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "table_list"
-PKG_REQUIRE_NAME = "@kbn/content-management-table-list"
+PKG_DIRNAME = "inspector"
+PKG_REQUIRE_NAME = "@kbn/content-management-inspector"
 
 SOURCE_FILES = glob(
   [
@@ -15,13 +15,13 @@ SOURCE_FILES = glob(
     "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
-    "**/__snapshots__",
-    "**/integration_tests",
-    "**/mocks",
-    "**/scripts",
-    "**/storybook",
-    "**/test_fixtures",
-    "**/test_helpers",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -49,19 +49,12 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-i18n-react",
   "//packages/kbn-i18n",
-  "//packages/content-management/inspector",
-  "//packages/core/http/core-http-browser",
-  "//packages/core/theme/core-theme-browser",
-  "//packages/kbn-safer-lodash-set",
-  "//packages/shared-ux/page/kibana_template/impl",
+  "//packages/core/mount-utils/core-mount-utils-browser",
+  "//packages/core/overlays/core-overlays-browser",
   "@npm//@elastic/eui",
   "@npm//@emotion/react",
-  "@npm//@emotion/css",
-  "@npm//lodash",
-  "@npm//moment",
-  "@npm//react-use",
   "@npm//react",
-  "@npm//rxjs",
+  "@npm//@emotion/css"
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -76,25 +69,17 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/content-management/inspector:npm_module_types",
-  "//packages/core/http/core-http-browser:npm_module_types",
-  "//packages/core/theme/core-theme-browser:npm_module_types",
-  "//packages/core/mount-utils/core-mount-utils-browser:npm_module_types",
-  "//packages/core/overlays/core-overlays-browser:npm_module_types",
   "//packages/kbn-ambient-storybook-types",
   "//packages/kbn-ambient-ui-types",
-  "//packages/kbn-safer-lodash-set:npm_module_types",
-  "//packages/shared-ux/page/kibana_template/impl:npm_module_types",
-  "//packages/shared-ux/page/kibana_template/types",
+  "//packages/core/mount-utils/core-mount-utils-browser:npm_module_types",
+  "//packages/core/overlays/core-overlays-browser:npm_module_types",
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/lodash",
   "@npm//@types/react",
   "@npm//@emotion/css",
   "@npm//@emotion/react",
   "@npm//@elastic/eui",
-  "@npm//react-use",
-  "@npm//rxjs",
+  "@npm//rxjs"
 ]
 
 jsts_transpiler(
@@ -107,7 +92,7 @@ jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  web = True
+  web = True,
 )
 
 ts_config(
@@ -125,6 +110,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   tsconfig = ":tsconfig",
@@ -134,14 +120,6 @@ js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":target_web"],
-  package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-js_library(
-  name = "npm_module_types",
-  srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -157,8 +135,17 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-pkg_npm(
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
   name = "build_types",
-  deps = [":npm_module_types"],
+  srcs = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

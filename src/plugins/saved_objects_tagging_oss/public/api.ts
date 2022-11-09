@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { SearchFilterConfig, EuiTableFieldDataColumnType } from '@elastic/eui';
+import { SearchFilterConfig, EuiTableFieldDataColumnType, EuiComboBoxProps } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
@@ -245,7 +245,12 @@ export interface TagSelectorComponentProps {
  *
  * @public
  */
-export interface SavedObjectSaveModalTagSelectorComponentProps {
+export type SavedObjectSaveModalTagSelectorComponentProps = EuiComboBoxProps<
+  | Tag
+  | {
+      type: '__create_option__';
+    }
+> & {
   /**
    * Ids of the initially selected tags.
    * Changing the value of this prop after initial mount will not rerender the component (see component description for more details)
@@ -255,7 +260,7 @@ export interface SavedObjectSaveModalTagSelectorComponentProps {
    * tags selection callback
    */
   onTagsSelected: (ids: string[]) => void;
-}
+};
 
 /**
  * Options for the {@link SavedObjectsTaggingApiUi.getTableColumnDefinition | getTableColumnDefinition api}

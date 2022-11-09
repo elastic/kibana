@@ -18,6 +18,8 @@
       "@kbn/analytics-shippers-fullstory/*": ["packages/analytics/shippers/fullstory/*"],
       "@kbn/analytics-shippers-gainsight": ["packages/analytics/shippers/gainsight"],
       "@kbn/analytics-shippers-gainsight/*": ["packages/analytics/shippers/gainsight/*"],
+      "@kbn/content-management-inspector": ["packages/content-management/inspector"],
+      "@kbn/content-management-inspector/*": ["packages/content-management/inspector/*"],
       "@kbn/content-management-table-list": ["packages/content-management/table_list"],
       "@kbn/content-management-table-list/*": ["packages/content-management/table_list/*"],
       "@kbn/core-analytics-browser": ["packages/core/analytics/core-analytics-browser"],

@@ -67,6 +67,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     data: dataStart,
     embeddable,
     notifications,
+    overlays,
     savedObjectsTagging,
     settings: { uiSettings },
   } = pluginServices.getServices();
@@ -171,6 +172,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
                 core: {
                   application: application as TableListViewApplicationService,
                   notifications,
+                  overlays,
                 },
                 toMountPoint,
                 savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
