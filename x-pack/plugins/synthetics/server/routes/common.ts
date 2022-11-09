@@ -127,3 +127,21 @@ const parseLocationFilter = (serviceLocations: ServiceLocations, locations?: str
 export const findLocationItem = (query: string, locations: ServiceLocations) => {
   return locations.find(({ id, label }) => query === id || label === query);
 };
+
+/**
+ * Returns whether the query is likely to return a subset of monitor objects.
+ * Useful where `absoluteTotal` needs to be determined with a separate call
+ * @param monitorQuery { MonitorsQuery }
+ */
+export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
+  const { query, tags, monitorType, locations, status, filter } = monitorQuery;
+
+  return (
+    !!query ||
+    !!filter ||
+    !!locations?.length ||
+    !!monitorType?.length ||
+    !!tags?.length ||
+    !!status?.length
+  );
+};
