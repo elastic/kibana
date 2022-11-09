@@ -9,13 +9,14 @@
 import React, { FC, useContext, useMemo, useCallback } from 'react';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
+import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
+import { InspectorKibanaProvider } from '@kbn/content-management-inspector';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';
 
-type UnmountCallback = () => void;
-type MountPoint = (element: HTMLElement) => UnmountCallback;
 type NotifyFn = (title: JSX.Element, text?: string) => void;
 
 export interface SavedObjectsReference {
@@ -59,6 +60,7 @@ export interface Services {
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
   /** Handler to return the url to navigate to the kibana tags management */
   getTagManagementUrl: () => string;
+  getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -96,6 +98,9 @@ export interface TableListViewKibanaDependencies {
         prepend: (path: string) => string;
       };
     };
+    overlays: {
+      openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+    };
   };
   /**
    * Handler from the '@kbn/kibana-react-plugin/public' Plugin
@@ -125,6 +130,10 @@ export interface TableListViewKibanaDependencies {
           };
           onClick?: (tag: Tag) => void;
           tagRender?: (tag: Tag) => JSX.Element;
+        }>;
+        SavedObjectSaveModalTagSelector: React.FC<{
+          initialSelection: string[];
+          onTagsSelected: (ids: string[]) => void;
         }>;
       };
       parseSearchQuery: (
@@ -181,13 +190,13 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
     return Comp;
   }, [savedObjectsTagging?.ui.components.TagList]);
 
-  const itemHasTags = useCallback(
+  const getTagIdsFromReferences = useCallback(
     (references: SavedObjectsReference[]) => {
       if (!savedObjectsTagging?.ui.getTagIdsFromReferences) {
-        return false;
+        return [];
       }
 
-      return savedObjectsTagging.ui.getTagIdsFromReferences(references).length > 0;
+      return savedObjectsTagging.ui.getTagIdsFromReferences(references);
     },
     [savedObjectsTagging?.ui]
   );
@@ -200,29 +209,43 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
     return savedObjectsTagging.ui.getTagList();
   }, [savedObjectsTagging?.ui]);
 
+  const itemHasTags = useCallback(
+    (references: SavedObjectsReference[]) => {
+      return getTagIdsFromReferences(references).length > 0;
+    },
+    [getTagIdsFromReferences]
+  );
+
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
-      <TableListViewProvider
-        canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
-        getListingLimitSettingsUrl={() =>
-          core.application.getUrlForApp('management', {
-            path: `/kibana/settings?query=savedObjects:listingLimit`,
-          })
-        }
-        notifyError={(title, text) => {
-          core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
-        }}
-        searchQueryParser={searchQueryParser}
-        DateFormatterComp={(props) => <FormattedRelative {...props} />}
-        currentAppId$={core.application.currentAppId$}
-        navigateToUrl={core.application.navigateToUrl}
-        getTagList={getTagList}
-        TagList={TagList}
-        itemHasTags={itemHasTags}
-        getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+      <InspectorKibanaProvider
+        core={core}
+        toMountPoint={toMountPoint}
+        savedObjectsTagging={savedObjectsTagging}
       >
-        {children}
-      </TableListViewProvider>
+        <TableListViewProvider
+          canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
+          getListingLimitSettingsUrl={() =>
+            core.application.getUrlForApp('management', {
+              path: `/kibana/settings?query=savedObjects:listingLimit`,
+            })
+          }
+          notifyError={(title, text) => {
+            core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
+          }}
+          searchQueryParser={searchQueryParser}
+          DateFormatterComp={(props) => <FormattedRelative {...props} />}
+          currentAppId$={core.application.currentAppId$}
+          navigateToUrl={core.application.navigateToUrl}
+          getTagList={getTagList}
+          TagList={TagList}
+          itemHasTags={itemHasTags}
+          getTagIdsFromReferences={getTagIdsFromReferences}
+          getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+        >
+          {children}
+        </TableListViewProvider>
+      </InspectorKibanaProvider>
     </RedirectAppLinksKibanaProvider>
   );
 };

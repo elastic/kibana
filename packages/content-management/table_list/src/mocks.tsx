@@ -70,6 +70,7 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     getTagList: () => [],
     itemHasTags: () => true,
     getTagManagementUrl: () => '',
+    getTagIdsFromReferences: () => [],
     ...params,
   };
 
