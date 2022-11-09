@@ -256,9 +256,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
         const optionsListField: OptionsListField = originalField.toSpec();
         optionsListField.textFieldName = textFieldName;
-        if (optionsListField.runtimeField) {
-          optionsListField.parentFieldName = parentFieldName;
-        }
 
         this.field = optionsListField;
       } catch (e) {

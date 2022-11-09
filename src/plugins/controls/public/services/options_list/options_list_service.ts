@@ -89,7 +89,7 @@ class OptionsListService implements ControlsOptionsListService {
       fieldName: field.name,
       fieldSpec: field,
       textFieldName: (field as OptionsListField).textFieldName,
-      parentFieldName: (field as OptionsListField).parentFieldName,
+      runtimeFieldMap: dataView.toSpec().runtimeFieldMap,
     };
   };
 

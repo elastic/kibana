@@ -22,19 +22,16 @@ const doubleLinkFields = (dataView: DataView) => {
     if (!fieldRegistry[field.name]) {
       fieldRegistry[field.name] = { field, compatibleControlTypes: [] };
     }
-    if (field.runtimeField?.type === 'composite') {
-      fieldRegistry[field.name].parentFieldName = field.spec.parentName;
-    } else {
-      const parentFieldName = (field.subType as IFieldSubTypeMulti)?.multi?.parent;
-      if (parentFieldName) {
-        fieldRegistry[field.name].parentFieldName = parentFieldName;
 
-        const parentField = dataView.getFieldByName(parentFieldName);
-        if (!fieldRegistry[parentFieldName] && parentField) {
-          fieldRegistry[parentFieldName] = { field: parentField, compatibleControlTypes: [] };
-        }
-        fieldRegistry[parentFieldName].childFieldName = field.name;
+    const parentFieldName = (field.subType as IFieldSubTypeMulti)?.multi?.parent;
+    if (parentFieldName) {
+      fieldRegistry[field.name].parentFieldName = parentFieldName;
+
+      const parentField = dataView.getFieldByName(parentFieldName);
+      if (!fieldRegistry[parentFieldName] && parentField) {
+        fieldRegistry[parentFieldName] = { field: parentField, compatibleControlTypes: [] };
       }
+      fieldRegistry[parentFieldName].childFieldName = field.name;
     }
   }
   return fieldRegistry;
