@@ -125,7 +125,7 @@ function deleteESAssets(
     } else if (assetType === ElasticsearchAssetType.componentTemplate) {
       return deleteComponentTemplate(esClient, id);
     } else if (assetType === ElasticsearchAssetType.transform) {
-      return deleteTransforms(esClient, [id]);
+      return deleteTransforms(esClient, [id], true);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
       return deleteIlms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.ilmPolicy) {
