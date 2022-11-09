@@ -34,7 +34,7 @@ describe('PrivilegedRoute', () => {
     renderProps = {
       component: () => <div data-test-subj={componentTestId} />,
       path: 'path',
-      privilege: true,
+      hasPrivilege: true,
     };
 
     const renderer = createAppRootMockRenderer();
@@ -81,7 +81,7 @@ describe('PrivilegedRoute', () => {
     testCommonPathsForAllFeatureFlags();
 
     it('renders `you need to be superuser` if no privileges', async () => {
-      renderProps.privilege = false;
+      renderProps.hasPrivilege = false;
 
       render();
 
@@ -100,7 +100,7 @@ describe('PrivilegedRoute', () => {
 
     describe('no privileges', () => {
       it('renders `you need to have privileges` on Response actions history', async () => {
-        renderProps.privilege = false;
+        renderProps.hasPrivilege = false;
         renderProps.path = AdministrationSubTab.responseActionsHistory;
         currentPath = AdministrationSubTab.responseActionsHistory;
 
@@ -112,7 +112,7 @@ describe('PrivilegedRoute', () => {
       });
 
       it('renders `you need to be superuser` on other pages', async () => {
-        renderProps.privilege = false;
+        renderProps.hasPrivilege = false;
 
         render();
 
@@ -131,7 +131,7 @@ describe('PrivilegedRoute', () => {
     testCommonPathsForAllFeatureFlags();
 
     it('renders `you need to have RBAC privileges` if no privileges', async () => {
-      renderProps.privilege = false;
+      renderProps.hasPrivilege = false;
 
       render();
 

@@ -96,22 +96,22 @@ export const ManagementContainer = memo(() => {
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
         component={EndpointTelemetry}
-        privilege={canReadEndpointList}
+        hasPrivilege={canReadEndpointList}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_POLICIES_PATH}
         component={PolicyTelemetry}
-        privilege={canReadPolicyManagement}
+        hasPrivilege={canReadPolicyManagement}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
         component={TrustedAppTelemetry}
-        privilege={canReadTrustedApplications}
+        hasPrivilege={canReadTrustedApplications}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}
         component={EventFilterTelemetry}
-        privilege={canReadEventFilters}
+        hasPrivilege={canReadEventFilters}
       />
       <Route
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
@@ -120,12 +120,12 @@ export const ManagementContainer = memo(() => {
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
         component={BlocklistContainer}
-        privilege={canReadBlocklist}
+        hasPrivilege={canReadBlocklist}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
         component={ResponseActionsTelemetry}
-        privilege={canReadActionsLogManagement}
+        hasPrivilege={canReadActionsLogManagement}
       />
 
       {canReadEndpointList && (

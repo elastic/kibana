@@ -15,16 +15,16 @@ import { AdministrationSubTab } from '../../types';
 export interface PrivilegedRouteProps {
   path: string;
   component: ComponentType<{}>;
-  privilege: boolean;
+  hasPrivilege: boolean;
 }
 
-export const PrivilegedRoute = memo(({ component, privilege, path }: PrivilegedRouteProps) => {
+export const PrivilegedRoute = memo(({ component, hasPrivilege, path }: PrivilegedRouteProps) => {
   const isEndpointRbacEnabled = useIsExperimentalFeatureEnabled('endpointRbacEnabled');
   const isEndpointRbacV1Enabled = useIsExperimentalFeatureEnabled('endpointRbacV1Enabled');
 
   let componentToRender = component;
 
-  if (!privilege) {
+  if (!hasPrivilege) {
     const shouldUseMissingPrivilegesScreen =
       isEndpointRbacEnabled ||
       (isEndpointRbacV1Enabled && path.includes(AdministrationSubTab.responseActionsHistory));
