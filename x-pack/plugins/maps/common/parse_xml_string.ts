@@ -8,7 +8,7 @@
 import { parseString } from 'xml2js';
 
 // promise based wrapper around parseString
-export async function parseXmlString(xmlString) {
+export async function parseXmlString(xmlString: string): Promise<unknown> {
   const parsePromise = new Promise((resolve, reject) => {
     parseString(xmlString, (error, result) => {
       if (error) {
