@@ -416,7 +416,7 @@ export class TaskRunner<
           setFlapping: true,
         });
 
-        const flappingAlerts = determineFlapping<
+        const processedFlappingAlertIds = determineFlapping<
           State,
           Context,
           ActionGroupIds,
@@ -433,7 +433,7 @@ export class TaskRunner<
           ruleRunMetricsStore,
           canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
           shouldPersistAlerts: this.shouldLogAndScheduleActionsForAlerts(),
-          flappingAlertIds,
+          flappingAlertIds: processedFlappingAlertIds,
         });
 
         return {
@@ -441,7 +441,7 @@ export class TaskRunner<
           activeAlerts: processedAlertsActive,
           currentRecoveredAlerts: processedAlertsRecoveredCurrent,
           recoveredAlerts: processedAlertsRecovered,
-          flappingAlertIds: flappingAlerts,
+          flappingAlertIds: processedFlappingAlertIds,
         };
       });
 
