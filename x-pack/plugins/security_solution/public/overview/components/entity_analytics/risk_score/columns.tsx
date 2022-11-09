@@ -65,6 +65,7 @@ export const getRiskScoreColumns = (
       riskEntity === RiskScoreEntity.host
         ? RiskScoreFields.hostRiskScore
         : RiskScoreFields.userRiskScore,
+    width: '15%',
     name: i18n.RISK_SCORE_TITLE(riskEntity),
     truncateText: true,
     mobileOptions: { show: true },
@@ -72,7 +73,7 @@ export const getRiskScoreColumns = (
       if (riskScore != null) {
         return (
           <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-            {riskScore.toFixed(2)}
+            {Math.round(riskScore)}
           </span>
         );
       }
@@ -82,6 +83,7 @@ export const getRiskScoreColumns = (
   {
     field:
       riskEntity === RiskScoreEntity.host ? RiskScoreFields.hostRisk : RiskScoreFields.userRisk,
+    width: '30%',
     name: (
       <EuiToolTip content={i18n.ENTITY_RISK_TOOLTIP(riskEntity)}>
         <>
@@ -101,7 +103,7 @@ export const getRiskScoreColumns = (
   },
   {
     field: RiskScoreFields.alertsCount,
-    width: '15%',
+    width: '10%',
     name: i18n.ALERTS,
     truncateText: false,
     mobileOptions: { show: true },
