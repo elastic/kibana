@@ -17,7 +17,7 @@ Array [
       type="button"
     />
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       style="flex-shrink: 0;"
     >
       <div
@@ -57,7 +57,7 @@ Array [
       class="euiHorizontalRule euiHorizontalRule--full emotion-euiHorizontalRule-full"
     />
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       style="flex-shrink: 0;"
     >
       <div
@@ -117,10 +117,10 @@ Array [
             class="euiAccordion__buttonContent"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+              class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
             >
               <div
-                class="euiFlexItem"
+                class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <h3
                   class="euiTitle euiCollapsibleNavGroup__title emotion-euiTitle-xxs"
@@ -215,7 +215,7 @@ Array [
       class="euiHorizontalRule euiHorizontalRule--full emotion-euiHorizontalRule-full"
     />
     <div
-      class="euiFlexItem eui-yScroll"
+      class="euiFlexItem eui-yScroll emotion-euiFlexItem-grow-1"
     >
       <div
         class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
@@ -235,17 +235,17 @@ Array [
               class="euiAccordion__buttonContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
                     data-euiicon-type="logoKibana"
                   />
                 </div>
                 <div
-                  class="euiFlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h3
                     class="euiTitle euiCollapsibleNavGroup__title emotion-euiTitle-xxs"
@@ -367,17 +367,17 @@ Array [
               class="euiAccordion__buttonContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
                     data-euiicon-type="logoObservability"
                   />
                 </div>
                 <div
-                  class="euiFlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h3
                     class="euiTitle euiCollapsibleNavGroup__title emotion-euiTitle-xxs"
@@ -482,17 +482,17 @@ Array [
               class="euiAccordion__buttonContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
                     data-euiicon-type="logoSecurity"
                   />
                 </div>
                 <div
-                  class="euiFlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h3
                     class="euiTitle euiCollapsibleNavGroup__title emotion-euiTitle-xxs"
@@ -580,17 +580,17 @@ Array [
               class="euiAccordion__buttonContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
                     data-euiicon-type="managementApp"
                   />
                 </div>
                 <div
-                  class="euiFlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h3
                     class="euiTitle euiCollapsibleNavGroup__title emotion-euiTitle-xxs"

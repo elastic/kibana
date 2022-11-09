@@ -2,7 +2,7 @@
 
 exports[`RevertToBasic component should display when license is about to expire 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
     class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
@@ -72,7 +72,7 @@ exports[`RevertToBasic component should display when license is about to expire 
 
 exports[`RevertToBasic component should display when license is expired 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
     class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"
@@ -142,7 +142,7 @@ exports[`RevertToBasic component should display when license is expired 1`] = `
 
 exports[`RevertToBasic component should display when trial is active 1`] = `
 <div
-  class="euiFlexItem"
+  class="euiFlexItem emotion-euiFlexItem-grow-1"
 >
   <div
     class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasBorder-euiCard-center-vertical"

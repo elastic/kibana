@@ -6,7 +6,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
         data-test-subj="Container"
       >
         <div
@@ -20,7 +20,7 @@ Object {
           </span>
         </div>
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <button
             class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
@@ -39,10 +39,10 @@ Object {
           </button>
         </div>
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
               class="euiPopover emotion-euiPopover"
@@ -73,7 +73,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
       data-test-subj="Container"
     >
       <div
@@ -87,7 +87,7 @@ Object {
         </span>
       </div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <button
           class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
@@ -106,10 +106,10 @@ Object {
         </button>
       </div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
             class="euiPopover emotion-euiPopover"
@@ -197,7 +197,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
         data-test-subj="Container"
       >
         <div
@@ -211,7 +211,7 @@ Object {
           </span>
         </div>
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <button
             class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
@@ -230,10 +230,10 @@ Object {
           </button>
         </div>
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
               class="euiPopover emotion-euiPopover"
@@ -344,7 +344,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
       data-test-subj="Container"
     >
       <div
@@ -358,7 +358,7 @@ Object {
         </span>
       </div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <button
           class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
@@ -377,10 +377,10 @@ Object {
         </button>
       </div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
             class="euiPopover emotion-euiPopover"
@@ -468,14 +468,14 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
         data-test-subj="Container"
       >
         <div
           class="euiFlexItem emotion-EuiFlexItem"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
               class="euiPopover emotion-euiPopover"
@@ -510,7 +510,7 @@ Object {
           </div>
         </div>
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <button
             class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
@@ -529,10 +529,10 @@ Object {
           </button>
         </div>
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
               class="euiPopover emotion-euiPopover"
@@ -644,14 +644,14 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
       data-test-subj="Container"
     >
       <div
         class="euiFlexItem emotion-EuiFlexItem"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
             class="euiPopover emotion-euiPopover"
@@ -686,7 +686,7 @@ Object {
         </div>
       </div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <button
           class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
@@ -705,10 +705,10 @@ Object {
         </button>
       </div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
             class="euiPopover emotion-euiPopover"
@@ -796,14 +796,14 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
         data-test-subj="Container"
       >
         <div
           class="euiFlexItem emotion-EuiFlexItem"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
               class="euiPopover emotion-euiPopover"
@@ -838,7 +838,7 @@ Object {
           </div>
         </div>
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <button
             class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
@@ -857,10 +857,10 @@ Object {
           </button>
         </div>
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
               class="euiPopover emotion-euiPopover"
@@ -891,14 +891,14 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
       data-test-subj="Container"
     >
       <div
         class="euiFlexItem emotion-EuiFlexItem"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
             class="euiPopover emotion-euiPopover"
@@ -933,7 +933,7 @@ Object {
         </div>
       </div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <button
           class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
@@ -952,10 +952,10 @@ Object {
         </button>
       </div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
             class="euiPopover emotion-euiPopover"
