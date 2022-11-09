@@ -13,6 +13,5 @@ steps:
     command: .buildkite/scripts/steps/functional/simple_performance.sh
     agents:
       queue: kb-static-scalability
-    depends_on: build
     key: tests
     timeout_in_minutes: 60
