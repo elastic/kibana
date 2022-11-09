@@ -51,6 +51,8 @@ function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
   };
 }
 
+const waitForNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 describe('test fetchAll', () => {
   let subjects: SavedSearchData;
   let deps: Parameters<typeof fetchAll>[3];
@@ -90,7 +92,8 @@ describe('test fetchAll', () => {
 
     subjects.main$.subscribe((value) => stateArr.push(value.fetchStatus));
 
-    await fetchAll(subjects, searchSource, false, deps);
+    fetchAll(subjects, searchSource, false, deps);
+    await waitForNextTick();
 
     expect(stateArr).toEqual([
       FetchStatus.UNINITIALIZED,
@@ -107,7 +110,8 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
-    await fetchAll(subjects, searchSource, false, deps);
+    fetchAll(subjects, searchSource, false, deps);
+    await waitForNextTick();
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -129,12 +133,18 @@ describe('test fetchAll', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
 
-    await fetchAll(subjects, searchSource, false, deps);
+    subjects.totalHits$.next({
+      fetchStatus: FetchStatus.LOADING,
+      recordRawType: RecordRawType.DOCUMENT,
+    });
+    fetchAll(subjects, searchSource, false, deps);
+    await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
       recordRawType: RecordRawType.DOCUMENT,
       result: 42,
     });
+
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -146,8 +156,12 @@ describe('test fetchAll', () => {
   test('should use charts query to fetch total hit count when chart is visible', async () => {
     const collect = subjectCollector(subjects.totalHits$);
     searchSource.getField('index')!.isTimeBased = () => true;
-    await fetchAll(subjects, searchSource, false, deps);
-
+    subjects.totalHits$.next({
+      fetchStatus: FetchStatus.LOADING,
+      recordRawType: RecordRawType.DOCUMENT,
+    });
+    fetchAll(subjects, searchSource, false, deps);
+    await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
       recordRawType: RecordRawType.DOCUMENT,
@@ -169,8 +183,12 @@ describe('test fetchAll', () => {
     const hits = [{ _id: '1', _index: 'logs' }];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
-    await fetchAll(subjects, searchSource, false, deps);
-
+    subjects.totalHits$.next({
+      fetchStatus: FetchStatus.LOADING,
+      recordRawType: RecordRawType.DOCUMENT,
+    });
+    fetchAll(subjects, searchSource, false, deps);
+    await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.ERROR,
       recordRawType: RecordRawType.DOCUMENT,
@@ -200,11 +218,22 @@ describe('test fetchAll', () => {
     const collectMain = subjectCollector(subjects.main$);
     searchSource.getField('index')!.isTimeBased = () => false;
     mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
-    await fetchAll(subjects, searchSource, false, deps);
+    subjects.totalHits$.next({
+      fetchStatus: FetchStatus.LOADING,
+      recordRawType: RecordRawType.DOCUMENT,
+    });
+    fetchAll(subjects, searchSource, false, deps);
+    await waitForNextTick();
+    subjects.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      recordRawType: RecordRawType.DOCUMENT,
+      result: 5,
+    });
+
     expect(await collectMain()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
-      { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document' }, // From totalHits query
+      // { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document' }, // There is no partial, since documents query failed
       {
         fetchStatus: FetchStatus.ERROR,
         error: { msg: 'This query failed' },
@@ -238,7 +267,9 @@ describe('test fetchAll', () => {
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
     };
-    await fetchAll(subjects, searchSource, false, deps);
+    fetchAll(subjects, searchSource, false, deps);
+    await waitForNextTick();
+
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'plain', query },
