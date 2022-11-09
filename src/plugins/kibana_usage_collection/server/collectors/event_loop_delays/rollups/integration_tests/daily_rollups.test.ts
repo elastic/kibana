@@ -50,7 +50,7 @@ function createRawEventLoopDelaysDailyDocs(logger: Logger) {
   if (moment().endOf('day').diff(moment(), 'hour', true) < 1) {
     edgeDocumentToKeep--;
   }
-  logger.info(`The eldest document to keep is ${edgeDocumentToKeep} days old.`);
+  logger.info(`The oldest document to keep is ${edgeDocumentToKeep} days old.`);
 
   const rawEventLoopDelaysDaily = [
     createRawObject(moment.now()),
