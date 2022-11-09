@@ -48,6 +48,7 @@ interface Props {
   history: History;
   notifications: NotificationsStart;
   apiKeysAPIClient: PublicMethodsOf<APIKeysAPIClient>;
+  readOnly?: boolean;
 }
 
 interface State {
@@ -65,6 +66,10 @@ interface State {
 const DATE_FORMAT = 'MMMM Do YYYY HH:mm:ss';
 
 export class APIKeysGridPage extends Component<Props, State> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   constructor(props: any) {
     super(props);
     this.state = {
@@ -147,21 +152,21 @@ export class APIKeysGridPage extends Component<Props, State> {
     }
 
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
-      return (
-        <ApiKeysEmptyPrompt>
-          <EuiButton
-            {...reactRouterNavigate(this.props.history, '/create')}
-            fill
-            iconType="plusInCircleFilled"
-            data-test-subj="apiKeysCreatePromptButton"
-          >
-            <FormattedMessage
-              id="xpack.security.management.apiKeys.table.createButton"
-              defaultMessage="Create API key"
-            />
-          </EuiButton>
-        </ApiKeysEmptyPrompt>
+      const createButton = this.props.readOnly ? undefined : (
+        <EuiButton
+          {...reactRouterNavigate(this.props.history, '/create')}
+          fill
+          iconType="plusInCircleFilled"
+          data-test-subj="apiKeysCreatePromptButton"
+        >
+          <FormattedMessage
+            id="xpack.security.management.apiKeys.table.createButton"
+            defaultMessage="Create API key"
+          />
+        </EuiButton>
       );
+
+      return <ApiKeysEmptyPrompt>{createButton}</ApiKeysEmptyPrompt>;
     }
 
     const concatenated = `${this.state.createdApiKey?.id}:${this.state.createdApiKey?.api_key}`;
@@ -192,19 +197,23 @@ export class APIKeysGridPage extends Component<Props, State> {
               )}
             </>
           }
-          rightSideItems={[
-            <EuiButton
-              {...reactRouterNavigate(this.props.history, '/create')}
-              fill
-              iconType="plusInCircleFilled"
-              data-test-subj="apiKeysCreateTableButton"
-            >
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.createButton"
-                defaultMessage="Create API key"
-              />
-            </EuiButton>,
-          ]}
+          rightSideItems={
+            this.props.readOnly
+              ? undefined
+              : [
+                  <EuiButton
+                    {...reactRouterNavigate(this.props.history, '/create')}
+                    fill
+                    iconType="plusInCircleFilled"
+                    data-test-subj="apiKeysCreateTableButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.apiKeys.table.createButton"
+                      defaultMessage="Create API key"
+                    />
+                  </EuiButton>,
+                ]
+          }
         />
 
         {this.state.createdApiKey && !this.state.isLoadingTable && (
@@ -451,7 +460,7 @@ export class APIKeysGridPage extends Component<Props, State> {
               columns={this.getColumnConfig(invalidateApiKeyPrompt)}
               search={search}
               sorting={sorting}
-              selection={selection}
+              selection={this.props.readOnly ? undefined : selection}
               pagination={pagination}
               loading={isLoadingTable}
               error={
@@ -580,7 +589,10 @@ export class APIKeysGridPage extends Component<Props, State> {
           );
         },
       },
-      {
+    ]);
+
+    if (!this.props.readOnly) {
+      config.push({
         actions: [
           {
             name: i18n.translate('xpack.security.management.apiKeys.table.deleteAction', {
@@ -600,8 +612,8 @@ export class APIKeysGridPage extends Component<Props, State> {
             'data-test-subj': 'apiKeysTableDeleteAction',
           },
         ],
-      },
-    ]);
+      });
+    }
 
     return config;
   };
@@ -618,7 +630,7 @@ export class APIKeysGridPage extends Component<Props, State> {
         await this.props.apiKeysAPIClient.checkPrivileges();
       this.setState({ isAdmin, canManage, areApiKeysEnabled });
 
-      if (!canManage || !areApiKeysEnabled) {
+      if ((!canManage && !this.props.readOnly) || !areApiKeysEnabled) {
         this.setState({ isLoadingApp: false });
       } else {
         this.loadApiKeys();
