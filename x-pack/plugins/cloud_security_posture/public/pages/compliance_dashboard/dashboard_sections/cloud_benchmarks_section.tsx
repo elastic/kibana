@@ -119,6 +119,7 @@ export const CloudBenchmarksSection = ({
           <EuiFlexItem grow={dashboardColumnsGrow.third}>
             <div style={{ padding: '0 16px' }}>
               <RisksTable
+                compact
                 data={cluster.groupedFindingsEvaluation}
                 maxItems={3}
                 onCellClick={(resourceTypeName) =>

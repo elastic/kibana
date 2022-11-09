@@ -9,10 +9,9 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
-  EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -64,8 +63,8 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
           }
         >
           <EuiLink onClick={() => handleClusterTitleClick(cluster.meta.clusterId)} color="text">
-            <EuiText size="xs">
-              <h3>
+            <EuiTitle size="xs">
+              <h5>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.clusterTitle"
                   defaultMessage="{title} - {shortId}"
@@ -74,16 +73,14 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
                     shortId,
                   }}
                 />
-              </h3>
-            </EuiText>
+              </h5>
+            </EuiTitle>
           </EuiLink>
         </EuiToolTip>
-        <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">
-          <EuiIcon type="clock" />
           <FormattedMessage
             id="xpack.csp.dashboard.benchmarkSection.lastEvaluatedTitle"
-            defaultMessage=" Last evaluated {dateFromNow}"
+            defaultMessage="Last evaluated {dateFromNow}"
             values={{
               dateFromNow: moment(cluster.meta.lastUpdate).fromNow(),
             }}
@@ -91,14 +88,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={true} style={{ justifyContent: 'flex-end' }}>
-        <CISBenchmarkIcon
-          type={cluster.meta.benchmarkId}
-          name={cluster.meta.benchmarkName}
-          style={{
-            width: 64,
-            height: 64,
-          }}
-        />
+        <CISBenchmarkIcon type={cluster.meta.benchmarkId} name={cluster.meta.benchmarkName} />
       </EuiFlexItem>
       {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
         <EuiFlexItem grow={false}>

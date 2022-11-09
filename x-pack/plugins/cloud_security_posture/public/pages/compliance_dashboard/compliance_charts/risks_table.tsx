@@ -25,6 +25,7 @@ export interface RisksTableProps {
   maxItems: number;
   onCellClick: (name: string) => void;
   onViewAllClick: () => void;
+  compact?: boolean;
 }
 
 export const getTopRisks = (
@@ -42,15 +43,18 @@ export const RisksTable = ({
   maxItems,
   onCellClick,
   onViewAllClick,
+  compact,
 }: RisksTableProps) => {
   const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
       {
         field: 'name',
         truncateText: true,
-        name: i18n.translate('xpack.csp.dashboard.risksTable.cisSectionColumnLabel', {
-          defaultMessage: 'CIS Section',
-        }),
+        name: compact
+          ? ''
+          : i18n.translate('xpack.csp.dashboard.risksTable.cisSectionColumnLabel', {
+              defaultMessage: 'CIS Section',
+            }),
         render: (name: GroupedFindingsEvaluation['name']) => (
           <EuiLink onClick={() => onCellClick(name)} className="eui-textTruncate">
             {name}
@@ -59,9 +63,11 @@ export const RisksTable = ({
       },
       {
         field: 'totalFailed',
-        name: i18n.translate('xpack.csp.dashboard.risksTable.findingsColumnLabel', {
-          defaultMessage: 'Findings',
-        }),
+        name: compact
+          ? ''
+          : i18n.translate('xpack.csp.dashboard.risksTable.findingsColumnLabel', {
+              defaultMessage: 'Findings',
+            }),
         render: (
           totalFailed: GroupedFindingsEvaluation['totalFailed'],
           resource: GroupedFindingsEvaluation
@@ -84,7 +90,12 @@ export const RisksTable = ({
   const items = useMemo(() => getTopRisks(resourcesTypes, maxItems), [resourcesTypes, maxItems]);
 
   return (
-    <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      justifyContent="spaceBetween"
+      gutterSize="none"
+      style={{ height: 200 }}
+    >
       <EuiFlexItem>
         <EuiBasicTable<GroupedFindingsEvaluation>
           rowHeader="name"
