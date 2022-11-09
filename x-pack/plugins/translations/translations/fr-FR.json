@@ -25619,6 +25619,8 @@
     "xpack.securitySolution.networkTopNFlowTable.rows": "{numRows} {numRows, plural, =0 {ligne} =1 {ligne} other {lignes}}",
     "xpack.securitySolution.networkTopNFlowTable.unit": "{totalCount, plural, other {IP}}",
     "xpack.securitySolution.noPermissionsMessage": "Pour afficher {subPluginKey}, vous devez mettre à jour les privilèges. Pour en savoir plus, contactez votre administrateur Kibana.",
+    "xpack.securitySolution.noPrivilegesDefaultMessage": "Pour afficher cette page, vous devez mettre à jour les privilèges. Pour en savoir plus, contactez votre administrateur Kibana.",
+    "xpack.securitySolution.noPrivilegesPerPageMessage": "Pour afficher {pageName}, vous devez mettre à jour les privilèges. Pour en savoir plus, contactez votre administrateur Kibana.",
     "xpack.securitySolution.notes.youAreViewingNotesScreenReaderOnly": "Vous visualisez des notes pour l'événement de la ligne {row}. Appuyez sur la touche fléchée vers le haut lorsque vous aurez terminé pour revenir à l'événement.",
     "xpack.securitySolution.open.timeline.deleteTimelineModalTitle": "Supprimer \"{title}\" ?",
     "xpack.securitySolution.open.timeline.selectedTemplatesTitle": "Sélection de {selectedTemplates} {selectedTemplates, plural, =1 {modèle} other {modèles}} effectuée",
