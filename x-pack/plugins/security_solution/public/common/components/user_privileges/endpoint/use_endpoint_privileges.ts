@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
+import { checkArtifactHasData } from '../../../../management/services/exceptions_list/check_artifact_has_data';
 import { HostIsolationExceptionsApiClient } from '../../../../management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { useCurrentUser, useHttp, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
@@ -132,10 +133,7 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
       setHasHostIsolationExceptionsItems(false);
       setCheckHostIsolationExceptionsDone(false);
 
-      // FIXME:PT maybe use QueryClient here so that call is cached?
-
-      HostIsolationExceptionsApiClient.getInstance(http)
-        .hasData()
+      checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(http))
         .then((hasData) => {
           setHasHostIsolationExceptionsItems(hasData);
         })
