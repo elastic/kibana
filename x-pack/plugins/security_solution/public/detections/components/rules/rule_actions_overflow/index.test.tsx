@@ -113,46 +113,6 @@ describe('RuleActionsOverflow', () => {
 
       expect(getByTestId('rules-details-popover')).not.toHaveTextContent(/.+/);
     });
-
-    test('it calls duplicate action when rules-details-duplicate-rule is clicked', () => {
-      const executeBulkAction = jest.fn();
-      useExecuteBulkActionMock.mockReturnValue({ executeBulkAction });
-
-      const { getByTestId } = render(
-        <RuleActionsOverflow
-          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
-          rule={mockRule('id')}
-          userHasPermissions
-          canDuplicateRuleWithActions={true}
-        />,
-        { wrapper: TestProviders }
-      );
-      fireEvent.click(getByTestId('rules-details-popover-button-icon'));
-      fireEvent.click(getByTestId('rules-details-duplicate-rule'));
-
-      expect(executeBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'duplicate' })
-      );
-    });
-
-    test('it calls duplicate action with the rule and rule.id when rules-details-duplicate-rule is clicked', () => {
-      const executeBulkAction = jest.fn();
-      useExecuteBulkActionMock.mockReturnValue({ executeBulkAction });
-
-      const { getByTestId } = render(
-        <RuleActionsOverflow
-          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
-          rule={mockRule('id')}
-          userHasPermissions
-          canDuplicateRuleWithActions={true}
-        />,
-        { wrapper: TestProviders }
-      );
-      fireEvent.click(getByTestId('rules-details-popover-button-icon'));
-      fireEvent.click(getByTestId('rules-details-duplicate-rule'));
-
-      expect(executeBulkAction).toHaveBeenCalledWith({ type: 'duplicate', ids: ['id'] });
-    });
   });
 
   describe('rules details export rule', () => {
