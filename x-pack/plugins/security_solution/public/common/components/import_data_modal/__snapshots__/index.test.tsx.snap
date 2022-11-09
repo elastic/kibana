@@ -6,7 +6,7 @@ Object {
   "baseElement": <body>
     <div />
     <div
-      class="euiOverlayMask"
+      class="euiOverlayMask emotion-euiOverlayMask-aboveHeader"
       data-euiportal="true"
       data-relative-to-header="above"
     >
