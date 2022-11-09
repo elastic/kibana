@@ -50,7 +50,7 @@ import {
 import { FiltersBuilder } from '../../filters_builder';
 
 /** The default max-height of the Add/Edit Filter popover used to show "+n More" filters (e.g. `+5 More`) */
-export const DEFAULT_MAX_HEIGHT = '227px';
+export const DEFAULT_MAX_HEIGHT = '233px';
 
 const filtersBuilderMaxHeight = css`
   max-height: ${DEFAULT_MAX_HEIGHT};

@@ -54,7 +54,7 @@ const Delimiter = ({
       .filter-builder__delimiter_text {
         position: absolute;
         display: block;
-        padding: ${xsPadding};
+        padding: 0 ${xsPadding};
         top: 0;
         left: ${mPadding};
         background: ${backgroundColor};
@@ -65,7 +65,7 @@ const Delimiter = ({
 
   return (
     <div className={delimiterStyles}>
-      <EuiHorizontalRule margin="s" />
+      <EuiHorizontalRule margin="xs" />
       <EuiText size="xs" className="filter-builder__delimiter_text">
         {i18n.translate('unifiedSearch.filter.filtersBuilder.delimiterLabel', {
           defaultMessage: '{booleanRelation}',
@@ -123,9 +123,7 @@ export const FilterGroup = ({
 
       {booleanRelation && index + 1 < acc.length ? (
         <EuiFlexItem>
-          {booleanRelation === BooleanRelation.OR && (
-            <Delimiter color={color} booleanRelation={booleanRelation} />
-          )}
+          <Delimiter color={color} booleanRelation={booleanRelation} />
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
