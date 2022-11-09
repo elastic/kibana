@@ -211,6 +211,7 @@ describe('rule_form', () => {
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          onChangeMetaData={jest.fn()}
         />
       );
 
@@ -334,6 +335,7 @@ describe('rule_form', () => {
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
           connectorFeatureId={featureId}
+          onChangeMetaData={jest.fn()}
         />
       );
 
@@ -578,6 +580,7 @@ describe('rule_form', () => {
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          onChangeMetaData={jest.fn()}
         />
       );
 
@@ -644,6 +647,7 @@ describe('rule_form', () => {
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          onChangeMetaData={jest.fn()}
         />
       );
 
