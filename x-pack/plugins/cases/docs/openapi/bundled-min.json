@@ -176,6 +176,69 @@
         }
       ]
     },
+    "/s/{spaceId}/api/cases/alerts/{alertId}": {
+      "get": {
+        "summary": "Returns the cases associated with a specific alert.",
+        "operationId": "getCasesByAlert",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "x-technical-preview": true,
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/alert_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The case identifier."
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "The case title."
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "id": "06116b80-e1c3-11ec-be9b-9b1838238ee6",
+                      "title": "security_case"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/s/{spaceId}/api/cases/configure": {
       "get": {
         "summary": "Retrieves external connection details, such as the closure type and default connector for cases.",
@@ -1248,6 +1311,16 @@
         "schema": {
           "type": "string",
           "example": "default"
+        }
+      },
+      "alert_id": {
+        "in": "path",
+        "name": "alertId",
+        "description": "An identifier for the alert.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540"
         }
       },
       "owner": {
