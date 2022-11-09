@@ -1041,7 +1041,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
@@ -1379,7 +1379,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -1415,7 +1415,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -1606,7 +1606,7 @@ describe('Task Runner', () => {
             },
             "state": Object {
               "bar": false,
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "start": "1969-12-31T00:00:00.000Z",
             },
           },
@@ -1675,7 +1675,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 64800000000000,
+              "duration": "64800000000000",
               "end": "1970-01-01T00:00:00.000Z",
               "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",
@@ -1711,7 +1711,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
@@ -2189,7 +2189,7 @@ describe('Task Runner', () => {
           },
           "state": Object {
             "bar": false,
-            "duration": 86400000000000,
+            "duration": "86400000000000",
             "start": "1969-12-31T00:00:00.000Z",
           },
         },
@@ -2242,7 +2242,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 64800000000000,
+              "duration": "64800000000000",
               "end": "1970-01-01T00:00:00.000Z",
               "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",
@@ -2279,7 +2279,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
@@ -3327,7 +3327,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -3363,7 +3363,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -3399,7 +3399,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -3435,7 +3435,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 0,
+              "duration": "0",
               "kind": "alert",
               "start": "1970-01-01T00:00:00.000Z",
             },
@@ -3613,7 +3613,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
             },
@@ -3649,7 +3649,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 64800000000000,
+              "duration": "64800000000000",
               "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",
             },
@@ -4016,7 +4016,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 86400000000000,
+              "duration": "86400000000000",
               "end": "1970-01-01T00:00:00.000Z",
               "kind": "alert",
               "start": "1969-12-31T00:00:00.000Z",
@@ -4052,7 +4052,7 @@ describe('Task Runner', () => {
               "category": Array [
                 "alerts",
               ],
-              "duration": 64800000000000,
+              "duration": "64800000000000",
               "end": "1970-01-01T00:00:00.000Z",
               "kind": "alert",
               "start": "1969-12-31T06:00:00.000Z",

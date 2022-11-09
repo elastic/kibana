@@ -37,7 +37,13 @@ import {
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY, millisToNanos, nanosToMillis } from '../../../event_log/server';
+import {
+  IEvent,
+  IEventLogger,
+  SAVED_OBJECT_REL_PRIMARY,
+  millisToNanos,
+  nanosToMillis,
+} from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { RulesClient } from '../rules_client';
 import { partiallyUpdateAlert } from '../saved_objects';

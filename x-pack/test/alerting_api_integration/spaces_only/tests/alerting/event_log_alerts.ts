@@ -107,7 +107,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             expect(
               new Date(instanceEvents[i]?.event?.end!).valueOf() -
                 new Date(instanceEvents[i]?.event?.start!).valueOf()
-              ).to.equal(nanosToMillis(instanceEvents[i]?.event?.duration!));
+            ).to.equal(nanosToMillis(instanceEvents[i]?.event?.duration!));
             break;
         }
       }
