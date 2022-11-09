@@ -10,9 +10,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { validateTimeWindowUnits } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ComparatorFnNames, getComparatorSchemaType } from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
-import { ComparatorFnNames } from '../lib';
-import { getComparatorSchemaType } from '../lib/comparator';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 

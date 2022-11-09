@@ -9,4 +9,11 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 export * from './config';
+export {
+  ComparatorFns,
+  getComparatorScript,
+  getComparatorSchemaType,
+  ComparatorFnNames,
+  getHumanReadableComparator,
+} from './comparator';
 export { STACK_ALERTS_FEATURE_ID } from './constants';

@@ -23,8 +23,10 @@ import {
   parseAggregationResults,
   isGroupAggregation,
   isCountAggregation,
+  BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { getComparatorScript } from '../../../../server/rule_types/lib/comparator';
+import { Comparator } from '../../../../common/comparator_types';
+import { getComparatorScript } from '../../../../common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { EsQueryRuleParams, SearchType } from '../types';
@@ -143,9 +145,8 @@ export const EsQueryExpression: React.FC<
             termField,
             termSize,
             condition: {
-              resultLimit: 100,
               conditionScript: getComparatorScript(
-                thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                (thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR) as Comparator,
                 threshold,
                 BUCKET_SELECTOR_FIELD
               ),
@@ -154,8 +155,6 @@ export const EsQueryExpression: React.FC<
         }),
       })
     );
-
-    console.log(JSON.stringify(rawResponse));
 
     return {
       testResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: rawResponse }),
@@ -174,6 +173,8 @@ export const EsQueryExpression: React.FC<
     aggField,
     termField,
     termSize,
+    threshold,
+    thresholdComparator,
   ]);
 
   return (

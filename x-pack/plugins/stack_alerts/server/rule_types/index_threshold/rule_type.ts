@@ -15,9 +15,12 @@ import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './rule_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
-import { ComparatorFns, getHumanReadableComparator } from '../lib';
-import { getComparatorScript } from '../lib/comparator';
+import {
+  ComparatorFns,
+  getComparatorScript,
+  getHumanReadableComparator,
+  STACK_ALERTS_FEATURE_ID,
+} from '../../../common';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';

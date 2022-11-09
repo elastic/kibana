@@ -22,7 +22,7 @@ describe('parseAggregationResults', () => {
     ).toEqual([
       {
         group: 'all documents',
-        value: 491,
+        count: 491,
       },
     ]);
   });
@@ -70,23 +70,23 @@ describe('parseAggregationResults', () => {
     ).toEqual([
       {
         group: 'execute',
-        value: 120,
+        count: 120,
       },
       {
         group: 'execute-start',
-        value: 120,
+        count: 120,
       },
       {
         group: 'active-instance',
-        value: 100,
+        count: 100,
       },
       {
         group: 'execute-action',
-        value: 100,
+        count: 100,
       },
       {
         group: 'new-instance',
-        value: 100,
+        count: 100,
       },
     ]);
   });
@@ -111,6 +111,7 @@ describe('parseAggregationResults', () => {
     ).toEqual([
       {
         group: 'all documents',
+        count: 643,
         value: 3578195238.095238,
       },
     ]);
@@ -174,24 +175,31 @@ describe('parseAggregationResults', () => {
     ).toEqual([
       {
         group: 'execute-action',
+        count: 120,
         value: null,
       },
       {
         group: 'execute-start',
+        count: 139,
         value: null,
       },
       {
         group: 'starting',
+        count: 1,
         value: null,
       },
       {
         group: 'recovered-instance',
+        count: 120,
         value: 12837500000,
       },
       {
         group: 'execute',
+        count: 139,
         value: 137647482.0143885,
       },
     ]);
   });
+
+  // it('correctly parses results with top hits results', () => {});
 });

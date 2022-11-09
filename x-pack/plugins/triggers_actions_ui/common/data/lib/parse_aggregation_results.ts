@@ -12,7 +12,8 @@ import {
 
 export interface ParsedAggregationGroup {
   group: string;
-  value: number;
+  count: number;
+  value?: number;
 }
 
 interface ParseAggregationResultsOpts {
@@ -33,14 +34,15 @@ export const parseAggregationResults = ({
       buckets: [
         {
           key: 'all documents',
-          ...(isCountAgg
-            ? { doc_count: esResult.hits.total ?? 0 }
-            : {
+          doc_count: esResult.hits.total ?? 0,
+          ...(!isCountAgg
+            ? {
                 metricAgg: {
                   value:
                     (aggregations.metricAgg as AggregationsSingleMetricAggregateBase)?.value ?? 0,
                 },
-              }),
+              }
+            : {}),
         },
       ],
     };
@@ -56,7 +58,8 @@ export const parseAggregationResults = ({
     const groupName: string = `${groupBucket?.key}`;
     const groupResult: any = {
       group: groupName,
-      value: isCountAgg ? groupBucket?.doc_count : groupBucket?.metricAgg?.value,
+      count: groupBucket?.doc_count,
+      ...(!isCountAgg ? { value: groupBucket?.metricAgg?.value } : {}),
     };
     results.push(groupResult);
   }

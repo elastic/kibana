@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Comparator } from '../../../common/comparator_types';
+import { Comparator } from './comparator_types';
 
 export type ComparatorFn = (value: number, threshold: number[]) => boolean;
 

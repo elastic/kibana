@@ -50,23 +50,25 @@ export function useTestQuery(
 
     try {
       const { testResults, isGrouped, timeWindow } = await fetch();
-      console.log(testResults);
 
       if (isGrouped) {
         setTestQueryResponse({
           result: i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryGroupedResponse', {
-            defaultMessage: 'Grouped query ',
-            values: {},
+            defaultMessage: 'Grouped query matched {groups} groups in the last {window}.',
+            values: {
+              groups: testResults.length,
+              window: timeWindow,
+            },
           }),
           error: null,
           isLoading: false,
         });
       } else {
-        const ungroupedQueryResponse = testResults.length > 0 ? testResults[0] : { value: 0 };
+        const ungroupedQueryResponse = testResults.length > 0 ? testResults[0] : { count: 0 };
         setTestQueryResponse({
           result: i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
             defaultMessage: 'Query matched {count} documents in the last {window}.',
-            values: { count: ungroupedQueryResponse?.value ?? 0, window: timeWindow },
+            values: { count: ungroupedQueryResponse?.count ?? 0, window: timeWindow },
           }),
           error: null,
           isLoading: false,
@@ -74,7 +76,6 @@ export function useTestQuery(
       }
     } catch (err) {
       const message = err?.body?.attributes?.error?.root_cause[0]?.reason || err?.body?.message;
-      console.log(message);
 
       setTestQueryResponse({
         result: null,

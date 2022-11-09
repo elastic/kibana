@@ -6,7 +6,7 @@
  */
 
 import { getComparatorScript } from './comparator';
-import { Comparator } from '../../../common/comparator_types';
+import { Comparator } from './comparator_types';
 
 describe('getComparatorScript', () => {
   it('correctly returns script when comparator is LT', () => {

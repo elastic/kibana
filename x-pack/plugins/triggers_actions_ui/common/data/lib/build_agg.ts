@@ -22,7 +22,7 @@ export interface BuildAggregationOpts {
   termField?: string;
   topHitsSize?: number;
   condition?: {
-    resultLimit: number;
+    resultLimit?: number;
     conditionScript: string;
   };
 }
@@ -59,11 +59,12 @@ export const buildAggregation = ({
   }
 
   let terms = termSize || DEFAULT_GROUPS;
-  terms = includeConditionInQuery
-    ? terms > condition.resultLimit
-      ? condition.resultLimit + 1
-      : terms
-    : terms;
+  terms =
+    includeConditionInQuery && condition.resultLimit
+      ? terms > condition.resultLimit
+        ? condition.resultLimit + 1
+        : terms
+      : terms;
 
   let aggParent: any = aggContainer;
 

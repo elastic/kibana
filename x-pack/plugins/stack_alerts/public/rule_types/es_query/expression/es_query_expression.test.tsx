@@ -281,7 +281,7 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(wrapper.find('[data-test-subj="testQuerySuccess"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();
     expect(wrapper.find('EuiText[data-test-subj="testQuerySuccess"]').text()).toEqual(
-      `Query matched 1234 documents in the last 15s.`
+      `Grouped query matched 5 groups in the last 15s.`
     );
   });
 

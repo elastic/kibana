@@ -12,12 +12,6 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { EXPRESSION_ERRORS } from './constants';
 
-export interface Comparator {
-  text: string;
-  value: string;
-  requiredValues: number;
-}
-
 export enum SearchType {
   esQuery = 'esQuery',
   searchSource = 'searchSource',
