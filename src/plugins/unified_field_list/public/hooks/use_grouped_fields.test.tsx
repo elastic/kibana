@@ -209,18 +209,20 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   it('should work correctly when details are overwritten', async () => {
+    const onOverrideFieldGroupDetails: GroupedFieldsParams<DataViewField>['onOverrideFieldGroupDetails'] =
+      jest.fn((groupName) => {
+        if (groupName === FieldsGroupNames.SelectedFields) {
+          return {
+            helpText: 'test',
+          };
+        }
+      });
     const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
         allFields,
         services: mockedServices,
-        onOverrideFieldGroupDetails: (groupName) => {
-          if (groupName === FieldsGroupNames.SelectedFields) {
-            return {
-              helpText: 'test',
-            };
-          }
-        },
+        onOverrideFieldGroupDetails,
       },
     });
 
@@ -230,6 +232,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     expect(fieldGroups[FieldsGroupNames.SelectedFields]?.helpText).toBe('test');
     expect(fieldGroups[FieldsGroupNames.AvailableFields]?.helpText).not.toBe('test');
+    expect(onOverrideFieldGroupDetails).toHaveBeenCalled();
   });
 
   it('should work correctly when changing a data view and existence info is available only for one of them', async () => {
