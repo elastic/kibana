@@ -69,11 +69,11 @@ export const useAdHocDataViews = ({
         prev.filter((d) => d.id && dataViewToUpdate.id && d.id !== dataViewToUpdate.id)
       );
 
+      // update filters references
       const uiActions = await getUiActions();
       const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
       const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
-      // execute shouldn't be awaited, this is important for pending history push cancellation
       action?.execute({
         trigger,
         fromDataView: dataViewToUpdate.id,
@@ -81,11 +81,12 @@ export const useAdHocDataViews = ({
         usedDataViews: [],
       } as ActionExecutionContext);
 
+      savedSearch.searchSource.setField('index', newDataView);
       stateContainer.replaceUrlAppState({ index: newDataView.id });
       setUrlTracking(newDataView);
       return newDataView;
     },
-    [dataViews, setUrlTracking, stateContainer]
+    [dataViews, setUrlTracking, stateContainer, savedSearch.searchSource]
   );
 
   const { openConfirmSavePrompt, updateSavedSearch } =
@@ -105,5 +106,19 @@ export const useAdHocDataViews = ({
     return currentDataView;
   }, [stateContainer, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
 
-  return { adHocDataViewList, persistDataView, updateAdHocDataViewId };
+  const onAddAdHocDataViews = useCallback((newDataViews: DataView[]) => {
+    setAdHocDataViewList((prev) => {
+      const newAdHocDataViews = newDataViews.filter(
+        (newDataView) => !prev.find((d) => d.id === newDataView.id)
+      );
+      return [...prev, ...newAdHocDataViews];
+    });
+  }, []);
+
+  return {
+    adHocDataViewList,
+    persistDataView,
+    updateAdHocDataViewId,
+    onAddAdHocDataViews,
+  };
 };
