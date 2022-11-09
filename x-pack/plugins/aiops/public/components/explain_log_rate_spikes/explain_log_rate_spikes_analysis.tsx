@@ -235,7 +235,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
               {overrides !== undefined ? (
                 <p>
                   <EuiButton size="s" onClick={() => startHandler(true)}>
-                    Try to continue analysis
+                    <FormattedMessage
+                      id="xpack.aiops.explainLogRateSpikesPage.tryToContinueAnalysisButtonText"
+                      defaultMessage="Try to continue analysis"
+                    />
                   </EuiButton>
                 </p>
               ) : null}
