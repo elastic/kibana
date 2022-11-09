@@ -34,7 +34,7 @@ export const deleteMonitorBulk = async ({
   syntheticsMonitorClient: SyntheticsMonitorClient;
   request: KibanaRequest;
 }) => {
-  const { logger, telemetry, kibanaVersion } = server;
+  const { logger, telemetry, stackVersion } = server;
   const spaceId = server.spaces.spacesService.getSpaceId(request);
 
   try {
@@ -60,7 +60,7 @@ export const deleteMonitorBulk = async ({
         telemetry,
         formatTelemetryDeleteEvent(
           monitor,
-          kibanaVersion,
+          stackVersion,
           new Date().toISOString(),
           Boolean((monitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
           errors

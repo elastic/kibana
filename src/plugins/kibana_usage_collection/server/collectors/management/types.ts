@@ -43,6 +43,8 @@ export interface UsageStats {
   'observability:enableComparisonByDefault': boolean;
   'observability:enableServiceGroups': boolean;
   'observability:apmEnableServiceMetrics': boolean;
+  'observability:apmAWSLambdaPriceFactor': string;
+  'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureHostsView': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;

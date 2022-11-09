@@ -6,7 +6,12 @@
     "declaration": true,
 
     // the plugin contains some heavy json files
-    "resolveJsonModule": false
+    "resolveJsonModule": false,
+    // there is still a decent amount of JS in this plugin and we are taking
+    // advantage of the fact that TS doesn't know the types of that code and
+    // gives us `any`. Once that code is converted to .ts we can remove this
+    // and allow TS to infer types from any JS file imported.
+    "allowJs": false
   },
   "include": [
     "../../../typings/**/*",
@@ -22,6 +27,7 @@
     "types/**/*"
   ],
   "kbn_references": [
+    { "path": "../../../src/setup_node_env/tsconfig.json" },
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/bfetch/tsconfig.json" },
     { "path": "../../../src/plugins/charts/tsconfig.json" },

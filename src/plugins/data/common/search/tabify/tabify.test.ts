@@ -60,6 +60,26 @@ describe('tabifyAggResponse Integration', () => {
 
     const mockAggConfig = (agg: any): IAggConfig => agg as unknown as IAggConfig;
 
+    if (isSamplingEnabled(probability)) {
+      test('does not fail if there is no aggregations object when sampling is active', () => {
+        const aggConfigs = createAggConfigs([
+          mockAggConfig({ type: 'avg', schema: 'metric', params: { field: '@timestamp' } }),
+          mockAggConfig({ type: 'terms', schema: 'split', params: { field: '@timestamp' } }),
+          mockAggConfig({ type: 'terms', schema: 'segment', params: { field: '@timestamp' } }),
+          mockAggConfig({ type: 'terms', schema: 'segment', params: { field: '@timestamp' } }),
+        ]);
+        const response = enrichResponseWithSampling(metricOnly);
+
+        delete response.aggregations;
+
+        expect(() =>
+          tabifyAggResponse(aggConfigs, response, {
+            metricsAtAllLevels: true,
+          })
+        ).not.toThrow();
+      });
+    }
+
     test(`transforms a simple response properly${getTitlePostfix()}`, () => {
       const aggConfigs = createAggConfigs([{ type: 'count' } as any]);
 

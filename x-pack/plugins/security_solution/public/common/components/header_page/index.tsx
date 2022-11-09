@@ -65,11 +65,11 @@ export interface HeaderPageProps extends HeaderProps {
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
+  rightSideItems?: React.ReactNode[];
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
   title: TitleProp;
   titleNode?: React.ReactElement;
-  rightSideItems?: React.ReactNode[];
 }
 
 export const HeaderLinkBack: React.FC<{ backOptions: BackOptions }> = React.memo(
@@ -105,11 +105,11 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   children,
   draggableArguments,
   isLoading,
+  rightSideItems,
   subtitle,
   subtitle2,
   title,
   titleNode,
-  rightSideItems,
 }) => (
   <>
     <EuiPageHeader alignItems="center" bottomBorder={border} rightSideItems={rightSideItems}>

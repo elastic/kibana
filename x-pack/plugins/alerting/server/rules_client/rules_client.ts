@@ -309,17 +309,9 @@ export interface BulkDeleteOptionsIds {
 
 export type BulkDeleteOptions = BulkDeleteOptionsFilter | BulkDeleteOptionsIds;
 
-export interface BulkEditError {
+export interface BulkOperationError {
   message: string;
-  rule: {
-    id: string;
-    name: string;
-  };
-}
-
-export interface BulkDeleteError {
-  message: string;
-  status: number;
+  status?: number;
   rule: {
     id: string;
     name: string;
@@ -419,6 +411,7 @@ export interface GetGlobalExecutionKPIParams {
   dateStart: string;
   dateEnd?: string;
   filter?: string;
+  namespaces?: Array<string | undefined>;
 }
 
 export interface GetGlobalExecutionLogParams {
@@ -428,6 +421,7 @@ export interface GetGlobalExecutionLogParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+  namespaces?: Array<string | undefined>;
 }
 
 export interface GetActionErrorLogByIdParams {
@@ -438,6 +432,7 @@ export interface GetActionErrorLogByIdParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+  namespace?: string;
 }
 
 interface ScheduleTaskOptions {
@@ -457,6 +452,9 @@ const preconfiguredConnectorActionRefPrefix = 'preconfigured:';
 const MAX_RULES_NUMBER_FOR_BULK_OPERATION = 10000;
 const API_KEY_GENERATE_CONCURRENCY = 50;
 const RULE_TYPE_CHECKS_CONCURRENCY = 50;
+
+const actionErrorLogDefaultFilter =
+  'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
@@ -951,6 +949,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
+    namespaces,
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -1001,7 +1000,8 @@ export class RulesClient {
             perPage,
             sort,
           }),
-        }
+        },
+        namespaces
       );
 
       return formatExecutionLogResult(aggResult);
@@ -1050,9 +1050,6 @@ export class RulesClient {
       })
     );
 
-    const defaultFilter =
-      'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
-
     // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
     const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
@@ -1069,10 +1066,86 @@ export class RulesClient {
           end: parsedDateEnd.toISOString(),
           page,
           per_page: perPage,
-          filter: filter ? `(${defaultFilter}) AND (${filter})` : defaultFilter,
+          filter: filter
+            ? `(${actionErrorLogDefaultFilter}) AND (${filter})`
+            : actionErrorLogDefaultFilter,
           sort: convertEsSortToEventLogSort(sort),
         },
         rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
+      return formatExecutionErrorsResult(errorResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getActionErrorLog(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getActionErrorLogWithAuth({
+    id,
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+    namespace,
+  }: GetActionErrorLogByIdParams): Promise<IExecutionErrorsResult> {
+    this.logger.debug(`getActionErrorLogWithAuth(): getting action error logs for rule ${id}`);
+
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'kibana.alert.rule.rule_type_id',
+            consumer: 'kibana.alert.rule.consumer',
+          },
+        }
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const errorResult = await eventLogClient.findEventsWithAuthFilter(
+        'alert',
+        [id],
+        authorizationTuple.filter as KueryNode,
+        namespace,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          page,
+          per_page: perPage,
+          filter: filter
+            ? `(${actionErrorLogDefaultFilter}) AND (${filter})`
+            : actionErrorLogDefaultFilter,
+          sort: convertEsSortToEventLogSort(sort),
+        }
       );
       return formatExecutionErrorsResult(errorResult);
     } catch (err) {
@@ -1087,6 +1160,7 @@ export class RulesClient {
     dateStart,
     dateEnd,
     filter,
+    namespaces,
   }: GetGlobalExecutionKPIParams) {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -1132,7 +1206,8 @@ export class RulesClient {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
           aggs: getExecutionKPIAggregation(filter),
-        }
+        },
+        namespaces
       );
 
       return formatExecutionKPIResult(aggResult);
@@ -1825,18 +1900,24 @@ export class RulesClient {
     );
 
     const taskIdsFailedToBeDeleted: string[] = [];
+    const taskIdsSuccessfullyDeleted: string[] = [];
     if (taskIdsToDelete.length > 0) {
       try {
         const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
         resultFromDeletingTasks?.statuses.forEach((status) => {
-          if (!status.success) {
+          if (status.success) {
+            taskIdsSuccessfullyDeleted.push(status.id);
+          } else {
             taskIdsFailedToBeDeleted.push(status.id);
           }
         });
         this.logger.debug(
-          `Successfully deleted schedules for underlying tasks: ${taskIdsToDelete
-            .filter((id) => taskIdsFailedToBeDeleted.includes(id))
-            .join(', ')}`
+          `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
+            ', '
+          )}`
+        );
+        this.logger.error(
+          `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(', ')}`
         );
       } catch (error) {
         this.logger.error(
@@ -1870,7 +1951,7 @@ export class RulesClient {
     const rules: SavedObjectsBulkDeleteObject[] = [];
     const apiKeysToInvalidate: string[] = [];
     const taskIdsToDelete: string[] = [];
-    const errors: BulkDeleteError[] = [];
+    const errors: BulkOperationError[] = [];
     const apiKeyToRuleIdMapping: Record<string, string> = {};
     const taskIdToRuleIdMapping: Record<string, string> = {};
     const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -1926,7 +2007,7 @@ export class RulesClient {
     options: BulkEditOptions<Params>
   ): Promise<{
     rules: Array<SanitizedRule<Params>>;
-    errors: BulkEditError[];
+    errors: BulkOperationError[];
     total: number;
   }> {
     const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
@@ -2093,7 +2174,7 @@ export class RulesClient {
     apiKeysToInvalidate: string[];
     rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
     resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
-    errors: BulkEditError[];
+    errors: BulkOperationError[];
   }> {
     const rulesFinder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
@@ -2106,7 +2187,7 @@ export class RulesClient {
       );
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-    const errors: BulkEditError[] = [];
+    const errors: BulkOperationError[] = [];
     const apiKeysToInvalidate: string[] = [];
     const apiKeysMap = new Map<string, { oldApiKey?: string; newApiKey?: string }>();
     const username = await this.getUserName();
