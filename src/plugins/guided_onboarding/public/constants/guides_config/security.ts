@@ -94,7 +94,7 @@ export const securityConfig: GuideConfig = {
         description: i18n.translate(
           'guidedOnboarding.securityGuide.alertsStep.manualCompletion.description',
           {
-            defaultMessage: `After you've explored the created case, click here to continue.`,
+            defaultMessage: `After you've explored the case you created, click here to continue.`,
           }
         ),
       },
