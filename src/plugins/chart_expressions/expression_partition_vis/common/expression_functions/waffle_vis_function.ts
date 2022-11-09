@@ -31,6 +31,10 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       required: true,
       multi: true,
     },
+    metricsToLabels: {
+      types: ['string'],
+      help: strings.getMetricToLabelHelp(),
+    },
     bucket: {
       types: ['vis_dimension'],
       help: strings.getBucketArgHelp(),
@@ -127,6 +131,7 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     const buckets = args.bucket ? [args.bucket] : [];
     const visConfig: PartitionVisParams = {
       ...args,
+      metricsToLabels: JSON.parse(args.metricsToLabels),
       ariaLabel:
         args.ariaLabel ??
         (handlers.variables?.embeddableTitle as string) ??

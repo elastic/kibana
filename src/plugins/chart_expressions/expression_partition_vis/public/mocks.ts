@@ -292,6 +292,7 @@ export const createMockPartitionVisParams = (): PartitionVisParams => {
       name: 'default',
       type: 'palette',
     },
+    metricsToLabels: {},
     dimensions: {
       metrics: [
         {

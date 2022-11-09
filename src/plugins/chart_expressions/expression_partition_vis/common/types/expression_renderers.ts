@@ -58,6 +58,9 @@ interface VisCommonParams {
 }
 
 interface VisCommonConfig extends VisCommonParams {
+  metrics: Array<ExpressionValueVisDimension | string>;
+  metricsToLabels: string;
+  buckets?: Array<ExpressionValueVisDimension | string>;
   splitColumn?: Array<ExpressionValueVisDimension | string>;
   splitRow?: Array<ExpressionValueVisDimension | string>;
   labels: ExpressionValuePartitionLabels;
@@ -66,6 +69,7 @@ interface VisCommonConfig extends VisCommonParams {
 
 export interface PartitionVisParams extends VisCommonParams {
   dimensions: Dimensions;
+  metricsToLabels: Record<string, string>;
   labels: LabelsParams;
   palette: PaletteOutput;
   isDonut?: boolean;
@@ -78,8 +82,6 @@ export interface PartitionVisParams extends VisCommonParams {
 }
 
 export interface PieVisConfig extends VisCommonConfig {
-  metrics: Array<ExpressionValueVisDimension | string>;
-  buckets?: Array<ExpressionValueVisDimension | string>;
   partitionByColumn?: boolean;
   isDonut: boolean;
   emptySizeRatio?: EmptySizeRatios;
@@ -90,19 +92,15 @@ export interface PieVisConfig extends VisCommonConfig {
 }
 
 export interface TreemapVisConfig extends VisCommonConfig {
-  metrics: Array<ExpressionValueVisDimension | string>;
-  buckets?: Array<ExpressionValueVisDimension | string>;
   nestedLegend: boolean;
 }
 
-export interface MosaicVisConfig extends VisCommonConfig {
+export interface MosaicVisConfig extends Omit<VisCommonConfig, 'metrics' | 'metricToLabel'> {
   metric: ExpressionValueVisDimension | string;
-  buckets?: Array<ExpressionValueVisDimension | string>;
   nestedLegend: boolean;
 }
 
-export interface WaffleVisConfig extends VisCommonConfig {
-  metrics: Array<ExpressionValueVisDimension | string>;
+export interface WaffleVisConfig extends Omit<VisCommonConfig, 'buckets'> {
   bucket?: ExpressionValueVisDimension | string;
   showValuesInLegend: boolean;
 }

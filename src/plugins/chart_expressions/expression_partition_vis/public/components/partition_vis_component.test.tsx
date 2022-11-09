@@ -99,6 +99,8 @@ describe('PartitionVisComponent', function () {
 
     localParams.dimensions.metrics = [...localParams.dimensions.metrics, 'col-3-1'];
 
+    localParams.metricsToLabels = { 'col-3-1': 'metric1 label', 'col-1-1': 'metric2 label' };
+
     const component = shallow(<PartitionVisComponent {...wrapperProps} visParams={localParams} />);
     expect(component).toMatchSnapshot();
   });

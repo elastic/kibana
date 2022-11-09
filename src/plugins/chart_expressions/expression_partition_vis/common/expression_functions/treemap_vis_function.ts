@@ -31,6 +31,10 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       required: true,
       multi: true,
     },
+    metricsToLabels: {
+      types: ['string'],
+      help: strings.getMetricToLabelHelp(),
+    },
     buckets: {
       types: ['vis_dimension'],
       help: strings.getBucketsArgHelp(),
@@ -132,6 +136,7 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
 
     const visConfig: PartitionVisParams = {
       ...args,
+      metricsToLabels: JSON.parse(args.metricsToLabels),
       ariaLabel:
         args.ariaLabel ??
         (handlers.variables?.embeddableTitle as string) ??

@@ -51,7 +51,10 @@ describe('consolidateMetricColumns', () => {
       ],
     };
 
-    const result = consolidateMetricColumns(table, ['1', '2'], ['3', '4']);
+    const result = consolidateMetricColumns(table, ['1', '2'], ['3', '4'], {
+      3: 'metric1 label',
+      4: 'metric2 label',
+    });
     expect(result.bucketAccessors).toEqual(['1', '2', 'metric-name']);
     expect(result.metricAccessor).toEqual('value');
     expect(result.table).toMatchInlineSnapshot(`
@@ -93,49 +96,49 @@ describe('consolidateMetricColumns', () => {
           Object {
             "1": "square",
             "2": "red",
-            "metric-name": "metric1",
+            "metric-name": "metric1 label",
             "value": 1,
           },
           Object {
             "1": "square",
             "2": "red",
-            "metric-name": "metric2",
+            "metric-name": "metric2 label",
             "value": 2,
           },
           Object {
             "1": "square",
             "2": "blue",
-            "metric-name": "metric1",
+            "metric-name": "metric1 label",
             "value": 3,
           },
           Object {
             "1": "square",
             "2": "blue",
-            "metric-name": "metric2",
+            "metric-name": "metric2 label",
             "value": 4,
           },
           Object {
             "1": "circle",
             "2": "red",
-            "metric-name": "metric1",
+            "metric-name": "metric1 label",
             "value": 5,
           },
           Object {
             "1": "circle",
             "2": "red",
-            "metric-name": "metric2",
+            "metric-name": "metric2 label",
             "value": 6,
           },
           Object {
             "1": "circle",
             "2": "blue",
-            "metric-name": "metric1",
+            "metric-name": "metric1 label",
             "value": 7,
           },
           Object {
             "1": "circle",
             "2": "blue",
-            "metric-name": "metric2",
+            "metric-name": "metric2 label",
             "value": 8,
           },
         ],
@@ -180,7 +183,9 @@ describe('consolidateMetricColumns', () => {
 
     const bucketAccessors = ['1', '2'];
     const metricAccessors = ['3'];
-    const result = consolidateMetricColumns(table, bucketAccessors, metricAccessors);
+    const result = consolidateMetricColumns(table, bucketAccessors, metricAccessors, {
+      3: 'metric1',
+    });
 
     expect(result.table).toEqual(table);
     expect(result.bucketAccessors).toEqual(bucketAccessors);
@@ -214,7 +219,10 @@ describe('consolidateMetricColumns', () => {
       ],
     };
 
-    const result = consolidateMetricColumns(table, undefined, ['3', '4']);
+    const result = consolidateMetricColumns(table, undefined, ['3', '4'], {
+      3: 'metric1',
+      4: 'metric2',
+    });
     expect(result.bucketAccessors).toEqual(['metric-name']);
     expect(result.metricAccessor).toEqual('value');
     expect(result.table).toMatchInlineSnapshot(`

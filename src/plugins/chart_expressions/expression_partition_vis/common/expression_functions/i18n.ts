@@ -17,6 +17,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.metricHelpText', {
       defaultMessage: 'Metric dimensions config',
     }),
+  getMetricToLabelHelp: () =>
+    i18n.translate('expressionXY.layer.columnToLabel.help', {
+      defaultMessage: 'JSON key-value pairs of column ID to label',
+    }),
   getBucketsArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.bucketsHelpText', {
       defaultMessage: 'Buckets dimensions config',

@@ -17,7 +17,8 @@ function nonNullable<T>(value: T): value is NonNullable<T> {
 export const consolidateMetricColumns = (
   table: Datatable,
   bucketAccessors: Array<string | ExpressionValueVisDimension> = [],
-  metricAccessors: Array<string | ExpressionValueVisDimension>
+  metricAccessors: Array<string | ExpressionValueVisDimension>,
+  metricsToLabels: Record<string, string>
 ): {
   table: Datatable;
   metricAccessor: string | ExpressionValueVisDimension | undefined;
@@ -52,7 +53,7 @@ export const consolidateMetricColumns = (
         newRow[id] = row[id];
       });
 
-      newRow[nameColumnId] = metricCol.name;
+      newRow[nameColumnId] = metricsToLabels[metricCol.id];
       newRow[valueColumnId] = row[metricCol.id];
 
       transposedRows.push(newRow);

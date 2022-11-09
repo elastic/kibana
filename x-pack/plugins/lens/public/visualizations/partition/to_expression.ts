@@ -64,6 +64,20 @@ type GenerateLabelsAstArguments = (
   layer: PieLayerState
 ) => [Ast];
 
+export const getColumnToLabelMap = (
+  columnIds: string[],
+  datasource: DatasourcePublicAPI | undefined
+) => {
+  const columnToLabel: Record<string, string> = {};
+  columnIds.forEach((accessor) => {
+    const operation = datasource?.getOperationForColumnId(accessor);
+    if (operation?.label) {
+      columnToLabel[accessor] = operation.label;
+    }
+  });
+  return columnToLabel;
+};
+
 export const getSortedGroups = (
   datasource: DatasourcePublicAPI | undefined,
   layer: PieLayerState,
@@ -141,6 +155,9 @@ const generateCommonArguments = (
       .map(prepareDimension),
     metrics: (layer.allowMultipleMetrics ? layer.metrics : [layer.metrics[0]]).map(
       prepareDimension
+    ),
+    metricsToLabels: JSON.stringify(
+      getColumnToLabelMap(layer.metrics, datasourceLayers[layer.layerId])
     ),
     legendDisplay: (attributes.isPreview
       ? LegendDisplay.HIDE

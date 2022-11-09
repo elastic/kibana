@@ -31,6 +31,10 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       required: true,
       multi: true,
     },
+    metricsToLabels: {
+      types: ['string'],
+      help: strings.getMetricToLabelHelp(),
+    },
     buckets: {
       types: ['vis_dimension', 'string'],
       help: strings.getBucketsArgHelp(),
@@ -152,6 +156,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
 
     const visConfig: PartitionVisParams = {
       ...args,
+      metricsToLabels: JSON.parse(args.metricsToLabels),
       ariaLabel:
         args.ariaLabel ??
         (handlers.variables?.embeddableTitle as string) ??
