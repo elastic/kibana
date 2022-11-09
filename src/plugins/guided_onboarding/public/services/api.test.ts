@@ -40,6 +40,9 @@ describe('GuidedOnboarding ApiService', () => {
     httpClient.get.mockResolvedValue({
       pluginState: mockPluginStateInProgress,
     });
+    httpClient.put.mockResolvedValue({
+      pluginState: mockPluginStateInProgress,
+    });
     apiService = new ApiService();
     apiService.setup(httpClient, true);
   });

@@ -233,7 +233,7 @@ export class ApiService implements GuidedOnboardingApi {
     const pluginState = await firstValueFrom(this.fetchPluginState$());
 
     // For now, returning undefined if consumer attempts to complete a guide that is not active
-    if (!isGuideActive(pluginState)) return undefined;
+    if (!isGuideActive(pluginState, guideId)) return undefined;
 
     const { activeGuide } = pluginState!;
 
