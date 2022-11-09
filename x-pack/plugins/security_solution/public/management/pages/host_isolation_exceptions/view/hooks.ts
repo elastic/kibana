@@ -31,8 +31,8 @@ export function useCanSeeHostIsolationExceptionsMenu(): boolean {
 
   const canSeeMenu = useMemo(() => {
     return (
-      privileges.canIsolateHost ||
-      (privileges.canAccessEndpointManagement && Boolean(summary?.total))
+      privileges.canAccessEndpointManagement &&
+      (privileges.canIsolateHost || Boolean(summary?.total))
     );
   }, [privileges.canIsolateHost, privileges.canAccessEndpointManagement, summary?.total]);
 
