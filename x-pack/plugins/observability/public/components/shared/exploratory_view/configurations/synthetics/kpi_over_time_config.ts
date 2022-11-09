@@ -105,7 +105,7 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         columnFilters: [
           {
             language: 'kuery',
-            query: `state.id: * and state.up: 0`,
+            query: `summary: * and summary.down > 0 and and monitor.status: "down"`,
           },
         ],
       },
@@ -117,7 +117,7 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         columnFilters: [
           {
             language: 'kuery',
-            query: `state.id: * and state.up: 1`,
+            query: `summary: * and summary.down: 0 and monitor.status: "up"`,
           },
         ],
       },

@@ -102,7 +102,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           titlePosition: 'bottom',
         },
         columnType: FORMULA_COLUMN,
-        formula: 'unique_count(state.id)',
+        formula: 'unique_count(monitor.check_group)',
         format: 'number',
       },
       {
@@ -114,7 +114,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           titlePosition: 'bottom',
         },
         columnType: FORMULA_COLUMN,
-        formula: 'unique_count(state.id, kql=\'monitor.status: "up"\')',
+        formula: 'unique_count(monitor.check_group, kql=\'monitor.status: "up"\')',
         format: 'number',
       },
       {
@@ -128,7 +128,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           palette: getColorPalette('danger'),
         },
         columnType: FORMULA_COLUMN,
-        formula: 'unique_count(state.id, kql=\'monitor.status: "down"\')',
+        formula: 'unique_count(monitor.check_group, kql=\'monitor.status: "down"\')',
         format: 'number',
       },
       {
