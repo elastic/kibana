@@ -8,11 +8,11 @@
 import { Duration, DurationUnit } from '../../../types/models';
 
 export function sevenDays(): Duration {
-  return new Duration(7, DurationUnit.d);
+  return new Duration(7, DurationUnit.Day);
 }
 
 export function oneWeek(): Duration {
-  return new Duration(1, DurationUnit.w);
+  return new Duration(1, DurationUnit.Week);
 }
 
 export function sixHours(): Duration {
@@ -20,5 +20,5 @@ export function sixHours(): Duration {
 }
 
 export function oneMinute(): Duration {
-  return new Duration(1, DurationUnit.m);
+  return new Duration(1, DurationUnit.Minute);
 }
