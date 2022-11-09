@@ -17,6 +17,7 @@ import {
   SearchFilterConfig,
   Direction,
   Query,
+  Ast,
 } from '@elastic/eui';
 
 import { useServices } from '../services';
@@ -114,8 +115,13 @@ export function Table<T extends UserContentCommonSchema>({
 
   const onSearchQueryChange = useCallback(
     (arg: { query: Query | null; queryText: string }) => {
-      const { queryText, query } = arg;
-      dispatch({ type: 'onSearchQueryChange', data: { query, text: queryText } });
+      dispatch({
+        type: 'onSearchQueryChange',
+        data: {
+          query: arg.query ?? new Query(Ast.create([]), undefined, arg.queryText),
+          text: arg.queryText,
+        },
+      });
     },
     [dispatch]
   );

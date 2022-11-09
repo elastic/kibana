@@ -72,7 +72,7 @@ export interface ShowConfirmDeleteItemsModalAction {
 export interface OnSearchQueryChangeAction {
   type: 'onSearchQueryChange';
   data: {
-    query: Query | null;
+    query: Query;
     text: string;
   };
 }
