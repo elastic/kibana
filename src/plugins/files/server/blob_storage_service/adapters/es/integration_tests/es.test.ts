@@ -161,4 +161,16 @@ describe('Elasticsearch blob storage', () => {
     }
     expect(chunks.join('')).toEqual(fileBuffer.toString('utf-8'));
   });
+
+  it('successfully uploads multiple files in parallel', async () => {
+    esBlobStorage = createEsBlobStorage({ chunkSize: '1024B' });
+    await expect(
+      Promise.all([
+        esBlobStorage.upload(Readable.from([Buffer.alloc(2048, 'a')])),
+        esBlobStorage.upload(Readable.from([Buffer.alloc(2048, 'a')])),
+        esBlobStorage.upload(Readable.from([Buffer.alloc(2048, 'a')])),
+        esBlobStorage.upload(Readable.from([Buffer.alloc(2048, 'a')])),
+      ])
+    ).resolves.toEqual(expect.any(Array));
+  });
 });
