@@ -37,6 +37,8 @@ export function getConnectorType(): ConnectorTypeModel<
       const translations = await import('./translations');
       const errors = {
         body: new Array<string>(),
+        severity: new Array<string>(),
+        eventType: new Array<string>(),
       };
       const validationResult = { errors };
       validationResult.errors = errors;

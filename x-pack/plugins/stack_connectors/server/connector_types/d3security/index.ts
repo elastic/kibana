@@ -18,6 +18,12 @@ import {
 
 
 // config definition
+export enum D3SecuritySeverity {
+  EMPTY = '',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
+}
 
 
 export type D3SecurityConnectorType = ConnectorType<
@@ -34,6 +40,8 @@ export type D3SecurityConnectorTypeExecutorOptions = ConnectorTypeExecutorOption
 
 const configSchemaProps = {
   url: schema.string(),
+  severity:  schema.string({ defaultValue: D3SecuritySeverity.EMPTY }),
+  eventtype: schema.string({ defaultValue: "" }),
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -57,6 +65,8 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
+  severity: schema.maybe(schema.string()),
+  eventType:  schema.maybe(schema.string())
 });
 
 export const ConnectorTypeId = '.d3security';
@@ -90,8 +100,9 @@ export function getConnectorType(): D3SecurityConnectorType {
 
 function renderParameterTemplates(params: ActionParamsType, variables: Record<string, unknown>): ActionParamsType {
   if (!params.body) return params;
+  const bodyString = addSeverityAndEventTypeInBody(params.body,String(params.severity),String(params.eventType));
   return {
-    body: renderMustacheString(params.body, variables, 'json'),
+    body: renderMustacheString(bodyString, variables, 'json'),
   };
 }
 
@@ -131,10 +142,11 @@ export async function executor(
   const { actionId, config, params, secrets, configurationUtilities, logger} = execOptions;
   const { url } = config;
   const { token } = secrets;
-  const { body: data } = params;
+  const { body:data, severity, eventType } = params;
 
   const axiosInstance = axios.create();
-
+  console.log(data);
+  const bodyData = addSeverityAndEventTypeInBody(String(data),String(severity),String(eventType));
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
@@ -142,7 +154,7 @@ export async function executor(
       url,
       logger,
       headers:{"d3key":token||""},
-      data,
+      data:bodyData,
       configurationUtilities,
     })
   );
@@ -197,6 +209,43 @@ export async function executor(
   }
 }
 
+function addSeverityAndEventTypeInBody(bodyString: string,severity: string,eventType: string){
+  let result = bodyString
+  try{
+    var bodyObj = JSON.parse(bodyString);
+    if (bodyObj.hasOwnProperty('_source')) {
+      bodyObj["_source"]["event.type"] = eventType;
+      if (bodyObj["_source"]["kibana"] != undefined) {
+        if (bodyObj["_source"]["kibana"]["alert"] != undefined) {
+          if (bodyObj["_source"]["kibana"]["alert"]["severity"] != undefined) {
+            result = JSON.stringify(bodyObj)
+          } else {
+            bodyObj["_source"]["kibana"]["alert"]["severity"] = severity;
+            result = JSON.stringify(bodyObj)
+          }
+        } else {
+          bodyObj["_source"]["kibana"]["alert"] = {};
+          bodyObj["_source"]["kibana"]["alert"]["severity"] = severity;
+          result = JSON.stringify(bodyObj)
+        }
+      } else {
+        bodyObj["_source"]["kibana"] = {};
+        bodyObj["_source"]["kibana"]["alert"] = {};
+        bodyObj["_source"]["kibana"]["alert"]["severity"] = severity;
+        result = JSON.stringify(bodyObj)
+      }
+    }else{
+      bodyObj["_source"] = {};
+      bodyObj["_source"]["kibana"] = {};
+      bodyObj["_source"]["event.type"] = eventType;
+      bodyObj["_source"]["kibana"]["alert"] = {};
+      bodyObj["_source"]["kibana"]["alert"]["severity"] = severity;
+      result = JSON.stringify(bodyObj)
+    }
+  }catch{
+  }
+  return result
+}
 // Action Executor Result w/ internationalisation
 function successResult(actionId: string, data: unknown): ConnectorTypeExecutorResult<unknown> {
   return { status: 'ok', data, actionId };

@@ -195,6 +195,8 @@ export type LogoProps = Omit<EuiIconProps, 'type'>;
 
 export interface D3ActionParams {
   body?: string;
+  severity?: string;
+  eventType?: string;
 }
 export interface D3Config {
   url: string;

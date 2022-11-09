@@ -10,6 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { D3ActionParams } from '../../types';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow } from '@elastic/eui';
+import {
+  TextFieldWithMessageVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3ActionParams>> = ({
   actionParams,
@@ -18,8 +22,51 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3ActionParams>>
   messageVariables,
   errors,
 }) => {
-  const { body } = actionParams;
+  const { body, severity, eventType } = actionParams;
   return (
+    <>
+    <EuiFormRow
+          fullWidth
+          error={errors.eventType}
+          isInvalid={false}
+          label={i18n.translate(
+            'xpack.stackConnectors.components.d3security.eventTypeFieldLabel',
+            {
+              defaultMessage: 'Event Type',
+            }
+          )}
+        >
+          <TextFieldWithMessageVariables
+            index={index}
+            editAction={editAction}
+            messageVariables={messageVariables}
+            paramsProperty={'eventType'}
+            inputTargetValue={eventType}
+            errors={(errors.eventType ?? []) as string[]}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          error={errors.severity}
+          isInvalid={false}
+          label={i18n.translate(
+            'xpack.stackConnectors.components.d3security.severityFieldLabel',
+            {
+              defaultMessage: 'Severity',
+            }
+          )}
+        >
+          <TextFieldWithMessageVariables
+            index={index}
+            editAction={editAction}
+            messageVariables={messageVariables}
+            paramsProperty={'severity'}
+            inputTargetValue={severity}
+            errors={(errors.severity ?? []) as string[]}
+          />
+        </EuiFormRow>
+        
+  
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}
       paramsProperty={'body'}
@@ -46,6 +93,7 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3ActionParams>>
         }
       }}
     />
+    </>
   );
 };
 

@@ -297,7 +297,9 @@ beforeAll(() => {
   
     test('execute with exception maxContentLength size exceeded should log the proper error', async () => {
       const config: ConnectorTypeConfigType = {
-        url: 'https://abc.def/my-webhook',
+        url: "https://abc.def/my-webhook",
+        severity:"high",
+        eventtype:""
       };
       const secrets: ConnectorTypeSecretsType = { token:"myToken" };
       requestMock.mockReset();

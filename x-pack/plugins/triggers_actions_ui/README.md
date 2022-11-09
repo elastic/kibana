@@ -1143,11 +1143,11 @@ export function getActionType(): ActionTypeModel {
 
 ![D3Security connector card](https://i.imgur.com/pbmXBVy.png)
 
-![D3security connector form](https://i.imgur.com/t600peG.png)
+![D3security connector form](https://i.imgur.com/HEUF6qC.png)
 
 and action params form available in Create Alert form:
 
-![D3Security action form](https://i.imgur.com/TwioSA0.png)
+![D3Security action form](https://i.imgur.com/Vd7zOUq.png)
 
 ## Action type model definition
 

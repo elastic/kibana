@@ -34,7 +34,7 @@ const D3SecurityConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readO
             configFormSchema={configFormSchema}
             secretsFormSchema={secretsFormSchema} />
 
-      
+    
       </>
   );
 };
