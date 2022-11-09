@@ -115,7 +115,7 @@ const CreateRulePageComponent: React.FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { addSuccess, addWarning } = useAppToasts();
+  const { addSuccess } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
   const { data: dataServices } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
@@ -170,6 +170,7 @@ const CreateRulePageComponent: React.FC = () => {
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
   const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(false);
+  const [isStartingJobs, setIsStartingJobs] = useState(false);
 
   const [defineRuleData, setDefineRuleData] = useState<DefineStepRule>({
     ...stepDefineDefaultValue,
@@ -289,7 +290,9 @@ const CreateRulePageComponent: React.FC = () => {
             stepIsValid(actionsStep)
           ) {
             if (actionsStep.data.enabled) {
+              setIsStartingJobs(true);
               await startMlJobs(defineStep.data.machineLearningJobId);
+              setIsStartingJobs(false);
             }
             const createdRule = await createRule(
               formatRule<RuleCreateProps>(
@@ -540,7 +543,7 @@ const CreateRulePageComponent: React.FC = () => {
                   addPadding={true}
                   defaultValues={stepsData.current[RuleStep.ruleActions].data}
                   isReadOnlyView={activeStep !== RuleStep.ruleActions}
-                  isLoading={isLoading || loading}
+                  isLoading={isLoading || loading || isStartingJobs}
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.ruleActions)}
                   actionMessageParams={actionMessageParams}

@@ -15,6 +15,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
+import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import * as i18n from './translations';
 
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -24,18 +25,21 @@ import { SecuritySolutionLinkButton } from '../../../../common/components/links'
 import { isMlRule } from '../../../../../common/detection_engine/utils';
 import { getCapitalizedStatusText } from '../../../../detections/components/rules/rule_execution_status/utils';
 import type { Rule } from '../../../rule_management/logic';
-import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 
 interface MlRuleWarningPopoverComponentProps {
   rule: Rule;
+  loadingJobs: boolean;
+  jobs: SecurityJob[];
 }
 
-const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps> = ({ rule }) => {
+const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps> = ({
+  rule,
+  loadingJobs,
+  jobs,
+}) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
-
-  const { loading: loadingJobs, jobs } = useSecurityJobs();
 
   if (!isMlRule(rule.type) || loadingJobs || !rule.machine_learning_job_id) {
     return null;

@@ -184,7 +184,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   } = useKibana().services;
 
   const dispatch = useDispatch();
-  const { startMlJobs } = useStartMlJobs();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
@@ -240,6 +239,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
+
+  const { startMlJobs } = useStartMlJobs();
+  const startMlJobsIfNeeded = useCallback(async () => {
+    await startMlJobs(rule?.machine_learning_job_id);
+  }, [rule?.machine_learning_job_id, startMlJobs]);
 
   const ruleDetailTabs = useMemo(
     (): Record<RuleDetailTabs, NavTab> => ({
@@ -581,15 +585,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [dispatch]
   );
 
-  const handleOnChangeEnabledRule = useCallback(
-    async (enabled: boolean) => {
-      if (enabled) {
-        await startMlJobs(rule?.machine_learning_job_id);
-      }
-      setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
-    },
-    [rule?.machine_learning_job_id, startMlJobs]
-  );
+  const handleOnChangeEnabledRule = useCallback(async (enabled: boolean) => {
+    setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
+  }, []);
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
     (newShowBuildingBlockAlerts: boolean) => {
@@ -704,6 +702,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             (isMlRule(rule?.type) && !hasMlPermissions)
                           }
                           enabled={isExistingRule && (rule?.enabled ?? false)}
+                          startMlJobsIfNeeded={startMlJobsIfNeeded}
                           onChange={handleOnChangeEnabledRule}
                         />
                         <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>

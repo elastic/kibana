@@ -9,7 +9,9 @@ import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eu
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import type { SecurityJob } from '../../../../common/components/ml_popover/types';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
   SecurityPageName,
@@ -44,14 +46,16 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from './ml_rule_warning_popover';
+import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
 interface ColumnsProps {
   hasCRUDPermissions: boolean;
+  startMlJobs?: (jobIds?: string[]) => Promise<void>;
 }
 
-const useEnabledColumn = ({ hasCRUDPermissions }: ColumnsProps): TableColumn => {
+const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): TableColumn => {
   const hasMlPermissions = useHasMlPermissions();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
@@ -59,6 +63,13 @@ const useEnabledColumn = ({ hasCRUDPermissions }: ColumnsProps): TableColumn => 
   const loadingIds = useMemo(
     () => (['disable', 'enable', 'edit'].includes(loadingRulesAction ?? '') ? loadingRuleIds : []),
     [loadingRuleIds, loadingRulesAction]
+  );
+
+  const startMlJobsIfNeeded = useCallback(
+    async (rule: Rule) => {
+      await startMlJobs?.(rule.machine_learning_job_id);
+    },
+    [startMlJobs]
   );
 
   return useMemo(
@@ -78,7 +89,7 @@ const useEnabledColumn = ({ hasCRUDPermissions }: ColumnsProps): TableColumn => 
           <RuleSwitch
             id={rule.id}
             enabled={rule.enabled}
-            mlJobIds={rule.machine_learning_job_id}
+            startMlJobsIfNeeded={() => startMlJobsIfNeeded(rule)}
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
               !hasCRUDPermissions ||
@@ -91,7 +102,7 @@ const useEnabledColumn = ({ hasCRUDPermissions }: ColumnsProps): TableColumn => 
       width: '95px',
       sortable: true,
     }),
-    [hasActionsPrivileges, hasMlPermissions, hasCRUDPermissions, loadingIds]
+    [hasMlPermissions, hasActionsPrivileges, hasCRUDPermissions, loadingIds, startMlJobsIfNeeded]
   );
 };
 
@@ -126,9 +137,13 @@ const useRuleNameColumn = (): TableColumn => {
 const useRuleExecutionStatusColumn = ({
   sortable,
   width,
+  loadingJobs,
+  jobs,
 }: {
   sortable: boolean;
   width: string;
+  loadingJobs: boolean;
+  jobs: SecurityJob[];
 }): TableColumn => {
   return useMemo(
     () => ({
@@ -144,7 +159,7 @@ const useRuleExecutionStatusColumn = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <MlRuleWarningPopover rule={item} />
+              <MlRuleWarningPopover rule={item} loadingJobs={loadingJobs} jobs={jobs} />
             </EuiFlexItem>
           </EuiFlexGroup>
         );
@@ -153,7 +168,7 @@ const useRuleExecutionStatusColumn = ({
       truncateText: true,
       width,
     }),
-    [sortable, width]
+    [jobs, loadingJobs, sortable, width]
   );
 };
 
@@ -209,13 +224,17 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
 
 export const useRulesColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
   const actionsColumn = useActionsColumn();
-  const enabledColumn = useEnabledColumn({ hasCRUDPermissions });
+  const { startMlJobs } = useStartMlJobs();
+  const enabledColumn = useEnabledColumn({ hasCRUDPermissions, startMlJobs });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+  const { loading: loadingJobs, jobs } = useSecurityJobs();
   const executionStatusColumn = useRuleExecutionStatusColumn({
     sortable: !!isInMemorySorting,
     width: '16%',
+    loadingJobs,
+    jobs,
   });
 
   return useMemo(
@@ -316,13 +335,17 @@ export const useRulesColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColu
 export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
   const docLinks = useKibana().services.docLinks;
   const actionsColumn = useActionsColumn();
-  const enabledColumn = useEnabledColumn({ hasCRUDPermissions });
+  const { startMlJobs } = useStartMlJobs();
+  const enabledColumn = useEnabledColumn({ hasCRUDPermissions, startMlJobs });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+  const { loading: loadingJobs, jobs } = useSecurityJobs();
   const executionStatusColumn = useRuleExecutionStatusColumn({
     sortable: !!isInMemorySorting,
     width: '12%',
+    loadingJobs,
+    jobs,
   });
 
   return useMemo(
