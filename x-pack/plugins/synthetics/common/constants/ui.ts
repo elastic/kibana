@@ -25,6 +25,8 @@ export const GETTING_STARTED_ROUTE = '/monitors/getting-started';
 
 export const SETTINGS_ROUTE = '/settings';
 
+export const SYNTHETICS_SETTINGS_ROUTE = '/settings/:tabId';
+
 export const CERTIFICATES_ROUTE = '/certificates';
 
 export const STEP_DETAIL_ROUTE = '/journey/:checkGroupId/step/:stepIndex';
