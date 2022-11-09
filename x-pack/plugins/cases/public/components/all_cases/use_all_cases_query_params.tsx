@@ -70,7 +70,7 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
   const persistAndUpdateQueryParams = useCallback(
     (params) => {
       if (isModalView) {
-        setQueryParams(params);
+        setQueryParams((prevParams) => ({ ...prevParams, ...params }));
         return;
       }
 
