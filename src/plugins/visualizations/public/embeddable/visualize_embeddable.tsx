@@ -126,6 +126,7 @@ export class VisualizeEmbeddable
     VisualizeByValueInput,
     VisualizeByReferenceInput
   >;
+  private expressionVariables?: Record<string, any>;
 
   constructor(
     timefilter: TimefilterContract,
@@ -526,6 +527,11 @@ export class VisualizeEmbeddable
       })
     );
 
+    this.expressionVariables = await this.vis.type.getExpressionVariables?.(
+      this.vis,
+      this.timefilter
+    );
+
     await this.updateHandler();
   }
 
@@ -590,7 +596,7 @@ export class VisualizeEmbeddable
       },
       variables: {
         embeddableTitle: this.getTitle(),
-        ...(await this.vis.type.getExpressionVariables?.(this.vis, this.timefilter)),
+        ...this.expressionVariables,
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
@@ -623,6 +629,10 @@ export class VisualizeEmbeddable
   }
 
   private handleVisUpdate = async () => {
+    this.expressionVariables = await this.vis.type.getExpressionVariables?.(
+      this.vis,
+      this.timefilter
+    );
     this.handleChanges();
     await this.updateHandler();
   };
@@ -635,6 +645,10 @@ export class VisualizeEmbeddable
 
   public supportedTriggers(): string[] {
     return this.vis.type.getSupportedTriggers?.(this.vis.params) ?? [];
+  }
+
+  public getExpressionVariables(): Record<string, any> | undefined {
+    return this.expressionVariables;
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {
