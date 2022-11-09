@@ -16,14 +16,14 @@ import {
   EuiToolTip,
   EuiPanel,
 } from '@elastic/eui';
-import { capitalize } from 'lodash';
 import { ALERT, ALERT_ICONS } from '../../../common/constants';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
 import { getAlertCategoryDisplayText } from '../../utils/alert_category_display_text';
-
+import * as i18n from './translations';
+import { getAlertTypeTooltipContent } from '../../utils/alert_type_tooltip_content';
 export interface ProcessTreeAlertDeps {
   alert: ProcessEvent;
   isInvestigated: boolean;
@@ -74,8 +74,9 @@ export const ProcessTreeAlert = ({
     return null;
   }
   const { name } = rule;
-  const processEventAlertCategory = category ?? 'alert';
+  const processEventAlertCategory = category ?? ALERT;
   const alertCategoryDetailDisplayText = getAlertCategoryDisplayText(alert, category);
+  const alertTypeTooltipContent = getAlertTypeTooltipContent(processEventAlertCategory);
 
   return (
     <div key={uuid} css={styles.alert} data-id={uuid}>
@@ -95,12 +96,7 @@ export const ProcessTreeAlert = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={`${capitalize(processEventAlertCategory)} ${
-              capitalize(processEventAlertCategory) !== ALERT ? ALERT : ''
-            }`}
-          >
+          <EuiToolTip position="top" content={i18n.ALERT_TYPE_TOOLTIP(alertTypeTooltipContent)}>
             <EuiIcon type={alertIconType} color="danger" />
           </EuiToolTip>
         </EuiFlexItem>
