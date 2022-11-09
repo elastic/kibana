@@ -10,11 +10,11 @@ export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPer
   defaultMessage: 'Privileges required',
 });
 
-export const NO_PERMISSIONS_MSG = (subPluginKey: string) =>
+export const NO_PERMISSIONS_MSG = (pageName: string) =>
   i18n.translate('xpack.securitySolution.noPermissionsMessage', {
-    values: { subPluginKey },
+    values: { pageName },
     defaultMessage:
-      'To view {subPluginKey}, you must update privileges. For more information, contact your Kibana administrator.',
+      'To view {pageName}, you must update privileges. For more information, contact your Kibana administrator.',
   });
 
 export const GO_TO_DOCUMENTATION = i18n.translate(

@@ -14,36 +14,34 @@ import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 
 interface NoPrivilegesPageProps {
-  subPluginKey?: string;
+  pageName?: string;
 }
 
-export const NoPrivilegesPage = React.memo<NoPrivilegesPageProps>(
-  ({ subPluginKey = 'this page' }) => {
-    const { docLinks } = useKibana().services;
-    const emptyPageActions = useMemo(
-      () => ({
-        feature: {
-          icon: 'documents',
-          label: i18n.GO_TO_DOCUMENTATION,
-          url: `${docLinks.links.siem.privileges}`,
-          target: '_blank',
-        },
-      }),
-      [docLinks]
-    );
-    return (
-      <SecuritySolutionPageWrapper>
-        <EuiPageTemplate template="centeredContent">
-          <EmptyPage
-            actions={emptyPageActions}
-            message={i18n.NO_PERMISSIONS_MSG(subPluginKey)}
-            data-test-subj="no_feature_permissions-alerts"
-            title={i18n.NO_PERMISSIONS_TITLE}
-          />
-        </EuiPageTemplate>
-      </SecuritySolutionPageWrapper>
-    );
-  }
-);
+export const NoPrivilegesPage = React.memo<NoPrivilegesPageProps>(({ pageName = 'this page' }) => {
+  const { docLinks } = useKibana().services;
+  const emptyPageActions = useMemo(
+    () => ({
+      feature: {
+        icon: 'documents',
+        label: i18n.GO_TO_DOCUMENTATION,
+        url: `${docLinks.links.siem.privileges}`,
+        target: '_blank',
+      },
+    }),
+    [docLinks]
+  );
+  return (
+    <SecuritySolutionPageWrapper>
+      <EuiPageTemplate template="centeredContent">
+        <EmptyPage
+          actions={emptyPageActions}
+          message={i18n.NO_PERMISSIONS_MSG(pageName)}
+          data-test-subj="no_feature_permissions-alerts"
+          title={i18n.NO_PERMISSIONS_TITLE}
+        />
+      </EuiPageTemplate>
+    </SecuritySolutionPageWrapper>
+  );
+});
 
 NoPrivilegesPage.displayName = 'NoPrivilegePage';
