@@ -349,7 +349,6 @@ const installTransformsAssets = async (
       '\n---Deleting previously installed transforms that have older version---\n',
       transformsToRemove
     );
-    // @TODO: no need to delete previous transforms or associated assets if version is different
     // delete all previous transform
     await deleteTransforms(
       esClient,
@@ -363,12 +362,10 @@ const installTransformsAssets = async (
       esReferences,
       {
         assetsToAdd: [...indexTemplatesRefs, ...componentTemplatesRefs, ...transformRefs],
-        // @TODO: Sort removal of previously installed transforms based on reversed installation order
         assetsToRemove: transformsToRemove,
       }
     );
 
-    // @TODO: sort templates based on installation order
     // create index templates and component templates
     await Promise.all(
       destinationIndexTemplates
@@ -478,7 +475,6 @@ const installTransformsAssets = async (
                     .get(transform.transformModuleId)
                     ?.get('destinationIndexAlias'),
                 },
-                // @todo: re-enable
                 { ignore: [400] }
               ),
             { logger }
@@ -666,7 +662,6 @@ async function handleTransformInstall({
     }
   }
 
-  // @TODO: Re-enable
   // start transform by default if not set in yml file
   // else, respect the setting
   if (startTransform === undefined || startTransform === true) {
