@@ -43,7 +43,7 @@ export class ApiService implements GuidedOnboardingApi {
       const controller = new AbortController();
       const signal = controller.signal;
       this.isPluginStateLoading = true;
-      this.client!.get<{ pluginState: PluginState }>(`${API_BASE_PATH}/plugin_state`, {
+      this.client!.get<{ pluginState: PluginState }>(`${API_BASE_PATH}/state`, {
         signal,
       })
         .then(({ pluginState }) => {
@@ -101,7 +101,7 @@ export class ApiService implements GuidedOnboardingApi {
     }
 
     try {
-      return await this.client.get<{ state: GuideState[] }>(`${API_BASE_PATH}/state`);
+      return await this.client.get<{ state: GuideState[] }>(`${API_BASE_PATH}/guides`);
     } catch (error) {
       // TODO handle error
       // eslint-disable-next-line no-console
@@ -116,10 +116,10 @@ export class ApiService implements GuidedOnboardingApi {
    * @param {boolean} panelState boolean to determine whether the dropdown panel should open or not
    * @return {Promise} a promise with the updated guide state
    */
-  public async updateGuideState(
-    newState: GuideState,
+  public async updatePluginState(
+    state: { status?: PluginStatus; guide?: GuideState },
     panelState: boolean
-  ): Promise<{ state: GuideState } | undefined> {
+  ): Promise<{ pluginState: PluginState } | undefined> {
     if (!this.isCloudEnabled) {
       return undefined;
     }
@@ -128,15 +128,14 @@ export class ApiService implements GuidedOnboardingApi {
     }
 
     try {
-      const response = await this.client.put<{ state: GuideState }>(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify(newState),
-      });
+      const response = await this.client.put<{ pluginState: PluginState }>(
+        `${API_BASE_PATH}/state`,
+        {
+          body: JSON.stringify(state),
+        }
+      );
       // update the guide state in the plugin state observable
-      const updatedPluginState = {
-        ...this.pluginState$.value!,
-        activeGuide: { ...newState },
-      };
-      this.pluginState$.next(updatedPluginState);
+      this.pluginState$.next(response.pluginState);
       this.isGuidePanelOpen$.next(panelState);
       return response;
     } catch (error) {
@@ -156,15 +155,17 @@ export class ApiService implements GuidedOnboardingApi {
   public async activateGuide(
     guideId: GuideId,
     guide?: GuideState
-  ): Promise<{ state: GuideState } | undefined> {
-    await this.updatePluginStatus('in_progress');
+  ): Promise<{ pluginState: PluginState } | undefined> {
     // If we already have the guide state (i.e., user has already started the guide at some point),
     // simply pass it through so they can continue where they left off, and update the guide to active
     if (guide) {
-      return await this.updateGuideState(
+      return await this.updatePluginState(
         {
-          ...guide,
-          isActive: true,
+          status: 'in_progress',
+          guide: {
+            ...guide,
+            isActive: true,
+          },
         },
         true
       );
@@ -190,7 +191,13 @@ export class ApiService implements GuidedOnboardingApi {
         steps: updatedSteps,
       };
 
-      return await this.updateGuideState(updatedGuide, true);
+      return await this.updatePluginState(
+        {
+          status: 'in_progress',
+          guide: updatedGuide,
+        },
+        true
+      );
     }
   }
 
@@ -200,13 +207,16 @@ export class ApiService implements GuidedOnboardingApi {
    * @param {GuideState} guide the selected guide state
    * @return {Promise} a promise with the updated guide state
    */
-  public async deactivateGuide(guide: GuideState): Promise<{ state: GuideState } | undefined> {
-    // update the state of the plugin
-    await this.updatePluginStatus('quit');
-    return await this.updateGuideState(
+  public async deactivateGuide(
+    guide: GuideState
+  ): Promise<{ pluginState: PluginState } | undefined> {
+    return await this.updatePluginState(
       {
-        ...guide,
-        isActive: false,
+        status: 'quit',
+        guide: {
+          ...guide,
+          isActive: false,
+        },
       },
       false
     );
@@ -219,7 +229,7 @@ export class ApiService implements GuidedOnboardingApi {
    * @param {GuideId} guideId the id of the guide (one of search, observability, security)
    * @return {Promise} a promise with the updated guide state
    */
-  public async completeGuide(guideId: GuideId): Promise<{ state: GuideState } | undefined> {
+  public async completeGuide(guideId: GuideId): Promise<{ pluginState: PluginState } | undefined> {
     const pluginState = await firstValueFrom(this.fetchPluginState$());
 
     // For now, returning undefined if consumer attempts to complete a guide that is not active
@@ -239,9 +249,7 @@ export class ApiService implements GuidedOnboardingApi {
         status: 'complete',
       };
 
-      // update the state of the plugin
-      await this.updatePluginStatus('complete');
-      return await this.updateGuideState(updatedGuide, false);
+      return await this.updatePluginState({ status: 'complete', guide: updatedGuide }, false);
     }
   }
 
@@ -272,7 +280,7 @@ export class ApiService implements GuidedOnboardingApi {
   public async startGuideStep(
     guideId: GuideId,
     stepId: GuideStepIds
-  ): Promise<{ state: GuideState } | undefined> {
+  ): Promise<{ pluginState: PluginState } | undefined> {
     const pluginState = await firstValueFrom(this.fetchPluginState$());
 
     // For now, returning undefined if consumer attempts to start a step for a guide that isn't active
@@ -301,7 +309,7 @@ export class ApiService implements GuidedOnboardingApi {
       steps: updatedSteps,
     };
 
-    return await this.updateGuideState(currentGuide, false);
+    return await this.updatePluginState({ guide: currentGuide }, false);
   }
 
   /**
@@ -314,7 +322,7 @@ export class ApiService implements GuidedOnboardingApi {
   public async completeGuideStep(
     guideId: GuideId,
     stepId: GuideStepIds
-  ): Promise<{ state: GuideState } | undefined> {
+  ): Promise<{ pluginState: PluginState } | undefined> {
     const pluginState = await firstValueFrom(this.fetchPluginState$());
     // For now, returning undefined if consumer attempts to complete a step for a guide that isn't active
     if (!isGuideActive(pluginState, guideId)) {
@@ -343,8 +351,10 @@ export class ApiService implements GuidedOnboardingApi {
         steps: updatedSteps,
       };
 
-      return await this.updateGuideState(
-        currentGuide,
+      return await this.updatePluginState(
+        {
+          guide: currentGuide,
+        },
         // the panel is opened when the step is being set to complete.
         // that happens when the step is not configured for manual completion
         // or it's already ready_to_complete
@@ -370,7 +380,7 @@ export class ApiService implements GuidedOnboardingApi {
 
   public async completeGuidedOnboardingForIntegration(
     integration?: string
-  ): Promise<{ state: GuideState } | undefined> {
+  ): Promise<{ pluginState: PluginState } | undefined> {
     if (!integration) return undefined;
     const pluginState = await firstValueFrom(this.fetchPluginState$());
     if (!isGuideActive(pluginState)) return undefined;
@@ -383,37 +393,9 @@ export class ApiService implements GuidedOnboardingApi {
     }
   }
 
-  public async updatePluginStatus(status: PluginStatus): Promise<PluginState | undefined> {
-    if (!this.isCloudEnabled) {
-      return undefined;
-    }
-    if (!this.client) {
-      throw new Error('ApiService has not be initialized.');
-    }
-
-    const currentState = await firstValueFrom(this.fetchPluginState$());
-    // only update the status if no state exists or the status is different from current
-    if (!currentState || currentState.status !== status) {
-      try {
-        const { pluginState } = await this.client.put<{ pluginState: PluginState }>(
-          `${API_BASE_PATH}/plugin_state`,
-          {
-            body: JSON.stringify({ status }),
-          }
-        );
-        this.pluginState$.next(pluginState);
-        return pluginState;
-      } catch (error) {
-        // TODO handle error
-        // eslint-disable-next-line no-console
-        console.error(error);
-      }
-    }
-  }
-
-  public async skipGuidedOnboarding(): Promise<PluginState | undefined> {
+  public async skipGuidedOnboarding(): Promise<{ pluginState: PluginState } | undefined> {
     // TODO error handling and loading state
-    return await this.updatePluginStatus('skipped');
+    return await this.updatePluginState({ status: 'skipped' }, false);
   }
 }
 

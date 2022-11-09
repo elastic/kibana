@@ -8,6 +8,8 @@
 
 import type { GuideState, GuideId, GuideStepIds } from '@kbn/guided-onboarding';
 
+import { PluginState } from '../../common/types';
+
 export const testGuide: GuideId = 'testGuide';
 export const testGuideFirstStep: GuideStepIds = 'step1';
 export const testGuideManualCompletionStep = 'step2';
@@ -98,4 +100,14 @@ export const readyToCompleteGuideState: GuideState = {
 export const testGuideNotActiveState: GuideState = {
   ...testGuideStep1ActiveState,
   isActive: false,
+};
+
+export const mockPluginStateNotStarted: PluginState = {
+  status: 'not_started',
+  isActivePeriod: true,
+};
+export const mockPluginStateInProgress: PluginState = {
+  status: 'in_progress',
+  isActivePeriod: true,
+  activeGuide: testGuideStep1ActiveState,
 };

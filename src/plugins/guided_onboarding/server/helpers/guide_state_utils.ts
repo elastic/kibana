@@ -29,3 +29,69 @@ export const findActiveGuide = async (savedObjectsClient: SavedObjectsClient) =>
 export const findAllGuides = async (savedObjectsClient: SavedObjectsClient) => {
   return savedObjectsClient.find<GuideState>({ type: guideStateSavedObjectsType });
 };
+
+export const updateGuideState = async (
+  savedObjectsClient: SavedObjectsClient,
+  updatedGuideState: GuideState
+) => {
+  const selectedGuideSO = await findGuideById(savedObjectsClient, updatedGuideState.guideId);
+
+  // If the SO already exists, update it, else create a new SO
+  if (selectedGuideSO.total > 0) {
+    const updatedGuides = [];
+    const selectedGuide = selectedGuideSO.saved_objects[0];
+
+    updatedGuides.push({
+      type: guideStateSavedObjectsType,
+      id: selectedGuide.id,
+      attributes: {
+        ...updatedGuideState,
+      },
+    });
+
+    // If we are activating a new guide, we need to check if there is a different, existing active guide
+    // If yes, we need to mark it as inactive (only 1 guide can be active at a time)
+    if (updatedGuideState.isActive) {
+      const activeGuideSO = await findActiveGuide(savedObjectsClient);
+
+      if (activeGuideSO.total > 0) {
+        const activeGuide = activeGuideSO.saved_objects[0];
+        if (activeGuide.attributes.guideId !== updatedGuideState.guideId) {
+          updatedGuides.push({
+            type: guideStateSavedObjectsType,
+            id: activeGuide.id,
+            attributes: {
+              ...activeGuide.attributes,
+              isActive: false,
+            },
+          });
+        }
+      }
+    }
+
+    const updatedGuidesResponse = await savedObjectsClient.bulkUpdate(updatedGuides);
+
+    return updatedGuidesResponse;
+  } else {
+    // If we are activating a new guide, we need to check if there is an existing active guide
+    // If yes, we need to mark it as inactive (only 1 guide can be active at a time)
+    if (updatedGuideState.isActive) {
+      const activeGuideSO = await findActiveGuide(savedObjectsClient);
+
+      if (activeGuideSO.total > 0) {
+        const activeGuide = activeGuideSO.saved_objects[0];
+        await savedObjectsClient.update(guideStateSavedObjectsType, activeGuide.id, {
+          ...activeGuide.attributes,
+          isActive: false,
+        });
+      }
+    }
+
+    const createdGuideResponse = await savedObjectsClient.create(
+      guideStateSavedObjectsType,
+      updatedGuideState
+    );
+
+    return createdGuideResponse;
+  }
+};

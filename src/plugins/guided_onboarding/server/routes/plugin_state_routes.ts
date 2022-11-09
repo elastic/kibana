@@ -8,51 +8,26 @@
 
 import { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { GuideState } from '@kbn/guided-onboarding';
+import { getPluginState, updatePluginStatus } from '../helpers/plugin_state_utils';
 import { API_BASE_PATH } from '../../common/constants';
-import type { PluginState, PluginStatus } from '../../common/types';
-import {
-  pluginStateSavedObjectsId,
-  pluginStateSavedObjectsType,
-  PluginStateSO,
-} from '../saved_objects';
-import { calculateIsActivePeriod, findActiveGuide } from '../helpers';
+import { updateGuideState } from '../helpers';
 
 export const registerGetPluginStateRoute = (router: IRouter) => {
   router.get(
     {
-      path: `${API_BASE_PATH}/plugin_state`,
+      path: `${API_BASE_PATH}/state`,
       validate: false,
     },
     async (context, request, response) => {
       const coreContext = await context.core;
       const savedObjectsClient = coreContext.savedObjects.client as SavedObjectsClient;
-
-      const pluginStateSO = await savedObjectsClient.find<PluginStateSO>({
-        type: pluginStateSavedObjectsType,
+      const pluginState = await getPluginState(savedObjectsClient);
+      return response.ok({
+        body: {
+          pluginState,
+        },
       });
-      if (pluginStateSO.saved_objects.length === 1) {
-        const { status, creationDate } = pluginStateSO.saved_objects[0].attributes;
-        const isActivePeriod = calculateIsActivePeriod(creationDate);
-        const activeGuideSO = await findActiveGuide(savedObjectsClient);
-        const pluginState: PluginState = { status: status as PluginStatus, isActivePeriod };
-        if (activeGuideSO.saved_objects.length === 1) {
-          pluginState.activeGuide = activeGuideSO.saved_objects[0].attributes;
-        }
-        return response.ok({
-          body: {
-            pluginState,
-          },
-        });
-      } else {
-        return response.ok({
-          body: {
-            pluginState: {
-              status: 'not_started',
-              isActivePeriod: true,
-            },
-          },
-        });
-      }
     }
   );
 };
@@ -60,37 +35,43 @@ export const registerGetPluginStateRoute = (router: IRouter) => {
 export const registerPutPluginStateRoute = (router: IRouter) => {
   router.put(
     {
-      path: `${API_BASE_PATH}/plugin_state`,
+      path: `${API_BASE_PATH}/state`,
       validate: {
         body: schema.object({
-          status: schema.string(),
+          status: schema.maybe(schema.string()),
+          guide: schema.maybe(
+            schema.object({
+              status: schema.string(),
+              guideId: schema.string(),
+              isActive: schema.boolean(),
+              steps: schema.arrayOf(
+                schema.object({
+                  status: schema.string(),
+                  id: schema.string(),
+                })
+              ),
+            })
+          ),
         }),
       },
     },
     async (context, request, response) => {
-      const updatedPluginState = request.body;
+      const { status, guide } = request.body as { status?: string; guide?: GuideState };
 
       const coreContext = await context.core;
       const savedObjectsClient = coreContext.savedObjects.client as SavedObjectsClient;
 
-      const { attributes } = await savedObjectsClient.update<PluginStateSO>(
-        pluginStateSavedObjectsType,
-        pluginStateSavedObjectsId,
-        {
-          ...updatedPluginState,
-        },
-        {
-          // if there is no saved object yet, insert a new SO with the creation date
-          upsert: { ...updatedPluginState, creationDate: new Date().toISOString() },
-        }
-      );
+      if (status) {
+        await updatePluginStatus(savedObjectsClient, status);
+      }
+      if (guide) {
+        await updateGuideState(savedObjectsClient, guide);
+      }
 
+      const pluginState = await getPluginState(savedObjectsClient);
       return response.ok({
         body: {
-          pluginState: {
-            status: attributes.status,
-            isActivePeriod: calculateIsActivePeriod(attributes.creationDate),
-          },
+          pluginState,
         },
       });
     }

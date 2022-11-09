@@ -28,7 +28,6 @@ import {
 import type { GuideState, GuideStepIds, GuideId, GuideStep } from '@kbn/guided-onboarding';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { guidesConfig } from '@kbn/guided-onboarding-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
 
 interface MainProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
@@ -49,17 +48,13 @@ export const Main = (props: MainProps) => {
 
   useEffect(() => {
     const fetchGuidesState = async () => {
+      console.log('fetch data');
       const newGuidesState = await guidedOnboardingApi?.fetchAllGuidesState();
       setGuidesState(newGuidesState ? newGuidesState.state : []);
     };
 
     fetchGuidesState();
   }, [guidedOnboardingApi]);
-
-  const pluginState = useObservable(guidedOnboardingApi!.fetchPluginState$());
-  useEffect(() => {
-    console.log({ pluginState });
-  }, [pluginState]);
 
   useEffect(() => {
     const newActiveGuide = guidesState?.find((guide) => guide.isActive === true);
@@ -119,7 +114,10 @@ export const Main = (props: MainProps) => {
       guideId: selectedGuide!,
     };
 
-    const response = await guidedOnboardingApi?.updateGuideState(updatedGuideState, true);
+    const response = await guidedOnboardingApi?.updatePluginState(
+      { status: 'in_progress', guide: updatedGuideState },
+      true
+    );
     if (response) {
       notifications.toasts.addSuccess(
         i18n.translate('guidedOnboardingExample.updateGuideState.toastLabel', {

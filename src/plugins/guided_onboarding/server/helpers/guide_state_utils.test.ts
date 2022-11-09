@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { calculateIsActivePeriod } from './calculate_active_period';
+import { calculateIsActivePeriod } from './plugin_state_utils';
 
 describe('calculateIsActivePeriod', () => {
   let result: boolean;

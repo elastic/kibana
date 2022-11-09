@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { calculateIsActivePeriod } from './calculate_active_period';
-export { findActiveGuide, findAllGuides, findGuideById } from './guide_state_utils';
+export { findActiveGuide, findAllGuides, findGuideById, updateGuideState } from './guide_state_utils';
+export { updatePluginStatus, calculateIsActivePeriod, getPluginState } from './plugin_state_utils';

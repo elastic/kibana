@@ -26,33 +26,33 @@ export interface AppPluginStartDependencies {
 
 export interface GuidedOnboardingApi {
   setup: (httpClient: HttpSetup, isCloudEnabled: boolean) => void;
+  fetchPluginState$: () => Observable<PluginState | undefined>;
   fetchAllGuidesState: () => Promise<{ state: GuideState[] } | undefined>;
-  updateGuideState: (
-    newState: GuideState,
+  updatePluginState: (
+    state: { status?: PluginStatus; guide?: GuideState },
     panelState: boolean
-  ) => Promise<{ state: GuideState } | undefined>;
+  ) => Promise<{ pluginState: PluginState } | undefined>;
   activateGuide: (
     guideId: GuideId,
     guide?: GuideState
-  ) => Promise<{ state: GuideState } | undefined>;
-  completeGuide: (guideId: GuideId) => Promise<{ state: GuideState } | undefined>;
+  ) => Promise<{ pluginState: PluginState } | undefined>;
+  deactivateGuide: (guide: GuideState) => Promise<{ pluginState: PluginState } | undefined>;
+  completeGuide: (guideId: GuideId) => Promise<{ pluginState: PluginState } | undefined>;
   isGuideStepActive$: (guideId: GuideId, stepId: GuideStepIds) => Observable<boolean>;
   startGuideStep: (
     guideId: GuideId,
     stepId: GuideStepIds
-  ) => Promise<{ state: GuideState } | undefined>;
+  ) => Promise<{ pluginState: PluginState } | undefined>;
   completeGuideStep: (
     guideId: GuideId,
     stepId: GuideStepIds
-  ) => Promise<{ state: GuideState } | undefined>;
+  ) => Promise<{ pluginState: PluginState } | undefined>;
   isGuidedOnboardingActiveForIntegration$: (integration?: string) => Observable<boolean>;
   completeGuidedOnboardingForIntegration: (
     integration?: string
-  ) => Promise<{ state: GuideState } | undefined>;
+  ) => Promise<{ pluginState: PluginState } | undefined>;
+  skipGuidedOnboarding: () => Promise<{ pluginState: PluginState } | undefined>;
   isGuidePanelOpen$: Observable<boolean>;
-  fetchPluginState$: () => Observable<PluginState | undefined>;
-  updatePluginStatus: (status: PluginStatus) => Promise<PluginState | undefined>;
-  skipGuidedOnboarding: () => Promise<PluginState | undefined>;
 }
 
 export interface StepConfig {

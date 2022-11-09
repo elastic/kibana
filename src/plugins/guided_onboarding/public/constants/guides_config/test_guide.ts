@@ -14,7 +14,7 @@ export const testGuideConfig: GuideConfig = {
   guideName: 'Testing example',
   completedGuideRedirectLocation: {
     appID: 'guidedOnboardingExample',
-    path: '/main',
+    path: '/',
   },
   docs: {
     text: 'Testing example docs',
