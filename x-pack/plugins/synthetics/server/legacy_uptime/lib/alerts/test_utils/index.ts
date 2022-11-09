@@ -84,6 +84,7 @@ export const createRuleTypeMocks = (recoveredAlerts: Array<Record<string, any>> 
 
 const createRecoveredAlerts = (alerts: Array<Record<string, any>>, setContext: jest.Mock) => {
   return alerts.map((alert) => ({
+    getId: () => 'mock-id',
     getState: () => alert,
     setContext,
     context: {},
