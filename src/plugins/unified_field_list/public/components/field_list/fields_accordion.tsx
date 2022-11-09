@@ -131,7 +131,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       );
     }
 
-    return <EuiLoadingSpinner size="m" />;
+    return <EuiLoadingSpinner size="m" data-test-subj={`${id}-countLoading`} />;
   }, [showExistenceFetchError, showExistenceFetchTimeout, hasLoaded, isFiltered, id, fieldsCount]);
 
   return (

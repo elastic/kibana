@@ -9,6 +9,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { EuiProgress } from '@elastic/eui';
 import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -27,6 +28,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
+import { resetExistingFieldsCache } from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 
@@ -104,10 +106,7 @@ jest.mock('../../utils/calc_field_counts', () => ({
   calcFieldCounts: () => mockCalcFieldCounts(),
 }));
 
-jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockImplementation(async () => ({
-  indexPatternTitle: 'test',
-  existingFieldNames: Object.keys(mockfieldCounts),
-}));
+jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
 
 function getCompProps(): DiscoverSidebarResponsiveProps {
   const dataView = stubLogstashDataView;
@@ -186,18 +185,67 @@ async function mountComponent(
 
 describe('discover responsive sidebar', function () {
   let props: DiscoverSidebarResponsiveProps;
-  let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
 
   beforeEach(async () => {
+    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => ({
+      indexPatternTitle: 'test',
+      existingFieldNames: Object.keys(mockfieldCounts),
+    }));
     props = getCompProps();
-    comp = await mountComponent(props);
   });
 
   afterEach(() => {
     mockCalcFieldCounts.mockClear();
+    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockClear();
+    resetExistingFieldsCache();
+  });
+
+  it('should have loading indicators during fields existence loading', async function () {
+    let resolveFunction: (arg: unknown) => void;
+    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockReset();
+    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const compLoadingExistence = await mountComponent(props);
+
+    expect(
+      findTestSubject(compLoadingExistence, 'fieldListGroupedAvailableFields-countLoading').exists()
+    ).toBe(true);
+    expect(
+      findTestSubject(compLoadingExistence, 'fieldListGroupedAvailableFields-count').exists()
+    ).toBe(false);
+
+    expect(compLoadingExistence.find(EuiProgress).exists()).toBe(true);
+
+    await act(async () => {
+      resolveFunction!({
+        indexPatternTitle: 'test-loaded',
+        existingFieldNames: Object.keys(mockfieldCounts),
+      });
+      await compLoadingExistence.update();
+    });
+
+    await act(async () => {
+      await compLoadingExistence.update();
+    });
+
+    expect(
+      findTestSubject(compLoadingExistence, 'fieldListGroupedAvailableFields-countLoading').exists()
+    ).toBe(false);
+    expect(
+      findTestSubject(compLoadingExistence, 'fieldListGroupedAvailableFields-count').exists()
+    ).toBe(true);
+
+    expect(compLoadingExistence.find(EuiProgress).exists()).toBe(false);
+
+    expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
   });
 
   it('should have Selected Fields, Available Fields, Popular and Meta Fields sections', async function () {
+    const comp = await mountComponent(props);
     const popularFieldsCount = findTestSubject(comp, 'fieldListGroupedPopularFields-count');
     const selectedFieldsCount = findTestSubject(comp, 'fieldListGroupedSelectedFields-count');
     const availableFieldsCount = findTestSubject(comp, 'fieldListGroupedAvailableFields-count');
@@ -217,6 +265,8 @@ describe('discover responsive sidebar', function () {
       fetchStatus: 'complete',
       fields: ['extension'],
     });
+
+    expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
   });
 
   it('should not have selected fields if no columns selected', async function () {
@@ -264,7 +314,6 @@ describe('discover responsive sidebar', function () {
   });
 
   it('should not calculate counts if documents are not fetched yet', async function () {
-    mockCalcFieldCounts.mockClear();
     const propsWithoutDocuments: DiscoverSidebarResponsiveProps = {
       ...props,
       documents$: new BehaviorSubject({
@@ -308,17 +357,20 @@ describe('discover responsive sidebar', function () {
     expect(mockCalcFieldCounts.mock.calls.length).toBe(0);
   });
 
-  it('should allow selecting fields', function () {
+  it('should allow selecting fields', async function () {
+    const comp = await mountComponent(props);
     const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     findTestSubject(availableFields, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
-  it('should allow deselecting fields', function () {
+  it('should allow deselecting fields', async function () {
+    const comp = await mountComponent(props);
     const selectedFields = findTestSubject(comp, 'fieldListGroupedSelectedFields');
     findTestSubject(selectedFields, 'fieldToggle-extension').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
   it('should allow adding filters', async function () {
+    const comp = await mountComponent(props);
     const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     await act(async () => {
       const button = findTestSubject(availableFields, 'field-extension-showDetails');
@@ -331,6 +383,7 @@ describe('discover responsive sidebar', function () {
     expect(props.onAddFilter).toHaveBeenCalled();
   });
   it('should allow adding "exist" filter', async function () {
+    const comp = await mountComponent(props);
     const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     await act(async () => {
       const button = findTestSubject(availableFields, 'field-extension-showDetails');
@@ -343,6 +396,7 @@ describe('discover responsive sidebar', function () {
     expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
   it('should allow filtering by string, and calcFieldCount should just be executed once', async function () {
+    const comp = await mountComponent(props);
     expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('3');
     await act(async () => {
       await findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
@@ -355,13 +409,12 @@ describe('discover responsive sidebar', function () {
 
   it('should show "Add a field" button to create a runtime field', async () => {
     const services = createMockServices();
-    comp = await mountComponent(props, {}, services);
+    const comp = await mountComponent(props, {}, services);
     expect(services.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
     expect(findTestSubject(comp, 'dataView-add-field_btn').length).toBe(1);
   });
 
   it('should render correctly in the sql mode', async () => {
-    mockCalcFieldCounts.mockClear();
     const propsWithTextBasedMode = {
       ...props,
       columns: ['extension', 'bytes'],
