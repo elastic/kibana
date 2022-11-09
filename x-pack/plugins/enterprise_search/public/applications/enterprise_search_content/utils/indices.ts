@@ -81,7 +81,7 @@ export function getIngestionStatus(index?: ElasticsearchIndexWithIngestion): Ing
   if (!index || isApiIndex(index)) {
     return IngestionStatus.CONNECTED;
   }
-  if (isConnectorIndex(index)) {
+  if (isConnectorIndex(index) || isCrawlerIndex(index)) {
     if (
       index.connector.last_seen &&
       moment(index.connector.last_seen).isBefore(moment().subtract(30, 'minutes'))
@@ -96,6 +96,9 @@ export function getIngestionStatus(index?: ElasticsearchIndexWithIngestion): Ing
     }
     if (index.connector.status === ConnectorStatus.ERROR) {
       return IngestionStatus.ERROR;
+    }
+    if (index.connector.status === ConnectorStatus.CONFIGURED) {
+      return IngestionStatus.CONFIGURED;
     }
   }
   return IngestionStatus.INCOMPLETE;
