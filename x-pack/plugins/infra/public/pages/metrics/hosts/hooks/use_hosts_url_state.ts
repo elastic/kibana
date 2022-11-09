@@ -73,7 +73,7 @@ export const useHostsUrlState = () => {
     defaultState: INITIAL_HOSTS_STATE,
     decodeUrlState,
     encodeUrlState,
-    urlStateKey: '_a', // TBD
+    urlStateKey: '_a',
   });
 
   const [state, dispatch] = useReducer(reducer, urlState);
