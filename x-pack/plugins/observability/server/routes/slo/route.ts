@@ -7,14 +7,14 @@
 
 import {
   CreateSLO,
-  DeleteSLO,
   DefaultResourceInstaller,
-  DefaultTransformManager,
-  KibanaSavedObjectsSLORepository,
-  GetSLO,
-  FindSLO,
-  UpdateSLO,
   DefaultSLIClient,
+  DefaultTransformManager,
+  DeleteSLO,
+  FindSLO,
+  GetSLO,
+  KibanaSavedObjectsSLORepository,
+  UpdateSLO,
 } from '../../services/slo';
 import {
   ApmTransactionDurationTransformGenerator,
