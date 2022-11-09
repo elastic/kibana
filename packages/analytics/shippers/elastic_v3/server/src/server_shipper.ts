@@ -304,7 +304,12 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   private async sendEvents(events: Event[]) {
-    this.initContext.logger.debug(`Reporting ${events.length} events...`);
+    this.initContext.logger.debug(
+      `[Server shipper]: sending ${events.length} events - ${events
+        .map((e) => e.event_type)
+        .join(',')}`
+    );
+
     try {
       const code = await this.makeRequest(events);
       this.reportTelemetryCounters(events, { code });
@@ -318,12 +323,6 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   private async makeRequest(events: Event[]): Promise<string> {
-    this.initContext.logger.debug(
-      `[Server shipper]: sending ${events.length} events - ${events
-        .map((e) => e.event_type)
-        .join(',')}`
-    );
-
     const response = await fetch(this.url, {
       method: 'POST',
       body: eventsToNDJSON(events),
