@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-import React, { ComponentType } from 'react';
-import { Provider } from 'react-redux';
-
-export function WithStore<T extends object = Record<string, any>>(store: any) {
-  return (WrappedComponent: ComponentType<T>) => (props: any) =>
-    (
-      <Provider store={store}>
-        <WrappedComponent {...props} />
-      </Provider>
-    );
-}
+export { WithServices, getMockServices } from './tests.helpers';
