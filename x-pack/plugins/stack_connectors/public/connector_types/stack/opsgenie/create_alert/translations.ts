@@ -90,21 +90,28 @@ export const PRIORITY_LABEL = i18n.translate(
 );
 
 export const PRIORITY_1 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority1', {
-  defaultMessage: 'P1',
+  defaultMessage: 'P1-Critical',
 });
 
 export const PRIORITY_2 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority2', {
-  defaultMessage: 'P2',
+  defaultMessage: 'P2-High',
 });
 
 export const PRIORITY_3 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority3', {
-  defaultMessage: 'P3',
+  defaultMessage: 'P3-Moderate',
 });
 
 export const PRIORITY_4 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority4', {
-  defaultMessage: 'P4',
+  defaultMessage: 'P4-Low',
 });
 
 export const PRIORITY_5 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority5', {
-  defaultMessage: 'P5',
+  defaultMessage: 'P5-Information',
 });
+
+export const RULE_TAGS_DESCRIPTION = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.ruleTagsDescription',
+  {
+    defaultMessage: 'The tags of the rule.',
+  }
+);
