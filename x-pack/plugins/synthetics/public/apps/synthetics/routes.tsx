@@ -24,6 +24,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { getSettingsRouteConfig } from './components/settings/route_config';
+import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { ErrorDetailsPage } from './components/error_details/error_details_page';
 import { StepTitle } from './components/step_details_page/step_title';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
@@ -51,6 +52,7 @@ import {
   ERROR_DETAILS_ROUTE,
   STEP_DETAIL_ROUTE,
   OVERVIEW_ROUTE,
+  TEST_RUN_DETAILS_ROUTE,
 } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
 import { MonitorPage } from './components/monitors_page/monitor_page';
@@ -321,6 +323,23 @@ const getRoutes = (
           <FormattedMessage
             id="xpack.synthetics.editMonitor.errorDetailsRoute.title"
             defaultMessage="Error details"
+          />
+        ),
+      },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.testRunDetailsRoute.title', {
+        defaultMessage: 'Test run details | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: TEST_RUN_DETAILS_ROUTE,
+      component: TestRunDetails,
+      dataTestSubj: 'syntheticsMonitorTestRunDetailsPage',
+      pageHeader: {
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.synthetics.testRunDetailsRoute.page.title"
+            defaultMessage="Test run details"
           />
         ),
       },
