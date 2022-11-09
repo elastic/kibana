@@ -6,8 +6,10 @@
  */
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
+import { SyntheticsUrlParams } from '../utils/url_params/get_supported_url_params';
 import { useMonitorsSortedByStatus } from './use_monitors_sorted_by_status';
 import { WrappedHelper } from '../utils/testing';
+import * as URL from './use_url_params';
 
 describe('useMonitorsSortedByStatus', () => {
   const location1 = {
@@ -24,7 +26,11 @@ describe('useMonitorsSortedByStatus', () => {
     isServiceManaged: true,
   };
 
+  let useGetUrlParamsSpy: jest.SpyInstance<SyntheticsUrlParams>;
+
   beforeEach(() => {
+    useGetUrlParamsSpy = jest.spyOn(URL, 'useGetUrlParams');
+
     jest.clearAllMocks();
   });
 
@@ -139,7 +145,7 @@ describe('useMonitorsSortedByStatus', () => {
   };
 
   it('returns monitors down first when sort order is asc', () => {
-    const { result } = renderHook(() => useMonitorsSortedByStatus(true), {
+    const { result } = renderHook(() => useMonitorsSortedByStatus(), {
       wrapper: WrapperWithState,
     });
     expect(result.current).toEqual({
@@ -190,7 +196,7 @@ describe('useMonitorsSortedByStatus', () => {
   });
 
   it('returns monitors up first when sort order is desc', () => {
-    const { result } = renderHook(() => useMonitorsSortedByStatus(true), {
+    const { result } = renderHook(() => useMonitorsSortedByStatus(), {
       wrapper: ({ children }: { children: React.ReactElement }) => (
         <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
       ),
@@ -227,6 +233,105 @@ describe('useMonitorsSortedByStatus', () => {
           location: location1,
           isEnabled: true,
         },
+        {
+          id: 'test-monitor-1',
+          name: 'Test monitor 1',
+          location: location1,
+          isEnabled: false,
+        },
+      ],
+      downMonitors: {
+        'test-monitor-1': ['US Central'],
+        'test-monitor-2': ['US Central'],
+        'test-monitor-3': ['US Central'],
+      },
+    });
+  });
+
+  it('returns only up monitors when statusFilter is down', () => {
+    useGetUrlParamsSpy.mockReturnValue({
+      statusFilter: 'up',
+    } as SyntheticsUrlParams);
+
+    const { result } = renderHook(() => useMonitorsSortedByStatus(), {
+      wrapper: ({ children }: { children: React.ReactElement }) => (
+        <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
+      ),
+    });
+    expect(result.current).toEqual({
+      monitorsSortedByStatus: [
+        {
+          id: 'test-monitor-1',
+          name: 'Test monitor 1',
+          location: location2,
+          isEnabled: true,
+        },
+        {
+          id: 'test-monitor-2',
+          name: 'Test monitor 2',
+          location: location2,
+          isEnabled: true,
+        },
+        {
+          id: 'test-monitor-3',
+          name: 'Test monitor 3',
+          location: location2,
+          isEnabled: true,
+        },
+      ],
+      downMonitors: {
+        'test-monitor-1': ['US Central'],
+        'test-monitor-2': ['US Central'],
+        'test-monitor-3': ['US Central'],
+      },
+    });
+  });
+
+  it('returns only down monitors when statusFilter is down', () => {
+    useGetUrlParamsSpy.mockReturnValue({
+      statusFilter: 'down',
+    } as SyntheticsUrlParams);
+
+    const { result } = renderHook(() => useMonitorsSortedByStatus(), {
+      wrapper: ({ children }: { children: React.ReactElement }) => (
+        <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
+      ),
+    });
+    expect(result.current).toEqual({
+      monitorsSortedByStatus: [
+        {
+          id: 'test-monitor-2',
+          name: 'Test monitor 2',
+          location: location1,
+          isEnabled: true,
+        },
+        {
+          id: 'test-monitor-3',
+          name: 'Test monitor 3',
+          location: location1,
+          isEnabled: true,
+        },
+      ],
+      downMonitors: {
+        'test-monitor-1': ['US Central'],
+        'test-monitor-2': ['US Central'],
+        'test-monitor-3': ['US Central'],
+      },
+    });
+  });
+
+  it('returns only disabled monitors when statusFilter is down', () => {
+    useGetUrlParamsSpy.mockReturnValue({
+      statusFilter: 'disabled',
+    } as SyntheticsUrlParams);
+
+    const { result } = renderHook(() => useMonitorsSortedByStatus(), {
+      wrapper: ({ children }: { children: React.ReactElement }) => (
+        <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
+      ),
+    });
+    expect(result.current).toEqual({
+      monitorsSortedByStatus: [
         {
           id: 'test-monitor-1',
           name: 'Test monitor 1',

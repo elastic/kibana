@@ -38,6 +38,7 @@ journey('Test Monitor Detail Flyout', async ({ page, params }) => {
 
   step('open overview flyout', async () => {
     await syntheticsApp.navigateToOverview();
+    await syntheticsApp.assertText({ text: monitorName });
     await page.click(`[data-test-subj="${monitorName}-metric-item"]`);
     const flyoutHeader = await page.waitForSelector('.euiFlyoutHeader');
     expect(await flyoutHeader.innerText()).toContain(monitorName);

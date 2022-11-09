@@ -23,6 +23,18 @@ export type FetchMonitorManagementListQueryArgs = t.TypeOf<
   typeof FetchMonitorManagementListQueryArgsCodec
 >;
 
+export const FetchMonitorOverviewQueryArgsCodec = t.partial({
+  query: t.string,
+  searchFields: t.array(t.string),
+  tags: t.array(t.string),
+  locations: t.array(t.string),
+  monitorType: t.array(t.string),
+  sortField: t.string,
+  sortOrder: t.string,
+});
+
+export type FetchMonitorOverviewQueryArgs = t.TypeOf<typeof FetchMonitorOverviewQueryArgsCodec>;
+
 export const MonitorManagementEnablementResultCodec = t.type({
   isEnabled: t.boolean,
   canEnable: t.boolean,

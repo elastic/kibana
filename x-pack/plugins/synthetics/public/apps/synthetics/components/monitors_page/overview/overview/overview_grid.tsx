@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, memo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import useThrottle from 'react-use/lib/useThrottle';
@@ -23,17 +23,20 @@ import {
   selectOverviewState,
   setFlyoutConfig,
 } from '../../../../state/overview';
+import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
+import { useGetUrlParams } from '../../../../hooks/use_url_params';
+import { OverviewLoader } from './overview_loader';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
 import { SortFields } from './sort_fields';
-import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
-import { OverviewLoader } from './overview_loader';
+import { NoMonitorsFound } from '../../common/no_monitors_found';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
-import { OverviewStatus } from './overview_status';
 
-export const OverviewGrid = () => {
+export const OverviewGrid = memo(() => {
+  const { statusFilter } = useGetUrlParams();
   const {
     data: { monitors },
+    status,
     flyoutConfig,
     loaded,
     pageState,
@@ -42,15 +45,14 @@ export const OverviewGrid = () => {
   const [loadNextPage, setLoadNextPage] = useState(false);
   const [page, setPage] = useState(1);
 
-  const { monitorsSortedByStatus } = useMonitorsSortedByStatus(
-    sortField === 'status' && monitors.length !== 0
-  );
+  const { monitorsSortedByStatus } = useMonitorsSortedByStatus();
   const currentMonitors = getCurrentMonitors({
     monitors,
     monitorsSortedByStatus,
     perPage,
     page,
     sortField,
+    statusFilter,
   });
 
   const dispatch = useDispatch();
@@ -91,17 +93,20 @@ export const OverviewGrid = () => {
     }
   }, [loadNextPage]);
 
+  // Display no monitors found when down, up, or disabled filter produces no results
+  if (status && !monitorsSortedByStatus.length) {
+    return <NoMonitorsFound />;
+  }
+
   return (
     <>
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <OverviewStatus />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <OverviewPaginationInfo page={page} loading={!loaded} />
+          <OverviewPaginationInfo
+            page={page}
+            loading={!loaded}
+            total={status ? monitorsSortedByStatus.length : undefined}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <SortFields onSortChange={() => setPage(1)} />
@@ -155,7 +160,7 @@ export const OverviewGrid = () => {
       )}
     </>
   );
-};
+});
 
 const getCurrentMonitors = ({
   sortField,
@@ -163,14 +168,16 @@ const getCurrentMonitors = ({
   page,
   monitors,
   monitorsSortedByStatus,
+  statusFilter,
 }: {
   sortField: string;
   perPage: number;
   page: number;
   monitors: MonitorOverviewItem[];
   monitorsSortedByStatus: MonitorOverviewItem[];
+  statusFilter?: string;
 }) => {
-  if (sortField === 'status') {
+  if (sortField === 'status' || statusFilter) {
     return monitorsSortedByStatus.slice(0, perPage * page);
   } else {
     return monitors.slice(0, perPage * page);
