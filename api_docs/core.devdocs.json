@@ -55129,7 +55129,7 @@
             "tags": [],
             "label": "hidden",
             "description": [
-              "\nIs the type hidden by default. If true, repositories will not have access to this type unless explicitly\ndeclared as an `extraType` when creating the repository.\n\nSee {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}."
+              "\nIs the type hidden by default. If true, repositories will not have access to this type unless explicitly\ndeclared as an `extraType` when creating the repository.\nIt is recommended to hide the type for better backward compatibility.\nThe hidden types will not be automatically exposed via the HTTP API.\nTherefore, that should prevent unexpected behavior in the client code, as all the interactions will be done via the plugin API.\n\nSee {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}."
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
