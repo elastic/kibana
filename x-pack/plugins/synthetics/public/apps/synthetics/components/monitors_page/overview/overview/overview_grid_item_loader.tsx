@@ -10,9 +10,7 @@ import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 export const OverviewGridItemLoader = () => {
   return (
     <EuiPanel
-      style={{
-        height: '160px',
-      }}
+      style={{ height: '160px' }}
       hasBorder={true}
     >
       <EuiLoadingContent lines={2} />

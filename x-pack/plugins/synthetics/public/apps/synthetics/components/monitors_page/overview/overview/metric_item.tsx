@@ -48,12 +48,11 @@ export const MetricItem = ({
   return (
     <div
       data-test-subj={`${monitor.name}-metric-item`}
-      style={{
-        height: '160px',
-      }}
+      style={{ height: '160px' }}
     >
       {loaded ? (
         <EuiPanel
+          paddingSize="none"
           onMouseOver={() => {
             if (!isMouseOver) {
               setIsMouseOver(true);
@@ -65,7 +64,6 @@ export const MetricItem = ({
             }
           }}
           style={{
-            padding: '0px',
             height: '100%',
             overflow: 'hidden',
           }}
@@ -88,7 +86,7 @@ export const MetricItem = ({
                     extra: (
                       <span>
                         {i18n.translate('xpack.synthetics.overview.duration.label', {
-                          defaultMessage: 'Duration',
+                          defaultMessage: 'Duration Avg.',
                         })}
                       </span>
                     ),
