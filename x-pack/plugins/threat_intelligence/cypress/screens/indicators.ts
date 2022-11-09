@@ -39,16 +39,17 @@ export const INDICATORS_TABLE_LAST_SEEN_COLUMN_HEADER = `[data-test-subj="dataGr
 
 export const TABLE_CONTROLS = '[data-test-sub="dataGridControls"]';
 
-export const INDICATOR_TYPE_CELL = '[data-gridcell-column-id="threat.indicator.type"]';
+export const INDICATOR_TYPE_CELL =
+  '[role="gridcell"][data-gridcell-column-id="threat.indicator.type"]';
 
 export const INDICATORS_TABLE_CELL_TIMELINE_BUTTON =
-  '[data-test-subj="tiIndicatorsTableCellTimelineButton"]';
+  '[data-test-subj="tiIndicatorsTableCellTimelineButton"] button';
 
 export const INDICATORS_TABLE_CELL_FILTER_IN_BUTTON =
-  '[data-test-subj="tiIndicatorsTableCellFilterInButton"]';
+  '[data-test-subj="tiIndicatorsTableCellFilterInButton"] button';
 
 export const INDICATORS_TABLE_CELL_FILTER_OUT_BUTTON =
-  '[data-test-subj="tiIndicatorsTableCellFilterOutButton"]';
+  '[data-test-subj="tiIndicatorsTableCellFilterOutButton"] button';
 
 export const INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON =
   '[data-test-subj="tiIndicatorTableInvestigateInTimelineButtonIcon"]';
@@ -90,6 +91,12 @@ export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON =
 
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_OUT_BUTTON =
   '[data-test-subj="tiFlyoutOverviewHighLevelBlocksFilterOutButton"]';
+
+export const FLYOUT_TABLE_MORE_ACTIONS_BUTTON =
+  '[data-test-subj="tiFlyoutOverviewTableRowPopoverButton"] button';
+
+export const FLYOUT_BLOCK_MORE_ACTIONS_BUTTON =
+  '[data-test-subj="tiFlyoutOverviewHighLevelBlocksPopoverButton"] button';
 
 export const FLYOUT_TABLE_TAB_ROW_TIMELINE_BUTTON =
   '[data-test-subj="tiFlyoutTableTabRowTimelineButton"]';

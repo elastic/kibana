@@ -33,6 +33,8 @@ export const STEP_DETAIL_ROUTE = '/journey/:checkGroupId/step/:stepIndex';
 
 export const SYNTHETIC_CHECK_STEPS_ROUTE = '/journey/:checkGroupId/steps';
 
+export const TEST_RUN_DETAILS_ROUTE = '/monitor/:monitorId/test-run/:checkGroupId';
+
 export const MAPPING_ERROR_ROUTE = '/mapping-error';
 
 export const ERROR_DETAILS_ROUTE = '/error-details/:errorStateId';
