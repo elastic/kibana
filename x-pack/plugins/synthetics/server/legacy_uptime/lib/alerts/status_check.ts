@@ -387,6 +387,15 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
         const alertUuid = getAlertUuid(alertId);
 
+        const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
+          monitorId: monitorSummary.monitorId,
+          dateRangeEnd: 'now',
+          dateRangeStart: indexedStartedAt,
+          filters: {
+            'observer.geo.name': [monitorSummary.observerLocation],
+          },
+        });
+
         const context = {
           ...monitorSummary,
           statusMessage,
@@ -398,22 +407,15 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           ...updateState(state, true),
         });
 
-        const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
-          monitorId: monitorSummary.monitorId,
-          dateRangeEnd: 'now',
-          dateRangeStart: indexedStartedAt,
-          filters: {
-            'observer.geo.name': [monitorSummary.observerLocation],
-          },
-        });
-
         alert.scheduleActions(MONITOR_STATUS.id, {
           [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid),
           [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
           ...context,
         });
       }
-      setRecoveredAlertsContext(alertFactory);
+
+      setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
+
       return updateState(state, downMonitorsByLocation.length > 0);
     }
 
@@ -491,7 +493,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         ...context,
       });
     });
-    setRecoveredAlertsContext(alertFactory);
+
+    setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
+
     return updateState(state, downMonitorsByLocation.length > 0);
   },
 });

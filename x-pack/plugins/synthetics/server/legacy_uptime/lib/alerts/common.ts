@@ -11,6 +11,7 @@ import { IBasePath } from '@kbn/core/server';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../../common/runtime_types';
+import { ALERT_DETAILS_URL } from './action_variables';
 
 export type UpdateUptimeAlertState = (
   state: Record<string, any>,
@@ -76,10 +77,29 @@ export const getAlertDetailsUrl = (
   alertUuid: string | null
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
-export const setRecoveredAlertsContext = (alertFactory: RuleExecutorServices['alertFactory']) => {
+export const setRecoveredAlertsContext = ({
+  alertFactory,
+  basePath,
+  getAlertUuid,
+  spaceId,
+}: {
+  alertFactory: RuleExecutorServices['alertFactory'];
+  basePath?: IBasePath;
+  getAlertUuid?: (alertId: string) => string | null;
+  spaceId?: string;
+}) => {
   const { getRecoveredAlerts } = alertFactory.done();
   for (const alert of getRecoveredAlerts()) {
+    const recoveredAlertId = alert.getId();
+    const alertUuid = getAlertUuid?.(recoveredAlertId) || undefined;
+
     const state = alert.getState();
-    alert.setContext(state);
+
+    alert.setContext({
+      ...state,
+      ...(basePath && spaceId && alertUuid
+        ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
+        : {}),
+    });
   }
 };

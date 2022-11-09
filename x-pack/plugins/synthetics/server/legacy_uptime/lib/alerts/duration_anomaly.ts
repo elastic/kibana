@@ -185,7 +185,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
       });
     }
 
-    setRecoveredAlertsContext(alertFactory);
+    setRecoveredAlertsContext({ alertFactory });
 
     return updateState(state, foundAnomalies);
   },
