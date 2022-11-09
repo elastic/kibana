@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { PartitionElementEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
+import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
+import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
+import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import { ChartPanel } from '../../../components/chart_panel';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
-import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
+import {
+  useNavigateFindings,
+  useNavigateFindingsByResource,
+} from '../../../common/hooks/use_navigate_findings';
 import { RULE_FAILED } from '../../../../common/constants';
 
 const defaultHeight = 360;
@@ -36,6 +42,7 @@ export const CloudSummarySection = ({
   complianceData: ComplianceDashboardData;
 }) => {
   const navToFindings = useNavigateFindings();
+  const navToFindingsByResource = useNavigateFindingsByResource();
 
   const handleElementClick = (elements: PartitionElementEvent[]) => {
     const [element] = elements;
@@ -56,9 +63,62 @@ export const CloudSummarySection = ({
     navToFindings({ 'result.evaluation': RULE_FAILED });
   };
 
+  const counters: CspCounterCardProps[] = useMemo(
+    () => [
+      {
+        id: DASHBOARD_COUNTER_CARDS.CLUSTERS_EVALUATED,
+        title: i18n.translate(
+          'xpack.csp.dashboard.summarySection.counterCard.clustersEvaluatedDescription',
+          { defaultMessage: 'Clusters Evaluated' }
+        ),
+        description: <CompactFormattedNumber number={complianceData.clusters.length} />,
+      },
+      {
+        id: DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED,
+        title: i18n.translate(
+          'xpack.csp.dashboard.summarySection.counterCard.resourcesEvaluatedDescription',
+          { defaultMessage: 'Resources Evaluated' }
+        ),
+        description: (
+          <CompactFormattedNumber number={complianceData.stats.resourcesEvaluated || 0} />
+        ),
+        onClick: () => {
+          navToFindingsByResource();
+        },
+      },
+      {
+        id: DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS,
+        title: i18n.translate(
+          'xpack.csp.dashboard.summarySection.counterCard.failingFindingsDescription',
+          { defaultMessage: 'Failing Findings' }
+        ),
+        description: <CompactFormattedNumber number={complianceData.stats.totalFailed} />,
+        descriptionColor: complianceData.stats.totalFailed > 0 ? 'danger' : 'text',
+        onClick: () => {
+          navToFindings({ 'result.evaluation': RULE_FAILED });
+        },
+      },
+    ],
+    [
+      complianceData.clusters.length,
+      complianceData.stats.resourcesEvaluated,
+      complianceData.stats.totalFailed,
+      navToFindings,
+      navToFindingsByResource,
+    ]
+  );
+
   return (
     <EuiFlexGroup gutterSize="l" style={summarySectionWrapperStyle}>
-      <EuiFlexItem grow={dashboardColumnsGrow.first} />
+      <EuiFlexItem grow={dashboardColumnsGrow.first}>
+        <EuiFlexGroup direction="column">
+          {counters.map((counter) => (
+            <EuiFlexItem key={counter.id}>
+              <CspCounterCard {...counter} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.second}>
         <ChartPanel
           title={i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {

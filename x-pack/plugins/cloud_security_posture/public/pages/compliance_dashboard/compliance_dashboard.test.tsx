@@ -20,6 +20,7 @@ import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 import { expectIdsInDoc } from '../../test/utils';
+import { ComplianceDashboardData } from '../../../common/types';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_compliance_dashboard_data_api');
@@ -28,12 +29,13 @@ jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration');
 const chance = new Chance();
 
-const mockDashboardData = {
+export const mockDashboardData: ComplianceDashboardData = {
   stats: {
     totalFailed: 17,
     totalPassed: 155,
     totalFindings: 172,
     postureScore: 90.1,
+    resourcesEvaluated: 162,
   },
   groupedFindingsEvaluation: [
     {
@@ -84,7 +86,8 @@ const mockDashboardData = {
       meta: {
         clusterId: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
         benchmarkName: 'CIS Kubernetes V1.20',
-        lastUpdate: 1653218903921,
+        lastUpdate: '2022-11-07T13:14:34.990Z',
+        benchmarkId: 'cis_k8s',
       },
       stats: {
         totalFailed: 17,
