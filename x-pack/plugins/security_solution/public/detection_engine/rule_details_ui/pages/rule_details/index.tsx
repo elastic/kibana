@@ -240,10 +240,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
 
+  const [isStartingJobs, setIsStartingJobs] = useState(false);
   const { startMlJobs } = useStartMlJobs();
   const startMlJobsIfNeeded = useCallback(async () => {
+    setIsStartingJobs(true);
     await startMlJobs(rule?.machine_learning_job_id);
-  }, [rule?.machine_learning_job_id, startMlJobs]);
+    setIsStartingJobs(false);
+  }, [rule, startMlJobs]);
 
   const ruleDetailTabs = useMemo(
     (): Record<RuleDetailTabs, NavTab> => ({
@@ -761,7 +764,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         loading={isLoading || isSavedQueryLoading}
                         title={ruleI18n.DEFINITION}
                       >
-                        {defineRuleData != null && !isSavedQueryLoading && (
+                        {defineRuleData != null && !isSavedQueryLoading && !isStartingJobs && (
                           <StepDefineRule
                             descriptionColumns="singleSplit"
                             isReadOnlyView={true}

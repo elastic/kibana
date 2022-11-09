@@ -17,7 +17,7 @@ export interface ReturnUseStartMlJobs {
 
 export const useStartMlJobs = (): ReturnUseStartMlJobs => {
   const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
-  const { loading: isLoadingJobs, jobs: mlJobs } = useSecurityJobs();
+  const { loading: isLoadingJobs, jobs: mlJobs, refetch: refetchJobs } = useSecurityJobs();
   const startMlJobs = useCallback(
     async (jobIds: string[] | undefined) => {
       if (isLoadingJobs || isLoadingEnableDataFeed) {
@@ -39,8 +39,10 @@ export const useStartMlJobs = (): ReturnUseStartMlJobs => {
           await enableDatafeed(job, latestTimestampMs, true);
         })
       );
+
+      refetchJobs();
     },
-    [enableDatafeed, isLoadingEnableDataFeed, isLoadingJobs, mlJobs]
+    [enableDatafeed, isLoadingEnableDataFeed, isLoadingJobs, mlJobs, refetchJobs]
   );
 
   return { startMlJobs };
