@@ -159,7 +159,7 @@ export function Chart({
                 justifyContent="flexEnd"
                 css={breakdownFieldSelectorGroupCss}
               >
-                {chartVisible && (
+                {chartVisible && breakdown && (
                   <EuiFlexItem css={breakdownFieldSelectorItemCss}>
                     <BreakdownFieldSelector
                       dataView={dataView}

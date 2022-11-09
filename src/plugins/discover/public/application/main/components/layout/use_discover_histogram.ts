@@ -231,7 +231,7 @@ export const useDiscoverHistogram = ({
   );
 
   const breakdown = useMemo(
-    () => (isPlainRecord || !isTimeBased || !field ? undefined : { field }),
+    () => (isPlainRecord || !isTimeBased ? undefined : { field }),
     [field, isPlainRecord, isTimeBased]
   );
 
