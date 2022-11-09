@@ -64,7 +64,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
 
   useEffect(() => {
     // Reset the scroll if we have made material changes to the field list
-    if (scrollContainer && scrollToTopResetCounter > 0) {
+    if (scrollContainer && scrollToTopResetCounter) {
       scrollContainer.scrollTop = 0;
       setPageSize(PAGINATION_SIZE);
     }

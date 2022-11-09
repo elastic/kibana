@@ -56,7 +56,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onSelectedFieldFilter,
   onFilterField,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
-  const [scrollToTopResetCounter, setScrollToTopResetCounter] = useState<number>(-1);
   const [dataView, setDataView] = useState<DataView | null>(null);
   const isAffectedByTimeFilter = Boolean(dataView?.timeFieldName);
   const fieldsExistenceInfoUnavailable: boolean = dataViewId
@@ -84,9 +83,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     }
   }, [dataView, setDataView, dataViewId]);
 
-  useEffect(() => {
-    setScrollToTopResetCounter((value) => value + 1);
-  }, [dataViewId, onFilterField, setScrollToTopResetCounter]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const scrollToTopResetCounter: number = useMemo(() => Date.now(), [dataViewId, onFilterField]);
 
   const unfilteredFieldGroups: FieldListGroups<T> = useMemo(() => {
     const containsData = (field: T) => {

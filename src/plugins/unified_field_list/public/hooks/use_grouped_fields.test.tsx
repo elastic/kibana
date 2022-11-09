@@ -116,6 +116,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     await waitForNextUpdate();
 
     let fieldGroups = result.current.fieldGroups;
+    const scrollToTopResetCounter1 = result.current.scrollToTopResetCounter;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -157,6 +158,30 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'EmptyFields-0-0',
       'MetaFields-0-3',
     ]);
+
+    expect(result.current.scrollToTopResetCounter).not.toBe(scrollToTopResetCounter1);
+  });
+
+  it('should not change the scroll position if fields list is extended', async () => {
+    const props: GroupedFieldsParams<DataViewField> = {
+      dataViewId: dataView.id!,
+      allFields,
+      services: mockedServices,
+    };
+    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+      initialProps: props,
+    });
+
+    await waitForNextUpdate();
+
+    const scrollToTopResetCounter1 = result.current.scrollToTopResetCounter;
+
+    rerender({
+      ...props,
+      allFields: allFieldsIncludingUnmapped,
+    });
+
+    expect(result.current.scrollToTopResetCounter).toBe(scrollToTopResetCounter1);
   });
 
   it('should work correctly when custom unsupported fields are skipped', async () => {

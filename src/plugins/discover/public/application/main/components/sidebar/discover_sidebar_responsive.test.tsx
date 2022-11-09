@@ -188,25 +188,126 @@ describe('discover responsive sidebar', function () {
   let props: DiscoverSidebarResponsiveProps;
   let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     props = getCompProps();
     comp = await mountComponent(props);
   });
 
-  it('should have Selected Fields, Available Fields, and Popular Fields sections', async function () {
+  afterEach(() => {
+    mockCalcFieldCounts.mockClear();
+  });
+
+  it('should have Selected Fields, Available Fields, Popular and Meta Fields sections', async function () {
     const popularFieldsCount = findTestSubject(comp, 'fieldListGroupedPopularFields-count');
     const selectedFieldsCount = findTestSubject(comp, 'fieldListGroupedSelectedFields-count');
     const availableFieldsCount = findTestSubject(comp, 'fieldListGroupedAvailableFields-count');
     const emptyFieldsCount = findTestSubject(comp, 'fieldListGroupedEmptyFields-count');
     const metaFieldsCount = findTestSubject(comp, 'fieldListGroupedMetaFields-count');
+    const unmappedFieldsCount = findTestSubject(comp, 'fieldListGroupedUnmappedFields-count');
 
     expect(selectedFieldsCount.text()).toBe('1');
     expect(popularFieldsCount.text()).toBe('4');
     expect(availableFieldsCount.text()).toBe('3');
     expect(emptyFieldsCount.text()).toBe('20');
     expect(metaFieldsCount.text()).toBe('2');
+    expect(unmappedFieldsCount.exists()).toBe(false);
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+
+    expect(props.availableFields$.getValue()).toEqual({
+      fetchStatus: 'complete',
+      fields: ['extension'],
+    });
   });
+
+  it('should not have selected fields if no columns selected', async function () {
+    const propsWithoutColumns = {
+      ...props,
+      columns: [],
+    };
+    const compWithoutSelected = await mountComponent(propsWithoutColumns);
+    const popularFieldsCount = findTestSubject(
+      compWithoutSelected,
+      'fieldListGroupedPopularFields-count'
+    );
+    const selectedFieldsCount = findTestSubject(
+      compWithoutSelected,
+      'fieldListGroupedSelectedFields-count'
+    );
+    const availableFieldsCount = findTestSubject(
+      compWithoutSelected,
+      'fieldListGroupedAvailableFields-count'
+    );
+    const emptyFieldsCount = findTestSubject(
+      compWithoutSelected,
+      'fieldListGroupedEmptyFields-count'
+    );
+    const metaFieldsCount = findTestSubject(
+      compWithoutSelected,
+      'fieldListGroupedMetaFields-count'
+    );
+    const unmappedFieldsCount = findTestSubject(
+      compWithoutSelected,
+      'fieldListGroupedUnmappedFields-count'
+    );
+
+    expect(selectedFieldsCount.exists()).toBe(false);
+    expect(popularFieldsCount.text()).toBe('4');
+    expect(availableFieldsCount.text()).toBe('3');
+    expect(emptyFieldsCount.text()).toBe('20');
+    expect(metaFieldsCount.text()).toBe('2');
+    expect(unmappedFieldsCount.exists()).toBe(false);
+
+    expect(propsWithoutColumns.availableFields$.getValue()).toEqual({
+      fetchStatus: 'complete',
+      fields: ['bytes', 'extension', '_id', 'phpmemory'],
+    });
+  });
+
+  it('should not calculate counts if documents are not fetched yet', async function () {
+    mockCalcFieldCounts.mockClear();
+    const propsWithoutDocuments: DiscoverSidebarResponsiveProps = {
+      ...props,
+      documents$: new BehaviorSubject({
+        fetchStatus: FetchStatus.UNINITIALIZED,
+        result: undefined,
+      }) as DataDocuments$,
+    };
+    const compWithoutDocuments = await mountComponent(propsWithoutDocuments);
+    const popularFieldsCount = findTestSubject(
+      compWithoutDocuments,
+      'fieldListGroupedPopularFields-count'
+    );
+    const selectedFieldsCount = findTestSubject(
+      compWithoutDocuments,
+      'fieldListGroupedSelectedFields-count'
+    );
+    const availableFieldsCount = findTestSubject(
+      compWithoutDocuments,
+      'fieldListGroupedAvailableFields-count'
+    );
+    const emptyFieldsCount = findTestSubject(
+      compWithoutDocuments,
+      'fieldListGroupedEmptyFields-count'
+    );
+    const metaFieldsCount = findTestSubject(
+      compWithoutDocuments,
+      'fieldListGroupedMetaFields-count'
+    );
+    const unmappedFieldsCount = findTestSubject(
+      compWithoutDocuments,
+      'fieldListGroupedUnmappedFields-count'
+    );
+
+    expect(selectedFieldsCount.text()).toBe('1');
+    expect(popularFieldsCount.text()).toBe('4');
+    expect(availableFieldsCount.text()).toBe('3');
+    expect(emptyFieldsCount.text()).toBe('20');
+    expect(metaFieldsCount.text()).toBe('2');
+    expect(unmappedFieldsCount.exists()).toBe(false);
+
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(0);
+  });
+
   it('should allow selecting fields', function () {
     const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     findTestSubject(availableFields, 'fieldToggle-bytes').simulate('click');
@@ -259,10 +360,11 @@ describe('discover responsive sidebar', function () {
     expect(findTestSubject(comp, 'dataView-add-field_btn').length).toBe(1);
   });
 
-  it('should not show "Add a field" button on the sql mode', async () => {
-    const initialProps = getCompProps();
+  it('should render correctly in the sql mode', async () => {
+    mockCalcFieldCounts.mockClear();
     const propsWithTextBasedMode = {
-      ...initialProps,
+      ...props,
+      columns: ['extension', 'bytes'],
       onAddFilter: undefined,
       documents$: new BehaviorSubject({
         fetchStatus: FetchStatus.COMPLETE,
@@ -274,6 +376,34 @@ describe('discover responsive sidebar', function () {
       query: { sql: 'SELECT * FROM `index`' },
     });
     expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
+
+    const popularFieldsCount = findTestSubject(
+      compInViewerMode,
+      'fieldListGroupedPopularFields-count'
+    );
+    const selectedFieldsCount = findTestSubject(
+      compInViewerMode,
+      'fieldListGroupedSelectedFields-count'
+    );
+    const availableFieldsCount = findTestSubject(
+      compInViewerMode,
+      'fieldListGroupedAvailableFields-count'
+    );
+    const emptyFieldsCount = findTestSubject(compInViewerMode, 'fieldListGroupedEmptyFields-count');
+    const metaFieldsCount = findTestSubject(compInViewerMode, 'fieldListGroupedMetaFields-count');
+    const unmappedFieldsCount = findTestSubject(
+      compInViewerMode,
+      'fieldListGroupedUnmappedFields-count'
+    );
+
+    expect(selectedFieldsCount.text()).toBe('2');
+    expect(popularFieldsCount.exists()).toBe(false);
+    expect(availableFieldsCount.text()).toBe('4');
+    expect(emptyFieldsCount.exists()).toBe(false);
+    expect(metaFieldsCount.exists()).toBe(false);
+    expect(unmappedFieldsCount.exists()).toBe(false);
+
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
 
   it('should not show "Add a field" button in viewer mode', async () => {
