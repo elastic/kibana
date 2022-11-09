@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { setTimeout } from 'timers/promises';
+
 
 export default function upgradeAssistantFunctionalTests({
   getService,
@@ -62,7 +64,8 @@ export default function upgradeAssistantFunctionalTests({
         });
 
         // Wait for the cluster settings to be reflected to the ES nodes
-        await new Promise((resolve) => setTimeout(resolve, 30000));
+        await setTimeout(30000);
+
       } catch (e) {
         log.debug('[Setup error] Error updating cluster settings');
         throw e;
