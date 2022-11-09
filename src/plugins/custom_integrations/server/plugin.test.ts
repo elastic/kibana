@@ -84,8 +84,7 @@ describe('CustomIntegrationsPlugin', () => {
           description: 'Index data to Elasticsearch with the PHP client.',
           type: 'ui_link',
           shipper: 'language_clients',
-          uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/php-api/branch/index.html',
+          uiInternalPath: '/app/integrations/language_clients/php/overview'
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],

@@ -89,9 +89,9 @@ export const languageIntegrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.PhpDescription', {
       defaultMessage: 'Index data to Elasticsearch with the PHP client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/php-api/{branch}/index.html`,
+    docUrlTemplate: '',
     integrationsAppUrl: `/app/integrations/language_clients/php/overview`,
-    exportLanguageUiComponent: false,
+    exportLanguageUiComponent: true,
   },
   {
     id: 'perl',
