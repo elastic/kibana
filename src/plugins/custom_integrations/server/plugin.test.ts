@@ -109,7 +109,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/python-api/branch/index.html',
+            '/app/integrations/language_clients/python/overview',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
