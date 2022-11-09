@@ -845,7 +845,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
       )}
 
       {shouldDisplayExtraOptions && <ParamEditor {...paramEditorProps} />}
-      {!selectedOperationDefinition?.handleDataSectionExtra && props.dataSectionExtra}
+      {!selectedOperationDefinition?.handleDataSectionExtra && (
+        <>
+          <EuiSpacer size="m" />
+          {props.dataSectionExtra}
+        </>
+      )}
     </>
   );
 

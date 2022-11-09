@@ -931,7 +931,12 @@ The top values of a specified field ranked by the chosen metric.
             }}
           />
         </EuiFormRow>
-        {dataSectionExtra}
+        {dataSectionExtra && (
+          <>
+            <EuiSpacer size="m" />
+            {dataSectionExtra}
+          </>
+        )}
         {!hasRestrictions && (
           <>
             <EuiSpacer size="m" />

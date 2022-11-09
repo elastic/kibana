@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiIcon, EuiSelect, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CollapseFunction } from '../../common/expressions';
@@ -27,7 +27,6 @@ export function CollapseSetting({
 }) {
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiFormRow
         label={
           <EuiToolTip
