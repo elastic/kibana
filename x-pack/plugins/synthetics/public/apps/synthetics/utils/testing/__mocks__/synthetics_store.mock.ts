@@ -98,6 +98,7 @@ export const mockState: SyntheticsAppState = {
     error: null,
     loaded: false,
     loading: false,
+    flyoutConfig: null,
     status: null,
     statusError: null,
   },
@@ -105,6 +106,7 @@ export const mockState: SyntheticsAppState = {
   monitorDetails: getMonitorDetailsMockSlice(),
   browserJourney: getBrowserJourneyMockSlice(),
   networkEvents: {},
+  pingStatus: getPingStatusesMockSlice(),
 };
 
 function getBrowserJourneyMockSlice() {
@@ -415,4 +417,33 @@ function getMonitorDetailsMockSlice() {
     error: null,
     selectedLocationId: 'us_central',
   };
+}
+
+function getPingStatusesMockSlice() {
+  const monitorDetails = getMonitorDetailsMockSlice();
+
+  return {
+    pingStatuses: monitorDetails.pings.data.reduce((acc, cur) => {
+      if (!acc[cur.monitor.id]) {
+        acc[cur.monitor.id] = {};
+      }
+
+      if (!acc[cur.monitor.id][cur.observer.geo.name]) {
+        acc[cur.monitor.id][cur.observer.geo.name] = {};
+      }
+
+      acc[cur.monitor.id][cur.observer.geo.name][cur.timestamp] = {
+        timestamp: cur.timestamp,
+        error: undefined,
+        locationId: cur.observer.geo.name,
+        config_id: cur.config_id,
+        docId: cur.docId,
+        summary: cur.summary,
+      };
+
+      return acc;
+    }, {} as SyntheticsAppState['pingStatus']['pingStatuses']),
+    loading: false,
+    error: null,
+  } as SyntheticsAppState['pingStatus'];
 }

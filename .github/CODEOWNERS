@@ -6,7 +6,7 @@
 # used for the 'team' designator within Kibana Stats
 
 # Alerting commmunal ownership
-/x-pack/plugins/rule_registry/ @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
+/x-pack/plugins/rule_registry/ @elastic/response-ops @elastic/actionable-observability
 
 # Data Discovery
 /src/plugins/discover/ @elastic/kibana-data-discovery
@@ -931,6 +931,7 @@ packages/kbn-get-repo-files @elastic/kibana-operations
 packages/kbn-guided-onboarding @elastic/platform-onboarding
 packages/kbn-handlebars @elastic/kibana-security
 packages/kbn-hapi-mocks @elastic/kibana-core
+packages/kbn-health-gateway-server @elastic/kibana-core
 packages/kbn-i18n @elastic/kibana-core
 packages/kbn-i18n-react @elastic/kibana-core
 packages/kbn-import-resolver @elastic/kibana-operations
