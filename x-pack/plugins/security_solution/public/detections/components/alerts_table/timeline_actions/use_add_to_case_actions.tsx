@@ -60,7 +60,7 @@ export const useAddToCaseActions = ({
       : [];
   }, [casesUi.helpers, ecsData, nonEcsData]);
 
-  const { activeStep, setStep, isTourShown } = useTourContext();
+  const { activeStep, incrementStep, setStep, isTourShown } = useTourContext();
 
   const afterCaseCreated = useCallback(async () => {
     if (isTourShown(SecurityStepId.alertsCases)) {
