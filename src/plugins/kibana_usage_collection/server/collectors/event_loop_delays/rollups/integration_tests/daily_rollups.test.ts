@@ -45,7 +45,7 @@ function createRawObject(date: moment.MomentInput): SavedObject<EventLoopDelaysD
 
 function createRawEventLoopDelaysDailyDocs(logger: Logger) {
   let edgeDocumentToKeep = 3;
-  // If we are too close to midnight, let's reduce the age of the eldest document to keep.
+  // If we are too close to midnight, let's reduce the age of the oldest document to keep.
   // Otherwise, the rollups may delete it.
   if (moment().endOf('day').diff(moment(), 'hour', true) < 1) {
     edgeDocumentToKeep--;
