@@ -59,26 +59,12 @@ fi
 
 cd "$KIBANA_BUILD_LOCATION"
 
-./bin/kibana \
---csp.disableUnsafeEval=true  \
---csp.strict=false  \
---csp.warnLegacyBrowsers=false  \
---elasticsearch.hosts=http://localhost:9200  \
---elasticsearch.password=changeme  \
---elasticsearch.username=kibana_system  \
---env.name=development \
---savedObjects.maxImportPayloadBytes=10485760  \
---server.maxPayload=1679958  \
---server.port=5620  \
---server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d  \
---status.allowAnonymous=true  \
---telemetry.banner=false  \
---telemetry.labels="{\"branch\": \"$BUILDKITE_BRANCH\", \"ciBuildNumber\": \"10\", \"journeyName\":\"simple-test\"}"  \
---telemetry.optIn=true  \
---telemetry.sendUsageTo=staging  \
---xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf" &
+echo "starting kibana"
+
+./bin/kibana &
 export kibPid=$!
 
+echo "kibana started"
 
 # wait until we can login to kibana
 curl 'http://localhost:5620/internal/security/login' \
