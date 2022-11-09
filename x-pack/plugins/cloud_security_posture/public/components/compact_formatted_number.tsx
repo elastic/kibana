@@ -16,13 +16,13 @@ export const CompactFormattedNumber = ({
   abbreviateAbove?: number;
 }) => {
   if (number <= abbreviateAbove) {
-    return <span>{number.toLocaleString('en-US')}</span>;
+    return <span>{number.toLocaleString()}</span>;
   }
 
   return (
-    <EuiToolTip content={number.toLocaleString('en-US')}>
+    <EuiToolTip content={number.toLocaleString()}>
       <span>
-        {number.toLocaleString('en-US', {
+        {number.toLocaleString(undefined, {
           notation: 'compact',
           maximumFractionDigits: 1,
         })}
