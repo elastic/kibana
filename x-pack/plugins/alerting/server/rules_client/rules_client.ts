@@ -558,7 +558,7 @@ export class RulesClient {
      */
     if (
       isDetectionEngineAADRuleType(ruleSavedObject) ||
-      ruleSavedObject.attributes.consumer === 'siem'
+      ruleSavedObject.attributes.consumer === AlertConsumers.SIEM
     ) {
       throw Boom.badRequest(
         'The clone functionality is not enable for rule who belongs to security solution'
