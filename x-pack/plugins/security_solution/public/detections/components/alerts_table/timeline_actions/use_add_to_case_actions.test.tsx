@@ -147,6 +147,6 @@ describe('useAddToCaseActions', () => {
     renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });
-    expect(addToNewCase.mock.calls[0][0].initialValue).toEqual({});
+    expect(addToNewCase.mock.calls[0][0]).not.toHaveProperty('initialValue');
   });
 });
