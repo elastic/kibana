@@ -19,6 +19,7 @@ trap 'killall node -q' EXIT
 
 export TEST_ES_URL=http://elastic:changeme@localhost:9200
 export TEST_ES_DISABLE_STARTUP=true
+export KIBANA_BASE_URL=http://localhost:5620
 
 echo "--- 🔎 Start es"
 
@@ -82,9 +83,15 @@ cd "$KIBANA_DIR"
 node scripts/es_archiver load test/functional/fixtures/es_archiver/stress_test --es-url "$TEST_ES_URL"
 node scripts/kbn_archiver load test/functional/fixtures/kbn_archiver/stress_test --kibana-url "http://elastic:changeme@localhost:5620/"
 
+sleep 30;
+
+for ((i=1;i<=10;i++)); do
+  echo "--- Run simple test - #$i"
+  node scripts/simple_test.js
+  sleep 5;
+done
 
 echo "--- 🔎 Shutdown Kibana"
-check_running_processes
 echo "waiting for $kbnPid to exit gracefully";
 
 timeout=30 #seconds
