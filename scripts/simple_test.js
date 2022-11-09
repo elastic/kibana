@@ -78,7 +78,7 @@ async function waitForVisualizations(page, visCount) {
 
 async function simpleTest() {
   var baseUrl = process.env.KIBANA_BASE_URL;
-  var browser = await playwright.chromium.launch({ headless: false, timeout: 60_000 });
+  var browser = await playwright.chromium.launch({ headless: true, timeout: 60_000 });
   var context = await browser.newContext({ bypassCSP: true });
   var cookie = await getCookie(baseUrl, 'elastic', 'changeme');
   await context.addCookies([cookie]);
