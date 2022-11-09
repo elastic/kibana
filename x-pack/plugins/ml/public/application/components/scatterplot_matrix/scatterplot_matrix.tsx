@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+// @ts-nocheck
 import React, { useMemo, useEffect, useState, FC } from 'react';
 
 // import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -53,7 +53,6 @@ const SCATTERPLOT_MATRIX_DEFAULT_FIELDS = 4;
 const SCATTERPLOT_MATRIX_DEFAULT_FETCH_SIZE = 1000;
 const SCATTERPLOT_MATRIX_DEFAULT_FETCH_MIN_SIZE = 1;
 const SCATTERPLOT_MATRIX_DEFAULT_FETCH_MAX_SIZE = 10000;
-const DEFAULT_QUERY = { match_all: {} };
 
 const TOGGLE_ON = i18n.translate('xpack.ml.splom.toggleOn', {
   defaultMessage: 'On',
@@ -129,7 +128,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
 
   // contains the fetched documents and columns to be passed on to the Vega spec.
   const [splom, setSplom] = useState<
-    { items: any[]; columns: string[]; messages: string[] } | undefined
+    { items: any[]; backgroundItems: any[]; columns: string[]; messages: string[] } | undefined
   >();
 
   // formats the array of field names for EuiComboBox
@@ -166,7 +165,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
 
   useEffect(() => {
     if (fields.length === 0) {
-      setSplom({ columns: [], items: [], messages: [] });
+      setSplom({ columns: [], items: [], backgroundItems: [], messages: [] });
       setIsLoading(false);
       return;
     }
@@ -195,48 +194,55 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           : searchQuery;
 
         let backgroundQuery;
-        // @ts-ignore // match_all property doesn't exist
-        if (searchQuery && searchQuery.match_all && Object.keys(searchQuery.match_all).length > 0) {
+        // If it's not the default query then we do a background search excluding the current query
+        if (
+          searchQuery &&
+          ((searchQuery.match_all && Object.keys(searchQuery.match_all).length > 0) ||
+            (searchQuery.bool && Object.keys(searchQuery.bool).length > 0))
+        ) {
           backgroundQuery = randomizeQuery
-          ? {
-              function_score: {
-                query: DEFAULT_QUERY,
-                random_score: { seed: 10, field: '_seq_no' },
-              },
-            }
-          : DEFAULT_QUERY;
+            ? {
+                function_score: {
+                  query: { bool: { must_not: [searchQuery] } },
+                  random_score: { seed: 10, field: '_seq_no' },
+                },
+              }
+            : { bool: { must_not: [searchQuery] } };
         }
 
         const combinedRuntimeMappings =
           indexPattern && getCombinedRuntimeMappings(indexPattern, runtimeMappings);
-        
+
         const body = {
-            fields: queryFields,
-            _source: false,
-            query: foregroundQuery,
-            from: 0,
-            size: fetchSize,
-            ...(isRuntimeMappings(combinedRuntimeMappings)
-              ? { runtime_mappings: combinedRuntimeMappings }
-              : {}),
-          };
+          fields: queryFields,
+          _source: false,
+          query: foregroundQuery,
+          from: 0,
+          size: fetchSize,
+          ...(isRuntimeMappings(combinedRuntimeMappings)
+            ? { runtime_mappings: combinedRuntimeMappings }
+            : {}),
+        };
 
         const promises = [
           esSearch({
             index,
-            body
-          })
-        ]
+            body,
+          }),
+        ];
 
         if (backgroundQuery) {
-          promises.push(esSearch({
-            index,
-            body: { ...body, query: backgroundQuery },
-          }))
+          promises.push(
+            esSearch({
+              index,
+              body: { ...body, query: backgroundQuery },
+            })
+          );
         }
 
-        // @ts-ignore estypes.SearchResponse 
-        const [foregroundResp, backGroundResp] = await Promise.all(promises);
+        // estypes.SearchResponse
+        // TODO: update types and move items process to separate function
+        const [foregroundResp, backgroundResp] = await Promise.all(promises);
 
         if (!options.didCancel) {
           const items = foregroundResp.hits.hits
@@ -246,6 +252,15 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
               )
             )
             .filter((d: any) => !Object.keys(d).some((field) => Array.isArray(d[field])));
+
+          const backgroundItems =
+            backgroundResp?.hits.hits
+              .map((d: any) =>
+                getProcessedFields(d.fields ?? {}, (key: string) =>
+                  key.startsWith(`${resultsField}.feature_importance`)
+                )
+              )
+              .filter((d: any) => !Object.keys(d).some((field) => Array.isArray(d[field]))) ?? [];
 
           const originalDocsCount = foregroundResp.hits.hits.length;
           const filteredDocsCount = originalDocsCount - items.length;
@@ -270,12 +285,17 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             );
           }
 
-          setSplom({ columns: fields, items, messages });
+          setSplom({ columns: fields, items, backgroundItems, messages });
           setIsLoading(false);
         }
       } catch (e) {
         setIsLoading(false);
-        setSplom({ columns: [], items: [], messages: [extractErrorMessage(e)] });
+        setSplom({
+          columns: [],
+          items: [],
+          backgroundItems: [],
+          messages: [extractErrorMessage(e)],
+        });
       }
     }
 
@@ -293,10 +313,11 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       return;
     }
 
-    const { items, columns } = splom;
+    const { items, backgroundItems, columns } = splom;
 
     return getScatterplotMatrixVegaLiteSpec(
       items,
+      backgroundItems,
       columns,
       euiTheme,
       resultsField,
