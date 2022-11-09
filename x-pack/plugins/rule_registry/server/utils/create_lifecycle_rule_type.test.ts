@@ -95,15 +95,13 @@ function createRule(shouldWriteAlerts: boolean = true) {
       scheduleActions.mockClear();
 
       state = ((await type.executor({
-        alertId: 'alertId',
-        createdBy: 'createdBy',
         executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
         logger: loggerMock.create(),
-        name: 'name',
         namespace: 'namespace',
         params: {},
         previousStartedAt,
         rule: {
+          id: 'alertId',
           actions: [],
           consumer: 'consumer',
           createdAt,
@@ -131,12 +129,11 @@ function createRule(shouldWriteAlerts: boolean = true) {
           shouldStopExecution: () => false,
           shouldWriteAlerts: () => shouldWriteAlerts,
           uiSettingsClient: {} as any,
+          ruleMonitoringService: {} as any,
         },
         spaceId: 'spaceId',
         startedAt,
         state,
-        tags: ['tags'],
-        updatedBy: 'updatedBy',
       })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;

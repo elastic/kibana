@@ -42,7 +42,7 @@ import {
   RuleType as CommonRuleType,
   RuleLastRun,
 } from '@kbn/alerting-plugin/common';
-import type { BulkEditError } from '@kbn/alerting-plugin/server';
+import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -160,8 +160,13 @@ export enum RuleFlyoutCloseReason {
 
 export interface BulkEditResponse {
   rules: Rule[];
-  errors: BulkEditError[];
+  errors: BulkOperationError[];
   total: number;
+}
+
+export enum ActionConnectorMode {
+  Test = 'test',
+  ActionForm = 'actionForm',
 }
 
 export interface ActionParamsProps<TParams> {
@@ -175,6 +180,7 @@ export interface ActionParamsProps<TParams> {
   isLoading?: boolean;
   isDisabled?: boolean;
   showEmailSubjectAndMessage?: boolean;
+  executionMode?: ActionConnectorMode;
 }
 
 export interface Pagination {
@@ -318,6 +324,7 @@ export interface RuleTypeParamsExpressionProps<
     key: Prop,
     value: SanitizedRule<Params>[Prop] | null
   ) => void;
+  onChangeMetaData: (metadata: MetaData) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
@@ -355,10 +362,10 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
   initialRule: Rule;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: RuleFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
-  onSave?: () => Promise<void>;
+  onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleType?: RuleType<string, string>;
 }
@@ -367,13 +374,13 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: RuleFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   ruleTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Rule>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
-  onSave?: () => Promise<void>;
+  onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
   filteredRuleTypes?: string[];

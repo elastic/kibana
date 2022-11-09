@@ -10,7 +10,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { merge } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import { copyAllowlistedFields, exceptionListAllowlistFields } from './filterlists';
+import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import type {
   ExceptionListItem,
@@ -191,7 +191,7 @@ export const templateExceptionList = (
 
     // cast exception list type to a TelemetryEvent for allowlist filtering
     const filteredListItem = copyAllowlistedFields(
-      exceptionListAllowlistFields,
+      filterList.exceptionLists,
       item as unknown as TelemetryEvent
     );
 

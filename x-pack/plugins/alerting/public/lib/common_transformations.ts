@@ -42,7 +42,7 @@ function transformMonitoring(input: RuleMonitoring): RuleMonitoring {
   return {
     run: {
       last_run: {
-        timestamp: new Date(input.run.last_run.timestamp),
+        timestamp: input.run.last_run.timestamp,
         ...restLastRun,
       },
       ...rest,

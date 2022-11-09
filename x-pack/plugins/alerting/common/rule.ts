@@ -134,7 +134,6 @@ export interface Rule<Params extends RuleTypeParams = never> {
   isSnoozedUntil?: Date | null;
   lastRun?: RuleLastRun | null;
   nextRun?: Date | null;
-  running: boolean;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
@@ -143,6 +142,7 @@ export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = Sanit
 
 export type SanitizedRuleConfig = Pick<
   SanitizedRule,
+  | 'id'
   | 'name'
   | 'tags'
   | 'consumer'
@@ -204,7 +204,7 @@ export interface RuleMonitoringCalculatedMetrics extends SavedObjectAttributes {
 }
 
 export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
-  duration: number;
+  duration?: number;
   total_search_duration_ms?: number | null;
   total_indexing_duration_ms?: number | null;
   total_alerts_detected?: number | null;

@@ -87,7 +87,7 @@ import {
   getDefaultMonitoring,
   updateMonitoring,
   convertMonitoringFromRawAndVerify,
-  getNextRunString,
+  getNextRun,
 } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -319,17 +319,9 @@ export interface BulkDeleteOptionsIds {
 
 export type BulkDeleteOptions = BulkDeleteOptionsFilter | BulkDeleteOptionsIds;
 
-export interface BulkEditError {
+export interface BulkOperationError {
   message: string;
-  rule: {
-    id: string;
-    name: string;
-  };
-}
-
-export interface BulkDeleteError {
-  message: string;
-  status: number;
+  status?: number;
   rule: {
     id: string;
     name: string;
@@ -385,7 +377,6 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'isSnoozedUntil'
     | 'lastRun'
     | 'nextRun'
-    | 'running'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -624,7 +615,6 @@ export class RulesClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
-      running: false,
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
     };
@@ -1943,18 +1933,24 @@ export class RulesClient {
     );
 
     const taskIdsFailedToBeDeleted: string[] = [];
+    const taskIdsSuccessfullyDeleted: string[] = [];
     if (taskIdsToDelete.length > 0) {
       try {
         const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
         resultFromDeletingTasks?.statuses.forEach((status) => {
-          if (!status.success) {
+          if (status.success) {
+            taskIdsSuccessfullyDeleted.push(status.id);
+          } else {
             taskIdsFailedToBeDeleted.push(status.id);
           }
         });
         this.logger.debug(
-          `Successfully deleted schedules for underlying tasks: ${taskIdsToDelete
-            .filter((id) => taskIdsFailedToBeDeleted.includes(id))
-            .join(', ')}`
+          `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
+            ', '
+          )}`
+        );
+        this.logger.error(
+          `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(', ')}`
         );
       } catch (error) {
         this.logger.error(
@@ -1988,7 +1984,7 @@ export class RulesClient {
     const rules: SavedObjectsBulkDeleteObject[] = [];
     const apiKeysToInvalidate: string[] = [];
     const taskIdsToDelete: string[] = [];
-    const errors: BulkDeleteError[] = [];
+    const errors: BulkOperationError[] = [];
     const apiKeyToRuleIdMapping: Record<string, string> = {};
     const taskIdToRuleIdMapping: Record<string, string> = {};
     const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -2044,7 +2040,7 @@ export class RulesClient {
     options: BulkEditOptions<Params>
   ): Promise<{
     rules: Array<SanitizedRule<Params>>;
-    errors: BulkEditError[];
+    errors: BulkOperationError[];
     total: number;
   }> {
     const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
@@ -2211,7 +2207,7 @@ export class RulesClient {
     apiKeysToInvalidate: string[];
     rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
     resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
-    errors: BulkEditError[];
+    errors: BulkOperationError[];
   }> {
     const rulesFinder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
@@ -2224,7 +2220,7 @@ export class RulesClient {
       );
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-    const errors: BulkEditError[] = [];
+    const errors: BulkOperationError[] = [];
     const apiKeysToInvalidate: string[] = [];
     const apiKeysMap = new Map<string, { oldApiKey?: string; newApiKey?: string }>();
     const username = await this.getUserName();
@@ -2657,8 +2653,7 @@ export class RulesClient {
             duration: 0,
           }),
         }),
-        running: false,
-        nextRun: getNextRunString(schedule.interval),
+        nextRun: getNextRun({ interval: schedule.interval }),
         enabled: true,
         updatedBy: username,
         updatedAt: now.toISOString(),
@@ -3519,6 +3514,7 @@ export class RulesClient {
           snoozeSchedule,
         })
       : null;
+    const includeMonitoring = monitoring && !excludeFromPublicApi;
     const rule = {
       id,
       notifyWhen,
@@ -3544,7 +3540,7 @@ export class RulesClient {
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
-      ...(monitoring
+      ...(includeMonitoring
         ? { monitoring: convertMonitoringFromRawAndVerify(this.logger, id, monitoring) }
         : {}),
       ...(nextRun ? { nextRun: new Date(nextRun) } : {}),

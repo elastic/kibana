@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { Logger } from '@kbn/core/server';
-import { RuleMonitoring, RawRuleMonitoring } from '../types';
+import stats from 'stats-lite';
+import { RuleMonitoring, RawRuleMonitoring, RuleMonitoringHistory } from '../types';
 
 export const INITIAL_METRICS = {
-  duration: 0,
   total_search_duration_ms: null,
   total_indexing_duration_ms: null,
   total_alerts_detected: null,
@@ -16,7 +16,7 @@ export const INITIAL_METRICS = {
   gap_duration_s: null,
 };
 
-export const getDefaultMonitoring = (timestamp: string) => {
+export const getDefaultMonitoring = (timestamp: string): RawRuleMonitoring => {
   return {
     run: {
       history: [],
@@ -29,6 +29,25 @@ export const getDefaultMonitoring = (timestamp: string) => {
       },
     },
   };
+};
+
+export const getExecutionDurationPercentiles = (history: RuleMonitoringHistory[]) => {
+  const durationSamples = history.reduce<number[]>((duration, historyItem) => {
+    if (typeof historyItem.duration === 'number') {
+      return [...duration, historyItem.duration];
+    }
+    return duration;
+  }, []);
+
+  if (durationSamples.length) {
+    return {
+      p50: stats.percentile(durationSamples as number[], 0.5),
+      p95: stats.percentile(durationSamples as number[], 0.95),
+      p99: stats.percentile(durationSamples as number[], 0.99),
+    };
+  }
+
+  return {};
 };
 
 // Immutably updates the monitoring object with timestamp and duration.

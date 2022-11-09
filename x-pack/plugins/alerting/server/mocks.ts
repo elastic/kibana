@@ -14,7 +14,7 @@ import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_so
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
-import { AlertInstanceContext, AlertInstanceState } from './types';
+import { AlertInstanceContext, AlertInstanceState, PublicRuleMonitoringService } from './types';
 
 export { rulesClientMock };
 
@@ -30,6 +30,7 @@ const createSetupMock = () => {
 const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     listTypes: jest.fn(),
+    getAllTypes: jest.fn(),
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),
@@ -127,3 +128,17 @@ export const alertsMock = {
   createStart: createStartMock,
   createRuleExecutorServices: createRuleExecutorServicesMock,
 };
+
+const createRuleMonitoringServiceMock = () => {
+  const mock = {
+    setLastRunMetricsTotalSearchDurationMs: jest.fn(),
+    setLastRunMetricsTotalIndexingDurationMs: jest.fn(),
+    setLastRunMetricsTotalAlertsDetected: jest.fn(),
+    setLastRunMetricsTotalAlertsCreated: jest.fn(),
+    setLastRunMetricsGapDurationS: jest.fn(),
+  } as unknown as jest.Mocked<PublicRuleMonitoringService>;
+
+  return mock;
+};
+
+export const ruleMonitoringServiceMock = { create: createRuleMonitoringServiceMock };

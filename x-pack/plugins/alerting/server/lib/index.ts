@@ -31,7 +31,7 @@ export {
   getDefaultMonitoring,
   convertMonitoringFromRawAndVerify,
 } from './monitoring';
-export { getNextRunDate, getNextRunString } from './next_run';
+export { getNextRun } from './next_run';
 export { processAlerts } from './process_alerts';
 export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
 export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';

@@ -111,6 +111,7 @@ import { BulkActionsResolver } from './services/agents';
 import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
+import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -220,6 +221,7 @@ export class FleetPlugin
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
   private bulkActionsResolver?: BulkActionsResolver;
   private fleetUsageSender?: FleetUsageSender;
+  private checkDeletedFilesTask?: CheckDeletedFilesTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -426,6 +428,11 @@ export class FleetPlugin
 
     this.telemetryEventsSender.setup(deps.telemetry);
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
+    this.checkDeletedFilesTask = new CheckDeletedFilesTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
@@ -457,6 +464,7 @@ export class FleetPlugin
     this.telemetryEventsSender.start(plugins.telemetry, core);
     this.bulkActionsResolver?.start(plugins.taskManager);
     this.fleetUsageSender?.start(plugins.taskManager);
+    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
     startFleetUsageLogger(plugins.taskManager);
 
     const logger = appContextService.getLogger();
@@ -572,7 +580,7 @@ export class FleetPlugin
       internalSoClient,
       this.getLogger()
     );
-    return this.packageService;
+    return this.packageService!;
   }
 
   private getLogger(): Logger {

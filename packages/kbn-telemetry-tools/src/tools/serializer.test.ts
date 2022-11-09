@@ -167,4 +167,13 @@ describe('getDescriptor', () => {
       prop5: { kind: ts.SyntaxKind.FirstLiteralToken, type: 'FirstLiteralToken' },
     });
   });
+
+  it('serializes RecordStringUnknown', () => {
+    const usageInterface = usageInterfaces.get('RecordStringUnknown')!;
+    const descriptor = getDescriptor(usageInterface, tsProgram);
+    expect(descriptor).toEqual({
+      kind: ts.SyntaxKind.UnknownKeyword,
+      type: 'UnknownKeyword',
+    });
+  });
 });
