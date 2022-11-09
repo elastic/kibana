@@ -52,13 +52,15 @@ export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<
 
 interface ColumnsProps {
   hasCRUDPermissions: boolean;
-  startMlJobsIfNeeded: (rule: Rule) => Promise<void>;
 }
 
 const useEnabledColumn = ({
   hasCRUDPermissions,
   startMlJobsIfNeeded,
-}: ColumnsProps): TableColumn => {
+}: {
+  hasCRUDPermissions: boolean;
+  startMlJobsIfNeeded: (rule: Rule) => Promise<void>;
+}): TableColumn => {
   const hasMlPermissions = useHasMlPermissions();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
