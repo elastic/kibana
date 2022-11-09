@@ -85,7 +85,7 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, fieldName, fieldSpec } = request;
+    const { runPastTimeout, filters, fieldName, fieldSpec, parentFieldName } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
@@ -108,7 +108,7 @@ export const setupOptionsListSuggestionsRoute = (
       : {};
     // console.log('builtSuggestionAggregation', builtSuggestionAggregation);
     // console.log('fieldSpec', fieldSpec);
-    let body: SearchRequest['body'] = {
+    const body: SearchRequest['body'] = {
       size: 0,
       ...timeoutSettings,
       query: {
@@ -128,17 +128,19 @@ export const setupOptionsListSuggestionsRoute = (
     };
     if (fieldSpec?.runtimeField) {
       // console.log('runtime field');
-      body = {
-        ...body,
-        runtime_mappings: {
-          [fieldName]: {
-            type: fieldSpec.runtimeField.type,
-            script: {
-              ...fieldSpec.runtimeField.script,
-            },
+      body.runtime_mappings = {
+        [parentFieldName ?? fieldName]: {
+          type: fieldSpec.runtimeField.type,
+          script: {
+            ...fieldSpec.runtimeField.script,
           },
         },
       };
+      if (fieldSpec.runtimeField.type === 'composite') {
+        body.runtime_mappings[parentFieldName ?? fieldName].fields = {
+          ...fieldSpec.runtimeField.fields,
+        };
+      }
     }
     // console.log('body', JSON.stringify(body));
 

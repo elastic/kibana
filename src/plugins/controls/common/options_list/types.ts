@@ -60,6 +60,7 @@ export interface OptionsListRequestBody {
   filters?: Array<{ bool: BoolQuery }>;
   selectedOptions?: string[];
   runPastTimeout?: boolean;
+  parentFieldName?: string;
   textFieldName?: string;
   searchString?: string;
   fieldSpec?: FieldSpec;
