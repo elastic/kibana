@@ -338,7 +338,7 @@ const getRoutes = (
       pageHeader: {
         pageTitle: (
           <FormattedMessage
-            id="xpack.synthetics.testRunDetailsRoute.title"
+            id="xpack.synthetics.testRunDetailsRoute.page.title"
             defaultMessage="Test run details"
           />
         ),
