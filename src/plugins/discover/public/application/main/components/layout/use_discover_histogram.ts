@@ -12,10 +12,10 @@ import {
   getVisualizeInformation,
   triggerVisualizeActions,
 } from '@kbn/unified-field-list-plugin/public';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
-import useDebounce from 'react-use/lib/useDebounce';
 import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { getUiActions } from '../../../../kibana_services';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -121,7 +121,9 @@ export const useDiscoverHistogram = ({
    * Request
    */
 
-  const searchSessionId = searchSessionManager.getLastSearchSessionId();
+  // The searchSessionId will be updated whenever a new search
+  // is started and will trigger a unified histogram refetch
+  const searchSessionId = useObservable(searchSessionManager.searchSessionId$);
   const request = useMemo(
     () => ({
       searchSessionId,
@@ -235,36 +237,12 @@ export const useDiscoverHistogram = ({
     [field, isPlainRecord, isTimeBased]
   );
 
-  /**
-   * Reload
-   */
-
-  const [lastReloadRequestTime, setLastReloadRequestTime] = useState(0);
-  const { fetchStatus: mainFetchStatus } = useDataState(savedSearchData$.main$);
-  const firstRun = useRef(true);
-
-  // Reload unified histogram when a refetch is triggered,
-  // with a debounce to avoid multiple requests
-  const [, cancelDebounce] = useDebounce(
-    () => {
-      if (mainFetchStatus === FetchStatus.LOADING && !firstRun.current) {
-        setLastReloadRequestTime(Date.now());
-      }
-
-      firstRun.current = false;
-    },
-    100,
-    [mainFetchStatus]
-  );
-
-  // A refetch is triggered when the data view is changed,
-  // but we don't want to reload unified histogram in this case,
-  // so cancel the debounced effect on unmount
-  useEffect(() => cancelDebounce, [cancelDebounce]);
-
   return {
+    // The histogram layout shouldn't render until the first search
+    // request has started, or an immediate refetch of the histogram
+    // will be triggered when the searchSessionId is set
+    shouldRender: Boolean(searchSessionId),
     topPanelHeight,
-    lastReloadRequestTime,
     request,
     hits,
     chart,
