@@ -98,17 +98,6 @@ export const createReduxEmbeddableTools = <
     >['actions'],
     useEmbeddableDispatch: () => useDispatch<typeof store.dispatch>(),
     useEmbeddableSelector: useSelector as TypedUseSelectorHook<ReduxEmbeddableStateType>,
-
-    // populate container actions for embeddables which are Containers
-    containerActions: embeddable.getIsContainer()
-      ? {
-          untilEmbeddableLoaded: embeddable.untilEmbeddableLoaded.bind(embeddable),
-          updateInputForChild: embeddable.updateInputForChild.bind(embeddable),
-          removeEmbeddable: embeddable.removeEmbeddable.bind(embeddable),
-          addNewEmbeddable: embeddable.addNewEmbeddable.bind(embeddable),
-          replaceEmbeddable: embeddable.replaceEmbeddable.bind(embeddable),
-        }
-      : undefined,
   };
 
   const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }: { children?: ReactNode }) => (

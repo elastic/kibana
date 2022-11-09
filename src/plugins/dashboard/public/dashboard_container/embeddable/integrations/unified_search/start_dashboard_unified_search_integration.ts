@@ -8,8 +8,6 @@
 
 import { cloneDeep } from 'lodash';
 
-import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-
 import { DashboardContainer } from '../../dashboard_container';
 import { syncUnifiedSearchState } from './sync_dashboard_unified_search_state';
 import { pluginServices } from '../../../../services/plugin_services';
@@ -39,12 +37,6 @@ export function startUnifiedSearchIntegration(
     timefilter: { timefilter: timefilterService },
   } = queryService;
 
-  // starts syncing `_g` portion of url with query services
-  const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-    queryService,
-    this.kbnUrlStateStorage
-  );
-
   // apply initial dashboard saved filters, query, and time range to the query bar.
   this.applySavedFiltersToUnifiedSearch(initialInput);
 
@@ -52,8 +44,7 @@ export function startUnifiedSearchIntegration(
   this.untilInitialized().then(() => {
     const stopSyncingUnifiedSearchState = syncUnifiedSearchState.bind(this)();
     setCleanupFunction(() => {
-      stopSyncingUnifiedSearchState();
-      stopSyncingQueryServiceStateWithUrl();
+      stopSyncingUnifiedSearchState?.();
     });
   });
   return initialTimeRange;
@@ -86,12 +77,7 @@ export function applySavedFiltersToUnifiedSearch(
    * time range and refresh interval to the query service.
    */
   if (timeRestore) {
-    const globalQueryState = this.kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g');
-    if (!globalQueryState?.time && timeRange) {
-      timefilterService.setTime(timeRange);
-    }
-    if (!globalQueryState?.refreshInterval && refreshInterval) {
-      timefilterService.setRefreshInterval(refreshInterval);
-    }
+    if (timeRange) timefilterService.setTime(timeRange);
+    if (refreshInterval) timefilterService.setRefreshInterval(refreshInterval);
   }
 }

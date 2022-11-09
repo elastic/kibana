@@ -50,7 +50,7 @@ export const useDashboardMenuItems = ({
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
     embeddableInstance: dashboardContainer,
-    actions: { setViewMode, setFullScreenMode, resetToLastSavedInput },
+    actions: { setViewMode, setFullScreenMode },
   } = useDashboardContainerContext();
   const dispatch = useEmbeddableDispatch();
 
@@ -121,14 +121,14 @@ export const useDashboardMenuItems = ({
     if (hasUnsavedChanges) {
       confirmDiscardUnsavedChanges(() => {
         batch(() => {
-          dispatch(resetToLastSavedInput({}));
+          dashboardContainer.resetToLastSavedState();
           dispatch(setViewMode(ViewMode.VIEW));
         });
       });
       return;
     }
     dispatch(setViewMode(ViewMode.VIEW));
-  }, [dashboardContainer, dispatch, hasUnsavedChanges, resetToLastSavedInput, setViewMode]);
+  }, [dashboardContainer, dispatch, hasUnsavedChanges, setViewMode]);
 
   /**
    * Register all of the top nav configs that can be used by dashboard.

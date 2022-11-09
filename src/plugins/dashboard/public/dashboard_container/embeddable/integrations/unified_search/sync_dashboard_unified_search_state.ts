@@ -8,10 +8,14 @@
 
 import { merge, Subject } from 'rxjs';
 
+import {
+  connectToQueryState,
+  syncGlobalQueryStateWithUrl,
+  waitUntilNextSessionCompletes$,
+} from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs/operators';
-import { connectToQueryState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
 import { pluginServices } from '../../../../services/plugin_services';
@@ -21,6 +25,8 @@ import { pluginServices } from '../../../../services/plugin_services';
  * and the dashboard Redux store.
  */
 export function syncUnifiedSearchState(this: DashboardContainer) {
+  if (!this.kbnUrlStateStorage) return;
+
   const {
     data: { query: queryService, search },
   } = pluginServices.getServices();
@@ -45,6 +51,12 @@ export function syncUnifiedSearchState(this: DashboardContainer) {
       query: query ?? queryString.getDefaultQuery(),
     });
   });
+
+  // starts syncing `_g` portion of url with query services
+  const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
+    queryService,
+    this.kbnUrlStateStorage
+  );
 
   // starts syncing app filters between dashboard state and filterManager
   const {
@@ -93,6 +105,7 @@ export function syncUnifiedSearchState(this: DashboardContainer) {
   const stopSyncingUnifiedSearchState = () => {
     autoRefreshSubscription.unsubscribe();
     timeRefreshSubscription.unsubscribe();
+    stopSyncingQueryServiceStateWithUrl();
     unsubscribeFromSavedFilterChanges();
     stopSyncingAppFilters();
   };

@@ -222,9 +222,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       ...creationOptions?.overrideInput,
     });
 
-    // set up data views integration
-    this.dataViewsChangeSubscription = this.syncDataViews();
-
     // set up unified search integration
     if (creationOptions?.unifiedSearchSettings) {
       const { kbnUrlStateStorage } = creationOptions.unifiedSearchSettings;
@@ -282,6 +279,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         this.stopDiffingDashboardState = cleanup;
       },
     });
+
+    // set up data views integration
+    this.dataViewsChangeSubscription = this.syncDataViews();
 
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
@@ -487,6 +487,34 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public onDataViewsUpdate$ = new Subject<DataView[]>();
+
+  public resetToLastSavedState() {
+    const {
+      dispatch,
+      getState,
+      actions: { resetToLastSavedInput },
+    } = this.getReduxEmbeddableTools();
+    dispatch(resetToLastSavedInput({}));
+    const {
+      explicitInput: { timeRange, refreshInterval },
+      componentState: {
+        lastSavedInput: { timeRestore: lastSavedTimeRestore },
+      },
+    } = getState();
+
+    // if we are syncing with unified search, we need to force reset the time picker.
+    if (this.kbnUrlStateStorage && lastSavedTimeRestore) {
+      const {
+        data: {
+          query: {
+            timefilter: { timefilter: timeFilterService },
+          },
+        },
+      } = pluginServices.getServices();
+      if (timeRange) timeFilterService.setTime(timeRange);
+      if (refreshInterval) timeFilterService.setRefreshInterval(refreshInterval);
+    }
+  }
 
   /**
    * Gets all the dataviews that are actively being used in the dashboard

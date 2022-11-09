@@ -53,7 +53,15 @@ export async function startDiffingDashboardState(
   ): Promise<boolean> => {
     if (useSessionBackup) {
       const unsavedChanges = await getUnsavedChanges.bind(this)(lastState, currentState);
-      dashboardSessionStorage.setState(this.getDashboardSavedObjectId(), unsavedChanges);
+
+      /**
+       * Current behaviour expects time range not to be backed up.
+       * TODO: Revisit this. It seems like we should treat all state the same.
+       */
+      dashboardSessionStorage.setState(
+        this.getDashboardSavedObjectId(),
+        omit(unsavedChanges, ['timeRange', 'refreshInterval'])
+      );
 
       return Object.keys(omit(unsavedChanges, 'viewMode')).length > 0; // omit view mode because it is always backed up
     } else {

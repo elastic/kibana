@@ -157,7 +157,11 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
    */
   useEffect(() => {
     onAppLeave((actions) => {
-      if (hasUnsavedChanges && !getStateTransfer().isTransferInProgress) {
+      if (
+        viewMode === ViewMode.EDIT &&
+        hasUnsavedChanges &&
+        !getStateTransfer().isTransferInProgress
+      ) {
         return actions.confirm(
           leaveConfirmStrings.getLeaveSubtitle(),
           leaveConfirmStrings.getLeaveTitle()
@@ -169,7 +173,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
       onAppLeave((actions) => actions.default());
     };
-  }, [onAppLeave, getStateTransfer, hasUnsavedChanges]);
+  }, [onAppLeave, getStateTransfer, hasUnsavedChanges, viewMode]);
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     redirectTo,

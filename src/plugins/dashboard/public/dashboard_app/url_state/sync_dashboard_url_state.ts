@@ -85,7 +85,6 @@ export const startSyncingDashboardUrlState = ({
       const stateFromUrl = loadAndRemoveDashboardState(kbnUrlStateStorage);
       if (Object.keys(stateFromUrl).length === 0) return;
       dashboardContainer.updateInput(stateFromUrl);
-      setTimeout(dashboardContainer.applySavedFiltersToUnifiedSearch, 1);
     });
 
   const stopWatchingAppStateInUrl = () => appStateSubscription.unsubscribe();
