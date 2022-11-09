@@ -57,11 +57,7 @@ export class TooltipHandler {
 
     const el = document.createElement('div');
     el.setAttribute('id', tooltipId);
-    ['vgaVis__tooltip', 'euiToolTipPopover', 'euiToolTip', `euiToolTip--${this.position}`].forEach(
-      (className) => {
-        el.classList.add(className);
-      }
-    );
+    el.classList.add('vgaVis__tooltip', `vgaVis__tooltip--${this.position}`);
 
     if (this.textTruncate) {
       el.classList.add('vgaVis__tooltip--textTruncate');
