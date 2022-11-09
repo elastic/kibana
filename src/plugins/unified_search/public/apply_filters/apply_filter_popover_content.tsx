@@ -25,8 +25,8 @@ import {
   getFieldDisplayValueFromFilter,
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { FilterContent } from '../filter_badge';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { FilterContent } from '../filter_badge/filter_content';
 
 interface Props {
   filters: Filter[];
