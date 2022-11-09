@@ -9,10 +9,10 @@ if [[ ! -d "$KIBANA_BUILD_LOCATION/bin" ]]; then
 
   cd "$WORKSPACE"
 
-  download_artifact kibana-default.tar.gz . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-  download_artifact kibana-default-plugins.tar.gz . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-  echo "KIBANA_BUILD_ID = $KIBANA_BUILD_ID"
-  echo "BUILDKITE_BUILD_ID = $BUILDKITE_BUILD_ID"
+  OLD_BUILD_ID="01845ba0-7599-464f-9a46-c7e98cd8be7d"
+
+  download_artifact kibana-default.tar.gz . --build "${KIBANA_BUILD_ID:-$OLD_BUILD_ID}"
+  download_artifact kibana-default-plugins.tar.gz . --build "${KIBANA_BUILD_ID:-$OLD_BUILD_ID}"
 
   mkdir -p "$KIBANA_BUILD_LOCATION"
   tar -xzf kibana-default.tar.gz -C "$KIBANA_BUILD_LOCATION" --strip=1
