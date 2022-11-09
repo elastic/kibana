@@ -58,10 +58,10 @@ describe('SyncJobsViewLogic', () => {
   });
 
   describe('actions', () => {
-    describe('FetchIndexApiLogic.apiSuccess', () => {
+    describe('CachedFetchIndexApiWrapperLogic.apiSuccess', () => {
       const syncJob: ConnectorSyncJob = {
-        canceled_at: null,
         cancelation_requested_at: null,
+        canceled_at: null,
         completed_at: '2022-09-05T15:59:39.816+00:00',
         connector_id: 'we2284IBjobuR2-lAuXh',
         created_at: '2022-09-05T14:59:39.816+00:00',
@@ -75,9 +75,9 @@ describe('SyncJobsViewLogic', () => {
         last_seen: '2022-09-05T15:59:39.816+00:00',
         metadata: {},
         pipeline: null,
-        trigger_method: TriggerMethod.ON_DEMAND,
         started_at: '2022-09-05T14:59:39.816+00:00',
         status: SyncStatus.COMPLETED,
+        trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: 'hostname_fake',
       };
       const syncJobView: SyncJobView = {
