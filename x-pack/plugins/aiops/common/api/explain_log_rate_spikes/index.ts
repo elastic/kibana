@@ -12,7 +12,7 @@ export {
   addChangePointsHistogramAction,
   addErrorAction,
   pingAction,
-  resetAction,
+  resetAllAction,
   resetErrorsAction,
   updateLoadingStateAction,
   API_ACTION_NAME,

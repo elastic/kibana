@@ -32,7 +32,7 @@ import {
   aiopsExplainLogRateSpikesSchema,
   addErrorAction,
   pingAction,
-  resetAction,
+  resetAllAction,
   resetErrorsAction,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
@@ -88,7 +88,7 @@ export const defineExplainLogRateSpikesRoute = (
       let logMessageCounter = 1;
 
       function logDebugMessage(msg: string) {
-        logger.info(`Explain Log Rate Spikes #${logMessageCounter}: ${msg}`);
+        logger.debug(`Explain Log Rate Spikes #${logMessageCounter}: ${msg}`);
         logMessageCounter++;
       }
 
@@ -174,7 +174,7 @@ export const defineExplainLogRateSpikesRoute = (
 
           if (!request.body.overrides) {
             logDebugMessage('Full Reset.');
-            push(resetAction());
+            push(resetAllAction());
           } else {
             logDebugMessage('Reset Errors.');
             push(resetErrorsAction());
@@ -189,7 +189,7 @@ export const defineExplainLogRateSpikesRoute = (
 
           // Step 1: Index Info: Field candidates, total doc count, sample probability
 
-          let fieldCandidates: Awaited<ReturnType<typeof fetchIndexInfo>>['fieldCandidates'] = [];
+          const fieldCandidates: Awaited<ReturnType<typeof fetchIndexInfo>>['fieldCandidates'] = [];
           let fieldCandidatesCount = fieldCandidates.length;
 
           let sampleProbability = 1;
@@ -275,6 +275,7 @@ export const defineExplainLogRateSpikesRoute = (
           if (request.body.overrides?.remainingFieldCandidates) {
             fieldCandidates.push(...request.body.overrides?.remainingFieldCandidates);
             remainingFieldCandidates = request.body.overrides?.remainingFieldCandidates;
+            fieldCandidatesCount = fieldCandidates.length;
             loadingStepSizePValues =
               LOADED_FIELD_CANDIDATES +
               PROGRESS_STEP_P_VALUES -
@@ -286,10 +287,6 @@ export const defineExplainLogRateSpikesRoute = (
           logDebugMessage('Fetch p-values.');
 
           const pValuesQueue = queue(async function (fieldCandidate: string) {
-            // if (fieldCandidatesChunks.length === 3 && request.body.overrides === undefined) {
-            //   throw new Error('simulate error');
-            // }
-
             loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
 
             let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
@@ -342,15 +339,20 @@ export const defineExplainLogRateSpikesRoute = (
                 remainingFieldCandidates,
               })
             );
+          }, MAX_CONCURRENT_QUERIES);
 
-            if (shouldStop) {
+          pValuesQueue.push(fieldCandidates, (err) => {
+            if (err) {
+              logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
+              pushError(`Failed to fetch p-values.`);
+              pValuesQueue.kill();
+              end();
+            } else if (shouldStop) {
               logDebugMessage('shouldStop fetching p-values.');
               pValuesQueue.kill();
               end();
             }
-          }, MAX_CONCURRENT_QUERIES);
-
-          pValuesQueue.push(fieldCandidates);
+          });
           await pValuesQueue.drain();
 
           if (changePoints.length === 0) {

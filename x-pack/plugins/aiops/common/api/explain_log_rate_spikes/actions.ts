@@ -19,7 +19,7 @@ export const API_ACTION_NAME = {
   ADD_CHANGE_POINTS_GROUP_HISTOGRAM: 'add_change_point_group_histogram',
   ADD_ERROR: 'add_error',
   PING: 'ping',
-  RESET: 'reset',
+  RESET_ALL: 'reset_all',
   RESET_ERRORS: 'reset_errors',
   UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
@@ -109,12 +109,12 @@ export function pingAction(): ApiActionPing {
   return { type: API_ACTION_NAME.PING };
 }
 
-interface ApiActionReset {
-  type: typeof API_ACTION_NAME.RESET;
+interface ApiActionResetAll {
+  type: typeof API_ACTION_NAME.RESET_ALL;
 }
 
-export function resetAction(): ApiActionReset {
-  return { type: API_ACTION_NAME.RESET };
+export function resetAllAction(): ApiActionResetAll {
+  return { type: API_ACTION_NAME.RESET_ALL };
 }
 
 interface ApiActionUpdateLoadingState {
@@ -144,6 +144,6 @@ export type AiopsExplainLogRateSpikesApiAction =
   | ApiActionAddChangePointsGroupHistogram
   | ApiActionAddError
   | ApiActionPing
-  | ApiActionReset
+  | ApiActionResetAll
   | ApiActionResetErrors
   | ApiActionUpdateLoadingState;
