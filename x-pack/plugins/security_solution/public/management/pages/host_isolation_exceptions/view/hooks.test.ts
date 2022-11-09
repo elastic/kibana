@@ -45,7 +45,10 @@ describe('host isolation exceptions hooks', () => {
     });
 
     it('should return false if does not have privileges and there are not existing host isolation items', () => {
-      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
+      useEndpointPrivilegesMock.mockReturnValue({
+        canIsolateHost: false,
+        canAccessEndpointManagement: false,
+      });
       mockedApis.responseProvider.exceptionsSummary.mockReturnValue({
         total: 0,
         linux: 0,
@@ -58,8 +61,11 @@ describe('host isolation exceptions hooks', () => {
       expect(result.current).toBe(false);
     });
 
-    it('should return true if does not have privileges and there are existing host isolation items', async () => {
-      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
+    it('should return true if does not have privileges but is a superuser and there are existing host isolation items', async () => {
+      useEndpointPrivilegesMock.mockReturnValue({
+        canIsolateHost: false,
+        canAccessEndpointManagement: true,
+      });
       const { result, waitForNextUpdate } = renderHook(
         () => useCanSeeHostIsolationExceptionsMenu(),
         {
