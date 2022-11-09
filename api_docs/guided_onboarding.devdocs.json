@@ -24,7 +24,13 @@
             "description": [],
             "signature": [
               "(httpClient: ",
-              "HttpSetup",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              },
               ") => void"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -39,7 +45,13 @@
                 "label": "httpClient",
                 "description": [],
                 "signature": [
-                  "HttpSetup"
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-common.HttpSetup",
+                    "text": "HttpSetup"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -60,7 +72,13 @@
               "() => ",
               "Observable",
               "<",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
               " | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -78,7 +96,13 @@
             "description": [],
             "signature": [
               "() => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
               "[]; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -96,9 +120,21 @@
             "description": [],
             "signature": [
               "(newState: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
               ", panelState: boolean) => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -113,7 +149,13 @@
                 "label": "newState",
                 "description": [],
                 "signature": [
-                  "GuideState"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideState",
+                    "text": "GuideState"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -147,11 +189,29 @@
             "description": [],
             "signature": [
               "(guideId: ",
-              "GuideId",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
               ", guide?: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
               " | undefined) => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -166,7 +226,13 @@
                 "label": "guideId",
                 "description": [],
                 "signature": [
-                  "GuideId"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -181,7 +247,13 @@
                 "label": "guide",
                 "description": [],
                 "signature": [
-                  "GuideState",
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideState",
+                    "text": "GuideState"
+                  },
                   " | undefined"
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -201,9 +273,21 @@
             "description": [],
             "signature": [
               "(guideId: ",
-              "GuideId",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
               ") => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -218,7 +302,13 @@
                 "label": "guideId",
                 "description": [],
                 "signature": [
-                  "GuideId"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -237,9 +327,21 @@
             "description": [],
             "signature": [
               "(guideId: ",
-              "GuideId",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
               ", stepId: ",
-              "GuideStepIds",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideStepIds",
+                "text": "GuideStepIds"
+              },
               ") => ",
               "Observable",
               "<boolean>"
@@ -256,7 +358,13 @@
                 "label": "guideId",
                 "description": [],
                 "signature": [
-                  "GuideId"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -271,7 +379,13 @@
                 "label": "stepId",
                 "description": [],
                 "signature": [
-                  "GuideStepIds"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideStepIds",
+                    "text": "GuideStepIds"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -290,11 +404,29 @@
             "description": [],
             "signature": [
               "(guideId: ",
-              "GuideId",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
               ", stepId: ",
-              "GuideStepIds",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideStepIds",
+                "text": "GuideStepIds"
+              },
               ") => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -309,7 +441,13 @@
                 "label": "guideId",
                 "description": [],
                 "signature": [
-                  "GuideId"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -324,7 +462,13 @@
                 "label": "stepId",
                 "description": [],
                 "signature": [
-                  "GuideStepIds"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideStepIds",
+                    "text": "GuideStepIds"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -343,11 +487,29 @@
             "description": [],
             "signature": [
               "(guideId: ",
-              "GuideId",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
               ", stepId: ",
-              "GuideStepIds",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideStepIds",
+                "text": "GuideStepIds"
+              },
               ") => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -362,7 +524,13 @@
                 "label": "guideId",
                 "description": [],
                 "signature": [
-                  "GuideId"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -377,7 +545,13 @@
                 "label": "stepId",
                 "description": [],
                 "signature": [
-                  "GuideStepIds"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideStepIds",
+                    "text": "GuideStepIds"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -430,7 +604,13 @@
             "description": [],
             "signature": [
               "(integration?: string | undefined) => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",

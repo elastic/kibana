@@ -32,6 +32,8 @@ const DEFAULT_VALUES = {
   indexName: '',
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
+  isCanceling: false,
+  isConnectorIndex: false,
   isSyncing: false,
   isWaitingForSync: false,
   lastUpdated: null,
@@ -46,7 +48,7 @@ const CONNECTOR_VALUES = {
   data: connectorIndex,
   index: indexToViewIndex(connectorIndex),
   ingestionMethod: IngestionMethod.CONNECTOR,
-  ingestionStatus: IngestionStatus.INCOMPLETE,
+  ingestionStatus: IngestionStatus.CONFIGURED,
   lastUpdated: 'never',
 };
 
@@ -93,8 +95,11 @@ describe('IndexViewLogic', () => {
               ...CONNECTOR_VALUES.index,
               connector: { ...CONNECTOR_VALUES.index.connector, sync_now: true },
             },
+            isCanceling: false,
+            isConnectorIndex: true,
             isWaitingForSync: true,
             localSyncNowValue: true,
+            pipelineData: undefined,
             syncStatus: SyncStatus.COMPLETED,
           })
         );

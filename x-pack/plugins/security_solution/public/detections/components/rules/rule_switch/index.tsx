@@ -7,10 +7,9 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
-import { noop } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useExecuteBulkAction } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
@@ -46,7 +45,7 @@ export const RuleSwitchComponent = ({
   const [myIsLoading, setMyIsLoading] = useState(false);
   const rulesTableContext = useRulesTableContextOptional();
   const { startTransaction } = useStartTransaction();
-  const { executeBulkAction } = useExecuteBulkAction();
+  const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: !rulesTableContext });
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
@@ -55,11 +54,8 @@ export const RuleSwitchComponent = ({
         name: enabled ? SINGLE_RULE_ACTIONS.DISABLE : SINGLE_RULE_ACTIONS.ENABLE,
       });
       const bulkActionResponse = await executeBulkAction({
-        setLoadingRules: rulesTableContext?.actions.setLoadingRules,
-        onSuccess: rulesTableContext ? undefined : noop,
-        action: event.target.checked ? BulkAction.enable : BulkAction.disable,
-        search: { ids: [id] },
-        visibleRuleIds: [],
+        type: event.target.checked ? BulkActionType.enable : BulkActionType.disable,
+        ids: [id],
       });
       if (bulkActionResponse?.attributes.results.updated.length) {
         // The rule was successfully updated
@@ -67,7 +63,7 @@ export const RuleSwitchComponent = ({
       }
       setMyIsLoading(false);
     },
-    [enabled, executeBulkAction, id, onChange, rulesTableContext, startTransaction]
+    [enabled, executeBulkAction, id, onChange, startTransaction]
   );
 
   const showLoader = useMemo((): boolean => {

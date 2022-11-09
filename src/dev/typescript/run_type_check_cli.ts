@@ -7,106 +7,228 @@
  */
 
 import Path from 'path';
-import Os from 'os';
+import Fs from 'fs';
+import Fsp from 'fs/promises';
 
-import * as Rx from 'rxjs';
-import { mergeMap, reduce } from 'rxjs/operators';
-import execa from 'execa';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/utils';
+import { Jsonc } from '@kbn/bazel-packages';
+import { runBazel } from '@kbn/bazel-runner';
+import { asyncForEachWithLimit } from '@kbn/std';
+import { BazelPackage, discoverBazelPackages } from '@kbn/bazel-packages';
 
 import { PROJECTS } from './projects';
-import { buildTsRefs } from './build_ts_refs';
-import { updateRootRefsConfig } from './root_refs_config';
+import { Project } from './project';
+import {
+  updateRootRefsConfig,
+  cleanupRootRefsConfig,
+  ROOT_REFS_CONFIG_PATH,
+} from './root_refs_config';
+
+function rel(from: string, to: string) {
+  const relative = Path.relative(from, to);
+  return relative.startsWith('.') ? relative : `./${relative}`;
+}
+
+function isValidRefs(refs: unknown): refs is Array<{ path: string }> {
+  return (
+    Array.isArray(refs) &&
+    refs.every(
+      (r) => typeof r === 'object' && r !== null && 'path' in r && typeof r.path === 'string'
+    )
+  );
+}
+
+function parseTsconfig(path: string) {
+  const jsonc = Fs.readFileSync(path, 'utf8');
+  const parsed = Jsonc.parse(jsonc) as Record<string, any>;
+  if (typeof parsed !== 'object' || parsed === null) {
+    throw createFailError(`expected JSON at ${path} to parse into an object`);
+  }
+
+  return parsed;
+}
+
+function toTypeCheckConfigPath(path: string) {
+  return path.endsWith('tsconfig.base.json')
+    ? path.replace(/\/tsconfig\.base\.json$/, '/tsconfig.base.type_check.json')
+    : path.replace(/\/tsconfig\.json$/, '/tsconfig.type_check.json');
+}
+
+function createTypeCheckConfigs(projects: Project[], bazelPackages: BazelPackage[]) {
+  const created = new Set<string>();
+  const bazelPackageIds = new Set(bazelPackages.map((p) => p.manifest.id));
+
+  // write root tsconfig.type_check.json
+  const baseTypeCheckConfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.type_check.json');
+  const baseConfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
+  const baseStat = Fs.statSync(baseConfigPath);
+  const basePaths = parseTsconfig(baseConfigPath).compilerOptions.paths;
+  if (typeof basePaths !== 'object' || basePaths === null) {
+    throw createFailError(`expected root compilerOptions.paths to be an object`);
+  }
+  Fs.writeFileSync(
+    baseTypeCheckConfigPath,
+    JSON.stringify(
+      {
+        extends: './tsconfig.base.json',
+        compilerOptions: {
+          paths: Object.fromEntries(
+            Object.entries(basePaths).flatMap(([key, value]) => {
+              if (key.endsWith('/*') && bazelPackageIds.has(key.slice(0, -2))) {
+                return [];
+              }
+
+              if (bazelPackageIds.has(key)) {
+                return [];
+              }
+
+              return [[key, value]];
+            })
+          ),
+        },
+      },
+      null,
+      2
+    )
+  );
+  Fs.utimesSync(baseTypeCheckConfigPath, baseStat.atime, baseStat.mtime);
+  created.add(baseTypeCheckConfigPath);
+
+  // write tsconfig.type_check.json files for each project that is not the root
+  const queue = new Set(projects.map((p) => p.tsConfigPath));
+  for (const path of queue) {
+    const tsconfigStat = Fs.statSync(path);
+    const parsed = parseTsconfig(path);
+
+    const dir = Path.dirname(path);
+    const typeCheckConfigPath = Path.resolve(dir, 'tsconfig.type_check.json');
+    const refs = parsed.kbn_references ?? [];
+    if (!isValidRefs(refs)) {
+      throw new Error(`expected valid TS refs in ${path}`);
+    }
+
+    const typeCheckConfig = {
+      ...parsed,
+      extends: parsed.extends
+        ? toTypeCheckConfigPath(parsed.extends)
+        : rel(dir, baseTypeCheckConfigPath),
+      compilerOptions: {
+        ...parsed.compilerOptions,
+        composite: true,
+        incremental: true,
+        rootDir: '.',
+        paths: undefined,
+      },
+      kbn_references: undefined,
+      references: refs.map((ref) => ({
+        path: toTypeCheckConfigPath(ref.path),
+      })),
+    };
+
+    Fs.writeFileSync(typeCheckConfigPath, JSON.stringify(typeCheckConfig, null, 2));
+    Fs.utimesSync(typeCheckConfigPath, tsconfigStat.atime, tsconfigStat.mtime);
+
+    created.add(typeCheckConfigPath);
+
+    // add all the referenced config files to the queue if they're not already in it
+    for (const ref of refs) {
+      queue.add(Path.resolve(dir, ref.path));
+    }
+  }
+
+  return created;
+}
 
 export async function runTypeCheckCli() {
   run(
-    async ({ log, flags, procRunner }) => {
+    async ({ log, flagsReader, procRunner }) => {
+      if (flagsReader.boolean('clean-cache')) {
+        await asyncForEachWithLimit(PROJECTS, 10, async (proj) => {
+          await Fsp.rm(Path.resolve(proj.directory, 'target/types'), {
+            force: true,
+            recursive: true,
+          });
+        });
+        log.warning('Deleted all typescript caches');
+      }
+
+      await runBazel(['build', '//packages:build_types', '--show_result=1'], {
+        cwd: REPO_ROOT,
+        logPrefix: '\x1b[94m[bazel]\x1b[39m',
+        onErrorExit(code: any, output: any) {
+          throw createFailError(
+            `The bazel command that was running exited with code [${code}] and output: ${output}`
+          );
+        },
+      });
+
+      const bazelPackages = await discoverBazelPackages(REPO_ROOT);
+
       // if the tsconfig.refs.json file is not self-managed then make sure it has
       // a reference to every composite project in the repo
-      await updateRootRefsConfig(log);
+      await updateRootRefsConfig(log, bazelPackages);
 
-      const projectFilter =
-        flags.project && typeof flags.project === 'string'
-          ? Path.resolve(flags.project)
-          : undefined;
+      const projectFilter = flagsReader.path('project');
 
       const projects = PROJECTS.filter((p) => {
         return !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter);
       });
 
-      if (projects.length > 1 || projects[0].isCompositeProject()) {
-        const { failed } = await buildTsRefs({
-          log,
-          procRunner,
-          verbose: !!flags.verbose,
-          project: projects.length === 1 ? projects[0] : undefined,
+      const created = createTypeCheckConfigs(projects, bazelPackages);
+
+      let pluginBuildResult;
+      try {
+        log.info(`Building TypeScript projects to check types...`);
+
+        const relative = Path.relative(
+          REPO_ROOT,
+          projects.length === 1 ? projects[0].typeCheckConfigPath : ROOT_REFS_CONFIG_PATH
+        );
+
+        await procRunner.run('tsc', {
+          cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
+          args: [
+            '-b',
+            relative,
+            '--pretty',
+            ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
+          ],
+          cwd: REPO_ROOT,
+          wait: true,
         });
-        if (failed) {
-          throw createFailError('Unable to build TS project refs');
-        }
+
+        pluginBuildResult = { failed: false };
+      } catch (error) {
+        pluginBuildResult = { failed: true };
       }
 
-      if (!projects.length) {
-        if (projectFilter) {
-          throw createFailError(`Unable to find project at ${flags.project}`);
-        } else {
-          throw createFailError(`Unable to find projects to type-check`);
-        }
+      // cleanup
+      if (flagsReader.boolean('cleanup')) {
+        await cleanupRootRefsConfig();
+
+        await asyncForEachWithLimit(created, 40, async (path) => {
+          await Fsp.unlink(path);
+        });
+
+        await asyncForEachWithLimit(bazelPackages, 40, async (pkg) => {
+          const targetTypesPaths = Path.resolve(
+            REPO_ROOT,
+            'bazel-bin',
+            pkg.normalizedRepoRelativeDir,
+            'target_type'
+          );
+
+          await Fsp.rm(targetTypesPaths, {
+            force: true,
+            recursive: true,
+          });
+        });
       }
 
-      const concurrencyArg =
-        typeof flags.concurrency === 'string' && parseInt(flags.concurrency, 10);
-      const concurrency =
-        concurrencyArg && concurrencyArg > 0
-          ? concurrencyArg
-          : Math.min(4, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
-
-      log.info('running type check in', projects.length, 'projects');
-
-      const tscArgs = [
-        ...['--emitDeclarationOnly', 'false'],
-        '--noEmit',
-        '--pretty',
-        ...(flags['skip-lib-check']
-          ? ['--skipLibCheck', flags['skip-lib-check'] as string]
-          : ['--skipLibCheck', 'false']),
-      ];
-
-      const failureCount = await Rx.lastValueFrom(
-        Rx.from(projects).pipe(
-          mergeMap(async (p) => {
-            const relativePath = Path.relative(process.cwd(), p.tsConfigPath);
-
-            const result = await execa(
-              process.execPath,
-              [
-                '--max-old-space-size=5120',
-                require.resolve('typescript/bin/tsc'),
-                ...['--project', p.tsConfigPath],
-                ...tscArgs,
-              ],
-              {
-                reject: false,
-                all: true,
-              }
-            );
-
-            if (result.failed) {
-              log.error(`Type check failed in ${relativePath}:`);
-              log.error(result.all ?? ' - tsc produced no output - ');
-              return 1;
-            } else {
-              log.success(relativePath);
-              return 0;
-            }
-          }, concurrency),
-          reduce((acc, f) => acc + f, 0)
-        )
-      );
-
-      if (failureCount > 0) {
-        throw createFailError(`${failureCount} type checks failed`);
+      if (pluginBuildResult.failed) {
+        throw createFailError('Unable to build TS project refs');
       }
     },
     {
@@ -121,13 +243,16 @@ export async function runTypeCheckCli() {
           node scripts/type_check --project packages/kbn-pm/tsconfig.json
       `,
       flags: {
-        string: ['project', 'concurrency'],
-        boolean: ['skip-lib-check'],
+        string: ['project'],
+        boolean: ['clean-cache', 'cleanup'],
+        default: {
+          cleanup: true,
+        },
         help: `
-          --concurrency <number>  Number of projects to check in parallel. Defaults to 50% of available CPUs, up to 4.
           --project [path]        Path to a tsconfig.json file determines the project to check
-          --skip-lib-check        Skip type checking of all declaration files (*.d.ts). Default is false
           --help                  Show this message
+          --clean-cache           Delete any existing TypeScript caches before running type check
+          --no-cleanup            Pass to avoid deleting the temporary tsconfig files written to disk
         `,
       },
     }

@@ -7,11 +7,9 @@
 
 import React, { ReactNode } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { TimePickerRefreshInterval } from '../../date_picker/typings';
 
 interface Props {
   children?: ReactNode;
@@ -39,17 +37,10 @@ export function useExplorerHref({ jobId }: { jobId: string }) {
   } = useApmPluginContext();
   const { urlParams } = useLegacyUrlParams();
 
-  const timePickerRefreshIntervalDefaults =
-    core.uiSettings.get<TimePickerRefreshInterval>(
-      UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
-    );
-
   const {
     // hardcoding a custom default of 1 hour since the default kibana timerange of 15 minutes is shorter than the ML interval
     rangeFrom = 'now-1h',
     rangeTo = 'now',
-    refreshInterval = timePickerRefreshIntervalDefaults.value,
-    refreshPaused = timePickerRefreshIntervalDefaults.pause,
   } = urlParams;
 
   const href = useMlHref(ml, core.http.basePath.get(), {
@@ -57,7 +48,7 @@ export function useExplorerHref({ jobId }: { jobId: string }) {
     pageState: {
       jobIds: [jobId],
       timeRange: { from: rangeFrom, to: rangeTo },
-      refreshInterval: { pause: refreshPaused, value: refreshInterval },
+      refreshInterval: { pause: true, value: 10000 },
     },
   });
 

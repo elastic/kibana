@@ -151,6 +151,30 @@ export async function getAgentTags(
   }
 }
 
+export function getElasticsearchQuery(
+  kuery: string,
+  showInactive = false,
+  includeHosted = false,
+  hostedPolicies: string[] = []
+): estypes.QueryDslQueryContainer | undefined {
+  const filters = [];
+
+  if (kuery && kuery !== '') {
+    filters.push(kuery);
+  }
+
+  if (showInactive === false) {
+    filters.push(ACTIVE_AGENT_CONDITION);
+  }
+
+  if (!includeHosted && hostedPolicies.length > 0) {
+    filters.push('NOT (policy_id:{policyIds})'.replace('{policyIds}', hostedPolicies.join(',')));
+  }
+
+  const kueryNode = _joinFilters(filters);
+  return kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
+}
+
 export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
   options: ListWithKuery & {

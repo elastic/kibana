@@ -9,7 +9,7 @@
 import { EncryptionConfig } from './encryption_config';
 import { generate } from './generate';
 
-import { Logger } from '../cli_plugin/lib/logger';
+import { Logger } from '../cli/logger';
 import * as prompt from '../cli_keystore/utils/prompt';
 import fs from 'fs';
 import crypto from 'crypto';

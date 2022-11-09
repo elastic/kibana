@@ -48,11 +48,6 @@ import {
   FetchIndexApiResponse,
 } from '../../../api/index/fetch_index_api_logic';
 import {
-  DeleteMlInferencePipelineApiLogic,
-  DeleteMlInferencePipelineApiLogicArgs,
-  DeleteMlInferencePipelineResponse,
-} from '../../../api/ml_models/delete_ml_inference_pipeline';
-import {
   AttachMlInferencePipelineApiLogic,
   AttachMlInferencePipelineApiLogicArgs,
   AttachMlInferencePipelineResponse,
@@ -62,6 +57,17 @@ import {
   CreateMlInferencePipelineApiLogicArgs,
   CreateMlInferencePipelineResponse,
 } from '../../../api/pipelines/create_ml_inference_pipeline';
+import {
+  DeleteMlInferencePipelineApiLogic,
+  DeleteMlInferencePipelineApiLogicArgs,
+  DeleteMlInferencePipelineResponse,
+} from '../../../api/pipelines/delete_ml_inference_pipeline';
+import {
+  DetachMlInferencePipelineApiLogic,
+  DetachMlInferencePipelineApiLogicArgs,
+  DetachMlInferencePipelineResponse,
+} from '../../../api/pipelines/detach_ml_inference_pipeline';
+
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
@@ -102,6 +108,18 @@ type PipelinesActions = Pick<
   deleteMlPipelineSuccess: Actions<
     DeleteMlInferencePipelineApiLogicArgs,
     DeleteMlInferencePipelineResponse
+  >['apiSuccess'];
+  detachMlPipeline: Actions<
+    DetachMlInferencePipelineApiLogicArgs,
+    DetachMlInferencePipelineResponse
+  >['makeRequest'];
+  detachMlPipelineError: Actions<
+    DetachMlInferencePipelineApiLogicArgs,
+    DetachMlInferencePipelineResponse
+  >['apiError'];
+  detachMlPipelineSuccess: Actions<
+    DetachMlInferencePipelineApiLogicArgs,
+    DetachMlInferencePipelineResponse
   >['apiSuccess'];
   fetchCustomPipeline: Actions<
     FetchCustomPipelineApiLogicArgs,
@@ -179,6 +197,12 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         'apiError as deleteMlPipelineError',
         'apiSuccess as deleteMlPipelineSuccess',
         'makeRequest as deleteMlPipeline',
+      ],
+      DetachMlInferencePipelineApiLogic,
+      [
+        'apiError as detachMlPipelineError',
+        'apiSuccess as detachMlPipelineSuccess',
+        'makeRequest as detachMlPipeline',
       ],
     ],
     values: [
@@ -262,6 +286,26 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
               defaultMessage: 'Deleted machine learning inference pipeline "{pipelineName}"',
               values: {
                 pipelineName: value.deleted,
+              },
+            }
+          )
+        );
+      }
+      // Re-fetch processors to ensure we display newly removed ml processor
+      actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+      // Needed to ensure correct JSON is available in the JSON configurations tab
+      actions.fetchCustomPipeline({ indexName: values.index.name });
+    },
+    detachMlPipelineError: (error) => flashAPIErrors(error),
+    detachMlPipelineSuccess: (response) => {
+      if (response.updated) {
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.successToastDetachMlPipeline.title',
+            {
+              defaultMessage: 'Detached machine learning inference pipeline from "{pipelineName}"',
+              values: {
+                pipelineName: response.updated,
               },
             }
           )
