@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { NoPrivilegesPage } from './no_privileges';
+export { NoPrivilegesPage, NoPrivileges } from './no_privileges';

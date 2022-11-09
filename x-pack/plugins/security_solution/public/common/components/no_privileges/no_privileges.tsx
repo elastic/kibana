@@ -17,8 +17,20 @@ interface NoPrivilegesPageProps {
   pageName?: string;
 }
 
-export const NoPrivilegesPage = React.memo<NoPrivilegesPageProps>(({ pageName = 'this page' }) => {
+export const NoPrivilegesPage = React.memo<NoPrivilegesPageProps>(({ pageName }) => {
+  return (
+    <SecuritySolutionPageWrapper>
+      <EuiPageTemplate template="centeredContent">
+        <NoPrivileges pageName={pageName} />
+      </EuiPageTemplate>
+    </SecuritySolutionPageWrapper>
+  );
+});
+NoPrivilegesPage.displayName = 'NoPrivilegePage';
+
+export const NoPrivileges = React.memo<NoPrivilegesPageProps>(({ pageName = 'this page' }) => {
   const { docLinks } = useKibana().services;
+
   const emptyPageActions = useMemo(
     () => ({
       feature: {
@@ -30,18 +42,14 @@ export const NoPrivilegesPage = React.memo<NoPrivilegesPageProps>(({ pageName = 
     }),
     [docLinks]
   );
+
   return (
-    <SecuritySolutionPageWrapper>
-      <EuiPageTemplate template="centeredContent">
-        <EmptyPage
-          actions={emptyPageActions}
-          message={i18n.NO_PERMISSIONS_MSG(pageName)}
-          data-test-subj="no_feature_permissions-alerts"
-          title={i18n.NO_PERMISSIONS_TITLE}
-        />
-      </EuiPageTemplate>
-    </SecuritySolutionPageWrapper>
+    <EmptyPage
+      actions={emptyPageActions}
+      message={i18n.NO_PERMISSIONS_MSG(pageName)}
+      data-test-subj="no_feature_permissions-alerts"
+      title={i18n.NO_PERMISSIONS_TITLE}
+    />
   );
 });
-
-NoPrivilegesPage.displayName = 'NoPrivilegePage';
+NoPrivileges.displayName = 'NoPrivileges';
