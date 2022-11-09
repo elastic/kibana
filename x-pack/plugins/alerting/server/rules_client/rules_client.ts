@@ -2784,6 +2784,7 @@ export class RulesClient {
     );
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
         'alert',

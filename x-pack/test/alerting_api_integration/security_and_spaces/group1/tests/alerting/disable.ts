@@ -75,7 +75,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager' });
+          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -149,7 +149,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager' });
+          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -204,7 +204,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager' });
+          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -269,7 +269,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager' });
+          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -340,7 +340,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           });
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager' });
+          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -400,7 +400,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
           objectRemover.add('other', createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getDisableRequest(createdAlert.id);
-          await es.indices.refresh({ index: '.kibana_task_manager' });
+          await es.indices.refresh({ index: '.kibana_task_manager*' });
 
           expect(response.statusCode).to.eql(404);
           switch (scenario.id) {
