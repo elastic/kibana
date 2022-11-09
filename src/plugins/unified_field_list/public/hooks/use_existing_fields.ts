@@ -74,7 +74,7 @@ export const useExistingFieldsFetcher = (
   const mountedRef = useRef<boolean>(true);
   const [activeRequests, setActiveRequests] = useState<number>(0);
   const isProcessing = activeRequests > 0;
-  const memorizedDateRange = useMemorizedDateRange(params.fromDate, params.toDate);
+  const memorizedDateRange = useMemorizedDateRange({ from: params.fromDate, to: params.toDate });
 
   const fetchFieldsExistenceInfo = useCallback(
     async ({

@@ -9,16 +9,26 @@
 import dateMath from '@kbn/datemath';
 import { useMemo } from 'react';
 
-export const useMemorizedDateRange = (
-  fromDate: string,
-  toDate: string
-): { from: string; to: string } => {
-  return useMemo(() => {
-    const roundedDateRange = {
-      from: dateMath.parse(fromDate)!.startOf('minute').toISOString(),
-      to: dateMath.parse(toDate, { roundUp: true })!.endOf('minute').toISOString(),
-    };
+export const useMemorizedDateRange = ({
+  from: fromDate,
+  to: toDate,
+}: {
+  from: string;
+  to: string;
+}): { from: string; to: string } => {
+  const roundedFromDate = useMemo(() => {
+    return dateMath.parse(fromDate)!.startOf('minute').toISOString();
+  }, [fromDate]);
 
-    return roundedDateRange;
-  }, [fromDate, toDate]);
+  const roundedToDate = useMemo(() => {
+    return dateMath.parse(toDate, { roundUp: true })!.endOf('minute').toISOString();
+  }, [toDate]);
+
+  return useMemo(
+    () => ({
+      from: roundedFromDate,
+      to: roundedToDate,
+    }),
+    [roundedFromDate, roundedToDate]
+  );
 };
