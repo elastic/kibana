@@ -31,6 +31,7 @@ interface ProcessAlertsResult<
 > {
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
 }
 
@@ -80,6 +81,7 @@ function processAlertsHelper<
   const currentTime = new Date().toISOString();
   const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
   const activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
+  const currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {};
   const recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {};
 
   for (const id in alerts) {
@@ -129,6 +131,7 @@ function processAlertsHelper<
         }
       } else if (existingAlertIds.has(id)) {
         recoveredAlerts[id] = alerts[id];
+        currentRecoveredAlerts[id] = alerts[id];
 
         // Inject end time into alert state of recovered alerts
         const state = recoveredAlerts[id].getState();
@@ -156,7 +159,7 @@ function processAlertsHelper<
     }
   }
 
-  return { recoveredAlerts, newAlerts, activeAlerts };
+  return { recoveredAlerts, currentRecoveredAlerts, newAlerts, activeAlerts };
 }
 
 function processAlertsLimitReached<
@@ -216,7 +219,7 @@ function processAlertsLimitReached<
 
   // if we don't have capacity for new alerts, return
   if (!hasCapacityForNewAlerts()) {
-    return { recoveredAlerts: {}, newAlerts: {}, activeAlerts };
+    return { recoveredAlerts: {}, currentRecoveredAlerts: {}, newAlerts: {}, activeAlerts };
   }
 
   // look for new alerts and add until we hit capacity
@@ -250,7 +253,7 @@ function processAlertsLimitReached<
       }
     }
   }
-  return { recoveredAlerts: {}, newAlerts, activeAlerts };
+  return { recoveredAlerts: {}, currentRecoveredAlerts: {}, newAlerts, activeAlerts };
 }
 
 export function updateFlappingHistory<

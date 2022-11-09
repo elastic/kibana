@@ -7,7 +7,6 @@
 
 import apm from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
-import { isEmpty } from 'lodash';
 import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
@@ -29,6 +28,7 @@ export interface LogAlertsParams<
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
   shouldPersistAlerts: boolean;
+  flappingAlertIds: string[];
 }
 
 export function logAlerts<
@@ -46,6 +46,7 @@ export function logAlerts<
   ruleRunMetricsStore,
   canSetRecoveryContext,
   shouldPersistAlerts,
+  flappingAlertIds,
 }: LogAlertsParams<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
   const newAlertIds = Object.keys(newAlerts);
   const activeAlertIds = Object.keys(activeAlerts);
@@ -95,19 +96,16 @@ export function logAlerts<
     for (const id of recoveredAlertIds) {
       const { group: actionGroup } = recoveredAlerts[id].getLastScheduledActions() ?? {};
       const state = recoveredAlerts[id].getState();
-      // do not log previously recovered alerts that don't have a state
-      if (!isEmpty(state)) {
-        const message = `${ruleLogPrefix} alert '${id}' has recovered`;
-
-        alertingEventLogger.logAlert({
-          action: EVENT_LOG_ACTIONS.recoveredInstance,
-          id,
-          group: actionGroup,
-          message,
-          state,
-          flapping: false,
-        });
-      }
+      const message = `${ruleLogPrefix} alert '${id}' has recovered`;
+      const flapping = flappingAlertIds.includes(id);
+      alertingEventLogger.logAlert({
+        action: EVENT_LOG_ACTIONS.recoveredInstance,
+        id,
+        group: actionGroup,
+        message,
+        state,
+        flapping,
+      });
     }
 
     for (const id of newAlertIds) {
@@ -128,13 +126,14 @@ export function logAlerts<
       const { actionGroup } = activeAlerts[id].getScheduledActionOptions() ?? {};
       const state = activeAlerts[id].getState();
       const message = `${ruleLogPrefix} active alert: '${id}' in actionGroup: '${actionGroup}'`;
+      const flapping = flappingAlertIds.includes(id);
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.activeInstance,
         id,
         group: actionGroup,
         message,
         state,
-        flapping: false,
+        flapping,
       });
     }
   }

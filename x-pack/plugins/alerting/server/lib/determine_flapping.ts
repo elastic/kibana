@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
 import { keys } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, RawAlertInstance } from '../types';
@@ -19,7 +18,34 @@ export function determineFlapping<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(
-  logger: Logger,
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
+): string[] {
+  const flappingAlertIds: string[] = [];
+
+  for (const id of keys(activeAlerts)) {
+    const alert = activeAlerts[id];
+    if (isFlapping(alert)) {
+      flappingAlertIds.push(id);
+    }
+  }
+
+  for (const id of keys(recoveredAlerts)) {
+    const alert = recoveredAlerts[id];
+    if (isFlapping(alert)) {
+      flappingAlertIds.push(id);
+    }
+  }
+  return flappingAlertIds;
+}
+
+export function determineAlertsToReturn<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+>(
+  flappingAlertIds: string[],
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
 ): {
@@ -30,17 +56,12 @@ export function determineFlapping<
   const recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
 
   for (const id of keys(activeAlerts)) {
-    const alert = activeAlerts[id];
-    if (isFlapping(alert)) {
-      logger.info(`Alert:${id} is flapping.`);
-    }
-    alertsToReturn[id] = alert.toRaw();
+    alertsToReturn[id] = activeAlerts[id].toRaw();
   }
 
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    if (isFlapping(alert)) {
-      logger.info(`Alert:${id} is flapping.`);
+    if (flappingAlertIds.includes(id)) {
       recoveredAlertsToReturn[id] = alert.toRaw(true);
     } else if (!atCapacity(alert.getFlappingHistory())) {
       recoveredAlertsToReturn[id] = alert.toRaw(true);

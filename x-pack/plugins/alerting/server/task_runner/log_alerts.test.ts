@@ -37,6 +37,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
+      flappingAlertIds: [],
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(1);
@@ -62,6 +63,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
+      flappingAlertIds: [],
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -94,6 +96,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
       shouldPersistAlerts: true,
+      flappingAlertIds: [],
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -118,6 +121,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
       shouldPersistAlerts: true,
+      flappingAlertIds: [],
     });
 
     expect(logger.debug).not.toHaveBeenCalled();
@@ -145,36 +149,65 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
+      flappingAlertIds: [],
     });
 
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(1);
     expect(ruleRunMetricsStore.getNumberOfActiveAlerts()).toEqual(3);
     expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toEqual(4);
 
-    expect(alertingEventLogger.logAlert).toHaveBeenCalledTimes(4);
+    expect(alertingEventLogger.logAlert).toHaveBeenCalledTimes(8);
 
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {
+      action: 'recovered-instance',
+      id: '7',
+      message: "test-rule-type-id:123: 'test rule' alert '7' has recovered",
+      state: {},
+      flapping: false,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
+      action: 'recovered-instance',
+      id: '8',
+      message: "test-rule-type-id:123: 'test rule' alert '8' has recovered",
+      state: {},
+      flapping: false,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
+      action: 'recovered-instance',
+      id: '9',
+      message: "test-rule-type-id:123: 'test rule' alert '9' has recovered",
+      state: {},
+      flapping: false,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
+      action: 'recovered-instance',
+      id: '10',
+      message: "test-rule-type-id:123: 'test rule' alert '10' has recovered",
+      state: {},
+      flapping: false,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(5, {
       action: 'new-instance',
       id: '4',
       message: "test-rule-type-id:123: 'test rule' created new alert: '4'",
       state: {},
       flapping: false,
     });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(6, {
       action: 'active-instance',
       id: '1',
       message: "test-rule-type-id:123: 'test rule' active alert: '1' in actionGroup: 'undefined'",
       state: {},
       flapping: false,
     });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(7, {
       action: 'active-instance',
       id: '2',
       message: "test-rule-type-id:123: 'test rule' active alert: '2' in actionGroup: 'undefined'",
       state: {},
       flapping: false,
     });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(8, {
       action: 'active-instance',
       id: '4',
       message: "test-rule-type-id:123: 'test rule' active alert: '4' in actionGroup: 'undefined'",
@@ -205,6 +238,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: false,
+      flappingAlertIds: [],
     });
 
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(0);
@@ -212,5 +246,88 @@ describe('logAlerts', () => {
     expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toEqual(0);
 
     expect(alertingEventLogger.logAlert).not.toHaveBeenCalled();
+  });
+
+  test('should correctly set flapping values', () => {
+    logAlerts({
+      logger,
+      alertingEventLogger,
+      newAlerts: {
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
+      },
+      activeAlerts: {
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1'),
+        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
+      },
+      recoveredAlerts: {
+        '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
+        '8': new Alert<{}, {}, DefaultActionGroupId>('8'),
+        '9': new Alert<{}, {}, DefaultActionGroupId>('9'),
+        '10': new Alert<{}, {}, DefaultActionGroupId>('10'),
+      },
+      ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
+      ruleRunMetricsStore,
+      canSetRecoveryContext: false,
+      shouldPersistAlerts: true,
+      flappingAlertIds: ['2', '8', '9'],
+    });
+
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {
+      action: 'recovered-instance',
+      id: '7',
+      message: "test-rule-type-id:123: 'test rule' alert '7' has recovered",
+      state: {},
+      flapping: false,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
+      action: 'recovered-instance',
+      id: '8',
+      message: "test-rule-type-id:123: 'test rule' alert '8' has recovered",
+      state: {},
+      flapping: true,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
+      action: 'recovered-instance',
+      id: '9',
+      message: "test-rule-type-id:123: 'test rule' alert '9' has recovered",
+      state: {},
+      flapping: true,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
+      action: 'recovered-instance',
+      id: '10',
+      message: "test-rule-type-id:123: 'test rule' alert '10' has recovered",
+      state: {},
+      flapping: false,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(5, {
+      action: 'new-instance',
+      id: '4',
+      message: "test-rule-type-id:123: 'test rule' created new alert: '4'",
+      state: {},
+      flapping: false,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(6, {
+      action: 'active-instance',
+      id: '1',
+      message: "test-rule-type-id:123: 'test rule' active alert: '1' in actionGroup: 'undefined'",
+      state: {},
+      flapping: false,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(7, {
+      action: 'active-instance',
+      id: '2',
+      message: "test-rule-type-id:123: 'test rule' active alert: '2' in actionGroup: 'undefined'",
+      state: {},
+      flapping: true,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(8, {
+      action: 'active-instance',
+      id: '4',
+      message: "test-rule-type-id:123: 'test rule' active alert: '4' in actionGroup: 'undefined'",
+      state: {},
+      flapping: false,
+    });
   });
 });

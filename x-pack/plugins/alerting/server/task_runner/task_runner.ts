@@ -66,6 +66,7 @@ import { loadRule } from './rule_loader';
 import { logAlerts } from './log_alerts';
 import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
+import { determineAlertsToReturn } from '../lib/determine_flapping';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -399,12 +400,12 @@ export class TaskRunner<
         };
       });
 
-    const { activeAlerts, recoveredAlerts } = await this.timer.runWithTimer(
-      TaskRunnerTimerSpan.ProcessAlerts,
-      async () => {
+    const { activeAlerts, recoveredAlerts, currentRecoveredAlerts, flappingAlertIds } =
+      await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
         const {
           newAlerts: processedAlertsNew,
           activeAlerts: processedAlertsActive,
+          currentRecoveredAlerts: processedAlertsRecoveredCurrent,
           recoveredAlerts: processedAlertsRecovered,
         } = processAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
           alerts: this.alerts,
@@ -415,25 +416,34 @@ export class TaskRunner<
           setFlapping: true,
         });
 
+        const flappingAlerts = determineFlapping<
+          State,
+          Context,
+          ActionGroupIds,
+          RecoveryActionGroupId
+        >(processedAlertsActive, processedAlertsRecovered);
+
         logAlerts({
           logger: this.logger,
           alertingEventLogger: this.alertingEventLogger,
           newAlerts: processedAlertsNew,
           activeAlerts: processedAlertsActive,
-          recoveredAlerts: processedAlertsRecovered,
+          recoveredAlerts: processedAlertsRecoveredCurrent,
           ruleLogPrefix: ruleLabel,
           ruleRunMetricsStore,
           canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
           shouldPersistAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+          flappingAlertIds,
         });
 
         return {
           newAlerts: processedAlertsNew,
           activeAlerts: processedAlertsActive,
+          currentRecoveredAlerts: processedAlertsRecoveredCurrent,
           recoveredAlerts: processedAlertsRecovered,
+          flappingAlertIds: flappingAlerts,
         };
-      }
-    );
+      });
 
     const executionHandler = new ExecutionHandler({
       rule,
@@ -462,17 +472,16 @@ export class TaskRunner<
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
         await executionHandler.run(activeAlerts);
-        await executionHandler.run(recoveredAlerts, true);
+        await executionHandler.run(currentRecoveredAlerts, true);
       }
     });
 
-    // determine if flapping
-    const { alertsToReturn, recoveredAlertsToReturn } = determineFlapping<
+    const { alertsToReturn, recoveredAlertsToReturn } = determineAlertsToReturn<
       State,
       Context,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(this.logger, activeAlerts, recoveredAlerts);
+    >(flappingAlertIds, activeAlerts, recoveredAlerts);
 
     return {
       metrics: ruleRunMetricsStore.getMetrics(),

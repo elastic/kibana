@@ -10,7 +10,7 @@ import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
 import { v4 } from 'uuid';
-import { difference } from 'lodash';
+import { difference, drop, remove } from 'lodash';
 import {
   RuleExecutorOptions,
   Alert,
@@ -37,13 +37,16 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
-  // ALERT_FLAPPING,
+  ALERT_FLAPPING,
 } from '../../common/technical_rule_data_field_names';
 import { CommonAlertFieldNameLatest, CommonAlertIdFieldNameLatest } from '../../common/schemas';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
 import { getCommonAlertFields } from './get_common_alert_fields';
+
+const MAX_CAPACITY = 20;
+const MAX_FLAP_COUNT = 4;
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
 
@@ -94,6 +97,7 @@ const trackedAlertStateRt = rt.type({
   alertId: rt.string,
   alertUuid: rt.string,
   started: rt.string,
+  flappingHistory: rt.array(rt.boolean),
 });
 
 export type TrackedLifecycleAlertState = rt.TypeOf<typeof trackedAlertStateRt>;
@@ -105,6 +109,7 @@ const wrappedStateRt = <State extends RuleTypeState>() =>
   rt.type({
     wrapped: alertTypeStateRt<State>(),
     trackedAlerts: rt.record(rt.string, trackedAlertStateRt),
+    trackedAlertsRecovered: rt.record(rt.string, trackedAlertStateRt),
   });
 
 /**
@@ -115,6 +120,7 @@ const wrappedStateRt = <State extends RuleTypeState>() =>
 export type WrappedLifecycleRuleState<State extends RuleTypeState> = RuleTypeState & {
   wrapped: State | void;
   trackedAlerts: Record<string, TrackedLifecycleAlertState>;
+  trackedAlertsRecovered: Record<string, TrackedLifecycleAlertState>;
 };
 
 export const createLifecycleExecutor =
@@ -154,6 +160,7 @@ export const createLifecycleExecutor =
       (): WrappedLifecycleRuleState<State> => ({
         wrapped: previousState as State,
         trackedAlerts: {},
+        trackedAlertsRecovered: {},
       })
     )(wrappedStateRt<State>().decode(previousState));
 
@@ -195,6 +202,7 @@ export const createLifecycleExecutor =
 
     const currentAlertIds = Object.keys(currentAlerts);
     const trackedAlertIds = Object.keys(state.trackedAlerts);
+    const trackedAlertRecoveredIds = Object.keys(state.trackedAlertsRecovered);
     const newAlertIds = difference(currentAlertIds, trackedAlertIds);
     const allAlertIds = [...new Set(currentAlertIds.concat(trackedAlertIds))];
 
@@ -235,12 +243,48 @@ export const createLifecycleExecutor =
           logger.debug(`[Rule Registry] Could not find alert data for ${alertId}`);
         }
 
-        const isNew = !state.trackedAlerts[alertId];
+        const isNew = !state.trackedAlerts[alertId] && !state.trackedAlertsRecovered[alertId];
         const isRecovered = !currentAlerts[alertId];
         const isActive = !isRecovered;
 
+        let flappingHistory: boolean[] = [];
+        if (isNew) {
+          flappingHistory = updateFlappingHistory([], false);
+        } else if (isActive) {
+          if (!state.trackedAlerts[alertId] && state.trackedAlertsRecovered[alertId]) {
+            // this alert has flapped from recovered to active
+            flappingHistory = updateFlappingHistory(
+              state.trackedAlertsRecovered[alertId].flappingHistory,
+              true
+            );
+            remove(trackedAlertRecoveredIds, (id) => id === alertId);
+          } else {
+            // this alert is still active
+            flappingHistory = updateFlappingHistory(
+              state.trackedAlerts[alertId].flappingHistory,
+              false
+            );
+          }
+        } else if (isRecovered) {
+          if (state.trackedAlerts[alertId]) {
+            // this alert has flapped from active to recovered
+            flappingHistory = updateFlappingHistory(
+              state.trackedAlerts[alertId].flappingHistory,
+              true
+            );
+          } else if (state.trackedAlertsRecovered[alertId]) {
+            // this alert is still recovered
+            flappingHistory = updateFlappingHistory(
+              state.trackedAlertsRecovered[alertId].flappingHistory,
+              false
+            );
+          }
+        }
+
         const { alertUuid, started } = !isNew
           ? state.trackedAlerts[alertId]
+            ? state.trackedAlerts[alertId]
+            : state.trackedAlertsRecovered[alertId]
           : {
               alertUuid: newAlertUuids[alertId] || v4(),
               started: commonRuleFields[TIMESTAMP],
@@ -266,17 +310,20 @@ export const createLifecycleExecutor =
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
           [TAGS]: options.rule.tags,
           [VERSION]: ruleDataClient.kibanaVersion,
+          [ALERT_FLAPPING]: isFlapping(flappingHistory),
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };
 
         return {
           indexName: alertData?.indexName,
           event,
+          flappingHistory,
         };
       });
 
     const trackedEventsToIndex = makeEventsDataMapFor(trackedAlertIds);
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
+    const trackedRecoveredEventsToIndex = makeEventsDataMapFor(trackedAlertRecoveredIds);
     const allEventsToIndex = [...trackedEventsToIndex, ...newEventsToIndex];
 
     // Only write alerts if:
@@ -307,16 +354,58 @@ export const createLifecycleExecutor =
     const nextTrackedAlerts = Object.fromEntries(
       allEventsToIndex
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
-        .map(({ event }) => {
+        .map(({ event, flappingHistory }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
-          return [alertId, { alertId, alertUuid, started }];
+          return [alertId, { alertId, alertUuid, started, flappingHistory }];
+        })
+    );
+
+    const nextTrackedAlertsRecovered = Object.fromEntries(
+      [...allEventsToIndex, ...trackedRecoveredEventsToIndex]
+        .filter(
+          ({ event, flappingHistory }) =>
+            event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
+            (isFlapping(flappingHistory) || !atCapacity(flappingHistory))
+        )
+        .map(({ event, flappingHistory }) => {
+          const alertId = event[ALERT_INSTANCE_ID]!;
+          const alertUuid = event[ALERT_UUID]!;
+          const started = new Date(event[ALERT_START]!).toISOString();
+          return [alertId, { alertId, alertUuid, started, flappingHistory }];
         })
     );
 
     return {
       wrapped: nextWrappedState ?? ({} as State),
       trackedAlerts: writeAlerts ? nextTrackedAlerts : {},
+      trackedAlertsRecovered: writeAlerts ? nextTrackedAlertsRecovered : {},
     };
   };
+
+function updateFlappingHistory(flappingHistory: boolean[], state: boolean) {
+  if (atCapacity(flappingHistory)) {
+    const diff = getCapcityDiff(flappingHistory);
+    flappingHistory = drop(flappingHistory, diff);
+  }
+  flappingHistory.push(state);
+  return flappingHistory;
+}
+
+function isFlapping(flappingHistory: boolean[]): boolean {
+  if (atCapacity(flappingHistory)) {
+    const numStateChanges = flappingHistory.filter((f) => f).length;
+    return numStateChanges >= MAX_FLAP_COUNT;
+  }
+  return false;
+}
+
+function atCapacity(flappingHistory: boolean[] = []): boolean {
+  return flappingHistory.length >= MAX_CAPACITY;
+}
+
+function getCapcityDiff(flappingHistory: boolean[] = []) {
+  const len = flappingHistory.length;
+  return len + 1 - MAX_CAPACITY;
+}
