@@ -271,7 +271,7 @@ export const termsOperation: OperationDefinition<
       const orderColumn = layer.columns[column.params.orderBy.columnId];
       orderBy = String(orderedColumnIds.indexOf(column.params.orderBy.columnId));
       // percentile rank with non integer value should default to alphabetical order
-      if (!isPercentileRankSortable(orderColumn)) {
+      if (!orderColumn || !isPercentileRankSortable(orderColumn)) {
         orderBy = '_key';
       }
     }
