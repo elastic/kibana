@@ -469,3 +469,8 @@ export const RISKY_USERS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/user-risk-score.html';
 
 export const BULK_ADD_TO_TIMELINE_LIMIT = 2000;
+
+export const DUPLICATE_OPTIONS = {
+  WITH_EXCEPTIONS: 'WITH_EXCEPTIONS',
+  WITHOUT_EXCEPTIONS: 'WITHOUT_EXCEPTIONS',
+};

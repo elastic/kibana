@@ -8,6 +8,7 @@
 import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { DUPLICATE_OPTIONS } from '../../../../../common/constants';
 import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -26,7 +27,7 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 export const useRulesTableActions = ({
   showExceptionsDuplicateConfirmation,
 }: {
-  showExceptionsDuplicateConfirmation: () => Promise<boolean>;
+  showExceptionsDuplicateConfirmation: () => Promise<string | null>;
 }): Array<DefaultItemAction<Rule>> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
@@ -68,10 +69,15 @@ export const useRulesTableActions = ({
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
         const duplicateExceptions = await showExceptionsDuplicateConfirmation();
+        if (!duplicateExceptions) {
+          return;
+        }
         const result = await executeBulkAction({
           type: BulkActionType.duplicate,
           ids: [rule.id],
-          duplicatePayload: { include_exceptions: duplicateExceptions },
+          duplicatePayload: {
+            include_exceptions: duplicateExceptions === DUPLICATE_OPTIONS.WITHOUT_EXCEPTIONS,
+          },
         });
         const createdRules = result?.attributes.results.created;
         if (createdRules?.length) {

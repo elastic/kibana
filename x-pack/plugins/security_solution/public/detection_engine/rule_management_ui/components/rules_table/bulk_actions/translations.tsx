@@ -139,22 +139,29 @@ export const bulkDuplicateRuleActions = {
   MODAL_TITLE: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.modalTitle',
     {
-      defaultMessage: 'Duplicate exceptions?',
+      defaultMessage: 'Exceptions duplication?',
     }
   ),
 
-  MODAL_TEXT: i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.modalBody',
-    {
-      defaultMessage:
-        'Rules you are duplicating may contain exceptions. Please select how you would like exceptions to be treated:',
-    }
+  MODAL_TEXT: (rulesCount: number): JSX.Element => (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.modalBody"
+      defaultMessage="You are duplicating {rulesCount, plural, one {# selected rule} other {# selected rules}} rule, please select how you would like to duplicate the existing exceptions:"
+      values={{ rulesCount }}
+    />
   ),
 
   DUPLICATE_EXCEPTIONS_TEXT: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.checkboxText',
     {
       defaultMessage: 'Duplicate rule with exceptions',
+    }
+  ),
+
+  DUPLICATE_WITHOUT_EXCEPTIONS_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.checkboxText',
+    {
+      defaultMessage: 'Duplicate rule without exceptions',
     }
   ),
 

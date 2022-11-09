@@ -659,6 +659,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
           onConfirm={confirmRuleDuplication}
+          rulesCount={1}
         />
       )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>

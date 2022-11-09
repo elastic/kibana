@@ -23,7 +23,7 @@ export const useBulkDuplicateExceptionsConfirmation = () => {
   const showBulkDuplicateConfirmation = useCallback(async () => {
     const confirmation = await confirmForm();
     if (confirmation) {
-      onConfirm(true);
+      onConfirm(confirmation);
     }
 
     return confirmation;

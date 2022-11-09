@@ -12,6 +12,7 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
+import { DUPLICATE_OPTIONS } from '../../../../../../common/constants';
 import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import {
   BulkActionType,
@@ -46,7 +47,7 @@ interface UseBulkActionsArgs {
     result: DryRunResult | undefined,
     action: BulkActionForConfirmation
   ) => Promise<boolean>;
-  showBulkDuplicateConfirmation: () => Promise<boolean>;
+  showBulkDuplicateConfirmation: () => Promise<string | null>;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
@@ -128,10 +129,14 @@ export const useBulkActions = ({
         closePopover();
 
         const duplicateExceptions = await showBulkDuplicateConfirmation();
-
+        if (!duplicateExceptions) {
+          return;
+        }
         await executeBulkAction({
           type: BulkActionType.duplicate,
-          duplicatePayload: { include_exceptions: duplicateExceptions },
+          duplicatePayload: {
+            include_exceptions: duplicateExceptions === DUPLICATE_OPTIONS.WITH_EXCEPTIONS,
+          },
           ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
         clearRulesSelection();

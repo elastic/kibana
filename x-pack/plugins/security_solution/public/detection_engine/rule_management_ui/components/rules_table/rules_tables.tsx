@@ -275,6 +275,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
           onConfirm={confirmRuleDuplication}
+          rulesCount={selectedRuleIds?.length ? selectedRuleIds?.length : 1}
         />
       )}
       {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (

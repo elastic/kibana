@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
-  EuiCheckbox,
+  EuiRadioGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
@@ -18,27 +18,35 @@ import {
   EuiModalHeaderTitle,
   EuiText,
 } from '@elastic/eui';
+import { DUPLICATE_OPTIONS } from '../../../../../../common/constants';
 
 import { bulkDuplicateRuleActions as i18n } from './translations';
 
 interface BulkDuplicateExceptionsConfirmationProps {
   onCancel: () => void;
-  onConfirm: (checked: boolean) => void;
+  onConfirm: (s: string) => void;
+  rulesCount: number;
 }
 
 const BulkActionDuplicateExceptionsConfirmationComponent = ({
   onCancel,
   onConfirm,
+  rulesCount,
 }: BulkDuplicateExceptionsConfirmationProps) => {
-  const [shouldDuplicateExceptions, setShouldDuplicateExceptions] = useState(false);
+  const [selectedDuplicateOption, setSelectedDuplicateOption] = useState(
+    DUPLICATE_OPTIONS.WITH_EXCEPTIONS
+  );
 
-  const handleCheckboxChange = useCallback(() => {
-    setShouldDuplicateExceptions((checked) => !checked);
-  }, [setShouldDuplicateExceptions]);
+  const handleRadioChange = useCallback(
+    (optionId) => {
+      setSelectedDuplicateOption(optionId);
+    },
+    [setSelectedDuplicateOption]
+  );
 
   const handleConfirm = useCallback(() => {
-    onConfirm(shouldDuplicateExceptions);
-  }, [onConfirm, shouldDuplicateExceptions]);
+    onConfirm(selectedDuplicateOption);
+  }, [onConfirm, selectedDuplicateOption]);
 
   return (
     <EuiModal onClose={onCancel}>
@@ -49,13 +57,32 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiText>{i18n.MODAL_TEXT}</EuiText>
-        <EuiCheckbox
+        <EuiText>{i18n.MODAL_TEXT(rulesCount)}</EuiText>
+        <EuiRadioGroup
+          options={[
+            {
+              id: DUPLICATE_OPTIONS.WITH_EXCEPTIONS,
+              label: i18n.DUPLICATE_EXCEPTIONS_TEXT,
+            },
+            {
+              id: DUPLICATE_OPTIONS.WITHOUT_EXCEPTIONS,
+              label: i18n.DUPLICATE_WITHOUT_EXCEPTIONS_TEXT,
+            },
+          ]}
+          idSelected={selectedDuplicateOption}
+          onChange={handleRadioChange}
+          // name="radio group"
+          // legend={{
+          //   children: <span>This is a legend for a radio group</span>,
+          // }}
+        />
+
+        {/* <EuiCheckbox
           id="duplicateExceptionsCheckbox"
           label={i18n.DUPLICATE_EXCEPTIONS_TEXT}
           checked={shouldDuplicateExceptions}
           onChange={handleCheckboxChange}
-        />
+        /> */}
       </EuiModalBody>
 
       <EuiModalFooter>

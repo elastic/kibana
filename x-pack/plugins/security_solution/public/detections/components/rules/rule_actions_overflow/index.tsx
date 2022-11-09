@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
+import { APP_UI_ID, DUPLICATE_OPTIONS, SecurityPageName } from '../../../../../common/constants';
 import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -47,7 +47,7 @@ interface RuleActionsOverflowComponentProps {
   rule: Rule | null;
   userHasPermissions: boolean;
   canDuplicateRuleWithActions: boolean;
-  showBulkDuplicateExceptionsConfirmation: () => Promise<boolean>;
+  showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
 }
 
 /**
@@ -86,11 +86,15 @@ const RuleActionsOverflowComponent = ({
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
                 const duplicateExceptions = await showBulkDuplicateExceptionsConfirmation();
-
+                if (!duplicateExceptions) {
+                  return;
+                }
                 const result = await executeBulkAction({
                   type: BulkActionType.duplicate,
                   ids: [rule.id],
-                  duplicatePayload: { include_exceptions: duplicateExceptions },
+                  duplicatePayload: {
+                    include_exceptions: duplicateExceptions === DUPLICATE_OPTIONS.WITH_EXCEPTIONS,
+                  },
                 });
 
                 const createdRules = result?.attributes.results.created;

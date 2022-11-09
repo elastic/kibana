@@ -8,8 +8,8 @@
 import { useCallback, useRef } from 'react';
 
 type UseAsyncConfirmationReturn = [
-  initConfirmation: () => Promise<boolean>,
-  confirm: (checked: boolean) => void,
+  initConfirmation: () => Promise<string | null>,
+  confirm: (value: string) => void,
   cancel: () => void
 ];
 
@@ -22,20 +22,20 @@ export const useAsyncCheckboxConfirmation = ({
   onInit,
   onFinish,
 }: UseAsyncConfirmationArgs): UseAsyncConfirmationReturn => {
-  const confirmationPromiseRef = useRef<(result: boolean) => void>();
+  const confirmationPromiseRef = useRef<(result: string | null) => void>();
 
-  const confirm = useCallback((checked: boolean) => {
-    confirmationPromiseRef.current?.(checked);
+  const confirm = useCallback((value: string) => {
+    confirmationPromiseRef.current?.(value);
   }, []);
 
   const cancel = useCallback(() => {
-    confirmationPromiseRef.current?.(false);
+    confirmationPromiseRef.current?.(null);
   }, []);
 
   const initConfirmation = useCallback(() => {
     onInit();
 
-    return new Promise<boolean>((resolve) => {
+    return new Promise<string | null>((resolve) => {
       confirmationPromiseRef.current = resolve;
     }).finally(() => {
       onFinish();
