@@ -27,19 +27,12 @@ import {
 } from '../shared_imports';
 import { AppDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
-import {
-  EsDeprecations,
-  EsDeprecationLogs,
-  ComingSoonPrompt,
-  KibanaDeprecations,
-  Overview,
-} from './components';
+import { EsDeprecations, EsDeprecationLogs, KibanaDeprecations, Overview } from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
   const {
-    isReadOnlyMode,
     services: { api, core },
   } = useAppContext();
 
@@ -78,11 +71,6 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
         />
       </EuiPageContent>
     );
-  }
-
-  // Read-only mode will be enabled up until the last minor before the next major release
-  if (isReadOnlyMode) {
-    return <ComingSoonPrompt />;
   }
 
   if (clusterUpgradeState === 'isUpgrading') {
