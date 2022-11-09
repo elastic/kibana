@@ -29,6 +29,7 @@ export const aiopsExplainLogRateSpikesSchema = schema.object({
     schema.object({
       loaded: schema.maybe(schema.number()),
       remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
+      // TODO Improve schema
       changePoints: schema.maybe(schema.arrayOf(schema.any())),
     })
   ),
