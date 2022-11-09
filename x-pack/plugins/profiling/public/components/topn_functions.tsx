@@ -38,6 +38,15 @@ interface Row {
   };
 }
 
+function getColorLabel(percent: number) {
+  const color = percent < 0 ? 'success' : 'danger';
+  const prefix = percent < 0 ? '-' : '+';
+  const label =
+    Math.abs(percent) <= 0.01 ? '<0.01' : ' ' + prefix + Math.abs(percent).toFixed(2) + '%';
+
+  return [color, label] as const;
+}
+
 function TotalSamplesStat({
   totalSamples,
   newSamples,
@@ -59,13 +68,8 @@ function TotalSamplesStat({
   }
 
   const diffSamples = totalSamples - newSamples;
-  const color = diffSamples < 0 ? 'success' : 'danger';
-  const prefix = diffSamples < 0 ? '-' : '+';
   const percentDelta = (diffSamples / (totalSamples - diffSamples)) * 100;
-  const label =
-    Math.abs(percentDelta) <= 0.01
-      ? '<0.01'
-      : ' ' + prefix + Math.abs(percentDelta).toFixed(2) + '%';
+  const [color, label] = getColorLabel(percentDelta);
 
   return (
     <EuiText size="xs">
@@ -90,29 +94,24 @@ function SampleStat({
   if (diffSamples === undefined || diffSamples === 0 || totalSamples === 0) {
     return <>{samplesLabel}</>;
   }
-  const color = diffSamples < 0 ? 'success' : 'danger';
-  const prefix = diffSamples < 0 ? '-' : '+';
+
   const percentDelta = (diffSamples / (samples - diffSamples)) * 100;
-  const label =
-    Math.abs(percentDelta) <= 0.01 ? '<0.01' : prefix + Math.abs(percentDelta).toFixed(2) + '% rel';
+  const [color, label] = getColorLabel(percentDelta);
 
   const totalPercentDelta = (diffSamples / totalSamples) * 100;
-  const totalLabel =
-    Math.abs(totalPercentDelta) <= 0.01
-      ? '<0.01'
-      : prefix + Math.abs(totalPercentDelta).toFixed(2) + '% abs';
+  const [totalColor, totalLabel] = getColorLabel(totalPercentDelta);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>{samplesLabel}</EuiFlexItem>
       <EuiFlexItem>
         <EuiText color={color} size="s">
-          {label}
+          {label} rel
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText color={color} size="s">
-          {totalLabel}
+        <EuiText color={totalColor} size="s">
+          {totalLabel} abs
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -125,9 +124,8 @@ function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU: number | undefined })
   if (diffCPU === undefined || diffCPU === 0) {
     return <>{cpuLabel}</>;
   }
-  const color = diffCPU < 0 ? 'success' : 'danger';
-  const prefix = diffCPU < 0 ? '-' : '+';
-  const label = Math.abs(diffCPU) <= 0.01 ? '<0.01' : prefix + Math.abs(diffCPU).toFixed(2);
+
+  const [color, label] = getColorLabel(diffCPU);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
