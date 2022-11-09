@@ -55,7 +55,7 @@ export function useTestQuery(
       if (isGrouped) {
         setTestQueryResponse({
           result: i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryGroupedResponse', {
-            defaultMessage: 'Query ',
+            defaultMessage: 'Grouped query ',
             values: {},
           }),
           error: null,
