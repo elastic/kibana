@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { API_RESULTS_PER_PAGE } from '../../../../common/connector_types/security/tines/constants';
 
 // config form
 export const URL_LABEL = i18n.translate(
@@ -128,8 +129,7 @@ export const WEBHOOK_URL_FALLBACK_TITLE = i18n.translate(
 export const WEBHOOK_URL_FALLBACK_TEXT = (type: 'Story' | 'Webhook') =>
   i18n.translate('xpack.stackConnectors.security.tines.params.webhookUrlFallbackText', {
     values: { type },
-    defaultMessage:
-      'Not possible to retrieve more than 500 results from the Tines {type} API. If your {type} does not appear in the list, please fill the Webhook URL below',
+    defaultMessage: `Not possible to retrieve more than ${API_RESULTS_PER_PAGE} results from the Tines {type} API. If your {type} does not appear in the list, please fill the Webhook URL below`,
   });
 export const WEBHOOK_URL_HELP = i18n.translate(
   'xpack.stackConnectors.security.tines.params.webhookUrlHelp',

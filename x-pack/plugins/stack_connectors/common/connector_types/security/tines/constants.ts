@@ -7,6 +7,7 @@
 
 export const TINES_TITLE = 'Tines';
 export const TINES_CONNECTOR_ID = '.tines';
+export const API_RESULTS_PER_PAGE = 500; // max value for per_page parameter
 export const enum SUB_ACTION {
   STORIES = 'stories',
   WEBHOOKS = 'webhooks',

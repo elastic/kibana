@@ -34,7 +34,10 @@ import type {
   TinesStoriesApiResponse,
   TinesWebhooksApiResponse,
 } from './api_schema';
-import { SUB_ACTION } from '../../../../common/connector_types/security/tines/constants';
+import {
+  API_RESULTS_PER_PAGE,
+  SUB_ACTION,
+} from '../../../../common/connector_types/security/tines/constants';
 
 export const API_PATH = '/api/v1';
 export const WEBHOOK_PATH = '/webhook';
@@ -108,12 +111,11 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
 
   private async tinesApiRequest<R extends TinesBaseApiResponse, T>(
     req: SubActionRequestParams<R>,
-    reducer: (response: R) => T,
-    pageSize: number = 500 // maximum page size allowed
+    reducer: (response: R) => T
   ): Promise<T & { incompleteResponse: boolean }> {
     const response = await this.request<R>({
       ...req,
-      params: { ...req.params, per_page: pageSize },
+      params: { ...req.params, per_page: API_RESULTS_PER_PAGE },
     });
     return {
       ...reducer(response.data),

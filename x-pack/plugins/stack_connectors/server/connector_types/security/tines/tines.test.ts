@@ -11,7 +11,10 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { TinesConnector } from './tines';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { TINES_CONNECTOR_ID } from '../../../../common/connector_types/security/tines/constants';
+import {
+  API_RESULTS_PER_PAGE,
+  TINES_CONNECTOR_ID,
+} from '../../../../common/connector_types/security/tines/constants';
 
 jest.mock('axios');
 (axios as jest.Mocked<typeof axios>).create.mockImplementation(
@@ -77,7 +80,7 @@ const storiesGetRequestExpected = {
     'x-user-token': token,
     'Content-Type': 'application/json',
   },
-  params: { per_page: 500 },
+  params: { per_page: API_RESULTS_PER_PAGE },
 };
 
 const agentsGetRequestExpected = {
@@ -90,7 +93,7 @@ const agentsGetRequestExpected = {
     'x-user-token': token,
     'Content-Type': 'application/json',
   },
-  params: { story_id: story.id, per_page: 500 },
+  params: { story_id: story.id, per_page: API_RESULTS_PER_PAGE },
 };
 
 describe('TinesConnector', () => {
