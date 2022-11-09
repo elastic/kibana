@@ -9,6 +9,7 @@ import { Route, Switch } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
@@ -49,11 +50,19 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
     <Route
       exact
       path={findingsNavigation.findings_by_resource.path}
-      render={() => <LatestFindingsByResource dataView={dataView} />}
+      render={() => (
+        <TrackApplicationView viewId={findingsNavigation.findings_by_resource.id}>
+          <LatestFindingsByResource dataView={dataView} />
+        </TrackApplicationView>
+      )}
     />
     <Route
       path={findingsNavigation.resource_findings.path}
-      render={() => <ResourceFindings dataView={dataView} />}
+      render={() => (
+        <TrackApplicationView viewId={findingsNavigation.resource_findings.id}>
+          <ResourceFindings dataView={dataView} />
+        </TrackApplicationView>
+      )}
     />
   </Switch>
 );
