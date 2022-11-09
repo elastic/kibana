@@ -59,6 +59,10 @@ const filtersBuilderMaxHeight = css`
   max-height: ${DEFAULT_MAX_HEIGHT};
 `;
 
+const tempStyle = css`
+  font-size: 12px;
+`;
+
 export interface FilterEditorProps {
   filter: Filter;
   indexPatterns: DataView[];
@@ -282,6 +286,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
         {shouldShowPreview ? (
           <EuiFormRow
             fullWidth
+            className={tempStyle}
             hasEmptyLabelSpace={true}
             label={
               <strong>
