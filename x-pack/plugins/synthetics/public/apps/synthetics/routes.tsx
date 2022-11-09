@@ -23,6 +23,8 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { getSettingsRouteConfig } from './components/settings/route_config';
+import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { ErrorDetailsPage } from './components/error_details/error_details_page';
 import { StepTitle } from './components/step_details_page/step_title';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
@@ -51,6 +53,7 @@ import {
   ERROR_DETAILS_ROUTE,
   STEP_DETAIL_ROUTE,
   OVERVIEW_ROUTE,
+  TEST_RUN_DETAILS_ROUTE,
 } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
 import { MonitorPage } from './components/monitors_page/monitor_page';
@@ -64,7 +67,7 @@ import { MonitorHistory } from './components/monitor_details/monitor_history/mon
 import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
 import { StepDetailPage } from './components/step_details_page/step_detail_page';
 
-type RouteProps = LazyObservabilityPageTemplateProps & {
+export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
   component: React.FC;
   dataTestSubj: string;
@@ -88,13 +91,14 @@ const getRoutes = (
   syntheticsPath: string
 ): RouteProps[] => {
   return [
+    ...getSettingsRouteConfig(history, syntheticsPath, baseTitle),
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
         defaultMessage: 'Synthetics Getting Started | {baseTitle}',
         values: { baseTitle },
       }),
       path: GETTING_STARTED_ROUTE,
-      component: () => <GettingStartedPage />,
+      component: GettingStartedPage,
       dataTestSubj: 'syntheticsGettingStartedPage',
       pageSectionProps: {
         alignment: 'center',
@@ -291,7 +295,7 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: STEP_DETAIL_ROUTE,
-      component: () => <StepDetailPage />,
+      component: StepDetailPage,
       dataTestSubj: 'syntheticsMonitorEditPage',
       pageHeader: {
         pageTitle: <StepTitle />,
@@ -309,13 +313,30 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: ERROR_DETAILS_ROUTE,
-      component: () => <ErrorDetailsPage />,
+      component: ErrorDetailsPage,
       dataTestSubj: 'syntheticsMonitorEditPage',
       pageHeader: {
         pageTitle: (
           <FormattedMessage
             id="xpack.synthetics.editMonitor.errorDetailsRoute.title"
             defaultMessage="Error details"
+          />
+        ),
+      },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.testRunDetailsRoute.title', {
+        defaultMessage: 'Test run details | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: TEST_RUN_DETAILS_ROUTE,
+      component: TestRunDetails,
+      dataTestSubj: 'syntheticsMonitorTestRunDetailsPage',
+      pageHeader: {
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.synthetics.testRunDetailsRoute.page.title"
+            defaultMessage="Test run details"
           />
         ),
       },

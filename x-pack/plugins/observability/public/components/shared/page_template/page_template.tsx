@@ -98,6 +98,7 @@ export function ObservabilityPageTemplate({
                   strict: !entry.ignoreTrailingSlash,
                 }) != null);
           const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
+          const navId = entry.label.toLowerCase().split(' ').join('_');
           return {
             id: `${sectionIndex}.${entryIndex}`,
             name: entry.isNewFeature ? (
@@ -107,7 +108,8 @@ export function ObservabilityPageTemplate({
             ),
             href,
             isSelected,
-            'data-nav-id': entry.label.toLowerCase().split(' ').join('_'),
+            'data-nav-id': navId,
+            'data-test-subj': `observability-nav-${entry.app}-${navId}`,
             onClick: (event) => {
               if (entry.onClick) {
                 entry.onClick(event);
