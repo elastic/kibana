@@ -46,7 +46,7 @@ interface Row {
  *
  * @return Formatted string.
  */
-function humanSampleCount(samples, dp=2) {
+function humanSampleCount(samples, dp = 2) {
   const thresh = 1000;
 
   if (Math.abs(samples) < thresh) {
@@ -55,7 +55,7 @@ function humanSampleCount(samples, dp=2) {
 
   const units = ['k', 'M', 'B', 'T', 'Q'];
   let u = -1;
-  const r = 10**dp;
+  const r = 10 ** dp;
 
   do {
     samples /= thresh;
@@ -65,37 +65,56 @@ function humanSampleCount(samples, dp=2) {
   return samples.toFixed(dp) + ' ' + units[u];
 }
 
-function TotalSamplesStat({ totalSamples, newSamples } : { totalSamples : number, newSamples : number | undefined }) {
+function TotalSamplesStat({
+  totalSamples,
+  newSamples,
+}: {
+  totalSamples: number;
+  newSamples: number | undefined;
+}) {
   const samplesLabel = `${totalSamples.toLocaleString()}`;
-  const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel',
-    { defaultMessage: ' Total sample estimate: ',});
+  const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
+    defaultMessage: ' Total sample estimate: ',
+  });
 
   if (newSamples === undefined || newSamples === 0) {
     return (
       <EuiText size="xs">
-        <strong>{sampleHeader}
-        </strong>
-        { " " + totalSamples.toLocaleString()}
-      </EuiText>)
+        <strong>{sampleHeader}</strong>
+        {' ' + totalSamples.toLocaleString()}
+      </EuiText>
+    );
   }
 
   const diffSamples = totalSamples - newSamples;
   const color = diffSamples < 0 ? 'success' : 'danger';
   const prefix = diffSamples < 0 ? '-' : '+';
-  const percentDelta = (diffSamples / (totalSamples - diffSamples))*100;
-  const label = Math.abs(percentDelta) <= 0.01 ? '<0.01' : 
-    " " + prefix + Math.abs(percentDelta).toFixed(2) + "%";
+  const percentDelta = (diffSamples / (totalSamples - diffSamples)) * 100;
+  const label =
+    Math.abs(percentDelta) <= 0.01
+      ? '<0.01'
+      : ' ' + prefix + Math.abs(percentDelta).toFixed(2) + '%';
 
   return (
     <EuiText size="xs">
-      <strong>{sampleHeader}</strong>{ " " + totalSamples.toLocaleString() + " " } 
-      <EuiTextColor color={color} size="xs">({label})</EuiTextColor>
+      <strong>{sampleHeader}</strong>
+      {' ' + totalSamples.toLocaleString() + ' '}
+      <EuiTextColor color={color} size="xs">
+        ({label})
+      </EuiTextColor>
     </EuiText>
   );
 }
 
-function SampleStat({ samples, diffSamples, totalSamples } :
-  { samples: number; diffSamples: number | undefined; totalSamples: number | undefined }){
+function SampleStat({
+  samples,
+  diffSamples,
+  totalSamples,
+}: {
+  samples: number;
+  diffSamples: number | undefined;
+  totalSamples: number | undefined;
+}) {
   const samplesLabel = `${samples.toLocaleString()}`;
 
   if (diffSamples === undefined || diffSamples === 0) {
@@ -103,13 +122,15 @@ function SampleStat({ samples, diffSamples, totalSamples } :
   }
   const color = diffSamples < 0 ? 'success' : 'danger';
   const prefix = diffSamples < 0 ? '-' : '+';
-  const percentDelta = (diffSamples / (samples - diffSamples))*100;
-  const label = Math.abs(percentDelta) <= 0.01 ? '<0.01' : 
-    prefix + Math.abs(percentDelta).toFixed(2) + "% rel";
+  const percentDelta = (diffSamples / (samples - diffSamples)) * 100;
+  const label =
+    Math.abs(percentDelta) <= 0.01 ? '<0.01' : prefix + Math.abs(percentDelta).toFixed(2) + '% rel';
 
-  const totalPercentDelta = (diffSamples / totalSamples)*100;
-  const totalLabel = Math.abs(totalPercentDelta) <= 0.01 ? '<0.01' : 
-    prefix + Math.abs(totalPercentDelta).toFixed(2) + "% abs";
+  const totalPercentDelta = (diffSamples / totalSamples) * 100;
+  const totalLabel =
+    Math.abs(totalPercentDelta) <= 0.01
+      ? '<0.01'
+      : prefix + Math.abs(totalPercentDelta).toFixed(2) + '% abs';
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
@@ -239,7 +260,9 @@ export const TopNFunctionsTable = ({
       }),
       align: 'right',
       render: (_, { samples, diff }) => {
-        return <SampleStat samples={samples} diffSamples={diff?.samples} totalSamples={totalCount} />;
+        return (
+          <SampleStat samples={samples} diffSamples={diff?.samples} totalSamples={totalCount} />
+        );
       },
     },
     {
@@ -248,12 +271,14 @@ export const TopNFunctionsTable = ({
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
             {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel1Exclusive', {
-                          defaultMessage: 'CPU excl.'})}
+              defaultMessage: 'CPU excl.',
+            })}
           </EuiFlexItem>
           <EuiFlexItem>
             {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel2Exclusive', {
-                          defaultMessage: 'subfunctions'})}
-         </EuiFlexItem>
+              defaultMessage: 'subfunctions',
+            })}
+          </EuiFlexItem>
         </EuiFlexGroup>
       ),
       render: (_, { exclusiveCPU, diff }) => {
@@ -267,12 +292,14 @@ export const TopNFunctionsTable = ({
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
             {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel1Inclusive', {
-                          defaultMessage: 'CPU incl.'})}
+              defaultMessage: 'CPU incl.',
+            })}
           </EuiFlexItem>
           <EuiFlexItem>
             {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel2Inclusive', {
-                          defaultMessage: 'subfunctions'})}
-         </EuiFlexItem>
+              defaultMessage: 'subfunctions',
+            })}
+          </EuiFlexItem>
         </EuiFlexGroup>
       ),
       render: (_, { inclusiveCPU, diff }) => {
@@ -331,7 +358,10 @@ export const TopNFunctionsTable = ({
 
   return (
     <>
-      <TotalSamplesStat totalSamples={totalCount} newSamples={comparisonTopNFunctions?.TotalCount} />
+      <TotalSamplesStat
+        totalSamples={totalCount}
+        newSamples={comparisonTopNFunctions?.TotalCount}
+      />
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable
