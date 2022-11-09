@@ -56,7 +56,7 @@ export function useTags({
   const hasTagInClauseGetter = useCallback(
     (matchValue: 'must' | 'must_not') => (tag: Tag, _query?: Query) => {
       const q = Boolean(_query) ? _query! : query;
-      const tagsClauses = query.ast.getFieldClauses('tag');
+      const tagsClauses = q.ast.getFieldClauses('tag');
 
       if (tagsClauses) {
         const mustHaveTagClauses = q.ast
@@ -102,9 +102,7 @@ export function useTags({
       // Remove the tag in the "Exclude" list if it is there
       if (hasTagInExclude(tag)) {
         q = removeTagFromExcludeClause(tag, undefined, false);
-      }
-
-      if (hasTagInInclude(tag, q)) {
+      } else if (hasTagInInclude(tag, q)) {
         // Already selected, remove the filter
         removeTagFromIncludeClause(tag, q);
         return;
