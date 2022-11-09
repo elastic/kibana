@@ -88,7 +88,7 @@ export function OverviewStatus() {
       setStatusConfig({
         up: status.up,
         down: status.down,
-        disabledCount: status.disabled,
+        disabledCount: status.disabledCount,
       });
     }
   }, [status, statusFilter]);
