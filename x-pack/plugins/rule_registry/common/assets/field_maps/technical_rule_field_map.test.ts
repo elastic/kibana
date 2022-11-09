@@ -246,9 +246,6 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
-      "undefined": Object {
-        "type": "boolean",
-      },
     }
   `);
 });
