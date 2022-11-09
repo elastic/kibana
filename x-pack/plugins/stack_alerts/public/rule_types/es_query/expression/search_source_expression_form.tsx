@@ -8,14 +8,18 @@
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { lastValueFrom } from 'rxjs';
-import { Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { DataView, Query, ISearchSource, getTime } from '@kbn/data-plugin/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
-import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import {
+  mapAndFlattenFilters,
+  getTime,
+  type SavedQuery,
+  type ISearchSource,
+} from '@kbn/data-plugin/public';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -25,12 +29,13 @@ import {
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { getComparatorScript } from '../../../../common';
-import { CommonRuleParams, EsQueryRuleParams, SearchType } from '../types';
+import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
+import { CommonRuleParams, EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
-import { useTriggersAndActionsUiDeps, convertFieldSpecToFieldOption } from '../util';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { hasExpressionValidationErrors } from '../validation';
+import { useTriggerUiActionServices, convertFieldSpecToFieldOption } from '../util';
 import { Comparator } from '../../../../common/comparator_types';
 
 const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
@@ -85,8 +90,10 @@ interface SearchSourceExpressionFormProps {
   searchSource: ISearchSource;
   ruleParams: EsQueryRuleParams<SearchType.searchSource>;
   errors: IErrorObject;
+  metadata?: EsQueryRuleMetaData;
   initialSavedQuery?: SavedQuery;
   setParam: (paramField: string, paramValue: unknown) => void;
+  onChangeMetaData: (metadata: EsQueryRuleMetaData) => void;
 }
 
 const isSearchSourceParam = (action: LocalStateAction): action is SearchSourceParamsAction => {
@@ -94,12 +101,11 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
 };
 
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
-  const { data } = useTriggersAndActionsUiDeps();
+  const services = useTriggerUiActionServices();
+  const unifiedSearch = services.unifiedSearch;
   const { searchSource, errors, initialSavedQuery, setParam, ruleParams } = props;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
-
-  const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
   useEffect(() => setSavedQuery(initialSavedQuery), [initialSavedQuery]);
 
@@ -138,16 +144,10 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     setEsFields(convertFieldSpecToFieldOption(dataView.fields.map((field) => field.toSpec())));
   }, [dataView]);
 
-  const onSelectDataView = useCallback(
-    (newDataViewId) =>
-      data.dataViews.get(newDataViewId).then((newDataView) => {
-        setEsFields(
-          convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec()))
-        );
-        dispatch({ type: 'index', payload: newDataView });
-      }),
-    [data.dataViews]
-  );
+  const onSelectDataView = useCallback((newDataView: DataView) => {
+    setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
+    dispatch({ type: 'index', payload: newDataView });
+  }, []);
 
   const onUpdateFilters = useCallback((newFilters) => {
     dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) });
@@ -317,9 +317,10 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       </EuiTitle>
       <EuiSpacer size="s" />
       <DataViewSelectPopover
-        dataViewName={dataView?.getName?.() ?? dataView?.title}
-        dataViewId={dataView?.id}
+        dataView={dataView}
+        metadata={props.metadata}
         onSelectDataView={onSelectDataView}
+        onChangeMetaData={props.onChangeMetaData}
       />
       {Boolean(dataView?.id) && (
         <>
@@ -333,7 +334,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
             </h5>
           </EuiTitle>
           <EuiSpacer size="xs" />
-          <SearchBar
+          <unifiedSearch.ui.SearchBar
+            appName={STACK_ALERTS_FEATURE_ID}
             onQuerySubmit={onQueryBarSubmit}
             onQueryChange={onChangeQuery}
             suggestionsSize="s"
@@ -354,7 +356,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
             showSubmitButton={false}
             dateRangeFrom={undefined}
             dateRangeTo={undefined}
-            timeHistory={timeHistory}
             hiddenFilterPanelOptions={HIDDEN_FILTER_PANEL_OPTIONS}
           />
         </>

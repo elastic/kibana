@@ -20,6 +20,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { copyToClipboard, EuiLoadingSpinner } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ReactWrapper } from 'enzyme';
 
 jest.mock('@elastic/eui', () => {
@@ -119,6 +120,9 @@ const searchSourceFieldsMock = {
     id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     title: 'kibana_sample_data_logs',
     fields: [],
+    isPersisted: () => true,
+    getName: () => 'kibana_sample_data_logs',
+    isTimeBased: () => true,
   },
 };
 
@@ -220,8 +224,9 @@ const dataMock = dataPluginMock.createStartContract();
 (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
   Promise.resolve(searchSourceMock)
 );
-(dataMock.dataViews.getIdsWithTitle as jest.Mock).mockImplementation(() => Promise.resolve([]));
-dataMock.dataViews.getDefaultDataView = jest.fn(() => Promise.resolve(null));
+(dataViewPluginMock.getIds as jest.Mock) = jest.fn().mockImplementation(() => Promise.resolve([]));
+dataViewPluginMock.getDefaultDataView = jest.fn(() => Promise.resolve(null));
+dataViewPluginMock.get = jest.fn();
 (dataMock.query.savedQueries.getSavedQuery as jest.Mock).mockImplementation(() =>
   Promise.resolve(savedQueryMock)
 );
@@ -236,9 +241,18 @@ const setup = (ruleParams: EsQueryRuleParams<SearchType.searchSource>) => {
     timeWindowSize: [],
     searchConfiguration: [],
   };
+  const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
 
   return mountWithIntl(
-    <KibanaContextProvider services={{ data: dataMock, uiSettings: uiSettingsMock }}>
+    <KibanaContextProvider
+      services={{
+        dataViews: dataViewPluginMock,
+        data: dataMock,
+        uiSettings: uiSettingsMock,
+        dataViewEditor: dataViewEditorMock,
+        unifiedSearch: unifiedSearchMock,
+      }}
+    >
       <SearchSourceExpression
         ruleInterval="1m"
         ruleThrottle="1m"
@@ -253,6 +267,8 @@ const setup = (ruleParams: EsQueryRuleParams<SearchType.searchSource>) => {
         defaultActionGroupId=""
         actionGroups={[]}
         charts={chartsStartMock}
+        metadata={{ adHocDataViewList: [] }}
+        onChangeMetaData={jest.fn()}
       />
     </KibanaContextProvider>
   );

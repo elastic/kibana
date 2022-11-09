@@ -29,7 +29,7 @@ import { Comparator } from '../../../../common/comparator_types';
 import { getComparatorScript } from '../../../../common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { EsQueryRuleParams, SearchType } from '../types';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
@@ -42,7 +42,7 @@ interface KibanaDeps {
 }
 
 export const EsQueryExpression: React.FC<
-  RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>>
+  RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
   const {
     index,

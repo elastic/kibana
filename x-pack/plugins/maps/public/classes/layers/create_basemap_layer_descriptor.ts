@@ -9,7 +9,6 @@ import _ from 'lodash';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { getKibanaTileMap } from '../../util';
 import { getEMSSettings } from '../../kibana_services';
-// @ts-expect-error
 import { KibanaTilemapSource } from '../sources/kibana_tilemap_source';
 import { RasterTileLayer } from './raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from './ems_vector_tile_layer/ems_vector_tile_layer';

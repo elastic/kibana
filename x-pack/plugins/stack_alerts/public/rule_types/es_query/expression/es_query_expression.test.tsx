@@ -161,6 +161,7 @@ describe('EsQueryRuleTypeExpression', () => {
         defaultActionGroupId=""
         actionGroups={[]}
         charts={chartsStartMock}
+        onChangeMetaData={() => {}}
       />
     );
 

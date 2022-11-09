@@ -16,8 +16,6 @@ export const isSearchSourceRule = (
   return ruleParams.searchType === 'searchSource';
 };
 
-export const useTriggersAndActionsUiDeps = () => useKibana<TriggersAndActionsUiDeps>().services;
-
 export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOption[] => {
   return (fieldSpec ?? [])
     .filter((spec: FieldSpec) => spec.isMapped)
@@ -42,3 +40,5 @@ export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOpti
       return converted;
     });
 };
+
+export const useTriggerUiActionServices = () => useKibana<TriggersAndActionsUiDeps>().services;
