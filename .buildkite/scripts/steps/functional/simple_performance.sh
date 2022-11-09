@@ -50,13 +50,6 @@ echo "✅ ES is ready and will run in the background"
 curl -I -XGET "${TEST_ES_URL}/_cat/indices"
 curl -I -XGET "${TEST_ES_URL}/_cat/count?v=true"
 
-echo "??????"
-
-if [ -d "$KIBANA_BUILD_LOCATION" ]; then
-  echo "folder exists"
-  ls -l $KIBANA_BUILD_LOCATION
-fi
-
 cd "$KIBANA_BUILD_LOCATION"
 
 echo "starting kibana"
@@ -75,7 +68,7 @@ echo "starting kibana"
 --server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d  \
 --status.allowAnonymous=true  \
 --telemetry.banner=false  \
---telemetry.labels="{\"branch\": \"$BUILDKITE_BRANCH\", \"ciBuildNumber\": \"10\", \"journeyName\":\"simple-test\"}"  \
+--telemetry.labels="{\"branch\": \"$BUILDKITE_BRANCH\", \"ciBuildNumber\": \"$BUILDKITE_BUILD_ID\", \"ciBuildName\": \"kibana-single-user-performance-debug\", \"journeyName\":\"simple-test\"}"  \
 --telemetry.optIn=true  \
 --telemetry.sendUsageTo=staging  \
 --xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf" &
@@ -104,7 +97,7 @@ node scripts/kbn_archiver load test/functional/fixtures/kbn_archiver/stress_test
 
 sleep 30;
 
-for ((i=1;i<=10;i++)); do
+for ((i=1;i<=50;i++)); do
   echo "--- Run simple test - #$i"
   node scripts/simple_test.js
   sleep 5;
