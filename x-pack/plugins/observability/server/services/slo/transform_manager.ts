@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { SLO, IndicatorTypes } from '../../types/models';
+import { SLO, IndicatorTypes } from '../../domain/models';
 import { retryTransientEsErrors } from '../../utils/retry';
 import { TransformGenerator } from './transform_generators';
 

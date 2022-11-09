@@ -13,7 +13,7 @@ import {
 } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { SLO, StoredSLO } from '../../types/models';
+import { SLO, StoredSLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
 import { createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Duration, DurationUnit } from '../../../types/models';
+import { Duration, DurationUnit } from '../../../domain/models';
 
 export function sevenDays(): Duration {
   return new Duration(7, DurationUnit.Day);
@@ -16,7 +16,7 @@ export function oneWeek(): Duration {
 }
 
 export function sixHours(): Duration {
-  return new Duration(6, DurationUnit.h);
+  return new Duration(6, DurationUnit.Hour);
 }
 
 export function oneMinute(): Duration {

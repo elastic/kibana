@@ -20,7 +20,7 @@ import {
   ApmTransactionErrorRateTransformGenerator,
   TransformGenerator,
 } from './transform_generators';
-import { SLO, IndicatorTypes } from '../../types/models';
+import { SLO, IndicatorTypes } from '../../domain/models';
 import {
   createAPMTransactionDurationIndicator,
   createAPMTransactionErrorRateIndicator,

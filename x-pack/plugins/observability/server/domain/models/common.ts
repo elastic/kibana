@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import * as t from 'io-ts';
-import { errorBudgetSchema } from '../schema';
+import { dateRangeSchema } from '../../types/schema';
 
-type ErrorBudget = t.TypeOf<typeof errorBudgetSchema>;
+type DateRange = t.TypeOf<typeof dateRangeSchema>;
 
-export type { ErrorBudget };
+export type { DateRange };

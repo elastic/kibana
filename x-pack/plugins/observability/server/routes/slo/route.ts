@@ -22,7 +22,7 @@ import {
   KQLCustomTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
-import { IndicatorTypes } from '../../types/models';
+import { IndicatorTypes } from '../../domain/models';
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,

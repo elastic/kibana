@@ -11,7 +11,7 @@ import moment from 'moment';
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services';
 import { InternalQueryError } from '../../errors';
-import { Duration, DurationUnit } from '../../types/models';
+import { Duration, DurationUnit } from '../../domain/models';
 import { createSLO } from './fixtures/slo';
 import { DefaultSLIClient } from './sli_client';
 

@@ -7,7 +7,7 @@
 
 import { validateSLO } from '.';
 import { createSLO } from '../../services/slo/fixtures/slo';
-import { Duration, DurationUnit } from '../../types/models/duration';
+import { Duration, DurationUnit } from '../models/duration';
 
 describe('validateSLO', () => {
   describe('any slo', () => {

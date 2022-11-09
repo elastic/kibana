@@ -6,8 +6,8 @@
  */
 
 import { IllegalArgumentError } from '../../errors';
-import { SLO } from '../../types/models';
-import { Duration, DurationUnit } from '../../types/models/duration';
+import { SLO } from '../models';
+import { Duration, DurationUnit } from '../models/duration';
 import { timeslicesBudgetingMethodSchema } from '../../types/schema';
 
 /**

@@ -6,9 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { sloSchema } from '../schema';
+import { timeWindowSchema } from '../../types/schema/time_window';
 
-type SLO = t.TypeOf<typeof sloSchema>;
-type StoredSLO = t.OutputOf<typeof sloSchema>;
+type TimeWindow = t.TypeOf<typeof timeWindowSchema>;
 
-export type { SLO, StoredSLO };
+export type { TimeWindow };

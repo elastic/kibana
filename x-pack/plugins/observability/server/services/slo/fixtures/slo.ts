@@ -14,7 +14,7 @@ import {
   Indicator,
   KQLCustomIndicator,
   SLO,
-} from '../../../types/models';
+} from '../../../domain/models';
 import { CreateSLOParams } from '../../../types/rest_specs';
 import { Paginated } from '../slo_repository';
 import { sevenDays } from './duration';
