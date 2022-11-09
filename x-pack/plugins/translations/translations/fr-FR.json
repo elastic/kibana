@@ -27995,7 +27995,6 @@
     "xpack.securitySolution.eventDetails.jsonView": "JSON",
     "xpack.securitySolution.eventDetails.multiFieldBadge": "champ multiple",
     "xpack.securitySolution.eventDetails.multiFieldTooltipContent": "Les champs multiples peuvent avoir plusieurs valeurs.",
-    "xpack.securitySolution.eventDetails.reason": "Raison",
     "xpack.securitySolution.eventDetails.table": "Tableau",
     "xpack.securitySolution.eventDetails.table.actions": "Actions",
     "xpack.securitySolution.eventDetails.value": "Valeur",

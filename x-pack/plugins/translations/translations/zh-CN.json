@@ -28004,7 +28004,6 @@
     "xpack.securitySolution.eventDetails.jsonView": "JSON",
     "xpack.securitySolution.eventDetails.multiFieldBadge": "多字段",
     "xpack.securitySolution.eventDetails.multiFieldTooltipContent": "多字段的每个字段可以有多个值",
-    "xpack.securitySolution.eventDetails.reason": "原因",
     "xpack.securitySolution.eventDetails.table": "表",
     "xpack.securitySolution.eventDetails.table.actions": "操作",
     "xpack.securitySolution.eventDetails.value": "值",

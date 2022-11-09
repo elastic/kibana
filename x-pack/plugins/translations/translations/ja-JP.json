@@ -27970,7 +27970,6 @@
     "xpack.securitySolution.eventDetails.jsonView": "JSON",
     "xpack.securitySolution.eventDetails.multiFieldBadge": "複数フィールド",
     "xpack.securitySolution.eventDetails.multiFieldTooltipContent": "複数フィールドにはフィールドごとに複数の値を入力できます",
-    "xpack.securitySolution.eventDetails.reason": "理由",
     "xpack.securitySolution.eventDetails.table": "表",
     "xpack.securitySolution.eventDetails.table.actions": "アクション",
     "xpack.securitySolution.eventDetails.value": "値",
