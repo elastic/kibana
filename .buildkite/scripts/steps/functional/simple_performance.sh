@@ -22,12 +22,6 @@ function is_running {
   kill -0 "$1" &>/dev/null
 }
 
-function check_running_processes {
-  ps aux | grep -e 'java' -e 'node' -e 'chrome' || echo "failed to run 'ps aux'"
-}
-
-check_running_processes
-
 # `kill $esPid` doesn't work, seems that kbn-es doesn't listen to signals correctly, this does work
 trap 'killall node -q' EXIT
 
@@ -74,7 +68,7 @@ echo "starting kibana"
 --server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d  \
 --status.allowAnonymous=true  \
 --telemetry.banner=false  \
---telemetry.labels="{\"branch\": \"$BUILDKITE_BRANCH\", \"ciBuildNumber\": \"$BUILDKITE_BUILD_ID\", \"ciBuildName\": \"kibana-single-user-performance-debug\", \"journeyName\":\"simple-test\"}"  \
+--telemetry.labels="{\"branch\": \"$BUILDKITE_BRANCH\", \"ciBuildNumber\": \"10\", \"ciBuildName\": \"kibana-single-user-performance-debug\", \"journeyName\":\"simple-test\"}"  \
 --telemetry.optIn=true  \
 --telemetry.sendUsageTo=staging  \
 --xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf" &
@@ -103,7 +97,7 @@ node scripts/kbn_archiver load test/functional/fixtures/kbn_archiver/stress_test
 
 sleep 30;
 
-for ((i=1;i<=50;i++)); do
+for ((i=1;i<=25;i++)); do
   echo "--- Run simple test - #$i"
   node scripts/simple_test.js
   sleep 5;
