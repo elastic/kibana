@@ -15,8 +15,8 @@ export const securityConfig: GuideConfig = {
   }),
   guideName: 'Security',
   completedGuideRedirectLocation: {
-    appID: 'security',
-    path: '/app/security/dashboards',
+    appID: 'securitySolutionUI',
+    path: '/dashboards',
   },
   description: i18n.translate('guidedOnboarding.securityGuide.description', {
     defaultMessage: `We'll help you get set up quickly, using Elastic's out-of-the-box integrations.`,
@@ -86,6 +86,17 @@ export const securityConfig: GuideConfig = {
       location: {
         appID: 'securitySolutionUI',
         path: '/alerts',
+      },
+      manualCompletion: {
+        title: i18n.translate('guidedOnboarding.securityGuide.alertsStep.manualCompletion.title', {
+          defaultMessage: 'Continue with the tour',
+        }),
+        description: i18n.translate(
+          'guidedOnboarding.securityGuide.alertsStep.manualCompletion.description',
+          {
+            defaultMessage: `After you've explored the case you created, click here to continue.`,
+          }
+        ),
       },
     },
   ],
