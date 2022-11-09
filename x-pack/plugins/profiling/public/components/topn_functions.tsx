@@ -38,33 +38,6 @@ interface Row {
   };
 }
 
-/**
- * Format number of samples as human-readable text.
- *
- * @param bytes Number of bytes.
- * @param dp Number of decimal places to display.
- *
- * @return Formatted string.
- */
-function humanSampleCount(samples, dp = 2) {
-  const thresh = 1000;
-
-  if (Math.abs(samples) < thresh) {
-    return samples + ' ';
-  }
-
-  const units = ['k', 'M', 'B', 'T', 'Q'];
-  let u = -1;
-  const r = 10 ** dp;
-
-  do {
-    samples /= thresh;
-    ++u;
-  } while (Math.round(Math.abs(samples) * r) / r >= thresh && u < units.length - 1);
-
-  return samples.toFixed(dp) + ' ' + units[u];
-}
-
 function TotalSamplesStat({
   totalSamples,
   newSamples,
@@ -72,7 +45,6 @@ function TotalSamplesStat({
   totalSamples: number;
   newSamples: number | undefined;
 }) {
-  const samplesLabel = `${totalSamples.toLocaleString()}`;
   const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
     defaultMessage: ' Total sample estimate: ',
   });
@@ -99,9 +71,7 @@ function TotalSamplesStat({
     <EuiText size="xs">
       <strong>{sampleHeader}</strong>
       {' ' + totalSamples.toLocaleString() + ' '}
-      <EuiTextColor color={color} size="xs">
-        ({label})
-      </EuiTextColor>
+      <EuiTextColor color={color}>({label})</EuiTextColor>
     </EuiText>
   );
 }
@@ -117,7 +87,12 @@ function SampleStat({
 }) {
   const samplesLabel = `${samples.toLocaleString()}`;
 
-  if (diffSamples === undefined || diffSamples === 0) {
+  if (
+    diffSamples === undefined ||
+    diffSamples === 0 ||
+    totalSamples === undefined ||
+    totalSamples === 0
+  ) {
     return <>{samplesLabel}</>;
   }
   const color = diffSamples < 0 ? 'success' : 'danger';
