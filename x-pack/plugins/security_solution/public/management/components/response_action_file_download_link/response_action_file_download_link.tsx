@@ -118,7 +118,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
         </EuiButtonEmpty>
         <EuiText
           size={textSize}
-          data-test-subj={getTestId('message')}
+          data-test-subj={getTestId('passcodeMessage')}
           className="eui-displayInline"
         >
           <FormattedMessage
