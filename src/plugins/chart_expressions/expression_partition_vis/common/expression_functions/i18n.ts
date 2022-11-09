@@ -18,7 +18,7 @@ export const strings = {
       defaultMessage: 'Metric dimensions config',
     }),
   getMetricToLabelHelp: () =>
-    i18n.translate('expressionXY.layer.columnToLabel.help', {
+    i18n.translate('expressionPartitionVis.metricToLabel.help', {
       defaultMessage: 'JSON key-value pairs of column ID to label',
     }),
   getBucketsArgHelp: () =>
