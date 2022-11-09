@@ -49,7 +49,10 @@ export const fetchSyncJobsByConnectorId = async (
     const total = totalToPaginateTotal(result.hits.total);
     // If we get fewer results than the target page, make sure we return correct page we're on
     const resultPageIndex = Math.min(pageIndex, Math.trunc(total.total / size));
-    const data = result.hits.hits.map((hit) => hit._source).filter(isNotNullish) ?? [];
+    const data =
+      result.hits.hits
+        .map((hit) => (hit._source ? { ...hit._source, id: hit._id } : null))
+        .filter(isNotNullish) ?? [];
     return {
       data,
       pageIndex: resultPageIndex,

@@ -98,6 +98,11 @@ export interface FilteringConfig {
   draft: FilteringRules;
 }
 
+export enum TriggerMethod {
+  ON_DEMAND = 'on-demand',
+  SCHEDULED = 'scheduled',
+}
+
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
@@ -126,14 +131,25 @@ export interface Connector {
 export type ConnectorDocument = Omit<Connector, 'id'>;
 
 export interface ConnectorSyncJob {
+  cancelation_requested_at: string | null;
+  canceled_at: string | null;
   completed_at: string | null;
-  connector?: ConnectorDocument;
   connector_id: string;
   created_at: string;
   deleted_document_count: number;
   error: string | null;
+  filtering: FilteringRules | null;
+  id: string;
   index_name: string;
   indexed_document_count: number;
+  indexed_document_volume: number;
+  last_seen: string;
+  metadata: Record<string, unknown>;
+  pipeline: IngestPipelineParams | null;
+  started_at: string;
   status: SyncStatus;
+  trigger_method: TriggerMethod;
   worker_hostname: string;
 }
+
+export type ConnectorSyncJobDocument = Omit<ConnectorSyncJob, 'id'>;

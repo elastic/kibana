@@ -9,25 +9,23 @@ import { kea, MakeLogicType } from 'kea';
 
 import moment from 'moment';
 
-import { Status } from '../../../../../common/types/api';
+import { Status } from '../../../../../../common/types/api';
 
-import { ConnectorSyncJob, SyncStatus } from '../../../../../common/types/connectors';
-import { Paginate } from '../../../../../common/types/pagination';
-import { Actions } from '../../../shared/api_logic/create_api_logic';
-import { clearFlashMessages, flashAPIErrors } from '../../../shared/flash_messages';
+import { ConnectorSyncJob } from '../../../../../../common/types/connectors';
+import { Paginate } from '../../../../../../common/types/pagination';
+import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
 import {
   FetchSyncJobsApiLogic,
   FetchSyncJobsArgs,
   FetchSyncJobsResponse,
-} from '../../api/connector/fetch_sync_jobs_api_logic';
+} from '../../../api/connector/fetch_sync_jobs_api_logic';
 
-import { IndexViewLogic } from './index_view_logic';
+import { IndexViewLogic } from '../index_view_logic';
 
-export interface SyncJobView {
-  docsCount: number;
+export interface SyncJobView extends ConnectorSyncJob {
   duration: moment.Duration;
   lastSync: string;
-  status: SyncStatus;
 }
 
 export interface IndexViewActions {
@@ -74,14 +72,13 @@ export const SyncJobsViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAct
       (data?: Paginate<ConnectorSyncJob>) =>
         data?.data.map((syncJob) => {
           return {
-            docsCount: syncJob.deleted_document_count
-              ? syncJob.indexed_document_count - syncJob.deleted_document_count
-              : syncJob.indexed_document_count,
+            ...syncJob,
             duration: syncJob.completed_at
               ? moment.duration(moment(syncJob.completed_at).diff(moment(syncJob.created_at)))
+              : syncJob.started_at
+              ? moment.duration(moment(new Date()).diff(moment(syncJob.started_at)))
               : undefined,
             lastSync: syncJob.completed_at ?? syncJob.created_at,
-            status: syncJob.status,
           };
         }) ?? [],
     ],

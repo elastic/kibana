@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
+import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 
 import moment from 'moment';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { HttpError, Status } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../../common/types/api';
 
-import { SyncStatus } from '../../../../../common/types/connectors';
-import { FetchSyncJobsApiLogic } from '../../api/connector/fetch_sync_jobs_api_logic';
+import {
+  ConnectorSyncJob,
+  SyncStatus,
+  TriggerMethod,
+} from '../../../../../../common/types/connectors';
+import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
-import { IndexViewLogic } from './index_view_logic';
+import { IndexViewLogic } from '../index_view_logic';
+
 import { SyncJobView, SyncJobsViewLogic } from './sync_jobs_view_logic';
 
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
@@ -54,21 +59,31 @@ describe('SyncJobsViewLogic', () => {
 
   describe('actions', () => {
     describe('FetchIndexApiLogic.apiSuccess', () => {
-      const syncJob = {
+      const syncJob: ConnectorSyncJob = {
+        canceled_at: null,
+        cancelation_requested_at: null,
         completed_at: '2022-09-05T15:59:39.816+00:00',
         connector_id: 'we2284IBjobuR2-lAuXh',
         created_at: '2022-09-05T14:59:39.816+00:00',
         deleted_document_count: 20,
         error: null,
+        filtering: null,
+        id: 'id',
         index_name: 'indexName',
         indexed_document_count: 50,
+        indexed_document_volume: 40,
+        last_seen: '2022-09-05T15:59:39.816+00:00',
+        metadata: {},
+        pipeline: null,
+        trigger_method: TriggerMethod.ON_DEMAND,
+        started_at: '2022-09-05T14:59:39.816+00:00',
         status: SyncStatus.COMPLETED,
         worker_hostname: 'hostname_fake',
       };
       const syncJobView: SyncJobView = {
-        docsCount: 30,
+        ...syncJob,
         duration: moment.duration(1, 'hour'),
-        lastSync: syncJob.completed_at,
+        lastSync: syncJob.completed_at ?? '',
         status: SyncStatus.COMPLETED,
       };
       it('should update values', async () => {
@@ -124,8 +139,10 @@ describe('SyncJobsViewLogic', () => {
           ...DEFAULT_VALUES,
           syncJobs: [
             {
-              docsCount: 50,
-              duration: undefined,
+              ...syncJob,
+              completed_at: null,
+              deleted_document_count: 0,
+              duration: expect.anything(),
               lastSync: syncJob.created_at,
               status: SyncStatus.IN_PROGRESS,
             },
