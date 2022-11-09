@@ -118,7 +118,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   <ListHeaderContainer gutterSize="m" alignItems="flexStart">
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
-                        iconType={toggleAccordion ? 'arrowRight' : 'arrowDown'}
+                        iconType={toggleAccordion ? 'arrowDown' : 'arrowRight'}
                         aria-label="Next"
                       />
                     </EuiFlexItem>

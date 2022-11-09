@@ -30,7 +30,7 @@ import type { AddExceptionItem, DeleteExceptionItem, EditExceptionItem, FetchIte
 export const prepareFetchExceptionItemsParams = (
   exceptions: ListArray | null,
   list: ExceptionListSchema | null,
-  options?: GetExceptionItemProps
+  options?: GetExceptionItemProps | null
 ) => {
   const { pagination, search, filters } = options || {};
   let listIds: string[] = [];
