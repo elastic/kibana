@@ -67,7 +67,6 @@ export const useAlertsActions = ({
     setEventsDeleted,
     onUpdateSuccess: onStatusUpdate,
     onUpdateFailure: onStatusUpdate,
-    scopeId,
   });
 
   return {

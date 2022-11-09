@@ -183,18 +183,18 @@ export const kpiUserAuthenticationsAreaLensAttributes: LensAttributes = {
   },
   references: [
     {
-      type: '{dataViewId}',
-      id: 'security-solution-default',
+      type: 'index-pattern',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-current-indexpattern',
     },
     {
-      type: '{dataViewId}',
-      id: 'security-solution-default',
+      type: 'index-pattern',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-31213ae3-905b-4e88-b987-0cccb1f3209f',
     },
     {
-      type: '{dataViewId}',
-      id: 'security-solution-default',
+      type: 'index-pattern',
+      id: '{dataViewId}',
       name: 'indexpattern-datasource-layer-4590dafb-4ac7-45aa-8641-47a3ff0b817c',
     },
   ],

@@ -46,15 +46,16 @@ const Truncate = euiStyled.span`
   ${truncate(unit * 12)}
 `;
 
-export function ServiceNodeMetrics() {
+interface Props {
+  serviceNodeName: string;
+}
+
+export function ServiceNodeMetrics({ serviceNodeName }: Props) {
   const { agentName, serviceName } = useApmServiceContext();
 
   const apmRouter = useApmRouter();
 
-  const {
-    path: { id: serviceNodeName },
-    query,
-  } = useApmParams('/services/{serviceName}/metrics/{id}');
+  const { query } = useApmParams('/services/{serviceName}/metrics/{id}');
 
   const { environment, kuery, rangeFrom, rangeTo } = query;
 
@@ -92,13 +93,14 @@ export function ServiceNodeMetrics() {
                 kuery,
                 start,
                 end,
+                environment,
               },
             },
           }
         );
       }
     },
-    [kuery, serviceName, serviceNodeName, start, end]
+    [kuery, serviceName, serviceNodeName, start, end, environment]
   );
 
   const { docLinks } = useApmPluginContext().core;

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+export const SESSION_VIEW_APP_ID = 'sessionView';
+
 // routes
 export const PROCESS_EVENTS_ROUTE = '/internal/session_view/process_events';
 export const ALERTS_ROUTE = '/internal/session_view/alerts';
 export const ALERT_STATUS_ROUTE = '/internal/session_view/alert_status';
 export const IO_EVENTS_ROUTE = '/internal/session_view/io_events';
 export const GET_TOTAL_IO_BYTES_ROUTE = '/internal/session_view/get_total_io_bytes';
+
+export const SECURITY_APP_ID = 'security';
+export const POLICIES_PAGE_PATH = '/administration/policy';
 
 // index patterns
 export const PROCESS_EVENTS_INDEX = '*:logs-endpoint.events.process*,logs-endpoint.events.process*'; // match on both cross cluster and local indices

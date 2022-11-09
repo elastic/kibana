@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { AlertConsumers } from '@kbn/rule-data-utils';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
@@ -13,10 +12,15 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import { clearEventsLoading, clearEventsDeleted, setTableUpdatedAt } from '../store/t_grid/actions';
+
+import {
+  clearEventsLoading,
+  clearEventsDeleted,
+  setTableUpdatedAt,
+  updateGraphEventId,
+} from '../store/t_grid/actions';
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -34,7 +38,7 @@ import type {
   TimelineRequestSortField,
 } from '../../common/search_strategy';
 import type { ESQuery } from '../../common/typed_json';
-import type { KueryFilterQueryKind } from '../../common/types/timeline';
+import type { KueryFilterQueryKind, AlertStatus } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
 import { TableId } from '../store/t_grid/types';
 import * as i18n from './translations';
@@ -82,6 +86,7 @@ export interface UseTimelineEventsProps {
   sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
+  filterStatus?: AlertStatus;
 }
 
 const createFilter = (filterQuery: ESQuery | string | undefined) =>
@@ -154,6 +159,7 @@ export const useTimelineEvents = ({
   skip = false,
   timerangeKind,
   data,
+  filterStatus,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
   const dispatch = useDispatch();
   const { startTracking } = useApmTracking(id);
@@ -165,6 +171,7 @@ export const useTimelineEvents = ({
   const [timelineRequest, setTimelineRequest] = useState<TimelineRequest<typeof language> | null>(
     null
   );
+  const [prevFilterStatus, setFilterStatus] = useState(filterStatus);
   const prevTimelineRequest = useRef<TimelineRequest<typeof language> | null>(null);
 
   const clearSignalsState = useCallback(() => {
@@ -259,6 +266,10 @@ export const useTimelineEvents = ({
                     setUpdated(newTimelineResponse.updatedAt);
                     return newTimelineResponse;
                   });
+                  if (prevFilterStatus !== request.filterStatus) {
+                    dispatch(updateGraphEventId({ id, graphEventId: '' }));
+                  }
+                  setFilterStatus(request.filterStatus);
                   setLoading(false);
 
                   searchSubscription$.current.unsubscribe();
@@ -284,7 +295,18 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, entityType, dataViewId, setUpdated, addWarning, startTracking]
+    [
+      skip,
+      data,
+      entityType,
+      dataViewId,
+      setUpdated,
+      addWarning,
+      startTracking,
+      dispatch,
+      id,
+      prevFilterStatus,
+    ]
   );
 
   useEffect(() => {
@@ -300,6 +322,7 @@ export const useTimelineEvents = ({
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
         runtimeMappings: prevRequest?.runtimeMappings ?? {},
+        filterStatus: prevRequest?.filterStatus,
       };
 
       const currentSearchParameters = {
@@ -339,6 +362,7 @@ export const useTimelineEvents = ({
           from: startDate,
           to: endDate,
         },
+        filterStatus,
       };
 
       if (activePage !== newActivePage) {
@@ -364,6 +388,7 @@ export const useTimelineEvents = ({
     sort,
     fields,
     runtimeMappings,
+    filterStatus,
   ]);
 
   useEffect(() => {

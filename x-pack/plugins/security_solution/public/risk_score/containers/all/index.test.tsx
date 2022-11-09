@@ -168,6 +168,8 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       expect(mockSearch).toHaveBeenCalledWith({
         defaultIndex: [`ml_${riskEntity}_risk_score_latest_default`],
         factoryQueryType: `${riskEntity}sRiskScore`,
+        riskScoreEntity: riskEntity,
+        includeAlertsCount: false,
       });
     });
 

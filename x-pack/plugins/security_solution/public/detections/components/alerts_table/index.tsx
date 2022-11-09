@@ -177,7 +177,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         id: tableId,
         loadingText: i18n.LOADING_ALERTS,
         queryFields: requiredFieldsForActions,
-        title: '',
+        title: i18n.ALERTS_DOCUMENT_TYPE,
         showCheckboxes: true,
       })
     );

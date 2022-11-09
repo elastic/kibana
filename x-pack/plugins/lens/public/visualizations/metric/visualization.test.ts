@@ -300,21 +300,18 @@ describe('metric visualization', () => {
           "chain": Array [
             Object {
               "arguments": Object {
-                "breakdownBy": Array [],
                 "color": Array [
                   "static-color",
                 ],
                 "inspectorTableId": Array [
                   "first",
                 ],
-                "max": Array [],
                 "maxCols": Array [
                   5,
                 ],
                 "metric": Array [
                   "metric-col-id",
                 ],
-                "minTiles": Array [],
                 "palette": Array [
                   Object {
                     "chain": Array [
@@ -370,7 +367,6 @@ describe('metric visualization', () => {
                 "inspectorTableId": Array [
                   "first",
                 ],
-                "max": Array [],
                 "maxCols": Array [
                   5,
                 ],
@@ -473,7 +469,6 @@ describe('metric visualization', () => {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "breakdownBy": Array [],
                   "inspectorTableId": Array [
                     "second",
                   ],
@@ -520,7 +515,6 @@ describe('metric visualization', () => {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "breakdownBy": Array [],
                   "inspectorTableId": Array [
                     "second",
                   ],
@@ -608,8 +602,8 @@ describe('metric visualization', () => {
             "type": "function",
           }
         `);
-        expect(ast.chain[1].arguments.minTiles).toHaveLength(0);
-        expect(ast.chain[1].arguments.breakdownBy).toHaveLength(0);
+        expect(ast.chain[1].arguments.minTiles).toBeUndefined();
+        expect(ast.chain[1].arguments.breakdownBy).toBeUndefined();
       });
 
       it('always applies max function to static max dimensions', () => {
@@ -758,6 +752,16 @@ describe('metric visualization', () => {
     `);
   });
 
+  it('removes all accessors from a layer', () => {
+    const chk = visualization.removeLayer!(fullState, 'first');
+    expect(chk.metricAccessor).toBeUndefined();
+    expect(chk.trendlineLayerId).toBeUndefined();
+    expect(chk.trendlineLayerType).toBeUndefined();
+    expect(chk.trendlineMetricAccessor).toBeUndefined();
+    expect(chk.trendlineTimeAccessor).toBeUndefined();
+    expect(chk.trendlineBreakdownByAccessor).toBeUndefined();
+  });
+
   it('appends a trendline layer', () => {
     const newLayerId = 'new-layer-id';
     const chk = visualization.appendLayer!(fullState, newLayerId, 'metricTrendline', '');
@@ -767,6 +771,7 @@ describe('metric visualization', () => {
 
   it('removes trendline layer', () => {
     const chk = visualization.removeLayer!(fullStateWTrend, fullStateWTrend.trendlineLayerId);
+    expect(chk.metricAccessor).toBe('metric-col-id');
     expect(chk.trendlineLayerId).toBeUndefined();
     expect(chk.trendlineLayerType).toBeUndefined();
     expect(chk.trendlineMetricAccessor).toBeUndefined();

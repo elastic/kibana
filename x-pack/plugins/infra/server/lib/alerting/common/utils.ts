@@ -8,14 +8,24 @@
 import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
-import type { IBasePath } from '@kbn/core/server';
+import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
+
+const SUPPORTED_ES_FIELD_TYPES = [
+  ES_FIELD_TYPES.KEYWORD,
+  ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.BOOLEAN,
+];
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
@@ -83,18 +93,30 @@ export const createScopedLogger = (
   };
 };
 
-export const getViewInAppUrl = (basePath: IBasePath, relativeViewInAppUrl: string) =>
-  basePath.publicBaseUrl
-    ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
-    : relativeViewInAppUrl;
+export const getAlertDetailsPageEnabledForApp = (
+  config: ObservabilityConfig['unsafe']['alertDetails'] | null,
+  appName: keyof ObservabilityConfig['unsafe']['alertDetails']
+): boolean => {
+  if (!config) return false;
 
-export const getViewInAppUrlInventory = (
-  criteria: InventoryMetricConditions[],
-  nodeType: string,
-  timestamp: string,
-  basePath: IBasePath
-) => {
+  return config[appName].enabled;
+};
+
+export const getViewInInventoryAppUrl = ({
+  basePath,
+  criteria,
+  nodeType,
+  spaceId,
+  timestamp,
+}: {
+  basePath: IBasePath;
+  criteria: InventoryMetricConditions[];
+  nodeType: string;
+  spaceId: string;
+  timestamp: string;
+}) => {
   const { metric, customMetric } = criteria[0];
+
   const fields = {
     [`${ALERT_RULE_PARAMETERS}.criteria.metric`]: [metric],
     [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`]: [customMetric?.id],
@@ -104,6 +126,87 @@ export const getViewInAppUrlInventory = (
     [TIMESTAMP]: timestamp,
   };
 
-  const relativeViewInAppUrl = getInventoryViewInAppUrl(parseTechnicalFields(fields, true));
-  return getViewInAppUrl(basePath, relativeViewInAppUrl);
+  return addSpaceIdToPath(
+    basePath.publicBaseUrl,
+    spaceId,
+    getInventoryViewInAppUrl(parseTechnicalFields(fields, true))
+  );
+};
+
+export const getViewInMetricsAppUrl = (basePath: IBasePath, spaceId: string) =>
+  addSpaceIdToPath(basePath.publicBaseUrl, spaceId, LINK_TO_METRICS_EXPLORER);
+
+export const getAlertDetailsUrl = (
+  basePath: IBasePath,
+  spaceId: string,
+  alertUuid: string | null
+) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
+
+const HOST_NAME = 'host.name';
+const HOST_HOSTNAME = 'host.hostname';
+const HOST_ID = 'host.id';
+const CONTAINER_ID = 'container.id';
+
+export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
+export const NUMBER_OF_DOCUMENTS = 10;
+export const termsAggField: Record<string, string> = { [KUBERNETES_POD_UID]: CONTAINER_ID };
+
+export interface AdditionalContext {
+  [x: string]: any;
+}
+
+export const doFieldsExist = async (
+  esClient: ElasticsearchClient,
+  fields: string[],
+  index: string
+): Promise<Record<string, boolean>> => {
+  // Get all supported fields
+  const respMapping = await esClient.fieldCaps({
+    index,
+    fields: '*',
+  });
+
+  const fieldsExisted: Record<string, boolean> = {};
+  const acceptableFields: Set<string> = new Set();
+
+  Object.entries(respMapping.fields).forEach(([key, value]) => {
+    const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
+    const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
+
+    // Check if fieldName is something we can aggregate on
+    if (isSupportedType) {
+      acceptableFields.add(key);
+    }
+  });
+
+  fields.forEach((field) => {
+    fieldsExisted[field] = acceptableFields.has(field);
+  });
+
+  return fieldsExisted;
+};
+
+export const validGroupByForContext: string[] = [
+  HOST_NAME,
+  HOST_HOSTNAME,
+  HOST_ID,
+  KUBERNETES_POD_UID,
+  CONTAINER_ID,
+];
+
+export const hasAdditionalContext = (
+  groupBy: string | string[] | undefined,
+  validGroups: string[]
+): boolean => {
+  return groupBy
+    ? Array.isArray(groupBy)
+      ? groupBy.every((group) => validGroups.includes(group))
+      : validGroups.includes(groupBy)
+    : false;
+};
+
+export const shouldTermsAggOnContainer = (groupBy: string | string[] | undefined) => {
+  return groupBy && Array.isArray(groupBy)
+    ? groupBy.includes(KUBERNETES_POD_UID)
+    : groupBy === KUBERNETES_POD_UID;
 };

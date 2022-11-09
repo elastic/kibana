@@ -136,6 +136,10 @@ async function teamsExecutor(
     })
   );
 
+  if (result == null) {
+    return errorResultUnexpectedNullResponse(actionId);
+  }
+
   if (isOk(result)) {
     const {
       value: { status, statusText, data: responseData, headers: responseHeaders },
@@ -203,6 +207,17 @@ function errorResultInvalid(
     message: errMessage,
     actionId,
     serviceMessage,
+  };
+}
+
+function errorResultUnexpectedNullResponse(actionId: string): ConnectorTypeExecutorResult<void> {
+  const message = i18n.translate('xpack.stackConnectors.teams.unexpectedNullResponseErrorMessage', {
+    defaultMessage: 'unexpected null response from Microsoft Teams',
+  });
+  return {
+    status: 'error',
+    actionId,
+    message,
   };
 }
 

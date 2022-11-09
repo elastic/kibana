@@ -4,10 +4,9 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
-  "include": ["*.ts", ".storybook/**/*", "common/**/*", "public/**/*", "server/**/*"],
-  "references": [
+  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../inspector/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },

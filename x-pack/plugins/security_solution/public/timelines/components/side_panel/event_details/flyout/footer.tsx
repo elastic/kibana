@@ -63,12 +63,30 @@ export const FlyoutFooterComponent = React.memo(
     refetchFlyoutData,
   }: FlyoutFooterProps & PropsFromRedux) => {
     const alertId = detailsEcsData?.kibana?.alert ? detailsEcsData?._id : null;
-    const ruleIndex = useMemo(
+    const ruleIndexRaw = useMemo(
       () =>
         find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values ??
         find({ category: 'kibana', field: 'kibana.alert.rule.parameters.index' }, detailsData)
           ?.values,
       [detailsData]
+    );
+    const ruleIndex = useMemo(
+      (): string[] | undefined => (Array.isArray(ruleIndexRaw) ? ruleIndexRaw : undefined),
+      [ruleIndexRaw]
+    );
+    const ruleDataViewIdRaw = useMemo(
+      () =>
+        find({ category: 'signal', field: 'signal.rule.data_view_id' }, detailsData)?.values ??
+        find(
+          { category: 'kibana', field: 'kibana.alert.rule.parameters.data_view_id' },
+          detailsData
+        )?.values,
+      [detailsData]
+    );
+    const ruleDataViewId = useMemo(
+      (): string | undefined =>
+        Array.isArray(ruleDataViewIdRaw) ? ruleDataViewIdRaw[0] : undefined,
+      [ruleDataViewIdRaw]
     );
 
     const addExceptionModalWrapperData = useMemo(
@@ -102,12 +120,11 @@ export const FlyoutFooterComponent = React.memo(
 
     const {
       exceptionFlyoutType,
+      openAddExceptionFlyout,
       onAddExceptionTypeClick,
       onAddExceptionCancel,
       onAddExceptionConfirm,
-      ruleIndices,
     } = useExceptionFlyout({
-      ruleIndex,
       refetch: refetchAll,
       isActiveTimelines: isActiveTimeline(scopeId),
     });
@@ -154,12 +171,13 @@ export const FlyoutFooterComponent = React.memo(
         {/* This is still wrong to do render flyout/modal inside of the flyout
         We need to completely refactor the EventDetails  component to be correct
       */}
-        {exceptionFlyoutType != null &&
+        {openAddExceptionFlyout &&
           addExceptionModalWrapperData.ruleId != null &&
           addExceptionModalWrapperData.eventId != null && (
             <AddExceptionFlyoutWrapper
               {...addExceptionModalWrapperData}
-              ruleIndices={ruleIndices}
+              ruleIndices={ruleIndex}
+              ruleDataViewId={ruleDataViewId}
               exceptionListType={exceptionFlyoutType}
               onCancel={onAddExceptionCancel}
               onConfirm={onAddExceptionConfirm}
@@ -177,6 +195,7 @@ export const FlyoutFooterComponent = React.memo(
             agentId={isOsqueryFlyoutOpenWithAgentId}
             defaultValues={alertId ? { alertIds: [alertId] } : undefined}
             onClose={closeOsqueryFlyout}
+            ecsData={detailsEcsData}
           />
         )}
       </>

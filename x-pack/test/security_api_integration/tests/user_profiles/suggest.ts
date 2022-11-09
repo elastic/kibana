@@ -305,7 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/internal/security/user_profile/_data')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', usersSessions.get('user_one')!.cookie.cookieString())
-        .send({ some: 'data', some_nested: { data: 'nested_data' } })
+        .send({ some: 'data', some_more: 'data', some_nested: { data: 'nested_data' } })
         .expect(200);
 
       // 2. Data is not returned by default
@@ -334,7 +334,7 @@ export default function ({ getService }: FtrProviderContext) {
       suggestions = await supertest
         .post('/internal/user_profiles_consumer/_suggest')
         .set('kbn-xsrf', 'xxx')
-        .send({ name: 'one', requiredAppPrivileges: ['discover'], dataPath: 'some' })
+        .send({ name: 'one', requiredAppPrivileges: ['discover'], dataPath: 'some,some_more' })
         .expect(200);
       expect(suggestions.body).to.have.length(1);
       expectSnapshot(
@@ -344,6 +344,7 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {
               "some": "data",
+              "some_more": "data",
             },
             "user": Object {
               "email": "one@elastic.co",
@@ -368,6 +369,7 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {
               "some": "data",
+              "some_more": "data",
               "some_nested": Object {
                 "data": "nested_data",
               },
@@ -379,6 +381,32 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         ]
+      `);
+    });
+
+    it('can get suggestions with hints', async () => {
+      const profile = await supertestWithoutAuth
+        .get('/internal/security/user_profile')
+        .set('kbn-xsrf', 'xxx')
+        .set('Cookie', usersSessions.get('user_three')!.cookie.cookieString())
+        .expect(200);
+
+      expect(profile.body.uid).not.to.be.empty();
+
+      const suggestions = await supertest
+        .post('/internal/user_profiles_consumer/_suggest')
+        .set('kbn-xsrf', 'xxx')
+        .send({ hint: { uids: [profile.body.uid] } })
+        .expect(200);
+
+      // `user_three` should be first in list
+      expect(suggestions.body.length).to.be.above(0);
+      expectSnapshot(suggestions.body[0].user).toMatchInline(`
+        Object {
+          "email": "three@elastic.co",
+          "full_name": "THREE",
+          "username": "user_three",
+        }
       `);
     });
   });

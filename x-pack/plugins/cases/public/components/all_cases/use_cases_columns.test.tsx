@@ -52,6 +52,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "assignees",
@@ -130,6 +131,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "assignees",
@@ -199,6 +201,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "assignees",
@@ -262,6 +265,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
@@ -331,6 +335,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
@@ -398,6 +403,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
@@ -464,6 +470,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
@@ -529,6 +536,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",

@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
-import { DETECTION_ENGINE_PREPACKAGED_URL } from '@kbn/security-solution-plugin/common/constants';
+import { PREBUILT_RULES_URL } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 import { countDownTest } from './count_down_test';
 
 export const installPrePackagedRules = async (
@@ -18,7 +18,7 @@ export const installPrePackagedRules = async (
   await countDownTest(
     async () => {
       const { status, body } = await supertest
-        .put(DETECTION_ENGINE_PREPACKAGED_URL)
+        .put(PREBUILT_RULES_URL)
         .set('kbn-xsrf', 'true')
         .send();
       if (status !== 200) {

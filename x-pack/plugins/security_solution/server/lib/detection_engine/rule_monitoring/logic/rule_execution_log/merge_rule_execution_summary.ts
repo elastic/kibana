@@ -5,22 +5,23 @@
  * 2.0.
  */
 
+import type { RuleExecutionStatus as RuleExecutionStatusByFramework } from '@kbn/alerting-plugin/common';
+
 import type { RuleExecutionSummary } from '../../../../../../common/detection_engine/rule_monitoring';
 import {
   RuleExecutionStatus,
   ruleExecutionStatusToNumber,
 } from '../../../../../../common/detection_engine/rule_monitoring';
-import type { RuleAlertType } from '../../../rules/types';
 
 export const mergeRuleExecutionSummary = (
-  rule: RuleAlertType,
+  ruleExecutionStatus: RuleExecutionStatusByFramework,
   ruleExecutionSummary: RuleExecutionSummary | null
 ): RuleExecutionSummary | null => {
   if (ruleExecutionSummary == null) {
     return null;
   }
 
-  const frameworkStatus = rule.executionStatus;
+  const frameworkStatus = ruleExecutionStatus;
   const customStatus = ruleExecutionSummary.last_execution;
 
   if (

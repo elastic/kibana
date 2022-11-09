@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './conditions/conditions';
-export * from './header/header';
-export * from './meta/meta';
-export * from './comments/comments';
+export * from './conditions';
+export * from './header';
+export * from './meta';
+export * from './comments';
 export * from './exception_item_card';

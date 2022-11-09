@@ -48,9 +48,19 @@ Array [
     "validationName": "(\\"off\\" | \\"errors\\" | \\"transactions\\" | \\"all\\")",
   },
   Object {
+    "key": "capture_body_content_types",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
     "key": "capture_headers",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "capture_jmx_metrics",
+    "type": "text",
+    "validationName": "string",
   },
   Object {
     "key": "circuit_breaker_enabled",
@@ -58,9 +68,35 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
+    "key": "dedot_custom_metrics",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
     "key": "enable_log_correlation",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "exit_span_min_duration",
+    "min": "0ms",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationName": "durationRt",
+  },
+  Object {
+    "key": "ignore_exceptions",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
+    "key": "ignore_message_queues",
+    "type": "text",
+    "validationName": "string",
   },
   Object {
     "key": "log_level",
@@ -157,6 +193,33 @@ Array [
     "validationName": "durationRt",
   },
   Object {
+    "key": "span_compression_enabled",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "span_compression_exact_match_max_duration",
+    "min": "0ms",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationName": "durationRt",
+  },
+  Object {
+    "key": "span_compression_same_kind_max_duration",
+    "min": "0ms",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationName": "durationRt",
+  },
+  Object {
     "key": "span_frames_min_duration",
     "min": "-1ms",
     "type": "duration",
@@ -206,7 +269,36 @@ Array [
     "validationName": "floatRt",
   },
   Object {
+    "key": "trace_continuation_strategy",
+    "options": Array [
+      Object {
+        "text": "continue",
+        "value": "continue",
+      },
+      Object {
+        "text": "restart",
+        "value": "restart",
+      },
+      Object {
+        "text": "restart_external",
+        "value": "restart_external",
+      },
+    ],
+    "type": "select",
+    "validationName": "(\\"continue\\" | \\"restart\\" | \\"restart_external\\")",
+  },
+  Object {
+    "key": "trace_methods",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
     "key": "transaction_ignore_urls",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
+    "key": "transaction_ignore_user_agents",
     "type": "text",
     "validationName": "string",
   },
@@ -218,9 +310,24 @@ Array [
     "validationName": "integerRt",
   },
   Object {
+    "key": "transaction_name_groups",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
     "key": "transaction_sample_rate",
     "type": "float",
     "validationName": "floatRt",
+  },
+  Object {
+    "key": "unnest_exceptions",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
+    "key": "use_path_as_transaction_name",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
   },
 ]
 `;

@@ -8,8 +8,8 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
+import type { GuideState } from '@kbn/guided-onboarding';
 import { API_BASE_PATH } from '../../common/constants';
-import type { GuideState } from '../../common/types';
 import { guidedSetupSavedObjectsType } from '../saved_objects';
 
 const findGuideById = async (savedObjectsClient: SavedObjectsClient, guideId: string) => {

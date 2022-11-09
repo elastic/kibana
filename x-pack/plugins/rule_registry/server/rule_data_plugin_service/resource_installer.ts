@@ -24,7 +24,7 @@ import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/d
 import type { IndexInfo } from './index_info';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
-
+const TOTAL_FIELDS_LIMIT = 1900;
 interface ConstructorOptions {
   getResourceName(relativeName: string): string;
   getClusterClient: () => Promise<ElasticsearchClient>;
@@ -169,8 +169,30 @@ export class ResourceInstaller {
 
     // Find all concrete indices for all namespaces of the index.
     const concreteIndices = await this.fetchConcreteIndices(aliases, backingIndices);
+    // Update total field limit setting of found indices
+    await Promise.all(concreteIndices.map((item) => this.updateTotalFieldLimitSetting(item)));
     // Update mappings of the found indices.
     await Promise.all(concreteIndices.map((item) => this.updateAliasWriteIndexMapping(item)));
+  }
+
+  private async updateTotalFieldLimitSetting({ index, alias }: ConcreteIndexInfo) {
+    const { logger, getClusterClient } = this.options;
+    const clusterClient = await getClusterClient();
+
+    try {
+      await clusterClient.indices.putSettings({
+        index,
+        body: {
+          'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
+        },
+      });
+      return;
+    } catch (err) {
+      logger.error(
+        `Failed to PUT index.mapping.total_fields.limit settings for alias ${alias}: ${err.message}`
+      );
+      throw err;
+    }
   }
 
   // NOTE / IMPORTANT: Please note this will update the mappings of backing indices but
@@ -350,7 +372,7 @@ export class ResourceInstaller {
               name: ilmPolicyName,
               rollover_alias: primaryNamespacedAlias,
             },
-            'index.mapping.total_fields.limit': 1900,
+            'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
             auto_expand_replicas: '0-1',
           },
           mappings: {

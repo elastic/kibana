@@ -8,8 +8,10 @@
 import { ISearchStart } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { FactoryQueryType } from '../../../../common/constants';
 import { Indicator } from '../../../../common/types/indicator';
-import { getIndicatorQueryParams, search } from '../utils';
+import { getIndicatorQueryParams } from '../utils/get_indicator_query_params';
+import { search } from '../utils/search';
 
 export interface RawIndicatorsResponse {
   hits: {
@@ -75,6 +77,7 @@ export const createFetchIndicators =
           index: selectedPatterns,
           body: searchRequestBody,
         },
+        factoryQueryType: FactoryQueryType.IndicatorGrid,
       },
       { inspectorAdapter, requestName: 'Indicators table', signal }
     );

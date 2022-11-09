@@ -14,10 +14,11 @@ export interface PackageInfo {
   archiveChecksum: string;
   binaryChecksum: string;
   binaryRelativePath: string;
-  revision: 901912 | 901913;
   isPreInstalled: boolean;
   location: 'custom' | 'common';
 }
+
+const REVISION = 1036745;
 
 enum BaseUrl {
   // see https://www.chromium.org/getting-involved/download-chromium
@@ -44,58 +45,53 @@ export class ChromiumArchivePaths {
       platform: 'darwin',
       architecture: 'x64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: '229fd88c73c5878940821875f77578e4',
-      binaryChecksum: 'b0e5ca009306b14e41527000139852e5',
+      archiveChecksum: 'dd4d44ad97ba2fef5dc47d7f2a39ccaa',
+      binaryChecksum: '4a7a663b2656d66ce975b00a30df3ab4',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
       location: 'common',
       archivePath: 'Mac',
-      revision: 901912,
       isPreInstalled: false,
     },
     {
       platform: 'darwin',
       architecture: 'arm64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: 'ecf7aa509c8e2545989ebb9711e35384',
-      binaryChecksum: 'b5072b06ffd2d2af4fea7012914da09f',
+      archiveChecksum: '5afc0d49865d55b69ea1ff65b9cc5794',
+      binaryChecksum: '4a7a663b2656d66ce975b00a30df3ab4',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
       location: 'common',
       archivePath: 'Mac_Arm',
-      revision: 901913, // NOTE: 901912 is not available
       isPreInstalled: false,
     },
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-70f5d88-locales-linux_x64.zip',
-      archiveChecksum: '759bda5e5d32533cb136a85e37c0d102',
-      binaryChecksum: '82e80f9727a88ba3836ce230134bd126',
+      archiveFilename: 'chromium-749e738-locales-linux_x64.zip',
+      archiveChecksum: '09ba194e6c720397728fbec3d3895b0b',
+      binaryChecksum: 'df1c957f41dcca8e33369b1d255406c2',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
-      revision: 901912,
       isPreInstalled: true,
     },
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-70f5d88-locales-linux_arm64.zip',
-      archiveChecksum: '33613b8dc5212c0457210d5a37ea4b43',
-      binaryChecksum: '29e943fbee6d87a217abd6cb6747058e',
+      archiveFilename: 'chromium-749e738-locales-linux_arm64.zip',
+      archiveChecksum: '1f535b1c2875d471829c6ff128a13262',
+      binaryChecksum: 'ca6b91d0ba8a65712554572dabc66968',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
-      revision: 901912,
       isPreInstalled: true,
     },
     {
       platform: 'win32',
       architecture: 'x64',
       archiveFilename: 'chrome-win.zip',
-      archiveChecksum: '861bb8b7b8406a6934a87d3cbbce61d9',
-      binaryChecksum: 'ffa0949471e1b9a57bc8f8633fca9c7b',
+      archiveChecksum: '42db052673414b89d8cb45657c1a6aeb',
+      binaryChecksum: '1b6eef775198ffd48fb9669ac0c818f7',
       binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
       location: 'common',
       archivePath: 'Win',
-      revision: 901912,
       isPreInstalled: true,
     },
   ];
@@ -118,7 +114,7 @@ export class ChromiumArchivePaths {
 
   public getDownloadUrl(p: PackageInfo) {
     if (isCommonPackage(p)) {
-      return `${BaseUrl.common}/${p.archivePath}/${p.revision}/${p.archiveFilename}`;
+      return `${BaseUrl.common}/${p.archivePath}/${REVISION}/${p.archiveFilename}`;
     }
     return BaseUrl.custom + '/' + p.archiveFilename; // revision is not used for URL if package is a custom build
   }

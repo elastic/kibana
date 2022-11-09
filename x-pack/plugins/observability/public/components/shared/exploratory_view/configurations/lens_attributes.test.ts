@@ -21,7 +21,7 @@ import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } fro
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
 
 describe('Lens Attribute', () => {
   mockAppDataView();
@@ -41,7 +41,7 @@ describe('Lens Attribute', () => {
     seriesConfig: reportViewConfig,
     seriesType: 'line',
     operationType: 'count',
-    indexPattern: mockDataView,
+    dataView: mockDataView,
     reportDefinitions: {},
     time: { from: 'now-15m', to: 'now' },
     color: 'green',
@@ -76,7 +76,7 @@ describe('Lens Attribute', () => {
           seriesConfig: seriesConfigKpi,
           seriesType: 'line',
           operationType: 'count',
-          indexPattern: mockDataView,
+          dataView: mockDataView,
           reportDefinitions: { 'service.name': ['elastic-co'] },
           time: { from: 'now-15m', to: 'now' },
           color: 'green',
@@ -107,7 +107,7 @@ describe('Lens Attribute', () => {
             from: 'now-1h',
             to: 'now',
           },
-          indexPattern: mockDataView,
+          dataView: mockDataView,
           name: 'ux-series-1',
           breakdown: 'percentile',
           reportDefinitions: {},
@@ -158,7 +158,7 @@ describe('Lens Attribute', () => {
         customLabel: true,
         dataType: 'number',
         isBucketed: false,
-        label: 'Pages loaded',
+        label: 'test-series',
         operationType: 'formula',
         params: {
           format: {
@@ -218,7 +218,7 @@ describe('Lens Attribute', () => {
       seriesConfig: reportViewConfig,
       seriesType: 'line',
       operationType: 'count',
-      indexPattern: mockDataView,
+      dataView: mockDataView,
       reportDefinitions: { 'performance.metric': [LCP_FIELD] },
       time: { from: 'now-15m', to: 'now' },
       color: 'green',
@@ -427,7 +427,13 @@ describe('Lens Attribute', () => {
           ],
         },
       ],
-      legend: { isVisible: true, showSingleSeries: true, position: 'right' },
+      legend: {
+        isVisible: true,
+        showSingleSeries: true,
+        position: 'right',
+        legendSize: 'large',
+        shouldTruncate: false,
+      },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       valueLabels: 'hide',
@@ -449,7 +455,7 @@ describe('Lens Attribute', () => {
         seriesConfig: reportViewConfig,
         seriesType: 'line',
         operationType: 'count',
-        indexPattern: mockDataView,
+        dataView: mockDataView,
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
         breakdown: USER_AGENT_NAME,
         time: { from: 'now-15m', to: 'now' },
@@ -464,11 +470,9 @@ describe('Lens Attribute', () => {
         layerConfig: layerConfig1,
         sourceField: USER_AGENT_NAME,
         layerId: 'layer0',
-        indexPattern: mockDataView,
-        labels: layerConfig.seriesConfig.labels,
       });
 
-      expect(lnsAttr.visualization?.layers).toEqual([
+      expect((lnsAttr.visualization as XYState)?.layers).toEqual([
         {
           accessors: ['y-axis-column-layer0-0'],
           layerId: 'layer0',
@@ -495,7 +499,7 @@ describe('Lens Attribute', () => {
           'breakdown-column-layer0': {
             dataType: 'string',
             isBucketed: true,
-            label: 'Top values of Browser family',
+            label: 'Browser family',
             operationType: 'terms',
             params: {
               missingBucket: false,
@@ -545,7 +549,7 @@ describe('Lens Attribute', () => {
                 'transaction.type: page-load and processor.event: transaction and transaction.type : *',
             },
             isBucketed: false,
-            label: 'Pages loaded',
+            label: 'test-series',
             operationType: 'formula',
             params: {
               format: {
@@ -640,7 +644,7 @@ describe('Lens Attribute', () => {
         seriesConfig: reportViewConfig,
         seriesType: 'line',
         operationType: 'count',
-        indexPattern: mockDataView,
+        dataView: mockDataView,
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
         time: { from: 'now-15m', to: 'now' },
         color: 'green',
@@ -661,7 +665,7 @@ describe('Lens Attribute', () => {
       const layerConfig1: LayerConfig = {
         seriesConfig: reportViewConfig,
         seriesType: 'line',
-        indexPattern: mockDataView,
+        dataView: mockDataView,
         reportDefinitions: {},
         time: { from: 'now-15m', to: 'now' },
         color: 'green',

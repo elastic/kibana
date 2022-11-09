@@ -75,19 +75,19 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.APM_SERVICE_NAME]: t.string,
     [ConfigKey.TAGS]: t.array(t.string),
     [ConfigKey.LOCATIONS]: t.array(t.union([MonitorServiceLocationCodec, PrivateLocationCodec])),
+    [ConfigKey.MONITOR_QUERY_ID]: t.string,
+    [ConfigKey.CONFIG_ID]: t.string,
   }),
   t.partial({
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
-    [ConfigKey.CONFIG_ID]: t.string,
     [ConfigKey.CONFIG_HASH]: t.string,
     [ConfigKey.JOURNEY_ID]: t.string,
     [ConfigKey.PROJECT_ID]: t.string,
     [ConfigKey.ORIGINAL_SPACE]: t.string,
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
-    [ConfigKey.ID]: t.string,
   }),
 ]);
 
@@ -400,7 +400,7 @@ export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
 export const MonitorOverviewResultCodec = t.type({
   total: t.number,
   allMonitorIds: t.array(t.string),
-  pages: t.record(t.string, t.array(MonitorOverviewItemCodec)),
+  monitors: t.array(MonitorOverviewItemCodec),
 });
 
 export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;

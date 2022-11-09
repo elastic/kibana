@@ -51,9 +51,9 @@ export const getMonitors = (
   const locationFilter = parseLocationFilter(syntheticsService.locations, locations);
 
   const filters =
-    getFilter('tags', tags) +
-    getFilter('type', monitorType) +
-    getFilter('locations.id', locationFilter);
+    getKqlFilter('tags', tags) +
+    getKqlFilter('type', monitorType) +
+    getKqlFilter('locations.id', locationFilter);
 
   return savedObjectsClient.find({
     type: syntheticsMonitorType,
@@ -69,7 +69,7 @@ export const getMonitors = (
   });
 };
 
-const getFilter = (field: string, values?: string | string[], operator = 'OR') => {
+export const getKqlFilter = (field: string, values?: string | string[], operator = 'OR') => {
   if (!values) {
     return '';
   }

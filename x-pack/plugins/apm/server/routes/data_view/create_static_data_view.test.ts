@@ -6,10 +6,10 @@
  */
 
 import { createStaticDataView } from './create_static_data_view';
-import { Setup } from '../../lib/helpers/setup_request';
 import * as HistoricalAgentData from '../historical_data/has_historical_agent_data';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { APMRouteHandlerResources, APMCore } from '../typings';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMConfig } from '../..';
 
 function getMockedDataViewService(existingDataViewTitle: string) {
@@ -20,15 +20,6 @@ function getMockedDataViewService(existingDataViewTitle: string) {
     createAndSave: jest.fn(),
   } as unknown as DataViewsService;
 }
-
-const setupMock = {
-  indices: {
-    transaction: 'apm-*-transaction-*',
-    span: 'apm-*-span-*',
-    error: 'apm-*-error-*',
-    metric: 'apm-*-metrics-*',
-  } as APMConfig['indices'],
-} as unknown as Setup;
 
 const coreMock = {
   start: () => {
@@ -44,11 +35,21 @@ const coreMock = {
   },
 } as unknown as APMCore;
 
+const apmEventClientMock = {
+  search: jest.fn(),
+  indices: {
+    transaction: 'apm-*-transaction-*',
+    span: 'apm-*-span-*',
+    error: 'apm-*-error-*',
+    metric: 'apm-*-metrics-*',
+  } as APMConfig['indices'],
+} as unknown as APMEventClient;
+
 describe('createStaticDataView', () => {
   it(`should not create data view if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
     const dataViewService = getMockedDataViewService('apm-*');
     await createStaticDataView({
-      setup: setupMock,
+      apmEventClient: apmEventClientMock,
       resources: {
         config: { autoCreateApmDataView: false },
       } as APMRouteHandlerResources,
@@ -66,7 +67,7 @@ describe('createStaticDataView', () => {
     const dataViewService = getMockedDataViewService('apm-*');
 
     await createStaticDataView({
-      setup: setupMock,
+      apmEventClient: apmEventClientMock,
       resources: {
         config: { autoCreateApmDataView: false },
       } as APMRouteHandlerResources,
@@ -84,7 +85,7 @@ describe('createStaticDataView', () => {
     const dataViewService = getMockedDataViewService('apm-*');
 
     await createStaticDataView({
-      setup: setupMock,
+      apmEventClient: apmEventClientMock,
       resources: {
         core: coreMock,
         config: { autoCreateApmDataView: true },
@@ -106,7 +107,7 @@ describe('createStaticDataView', () => {
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
 
     await createStaticDataView({
-      setup: setupMock,
+      apmEventClient: apmEventClientMock,
       resources: {
         core: coreMock,
         config: { autoCreateApmDataView: true },
@@ -135,7 +136,7 @@ describe('createStaticDataView', () => {
     );
 
     await createStaticDataView({
-      setup: setupMock,
+      apmEventClient: apmEventClientMock,
       resources: {
         core: coreMock,
         config: { autoCreateApmDataView: true },

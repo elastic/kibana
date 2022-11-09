@@ -131,17 +131,11 @@ Object {
         },
         "query": Object {
           "bool": Object {
-            "filter": Array [
+            "minimum_should_match": 1,
+            "should": Array [
               Object {
-                "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "host.name",
-                      },
-                    },
-                  ],
+                "exists": Object {
+                  "field": "host.name",
                 },
               },
             ],

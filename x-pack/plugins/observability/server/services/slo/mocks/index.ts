@@ -30,12 +30,13 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
     save: jest.fn(),
     findById: jest.fn(),
     deleteById: jest.fn(),
+    find: jest.fn(),
   };
 };
 
 const createSLIClientMock = (): jest.Mocked<SLIClient> => {
   return {
-    fetchDataForSLOTimeWindow: jest.fn(),
+    fetchCurrentSLIData: jest.fn(),
   };
 };
 

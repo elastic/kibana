@@ -168,6 +168,14 @@ export const isDetectionsPath = (pathname: string): boolean => {
   });
 };
 
+export const isAlertDetailsPage = (pathname: string): boolean => {
+  return !!matchPath(pathname, {
+    path: `${ALERTS_PATH}/:detailName/:tabName`,
+    strict: false,
+    exact: true,
+  });
+};
+
 export const isThreatIntelligencePath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
     path: `(${THREAT_INTELLIGENCE_PATH})`,
