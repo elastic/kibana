@@ -38,8 +38,7 @@ export interface UnifiedHistogramServices {
 }
 
 /**
- * The bucketInterval object returned by {@link buildChartData} that
- * should be used to set {@link UnifiedHistogramChartContext.bucketInterval}
+ * The bucketInterval object returned by {@link buildBucketInterval}
  */
 export interface UnifiedHistogramBucketInterval {
   scaled?: boolean;
@@ -72,7 +71,7 @@ export interface UnifiedHistogramRequestContext {
    */
   searchSessionId?: string;
   /**
-   * The adapter to use for requests
+   * The adapter to use for requests (does not apply to Lens requests)
    */
   adapter?: RequestAdapter;
 }

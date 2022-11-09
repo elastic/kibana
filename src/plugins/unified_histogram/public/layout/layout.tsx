@@ -25,8 +25,17 @@ import type {
 } from '../types';
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
+  /**
+   * Optional class name to add to the layout container
+   */
   className?: string;
+  /**
+   * Required services
+   */
   services: UnifiedHistogramServices;
+  /**
+   * The current data view
+   */
   dataView: DataView;
   /**
    * Can be updated to `Date.now()` to force a refresh
@@ -82,7 +91,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   /**
    * Callback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status
-   * and {@link UnifiedHistogramHitsContext.total} to totalHits
+   * and {@link UnifiedHistogramHitsContext.total} to result
    */
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   /**

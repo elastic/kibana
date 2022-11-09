@@ -149,7 +149,7 @@ export function Histogram({
       );
     },
     REQUEST_DEBOUNCE_MS,
-    [attributes, lastReloadRequestTime, onLoad, request?.searchSessionId, timeRange]
+    [attributes, lastReloadRequestTime, onLoad, request, timeRange]
   );
 
   return (

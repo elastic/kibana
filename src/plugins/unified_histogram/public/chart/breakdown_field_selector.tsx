@@ -26,7 +26,7 @@ export const BreakdownFieldSelector = ({
   onBreakdownFieldChange,
 }: BreakdownFieldSelectorProps) => {
   const fieldOptions = dataView.fields
-    .filter((field) => fieldSupportsBreakdown(field))
+    .filter(fieldSupportsBreakdown)
     .map((field) => ({ label: field.displayName, value: field.name }))
     .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 

@@ -61,7 +61,6 @@ export const useRefetchId = ({
     });
 
     if (!isEqual(refetchDeps.current, newRefetchDeps)) {
-      console.log(newRefetchDeps.filter((item, i) => !isEqual(item, refetchDeps.current?.[i])));
       if (refetchDeps.current) {
         setRefetchId((id) => id + 1);
       }

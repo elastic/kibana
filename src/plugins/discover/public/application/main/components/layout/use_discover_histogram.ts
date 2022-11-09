@@ -143,12 +143,12 @@ export const useDiscoverHistogram = ({
 
   const onTotalHitsChange = useCallback(
     (status: UnifiedHistogramFetchStatus, result?: number | Error) => {
-      const { fetchStatus, recordRawType } = savedSearchData$.totalHits$.getValue();
-
       if (result instanceof Error) {
         sendTotalHitsError(result);
         return;
       }
+
+      const { fetchStatus, recordRawType } = savedSearchData$.totalHits$.getValue();
 
       // If we have a partial result already, we don't
       // want to update the total hits back to loading
