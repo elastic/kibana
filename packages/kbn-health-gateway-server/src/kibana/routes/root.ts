@@ -60,7 +60,14 @@ async function fetchKibanaRoots({
 
   return requests.map((r, i) => {
     if (r.status === 'rejected') {
-      log.error(`No response from ${kibanaConfig.hosts[i]}${KIBANA_ROOT_ROUTE}`);
+      log.error(
+        `No response from ${kibanaConfig.hosts[i]}${KIBANA_ROOT_ROUTE}: ${
+          r.reason instanceof Error ? r.reason.message : JSON.stringify(r.reason)
+        }`
+      );
+      if (r.reason instanceof Error) {
+        log.error(r.reason);
+      }
     } else {
       log.info(
         `Got response from ${kibanaConfig.hosts[i]}${KIBANA_ROOT_ROUTE}: ${JSON.stringify(
