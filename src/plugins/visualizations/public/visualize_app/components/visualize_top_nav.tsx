@@ -65,6 +65,7 @@ const TopNav = ({
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const [navigateToLens, setNavigateToLens] = useState(false);
+  const [displayEditInLensItem, setDisplayEditInLensItem] = useState(false);
   // If the user has clicked the edit in lens button, we want to hide the badge.
   // The information is stored in local storage to persist across reloads.
   const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
@@ -96,9 +97,19 @@ const TopNav = ({
     [doReload]
   );
 
-  const displayEditInLensItem = Boolean(
-    vis.type.navigateToLens && embeddableHandler.getExpressionVariables()?.canNavigateToLens
-  );
+  useEffect(() => {
+    const subscription = embeddableHandler
+      .getExpressionVariables$()
+      .subscribe((expressionVariables) => {
+        setDisplayEditInLensItem(
+          Boolean(vis.type.navigateToLens && expressionVariables?.canNavigateToLens)
+        );
+      });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [embeddableHandler, vis]);
+
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
       return getTopNavConfig(
