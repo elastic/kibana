@@ -16,6 +16,7 @@ import {
   ALERTS_HEADERS_THRESHOLD_TERMS,
   ALERTS_HEADERS_RULE_DESCRIPTION,
   ALERTS_HEADERS_NEW_TERMS,
+  ALERTS_HEADERS_NEW_TERMS_FIELDS,
 } from '../../../detections/components/alerts_table/translations';
 import {
   ALERT_NEW_TERMS_FIELDS,
@@ -177,6 +178,10 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
     case 'new_terms':
       return [
         {
+          id: ALERT_NEW_TERMS_FIELDS,
+          label: ALERTS_HEADERS_NEW_TERMS_FIELDS,
+        },
+        {
           id: ALERT_NEW_TERMS,
           label: ALERTS_HEADERS_NEW_TERMS,
         },
@@ -324,11 +329,6 @@ export const getSummaryRows = ({
           }
         }
 
-        if (field.id === ALERT_NEW_TERMS) {
-          const enrichedInfo = enrichNewTerms(item, data, description);
-          return [...acc, enrichedInfo];
-        }
-
         return [
           ...acc,
           {
@@ -403,37 +403,4 @@ function enrichThresholdCardinality(
       },
     };
   }
-}
-
-/**
- * if new terms fields present and have the same length as new terms
- * transform new terms in following format:
- * new_terms_fields: ['field-1', 'field-2']
- * new_terms: ['value-1', 'value-2']
- * enriched new_terms: ['field-1: value-1', 'field-2: value-2']
- */
-function enrichNewTerms(
-  { values: newTerms }: TimelineEventsDetailsItem,
-  data: TimelineEventsDetailsItem[],
-  description: EnrichedFieldInfo
-) {
-  const newTermsFields = data.find(({ field }) => field === ALERT_NEW_TERMS_FIELDS)?.values;
-
-  // terms values and terms fields arrays must have the same length
-  if (
-    !Array.isArray(newTerms) ||
-    !Array.isArray(newTermsFields) ||
-    newTerms.length !== newTermsFields.length
-  ) {
-    return { title: ALERTS_HEADERS_NEW_TERMS, description };
-  }
-
-  return {
-    title: ALERTS_HEADERS_NEW_TERMS,
-    description: {
-      ...description,
-      values: newTerms.map((newTerm, i) => `${newTermsFields[i]}: ${newTerm}`),
-      data: { ...description.data, field: `${ALERT_NEW_TERMS}_enriched` },
-    },
-  };
 }

@@ -703,41 +703,6 @@ describe('AlertSummaryView', () => {
         values: ['127.0.0.1'],
         originalValue: ['127.0.0.1'],
       },
-    ] as TimelineEventsDetailsItem[];
-    const renderProps = {
-      ...props,
-      data: enhancedData,
-    };
-
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
-
-    ['New Terms', '127.0.0.1'].forEach((fieldId) => {
-      expect(getByText(fieldId));
-    });
-  });
-
-  test('enriches New terms with new terms field names', () => {
-    const enhancedData = [
-      ...mockAlertDetailsData.map((item) => {
-        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
-          return {
-            ...item,
-            values: ['new_terms'],
-            originalValue: ['new_terms'],
-          };
-        }
-        return item;
-      }),
-      {
-        category: 'kibana',
-        field: 'kibana.alert.new_terms',
-        values: ['127.0.0.1'],
-        originalValue: ['127.0.0.1'],
-      },
       {
         category: 'kibana',
         field: 'kibana.alert.rule.parameters.new_terms_fields',
@@ -756,7 +721,7 @@ describe('AlertSummaryView', () => {
       </TestProvidersComponent>
     );
 
-    ['New Terms', 'host.ip: 127.0.0.1'].forEach((fieldId) => {
+    ['New Terms', '127.0.0.1', 'New Terms fields', 'host.ip'].forEach((fieldId) => {
       expect(getByText(fieldId));
     });
   });
