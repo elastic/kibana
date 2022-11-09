@@ -152,14 +152,14 @@ export const bulkDuplicateRuleActions = {
   ),
 
   DUPLICATE_EXCEPTIONS_TEXT: i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.checkboxText',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.with',
     {
       defaultMessage: 'Duplicate rule with exceptions',
     }
   ),
 
   DUPLICATE_WITHOUT_EXCEPTIONS_TEXT: i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.checkboxText',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.without',
     {
       defaultMessage: 'Duplicate rule without exceptions',
     }
