@@ -42,6 +42,9 @@ import { IndexPattern } from '../../../types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const dataMock = dataPluginMock.createStartContract();
+dataMock.query.timefilter.timefilter.getAbsoluteTime = jest
+  .fn()
+  .mockReturnValue({ from: '2022-11-01T00:00:00.000Z', to: '2022-11-03T00:00:00.000Z' });
 
 jest.mock('.');
 jest.mock('../../../id_generator');
@@ -3202,6 +3205,10 @@ describe('state_helpers', () => {
         },
         'col1',
         indexPattern,
+        {
+          fromDate: '2022-11-01T00:00:00.000Z',
+          toDate: '2022-11-03T00:00:00.000Z',
+        },
         operationDefinitionMap
       );
     });
