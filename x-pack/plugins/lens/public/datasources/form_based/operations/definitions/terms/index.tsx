@@ -560,6 +560,7 @@ export const termsOperation: OperationDefinition<
 The top values of a specified field ranked by the chosen metric.
       `,
   }),
+  handleDataSectionExtra: true,
   paramEditor: function ParamEditor({
     layer,
     paramEditorUpdater,
@@ -570,6 +571,7 @@ The top values of a specified field ranked by the chosen metric.
     ReferenceEditor,
     paramEditorCustomProps,
     activeData,
+    dataSectionExtra,
     ...rest
   }) {
     const [incompleteColumn, setIncompleteColumn] = useState<IncompleteColumn | undefined>(
@@ -929,6 +931,7 @@ The top values of a specified field ranked by the chosen metric.
             }}
           />
         </EuiFormRow>
+        {dataSectionExtra}
         {!hasRestrictions && (
           <>
             <EuiSpacer size="m" />
