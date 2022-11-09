@@ -193,6 +193,21 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return details as unknown as ActionDetails<TOutputType, TParameters>;
   }
 
+  randomGetFileFailureCode(): string {
+    return this.randomChoice([
+      'ra_get-file_error_not-found',
+      'ra_get-file_error_is-directory',
+      'ra_get-file_error_invalid-input',
+      'ra_get-file_error_not-permitted',
+      'ra_get-file_error_too-big',
+      'ra_get-file_error_disk-quota',
+      'ra_get-file_error_processing',
+      'ra_get-file_error_upload-api-unreachable',
+      'ra_get-file_error_upload-timeout',
+      'ra_get-file_error_queue-timeout',
+    ]);
+  }
+
   generateActivityLogAction(
     overrides: DeepPartial<EndpointActivityLogAction>
   ): EndpointActivityLogAction {

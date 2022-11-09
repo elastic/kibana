@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormControlLayout, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -14,13 +14,22 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  ExistenceFetchStatus,
+  FieldListGrouped,
+  FieldListGroupedProps,
+  FieldsGroupNames,
+  useGroupedFields,
+} from '@kbn/unified-field-list-plugin/public';
+import { FieldButton } from '@kbn/react-field';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
-import { ChildDragDropProvider } from '../../drag_drop';
-import { FieldsAccordion } from './fields_accordion';
+import { ChildDragDropProvider, DragDrop } from '../../drag_drop';
+import { DataType } from '../../types';
+import { LensFieldIcon } from '../../shared_components';
 
 export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateState> & {
   data: DataPublicPluginStart;
@@ -67,8 +76,16 @@ export function TextBasedDataPanel({
   }, [data, dataViews, expressions, prevQuery, query, setState, state]);
 
   const { fieldList } = state;
-  const filteredFields = useMemo(() => {
-    return fieldList.filter((field) => {
+
+  const onSelectedFieldFilter = useCallback(
+    (field: DatatableColumn): boolean => {
+      return Boolean(layerFields?.includes(field.name));
+    },
+    [layerFields]
+  );
+
+  const onFilterField = useCallback(
+    (field: DatatableColumn) => {
       if (
         localState.nameFilter &&
         !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
@@ -76,9 +93,57 @@ export function TextBasedDataPanel({
         return false;
       }
       return true;
-    });
-  }, [fieldList, localState.nameFilter]);
-  const usedByLayersFields = fieldList.filter((field) => layerFields?.includes(field.name));
+    },
+    [localState]
+  );
+
+  const onOverrideFieldGroupDetails = useCallback((groupName) => {
+    if (groupName === FieldsGroupNames.AvailableFields) {
+      return {
+        helpText: i18n.translate('xpack.lens.indexPattern.allFieldsForTextBasedLabelHelp', {
+          defaultMessage:
+            'Drag and drop available fields to the workspace and create visualizations. To change the available fields, edit your query.',
+        }),
+      };
+    }
+  }, []);
+
+  const { fieldGroups } = useGroupedFields<DatatableColumn>({
+    dataViewId: null,
+    allFields: fieldList,
+    services: {
+      dataViews,
+    },
+    onFilterField,
+    onSelectedFieldFilter,
+    onOverrideFieldGroupDetails,
+  });
+
+  const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(
+    ({ field, itemIndex, groupIndex, hideDetails }) => {
+      return (
+        <DragDrop
+          draggable
+          order={[itemIndex]}
+          value={{
+            field: field?.name,
+            id: field.id,
+            humanData: { label: field?.name },
+          }}
+          dataTestSubj={`lnsFieldListPanelField-${field.name}`}
+        >
+          <FieldButton
+            className={`lnsFieldItem lnsFieldItem--${field?.meta?.type}`}
+            isActive={false}
+            onClick={() => {}}
+            fieldIcon={<LensFieldIcon type={field?.meta.type as DataType} />}
+            fieldName={field?.name}
+          />
+        </DragDrop>
+      );
+    },
+    []
+  );
 
   return (
     <KibanaContextProvider
@@ -111,7 +176,7 @@ export function TextBasedDataPanel({
             >
               <input
                 className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
-                data-test-subj="lnsTextBasedLangugesFieldSearch"
+                data-test-subj="lnsTextBasedLanguagesFieldSearch"
                 placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
                   defaultMessage: 'Search field names',
                   description: 'Search the list of fields in the data view for the provided text',
@@ -129,32 +194,16 @@ export function TextBasedDataPanel({
             </EuiFormControlLayout>
           </EuiFlexItem>
           <EuiFlexItem>
-            <div className="lnsIndexPatternFieldList">
-              <div className="lnsIndexPatternFieldList__accordionContainer">
-                {usedByLayersFields.length > 0 && (
-                  <FieldsAccordion
-                    initialIsOpen={true}
-                    hasLoaded={dataHasLoaded}
-                    isFiltered={Boolean(localState.nameFilter)}
-                    fields={usedByLayersFields}
-                    id="lnsSelectedFieldsTextBased"
-                    label={i18n.translate('xpack.lens.textBased.selectedFieldsLabel', {
-                      defaultMessage: 'Selected fields',
-                    })}
-                  />
-                )}
-                <FieldsAccordion
-                  initialIsOpen={true}
-                  hasLoaded={dataHasLoaded}
-                  isFiltered={Boolean(localState.nameFilter)}
-                  fields={filteredFields}
-                  id="lnsAvailableFieldsTextBased"
-                  label={i18n.translate('xpack.lens.textBased.availableFieldsLabel', {
-                    defaultMessage: 'Available fields',
-                  })}
-                />
-              </div>
-            </div>
+            <FieldListGrouped<DatatableColumn>
+              fieldGroups={fieldGroups}
+              fieldsExistenceStatus={
+                dataHasLoaded ? ExistenceFetchStatus.succeeded : ExistenceFetchStatus.unknown
+              }
+              fieldsExistInIndex={Boolean(fieldList.length)}
+              renderFieldItem={renderFieldItem}
+              screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+              data-test-subj="lnsTextBasedLanguages"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </ChildDragDropProvider>

@@ -29,13 +29,6 @@
   .embPanel__content--fullWidth {
     width: 100%;
   }
-
-  .embPanel__content--error {
-    &:hover {
-      box-shadow: none;
-      transform: none;
-    }
-  }
 }
 
 // HEADER
@@ -165,11 +158,12 @@
 }
 
 .embPanel__error {
-  text-align: center;
-  justify-content: center;
-  flex-direction: column;
-  overflow: auto;
-  padding: $euiSizeS;
+  padding: $euiSizeL;
+
+  & > * {
+    max-height: 100%;
+    overflow: auto;
+  }
 }
 
 .embPanel__label {

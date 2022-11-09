@@ -133,6 +133,12 @@ export const sendEndpointActionResponse = async (
     endpointResponse.error = {
       message: 'Endpoint encountered an error and was unable to apply action to host',
     };
+
+    if (endpointResponse.EndpointActions.data.command === 'get-file') {
+      (
+        endpointResponse.EndpointActions.data.output?.content as ResponseActionGetFileOutputContent
+      ).code = endpointActionGenerator.randomGetFileFailureCode();
+    }
   }
 
   await esClient.index({
