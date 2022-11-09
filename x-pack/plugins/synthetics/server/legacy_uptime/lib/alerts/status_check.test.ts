@@ -291,6 +291,7 @@ describe('status check alert', () => {
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
+            "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
             "monitorName": "First",
@@ -370,6 +371,7 @@ describe('status check alert', () => {
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
+            "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
             "monitorName": "First",
@@ -850,6 +852,7 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
               "latestErrorMessage": undefined,
               "monitorId": "foo",
               "monitorName": "Foo",
@@ -865,6 +868,7 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
               "latestErrorMessage": undefined,
               "monitorId": "foo",
               "monitorName": "Foo",
@@ -880,6 +884,7 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
               "latestErrorMessage": undefined,
               "monitorId": "unreliable",
               "monitorName": "Unreliable",
@@ -895,6 +900,7 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
               "latestErrorMessage": undefined,
               "monitorId": "no-name",
               "monitorName": "no-name",

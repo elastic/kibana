@@ -23,6 +23,7 @@ export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = AlertTy
   {
     alertWithLifecycle: LifecycleAlertService<RuleTypeState, AlertInstanceContext, TActionGroupIds>;
     getAlertStartedDate: (alertId: string) => string | null;
+    getAlertUuid: (alertId: string) => string | null;
   }
 >;
 
