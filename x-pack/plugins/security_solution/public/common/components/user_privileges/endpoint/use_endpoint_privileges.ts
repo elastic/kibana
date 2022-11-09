@@ -41,6 +41,7 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const licenseService = useLicense();
   const isPlatinumPlus = licenseService.isPlatinumPlus();
 
+  // FIXME:PT remove this since `fleetServicesFromUseKibana.auth is no longer a promise
   const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
   const [fleetAuthz, setFleetAuthz] = useState<FleetAuthz | null>(null);
 
@@ -130,6 +131,8 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
       // Reset these back to false. Case license is changed while the user is logged in.
       setHasHostIsolationExceptionsItems(false);
       setCheckHostIsolationExceptionsDone(false);
+
+      // FIXME:PT maybe use QueryClient here so that call is cached?
 
       HostIsolationExceptionsApiClient.getInstance(http)
         .hasData()
