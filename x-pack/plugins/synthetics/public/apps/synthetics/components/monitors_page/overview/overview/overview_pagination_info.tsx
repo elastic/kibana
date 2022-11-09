@@ -13,24 +13,19 @@ import { selectOverviewState } from '../../../../state/overview';
 export const OverviewPaginationInfo = ({
   page,
   loading,
+  total,
   startRange,
   endRange,
 }: {
   page: number;
   loading: boolean;
+  total?: number;
   startRange?: number;
   endRange?: number;
 }) => {
-  const {
-    data: { total, monitors },
-    loaded,
-  } = useSelector(selectOverviewState);
+  const { loaded } = useSelector(selectOverviewState);
 
-  if (loaded && !monitors.length) {
-    return null;
-  }
-
-  return loaded ? (
+  return loaded && total !== undefined ? (
     <EuiText size="xs">
       {startRange && endRange ? (
         <FormattedMessage

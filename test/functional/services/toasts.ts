@@ -67,6 +67,11 @@ export class ToastsService extends FtrService {
     return await list.findByCssSelector(`.euiToast:nth-child(${index})`);
   }
 
+  public async getToastContent(index: number) {
+    const elem = await this.getToastElement(index);
+    return await elem.getVisibleText();
+  }
+
   public async getAllToastElements() {
     const list = await this.getGlobalToastList();
     return await list.findAllByCssSelector(`.euiToast`);
