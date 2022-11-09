@@ -20,11 +20,11 @@ import { useTimefilterService } from '../../../../hooks/use_timefilter_service';
 import {
   useContainer,
   defaultState,
-  AlertsPageStateContainer,
-  AlertsPageContainerState,
+  AlertSearchBarStateContainer,
+  AlertSearchBarContainerState,
 } from './state_container';
 
-export function useAlertsPageStateContainer() {
+export function useAlertSearchBarStateContainer() {
   const stateContainer = useContainer();
 
   useUrlStateSyncEffect(stateContainer);
@@ -47,7 +47,7 @@ export function useAlertsPageStateContainer() {
   };
 }
 
-function useUrlStateSyncEffect(stateContainer: AlertsPageStateContainer) {
+function useUrlStateSyncEffect(stateContainer: AlertSearchBarStateContainer) {
   const history = useHistory();
   const timefilterService = useTimefilterService();
 
@@ -68,11 +68,11 @@ function useUrlStateSyncEffect(stateContainer: AlertsPageStateContainer) {
 }
 
 function setupUrlStateSync(
-  stateContainer: AlertsPageStateContainer,
+  stateContainer: AlertSearchBarStateContainer,
   stateStorage: IKbnUrlStateStorage
 ) {
   // This handles filling the state when an incomplete URL set is provided
-  const setWithDefaults = (changedState: Partial<AlertsPageContainerState> | null) => {
+  const setWithDefaults = (changedState: Partial<AlertSearchBarContainerState> | null) => {
     stateContainer.set({ ...defaultState, ...changedState });
   };
 
@@ -88,10 +88,10 @@ function setupUrlStateSync(
 
 function syncUrlStateWithInitialContainerState(
   timefilterService: TimefilterContract,
-  stateContainer: AlertsPageStateContainer,
+  stateContainer: AlertSearchBarStateContainer,
   urlStateStorage: IKbnUrlStateStorage
 ) {
-  const urlState = urlStateStorage.get<Partial<AlertsPageContainerState>>('_a');
+  const urlState = urlStateStorage.get<Partial<AlertSearchBarContainerState>>('_a');
 
   if (urlState) {
     const newState = {
