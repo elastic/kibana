@@ -10,20 +10,13 @@ import { GuideState } from '@kbn/guided-onboarding';
 
 /**
  * Guided onboarding overall status:
- *  disabled: self managed deployment have guided onboarding disabled
  *  not_started: no guides have been started yet
  *  in_progress: a guide is currently active
  *  complete: at least one guide has been completed
  *  quit: the user quit a guide before completion
  *  skipped: the user skipped on the landing page
  */
-export type PluginStatus =
-  | 'disabled'
-  | 'not_started'
-  | 'in_progress'
-  | 'complete'
-  | 'quit'
-  | 'skipped';
+export type PluginStatus = 'not_started' | 'in_progress' | 'complete' | 'quit' | 'skipped';
 
 export interface PluginState {
   status: PluginStatus;
