@@ -9,6 +9,7 @@
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { Filter, isCombinedFilter } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { validateParams } from './filter_editor_utils';
 
@@ -44,4 +45,19 @@ const invalidFormatError = (): { isInvalid: boolean; errorMessage?: string } => 
       }
     ),
   };
+};
+
+export const flattenFilters = (filter: Filter[]) => {
+  const returnArray: Filter[] = [];
+  const doRecursive = (f: Filter) => {
+    if (isCombinedFilter(f)) {
+      f.meta.params.forEach(doRecursive);
+    } else if (f) {
+      returnArray.push(f);
+    }
+  };
+
+  filter.forEach(doRecursive);
+
+  return returnArray;
 };

@@ -50,6 +50,7 @@ import {
 } from './lib/filter_editor_utils';
 import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge';
+import { flattenFilters } from './lib/helpers';
 
 /** The default max-height of the Add/Edit Filter popover used to show "+n More" filters (e.g. `+4 More`) */
 export const DEFAULT_MAX_HEIGHT = '233px';
@@ -263,6 +264,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
   private renderFiltersBuilderEditor() {
     const { selectedIndexPattern, filters } = this.state;
+    const shouldShowPreview = filters && flattenFilters(filters).length > 1;
 
     return (
       <>
@@ -277,27 +279,29 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
           />
         </div>
 
-        <EuiFormRow
-          fullWidth
-          hasEmptyLabelSpace={true}
-          label={
-            <strong>
-              <FormattedMessage
-                id="unifiedSearch.filter.filterBar.preview"
-                defaultMessage="{icon} Preview"
-                values={{
-                  icon: <EuiIcon type="inspect" size="s" />,
-                }}
-              />
-            </strong>
-          }
-        >
-          <FilterBadgeGroup
-            filters={filters}
-            dataViews={this.props.indexPatterns}
-            booleanRelation={BooleanRelation.AND}
-          />
-        </EuiFormRow>
+        {shouldShowPreview ? (
+          <EuiFormRow
+            fullWidth
+            hasEmptyLabelSpace={true}
+            label={
+              <strong>
+                <FormattedMessage
+                  id="unifiedSearch.filter.filterBar.preview"
+                  defaultMessage="{icon} Preview"
+                  values={{
+                    icon: <EuiIcon type="inspect" size="s" />,
+                  }}
+                />
+              </strong>
+            }
+          >
+            <FilterBadgeGroup
+              filters={filters}
+              dataViews={this.props.indexPatterns}
+              booleanRelation={BooleanRelation.AND}
+            />
+          </EuiFormRow>
+        ) : null}
       </>
     );
   }
@@ -360,25 +364,14 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       return false;
     }
 
-    const mappedFilter = (filter: Filter) => {
-      return filter.meta.params.map((item: Filter) => validationCheck(item));
-    };
-
-    function validationCheck(filter: Filter) {
-      if (isCombinedFilter(filter)) {
-        return mappedFilter(filter);
-      } else {
-        return isFilterValid(
-          indexPattern,
-          getFieldFromFilter(filter as FieldFilter, indexPattern!),
-          getOperatorFromFilter(filter),
-          getFilterParams(filter)
-        );
-      }
-    }
-    const flattenedFillters = filters.map((filter) => validationCheck(filter)).flat(Infinity);
-
-    return flattenedFillters.every((checkedFilter) => Boolean(checkedFilter));
+    return flattenFilters(filters).every((f) =>
+      isFilterValid(
+        indexPattern,
+        getFieldFromFilter(f as FieldFilter, indexPattern!),
+        getOperatorFromFilter(f),
+        getFilterParams(f)
+      )
+    );
   }
 
   private onIndexPatternChange = ([selectedIndexPattern]: DataView[]) => {
