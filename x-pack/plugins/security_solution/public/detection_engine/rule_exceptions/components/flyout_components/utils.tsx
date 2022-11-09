@@ -111,7 +111,7 @@ export const enrichItemsForSharedLists =
  * @param listType exception list type
  * @param items exception items to be modified
  */
-export const entrichNewExceptionItems = ({
+export const enrichNewExceptionItems = ({
   itemName,
   commentToAdd,
   addToRules,
@@ -152,7 +152,7 @@ export const entrichNewExceptionItems = ({
  * @param listType exception list type
  * @param items exception items to be modified
  */
-export const entrichExceptionItemsForUpdate = ({
+export const enrichExceptionItemsForUpdate = ({
   itemName,
   commentToAdd,
   selectedOs,

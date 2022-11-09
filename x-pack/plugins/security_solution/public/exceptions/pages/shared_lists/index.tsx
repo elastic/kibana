@@ -27,28 +27,28 @@ import {
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 
-import { AutoDownload } from '../../common/components/auto_download/auto_download';
-import { Loader } from '../../common/components/loader';
-import { useKibana } from '../../common/lib/kibana';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { AutoDownload } from '../../../common/components/auto_download/auto_download';
+import { Loader } from '../../../common/components/loader';
+import { useKibana } from '../../../common/lib/kibana';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-import * as i18n from './translations_exceptions_table';
-import { ExceptionsTableUtilityBar } from './exceptions_table_utility_bar';
-import { useAllExceptionLists } from './use_all_exception_lists';
-import { ReferenceErrorModal } from '../../detections/components/value_lists_management_flyout/reference_error_modal';
-import { patchRule } from '../../detection_engine/rule_management/api/api';
-import { ExceptionsSearchBar } from './exceptions_search_bar';
-import { getSearchFilters } from '../../detection_engine/rule_management_ui/components/rules_table/helpers';
-import { useUserData } from '../../detections/components/user_info';
-import { useListsConfig } from '../../detections/containers/detection_engine/lists/use_lists_config';
-import { MissingPrivilegesCallOut } from '../../detections/components/callouts/missing_privileges_callout';
-import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
-import { ExceptionsListCard } from './exceptions_list_card';
+import * as i18n from '../../translations/shared_list';
+import { ExceptionsTableUtilityBar } from '../../components/shared_list_utilty_bar';
+import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
+import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
+import { patchRule } from '../../../detection_engine/rule_management/api/api';
+import { ExceptionsSearchBar } from '../../components/list_search_bar';
+import { getSearchFilters } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
+import { useUserData } from '../../../detections/components/user_info';
+import { useListsConfig } from '../../../detections/containers/detection_engine/lists/use_lists_config';
+import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
+import { ExceptionsListCard } from '../../components/exceptions_list_card';
 
-import { ImportExceptionListFlyout } from './import_exceptions_list_flyout';
-import { CreateSharedListFlyout } from './create_shared_exception_list';
+import { ImportExceptionListFlyout } from '../../components/import_exceptions_list_flyout';
+import { CreateSharedListFlyout } from '../../components/create_shared_exception_list';
 
-import { AddExceptionFlyout } from '../../detection_engine/rule_exceptions/components/add_exception_flyout';
+import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 
 export type Func = () => Promise<void>;
 
@@ -68,7 +68,7 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listNamespaceType: 'single',
 };
 
-export const ExceptionListsTable = React.memo(() => {
+export const SharedLists = React.memo(() => {
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
   const { loading: listsConfigLoading } = useListsConfig();
@@ -304,6 +304,7 @@ export const ExceptionListsTable = React.memo(() => {
       iconSide="right"
       onClick={onRowSizeButtonClick}
     >
+      {/* TODO move to translations */}
       {`Rows per page: ${rowSize}`}
     </EuiButtonEmpty>
   );
@@ -479,9 +480,8 @@ export const ExceptionListsTable = React.memo(() => {
               totalExceptionLists={exceptionListsWithRuleRefs.length}
               onRefresh={handleRefresh}
             />
-            <EuiSpacer size="m" />
             {exceptionListsWithRuleRefs.length > 0 && canUserCRUD !== null && canUserREAD !== null && (
-              <React.Fragment data-test-subj="exceptionsTable">
+              <div data-test-subj="exceptionsTable">
                 {exceptionListsWithRuleRefs.map((excList) => (
                   <ExceptionsListCard
                     key={excList.list_id}
@@ -493,7 +493,7 @@ export const ExceptionListsTable = React.memo(() => {
                     handleExport={handleExport}
                   />
                 ))}
-              </React.Fragment>
+              </div>
             )}
           </>
         )}
@@ -546,4 +546,4 @@ export const ExceptionListsTable = React.memo(() => {
   );
 });
 
-ExceptionListsTable.displayName = 'ExceptionListsTable';
+SharedLists.displayName = 'SharedLists';

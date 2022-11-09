@@ -11,7 +11,7 @@ import { Route } from '@kbn/kibana-react-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
 import { EXCEPTIONS_PATH, SecurityPageName } from '../../common/constants';
-import { ExceptionListsTable } from './manage_exceptions/exceptions_table';
+import { SharedLists } from './pages/shared_lists';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 import { useReadonlyHeader } from '../use_readonly_header';
@@ -20,7 +20,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 const ExceptionsRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.exceptions}>
-      <ExceptionListsTable />
+      <SharedLists />
       <SpyRoute pageName={SecurityPageName.exceptions} />
     </TrackApplicationView>
   </PluginTemplateWrapper>

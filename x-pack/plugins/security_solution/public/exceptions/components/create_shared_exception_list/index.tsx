@@ -27,7 +27,7 @@ import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notificatio
 import { i18n as translate } from '@kbn/i18n';
 import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
 
-import { useCreateSharedExceptionListWithOptionalSignal } from './use_create_shared_list';
+import { useCreateSharedExceptionListWithOptionalSignal } from '../../hooks/use_create_shared_list';
 import {
   CREATE_SHARED_LIST_TITLE,
   CREATE_SHARED_LIST_NAME_FIELD,
@@ -38,7 +38,7 @@ import {
   CREATE_SHARED_LIST_NAME_FIELD_PLACEHOLDER,
   SUCCESS_TITLE,
   getSuccessText,
-} from './translations';
+} from '../../translations';
 
 export const CreateSharedListFlyout = memo(
   ({

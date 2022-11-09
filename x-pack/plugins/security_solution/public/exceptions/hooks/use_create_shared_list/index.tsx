@@ -10,7 +10,7 @@ import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types
 import type { HttpStart } from '@kbn/core/public';
 import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
-import { SHARED_EXCEPTION_LIST_URL } from '../../../common/constants';
+import { SHARED_EXCEPTION_LIST_URL } from '../../../../common/constants';
 
 export const createSharedExceptionList = async ({
   name,
