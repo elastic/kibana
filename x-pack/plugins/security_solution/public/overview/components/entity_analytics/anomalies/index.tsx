@@ -74,8 +74,9 @@ export const EntityAnalyticsAnomalies = () => {
 
   const handleJobStateChange = useCallback(
     async (job: SecurityJob) => {
-      await enableDatafeed(job, job.latestTimestampMs || 0, true);
+      const result = await enableDatafeed(job, job.latestTimestampMs || 0, true);
       refetch();
+      return result;
     },
     [refetch, enableDatafeed]
   );

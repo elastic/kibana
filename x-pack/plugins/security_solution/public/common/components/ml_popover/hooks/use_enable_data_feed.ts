@@ -34,6 +34,7 @@ export const useEnableDataFeed = () => {
         } catch (error) {
           addError(error, { title: i18n.CREATE_JOB_FAILURE });
           setIsLoading(false);
+          return;
         }
       }
 
