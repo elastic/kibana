@@ -328,7 +328,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       const ruleDefaultOptions = ['add_to_rule', 'add_to_rules', 'select_rules_to_add_to'];
       const addToRules = ruleDefaultOptions.includes(addExceptionToRadioSelection);
       const addToSharedLists =
-        !!sharedListToAddTo?.length || addExceptionToRadioSelection === 'add_to_lists';
+        !!sharedListToAddTo?.length ||
+        (addExceptionToRadioSelection === 'add_to_lists' && !isEmpty(exceptionListsToAddTo));
       const sharedLists = sharedListToAddTo?.length ? sharedListToAddTo : exceptionListsToAddTo;
 
       const items = enrichNewExceptionItems({
@@ -347,8 +348,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         selectedRulesToAddTo,
         listType,
         addToRules: addToRules && !isEmpty(selectedRulesToAddTo),
-        addToSharedLists:
-          !!sharedListToAddTo?.length || (addToSharedLists && !isEmpty(exceptionListsToAddTo)),
+        addToSharedLists,
         sharedLists,
       });
 
