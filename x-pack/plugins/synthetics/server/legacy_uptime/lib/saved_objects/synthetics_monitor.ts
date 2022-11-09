@@ -109,6 +109,9 @@ export const getSyntheticsMonitorSavedObjectType = (
             },
           },
         },
+        enabled: {
+          type: 'boolean',
+        },
       },
     },
     management: {
