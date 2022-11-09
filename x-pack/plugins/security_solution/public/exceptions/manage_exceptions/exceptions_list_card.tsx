@@ -52,6 +52,7 @@ interface ExceptionsListCardProps {
 
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
   ({ exceptionsList, handleDelete, handleExport, readOnly }) => {
+    // routes to x-pack/plugins/security_solution/public/exceptions/routes.tsx
     const { onClick: goToExceptionDetail } = useGetSecuritySolutionLinkProps()({
       deepLinkId: SecurityPageName.sharedExceptionListDetails,
       path: `/exceptions/shared/${exceptionsList.list_id}`,
