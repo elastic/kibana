@@ -10,7 +10,10 @@
 // / <reference types="cypress" />
 // @ts-check
 
-// @ts-ignore
+// TODO(jbudz): should be removed when upgrading to TS@4.8
+// this is a skip for the errors created when typechecking with isolatedModules
+export {};
+
 const dayjs = require('dayjs');
 const duration = require('dayjs/plugin/duration');
 // const { filterSpecsFromCoverage } = require('./support-utils');

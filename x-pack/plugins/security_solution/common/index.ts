@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-// skips errors when typechecking with isolated modules
+// TODO(jbudz): should be removed when upgrading to TS@4.8
+// this is a skip for the errors created when typechecking with isolatedModules
 export {};
 
 // Careful of exporting anything from this file as any file(s) you export here will cause your page bundle size to increase.
