@@ -14,7 +14,6 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
@@ -70,7 +69,6 @@ export const fetchBooleanFieldsStats = (
   fields: Field[],
   options: ISearchOptions
 ): Observable<BooleanFieldStats[] | FieldStatsError> => {
-  const { samplerShardSize } = params;
   const request: estypes.SearchRequest = getBooleanFieldsStatsRequest(params, fields);
   return dataSearch
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
@@ -85,15 +83,29 @@ export const fetchBooleanFieldsStats = (
         if (!isIKibanaSearchResponse(resp)) return resp;
 
         const aggregations = resp.rawResponse.aggregations;
-        const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+        const aggsPath = ['sample'];
+        const sampleCount = get(aggregations, [...aggsPath, 'doc_count'], 0);
 
         const batchStats: BooleanFieldStats[] = fields.map((field, i) => {
           const safeFieldName = field.fieldName;
+          // Sampler agg will yield doc_count that's bigger than the actual # of sampled records
+          // because it uses the stored _doc_count if available
+          // https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-doc-count-field.html
+          // therefore we need to correct it by multiplying by the sampled probability
+          const count = get(
+            aggregations,
+            [...aggsPath, `${safeFieldName}_value_count`, 'doc_count'],
+            0
+          );
+          const multiplier =
+            count > sampleCount ? get(aggregations, [...aggsPath, 'probability'], 1) : 1;
+
           const stats: BooleanFieldStats = {
             fieldName: field.fieldName,
-            count: get(aggregations, [...aggsPath, `${safeFieldName}_value_count`, 'doc_count'], 0),
+            count: count * multiplier,
             trueCount: 0,
             falseCount: 0,
+            sampleCount,
           };
 
           const valueBuckets: Array<{ [key: string]: number }> = get(

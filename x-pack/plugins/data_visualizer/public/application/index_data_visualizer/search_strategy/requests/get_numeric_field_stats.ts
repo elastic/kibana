@@ -16,8 +16,8 @@ import {
   ISearchOptions,
 } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
-import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '../../../common/util/is_defined';
 import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
 import { MAX_PERCENT, PERCENTILE_SPACING, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type { Aggs, FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
@@ -121,7 +121,7 @@ export const fetchNumericFieldsStats = (
         if (!isIKibanaSearchResponse(resp)) return resp;
 
         const aggregations = resp.rawResponse.aggregations;
-        const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+        const aggsPath = ['sample'];
 
         const batchStats: NumericFieldStats[] = [];
 
@@ -151,7 +151,7 @@ export const fetchNumericFieldsStats = (
             max: get(fieldStatsResp, 'max', 0),
             avg: get(fieldStatsResp, 'avg', 0),
             isTopValuesSampled:
-              field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
+              isDefined(params.samplingProbability) && params.samplingProbability < 1,
             topValues,
             topValuesSampleSize: get(aggregations, ['sample', 'doc_count']),
             topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),

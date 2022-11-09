@@ -19,8 +19,9 @@ interface Props extends FieldDataRowProps {
 export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
   const { stats } = config;
   if (stats === undefined) return null;
-  const { count, sampleCount, totalDocuments } = stats;
-  const total = totalDocuments ?? sampleCount ?? totalCount;
+
+  const { count, sampleCount } = stats;
+  const total = sampleCount ?? totalCount;
 
   // If field exists is docs but we don't have count stats then don't show
   // Otherwise if field doesn't appear in docs at all, show 0%

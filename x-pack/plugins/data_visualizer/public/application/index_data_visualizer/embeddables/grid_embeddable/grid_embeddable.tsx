@@ -83,8 +83,15 @@ export const EmbeddableWrapper = ({
     [dataVisualizerListState, onOutputChange]
   );
 
-  const { configs, searchQueryLanguage, searchString, extendedColumns, progress, setLastRefresh } =
-    useDataVisualizerGridData(input, dataVisualizerListState);
+  const {
+    configs,
+    searchQueryLanguage,
+    searchString,
+    extendedColumns,
+    progress,
+    overallStatsProgress,
+    setLastRefresh,
+  } = useDataVisualizerGridData(input, dataVisualizerListState);
 
   useEffect(() => {
     setLastRefresh(Date.now());
@@ -143,6 +150,7 @@ export const EmbeddableWrapper = ({
       showPreviewByDefault={input?.showPreviewByDefault}
       onChange={onOutputChange}
       loading={progress < 100}
+      overallStatsRunning={overallStatsProgress.isRunning}
     />
   );
 };

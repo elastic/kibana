@@ -551,6 +551,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
                   extendedColumns={extendedColumns}
                   loading={progress < 100}
+                  overallStatsRunning={overallStatsProgress.isRunning}
                   showPreviewByDefault={dataVisualizerListState.showDistributions ?? true}
                   onChange={setDataVisualizerListState}
                   totalCount={overallStats.totalCount}
