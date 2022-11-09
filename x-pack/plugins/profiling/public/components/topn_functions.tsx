@@ -83,16 +83,11 @@ function SampleStat({
 }: {
   samples: number;
   diffSamples: number | undefined;
-  totalSamples: number | undefined;
+  totalSamples: number;
 }) {
   const samplesLabel = `${samples.toLocaleString()}`;
 
-  if (
-    diffSamples === undefined ||
-    diffSamples === 0 ||
-    totalSamples === undefined ||
-    totalSamples === 0
-  ) {
+  if (diffSamples === undefined || diffSamples === 0 || totalSamples === 0) {
     return <>{samplesLabel}</>;
   }
   const color = diffSamples < 0 ? 'success' : 'danger';
@@ -163,7 +158,7 @@ export const TopNFunctionsTable = ({
   comparisonTopNFunctions?: TopNFunctions;
 }) => {
   const totalCount: number = useMemo(() => {
-    if (!topNFunctions || !topNFunctions.TotalCount || topNFunctions.TotalCount === 0) {
+    if (!topNFunctions || !topNFunctions.TotalCount) {
       return 0;
     }
 
