@@ -153,8 +153,6 @@ export const fetchNumericFieldsStats = (
             isTopValuesSampled:
               isDefined(params.samplingProbability) && params.samplingProbability < 1,
             topValues,
-            topValuesSampleSize: get(aggregations, ['sample', 'doc_count']),
-            topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };
 
           if (docCount > 0) {

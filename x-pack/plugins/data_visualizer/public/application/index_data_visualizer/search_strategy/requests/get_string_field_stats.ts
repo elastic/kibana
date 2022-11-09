@@ -15,8 +15,8 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '../../../common/util/is_defined';
 import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
 import { SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {
@@ -92,8 +92,9 @@ export const fetchStringFieldsStats = (
         if (!isIKibanaSearchResponse(resp)) return resp;
         const aggregations = resp.rawResponse.aggregations;
 
-        const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+        const aggsPath = ['sample'];
         const batchStats: StringFieldStats[] = [];
+        const sampleCount = get(aggregations, [...aggsPath, 'doc_count']);
 
         fields.forEach((field, i) => {
           const safeFieldName = field.safeFieldName;
@@ -107,10 +108,10 @@ export const fetchStringFieldsStats = (
 
           const stats = {
             fieldName: field.fieldName,
-            isTopValuesSampled: true,
+            isTopValuesSampled:
+              isDefined(params.samplingProbability) && params.samplingProbability < 1,
             topValues,
-            topValuesSampleSize: get(aggregations, ['sample', 'doc_count']),
-            topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
+            sampleCount,
           };
 
           batchStats.push(stats);

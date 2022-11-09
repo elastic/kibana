@@ -19,6 +19,11 @@ import type {
 } from '../../../../../common/types/field_stats';
 
 const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
+const DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY = 0.000001;
+const MINIMUM_SAMPLED_DOCS_THRESHOLD = 3e6 * DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY;
+// Ok so if the sample probability is p and the count you get back is N then the 90% confidence interval is (N * p - 1.64 * sqrt(N * p), N * p + 1.64 * sqrt(N * p))
+// const THRESHOLD =
+//   (doc_count / p - (1.64 * sqrt(doc_count)) / p, doc_count / p + (1.64 * sqrt(doc_count)) / p);
 export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyParams) => {
   const {
     index,
@@ -187,9 +192,10 @@ export const getDocumentCountStats = async (
     const newProbability =
       (initialDefaultProbability * numDocs) / (numSampled - 2 * Math.sqrt(numSampled));
 
-    // If the number of docs sampled is is too small
-    // proceed to make a vanilla aggregation without any sampling
-    if (numSampled === 0 || newProbability === Infinity || numSampled < 5) {
+    // If the number of docs is < 3 million
+    // proceed to make a vanilla aggregation without any sampling (probability = 1)
+    // Minimum of 4 docs (3e6 * 0.000001 + 1) sampled gives us 90% confidence interval # docs is within
+    if (newProbability === Infinity || numSampled <= 4) {
       const vanillaAggResp = await search
         .search(
           {
