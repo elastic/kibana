@@ -16,14 +16,22 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import {
+  BUCKET_SELECTOR_FIELD,
+  buildAggregation,
+  FieldOption,
+  isCountAggregation,
+  isGroupAggregation,
+  parseAggregationResults,
+} from '@kbn/triggers-actions-ui-plugin/public/common';
+import { getComparatorScript } from '../../../../common';
 import { CommonRuleParams, EsQueryRuleParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps, convertFieldSpecToFieldOption } from '../util';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { totalHitsToNumber } from '../test_query_row';
 import { hasExpressionValidationErrors } from '../validation';
+import { Comparator } from '../../../../common/comparator_types';
 
 const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
   'pinFilter',
@@ -251,8 +259,34 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       'filter',
       timeFilter ? [timeFilter, ...ruleConfiguration.filter] : ruleConfiguration.filter
     );
+    testSearchSource.setField(
+      'aggs',
+      buildAggregation({
+        aggType: ruleParams.aggType,
+        aggField: ruleParams.aggField,
+        termField: ruleParams.termField,
+        termSize: ruleParams.termSize,
+        condition: {
+          conditionScript: getComparatorScript(
+            (ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR) as Comparator,
+            ruleParams.threshold,
+            BUCKET_SELECTOR_FIELD
+          ),
+        },
+      })
+    );
     return testSearchSource;
-  }, [searchSource, timeWindow, ruleConfiguration]);
+  }, [
+    searchSource,
+    timeWindow,
+    ruleConfiguration,
+    ruleParams.aggType,
+    ruleParams.aggField,
+    ruleParams.termField,
+    ruleParams.termSize,
+    ruleParams.threshold,
+    ruleParams.thresholdComparator,
+  ]);
 
   const onCopyQuery = useCallback(() => {
     const testSearchSource = createTestSearchSource();
@@ -260,10 +294,16 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   }, [createTestSearchSource]);
 
   const onTestFetch = useCallback(async () => {
+    const isGroupAgg = isGroupAggregation(ruleParams.termField);
+    const isCountAgg = isCountAggregation(ruleParams.aggType);
     const testSearchSource = createTestSearchSource();
     const { rawResponse } = await lastValueFrom(testSearchSource.fetch$());
-    return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
-  }, [timeWindow, createTestSearchSource]);
+    return {
+      testResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: rawResponse }),
+      isGrouped: isGroupAgg,
+      timeWindow,
+    };
+  }, [timeWindow, createTestSearchSource, ruleParams.aggType, ruleParams.termField]);
 
   return (
     <Fragment>
@@ -275,15 +315,12 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
           />
         </h5>
       </EuiTitle>
-
       <EuiSpacer size="s" />
-
       <DataViewSelectPopover
         dataViewName={dataView?.getName?.() ?? dataView?.title}
         dataViewId={dataView?.id}
         onSelectDataView={onSelectDataView}
       />
-
       {Boolean(dataView?.id) && (
         <>
           <EuiSpacer size="s" />
@@ -354,7 +391,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRun}
       />
-
       <EuiSpacer />
     </Fragment>
   );

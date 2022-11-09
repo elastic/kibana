@@ -18,11 +18,27 @@ export const isSearchSourceRule = (
 
 export const useTriggersAndActionsUiDeps = () => useKibana<TriggersAndActionsUiDeps>().services;
 
-export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOption[] =>
-  (fieldSpec ?? []).map((spec: FieldSpec) => ({
-    name: spec.name,
-    type: spec.type,
-    normalizedType: spec.type,
-    searchable: spec.searchable,
-    aggregatable: spec.aggregatable,
-  }));
+export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOption[] => {
+  return (fieldSpec ?? [])
+    .filter((spec: FieldSpec) => spec.isMapped)
+    .map((spec: FieldSpec) => {
+      const converted = {
+        name: spec.name,
+        searchable: spec.searchable,
+        aggregatable: spec.aggregatable,
+        type: spec.type,
+        normalizedType: spec.type,
+      };
+
+      if (spec.type === 'string') {
+        const esType = spec.esTypes && spec.esTypes.length > 0 ? spec.esTypes[0] : spec.type;
+        converted.type = esType;
+        converted.normalizedType = esType;
+      } else if (spec.type === 'number') {
+        const esType = spec.esTypes && spec.esTypes.length > 0 ? spec.esTypes[0] : spec.type;
+        converted.type = esType;
+      }
+
+      return converted;
+    });
+};

@@ -55,6 +55,8 @@ const defaultSearchSourceExpressionParams: EsQueryRuleParams<SearchType.searchSo
     index: '90943e30-9a47-11e8-b64d-95841ca0b247',
   },
   excludeHitsFromPreviousRun: true,
+  aggType: 'count',
+  groupBy: 'all',
 };
 
 const mockSearchResult = new Subject();
@@ -62,6 +64,42 @@ const testResultComplete = {
   rawResponse: {
     hits: {
       total: 1234,
+    },
+  },
+};
+
+const testResultGroupedComplete = {
+  rawResponse: {
+    hits: {
+      total: 1234,
+    },
+    aggregations: {
+      groupAgg: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 103,
+        buckets: [
+          {
+            key: 'execute',
+            doc_count: 120,
+          },
+          {
+            key: 'execute-start',
+            doc_count: 120,
+          },
+          {
+            key: 'active-instance',
+            doc_count: 100,
+          },
+          {
+            key: 'execute-action',
+            doc_count: 100,
+          },
+          {
+            key: 'new-instance',
+            doc_count: 100,
+          },
+        ],
+      },
     },
   },
 };
@@ -191,7 +229,7 @@ dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
   Promise.resolve({ total: 0, queries: [] })
 );
 
-const setup = (alertParams: EsQueryRuleParams<SearchType.searchSource>) => {
+const setup = (ruleParams: EsQueryRuleParams<SearchType.searchSource>) => {
   const errors = {
     size: [],
     timeField: [],
@@ -205,7 +243,7 @@ const setup = (alertParams: EsQueryRuleParams<SearchType.searchSource>) => {
         ruleInterval="1m"
         ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
-        ruleParams={alertParams}
+        ruleParams={ruleParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
         errors={errors}
@@ -248,7 +286,7 @@ describe('SearchSourceAlertTypeExpression', () => {
     expect(testButton.prop('disabled')).toBeTruthy();
   });
 
-  test('should show success message if Test Query is successful', async () => {
+  test('should show success message if ungrouped Test Query is successful', async () => {
     let wrapper = setup(defaultSearchSourceExpressionParams);
     await act(async () => {
       await nextTick();
@@ -274,6 +312,39 @@ describe('SearchSourceAlertTypeExpression', () => {
     expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();
     expect(wrapper.find('EuiText[data-test-subj="testQuerySuccess"]').text()).toEqual(
       `Query matched 1234 documents in the last 15s.`
+    );
+  });
+
+  test('test meee should show success message if grouped Test Query is successful', async () => {
+    let wrapper = setup({
+      ...defaultSearchSourceExpressionParams,
+      termField: 'the-term',
+      termSize: 10,
+    });
+    await act(async () => {
+      await nextTick();
+    });
+    wrapper = await wrapper.update();
+    await act(async () => {
+      const testButton = findTestSubject(wrapper, 'testQuery');
+      expect(testButton.prop('disabled')).toBeFalsy();
+      testButton.simulate('click');
+      wrapper.update();
+    });
+    wrapper = await wrapper.update();
+
+    await act(async () => {
+      mockSearchResult.next(testResultPartial);
+      mockSearchResult.next(testResultGroupedComplete);
+      mockSearchResult.complete();
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="testQuerySuccess"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();
+    expect(wrapper.find('EuiText[data-test-subj="testQuerySuccess"]').text()).toEqual(
+      `Grouped query matched 5 groups in the last 15s.`
     );
   });
 

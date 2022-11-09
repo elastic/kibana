@@ -7,13 +7,28 @@
 
 import { defaultsDeep, isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ValidationResult, builtInComparators } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ValidationResult,
+  builtInComparators,
+  builtInAggregationTypes,
+  builtInGroupByTypes,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { EsQueryRuleParams, ExpressionErrors } from './types';
 import { isSearchSourceRule } from './util';
 import { EXPRESSION_ERRORS } from './constants';
 
 export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
-  const { size, threshold, timeWindowSize, thresholdComparator } = ruleParams;
+  const {
+    size,
+    threshold,
+    timeWindowSize,
+    thresholdComparator,
+    aggType,
+    aggField,
+    groupBy,
+    termSize,
+    termField,
+  } = ruleParams;
   const validationResult = { errors: {} };
   const errors: ExpressionErrors = defaultsDeep({}, EXPRESSION_ERRORS);
   validationResult.errors = errors;
@@ -26,6 +41,40 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
     );
 
     return validationResult;
+  }
+
+  if (aggType && builtInAggregationTypes[aggType].fieldRequired && !aggField) {
+    errors.aggField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredAggFieldText', {
+        defaultMessage: 'Aggregation field is required.',
+      })
+    );
+  }
+
+  if (
+    groupBy &&
+    builtInGroupByTypes[groupBy] &&
+    builtInGroupByTypes[groupBy].sizeRequired &&
+    !termSize
+  ) {
+    errors.termSize.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermSizedText', {
+        defaultMessage: 'Term size is required.',
+      })
+    );
+  }
+
+  if (
+    groupBy &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
+    !termField
+  ) {
+    errors.termField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermFieldText', {
+        defaultMessage: 'Term field is required.',
+      })
+    );
   }
 
   if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
