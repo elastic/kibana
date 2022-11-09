@@ -269,7 +269,7 @@ export class ApiService implements GuidedOnboardingApi {
   public isGuideStepActive$(guideId: GuideId, stepId: GuideStepIds): Observable<boolean> {
     return this.fetchPluginState$().pipe(
       map((pluginState) => {
-        if (!isGuideActive(pluginState)) return false;
+        if (!isGuideActive(pluginState, guideId)) return false;
         return isStepInProgress(pluginState!.activeGuide, guideId, stepId);
       })
     );
