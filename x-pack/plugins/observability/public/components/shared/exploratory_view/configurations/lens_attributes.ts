@@ -200,11 +200,19 @@ export class LensAttributes {
     indexPattern: DataView;
     layerConfig: LayerConfig;
   }): TermsIndexPatternColumn {
+    const { seriesConfig, selectedMetricField } = layerConfig;
+
     const fieldMeta = indexPattern.getFieldByName(sourceField);
+    const { metricOptions } = seriesConfig;
 
     const { sourceField: yAxisSourceField } = layerConfig.seriesConfig.yAxisColumns[0];
 
-    const isFormulaColumn = yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
+    const isFormulaColumn =
+      Boolean(
+        metricOptions &&
+        (metricOptions.find((option) => option.id === selectedMetricField) as MetricOption)
+          ?.formula
+      ) || yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
 
     return {
       sourceField,
@@ -223,15 +231,15 @@ export class LensAttributes {
         missingBucket: false,
         ...(isFormulaColumn
           ? {
-              orderAgg: {
-                label: 'Count of records',
-                dataType: 'number',
-                operationType: 'count',
-                isBucketed: false,
-                scale: 'ratio',
-                sourceField: '___records___',
-              },
-            }
+            orderAgg: {
+              label: 'Count of records',
+              dataType: 'number',
+              operationType: 'count',
+              isBucketed: false,
+              scale: 'ratio',
+              sourceField: '___records___',
+            },
+          }
           : {}),
       },
     };
@@ -898,15 +906,15 @@ export class LensAttributes {
           },
           ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN && breakdown !== PERCENTILE
             ? // do nothing since this will be used a x axis source
-              {
-                [`breakdown-column-${layerId}`]: this.getBreakdownColumn({
-                  layerId,
-                  sourceField: breakdown,
-                  indexPattern: layerConfig.indexPattern,
-                  labels: layerConfig.seriesConfig.labels,
-                  layerConfig,
-                }),
-              }
+            {
+              [`breakdown-column-${layerId}`]: this.getBreakdownColumn({
+                layerId,
+                sourceField: breakdown,
+                indexPattern: layerConfig.indexPattern,
+                labels: layerConfig.seriesConfig.labels,
+                layerConfig,
+              }),
+            }
             : {}),
           ...this.getChildYAxises(layerConfig, layerId, columnFilter),
         },
@@ -972,17 +980,17 @@ export class LensAttributes {
              * if not, use the secondary y axis (left) */
             axisMode:
               layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
-              this.layerConfigs[0].indexPattern.fieldFormatMap[
-                this.layerConfigs[0].selectedMetricField
-              ]?.id
+                this.layerConfigs[0].indexPattern.fieldFormatMap[
+                  this.layerConfigs[0].selectedMetricField
+                ]?.id
                 ? ('left' as YAxisMode)
                 : ('right' as YAxisMode),
           },
         ],
         xAccessor: `x-axis-column-layer${index}`,
         ...(layerConfig.breakdown &&
-        layerConfig.breakdown !== PERCENTILE &&
-        layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
+          layerConfig.breakdown !== PERCENTILE &&
+          layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
           ? { splitAccessor: `breakdown-column-layer${index}` }
           : {}),
         ...(this.layerConfigs[0].seriesConfig.yTitle

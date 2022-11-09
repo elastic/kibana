@@ -91,7 +91,7 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         label: 'Monitor availability',
         id: 'monitor_availability',
         columnType: FORMULA_COLUMN,
-        formula: "1- (count(kql='summary.down > 0') / count())",
+        formula: "1- (count(kql='summary.down > 0') / count(kql='summary: *'))",
       },
       {
         field: SUMMARY_UP,
