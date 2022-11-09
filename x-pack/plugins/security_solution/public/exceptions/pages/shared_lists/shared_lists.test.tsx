@@ -6,21 +6,21 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 
-import { TestProviders } from '../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
-import { useUserData } from '../../detections/components/user_info';
+import { useUserData } from '../../../detections/components/user_info';
 
-import { ExceptionListsTable } from './exceptions_table';
+import { SharedLists } from '.';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
-import { useAllExceptionLists } from './use_all_exception_lists';
+import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
 import { useHistory } from 'react-router-dom';
-import { generateHistoryMock } from '../../common/utils/route/mocks';
+import { generateHistoryMock } from '../../../common/utils/route/mocks';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 
-jest.mock('../../detections/components/user_info');
-jest.mock('../../common/lib/kibana');
-jest.mock('./use_all_exception_lists');
+jest.mock('../../../detections/components/user_info');
+jest.mock('../../../common/utils/route/mocks');
+jest.mock('../../hooks/use_all_exception_lists');
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -39,11 +39,11 @@ jest.mock('@kbn/i18n-react', () => {
   };
 });
 
-jest.mock('../../detections/containers/detection_engine/lists/use_lists_config', () => ({
+jest.mock('../../../detections/containers/detection_engine/lists/use_lists_config', () => ({
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
 
-describe('ExceptionListsTable', () => {
+describe('SharedLists', () => {
   const mockHistory = generateHistoryMock();
   const exceptionList1 = getExceptionListSchemaMock();
   const exceptionList2 = { ...getExceptionListSchemaMock(), list_id: 'not_endpoint_list', id: '2' };
@@ -91,21 +91,18 @@ describe('ExceptionListsTable', () => {
   });
 
   it('renders delete option as disabled if list is "endpoint_list"', async () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
-        <ExceptionListsTable />
+        <SharedLists />
       </TestProviders>
     );
+    const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    fireEvent.click(allMenuActions[0]);
 
-    wrapper
-      .find('[data-test-subj="exceptionsListCardOverflowActions"] button')
-      .at(0)
-      .simulate('click');
-
-    expect(wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button')).toHaveLength(1);
-    expect(
-      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
-    ).toBeTruthy();
+    await waitFor(() => {
+      const allDeleteActions = wrapper.getAllByTestId('sharedListOverflowCardActionItemDelete');
+      expect(allDeleteActions[0]).toBeDisabled();
+    });
   });
 
   it('renders delete option as disabled if user is read only', async () => {
@@ -117,17 +114,19 @@ describe('ExceptionListsTable', () => {
       },
     ]);
 
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
-        <ExceptionListsTable />
+        <SharedLists />
       </TestProviders>
     );
-    wrapper
-      .find('[data-test-subj="exceptionsListCardOverflowActions"] button')
-      .at(0)
-      .simulate('click');
-    expect(
-      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
-    ).toBeTruthy();
+    const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    fireEvent.click(allMenuActions[1]);
+
+    await waitFor(() => {
+      const allDeleteActions = wrapper.queryAllByTestId('sharedListOverflowCardActionItemDelete');
+      expect(allDeleteActions).toEqual([]);
+      const allExportActions = wrapper.queryAllByTestId('sharedListOverflowCardActionItemExport');
+      expect(allExportActions).toEqual([]);
+    });
   });
 });

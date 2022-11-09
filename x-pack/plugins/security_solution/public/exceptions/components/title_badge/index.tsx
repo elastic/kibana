@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 interface TitleBadgeProps {
   title: string;
@@ -17,20 +18,25 @@ interface TitleBadgeProps {
 
 const StyledFlexItem = styled(EuiFlexItem)`
   border-right: 1px solid #d3dae6;
-  padding: 4px 12px 4px 0;
+  padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeS} ${euiThemeVars.euiSizeXS} 0;
 `;
+
+const TextContainer = styled(EuiText)`
+  width: max-content;
+`;
+
 export const TitleBadge = memo<TitleBadgeProps>(({ title, badgeString }) => {
   return (
-    <EuiFlexItem style={{ flex: '1 1 auto' }}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiText>{title}</EuiText>
-        </EuiFlexItem>
-        <StyledFlexItem grow={false}>
-          <EuiBadge>{badgeString}</EuiBadge>{' '}
-        </StyledFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem>
+        <TextContainer grow size="xs">
+          {`${title}:`}
+        </TextContainer>
+      </EuiFlexItem>
+      <StyledFlexItem>
+        <EuiBadge>{badgeString}</EuiBadge>
+      </StyledFlexItem>
+    </EuiFlexGroup>
   );
 });
 

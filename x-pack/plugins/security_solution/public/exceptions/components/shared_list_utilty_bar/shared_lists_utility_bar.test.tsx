@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { TestProviders } from '../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { render, screen, within } from '@testing-library/react';
-import { ExceptionsTableUtilityBar } from './exceptions_table_utility_bar';
+import { ExceptionsTableUtilityBar } from '.';
 
 describe('ExceptionsTableUtilityBar', () => {
   it('displays correct exception lists label and refresh rules action button', () => {
