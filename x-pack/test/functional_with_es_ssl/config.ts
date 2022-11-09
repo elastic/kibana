@@ -7,6 +7,7 @@
 
 import Fs from 'fs';
 import { resolve, join } from 'path';
+import getPort from 'get-port';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
@@ -45,6 +46,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
     },
   };
+
+  // Proxy server config is needed to simulate http responses in some tests
+  // Only from localhost, currently only Tines connector needs it.
+  const proxyPort = await getPort({ port: getPort.makeRange(6200, 6299) });
+  const proxyHosts = ['localhost'];
+  const actionsProxyUrl = [
+    `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
+    `--xpack.actions.proxyOnlyHosts=${JSON.stringify(proxyHosts)}`,
+    '--xpack.actions.proxyRejectUnauthorizedCertificates=false',
+  ];
 
   const returnedObject = {
     ...xpackFunctionalConfig.getAll(),
@@ -118,6 +129,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             },
           },
         })}`,
+        ...actionsProxyUrl,
       ],
     },
     security: {
