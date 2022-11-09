@@ -433,6 +433,7 @@ function enrichNewTerms(
     description: {
       ...description,
       values: newTerms.map((newTerm, i) => `${newTermsFields[i]}: ${newTerm}`),
+      data: { ...description.data, field: `${ALERT_NEW_TERMS}_enriched` },
     },
   };
 }

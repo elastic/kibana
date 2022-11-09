@@ -14,6 +14,7 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
+import { ALERT_NEW_TERMS } from '../../../../common/field_maps/field_names';
 import type { BrowserFields } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import type { EnrichedFieldInfo, EventSummaryField } from './types';
@@ -176,6 +177,7 @@ export function getEnrichedFieldInfo({
  */
 export const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = {
   [AGENT_STATUS_FIELD_NAME]: true,
+  [`${ALERT_NEW_TERMS}_enriched`]: true,
 };
 
 /**
