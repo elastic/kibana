@@ -235,7 +235,7 @@ describe('APIKeysGridPage', () => {
           />
         </Providers>
       );
-
+      expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
       expect(await findByText('Create your first API key')).toBeInTheDocument();
       expect(queryByText('Create API key')).toBeNull();
     });
