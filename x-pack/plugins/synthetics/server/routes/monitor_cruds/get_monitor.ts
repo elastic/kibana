@@ -105,7 +105,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
       sortOrder,
       perPage: 500,
-      search: query ? `${query}` : undefined,
+      search: query ? `${query}*` : undefined,
       searchFields: SEARCH_FIELDS,
     });
 
