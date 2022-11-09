@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
 import {
@@ -90,7 +91,13 @@ export const ProcessTreeAlertsFilter = ({
       onClick={onButtonClick}
     >
       <EuiText size="s">
-        {i18n.SELECTED_ALERT_CATEGORY_TEXT(selectedProcessEventAlertCategory)}
+        <FormattedMessage
+          id={`sessionView.alertDetailsFilterItem-${selectedProcessEventAlertCategory}`}
+          defaultMessage="View: {selectedProcessEventAlertCategory} alerts"
+          values={{
+            selectedProcessEventAlertCategory,
+          }}
+        />
       </EuiText>
     </EuiButtonEmpty>
   );
@@ -110,7 +117,13 @@ export const ProcessTreeAlertsFilter = ({
             icon={getIconType(processEventAlertCategory)}
             onClick={onSelectedProcessEventAlertCategory}
           >
-            {i18n.FILTER_MENU_ITEM_TEXT(processEventAlertCategory)}
+            <FormattedMessage
+              id={`sessionView.alertDetailsFilterItem-${processEventAlertCategory}`}
+              defaultMessage="View {processEventAlertCategory} alerts"
+              values={{
+                processEventAlertCategory,
+              }}
+            />
           </EuiContextMenuItem>
         );
       });
@@ -122,7 +135,7 @@ export const ProcessTreeAlertsFilter = ({
         icon={getIconType(DEFAULT_ALERT_FILTER_VALUE)}
         onClick={onSelectedProcessEventAlertCategory}
       >
-        {i18n.FILTER_MENU_ITEM_DEFAULT_TEXT(DEFAULT_ALERT_FILTER_VALUE)}
+        {i18n.FILTER_MENU_ITEM_DEFAULT_TEXT}
       </EuiContextMenuItem>,
       ...alertEventFilterMenuItems,
     ];
@@ -133,14 +146,20 @@ export const ProcessTreeAlertsFilter = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem css={filterStatus} style={{ paddingLeft: '16px' }}>
           <EuiText size="s">
-            Showing{' '}
-            <span
-              className={'text'}
-              data-test-subj="sessionView:sessionViewAlertDetailsFilterStatus"
-            >
-              {alertCountsStatusText}
-            </span>{' '}
-            alerts
+            <FormattedMessage
+              id="sessionView.alertDetailsCountStatus"
+              defaultMessage="Showing {alertCountsStatusElem} alerts"
+              values={{
+                alertCountsStatusElem: (
+                  <span
+                    className={'text'}
+                    data-test-subj="sessionView:sessionViewAlertDetailsFilterStatus"
+                  >
+                    {alertCountsStatusText}
+                  </span>
+                ),
+              }}
+            />
           </EuiText>
         </EuiFlexItem>
         {doesMultipleAlertTypesExist && (

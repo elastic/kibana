@@ -16,14 +16,17 @@ import {
   EuiToolTip,
   EuiPanel,
 } from '@elastic/eui';
-import { ALERT, ALERT_ICONS } from '../../../common/constants';
-import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
+import { ALERT_ICONS } from '../../../common/constants';
+import {
+  ProcessEvent,
+  ProcessEventAlert,
+  ProcessEventAlertCategory,
+} from '../../../common/types/process_tree';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
 import { getAlertCategoryDisplayText } from '../../utils/alert_category_display_text';
-import * as i18n from './translations';
-import { getAlertTypeTooltipContent } from '../../utils/alert_type_tooltip_content';
+import { getAlertIconTooltipContent } from '../../../common/utils/alert_icon_tooltip_content';
 export interface ProcessTreeAlertDeps {
   alert: ProcessEvent;
   isInvestigated: boolean;
@@ -49,7 +52,7 @@ export const ProcessTreeAlert = ({
   const category = event?.category?.[0];
   const alertIconType = useMemo(() => {
     if (category && category in ALERT_ICONS) return ALERT_ICONS[category];
-    return 'danger';
+    return ALERT_ICONS.process;
   }, [category]);
 
   useEffect(() => {
@@ -74,9 +77,9 @@ export const ProcessTreeAlert = ({
     return null;
   }
   const { name } = rule;
-  const processEventAlertCategory = category ?? ALERT;
+  const processEventAlertCategory = category ?? ProcessEventAlertCategory.process;
   const alertCategoryDetailDisplayText = getAlertCategoryDisplayText(alert, category);
-  const alertTypeTooltipContent = getAlertTypeTooltipContent(processEventAlertCategory);
+  const alertIconTooltipContent = getAlertIconTooltipContent(processEventAlertCategory);
 
   return (
     <div key={uuid} css={styles.alert} data-id={uuid}>
@@ -96,7 +99,7 @@ export const ProcessTreeAlert = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={i18n.ALERT_TYPE_TOOLTIP(alertTypeTooltipContent)}>
+          <EuiToolTip position="top" content={alertIconTooltipContent}>
             <EuiIcon type={alertIconType} color="danger" />
           </EuiToolTip>
         </EuiFlexItem>
