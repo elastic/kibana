@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// @ts-nocheck
+
 import React, { useMemo, useEffect, useState, FC } from 'react';
 
-// import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiCallOut,
@@ -29,7 +29,6 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorMessage } from '../../../../common';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
-import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
 import { getCombinedRuntimeMappings } from '../data_grid';
 
 import { useMlApiContext } from '../../contexts/kibana';
@@ -81,13 +80,25 @@ const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, toolti
   </>
 );
 
+function filterChartableItems(items: estypes.SearchHit[], resultsField?: string) {
+  return (
+    items
+      ?.map((d) =>
+        getProcessedFields(d.fields ?? {}, (key: string) =>
+          key.startsWith(`${resultsField}.feature_importance`)
+        )
+      )
+      .filter((d) => !Object.keys(d).some((field) => Array.isArray(d[field]))) ?? []
+  );
+}
+
 export interface ScatterplotMatrixProps {
   fields: string[];
   index: string;
   resultsField?: string;
   color?: string;
   legendType?: LegendType;
-  searchQuery?: ResultsSearchQuery;
+  searchQuery?: estypes.QueryDslQueryContainer;
   runtimeMappings?: RuntimeMappings;
   indexPattern?: DataView;
 }
@@ -240,27 +251,16 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           );
         }
 
-        // estypes.SearchResponse
-        // TODO: update types and move items process to separate function
-        const [foregroundResp, backgroundResp] = await Promise.all(promises);
+        const [foregroundResp, backgroundResp] = await Promise.all<estypes.SearchResponse>(
+          promises
+        );
 
         if (!options.didCancel) {
-          const items = foregroundResp.hits.hits
-            .map((d: any) =>
-              getProcessedFields(d.fields ?? {}, (key: string) =>
-                key.startsWith(`${resultsField}.feature_importance`)
-              )
-            )
-            .filter((d: any) => !Object.keys(d).some((field) => Array.isArray(d[field])));
-
-          const backgroundItems =
-            backgroundResp?.hits.hits
-              .map((d: any) =>
-                getProcessedFields(d.fields ?? {}, (key: string) =>
-                  key.startsWith(`${resultsField}.feature_importance`)
-                )
-              )
-              .filter((d: any) => !Object.keys(d).some((field) => Array.isArray(d[field]))) ?? [];
+          const items = filterChartableItems(foregroundResp.hits.hits, resultsField);
+          const backgroundItems = filterChartableItems(
+            backgroundResp?.hits.hits ?? [],
+            resultsField
+          );
 
           const originalDocsCount = foregroundResp.hits.hits.length;
           const filteredDocsCount = originalDocsCount - items.length;

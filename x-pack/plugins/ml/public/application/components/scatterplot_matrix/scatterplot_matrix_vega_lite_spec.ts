@@ -107,7 +107,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
     legendType
   );
 
-  const schema = {
+  const schema: TopLevelSpec = {
     $schema: 'https://vega.github.io/schema/vega-lite/v4.17.0.json',
     background: 'transparent',
     // There seems to be a bug in Vega which doesn't propagate these settings
@@ -296,11 +296,9 @@ export const getScatterplotMatrixVegaLiteSpec = (
           }
         : {}),
       encoding: {
-        // @ts-ignore // TODO: update encoding type
         color: {
           value: COLOR_BLUR,
         },
-        // @ts-ignore // TODO: update encoding type
         opacity: {
           value: 0.5,
         },
