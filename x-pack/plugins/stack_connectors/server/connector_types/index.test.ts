@@ -19,6 +19,7 @@ const ACTION_TYPE_IDS = [
   '.webhook',
   '.xmatters',
   '.torq',
+  '.d3security',
 ];
 
 const mockedActions = actionsMock.createSetup();

@@ -36,4 +36,6 @@ export type {
   ResilientActionParams,
   TeamsConnectorTypeId,
   TeamsActionParams,
+  D3SecurityConnectorTypeId,
+  D3SecurityActionParams,
 } from './connector_types';

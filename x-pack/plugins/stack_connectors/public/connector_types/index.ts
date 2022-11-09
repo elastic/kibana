@@ -26,6 +26,7 @@ import { getTinesConnectorType } from './tines';
 import { getTorqConnectorType } from './torq';
 import { getWebhookConnectorType } from './webhook';
 import { getXmattersConnectorType } from './xmatters';
+import { getD3SecurityConnectorType } from './d3security'
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -60,4 +61,5 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getTeamsConnectorType());
   connectorTypeRegistry.register(getTorqConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
+  connectorTypeRegistry.register(getD3SecurityConnectorType());
 }

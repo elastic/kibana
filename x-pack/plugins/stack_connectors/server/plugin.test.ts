@@ -131,6 +131,13 @@ describe('Stack Connectors Plugin', () => {
           name: 'Microsoft Teams',
         })
       );
+      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+        16,
+        expect.objectContaining({
+          id: '.d3security',
+          name: 'D3 Security',
+        })
+      );
     });
   });
 });
