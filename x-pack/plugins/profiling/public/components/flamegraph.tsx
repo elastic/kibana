@@ -127,39 +127,35 @@ function FlameGraphTooltip({
         <EuiFlexItem>{label}</EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
-            {isRoot ? (
-              ''
-            ) : (
-              <TooltipRow
-                label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
-                  defaultMessage: `CPU incl. subfunctions`,
-                })}
-                value={countInclusive / totalSamples}
-                comparison={
-                  isNumber(comparisonCountInclusive) && isNumber(comparisonTotalSamples)
-                    ? comparisonCountInclusive / comparisonTotalSamples
-                    : undefined
-                }
-                formatAsPercentage
-                showChange
-              />
-            )}
-            {isRoot ? (
-              ''
-            ) : (
-              <TooltipRow
-                label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
-                  defaultMessage: `CPU`,
-                })}
-                value={countExclusive / totalSamples}
-                comparison={
-                  isNumber(comparisonCountExclusive) && isNumber(comparisonTotalSamples)
-                    ? comparisonCountExclusive / comparisonTotalSamples
-                    : undefined
-                }
-                formatAsPercentage
-                showChange
-              />
+            {isRoot === false && (
+              <>
+                <TooltipRow
+                  label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
+                    defaultMessage: `CPU incl. subfunctions`,
+                  })}
+                  value={countInclusive / totalSamples}
+                  comparison={
+                    isNumber(comparisonCountInclusive) && isNumber(comparisonTotalSamples)
+                      ? comparisonCountInclusive / comparisonTotalSamples
+                      : undefined
+                  }
+                  formatAsPercentage
+                  showChange
+                />
+                <TooltipRow
+                  label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
+                    defaultMessage: `CPU`,
+                  })}
+                  value={countExclusive / totalSamples}
+                  comparison={
+                    isNumber(comparisonCountExclusive) && isNumber(comparisonTotalSamples)
+                      ? comparisonCountExclusive / comparisonTotalSamples
+                      : undefined
+                  }
+                  formatAsPercentage
+                  showChange
+                />
+              </>
             )}
             <TooltipRow
               label={i18n.translate('xpack.profiling.flameGraphTooltip.samplesLabel', {
