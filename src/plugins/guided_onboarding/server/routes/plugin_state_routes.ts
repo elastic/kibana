@@ -6,19 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
-import { IRouter } from '@kbn/core/server';
+import { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../../common/constants';
+import type { PluginState, PluginStatus } from '../../common/types';
 import {
   pluginStateSavedObjectsId,
   pluginStateSavedObjectsType,
   PluginStateSO,
 } from '../saved_objects';
 import { calculateIsActivePeriod, findActiveGuide } from '../helpers';
-import { API_BASE_PATH } from '../../common/constants';
-import type { PluginState, PluginStatus } from '../../common/types';
 
-export const registerGetPluginState = (router: IRouter) => {
+export const registerGetPluginStateRoute = (router: IRouter) => {
   router.get(
     {
       path: `${API_BASE_PATH}/plugin_state`,
@@ -58,7 +57,7 @@ export const registerGetPluginState = (router: IRouter) => {
   );
 };
 
-export const registerPutPluginState = (router: IRouter) => {
+export const registerPutPluginStateRoute = (router: IRouter) => {
   router.put(
     {
       path: `${API_BASE_PATH}/plugin_state`,
@@ -82,7 +81,7 @@ export const registerPutPluginState = (router: IRouter) => {
         },
         {
           // if there is no saved object yet, insert a new SO with the creation date
-          upsert: { ...updatedPluginState, creationDate: new Date() },
+          upsert: { ...updatedPluginState, creationDate: new Date().toISOString() },
         }
       );
 

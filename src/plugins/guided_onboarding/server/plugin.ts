@@ -10,7 +10,7 @@ import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/s
 
 import { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
 import { defineRoutes } from './routes';
-import { guideStateSavedObjects, guidedOnboardingSavedObjects } from './saved_objects';
+import { guideStateSavedObjects, pluginStateSavedObjects } from './saved_objects';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
@@ -30,7 +30,7 @@ export class GuidedOnboardingPlugin
 
     // register saved objects
     core.savedObjects.registerType(guideStateSavedObjects);
-    core.savedObjects.registerType(guidedOnboardingSavedObjects);
+    core.savedObjects.registerType(pluginStateSavedObjects);
 
     return {};
   }

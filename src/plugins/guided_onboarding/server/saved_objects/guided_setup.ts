@@ -46,5 +46,5 @@ export const pluginStateSavedObjects: SavedObjectsType = {
 // plugin state SO interface
 export interface PluginStateSO {
   status: string;
-  creationDate: Date;
+  creationDate: string;
 }

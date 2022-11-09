@@ -72,6 +72,10 @@ export class ApiService implements GuidedOnboardingApi {
     if (!this.isCloudEnabled) {
       return of(undefined);
     }
+    if (!this.client) {
+      throw new Error('ApiService has not be initialized.');
+    }
+
     const currentState = this.pluginState$.value;
     // if currentState is undefined, it was not fetched from the backend yet
     // or the request was cancelled or failed
@@ -89,6 +93,9 @@ export class ApiService implements GuidedOnboardingApi {
    * where all guides are displayed with their corresponding status
    */
   public async fetchAllGuidesState(): Promise<{ state: GuideState[] } | undefined> {
+    if (!this.isCloudEnabled) {
+      return undefined;
+    }
     if (!this.client) {
       throw new Error('ApiService has not be initialized.');
     }
@@ -113,6 +120,9 @@ export class ApiService implements GuidedOnboardingApi {
     newState: GuideState,
     panelState: boolean
   ): Promise<{ state: GuideState } | undefined> {
+    if (!this.isCloudEnabled) {
+      return undefined;
+    }
     if (!this.client) {
       throw new Error('ApiService has not be initialized.');
     }
@@ -374,6 +384,9 @@ export class ApiService implements GuidedOnboardingApi {
   }
 
   public async updatePluginStatus(status: PluginStatus): Promise<PluginState | undefined> {
+    if (!this.isCloudEnabled) {
+      return undefined;
+    }
     if (!this.client) {
       throw new Error('ApiService has not be initialized.');
     }

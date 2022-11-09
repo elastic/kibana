@@ -7,4 +7,4 @@
  */
 
 export { calculateIsActivePeriod } from './calculate_active_period';
-export { findActiveGuide } from './find_active_guide';
+export { findActiveGuide, findAllGuides, findGuideById } from './guide_state_utils';
