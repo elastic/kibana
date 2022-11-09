@@ -15,7 +15,6 @@ import {
   SecurityPageName,
   SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../../../../../common/constants';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
 import type {
   DurationMetric,
   RuleExecutionSummary,
@@ -44,7 +43,7 @@ import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
-import { MlRuleErrorPopover } from './ml_rule_error_popover';
+import { MlRuleWarningPopover } from './ml_rule_warning_popover';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -136,20 +135,16 @@ const useRuleExecutionStatusColumn = ({
       field: 'execution_summary.last_execution.status',
       name: i18n.COLUMN_LAST_RESPONSE,
       render: (value: RuleExecutionSummary['last_execution']['status'] | undefined, item: Rule) => {
-        const isFailedStatus =
-          value === RuleExecutionStatus.failed || value === RuleExecutionStatus['partial failure'];
         return (
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <RuleStatusBadge
                 status={value}
-                message={
-                  isFailedStatus ? item.execution_summary?.last_execution.message : undefined
-                }
+                message={item.execution_summary?.last_execution.message}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <MlRuleErrorPopover rule={item} />
+              <MlRuleWarningPopover rule={item} />
             </EuiFlexItem>
           </EuiFlexGroup>
         );

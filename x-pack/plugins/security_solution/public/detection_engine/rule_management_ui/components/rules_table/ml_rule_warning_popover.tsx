@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiPopover,
   EuiText,
@@ -15,6 +15,9 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
+import * as i18n from './translations';
+
+import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecurityPageName } from '../../../../../common/constants';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
@@ -23,17 +26,14 @@ import { getCapitalizedStatusText } from '../../../../detections/components/rule
 import type { Rule } from '../../../rule_management/logic';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 
-interface MlRuleErrorPopoverComponentProps {
+interface MlRuleWarningPopoverComponentProps {
   rule: Rule;
 }
 
-const MlRuleErrorPopoverComponent: React.FC<MlRuleErrorPopoverComponentProps> = ({ rule }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const onButtonClick = () => setIsPopoverOpen((open) => !open);
-  const closePopover = () => setIsPopoverOpen(false);
+const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps> = ({ rule }) => {
+  const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
 
   const { loading: loadingJobs, jobs } = useSecurityJobs();
 
@@ -50,7 +50,7 @@ const MlRuleErrorPopoverComponent: React.FC<MlRuleErrorPopoverComponentProps> = 
   }
 
   const button = (
-    <EuiButtonIcon display={'empty'} color={'warning'} iconType={'alert'} onClick={onButtonClick} />
+    <EuiButtonIcon display={'empty'} color={'warning'} iconType={'alert'} onClick={togglePopover} />
   );
   const popoverTitle = getCapitalizedStatusText(rule.execution_summary?.last_execution.status);
 
@@ -85,6 +85,6 @@ const MlRuleErrorPopoverComponent: React.FC<MlRuleErrorPopoverComponentProps> = 
   );
 };
 
-export const MlRuleErrorPopover = React.memo(MlRuleErrorPopoverComponent);
+export const MlRuleWarningPopover = React.memo(MlRuleWarningPopoverComponent);
 
-MlRuleErrorPopover.displayName = 'MlRuleErrorPopover';
+MlRuleWarningPopover.displayName = 'MlRuleWarningPopover';
