@@ -49,13 +49,10 @@ export const useRequestParams = ({
     [data.query.queryString, queryState.query]
   );
 
-  // We need to update the absolute time range whenever the relative
-  // time range changes, or when the lastReloadRequestTime changes
-  const timeRange = useMemo(
-    () => data.query.timefilter.timefilter.getAbsoluteTime(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data.query.timefilter.timefilter, queryState.time, lastReloadRequestTime]
+  const relativeTimeRange = useMemo(
+    () => queryState.time ?? data.query.timefilter.timefilter.getTimeDefaults(),
+    [data.query.timefilter.timefilter, queryState.time]
   );
 
-  return { filters, query, timeRange };
+  return { filters, query, relativeTimeRange };
 };

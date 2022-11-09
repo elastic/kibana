@@ -8,13 +8,15 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateQuery, Query, Filter, TimeRange } from '@kbn/es-query';
+import useDebounce from 'react-use/lib/useDebounce';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramBucketInterval,
@@ -28,6 +30,7 @@ import {
 import { getLensAttributes } from './get_lens_attributes';
 import { buildBucketInterval } from './build_bucket_interval';
 import { useTimeRange } from './use_time_range';
+import { REQUEST_DEBOUNCE_MS } from './consts';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
@@ -96,6 +99,7 @@ export function Histogram({
           data,
           dataView,
           timeInterval,
+          timeRange,
           response,
         });
 
@@ -104,7 +108,7 @@ export function Histogram({
 
       onChartLoad?.({ complete: !isLoading, adapters: adapters ?? {} });
     },
-    [data, dataView, onChartLoad, onTotalHitsChange, timeInterval]
+    [data, dataView, onChartLoad, onTotalHitsChange, timeInterval, timeRange]
   );
 
   const { euiTheme } = useEuiTheme();
@@ -128,24 +132,58 @@ export function Histogram({
     }
   `;
 
+  const [debouncedProps, setDebouncedProps] = useState(
+    getLensProps({
+      timeRange,
+      attributes,
+      request,
+      lastReloadRequestTime,
+      onLoad,
+    })
+  );
+
+  useDebounce(
+    () => {
+      setDebouncedProps(
+        getLensProps({ timeRange, attributes, request, lastReloadRequestTime, onLoad })
+      );
+    },
+    REQUEST_DEBOUNCE_MS,
+    [attributes, lastReloadRequestTime, onLoad, request?.searchSessionId, timeRange]
+  );
+
   return (
     <>
       <div data-test-subj="unifiedHistogramChart" data-time-range={timeRangeText} css={chartCss}>
-        <lens.EmbeddableComponent
-          id="unifiedHistogramLensComponent"
-          viewMode={ViewMode.VIEW}
-          timeRange={timeRange}
-          attributes={attributes}
-          noPadding
-          searchSessionId={request?.searchSessionId}
-          executionContext={{
-            description: 'fetch chart data and total hits',
-          }}
-          lastReloadRequestTime={lastReloadRequestTime}
-          onLoad={onLoad}
-        />
+        <lens.EmbeddableComponent {...debouncedProps} />
       </div>
       {timeRangeDisplay}
     </>
   );
 }
+
+const getLensProps = ({
+  timeRange,
+  attributes,
+  request,
+  lastReloadRequestTime,
+  onLoad,
+}: {
+  timeRange: TimeRange;
+  attributes: TypedLensByValueInput['attributes'];
+  request: UnifiedHistogramRequestContext | undefined;
+  lastReloadRequestTime: number | undefined;
+  onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
+}) => ({
+  id: 'unifiedHistogramLensComponent',
+  viewMode: ViewMode.VIEW,
+  timeRange,
+  attributes,
+  noPadding: true,
+  searchSessionId: request?.searchSessionId,
+  executionContext: {
+    description: 'fetch chart data and total hits',
+  },
+  lastReloadRequestTime,
+  onLoad,
+});
