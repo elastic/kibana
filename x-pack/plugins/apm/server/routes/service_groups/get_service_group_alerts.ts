@@ -11,9 +11,9 @@ import {
   AggregationsFilterAggregate,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import { Logger } from '@kbn/core/server';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { SavedServiceGroup } from '../../../common/service_groups';
-import { Logger } from '@kbn/core/server';
 
 export async function getServiceGroupAlerts({
   serviceGroups,
