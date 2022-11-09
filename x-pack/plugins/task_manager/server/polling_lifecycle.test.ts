@@ -206,9 +206,7 @@ describe('TaskPollingLifecycle', () => {
         )
       );
 
-      expect(
-        isOk(await getFirstAsPromise(claimAvailableTasks([], taskClaiming, logger)))
-      ).toBeTruthy();
+      expect(isOk(await getFirstAsPromise(claimAvailableTasks(taskClaiming, logger)))).toBeTruthy();
 
       expect(taskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
     });
@@ -266,7 +264,7 @@ describe('TaskPollingLifecycle', () => {
           })
       );
 
-      const err = await getFirstAsPromise(claimAvailableTasks([], taskClaiming, logger));
+      const err = await getFirstAsPromise(claimAvailableTasks(taskClaiming, logger));
 
       expect(isErr(err)).toBeTruthy();
       expect((err as Err<FillPoolResult>).error).toEqual(FillPoolResult.Failed);
