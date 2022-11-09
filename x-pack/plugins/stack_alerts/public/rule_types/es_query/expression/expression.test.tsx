@@ -54,6 +54,7 @@ const defaultEsQueryRuleParams: EsQueryRuleParams<SearchType.esQuery> = {
   esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
   searchType: SearchType.esQuery,
   excludeHitsFromPreviousRun: true,
+  aggType: 'count',
 };
 const defaultSearchSourceRuleParams: EsQueryRuleParams<SearchType.searchSource> = {
   size: 100,
@@ -66,6 +67,7 @@ const defaultSearchSourceRuleParams: EsQueryRuleParams<SearchType.searchSource> 
   searchType: SearchType.searchSource,
   searchConfiguration: {},
   excludeHitsFromPreviousRun: true,
+  aggType: 'count',
 };
 
 const dataViewPluginMock = dataViewPluginMocks.createStartContract();

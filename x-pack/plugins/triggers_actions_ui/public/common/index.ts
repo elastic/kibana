@@ -32,5 +32,5 @@ export {
   isCountAggregation,
   isGroupAggregation,
   parseAggregationResults,
-  ParsedAggregationGroup,
 } from '../../common';
+export type { ParsedAggregationGroup } from '../../common';

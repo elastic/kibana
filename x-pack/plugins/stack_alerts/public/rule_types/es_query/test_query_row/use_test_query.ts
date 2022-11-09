@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ParsedAggregationGroup } from '@kbn/triggers-actions-ui-plugin/common';
+import type { ParsedAggregationGroup } from '@kbn/triggers-actions-ui-plugin/common';
 
 interface TestQueryResponse {
   result: string | null;
