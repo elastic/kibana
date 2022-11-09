@@ -141,6 +141,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     spaceId,
     state,
   }) {
+    const { basePath } = _server;
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
     const uptimeEsClient = createUptimeESClient({
@@ -208,13 +209,13 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         });
 
         alertInstance.scheduleActions(TLS.id, {
-          alertDetailsUrl: getAlertDetailsUrl(_server.basePath, spaceId, alertUuid),
+          alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
           ...summary,
         });
       });
     }
 
-    setRecoveredAlertsContext(alertFactory);
+    setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
 
     return updateState(state, foundCerts);
   },
