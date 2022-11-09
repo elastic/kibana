@@ -29,7 +29,7 @@ import type { CreateTimelineProps } from '../types';
 import { tableDefaults } from '../../../../common/store/data_table/defaults';
 import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import type { Direction } from '../../../../../common/search_strategy';
-import { setEventsLoading } from '../../../../common/store/data_table/actions';
+import { setEventsLoading, setSelected } from '../../../../common/store/data_table/actions';
 
 export interface UseAddBulkToTimelineActionProps {
   /* filters being passed to the Alert/events table */
@@ -161,14 +161,29 @@ export const useAddBulkToTimelineAction = ({
     [dispatch, updateTimelineIsLoading, clearActiveTimeline, from, to]
   );
 
-  const onResponseHandler = useCallback(
-    (localResponse: TimelineArgs) => {
+  const sendBulkEventsToTimelineHandler = useCallback(
+    (items: TimelineItem[]) => {
       sendBulkEventsToTimelineAction(
         createTimeline,
-        localResponse.events.map((item) => item.ecs),
+        items.map((item) => item.ecs),
         'KqlFilter'
       );
 
+      dispatch(
+        setSelected({
+          id: tableId,
+          isSelectAllChecked: false,
+          isSelected: false,
+          eventIds: selectedEventIds,
+        })
+      );
+    },
+    [dispatch, createTimeline, selectedEventIds, tableId]
+  );
+
+  const onResponseHandler = useCallback(
+    (localResponse: TimelineArgs) => {
+      sendBulkEventsToTimelineHandler(localResponse.events);
       dispatch(
         setEventsLoading({
           id: tableId,
@@ -177,7 +192,7 @@ export const useAddBulkToTimelineAction = ({
         })
       );
     },
-    [dispatch, createTimeline, selectedEventIds, tableId]
+    [dispatch, sendBulkEventsToTimelineHandler, tableId, selectedEventIds]
   );
 
   const onActionClick = useCallback(
@@ -196,20 +211,16 @@ export const useAddBulkToTimelineAction = ({
         return;
       }
 
-      sendBulkEventsToTimelineAction(
-        createTimeline,
-        items.map((item) => item.ecs),
-        'KqlFilter'
-      );
+      sendBulkEventsToTimelineHandler(items);
     },
     [
       dispatch,
       selectedEventIds,
       tableId,
-      createTimeline,
       searchhandler,
       selectAll,
       onResponseHandler,
+      sendBulkEventsToTimelineHandler,
     ]
   );
 

@@ -38,10 +38,6 @@ import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
 import { HOSTS_URL } from '../../urls/navigation';
 import { resetFields } from '../../tasks/timeline';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import {
-  investigateAllEventsInTimeline,
-  investigateFirstPageEventsInTimeline,
-} from '../../tasks/common/event_table';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -158,26 +154,6 @@ describe('Events Viewer', () => {
           kqlSearch(`${filterInput}{enter}`);
           cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', initialNumberOfEvents);
         });
-    });
-  });
-
-  context('Bulk operations', () => {
-    before(() => {
-      esArchiverLoad('bulk_process');
-    });
-    beforeEach(() => {
-      visit(HOSTS_URL);
-      openEvents();
-      waitsForEventsToBeLoaded();
-    });
-
-    it('Adding multiple events to the timeline should be successful', () => {
-      // select all visible events
-      investigateFirstPageEventsInTimeline();
-    });
-
-    it('When selected all events are selected, bulk action should be disabled', () => {
-      investigateAllEventsInTimeline();
     });
   });
 });

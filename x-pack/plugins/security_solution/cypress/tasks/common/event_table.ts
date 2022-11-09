@@ -11,7 +11,6 @@ import {
   SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE,
 } from '../../screens/common/controls';
 import { EVENT_VIEWER_CHECKBOX } from '../../screens/hosts/events';
-import { SERVER_SIDE_EVENT_COUNT } from '../../screens/timeline';
 
 export const selectFirstPageEvents = () => {
   cy.get(EVENT_VIEWER_CHECKBOX).first().scrollIntoView().click();
@@ -22,26 +21,7 @@ export const selectAllEvents = () => {
   cy.get(SELECT_ALL_EVENTS).click();
 };
 
-export const investigateFirstPageEventsInTimeline = () => {
-  selectFirstPageEvents();
-  cy.get(SELECTED_ALERTS).then((sub) => {
-    const alertCountText = sub.text();
-    const alertCount = alertCountText.split(' ')[1];
-    sub.trigger('click');
-    cy.get(SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE).click();
-    cy.get('body').should('contain.text', `${alertCount} event IDs`);
-    cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
-  });
-};
-
-export const investigateAllEventsInTimeline = () => {
-  selectAllEvents();
-  cy.get(SELECTED_ALERTS).then((sub) => {
-    const alertCountText = sub.text(); // Selected 3,654 alerts
-    const alertCount = alertCountText.split(' ')[1];
-    sub.trigger('click');
-    cy.get(SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE).click();
-    cy.get('body').should('contain.text', `${alertCount} event IDs`);
-    cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
-  });
+export const bulkInvestigateSelectedEventsInTimeline = () => {
+  cy.get(SELECTED_ALERTS).trigger('click');
+  cy.get(SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE).click();
 };

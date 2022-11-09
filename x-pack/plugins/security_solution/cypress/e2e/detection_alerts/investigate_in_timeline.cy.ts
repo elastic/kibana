@@ -12,7 +12,6 @@ import {
   ALERT_TABLE_SEVERITY_VALUES,
   PROVIDER_BADGE,
 } from '../../screens/timeline';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 import {
   addAlertPropertyToTimeline,
@@ -26,10 +25,6 @@ import { login, visit } from '../../tasks/login';
 import { openActiveTimeline } from '../../tasks/timeline';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import {
-  investigateAllEventsInTimeline,
-  investigateFirstPageEventsInTimeline,
-} from '../../tasks/common/event_table';
 import { fillAddFilterForm, openAddFilterPopover } from '../../tasks/search_bar';
 
 describe('Alerts timeline', () => {
@@ -75,32 +70,5 @@ describe('Alerts timeline', () => {
     addAlertPropertyToTimeline(ALERT_TABLE_FILE_NAME_VALUES, 0);
     openActiveTimeline();
     cy.get(PROVIDER_BADGE).first().should('have.text', 'NOT file.name exists');
-  });
-});
-
-describe('Bulk Investigate in Timeline', () => {
-  before(() => {
-    cleanKibana();
-    login();
-    createCustomRuleEnabled(getNewRule());
-    esArchiverLoad('bulk_process');
-  });
-
-  after(() => {
-    esArchiverUnload('bulk_process');
-  });
-
-  beforeEach(() => {
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
-  });
-
-  it('Adding multiple alerts to the timeline should be successful', () => {
-    // select all visible events
-    investigateFirstPageEventsInTimeline();
-  });
-
-  it('When selected all alerts are selected should be successfull', () => {
-    investigateAllEventsInTimeline();
   });
 });
