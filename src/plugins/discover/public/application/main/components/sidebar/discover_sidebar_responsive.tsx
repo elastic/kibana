@@ -123,6 +123,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [allFields, setAllFields] = useState<DataViewField[] | null>(null);
   const [fieldCounts, setFieldCounts] = useState<Record<string, number> | null>(null);
+  const dataViewFields = selectedDataView?.fields;
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
@@ -137,7 +138,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   useEffect(() => {
     setAllFields(getDataViewFieldList(selectedDataView, fieldCounts, isPlainRecord));
-  }, [selectedDataView, fieldCounts, setAllFields, isPlainRecord]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewFields, fieldCounts, setAllFields, isPlainRecord]);
 
   const query = useAppStateSelector((state) => state.query);
   const filters = useAppStateSelector((state) => state.filters);
