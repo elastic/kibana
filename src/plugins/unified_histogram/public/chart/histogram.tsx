@@ -70,13 +70,21 @@ export function Histogram({
     timeInterval,
   });
 
+  // Keep track of previous hits in a ref to avoid recreating the
+  // onLoad callback when the hits change, which triggers a Lens reload
+  const previousHits = useRef(hits?.total);
+
+  useEffect(() => {
+    previousHits.current = hits?.total;
+  }, [hits?.total]);
+
   const onLoad = useCallback(
     (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
       const totalHits = adapters?.tables?.tables?.unifiedHistogram?.meta?.statistics?.totalCount;
 
       onTotalHitsChange?.(
         isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
-        totalHits ?? hits?.total
+        totalHits ?? previousHits.current
       );
 
       const lensRequest = adapters?.requests?.getRequests()[0];
@@ -96,7 +104,7 @@ export function Histogram({
 
       onChartLoad?.({ complete: !isLoading, adapters: adapters ?? {} });
     },
-    [data, dataView, hits?.total, onChartLoad, onTotalHitsChange, timeInterval]
+    [data, dataView, onChartLoad, onTotalHitsChange, timeInterval]
   );
 
   const { euiTheme } = useEuiTheme();
