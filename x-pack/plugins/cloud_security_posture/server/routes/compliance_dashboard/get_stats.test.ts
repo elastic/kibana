@@ -13,6 +13,9 @@ import {
 } from './get_stats';
 
 const standardQueryResult: FindingsEvaluationsQueryResult = {
+  resources_evaluated: {
+    value: 30,
+  },
   failed_findings: {
     doc_count: 30,
   },
@@ -22,6 +25,9 @@ const standardQueryResult: FindingsEvaluationsQueryResult = {
 };
 
 const oneIsZeroQueryResult: FindingsEvaluationsQueryResult = {
+  resources_evaluated: {
+    value: 30,
+  },
   failed_findings: {
     doc_count: 0,
   },
@@ -31,6 +37,9 @@ const oneIsZeroQueryResult: FindingsEvaluationsQueryResult = {
 };
 
 const bothAreZeroQueryResult: FindingsEvaluationsQueryResult = {
+  resources_evaluated: {
+    value: 30,
+  },
   failed_findings: {
     doc_count: 0,
   },
@@ -66,6 +75,7 @@ describe('getStatsFromFindingsEvaluationsAggs', () => {
       totalPassed: 11,
       totalFindings: 41,
       postureScore: 26.8,
+      resourcesEvaluated: 30,
     });
   });
 
@@ -76,6 +86,7 @@ describe('getStatsFromFindingsEvaluationsAggs', () => {
       totalPassed: 11,
       totalFindings: 11,
       postureScore: 100.0,
+      resourcesEvaluated: 30,
     });
   });
 

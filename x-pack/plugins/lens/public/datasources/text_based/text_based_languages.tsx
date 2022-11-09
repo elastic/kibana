@@ -18,6 +18,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -385,7 +386,7 @@ export function getTextBasedDatasource({
 
       render(
         <EuiButtonEmpty
-          color={customLabel ? 'primary' : 'danger'}
+          color={customLabel && selectedField ? 'primary' : 'danger'}
           onClick={() => {}}
           data-test-subj="lns-dimensionTrigger-textBased"
         >
@@ -482,6 +483,16 @@ export function getTextBasedDatasource({
               }}
             />
           </EuiFormRow>
+          {props.dataSectionExtra && (
+            <div
+              style={{
+                paddingLeft: euiThemeVars.euiSize,
+                paddingRight: euiThemeVars.euiSize,
+              }}
+            >
+              {props.dataSectionExtra}
+            </div>
+          )}
         </KibanaThemeProvider>,
         domElement
       );
