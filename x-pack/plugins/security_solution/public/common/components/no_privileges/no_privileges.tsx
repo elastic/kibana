@@ -28,7 +28,7 @@ export const NoPrivilegesPage = React.memo<NoPrivilegesPageProps>(({ pageName })
 });
 NoPrivilegesPage.displayName = 'NoPrivilegePage';
 
-export const NoPrivileges = React.memo<NoPrivilegesPageProps>(({ pageName = 'this page' }) => {
+export const NoPrivileges = React.memo<NoPrivilegesPageProps>(({ pageName }) => {
   const { docLinks } = useKibana().services;
 
   const emptyPageActions = useMemo(
@@ -43,10 +43,14 @@ export const NoPrivileges = React.memo<NoPrivilegesPageProps>(({ pageName = 'thi
     [docLinks]
   );
 
+  const message = pageName
+    ? i18n.NO_PRIVILEGES_PER_PAGE_MESSAGE(pageName)
+    : i18n.NO_PRIVILEGES_DEFAULT_MESSAGE;
+
   return (
     <EmptyPage
       actions={emptyPageActions}
-      message={i18n.NO_PERMISSIONS_MSG(pageName)}
+      message={message}
       data-test-subj="noPrivilegesPage"
       title={i18n.NO_PERMISSIONS_TITLE}
     />
