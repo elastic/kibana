@@ -101,6 +101,7 @@ tsconfig.type_check.json
 .yarn-local-mirror
 
 # Bazel
+.ijwb
 /bazel
 /bazel-*
 .bazelrc.user

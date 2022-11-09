@@ -139,7 +139,8 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
     },
   ];
 
-  const historyIdParam = monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID] ?? monitor?.[ConfigKey.ID];
+  const historyIdParam =
+    monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID] ?? monitor?.[ConfigKey.MONITOR_QUERY_ID];
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 200 }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -229,7 +230,7 @@ const TEST_RUNS = i18n.translate('xpack.synthetics.monitorDetails.summary.testRu
   defaultMessage: 'Test Runs',
 });
 
-const LAST_10_TEST_RUNS = i18n.translate(
+export const LAST_10_TEST_RUNS = i18n.translate(
   'xpack.synthetics.monitorDetails.summary.lastTenTestRuns',
   {
     defaultMessage: 'Last 10 Test Runs',
