@@ -70,7 +70,7 @@ export const TestTrainedModelFlyout: FC<Props> = ({ modelId, onClose }) => {
               onClick={() => setInputType(INPUT_TYPE.TEXT)}
             >
               <FormattedMessage
-                id="xpack.ml.importExport.exportFlyout.adTab"
+                id="xpack.ml.trainedModels.testModelsFlyout.textTab"
                 defaultMessage="Text"
               />
             </EuiTab>
@@ -79,7 +79,7 @@ export const TestTrainedModelFlyout: FC<Props> = ({ modelId, onClose }) => {
               onClick={() => setInputType(INPUT_TYPE.INDEX)}
             >
               <FormattedMessage
-                id="xpack.ml.importExport.exportFlyout.dfaTab"
+                id="xpack.ml.trainedModels.testModelsFlyout.indexTab"
                 defaultMessage="Index"
               />
             </EuiTab>

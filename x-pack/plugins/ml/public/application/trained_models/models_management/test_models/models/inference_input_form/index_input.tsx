@@ -79,8 +79,8 @@ export const IndexInput: FC<Props> = ({ inferrer }) => {
             disabled={runningState === RUNNING_STATE.RUNNING || selectedField === undefined}
           >
             <FormattedMessage
-              id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.runButton"
-              defaultMessage="Refresh"
+              id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.reloadButton"
+              defaultMessage="Reload examples"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
