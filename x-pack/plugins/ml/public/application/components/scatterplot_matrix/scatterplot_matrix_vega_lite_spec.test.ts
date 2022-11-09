@@ -102,7 +102,13 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
   it('should return the spec for outliers', () => {
     const data = [{ x: 1, y: 1 }];
 
-    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, [], ['x', 'y'], euiThemeLight, 'ml');
+    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
+      data,
+      [],
+      ['x', 'y'],
+      euiThemeLight,
+      'ml'
+    );
     const specForegroundLayer = vegaLiteSpec.spec.layer[0];
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
