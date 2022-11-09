@@ -965,7 +965,7 @@
     "apidoc-markdown": "^6.0.0",
     "argsplit": "^1.0.5",
     "autoprefixer": "^10.4.7",
-    "axe-core": "^4.0.2",
+    "axe-core": "^4.5.1",
     "babel-jest": "^27.5.1",
     "babel-loader": "^8.2.5",
     "babel-plugin-add-module-exports": "^1.0.4",
