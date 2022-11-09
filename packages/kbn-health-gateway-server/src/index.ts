@@ -31,6 +31,10 @@ export async function bootstrap() {
   await loggingSystem.upgrade(configService.atPathSync<LoggingConfigType>('logging'));
   const log = logger.get('root');
 
+  configService.getConfig$().subscribe((config) => {
+    log.debug(`Health gateway config: ${JSON.stringify(config)}`);
+  });
+
   let server: Server;
   let serverStart: ServerStart;
   try {
