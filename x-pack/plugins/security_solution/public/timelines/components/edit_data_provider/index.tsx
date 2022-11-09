@@ -10,6 +10,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiComboBox,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -91,7 +92,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
       getInitialOperatorLabel(isExcluded, operator)
     );
 
-    const [disableButton, setDisableButton] = useState<boolean>(true);
+    const [disableButton, setDisableButton] = useState<boolean>(false);
     const [updatedValue, setUpdatedValue] = useState<string | number | Array<string | number>>(
       value
     );
@@ -169,6 +170,16 @@ export const StatefulEditDataProvider = React.memo<Props>(
       window.onscroll = () => noop;
     };
 
+    console.log({
+      test: selectionsAreValid({
+        type,
+        browserFields,
+        selectedField: updatedField,
+        selectedOperator: updatedOperator,
+      }),
+      disableButton,
+    });
+
     const handleSave = useCallback(() => {
       onDataProviderEdited({
         andProviderId,
@@ -229,7 +240,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
                     data-test-subj="operator"
                     isClearable={false}
                     onChange={onOperatorSelected}
-                    options={operatorLabels(type)}
+                    options={operatorLabels}
                     placeholder={i18n.SELECT_AN_OPERATOR}
                     selectedOptions={updatedOperator}
                     singleSelection={{ asPlainText: true }}
@@ -256,7 +267,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
               </EuiFormRow>
             )}
 
-            {showComboBoxInput && (
+            {showComboBoxInput && type !== DataProviderType.template && (
               <EuiFormRow label={i18n.VALUE_LABEL}>
                 <ControlledComboboxInput
                   disableButtonCallback={disableButtonCallback}
@@ -273,6 +284,17 @@ export const StatefulEditDataProvider = React.memo<Props>(
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
+            {type === DataProviderType.template && showComboBoxInput && (
+              <>
+                <EuiCallOut
+                  color="warning"
+                  iconType="alert"
+                  size="s"
+                  title={`'${updatedOperator[0].label}' operator is unavailable with templates`}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
               <EuiFlexItem grow={false}>
                 <EuiButton

@@ -297,7 +297,7 @@ describe('isStringOrNumberArray', () => {
     expect(isStringOrNumberArray([123, 456, 789])).toBe(true);
   });
 
-  describe.only('queryHandlerFunctions', () => {
+  describe('queryHandlerFunctions', () => {
     describe('handleISOperator', () => {
       it('returns the entire query unchanged, if value is an array', () => {
         expect(
