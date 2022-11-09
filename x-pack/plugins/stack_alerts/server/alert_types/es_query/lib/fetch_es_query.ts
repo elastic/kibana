@@ -19,6 +19,8 @@ export async function fetchEsQuery(
   name: string,
   params: OnlyEsQueryRuleParams,
   timestamp: string | undefined,
+  publicBaseUrl: string,
+  spacePrefix: string,
   services: {
     scopedClusterClient: IScopedClusterClient;
     logger: Logger;
@@ -88,7 +90,10 @@ export async function fetchEsQuery(
   logger.debug(
     ` es query rule ${ES_QUERY_ID}:${ruleId} "${name}" result - ${JSON.stringify(searchResult)}`
   );
+  const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
+
   return {
+    link,
     numMatches: (searchResult.hits.total as estypes.SearchTotalHits).value,
     searchResult,
     dateStart,

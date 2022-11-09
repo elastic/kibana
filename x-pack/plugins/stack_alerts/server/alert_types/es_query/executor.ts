@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { sha256 } from 'js-sha256';
+
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
@@ -23,7 +23,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   const { alertId: ruleId, name, services, params, state, spaceId, logger } = options;
   const { alertFactory, scopedClusterClient, searchSourceClient } = services;
   const currentTimestamp = new Date().toISOString();
-  const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
+  const base = core.http.basePath.publicBaseUrl ?? '';
+  const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
 
   const alertLimit = alertFactory.alertLimit.getValue();
 
@@ -41,26 +42,34 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   // of the rule, the latestTimestamp will be used to gate the query in order to
   // avoid counting a document multiple times.
 
-  const { numMatches, searchResult, dateStart, dateEnd } = esQueryRule
-    ? await fetchEsQuery(ruleId, name, params as OnlyEsQueryRuleParams, latestTimestamp, {
-        scopedClusterClient,
-        logger,
-      })
-    : await fetchSearchSourceQuery(ruleId, params as OnlySearchSourceRuleParams, latestTimestamp, {
-        searchSourceClient,
-        logger,
-      });
+  const { numMatches, searchResult, dateStart, dateEnd, link } = esQueryRule
+    ? await fetchEsQuery(
+        ruleId,
+        name,
+        params as OnlyEsQueryRuleParams,
+        latestTimestamp,
+        base,
+        spacePrefix,
+        {
+          scopedClusterClient,
+          logger,
+        }
+      )
+    : await fetchSearchSourceQuery(
+        ruleId,
+        params as OnlySearchSourceRuleParams,
+        latestTimestamp,
+        base,
+        spacePrefix,
+        {
+          searchSourceClient,
+          logger,
+        }
+      );
 
   // apply the rule condition
   const conditionMet = compareFn(numMatches, params.threshold);
 
-  const base = publicBaseUrl;
-  const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const link = esQueryRule
-    ? `${base}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`
-    : `${base}${spacePrefix}/app/discover#/viewAlert/${ruleId}?from=${dateStart}&to=${dateEnd}&checksum=${getChecksum(
-        params as OnlyEsQueryRuleParams
-      )}`;
   const baseContext: Omit<EsQueryRuleActionContext, 'conditions'> = {
     title: name,
     date: currentTimestamp,
@@ -177,10 +186,6 @@ export function tryToParseAsDate(sortValue?: string | number | null): undefined 
   if (sortDate && !isNaN(sortDate)) {
     return new Date(sortDate).toISOString();
   }
-}
-
-export function getChecksum(params: OnlyEsQueryRuleParams) {
-  return sha256.create().update(JSON.stringify(params));
 }
 
 export function getInvalidComparatorError(comparator: string) {

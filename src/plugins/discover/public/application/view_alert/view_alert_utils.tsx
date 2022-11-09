@@ -22,7 +22,8 @@ export interface SearchThresholdAlertParams extends RuleTypeParams {
 export interface QueryParams {
   from: string | null;
   to: string | null;
-  checksum: string | null;
+  ruleParamsChecksum: string | null;
+  dataViewChecksum: string | null;
 }
 
 const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
