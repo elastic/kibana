@@ -61,6 +61,9 @@ const filtersBuilderMaxHeight = css`
 
 const tempStyle = css`
   font-size: 12px;
+  .euiFormRow__fieldWrapper {
+    line-height: 1.2rem;
+  }
 `;
 
 export interface FilterEditorProps {
