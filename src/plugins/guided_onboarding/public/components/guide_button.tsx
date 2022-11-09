@@ -51,11 +51,13 @@ export const GuideButton = ({
 
   // if there is no active guide
   if (!pluginState || !pluginState.activeGuide || !pluginState.activeGuide.isActive) {
-    // if still active period and the user quit or skipped the guide,
+    // if still active period and the user has not started a guide, quit or skipped the guide,
     // display the button that redirects to the landing page
     if (
       pluginState?.isActivePeriod &&
-      (pluginState?.status === 'quit' || pluginState?.status === 'skipped')
+      (pluginState?.status === 'not_started' ||
+        pluginState?.status === 'quit' ||
+        pluginState?.status === 'skipped')
     ) {
       return (
         <EuiButton
@@ -63,7 +65,7 @@ export const GuideButton = ({
           color="success"
           fill
           size="s"
-          data-test-subj="guideButton"
+          data-test-subj="guideButtonRedirect"
         >
           {i18n.translate('guidedOnboarding.guidedSetupRedirectButtonLabel', {
             defaultMessage: 'Launch setup guide',

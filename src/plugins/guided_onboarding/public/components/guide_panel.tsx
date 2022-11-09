@@ -150,13 +150,6 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     return () => subscription.unsubscribe();
   }, [api]);
 
-  useEffect(() => {
-    const subscription = api.fetchPluginState$().subscribe((newPluginState) => {
-      setPluginState(newPluginState);
-    });
-    return () => subscription.unsubscribe();
-  }, [api]);
-
   const guideConfig = getGuideConfig(pluginState?.activeGuide?.guideId)!;
 
   const stepsCompleted = getProgress(pluginState?.activeGuide);

@@ -163,7 +163,7 @@ describe('GuidedOnboarding ApiService', () => {
       await apiService.deactivateGuide(testGuideStep1ActiveState);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
-      expect(httpClient.put).toHaveBeenNthCalledWith(1, `${API_BASE_PATH}/state`, {
+      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
           status: 'quit',
           guide: {
