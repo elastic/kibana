@@ -31,6 +31,7 @@ import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_de
 import { MonitorDetailsPage } from './components/monitor_details/monitor_details_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import { MonitorsPageHeader } from './components/monitors_page/management/page_header/monitors_page_header';
+import { CreateMonitorButton } from './components/monitors_page/create_monitor_button';
 import { OverviewPage } from './components/monitors_page/overview/overview_page';
 import { SyntheticsPageTemplateComponent } from './components/common/pages/synthetics_page_template';
 import { NotFoundPage } from './components/common/pages/not_found';
@@ -151,18 +152,9 @@ const getRoutes = (
       component: OverviewPage,
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {
-        pageTitle: (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.synthetics.overview.pageHeader.title"
-                defaultMessage="Overview"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+        pageTitle: <MonitorsPageHeader />,
         rightSideItems: [
-          /* <AddMonitorBtn />*/
+          <CreateMonitorButton />
         ],
         tabs: [
           {
@@ -202,6 +194,9 @@ const getRoutes = (
       dataTestSubj: 'syntheticsMonitorManagementPage',
       pageHeader: {
         pageTitle: <MonitorsPageHeader />,
+        rightSideItems: [
+          <CreateMonitorButton />
+        ],
         tabs: [
           {
             label: (
@@ -236,6 +231,7 @@ const getRoutes = (
         </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'syntheticsMonitorAddPage',
+      restrictWidth: true,
       pageHeader: {
         pageTitle: (
           <FormattedMessage
@@ -273,6 +269,7 @@ const getRoutes = (
         </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'syntheticsMonitorEditPage',
+      restrictWidth: true,
       pageHeader: {
         pageTitle: (
           <FormattedMessage
@@ -356,7 +353,7 @@ const getMonitorSummaryHeader = (
         ),
         color: 'primary',
         'aria-current': false,
-        href: `${syntheticsPath}${MONITORS_ROUTE}`,
+        href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
       },
     ],
     rightSideItems: [
