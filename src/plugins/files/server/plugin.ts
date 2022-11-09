@@ -14,6 +14,7 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 
+import { AnalyticsServiceStart } from '@kbn/core/server';
 import { PLUGIN_ID } from '../common/constants';
 import {
   setFileKindsRegistry,
@@ -35,6 +36,7 @@ import { registerRoutes, registerFileKindRoutes } from './routes';
 import { Counters, registerUsageCollector } from './usage';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
+  private static analytics?: AnalyticsServiceStart;
   private readonly logger: Logger;
   private fileServiceFactory: undefined | FileServiceFactory;
   private securitySetup: FilesPluginSetupDependencies['security'];
@@ -42,6 +44,14 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+  }
+
+  public static getAnalytics() {
+    return this.analytics;
+  }
+
+  private static setAnalytics(analytics: AnalyticsServiceStart) {
+    this.analytics = analytics;
   }
 
   public setup(
@@ -89,8 +99,9 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
   }
 
   public start(coreStart: CoreStart, { security }: FilesPluginStartDependencies): FilesStart {
-    const { savedObjects } = coreStart;
+    const { savedObjects, analytics } = coreStart;
     this.securityStart = security;
+    FilesPlugin.setAnalytics(analytics);
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const blobStorageService = new BlobStorageService(
       esClient,

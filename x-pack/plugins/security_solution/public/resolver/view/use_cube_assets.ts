@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { ButtonColor } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import { useMemo } from 'react';
 import type { ResolverProcessType, NodeDataStatus } from '../types';
 import { useSymbolIDs } from './use_symbol_ids';
@@ -145,6 +145,6 @@ interface NodeStyleConfig {
   descriptionFill: string;
   descriptionText: string;
   isLabelFilled: boolean;
-  labelButtonFill: ButtonColor;
+  labelButtonFill: EuiButtonColor;
   strokeColor: string;
 }

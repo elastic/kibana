@@ -182,6 +182,10 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           .valueOf();
         const summary = getCertSummary(cert, absoluteExpirationThreshold, absoluteAgeThreshold);
 
+        if (!summary.summary || !summary.status) {
+          return;
+        }
+
         const id = `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`;
         const alertUuid = getAlertUuid(id);
 
