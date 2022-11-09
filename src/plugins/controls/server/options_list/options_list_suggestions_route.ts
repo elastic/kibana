@@ -85,8 +85,7 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, fieldName } = request;
-
+    const { runPastTimeout, filters, fieldName, fieldSpec } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
@@ -107,7 +106,9 @@ export const setupOptionsListSuggestionsRoute = (
           validation: builtValidationAggregation,
         }
       : {};
-    const body: SearchRequest['body'] = {
+    // console.log('builtSuggestionAggregation', builtSuggestionAggregation);
+    // console.log('fieldSpec', fieldSpec);
+    let body: SearchRequest['body'] = {
       size: 0,
       ...timeoutSettings,
       query: {
@@ -125,12 +126,27 @@ export const setupOptionsListSuggestionsRoute = (
         },
       },
     };
+    if (fieldSpec?.runtimeField) {
+      // console.log('runtime field');
+      body = {
+        ...body,
+        runtime_mappings: {
+          [fieldName]: {
+            type: fieldSpec.runtimeField.type,
+            script: {
+              ...fieldSpec.runtimeField.script,
+            },
+          },
+        },
+      };
+    }
+    // console.log('body', JSON.stringify(body));
 
     /**
      * Run ES query
      */
     const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
-
+    // console.log('rawEsResult', rawEsResult);
     /**
      * Parse ES response into Options List Response
      */
