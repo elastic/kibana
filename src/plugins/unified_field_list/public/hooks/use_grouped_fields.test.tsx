@@ -40,13 +40,13 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   it('should work correctly for no data', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useGroupedFields({
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
         dataViewId: dataView.id!,
         allFields: [],
         services: mockedServices,
-      })
-    );
+      },
+    });
 
     await waitForNextUpdate();
 
@@ -68,13 +68,13 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   it('should work correctly with fields', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useGroupedFields({
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
         dataViewId: dataView.id!,
         allFields,
         services: mockedServices,
-      })
-    );
+      },
+    });
 
     await waitForNextUpdate();
 
@@ -96,14 +96,14 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   it('should work correctly when filtered', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useGroupedFields({
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
         dataViewId: dataView.id!,
         allFields,
         services: mockedServices,
         onFilterField: (field: DataViewField) => field.name.startsWith('@'),
-      })
-    );
+      },
+    });
 
     await waitForNextUpdate();
 
@@ -125,14 +125,14 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   it('should work correctly when custom unsupported fields are skipped', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useGroupedFields({
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
         dataViewId: dataView.id!,
         allFields,
         services: mockedServices,
         onSupportedFieldFilter: (field: DataViewField) => field.aggregatable,
-      })
-    );
+      },
+    });
 
     await waitForNextUpdate();
 
@@ -154,15 +154,15 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   it('should work correctly when selected fields are present', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useGroupedFields({
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
         dataViewId: dataView.id!,
         allFields,
         services: mockedServices,
         onSelectedFieldFilter: (field: DataViewField) =>
           ['bytes', 'extension', '_id', '@timestamp'].includes(field.name),
-      })
-    );
+      },
+    });
 
     await waitForNextUpdate();
 
@@ -184,13 +184,13 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   it('should work correctly for text-based queries (no data view)', async () => {
-    const { result } = renderHook(() =>
-      useGroupedFields({
+    const { result } = renderHook(useGroupedFields, {
+      initialProps: {
         dataViewId: null,
         allFields,
         services: mockedServices,
-      })
-    );
+      },
+    });
 
     const fieldGroups = result.current.fieldGroups;
 
@@ -209,8 +209,8 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   it('should work correctly when details are overwritten', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useGroupedFields({
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
         dataViewId: dataView.id!,
         allFields,
         services: mockedServices,
@@ -221,8 +221,8 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             };
           }
         },
-      })
-    );
+      },
+    });
 
     await waitForNextUpdate();
 
