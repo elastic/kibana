@@ -222,7 +222,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                 style="padding: 16px;"
               >
                 <div
-                  class="euiSwitch"
+                  class="euiSwitch emotion-euiSwitch"
                 >
                   <button
                     aria-checked="false"
@@ -583,7 +583,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiSwitch"
+                      class="euiSwitch emotion-euiSwitch"
                     >
                       <button
                         aria-checked="false"
@@ -769,7 +769,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiSwitch"
+                      class="euiSwitch emotion-euiSwitch"
                     >
                       <button
                         aria-checked="true"
