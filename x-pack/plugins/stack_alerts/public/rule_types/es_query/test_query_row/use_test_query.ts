@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ParsedAggregationGroup } from '@kbn/triggers-actions-ui-plugin/common';
 
 interface TestQueryResponse {
   result: string | null;
@@ -25,7 +25,13 @@ const TEST_QUERY_INITIAL_RESPONSE: TestQueryResponse = {
  * Hook used to test the data fetching execution by returning a number of found documents
  * Or in error in case it's failing
  */
-export function useTestQuery(fetch: () => Promise<{ nrOfDocs: number; timeWindow: string }>) {
+export function useTestQuery(
+  fetch: () => Promise<{
+    testResults: ParsedAggregationGroup[];
+    isGrouped: boolean;
+    timeWindow: string;
+  }>
+) {
   const [testQueryResponse, setTestQueryResponse] = useState<TestQueryResponse>(
     TEST_QUERY_INITIAL_RESPONSE
   );
@@ -43,18 +49,32 @@ export function useTestQuery(fetch: () => Promise<{ nrOfDocs: number; timeWindow
     });
 
     try {
-      const { nrOfDocs, timeWindow } = await fetch();
+      const { testResults, isGrouped, timeWindow } = await fetch();
+      console.log(testResults);
 
-      setTestQueryResponse({
-        result: i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
-          defaultMessage: 'Query matched {count} documents in the last {window}.',
-          values: { count: nrOfDocs, window: timeWindow },
-        }),
-        error: null,
-        isLoading: false,
-      });
+      if (isGrouped) {
+        setTestQueryResponse({
+          result: i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryGroupedResponse', {
+            defaultMessage: 'Query ',
+            values: {},
+          }),
+          error: null,
+          isLoading: false,
+        });
+      } else {
+        const ungroupedQueryResponse = testResults.length > 0 ? testResults[0] : { value: 0 };
+        setTestQueryResponse({
+          result: i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
+            defaultMessage: 'Query matched {count} documents in the last {window}.',
+            values: { count: ungroupedQueryResponse?.value ?? 0, window: timeWindow },
+          }),
+          error: null,
+          isLoading: false,
+        });
+      }
     } catch (err) {
       const message = err?.body?.attributes?.error?.root_cause[0]?.reason || err?.body?.message;
+      console.log(message);
 
       setTestQueryResponse({
         result: null,
@@ -73,8 +93,4 @@ export function useTestQuery(fetch: () => Promise<{ nrOfDocs: number; timeWindow
     testQueryError: testQueryResponse.error,
     testQueryLoading: testQueryResponse.isLoading,
   };
-}
-
-export function totalHitsToNumber(total: estypes.SearchHitsMetadata['total']): number {
-  return typeof total === 'number' ? total : total?.value ?? 0;
 }

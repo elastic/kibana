@@ -10,7 +10,12 @@ import { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
-import { buildAggregation, getDateRangeInfo } from '../../../common';
+import {
+  buildAggregation,
+  getDateRangeInfo,
+  isCountAggregation,
+  isGroupAggregation,
+} from '../../../common';
 import { DEFAULT_GROUPS } from '..';
 
 import {
@@ -95,8 +100,8 @@ export async function timeSeriesQuery(
 
   // add the aggregations
 
-  const isCountAgg = aggType === 'count';
-  const isGroupAgg = !!termField;
+  const isCountAgg = isCountAggregation(aggType);
+  const isGroupAgg = isGroupAggregation(termField);
   const includeConditionInQuery = !!conditionParams;
 
   // Cap the maximum number of terms returned to the resultLimit if defined

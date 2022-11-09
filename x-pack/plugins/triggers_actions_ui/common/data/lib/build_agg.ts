@@ -20,6 +20,7 @@ export interface BuildAggregationOpts {
   aggField?: string;
   termSize?: number;
   termField?: string;
+  topHitsSize?: number;
   condition?: {
     resultLimit: number;
     conditionScript: string;
@@ -30,6 +31,9 @@ export const BUCKET_SELECTOR_PATH_NAME = 'compareValue';
 export const BUCKET_SELECTOR_FIELD = `params.${BUCKET_SELECTOR_PATH_NAME}`;
 export const DEFAULT_GROUPS = 100;
 
+export const isCountAggregation = (aggType: string) => aggType === 'count';
+export const isGroupAggregation = (termField?: string) => !!termField;
+
 export const buildAggregation = ({
   timeSeries,
   aggType,
@@ -37,16 +41,18 @@ export const buildAggregation = ({
   termField,
   termSize,
   condition,
+  topHitsSize,
 }: BuildAggregationOpts): Record<string, AggregationsAggregationContainer> => {
   const aggContainer = {
     aggs: {},
   };
-  const isCountAgg = aggType === 'count';
-  const isGroupAgg = !!termField;
+  const isCountAgg = isCountAggregation(aggType);
+  const isGroupAgg = isGroupAggregation(termField);
+  const isDateAgg = !!timeSeries;
   const includeConditionInQuery = !!condition;
 
   let dateRangeInfo: DateRangeInfo | null = null;
-  if (timeSeries) {
+  if (isDateAgg) {
     const { timeWindowSize, timeWindowUnit, dateStart, dateEnd, interval } = timeSeries;
     const window = `${timeWindowSize}${timeWindowUnit}`;
     dateRangeInfo = getDateRangeInfo({ dateStart, dateEnd, window, interval });
@@ -60,6 +66,8 @@ export const buildAggregation = ({
     : terms;
 
   let aggParent: any = aggContainer;
+
+  const getAggName = () => (isDateAgg ? 'sortValueAgg' : 'metricAgg');
 
   // first, add a group aggregation, if requested
   if (isGroupAgg) {
@@ -85,7 +93,7 @@ export const buildAggregation = ({
     if (!isCountAgg) {
       const sortOrder = aggType === 'min' ? 'asc' : 'desc';
       aggParent.aggs.groupAgg.terms!.order = {
-        sortValueAgg: sortOrder,
+        [getAggName()]: sortOrder,
       };
     } else if (includeConditionInQuery) {
       aggParent.aggs.groupAgg.aggs = {
@@ -104,14 +112,25 @@ export const buildAggregation = ({
   }
 
   // next, add the time window aggregation
-  if (timeSeries && dateRangeInfo) {
+  if (isDateAgg) {
     aggParent.aggs = {
       ...aggParent.aggs,
       dateAgg: {
         date_range: {
           field: timeSeries.timeField,
           format: 'strict_date_time',
-          ranges: dateRangeInfo.dateRanges,
+          ranges: dateRangeInfo!.dateRanges,
+        },
+      },
+    };
+  }
+
+  if (isGroupAgg && topHitsSize) {
+    aggParent.aggs = {
+      ...aggParent.aggs,
+      topHitsAgg: {
+        top_hits: {
+          size: topHitsSize,
         },
       },
     };
@@ -121,7 +140,7 @@ export const buildAggregation = ({
   if (!isCountAgg) {
     aggParent.aggs = {
       ...aggParent.aggs,
-      sortValueAgg: {
+      [getAggName()]: {
         [aggType]: {
           field: aggField,
         },
@@ -129,15 +148,12 @@ export const buildAggregation = ({
     };
 
     if (isGroupAgg && includeConditionInQuery) {
-      aggParent.aggs = {
-        ...aggParent.aggs,
-        conditionSelector: {
-          bucket_selector: {
-            buckets_path: {
-              [BUCKET_SELECTOR_PATH_NAME]: 'sortValueAgg',
-            },
-            script: condition.conditionScript,
+      aggParent.aggs.conditionSelector = {
+        bucket_selector: {
+          buckets_path: {
+            [BUCKET_SELECTOR_PATH_NAME]: getAggName(),
           },
+          script: condition.conditionScript,
         },
       };
     }
@@ -145,17 +161,17 @@ export const buildAggregation = ({
 
   if (timeSeries && dateRangeInfo) {
     aggParent = aggParent.aggs.dateAgg;
-  }
 
-  // finally, the metric aggregation, if requested
-  if (!isCountAgg) {
-    aggParent.aggs = {
-      metricAgg: {
-        [aggType]: {
-          field: aggField,
+    // finally, the metric aggregation, if requested
+    if (!isCountAgg) {
+      aggParent.aggs = {
+        metricAgg: {
+          [aggType]: {
+            field: aggField,
+          },
         },
-      },
-    };
+      };
+    }
   }
 
   return aggContainer.aggs;

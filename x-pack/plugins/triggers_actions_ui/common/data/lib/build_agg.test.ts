@@ -7,611 +7,794 @@
 import { buildAggregation } from './build_agg';
 
 describe('buildAgg', () => {
-  it('should create correct aggregation when aggType=count and termField is undefined (count over all), condition params are undefined and timeSeries is defined', async () => {
-    expect(
-      buildAggregation({
-        timeSeries: {
-          timeField: 'time-field',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          dateStart: '2021-04-22T15:19:31Z',
-          dateEnd: '2021-04-22T15:20:31Z',
-          interval: '1m',
-        },
-        aggType: 'count',
-        aggField: undefined,
-        termField: undefined,
-        termSize: undefined,
-      })
-    ).toEqual({
-      dateAgg: {
-        date_range: {
-          field: 'time-field',
-          format: 'strict_date_time',
-          ranges: [
-            {
-              from: '2021-04-22T15:14:31.000Z',
-              to: '2021-04-22T15:19:31.000Z',
-            },
-            {
-              from: '2021-04-22T15:15:31.000Z',
-              to: '2021-04-22T15:20:31.000Z',
-            },
-          ],
-        },
-      },
-    });
-  });
-
-  it('should create correct aggregation when aggType=count and termField is undefined (count over all), condition params are undefined and timeSeries is undefined', async () => {
-    expect(
-      buildAggregation({
-        aggType: 'count',
-        aggField: undefined,
-        termField: undefined,
-        termSize: undefined,
-      })
-    ).toEqual({});
-  });
-
-  it('should create correct aggregation when aggType=count and termField is undefined (count over all), condition params are defined and timeSeries is defined', async () => {
-    expect(
-      buildAggregation({
-        timeSeries: {
-          timeField: 'time-field',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          dateStart: '2021-04-22T15:19:31Z',
-          dateEnd: '2021-04-22T15:20:31Z',
-          interval: '1m',
-        },
-        aggType: 'count',
-        aggField: undefined,
-        termField: undefined,
-        termSize: undefined,
-        condition: {
-          resultLimit: 1000,
-          conditionScript: `params.compareValue > 1`,
-        },
-      })
-    ).toEqual({
-      dateAgg: {
-        date_range: {
-          field: 'time-field',
-          format: 'strict_date_time',
-          ranges: [
-            {
-              from: '2021-04-22T15:14:31.000Z',
-              to: '2021-04-22T15:19:31.000Z',
-            },
-            {
-              from: '2021-04-22T15:15:31.000Z',
-              to: '2021-04-22T15:20:31.000Z',
-            },
-          ],
-        },
-      },
-    });
-  });
-
-  it('should create correct aggregation when aggType=count and termField is undefined (count over all), condition params are defined and timeSeries is undefined', async () => {
-    expect(
-      buildAggregation({
-        aggType: 'count',
-        aggField: undefined,
-        termField: undefined,
-        termSize: undefined,
-        condition: {
-          resultLimit: 1000,
-          conditionScript: `params.compareValue > 1`,
-        },
-      })
-    ).toEqual({});
-  });
-
-  it('should create correct aggregation when aggType=count and termField is specified (count over top N termField), condition params are undefined and timeSeries is defined', async () => {
-    expect(
-      buildAggregation({
-        timeSeries: {
-          timeField: 'time-field',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          dateStart: '2021-04-22T15:19:31Z',
-          dateEnd: '2021-04-22T15:20:31Z',
-          interval: '1m',
-        },
-        aggType: 'count',
-        aggField: undefined,
-        termField: 'the-term',
-        termSize: 10,
-      })
-    ).toEqual({
-      groupAgg: {
-        terms: {
-          field: 'the-term',
-          size: 10,
-        },
-        aggs: {
-          dateAgg: {
-            date_range: {
-              field: 'time-field',
-              format: 'strict_date_time',
-              ranges: [
-                {
-                  from: '2021-04-22T15:14:31.000Z',
-                  to: '2021-04-22T15:19:31.000Z',
-                },
-                {
-                  from: '2021-04-22T15:15:31.000Z',
-                  to: '2021-04-22T15:20:31.000Z',
-                },
-              ],
-            },
+  describe('count over all (aggType = count and termField is undefined)', () => {
+    it('should create correct aggregation when condition params are undefined and timeSeries is defined', async () => {
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
           },
-        },
-      },
-    });
-  });
-
-  it('should create correct aggregation when aggType=count and termField is specified (count over top N termField), condition params are undefined and timeSeries is undefined', async () => {
-    expect(
-      buildAggregation({
-        aggType: 'count',
-        aggField: undefined,
-        termField: 'the-term',
-        termSize: 10,
-      })
-    ).toEqual({
-      groupAgg: {
-        terms: {
-          field: 'the-term',
-          size: 10,
-        },
-      },
-    });
-  });
-
-  it('should create correct aggregation when aggType=count and termField is specified (count over top N termField), condition params are defined and timeSeries is defined', async () => {
-    expect(
-      buildAggregation({
-        timeSeries: {
-          timeField: 'time-field',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          dateStart: '2021-04-22T15:19:31Z',
-          dateEnd: '2021-04-22T15:20:31Z',
-          interval: '1m',
-        },
-        aggType: 'count',
-        aggField: undefined,
-        termField: 'the-term',
-        termSize: 10,
-        condition: {
-          resultLimit: 1000,
-          conditionScript: `params.compareValue > 1`,
-        },
-      })
-    ).toEqual({
-      groupAgg: {
-        terms: {
-          field: 'the-term',
-          size: 10,
-        },
-        aggs: {
-          conditionSelector: {
-            bucket_selector: {
-              buckets_path: {
-                compareValue: '_count',
+          aggType: 'count',
+          aggField: undefined,
+          termField: undefined,
+          termSize: undefined,
+        })
+      ).toEqual({
+        dateAgg: {
+          date_range: {
+            field: 'time-field',
+            format: 'strict_date_time',
+            ranges: [
+              {
+                from: '2021-04-22T15:14:31.000Z',
+                to: '2021-04-22T15:19:31.000Z',
               },
-              script: `params.compareValue > 1`,
-            },
-          },
-          dateAgg: {
-            date_range: {
-              field: 'time-field',
-              format: 'strict_date_time',
-              ranges: [
-                {
-                  from: '2021-04-22T15:14:31.000Z',
-                  to: '2021-04-22T15:19:31.000Z',
-                },
-                {
-                  from: '2021-04-22T15:15:31.000Z',
-                  to: '2021-04-22T15:20:31.000Z',
-                },
-              ],
-            },
-          },
-        },
-      },
-      groupAggCount: {
-        stats_bucket: {
-          buckets_path: 'groupAgg._count',
-        },
-      },
-    });
-  });
-
-  it('should create correct aggregation when aggType=count and termField is specified (count over top N termField), condition params are defined and timeSeries is undefined', async () => {
-    expect(
-      buildAggregation({
-        aggType: 'count',
-        aggField: undefined,
-        termField: 'the-term',
-        termSize: 10,
-        condition: {
-          resultLimit: 1000,
-          conditionScript: `params.compareValue > 1`,
-        },
-      })
-    ).toEqual({
-      groupAgg: {
-        terms: {
-          field: 'the-term',
-          size: 10,
-        },
-        aggs: {
-          conditionSelector: {
-            bucket_selector: {
-              buckets_path: {
-                compareValue: '_count',
+              {
+                from: '2021-04-22T15:15:31.000Z',
+                to: '2021-04-22T15:20:31.000Z',
               },
-              script: `params.compareValue > 1`,
-            },
+            ],
           },
         },
-      },
-      groupAggCount: {
-        stats_bucket: {
-          buckets_path: 'groupAgg._count',
-        },
-      },
+      });
     });
-  });
 
-  it('should create correct aggregation when aggType!=count and termField is undefined (aggregate metric over all), condition params are undefined and timeSeries is defined', async () => {
-    expect(
-      buildAggregation({
-        timeSeries: {
-          timeField: 'time-field',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          dateStart: '2021-04-22T15:19:31Z',
-          dateEnd: '2021-04-22T15:20:31Z',
-          interval: '1m',
-        },
-        aggType: 'avg',
-        aggField: 'avg-field',
-        termField: undefined,
-        termSize: undefined,
-      })
-    ).toEqual({
-      dateAgg: {
-        date_range: {
-          field: 'time-field',
-          format: 'strict_date_time',
-          ranges: [
-            {
-              from: '2021-04-22T15:14:31.000Z',
-              to: '2021-04-22T15:19:31.000Z',
-            },
-            {
-              from: '2021-04-22T15:15:31.000Z',
-              to: '2021-04-22T15:20:31.000Z',
-            },
-          ],
-        },
-        aggs: {
-          metricAgg: {
-            avg: {
-              field: 'avg-field',
-            },
+    it('should create correct aggregation when condition params are undefined and timeSeries is undefined', async () => {
+      expect(
+        buildAggregation({
+          aggType: 'count',
+          aggField: undefined,
+          termField: undefined,
+          termSize: undefined,
+        })
+      ).toEqual({});
+    });
+
+    it('should create correct aggregation when condition params are defined and timeSeries is defined', async () => {
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
+          },
+          aggType: 'count',
+          aggField: undefined,
+          termField: undefined,
+          termSize: undefined,
+          condition: {
+            resultLimit: 1000,
+            conditionScript: `params.compareValue > 1`,
+          },
+        })
+      ).toEqual({
+        dateAgg: {
+          date_range: {
+            field: 'time-field',
+            format: 'strict_date_time',
+            ranges: [
+              {
+                from: '2021-04-22T15:14:31.000Z',
+                to: '2021-04-22T15:19:31.000Z',
+              },
+              {
+                from: '2021-04-22T15:15:31.000Z',
+                to: '2021-04-22T15:20:31.000Z',
+              },
+            ],
           },
         },
-      },
-      sortValueAgg: {
-        avg: {
-          field: 'avg-field',
-        },
-      },
+      });
     });
-  });
 
-  it('should create correct aggregation when aggType!=count and termField is undefined (aggregate metric over all), condition params are undefined and timeSeries is undefined', async () => {
-    expect(
-      buildAggregation({
-        aggType: 'avg',
-        aggField: 'avg-field',
-        termField: undefined,
-        termSize: undefined,
-      })
-    ).toEqual({
-      metricAgg: {
-        avg: {
-          field: 'avg-field',
-        },
-      },
-    });
-  });
-
-  it('should create correct aggregation when aggType!=count and termField is undefined (aggregate metric over all), condition params are defined and timeSeries is defined', async () => {
-    expect(
-      buildAggregation({
-        timeSeries: {
-          timeField: 'time-field',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          dateStart: '2021-04-22T15:19:31Z',
-          dateEnd: '2021-04-22T15:20:31Z',
-          interval: '1m',
-        },
-        aggType: 'avg',
-        aggField: 'avg-field',
-        termField: undefined,
-        termSize: undefined,
-        condition: {
-          resultLimit: 1000,
-          conditionScript: `params.compareValue > 1`,
-        },
-      })
-    ).toEqual({
-      dateAgg: {
-        date_range: {
-          field: 'time-field',
-          format: 'strict_date_time',
-          ranges: [
-            {
-              from: '2021-04-22T15:14:31.000Z',
-              to: '2021-04-22T15:19:31.000Z',
-            },
-            {
-              from: '2021-04-22T15:15:31.000Z',
-              to: '2021-04-22T15:20:31.000Z',
-            },
-          ],
-        },
-        aggs: {
-          metricAgg: {
-            avg: {
-              field: 'avg-field',
-            },
+    it('should create correct aggregation when condition params are defined and timeSeries is undefined', async () => {
+      expect(
+        buildAggregation({
+          aggType: 'count',
+          aggField: undefined,
+          termField: undefined,
+          termSize: undefined,
+          condition: {
+            resultLimit: 1000,
+            conditionScript: `params.compareValue > 1`,
           },
-        },
-      },
-      sortValueAgg: {
-        avg: {
-          field: 'avg-field',
-        },
-      },
+        })
+      ).toEqual({});
+    });
+
+    it('should not add top hits aggregation even if topHitsSize is specified', async () => {
+      expect(
+        buildAggregation({
+          aggType: 'count',
+          aggField: undefined,
+          termField: undefined,
+          termSize: undefined,
+          topHitsSize: 10,
+        })
+      ).toEqual({});
     });
   });
 
-  it('should create correct aggregation when aggType!=count and termField is undefined (aggregate metric over all), condition params are defined and timeSeries is undefined', async () => {
-    expect(
-      buildAggregation({
-        aggType: 'avg',
-        aggField: 'avg-field',
-        termField: undefined,
-        termSize: undefined,
-        condition: {
-          resultLimit: 1000,
-          conditionScript: `params.compareValue > 1`,
-        },
-      })
-    ).toEqual({
-      metricAgg: {
-        avg: {
-          field: 'avg-field',
-        },
-      },
-    });
-  });
-
-  it('should create correct aggregation when aggType!=count and termField is specified (aggregate metric over top N termField), condition params are undefined and timeSeries is defined', async () => {
-    expect(
-      buildAggregation({
-        timeSeries: {
-          timeField: 'time-field',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          dateStart: '2021-04-22T15:19:31Z',
-          dateEnd: '2021-04-22T15:20:31Z',
-          interval: '1m',
-        },
-        aggType: 'avg',
-        aggField: 'avg-field',
-        termField: 'the-field',
-        termSize: 20,
-      })
-    ).toEqual({
-      groupAgg: {
-        terms: {
-          field: 'the-field',
-          order: {
-            sortValueAgg: 'desc',
+  describe('count over top N termField (aggType = count and termField is specified)', () => {
+    it('should create correct aggregation when condition params are undefined and timeSeries is defined', async () => {
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
           },
-          size: 20,
-        },
-        aggs: {
-          dateAgg: {
-            date_range: {
-              field: 'time-field',
-              format: 'strict_date_time',
-              ranges: [
-                {
-                  from: '2021-04-22T15:14:31.000Z',
-                  to: '2021-04-22T15:19:31.000Z',
-                },
-                {
-                  from: '2021-04-22T15:15:31.000Z',
-                  to: '2021-04-22T15:20:31.000Z',
-                },
-              ],
-            },
-            aggs: {
-              metricAgg: {
-                avg: {
-                  field: 'avg-field',
-                },
+          aggType: 'count',
+          aggField: undefined,
+          termField: 'the-term',
+          termSize: 10,
+        })
+      ).toEqual({
+        groupAgg: {
+          terms: {
+            field: 'the-term',
+            size: 10,
+          },
+          aggs: {
+            dateAgg: {
+              date_range: {
+                field: 'time-field',
+                format: 'strict_date_time',
+                ranges: [
+                  {
+                    from: '2021-04-22T15:14:31.000Z',
+                    to: '2021-04-22T15:19:31.000Z',
+                  },
+                  {
+                    from: '2021-04-22T15:15:31.000Z',
+                    to: '2021-04-22T15:20:31.000Z',
+                  },
+                ],
               },
             },
           },
-          sortValueAgg: {
-            avg: {
-              field: 'avg-field',
-            },
-          },
         },
-      },
+      });
     });
-  });
 
-  it('needs fixed should create correct aggregation when aggType!=count and termField is specified (aggregate metric over top N termField), condition params are undefined and timeSeries is undefined', async () => {
-    expect(
-      buildAggregation({
-        aggType: 'avg',
-        aggField: 'avg-field',
-        termField: 'the-field',
-        termSize: 20,
-      })
-    ).toEqual({
-      groupAgg: {
-        terms: {
-          field: 'the-field',
-          order: {
-            sortValueAgg: 'desc',
-          },
-          size: 20,
-        },
-        aggs: {
-          metricAgg: {
-            avg: {
-              field: 'avg-field',
-            },
+    it('should create correct aggregation when condition params are undefined and timeSeries is undefined', async () => {
+      expect(
+        buildAggregation({
+          aggType: 'count',
+          aggField: undefined,
+          termField: 'the-term',
+          termSize: 10,
+        })
+      ).toEqual({
+        groupAgg: {
+          terms: {
+            field: 'the-term',
+            size: 10,
           },
         },
-      },
+      });
     });
-  });
 
-  it('should create correct aggregation when aggType!=count and termField is specified (aggregate metric over top N termField), condition params are defined and timeSeries is defined', async () => {
-    expect(
-      buildAggregation({
-        timeSeries: {
-          timeField: 'time-field',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          dateStart: '2021-04-22T15:19:31Z',
-          dateEnd: '2021-04-22T15:20:31Z',
-          interval: '1m',
-        },
-        aggType: 'avg',
-        aggField: 'avg-field',
-        termField: 'the-field',
-        termSize: 20,
-        condition: {
-          resultLimit: 1000,
-          conditionScript: `params.compareValue > 1`,
-        },
-      })
-    ).toEqual({
-      groupAgg: {
-        terms: {
-          field: 'the-field',
-          order: {
-            sortValueAgg: 'desc',
+    it('should create correct aggregation when condition params are defined and timeSeries is defined', async () => {
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
           },
-          size: 20,
-        },
-        aggs: {
-          dateAgg: {
-            date_range: {
-              field: 'time-field',
-              format: 'strict_date_time',
-              ranges: [
-                {
-                  from: '2021-04-22T15:14:31.000Z',
-                  to: '2021-04-22T15:19:31.000Z',
+          aggType: 'count',
+          aggField: undefined,
+          termField: 'the-term',
+          termSize: 10,
+          condition: {
+            resultLimit: 1000,
+            conditionScript: `params.compareValue > 1`,
+          },
+        })
+      ).toEqual({
+        groupAgg: {
+          terms: {
+            field: 'the-term',
+            size: 10,
+          },
+          aggs: {
+            conditionSelector: {
+              bucket_selector: {
+                buckets_path: {
+                  compareValue: '_count',
                 },
-                {
-                  from: '2021-04-22T15:15:31.000Z',
-                  to: '2021-04-22T15:20:31.000Z',
-                },
-              ],
+                script: `params.compareValue > 1`,
+              },
             },
-            aggs: {
-              metricAgg: {
-                avg: {
-                  field: 'avg-field',
-                },
+            dateAgg: {
+              date_range: {
+                field: 'time-field',
+                format: 'strict_date_time',
+                ranges: [
+                  {
+                    from: '2021-04-22T15:14:31.000Z',
+                    to: '2021-04-22T15:19:31.000Z',
+                  },
+                  {
+                    from: '2021-04-22T15:15:31.000Z',
+                    to: '2021-04-22T15:20:31.000Z',
+                  },
+                ],
               },
             },
           },
-          conditionSelector: {
-            bucket_selector: {
-              buckets_path: {
-                compareValue: 'sortValueAgg',
+        },
+        groupAggCount: {
+          stats_bucket: {
+            buckets_path: 'groupAgg._count',
+          },
+        },
+      });
+    });
+
+    it('should create correct aggregation when condition params are defined and timeSeries is undefined', async () => {
+      expect(
+        buildAggregation({
+          aggType: 'count',
+          aggField: undefined,
+          termField: 'the-term',
+          termSize: 10,
+          condition: {
+            resultLimit: 1000,
+            conditionScript: `params.compareValue > 1`,
+          },
+        })
+      ).toEqual({
+        groupAgg: {
+          terms: {
+            field: 'the-term',
+            size: 10,
+          },
+          aggs: {
+            conditionSelector: {
+              bucket_selector: {
+                buckets_path: {
+                  compareValue: '_count',
+                },
+                script: `params.compareValue > 1`,
               },
-              script: 'params.compareValue > 1',
-            },
-          },
-          sortValueAgg: {
-            avg: {
-              field: 'avg-field',
             },
           },
         },
-      },
-      groupAggCount: {
-        stats_bucket: {
-          buckets_path: 'groupAgg._count',
+        groupAggCount: {
+          stats_bucket: {
+            buckets_path: 'groupAgg._count',
+          },
         },
-      },
+      });
+    });
+
+    it('should add top hits aggregation if topHitsSize is defined', async () => {
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
+          },
+          aggType: 'count',
+          aggField: undefined,
+          termField: 'the-term',
+          termSize: 10,
+          topHitsSize: 15,
+        })
+      ).toEqual({
+        groupAgg: {
+          terms: {
+            field: 'the-term',
+            size: 10,
+          },
+          aggs: {
+            topHitsAgg: {
+              top_hits: {
+                size: 15,
+              },
+            },
+            dateAgg: {
+              date_range: {
+                field: 'time-field',
+                format: 'strict_date_time',
+                ranges: [
+                  {
+                    from: '2021-04-22T15:14:31.000Z',
+                    to: '2021-04-22T15:19:31.000Z',
+                  },
+                  {
+                    from: '2021-04-22T15:15:31.000Z',
+                    to: '2021-04-22T15:20:31.000Z',
+                  },
+                ],
+              },
+            },
+          },
+        },
+      });
     });
   });
 
-  it('needs fixed should create correct aggregation when aggType!=count and termField is specified (aggregate metric over top N termField), condition params are defined and timeSeries is undefined', async () => {
-    expect(
-      buildAggregation({
-        aggType: 'avg',
-        aggField: 'avg-field',
-        termField: 'the-field',
-        termSize: 20,
-        condition: {
-          resultLimit: 1000,
-          conditionScript: `params.compareValue > 1`,
-        },
-      })
-    ).toEqual({
-      groupAgg: {
-        terms: {
-          field: 'the-field',
-          order: {
-            sortValueAgg: 'desc',
+  describe('aggregate metric over all (aggType != count and termField is undefined)', () => {
+    it('should create correct aggregation when condition params are undefined and timeSeries is defined', async () => {
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
           },
-          size: 20,
-        },
-        aggs: {
-          conditionSelector: {
-            bucket_selector: {
-              buckets_path: {
-                compareValue: 'sortValueAgg',
+          aggType: 'avg',
+          aggField: 'avg-field',
+          termField: undefined,
+          termSize: undefined,
+        })
+      ).toEqual({
+        dateAgg: {
+          date_range: {
+            field: 'time-field',
+            format: 'strict_date_time',
+            ranges: [
+              {
+                from: '2021-04-22T15:14:31.000Z',
+                to: '2021-04-22T15:19:31.000Z',
               },
-              script: 'params.compareValue > 1',
-            },
+              {
+                from: '2021-04-22T15:15:31.000Z',
+                to: '2021-04-22T15:20:31.000Z',
+              },
+            ],
           },
-          metricAgg: {
-            avg: {
-              field: 'avg-field',
+          aggs: {
+            metricAgg: {
+              avg: {
+                field: 'avg-field',
+              },
             },
           },
         },
-      },
-      groupAggCount: {
-        stats_bucket: {
-          buckets_path: 'groupAgg._count',
+        sortValueAgg: {
+          avg: {
+            field: 'avg-field',
+          },
         },
-      },
+      });
+    });
+
+    it('should create correct aggregation when condition params are undefined and timeSeries is undefined', async () => {
+      expect(
+        buildAggregation({
+          aggType: 'avg',
+          aggField: 'avg-field',
+          termField: undefined,
+          termSize: undefined,
+        })
+      ).toEqual({
+        metricAgg: {
+          avg: {
+            field: 'avg-field',
+          },
+        },
+      });
+    });
+
+    it('should create correct aggregation when condition params are defined and timeSeries is defined', async () => {
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
+          },
+          aggType: 'avg',
+          aggField: 'avg-field',
+          termField: undefined,
+          termSize: undefined,
+          condition: {
+            resultLimit: 1000,
+            conditionScript: `params.compareValue > 1`,
+          },
+        })
+      ).toEqual({
+        dateAgg: {
+          date_range: {
+            field: 'time-field',
+            format: 'strict_date_time',
+            ranges: [
+              {
+                from: '2021-04-22T15:14:31.000Z',
+                to: '2021-04-22T15:19:31.000Z',
+              },
+              {
+                from: '2021-04-22T15:15:31.000Z',
+                to: '2021-04-22T15:20:31.000Z',
+              },
+            ],
+          },
+          aggs: {
+            metricAgg: {
+              avg: {
+                field: 'avg-field',
+              },
+            },
+          },
+        },
+        sortValueAgg: {
+          avg: {
+            field: 'avg-field',
+          },
+        },
+      });
+    });
+
+    it('should create correct aggregation when condition params are defined and timeSeries is undefined', async () => {
+      expect(
+        buildAggregation({
+          aggType: 'avg',
+          aggField: 'avg-field',
+          termField: undefined,
+          termSize: undefined,
+          condition: {
+            resultLimit: 1000,
+            conditionScript: `params.compareValue > 1`,
+          },
+        })
+      ).toEqual({
+        metricAgg: {
+          avg: {
+            field: 'avg-field',
+          },
+        },
+      });
+    });
+
+    it('should not add top hits aggregation even if topHitsSize is specified', async () => {
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
+          },
+          aggType: 'avg',
+          aggField: 'avg-field',
+          termField: undefined,
+          termSize: undefined,
+        })
+      ).toEqual({
+        dateAgg: {
+          date_range: {
+            field: 'time-field',
+            format: 'strict_date_time',
+            ranges: [
+              {
+                from: '2021-04-22T15:14:31.000Z',
+                to: '2021-04-22T15:19:31.000Z',
+              },
+              {
+                from: '2021-04-22T15:15:31.000Z',
+                to: '2021-04-22T15:20:31.000Z',
+              },
+            ],
+          },
+          aggs: {
+            metricAgg: {
+              avg: {
+                field: 'avg-field',
+              },
+            },
+          },
+        },
+        sortValueAgg: {
+          avg: {
+            field: 'avg-field',
+          },
+        },
+      });
+    });
+  });
+
+  describe('aggregate metric over top N termField (aggType != count and termField is specified)', () => {
+    it('should create correct aggregation when condition params are undefined and timeSeries is defined', async () => {
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
+          },
+          aggType: 'avg',
+          aggField: 'avg-field',
+          termField: 'the-field',
+          termSize: 20,
+        })
+      ).toEqual({
+        groupAgg: {
+          terms: {
+            field: 'the-field',
+            order: {
+              sortValueAgg: 'desc',
+            },
+            size: 20,
+          },
+          aggs: {
+            dateAgg: {
+              date_range: {
+                field: 'time-field',
+                format: 'strict_date_time',
+                ranges: [
+                  {
+                    from: '2021-04-22T15:14:31.000Z',
+                    to: '2021-04-22T15:19:31.000Z',
+                  },
+                  {
+                    from: '2021-04-22T15:15:31.000Z',
+                    to: '2021-04-22T15:20:31.000Z',
+                  },
+                ],
+              },
+              aggs: {
+                metricAgg: {
+                  avg: {
+                    field: 'avg-field',
+                  },
+                },
+              },
+            },
+            sortValueAgg: {
+              avg: {
+                field: 'avg-field',
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should create correct aggregation when condition params are undefined and timeSeries is undefined', async () => {
+      expect(
+        buildAggregation({
+          aggType: 'avg',
+          aggField: 'avg-field',
+          termField: 'the-field',
+          termSize: 20,
+        })
+      ).toEqual({
+        groupAgg: {
+          terms: {
+            field: 'the-field',
+            order: {
+              metricAgg: 'desc',
+            },
+            size: 20,
+          },
+          aggs: {
+            metricAgg: {
+              avg: {
+                field: 'avg-field',
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should create correct aggregation when condition params are defined and timeSeries is defined', async () => {
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
+          },
+          aggType: 'avg',
+          aggField: 'avg-field',
+          termField: 'the-field',
+          termSize: 20,
+          condition: {
+            resultLimit: 1000,
+            conditionScript: `params.compareValue > 1`,
+          },
+        })
+      ).toEqual({
+        groupAgg: {
+          terms: {
+            field: 'the-field',
+            order: {
+              sortValueAgg: 'desc',
+            },
+            size: 20,
+          },
+          aggs: {
+            dateAgg: {
+              date_range: {
+                field: 'time-field',
+                format: 'strict_date_time',
+                ranges: [
+                  {
+                    from: '2021-04-22T15:14:31.000Z',
+                    to: '2021-04-22T15:19:31.000Z',
+                  },
+                  {
+                    from: '2021-04-22T15:15:31.000Z',
+                    to: '2021-04-22T15:20:31.000Z',
+                  },
+                ],
+              },
+              aggs: {
+                metricAgg: {
+                  avg: {
+                    field: 'avg-field',
+                  },
+                },
+              },
+            },
+            conditionSelector: {
+              bucket_selector: {
+                buckets_path: {
+                  compareValue: 'sortValueAgg',
+                },
+                script: 'params.compareValue > 1',
+              },
+            },
+            sortValueAgg: {
+              avg: {
+                field: 'avg-field',
+              },
+            },
+          },
+        },
+        groupAggCount: {
+          stats_bucket: {
+            buckets_path: 'groupAgg._count',
+          },
+        },
+      });
+    });
+
+    it('should create correct aggregation when condition params are defined and timeSeries is undefined', async () => {
+      expect(
+        buildAggregation({
+          aggType: 'avg',
+          aggField: 'avg-field',
+          termField: 'the-field',
+          termSize: 20,
+          condition: {
+            resultLimit: 1000,
+            conditionScript: `params.compareValue > 1`,
+          },
+        })
+      ).toEqual({
+        groupAgg: {
+          terms: {
+            field: 'the-field',
+            order: {
+              metricAgg: 'desc',
+            },
+            size: 20,
+          },
+          aggs: {
+            conditionSelector: {
+              bucket_selector: {
+                buckets_path: {
+                  compareValue: 'metricAgg',
+                },
+                script: 'params.compareValue > 1',
+              },
+            },
+            metricAgg: {
+              avg: {
+                field: 'avg-field',
+              },
+            },
+          },
+        },
+        groupAggCount: {
+          stats_bucket: {
+            buckets_path: 'groupAgg._count',
+          },
+        },
+      });
+    });
+
+    it('should add topHitsAgg if topHitsSize is defined', () => {
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
+          },
+          aggType: 'avg',
+          aggField: 'avg-field',
+          termField: 'the-field',
+          termSize: 20,
+          topHitsSize: 15,
+        })
+      ).toEqual({
+        groupAgg: {
+          terms: {
+            field: 'the-field',
+            order: {
+              sortValueAgg: 'desc',
+            },
+            size: 20,
+          },
+          aggs: {
+            topHitsAgg: {
+              top_hits: {
+                size: 15,
+              },
+            },
+            dateAgg: {
+              date_range: {
+                field: 'time-field',
+                format: 'strict_date_time',
+                ranges: [
+                  {
+                    from: '2021-04-22T15:14:31.000Z',
+                    to: '2021-04-22T15:19:31.000Z',
+                  },
+                  {
+                    from: '2021-04-22T15:15:31.000Z',
+                    to: '2021-04-22T15:20:31.000Z',
+                  },
+                ],
+              },
+              aggs: {
+                metricAgg: {
+                  avg: {
+                    field: 'avg-field',
+                  },
+                },
+              },
+            },
+            sortValueAgg: {
+              avg: {
+                field: 'avg-field',
+              },
+            },
+          },
+        },
+      });
     });
   });
 

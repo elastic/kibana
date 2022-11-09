@@ -17,14 +17,20 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import {
+  FieldOption,
+  buildAggregation,
+  parseAggregationResults,
+  isGroupAggregation,
+  isCountAggregation,
+} from '@kbn/triggers-actions-ui-plugin/public/common';
+import { getComparatorScript } from '../../../../server/rule_types/lib/comparator';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { EsQueryRuleParams, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { totalHitsToNumber } from '../test_query_row';
 
 const { useXJsonMode } = XJson;
 
@@ -111,9 +117,11 @@ export const EsQueryExpression: React.FC<
   }, [currentRuleParams]);
 
   const onTestQuery = useCallback(async () => {
+    const isGroupAgg = isGroupAggregation(termField);
+    const isCountAgg = isCountAggregation(aggType);
     const window = `${timeWindowSize}${timeWindowUnit}`;
     if (hasValidationErrors()) {
-      return { nrOfDocs: 0, timeWindow: window };
+      return { testResults: [], isGrouped: isGroupAgg, timeWindow: window };
     }
     const timeWindow = parseDuration(window);
     const parsedQuery = JSON.parse(esQuery);
@@ -129,13 +137,44 @@ export const EsQueryExpression: React.FC<
           searchAfterSortId: undefined,
           timeField: timeField ? timeField : '',
           track_total_hits: true,
+          aggs: buildAggregation({
+            aggType,
+            aggField,
+            termField,
+            termSize,
+            condition: {
+              resultLimit: 100,
+              conditionScript: getComparatorScript(
+                thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                threshold,
+                BUCKET_SELECTOR_FIELD
+              ),
+            },
+          }),
         }),
       })
     );
 
-    const hits = rawResponse.hits;
-    return { nrOfDocs: totalHitsToNumber(hits.total), timeWindow: window };
-  }, [data.search, esQuery, index, timeField, timeWindowSize, timeWindowUnit, hasValidationErrors]);
+    console.log(JSON.stringify(rawResponse));
+
+    return {
+      testResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: rawResponse }),
+      isGrouped: isGroupAgg,
+      timeWindow: window,
+    };
+  }, [
+    data.search,
+    esQuery,
+    index,
+    timeField,
+    timeWindowSize,
+    timeWindowUnit,
+    hasValidationErrors,
+    aggType,
+    aggField,
+    termField,
+    termSize,
+  ]);
 
   return (
     <Fragment>

@@ -12,7 +12,12 @@ import { useTestQuery } from './use_test_query';
 describe('useTestQuery', () => {
   test('returning a valid result', async () => {
     const { result } = renderHook(useTestQuery, {
-      initialProps: () => Promise.resolve({ nrOfDocs: 1, timeWindow: '1s' }),
+      initialProps: () =>
+        Promise.resolve({
+          testResults: [{ group: 'all documents', value: 1 }],
+          isGrouped: false,
+          timeWindow: '1s',
+        }),
     });
     await act(async () => {
       await result.current.onTestQuery();

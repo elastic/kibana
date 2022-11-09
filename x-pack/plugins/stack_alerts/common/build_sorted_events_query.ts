@@ -72,12 +72,7 @@ export const buildSortedEventsQuery = ({
       docvalue_fields: docFields,
       query: {
         bool: {
-          filter: [
-            ...filterWithTime,
-            {
-              match_all: {},
-            },
-          ],
+          filter: [...filterWithTime],
         },
       },
       ...(aggs ? { aggs } : {}),
