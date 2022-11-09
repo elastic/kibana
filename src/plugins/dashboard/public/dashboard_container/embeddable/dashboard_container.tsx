@@ -428,7 +428,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
   private expectingIdChange = false;
   public expectIdChange() {
-    this.expectingIdChange = true;
+    // this.expectingIdChange = true; TODO - re-enable this for saving speed-ups. It causes some functional test failures because the _g param is not carried over.
     setTimeout(() => {
       this.expectingIdChange = false;
     }, 1); // turn this off after the next update.
