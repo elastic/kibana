@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SingleCaseMetricsResponse } from '../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../common/api';
 import { Operations } from '../../../authorization';
 import { createCaseError } from '../../../common/error';
 import { SingleCaseBaseHandler } from '../single_case_base_handler';
-import { SingleCaseBaseHandlerCommonOptions } from '../types';
+import type { SingleCaseBaseHandlerCommonOptions } from '../types';
 
 export class AlertsCount extends SingleCaseBaseHandler {
   constructor(options: SingleCaseBaseHandlerCommonOptions) {

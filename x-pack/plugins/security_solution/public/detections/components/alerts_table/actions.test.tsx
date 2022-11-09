@@ -391,12 +391,11 @@ describe('alert actions', () => {
             pinnedEventIds: {},
             pinnedEventsSaveObject: {},
             queryFields: [],
+            resolveTimelineConfig: undefined,
             savedObjectId: null,
-            selectAll: false,
             selectedEventIds: {},
             sessionViewConfig: null,
             show: true,
-            showCheckboxes: false,
             sort: [
               {
                 columnId: '@timestamp',

@@ -11,8 +11,6 @@ info:
 tags:
   - name: cases
     description: Case APIs enable you to open and track issues.
-  - name: kibana
-    description: Kibana APIs enable you to interact with Kibana features.
 servers:
   - url: 'http://localhost:5601'
     description: local

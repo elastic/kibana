@@ -6,34 +6,33 @@
  */
 
 import expect from '@kbn/expect';
-
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
-
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import {
-  BulkAction,
+  BulkActionType,
   BulkActionEditType,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/perform_bulk_action_schema';
-import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
+  createLegacyRuleAction,
   createRule,
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getLegacyActionSO,
+  getSimpleMlRule,
   getSimpleRule,
   getSimpleRuleOutput,
-  removeServerGeneratedProperties,
-  createLegacyRuleAction,
-  getLegacyActionSO,
-  installPrePackagedRules,
-  getSimpleMlRule,
+  getSlackAction,
   getWebHookAction,
+  installPrePackagedRules,
+  removeServerGeneratedProperties,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -63,14 +62,12 @@ export default ({ getService }: FtrProviderContext): void => {
   const fetchRuleByAlertApi = (ruleId: string) =>
     supertest.get(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
 
-  const createWebHookAction = async () =>
-    (
-      await supertest
-        .post('/api/actions/action')
-        .set('kbn-xsrf', 'true')
-        .send(getWebHookAction())
-        .expect(200)
-    ).body;
+  const createConnector = async (payload: Record<string, unknown>) =>
+    (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
+      .body;
+
+  const createWebHookConnector = () => createConnector(getWebHookAction());
+  const createSlackConnector = () => createConnector(getSlackAction());
 
   describe('perform_bulk_action', () => {
     beforeEach(async () => {
@@ -86,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule());
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.export })
+        .send({ query: '', action: BulkActionType.export })
         .expect(200)
         .expect('Content-Type', 'application/ndjson')
         .expect('Content-Disposition', 'attachment; filename="rules_export.ndjson"')
@@ -118,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, testRule);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.delete })
+        .send({ query: '', action: BulkActionType.delete })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -153,7 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.delete })
+        .send({ query: '', action: BulkActionType.delete })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -174,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId));
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.enable })
+        .send({ query: '', action: BulkActionType.enable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -210,7 +207,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.enable })
+        .send({ query: '', action: BulkActionType.enable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -243,7 +240,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId, true));
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.disable })
+        .send({ query: '', action: BulkActionType.disable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -279,7 +276,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.disable })
+        .send({ query: '', action: BulkActionType.disable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -313,7 +310,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, ruleToDuplicate);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.duplicate })
+        .send({ query: '', action: BulkActionType.duplicate })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -355,7 +352,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.duplicate })
+        .send({ query: '', action: BulkActionType.duplicate })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -375,7 +372,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(rulesResponse.total).to.eql(2);
 
-      rulesResponse.data.forEach((rule: FullResponseSchema) => {
+      rulesResponse.data.forEach((rule: RuleResponse) => {
         expect(rule.actions).to.eql([
           {
             action_type_id: '.slack',
@@ -435,8 +432,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.set_tags,
                     value: tagsToOverwrite,
@@ -509,8 +506,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.delete_tags,
                     value: tagsToDelete,
@@ -576,8 +573,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.add_tags,
                     value: addedTags,
@@ -611,8 +608,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: bulkEditResponse } = await postBulkAction()
             .send({
               query: '',
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.set_index_patterns,
                   value: ['initial-index-*'],
@@ -641,8 +638,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: bulkEditResponse } = await postBulkAction()
             .send({
               query: '',
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.add_index_patterns,
                   value: ['index3-*'],
@@ -673,8 +670,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: bulkEditResponse } = await postBulkAction()
             .send({
               query: '',
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.delete_index_patterns,
                   value: ['index2-*'],
@@ -702,8 +699,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               ids: [mlRule.id],
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.add_index_patterns,
                   value: ['index-*'],
@@ -735,8 +732,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               ids: [rule.id],
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.delete_index_patterns,
                   value: ['simple-index-*'],
@@ -768,8 +765,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               ids: [rule.id],
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.set_index_patterns,
                   value: [],
@@ -823,8 +820,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: setTagsBody } = await postBulkAction().send({
           query: '',
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
+          action: BulkActionType.edit,
+          [BulkActionType.edit]: [
             {
               type: BulkActionEditType.set_tags,
               value: ['reset-tag'],
@@ -865,8 +862,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_timeline,
                 value: {
@@ -908,8 +905,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_timeline,
                 value: {
@@ -940,8 +937,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [mlRule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.add_index_patterns,
                 value: ['index-*'],
@@ -973,8 +970,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.delete_index_patterns,
                 value: ['simple-index-*'],
@@ -1002,8 +999,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.add_tags,
                 value: ['test'],
@@ -1063,8 +1060,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [prebuiltRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type,
                     value,
@@ -1092,23 +1089,23 @@ export default ({ getService }: FtrProviderContext): void => {
         const webHookActionMock = {
           group: 'default',
           params: {
-            body: '{}',
+            body: '{"test":"action to be saved in a rule"}',
           },
         };
 
         describe('set_rule_actions', () => {
-          it('should set action correctly', async () => {
+          it('should set action correctly to existing empty actions list', async () => {
             const ruleId = 'ruleId';
             const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
 
-            // create a new action
-            const hookAction = await createWebHookAction();
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.set_rule_actions,
                     value: {
@@ -1116,7 +1113,7 @@ export default ({ getService }: FtrProviderContext): void => {
                       actions: [
                         {
                           ...webHookActionMock,
-                          id: hookAction.id,
+                          id: webHookConnector.id,
                         },
                       ],
                     },
@@ -1125,33 +1122,85 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].actions).to.eql([
+            const expectedRuleActions = [
               {
                 ...webHookActionMock,
-                id: hookAction.id,
+                id: webHookConnector.id,
                 action_type_id: '.webhook',
               },
-            ]);
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
-            expect(readRule.actions).to.eql([
+            expect(readRule.actions).to.eql(expectedRuleActions);
+          });
+
+          it('should set action correctly to existing non empty actions list', async () => {
+            const webHookConnector = await createWebHookConnector();
+
+            const existingRuleAction = {
+              id: webHookConnector.id,
+              action_type_id: '.webhook',
+              group: 'default',
+              params: {
+                body: '{"test":"an existing action"}',
+              },
+            };
+
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, {
+              ...getSimpleRule(ruleId),
+              actions: [existingRuleAction],
+            });
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
+                  {
+                    type: BulkActionEditType.set_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...webHookActionMock,
+                          id: webHookConnector.id,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            const expectedRuleActions = [
               {
                 ...webHookActionMock,
-                id: hookAction.id,
+                id: webHookConnector.id,
                 action_type_id: '.webhook',
               },
-            ]);
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql(expectedRuleActions);
           });
 
           it('should set actions to empty list, actions payload is empty list', async () => {
-            // create a new action
-            const hookAction = await createWebHookAction();
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const defaultRuleAction = {
-              id: hookAction.id,
+              id: webHookConnector.id,
               action_type_id: '.webhook',
               group: 'default',
               params: {
@@ -1169,8 +1218,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.set_rule_actions,
                     value: {
@@ -1197,14 +1246,14 @@ export default ({ getService }: FtrProviderContext): void => {
             const ruleId = 'ruleId';
             const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
 
-            // create a new action
-            const hookAction = await createWebHookAction();
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.add_rule_actions,
                     value: {
@@ -1212,7 +1261,7 @@ export default ({ getService }: FtrProviderContext): void => {
                       actions: [
                         {
                           ...webHookActionMock,
-                          id: hookAction.id,
+                          id: webHookConnector.id,
                         },
                       ],
                     },
@@ -1221,33 +1270,29 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].actions).to.eql([
+            const expectedRuleActions = [
               {
                 ...webHookActionMock,
-                id: hookAction.id,
+                id: webHookConnector.id,
                 action_type_id: '.webhook',
               },
-            ]);
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
-            expect(readRule.actions).to.eql([
-              {
-                ...webHookActionMock,
-                id: hookAction.id,
-                action_type_id: '.webhook',
-              },
-            ]);
+            expect(readRule.actions).to.eql(expectedRuleActions);
           });
 
-          it('should add action correctly to non empty actions list', async () => {
-            // create a new action
-            const hookAction = await createWebHookAction();
+          it('should add action correctly to non empty actions list of the same type', async () => {
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const defaultRuleAction = {
-              id: hookAction.id,
+              id: webHookConnector.id,
               action_type_id: '.webhook',
               group: 'default',
               params: {
@@ -1265,8 +1310,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.add_rule_actions,
                     value: {
@@ -1274,7 +1319,7 @@ export default ({ getService }: FtrProviderContext): void => {
                       actions: [
                         {
                           ...webHookActionMock,
-                          id: hookAction.id,
+                          id: webHookConnector.id,
                         },
                       ],
                     },
@@ -1283,35 +1328,97 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].actions).to.eql([
+            const expectedRuleActions = [
               defaultRuleAction,
               {
                 ...webHookActionMock,
-                id: hookAction.id,
+                id: webHookConnector.id,
                 action_type_id: '.webhook',
               },
-            ]);
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
-            expect(readRule.actions).to.eql([
+            expect(readRule.actions).to.eql(expectedRuleActions);
+          });
+
+          it('should add action correctly to non empty actions list of a different type', async () => {
+            // create new actions
+            const webHookAction = await createWebHookConnector();
+            const slackConnector = await createSlackConnector();
+
+            const defaultRuleAction = {
+              id: webHookAction.id,
+              action_type_id: '.webhook',
+              group: 'default',
+              params: {
+                body: '{"test":"a default action"}',
+              },
+            };
+
+            const slackConnectorMockProps = {
+              group: 'default',
+              params: {
+                message: 'test slack message',
+              },
+            };
+
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, {
+              ...getSimpleRule(ruleId),
+              actions: [defaultRuleAction],
+              throttle: '1d',
+            });
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
+                  {
+                    type: BulkActionEditType.add_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...slackConnectorMockProps,
+                          id: slackConnector.id,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            const expectedRuleActions = [
               defaultRuleAction,
               {
-                ...webHookActionMock,
-                id: hookAction.id,
-                action_type_id: '.webhook',
+                ...slackConnectorMockProps,
+                id: slackConnector.id,
+                action_type_id: '.slack',
               },
-            ]);
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql(expectedRuleActions);
           });
 
           it('should not change actions of rule if empty list of actions added', async () => {
-            // create a new action
-            const hookAction = await createWebHookAction();
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const defaultRuleAction = {
-              id: hookAction.id,
+              id: webHookConnector.id,
               action_type_id: '.webhook',
               group: 'default',
               params: {
@@ -1329,8 +1436,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.add_rule_actions,
                     value: {
@@ -1352,11 +1459,11 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it('should change throttle if actions list in payload is empty', async () => {
-            // create a new action
-            const hookAction = await createWebHookAction();
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
 
             const defaultRuleAction = {
-              id: hookAction.id,
+              id: webHookConnector.id,
               action_type_id: '.webhook',
               group: 'default',
               params: {
@@ -1374,8 +1481,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.add_rule_actions,
                     value: {
@@ -1410,13 +1517,13 @@ export default ({ getService }: FtrProviderContext): void => {
             it(`should apply "${type}" rule action to prebuilt rule`, async () => {
               await installPrePackagedRules(supertest, log);
               const prebuiltRule = await fetchPrebuiltRule();
-              const hookAction = await createWebHookAction();
+              const webHookConnector = await createWebHookConnector();
 
               const { body } = await postBulkAction()
                 .send({
                   ids: [prebuiltRule.id],
-                  action: BulkAction.edit,
-                  [BulkAction.edit]: [
+                  action: BulkActionType.edit,
+                  [BulkActionType.edit]: [
                     {
                       type,
                       value: {
@@ -1424,7 +1531,7 @@ export default ({ getService }: FtrProviderContext): void => {
                         actions: [
                           {
                             ...webHookActionMock,
-                            id: hookAction.id,
+                            id: webHookConnector.id,
                           },
                         ],
                       },
@@ -1438,7 +1545,7 @@ export default ({ getService }: FtrProviderContext): void => {
               expect(editedRule.actions).to.eql([
                 {
                   ...webHookActionMock,
-                  id: hookAction.id,
+                  id: webHookConnector.id,
                   action_type_id: '.webhook',
                 },
               ]);
@@ -1451,7 +1558,7 @@ export default ({ getService }: FtrProviderContext): void => {
               expect(readRule.actions).to.eql([
                 {
                   ...webHookActionMock,
-                  id: hookAction.id,
+                  id: webHookConnector.id,
                   action_type_id: '.webhook',
                 },
               ]);
@@ -1464,13 +1571,13 @@ export default ({ getService }: FtrProviderContext): void => {
           it(`should return error if one of edit action is not eligible for prebuilt rule`, async () => {
             await installPrePackagedRules(supertest, log);
             const prebuiltRule = await fetchPrebuiltRule();
-            const hookAction = await createWebHookAction();
+            const webHookConnector = await createWebHookConnector();
 
             const { body } = await postBulkAction()
               .send({
                 ids: [prebuiltRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.set_rule_actions,
                     value: {
@@ -1478,7 +1585,7 @@ export default ({ getService }: FtrProviderContext): void => {
                       actions: [
                         {
                           ...webHookActionMock,
-                          id: hookAction.id,
+                          id: webHookConnector.id,
                         },
                       ],
                     },
@@ -1534,8 +1641,8 @@ export default ({ getService }: FtrProviderContext): void => {
               const { body } = await postBulkAction()
                 .send({
                   ids: [createdRule.id],
-                  action: BulkAction.edit,
-                  [BulkAction.edit]: [
+                  action: BulkActionType.edit,
+                  [BulkActionType.edit]: [
                     {
                       type: BulkActionEditType.set_rule_actions,
                       value: {
@@ -1568,46 +1675,58 @@ export default ({ getService }: FtrProviderContext): void => {
               payloadThrottle: '1h',
               expectedThrottle: '1h',
             },
+            {
+              payloadThrottle: '1d',
+              expectedThrottle: '1d',
+            },
+            {
+              payloadThrottle: '7d',
+              expectedThrottle: '7d',
+            },
           ];
-          casesForNonEmptyActions.forEach(({ payloadThrottle, expectedThrottle }) => {
-            it(`throttle is set correctly, if payload throttle="${payloadThrottle}" and actions non empty`, async () => {
-              // create a new action
-              const hookAction = await createWebHookAction();
+          [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].forEach(
+            (ruleAction) => {
+              casesForNonEmptyActions.forEach(({ payloadThrottle, expectedThrottle }) => {
+                it(`throttle is updated correctly for rule action "${ruleAction}", if payload throttle="${payloadThrottle}" and actions non empty`, async () => {
+                  // create a new connector
+                  const webHookConnector = await createWebHookConnector();
 
-              const ruleId = 'ruleId';
-              const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+                  const ruleId = 'ruleId';
+                  const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
 
-              const { body } = await postBulkAction()
-                .send({
-                  ids: [createdRule.id],
-                  action: BulkAction.edit,
-                  [BulkAction.edit]: [
-                    {
-                      type: BulkActionEditType.set_rule_actions,
-                      value: {
-                        throttle: payloadThrottle,
-                        actions: [
-                          {
-                            id: hookAction.id,
-                            group: 'default',
-                            params: { body: '{}' },
+                  const { body } = await postBulkAction()
+                    .send({
+                      ids: [createdRule.id],
+                      action: BulkActionType.edit,
+                      [BulkActionType.edit]: [
+                        {
+                          type: BulkActionEditType.set_rule_actions,
+                          value: {
+                            throttle: payloadThrottle,
+                            actions: [
+                              {
+                                id: webHookConnector.id,
+                                group: 'default',
+                                params: { body: '{}' },
+                              },
+                            ],
                           },
-                        ],
-                      },
-                    },
-                  ],
-                })
-                .expect(200);
+                        },
+                      ],
+                    })
+                    .expect(200);
 
-              // Check that the updated rule is returned with the response
-              expect(body.attributes.results.updated[0].throttle).to.eql(expectedThrottle);
+                  // Check that the updated rule is returned with the response
+                  expect(body.attributes.results.updated[0].throttle).to.eql(expectedThrottle);
 
-              // Check that the updates have been persisted
-              const { body: rule } = await fetchRule(ruleId).expect(200);
+                  // Check that the updates have been persisted
+                  const { body: rule } = await fetchRule(ruleId).expect(200);
 
-              expect(rule.throttle).to.eql(expectedThrottle);
-            });
-          });
+                  expect(rule.throttle).to.eql(expectedThrottle);
+                });
+              });
+            }
+          );
         });
 
         describe('notifyWhen', () => {
@@ -1630,8 +1749,8 @@ export default ({ getService }: FtrProviderContext): void => {
               await postBulkAction()
                 .send({
                   ids: [createdRule.id],
-                  action: BulkAction.edit,
-                  [BulkAction.edit]: [
+                  action: BulkActionType.edit,
+                  [BulkActionType.edit]: [
                     {
                       type: BulkActionEditType.set_rule_actions,
                       value: {
@@ -1664,8 +1783,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               query: '',
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.set_schedule,
                   value: {
@@ -1694,8 +1813,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               query: '',
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.set_schedule,
                   value: {
@@ -1732,8 +1851,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.add_index_patterns,
                 value: ['initial-index-*'],
@@ -1768,8 +1887,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.add_index_patterns,
                 value: ['initial-index-*'],
@@ -1805,8 +1924,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_index_patterns,
                 value: ['initial-index-*'],
@@ -1841,8 +1960,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_index_patterns,
                 value: [],
@@ -1878,8 +1997,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_index_patterns,
                 value: ['initial-index-*'],
@@ -1916,8 +2035,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.delete_index_patterns,
                 value: ['simple-index-*'],
@@ -1952,8 +2071,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.delete_index_patterns,
                 value: ['simple-index-*'],
@@ -1988,8 +2107,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.delete_index_patterns,
                 value: ['simple-index-*'],
@@ -2023,8 +2142,8 @@ export default ({ getService }: FtrProviderContext): void => {
         Array.from({ length: 10 }).map(() =>
           postBulkAction().send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_timeline,
                 value: {
@@ -2052,8 +2171,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await postBulkAction()
         .send({
           ids: [id],
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
+          action: BulkActionType.edit,
+          [BulkActionType.edit]: [
             {
               type: BulkActionEditType.set_timeline,
               value: {

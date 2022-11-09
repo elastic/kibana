@@ -22,6 +22,7 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
+import { EntityFilter } from './entity_filter';
 import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
 import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
@@ -77,7 +78,7 @@ export const NotificationsList: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [queryError, setQueryError] = useState<string>('');
@@ -277,6 +278,10 @@ export const NotificationsList: FC = () => {
           },
         ],
       },
+      {
+        type: 'custom_component',
+        component: EntityFilter,
+      },
     ];
   }, []);
 
@@ -286,7 +291,7 @@ export const NotificationsList: FC = () => {
     <>
       <SavedObjectsWarning onCloseFlyout={fetchNotifications} forceRefresh={isLoading} />
 
-      {newNotificationsCount ? (
+      {newNotificationsCount && !isLoading ? (
         <>
           <EuiCallOut
             size="s"

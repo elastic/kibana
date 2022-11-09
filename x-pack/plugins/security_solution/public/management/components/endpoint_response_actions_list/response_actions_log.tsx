@@ -11,7 +11,7 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
-  ResponseActions,
+  ResponseActionsApiCommandNames,
   ResponseActionStatus,
 } from '../../../../common/endpoint/service/response_actions/constants';
 
@@ -142,7 +142,7 @@ export const ResponseActionsLog = memo<
     (selectedCommands: string[]) => {
       setQueryParams((prevState) => ({
         ...prevState,
-        commands: selectedCommands as ResponseActions[],
+        commands: selectedCommands as ResponseActionsApiCommandNames[],
       }));
     },
     [setQueryParams]

@@ -30,8 +30,9 @@ jest.mock('../../../lib/rule_api/load_global_execution_kpi_aggregations', () => 
 
 const mockKpiResponse = {
   success: 4,
-  unknown: 10,
+  unknown: 0,
   failure: 60,
+  warning: 10,
   activeAlerts: 100,
   newAlerts: 40,
   recoveredAlerts: 30,
@@ -62,15 +63,54 @@ describe('rule_event_log_list_kpi', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="centerJustifiedSpinner"]').exists()).toBeTruthy();
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-successOutcome"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-warningOutcome"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-failureOutcome"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
+    expect(
+      wrapper.find('[data-test-subj="ruleEventLogKpi-activeAlerts"] .euiStat__title').first().text()
+    ).toEqual('--');
+    expect(
+      wrapper.find('[data-test-subj="ruleEventLogKpi-newAlerts"] .euiStat__title').first().text()
+    ).toEqual('--');
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-recoveredAlerts"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-erroredActions"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
+    expect(
+      wrapper
+        .find('[data-test-subj="ruleEventLogKpi-triggeredActions"] .euiStat__title')
+        .first()
+        .text()
+    ).toEqual('--');
 
     // Let the load resolve
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
-
-    expect(wrapper.find('[data-test-subj="centerJustifiedSpinner"]').exists()).toBeFalsy();
 
     expect(loadExecutionKPIAggregationsMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -90,10 +130,10 @@ describe('rule_event_log_list_kpi', () => {
     ).toEqual(`${mockKpiResponse.success}`);
     expect(
       wrapper
-        .find('[data-test-subj="ruleEventLogKpi-unknownOutcome"] .euiStat__title')
+        .find('[data-test-subj="ruleEventLogKpi-warningOutcome"] .euiStat__title')
         .first()
         .text()
-    ).toEqual(`${mockKpiResponse.unknown}`);
+    ).toEqual(`${mockKpiResponse.warning}`);
     expect(
       wrapper
         .find('[data-test-subj="ruleEventLogKpi-failureOutcome"] .euiStat__title')

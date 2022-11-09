@@ -78,10 +78,17 @@ describe('current status route', () => {
                             '@timestamp': '2022-09-15T16:08:16.724Z',
                             monitor: {
                               status: 'up',
+                              id: 'id1',
                             },
                             summary: {
                               up: 1,
                               down: 0,
+                            },
+                            config_id: 'id1',
+                            observer: {
+                              geo: {
+                                name: 'test-location',
+                              },
                             },
                           },
                         },
@@ -106,10 +113,17 @@ describe('current status route', () => {
                             '@timestamp': '2022-09-15T16:09:16.724Z',
                             monitor: {
                               status: 'up',
+                              id: 'id2',
                             },
                             summary: {
                               up: 1,
                               down: 0,
+                            },
+                            config_id: 'id2',
+                            observer: {
+                              geo: {
+                                name: 'test-location',
+                              },
                             },
                           },
                         },
@@ -127,10 +141,17 @@ describe('current status route', () => {
                             '@timestamp': '2022-09-15T16:19:16.724Z',
                             monitor: {
                               status: 'down',
+                              id: 'id2',
                             },
                             summary: {
                               down: 1,
                               up: 0,
+                            },
+                            config_id: 'id2',
+                            observer: {
+                              geo: {
+                                name: 'test-location',
+                              },
                             },
                           },
                         },
@@ -146,6 +167,25 @@ describe('current status route', () => {
       expect(await queryMonitorStatus(uptimeEsClient, 3, 140000, ['id1', 'id2'])).toEqual({
         down: 1,
         up: 2,
+        upConfigs: [
+          {
+            configId: 'id1',
+            heartbeatId: 'id1',
+            location: 'test-location',
+          },
+          {
+            configId: 'id2',
+            heartbeatId: 'id2',
+            location: 'test-location',
+          },
+        ],
+        downConfigs: [
+          {
+            configId: 'id2',
+            heartbeatId: 'id2',
+            location: 'test-location',
+          },
+        ],
       });
     });
 
@@ -167,10 +207,17 @@ describe('current status route', () => {
                             '@timestamp': '2022-09-15T16:08:16.724Z',
                             monitor: {
                               status: 'up',
+                              id: 'id1',
                             },
                             summary: {
                               up: 1,
                               down: 0,
+                            },
+                            config_id: 'id1',
+                            observer: {
+                              geo: {
+                                name: 'test-location',
+                              },
                             },
                           },
                         },
@@ -195,10 +242,17 @@ describe('current status route', () => {
                             '@timestamp': '2022-09-15T16:09:16.724Z',
                             monitor: {
                               status: 'up',
+                              id: 'id2',
                             },
                             summary: {
                               up: 1,
                               down: 0,
+                            },
+                            config_id: 'id2',
+                            observer: {
+                              geo: {
+                                name: 'test-location',
+                              },
                             },
                           },
                         },
@@ -216,10 +270,17 @@ describe('current status route', () => {
                             '@timestamp': '2022-09-15T16:19:16.724Z',
                             monitor: {
                               status: 'down',
+                              id: 'id2',
                             },
                             summary: {
                               up: 0,
                               down: 1,
+                            },
+                            config_id: 'id2',
+                            observer: {
+                              geo: {
+                                name: 'test-location',
+                              },
                             },
                           },
                         },
@@ -242,6 +303,25 @@ describe('current status route', () => {
       expect(await queryMonitorStatus(uptimeEsClient, 10000, 2500, ['id1', 'id2'])).toEqual({
         down: 1,
         up: 2,
+        upConfigs: [
+          {
+            configId: 'id1',
+            heartbeatId: 'id1',
+            location: 'test-location',
+          },
+          {
+            configId: 'id2',
+            heartbeatId: 'id2',
+            location: 'test-location',
+          },
+        ],
+        downConfigs: [
+          {
+            configId: 'id2',
+            heartbeatId: 'id2',
+            location: 'test-location',
+          },
+        ],
       });
       expect(esClient.search).toHaveBeenCalledTimes(2);
       // These assertions are to ensure that we are paginating through the IDs we use for filtering

@@ -16,34 +16,6 @@ export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 export const ACTIONS_THROTTLE_INPUT =
   '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
 
-export const EMAIL_ACTION_BTN = '[data-test-subj=".email-siem-ActionTypeSelectOption"]';
-
-export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
-
-export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';
-
-export const EMAIL_ACTION_TO_INPUT = '[data-test-subj="toEmailAddressInput"]';
-
-export const EMAIL_ACTION_SUBJECT_INPUT = '[data-test-subj="subjectInput"]';
-
-export const FROM_VALIDATION_ERROR = '.euiFormErrorText';
-
-export const CONNECTOR_NAME_INPUT = '[data-test-subj="nameInput"]';
-
-export const EMAIL_CONNECTOR_FROM_INPUT = '[data-test-subj="emailFromInput"]';
-
-export const EMAIL_CONNECTOR_HOST_INPUT = '[data-test-subj="emailHostInput"]';
-
-export const EMAIL_CONNECTOR_PORT_INPUT = '[data-test-subj="emailPortInput"]';
-
-export const EMAIL_CONNECTOR_USER_INPUT = '[data-test-subj="emailUserInput"]';
-
-export const EMAIL_CONNECTOR_PASSWORD_INPUT = '[data-test-subj="emailPasswordInput"]';
-
-export const EMAIL_CONNECTOR_SERVICE_SELECTOR = '[data-test-subj="emailServiceSelectInput"]';
-
-export const JSON_EDITOR = "[data-test-subj='actionJsonEditor']";
-
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
@@ -57,10 +29,6 @@ export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAc
 export const BACK_TO_ALL_RULES_LINK = '[data-test-subj="ruleDetailsBackToAllRules"]';
 
 export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
-
-export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
-
-export const COMBO_BOX_SELECTION = '.euiMark';
 
 export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
 
@@ -156,10 +124,6 @@ export const MITRE_ATTACK_ADD_TACTIC_BUTTON = '[data-test-subj="addMitreAttackTa
 export const MITRE_ATTACK_ADD_TECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackTechnique"]';
 
 export const MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackSubtechnique"]';
-
-export const PREVIEW_HEADER_SUBTITLE = '[data-test-subj="header-panel-subtitle"]';
-
-export const QUERY_PREVIEW_BUTTON = '[data-test-subj="queryPreviewButton"]';
 
 export const REFERENCE_URLS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] input';
@@ -260,7 +224,3 @@ export const savedQueryByName = (savedQueryName: string) =>
 
 export const APPLY_SELECTED_SAVED_QUERY_BUTTON =
   '[data-test-subj="saved-query-management-apply-changes-button"]';
-
-export const INDEX_SELECTOR = "[data-test-subj='.index-siem-ActionTypeSelectOption']";
-
-export const CREATE_CONNECTOR_BTN = "[data-test-subj='createActionConnectorButton-0']";

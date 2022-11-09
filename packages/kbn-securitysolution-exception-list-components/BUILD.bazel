@@ -93,7 +93,8 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   additional_args = [
-    "--copy-files"
+    "--copy-files",
+    "--quiet"
   ],
 )
 
@@ -103,7 +104,8 @@ jsts_transpiler(
   build_pkg_name = package_name(),
   web = True,
   additional_args = [
-    "--copy-files"
+    "--copy-files",
+    "--quiet"
   ],
 )
 
@@ -122,7 +124,6 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   tsconfig = ":tsconfig",
@@ -132,6 +133,14 @@ js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":target_web"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+js_library(
+  name = "npm_module_types",
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -147,17 +156,8 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
+pkg_npm(
   name = "build_types",
-  srcs = [":npm_module_types"],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

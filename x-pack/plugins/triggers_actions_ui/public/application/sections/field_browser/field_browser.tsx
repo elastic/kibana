@@ -31,6 +31,11 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
   options,
   width,
 }) => {
+  const initialCategories = useMemo(
+    () => options?.preselectedCategoryIds ?? [],
+    [options?.preselectedCategoryIds]
+  );
+
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
   /** all field names shown in the field browser must contain this string (when specified) */
   const [filterInput, setFilterInput] = useState('');
@@ -43,7 +48,7 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
   /** when true, show a spinner in the input to indicate the field browser is searching for matching field names */
   const [isSearching, setIsSearching] = useState(false);
   /** this category will be displayed in the right-hand pane of the field browser */
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(initialCategories);
   /** show the field browser */
   const [show, setShow] = useState(false);
 
@@ -93,9 +98,9 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
     setFilteredBrowserFields(null);
     setFilterSelectedEnabled(false);
     setIsSearching(false);
-    setSelectedCategoryIds([]);
+    setSelectedCategoryIds(initialCategories);
     setShow(false);
-  }, []);
+  }, [initialCategories]);
 
   /** Invoked when the user types in the filter input */
   const updateFilter = useCallback(

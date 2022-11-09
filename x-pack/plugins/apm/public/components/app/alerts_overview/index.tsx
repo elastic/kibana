@@ -18,7 +18,7 @@ import {
   AlertsTableStatusFilter,
   ALL_ALERTS_FILTER,
   AlertStatusFilterButton,
-} from '../../alerting/service_overview_alerts/alerts_table_status_filter';
+} from './alerts_table_status_filter';
 
 export function AlertsOverview() {
   const {

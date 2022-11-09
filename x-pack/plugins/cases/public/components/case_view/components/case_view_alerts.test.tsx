@@ -8,8 +8,9 @@
 import React from 'react';
 import { waitFor } from '@testing-library/dom';
 import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
-import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
-import { Case } from '../../../../common';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
+import type { Case } from '../../../../common';
 import { CaseViewAlerts } from './case_view_alerts';
 import * as api from '../../../containers/api';
 

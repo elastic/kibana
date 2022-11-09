@@ -26,17 +26,6 @@ export interface ApmFtrConfig {
   kibanaConfig?: Record<string, string | string[]>;
 }
 
-function getLegacySupertestClient(kibanaServer: UrlObject, username: ApmUsername) {
-  return async (context: InheritedFtrProviderContext) => {
-    const url = format({
-      ...kibanaServer,
-      auth: `${username}:${APM_TEST_PASSWORD}`,
-    });
-
-    return supertest(url);
-  };
-}
-
 async function getApmApiClient({
   kibanaServer,
   username,
@@ -118,22 +107,13 @@ export function createTestConfig(config: ApmFtrConfig) {
               kibanaServer,
               username: ApmUsername.apmManageOwnAndCreateAgentKeys,
             }),
-            monitorIndicesUser: await getApmApiClient({
+            monitorClusterAndIndicesUser: await getApmApiClient({
               kibanaServer,
-              username: ApmUsername.apmMonitorIndices,
+              username: ApmUsername.apmMonitorClusterAndIndices,
             }),
           };
         },
         ml: MachineLearningAPIProvider,
-        // legacy clients
-        legacySupertestAsApmWriteUser: getLegacySupertestClient(
-          kibanaServer,
-          ApmUsername.editorUser
-        ),
-        legacySupertestAsApmReadUserWithoutMlAccess: getLegacySupertestClient(
-          kibanaServer,
-          ApmUsername.apmReadUserWithoutMlAccess
-        ),
       },
       junit: {
         reportName: `APM API Integration tests (${name})`,

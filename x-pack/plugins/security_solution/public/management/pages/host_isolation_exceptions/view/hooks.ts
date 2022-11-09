@@ -16,6 +16,7 @@ import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions_a
  */
 export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   const http = useHttp();
+  // TODO: why doesn't this use useUserPrivileges?
   const privileges = useEndpointPrivileges();
   const apiQuery = useSummaryArtifact(
     HostIsolationExceptionsApiClient.getInstance(http),

@@ -68,6 +68,7 @@ export interface InheritedChildInput extends IndexSignature {
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
+  syncCursor?: boolean;
   syncTooltips?: boolean;
   executionContext?: KibanaExecutionContext;
 }
@@ -153,13 +154,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       isProjectEnabledInLabs('labs:dashboard:dashboardControls')
     ) {
       this.controlGroup = controlGroup;
-      syncDashboardControlGroup({ dashboardContainer: this, controlGroup: this.controlGroup }).then(
-        (result) => {
-          if (!result) return;
-          const { onDestroyControlGroup } = result;
-          this.onDestroyControlGroup = onDestroyControlGroup;
-        }
-      );
+      syncDashboardControlGroup({
+        dashboardContainer: this,
+        controlGroup: this.controlGroup,
+      }).then((result) => {
+        if (!result) return;
+        const { onDestroyControlGroup } = result;
+        this.onDestroyControlGroup = onDestroyControlGroup;
+      });
     }
 
     this.subscriptions.add(
@@ -350,6 +352,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       filters,
       searchSessionId,
       syncColors,
+      syncCursor,
       syncTooltips,
       executionContext,
     } = this.input;
@@ -370,6 +373,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       searchSessionId,
       syncColors,
       syncTooltips,
+      syncCursor,
       executionContext,
     };
   }

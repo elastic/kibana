@@ -20,6 +20,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -30,23 +31,29 @@ import { InferencePipeline, TrainedModelState } from '../../../../../../common/t
 import { CANCEL_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { HttpLogic } from '../../../../shared/http';
 import { ML_MANAGE_TRAINED_MODELS_PATH } from '../../../routes';
+import { getMLType, getModelDisplayTitle } from '../../shared/ml_inference/utils';
 import { IndexNameLogic } from '../index_name_logic';
 
+import { IndexViewLogic } from '../index_view_logic';
+
+import { DeleteInferencePipelineButton } from './delete_inference_pipeline_button';
 import { TrainedModelHealth } from './ml_model_health';
 import { PipelinesLogic } from './pipelines_logic';
 
 export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => {
   const { http } = useValues(HttpLogic);
   const { indexName } = useValues(IndexNameLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const { deleteMlPipeline } = useActions(PipelinesLogic);
+  const { deleteMlPipeline, detachMlPipeline } = useActions(PipelinesLogic);
   const showConfirmDeleteModal = () => {
     setShowConfirmDelete(true);
     setIsPopOverOpen(false);
   };
-  const { pipelineName, types } = pipeline;
-
+  const { pipelineName, types: modelTypes } = pipeline;
+  const modelType = getMLType(modelTypes);
+  const modelTitle = getModelDisplayTitle(modelType);
   const actionButton = (
     <EuiButtonEmpty
       iconSide="right"
@@ -67,7 +74,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
               <EuiTitle size="xs">
-                <h4>{pipelineName}</h4>
+                <h4>{modelTitle ?? pipelineName}</h4>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -85,6 +92,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   <EuiFlexItem>
                     <div>
                       <EuiButtonEmpty
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-stackManagement`}
                         size="s"
                         flush="both"
                         iconType="eye"
@@ -103,17 +111,30 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   <EuiFlexItem>
                     <div>
                       <EuiButtonEmpty
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
                         size="s"
                         flush="both"
-                        iconType="trash"
+                        iconType="unlink"
                         color="text"
-                        onClick={showConfirmDeleteModal}
+                        onClick={() => {
+                          detachMlPipeline({ indexName, pipelineName });
+                          setIsPopOverOpen(false);
+                        }}
                       >
                         {i18n.translate(
-                          'xpack.enterpriseSearch.inferencePipelineCard.action.delete',
-                          { defaultMessage: 'Delete pipeline' }
+                          'xpack.enterpriseSearch.inferencePipelineCard.action.detach',
+                          { defaultMessage: 'Detach pipeline' }
                         )}
                       </EuiButtonEmpty>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div>
+                      <DeleteInferencePipelineButton
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-deletePipeline`}
+                        onClick={showConfirmDeleteModal}
+                        pipeline={pipeline}
+                      />
                     </div>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -125,6 +146,11 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+                {modelTitle && (
+                  <EuiFlexItem>
+                    <EuiTextColor color="subdued">{pipelineName}</EuiTextColor>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <TrainedModelHealth {...pipeline} />
                 </EuiFlexItem>
@@ -138,6 +164,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                       )}
                     >
                       <EuiButtonIcon
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
                         href={http.basePath.prepend(ML_MANAGE_TRAINED_MODELS_PATH)}
                         display="base"
                         size="xs"
@@ -146,15 +173,15 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                     </EuiToolTip>
                   </EuiFlexItem>
                 )}
-                {types.map((type) => (
-                  <EuiFlexItem grow={false} key={type}>
-                    <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem>
-                        <EuiBadge color="hollow">{type}</EuiBadge>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ))}
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem>
+                      <span>
+                        <EuiBadge color="hollow">{modelType}</EuiBadge>
+                      </span>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

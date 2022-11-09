@@ -9,29 +9,21 @@ import { omit, union } from 'lodash/fp';
 
 import { isEmpty } from 'lodash';
 import { EuiDataGridColumn } from '@elastic/eui';
-import type { ToggleDetailPanel } from './actions';
-import { TGridPersistInput, TimelineById, TimelineId } from './types';
-import type { TGridModel, TGridModelSettings } from './model';
+import type { TableToggleDetailPanel } from './actions';
+import { TGridPersistInput, TableById } from './types';
+import type { TGridModelSettings } from './model';
 
-import type {
+import {
   ColumnHeaderOptions,
-  DataProvider,
-  SortColumnTimeline,
-  TimelineExpandedDetail,
-  TimelineExpandedDetailType,
+  SortColumnTable,
+  DataExpandedDetail,
+  DataExpandedDetailType,
+  SessionViewConfig,
 } from '../../../common/types/timeline';
 import { getTGridManageDefaults, tGridDefaults } from './defaults';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 export type Maybe<T> = T | null;
-
-enum TimelineTabs {
-  query = 'query',
-  graph = 'graph',
-  notes = 'notes',
-  pinned = 'pinned',
-  eql = 'eql',
-}
 
 /** The default minimum width of a column (when a width for the column type is not specified) */
 export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
@@ -39,49 +31,32 @@ export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
 /** The minimum width of a resized column */
 export const RESIZED_COLUMN_MIN_WITH = 70; // px
 
-export const shouldResetActiveTimelineContext = (
-  id: string,
-  oldTimeline: TGridModel,
-  newTimeline: TGridModel
-) => {
-  if (id === TimelineId.active && oldTimeline.savedObjectId !== newTimeline.savedObjectId) {
-    return true;
-  }
-  return false;
-};
-
-interface AddTimelineColumnParams {
+interface AddTableColumnParams {
   column: ColumnHeaderOptions;
   id: string;
   index: number;
-  timelineById: TimelineById;
+  tableById: TableById;
 }
 
-interface TimelineNonEcsData {
+interface TableNonEcsData {
   field: string;
   value?: Maybe<string[]>;
 }
 
 interface CreateTGridParams extends TGridPersistInput {
-  timelineById: TimelineById;
+  tableById: TableById;
 }
 
-/** Adds a new `Timeline` to the provided collection of `TimelineById` */
-export const createInitTGrid = ({
-  id,
-  timelineById,
-  ...tGridProps
-}: CreateTGridParams): TimelineById => {
-  const timeline = timelineById[id];
+/** Adds a new `Table` to the provided collection of `TableById` */
+export const createInitTGrid = ({ id, tableById, ...tGridProps }: CreateTGridParams): TableById => {
+  const dataTable = tableById[id];
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       ...tGridDefaults,
       ...tGridProps,
       isLoading: false,
-      savedObjectId: null,
-      version: null,
     },
   };
 };
@@ -90,61 +65,61 @@ export const createInitTGrid = ({
  * Adds or updates a column. When updating a column, it will be moved to the
  * new index
  */
-export const upsertTimelineColumn = ({
+export const upsertTableColumn = ({
   column,
   id,
   index,
-  timelineById,
-}: AddTimelineColumnParams): TimelineById => {
-  const timeline = timelineById[id];
-  const alreadyExistsAtIndex = timeline.columns.findIndex((c) => c.id === column.id);
+  tableById,
+}: AddTableColumnParams): TableById => {
+  const dataTable = tableById[id];
+  const alreadyExistsAtIndex = dataTable.columns.findIndex((c) => c.id === column.id);
 
   if (alreadyExistsAtIndex !== -1) {
     // remove the existing entry and add the new one at the specified index
-    const reordered = timeline.columns.filter((c) => c.id !== column.id);
+    const reordered = dataTable.columns.filter((c) => c.id !== column.id);
     reordered.splice(index, 0, column); // ⚠️ mutation
 
     return {
-      ...timelineById,
+      ...tableById,
       [id]: {
-        ...timeline,
+        ...dataTable,
         columns: reordered,
       },
     };
   }
 
   // add the new entry at the specified index
-  const columns = [...timeline.columns];
+  const columns = [...dataTable.columns];
   columns.splice(index, 0, column); // ⚠️ mutation
 
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       columns,
     },
   };
 };
 
-interface RemoveTimelineColumnParams {
+interface RemoveTableColumnParams {
   id: string;
   columnId: string;
-  timelineById: TimelineById;
+  tableById: TableById;
 }
 
-export const removeTimelineColumn = ({
+export const removeTableColumn = ({
   id,
   columnId,
-  timelineById,
-}: RemoveTimelineColumnParams): TimelineById => {
-  const timeline = timelineById[id];
+  tableById,
+}: RemoveTableColumnParams): TableById => {
+  const dataTable = tableById[id];
 
-  const columns = timeline.columns.filter((c) => c.id !== columnId);
+  const columns = dataTable.columns.filter((c) => c.id !== columnId);
 
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       columns,
     },
   };
@@ -152,27 +127,27 @@ export const removeTimelineColumn = ({
 
 interface InitializeTgridParams {
   id: string;
-  timelineById: TimelineById;
+  tableById: TableById;
   tGridSettingsProps: Partial<TGridModelSettings>;
 }
 
 export const setInitializeTgridSettings = ({
   id,
-  timelineById,
+  tableById,
   tGridSettingsProps,
-}: InitializeTgridParams): TimelineById => {
-  const timeline = timelineById[id];
+}: InitializeTgridParams): TableById => {
+  const dataTable = tableById[id];
 
-  return !timeline?.initialized
+  return !dataTable?.initialized
     ? {
-        ...timelineById,
+        ...tableById,
         [id]: {
           ...tGridDefaults,
           ...getTGridManageDefaults(id),
-          ...timeline,
+          ...dataTable,
           ...tGridSettingsProps,
-          ...(!timeline ||
-          (isEmpty(timeline.columns) && !isEmpty(tGridSettingsProps.defaultColumns))
+          ...(!dataTable ||
+          (isEmpty(dataTable.columns) && !isEmpty(tGridSettingsProps.defaultColumns))
             ? { columns: tGridSettingsProps.defaultColumns }
             : {}),
           sort: tGridSettingsProps.sort ?? tGridDefaults.sort,
@@ -180,54 +155,54 @@ export const setInitializeTgridSettings = ({
           initialized: true,
         },
       }
-    : timelineById;
+    : tableById;
 };
 
-interface ApplyDeltaToTimelineColumnWidth {
+interface ApplyDeltaToTableColumnWidth {
   id: string;
   columnId: string;
   delta: number;
-  timelineById: TimelineById;
+  tableById: TableById;
 }
 
-export const applyDeltaToTimelineColumnWidth = ({
+export const applyDeltaToTableColumnWidth = ({
   id,
   columnId,
   delta,
-  timelineById,
-}: ApplyDeltaToTimelineColumnWidth): TimelineById => {
-  const timeline = timelineById[id];
+  tableById,
+}: ApplyDeltaToTableColumnWidth): TableById => {
+  const dataTable = tableById[id];
 
-  const columnIndex = timeline.columns.findIndex((c) => c.id === columnId);
+  const columnIndex = dataTable.columns.findIndex((c) => c.id === columnId);
   if (columnIndex === -1) {
     // the column was not found
     return {
-      ...timelineById,
+      ...tableById,
       [id]: {
-        ...timeline,
+        ...dataTable,
       },
     };
   }
 
   const requestedWidth =
-    (timeline.columns[columnIndex].initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH) + delta; // raw change in width
+    (dataTable.columns[columnIndex].initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH) + delta; // raw change in width
   const initialWidth = Math.max(RESIZED_COLUMN_MIN_WITH, requestedWidth); // if the requested width is smaller than the min, use the min
 
   const columnWithNewWidth = {
-    ...timeline.columns[columnIndex],
+    ...dataTable.columns[columnIndex],
     initialWidth,
   };
 
   const columns = [
-    ...timeline.columns.slice(0, columnIndex),
+    ...dataTable.columns.slice(0, columnIndex),
     columnWithNewWidth,
-    ...timeline.columns.slice(columnIndex + 1),
+    ...dataTable.columns.slice(columnIndex + 1),
   ];
 
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       columns,
     },
   };
@@ -240,24 +215,24 @@ type Columns = Array<
 export const updateTGridColumnOrder = ({
   columnIds,
   id,
-  timelineById,
+  tableById,
 }: {
   columnIds: string[];
   id: string;
-  timelineById: TimelineById;
-}): TimelineById => {
-  const timeline = timelineById[id];
+  tableById: TableById;
+}): TableById => {
+  const dataTable = tableById[id];
 
   const columns = columnIds.reduce<Columns>((acc, cid) => {
-    const columnIndex = timeline.columns.findIndex((c) => c.id === cid);
+    const columnIndex = dataTable.columns.findIndex((c) => c.id === cid);
 
-    return columnIndex !== -1 ? [...acc, timeline.columns[columnIndex]] : acc;
+    return columnIndex !== -1 ? [...acc, dataTable.columns[columnIndex]] : acc;
   }, []);
 
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       columns,
     },
   };
@@ -266,146 +241,142 @@ export const updateTGridColumnOrder = ({
 export const updateTGridColumnWidth = ({
   columnId,
   id,
-  timelineById,
+  tableById,
   width,
 }: {
   columnId: string;
   id: string;
-  timelineById: TimelineById;
+  tableById: TableById;
   width: number;
-}): TimelineById => {
-  const timeline = timelineById[id];
+}): TableById => {
+  const dataTable = tableById[id];
 
-  const columns = timeline.columns.map((x) => ({
+  const columns = dataTable.columns.map((x) => ({
     ...x,
     initialWidth: x.id === columnId ? width : x.initialWidth,
   }));
 
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       columns,
     },
   };
 };
 
-interface UpdateTimelineColumnsParams {
+interface UpdateTableColumnsParams {
   id: string;
   columns: ColumnHeaderOptions[];
-  timelineById: TimelineById;
+  tableById: TableById;
 }
 
-export const updateTimelineColumns = ({
+export const updateTableColumns = ({
   id,
   columns,
-  timelineById,
-}: UpdateTimelineColumnsParams): TimelineById => {
-  const timeline = timelineById[id];
+  tableById,
+}: UpdateTableColumnsParams): TableById => {
+  const dataTable = tableById[id];
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       columns,
     },
   };
 };
 
-interface UpdateTimelineSortParams {
+interface UpdateTableSortParams {
   id: string;
-  sort: SortColumnTimeline[];
-  timelineById: TimelineById;
+  sort: SortColumnTable[];
+  tableById: TableById;
 }
 
-export const updateTimelineSort = ({
-  id,
-  sort,
-  timelineById,
-}: UpdateTimelineSortParams): TimelineById => {
-  const timeline = timelineById[id];
+export const updateTableSort = ({ id, sort, tableById }: UpdateTableSortParams): TableById => {
+  const dataTable = tableById[id];
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       sort,
     },
   };
 };
 
-interface UpdateTimelineItemsPerPageParams {
+interface UpdateTableItemsPerPageParams {
   id: string;
   itemsPerPage: number;
-  timelineById: TimelineById;
+  tableById: TableById;
 }
 
-export const updateTimelineItemsPerPage = ({
+export const updateTableItemsPerPage = ({
   id,
   itemsPerPage,
-  timelineById,
-}: UpdateTimelineItemsPerPageParams) => {
-  const timeline = timelineById[id];
+  tableById,
+}: UpdateTableItemsPerPageParams) => {
+  const dataTable = tableById[id];
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       itemsPerPage,
     },
   };
 };
 
-interface UpdateTimelinePerPageOptionsParams {
+interface UpdateTablePerPageOptionsParams {
   id: string;
   itemsPerPageOptions: number[];
-  timelineById: TimelineById;
+  tableById: TableById;
 }
 
-export const updateTimelinePerPageOptions = ({
+export const updateTablePerPageOptions = ({
   id,
   itemsPerPageOptions,
-  timelineById,
-}: UpdateTimelinePerPageOptionsParams) => {
-  const timeline = timelineById[id];
+  tableById,
+}: UpdateTablePerPageOptionsParams) => {
+  const dataTable = tableById[id];
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       itemsPerPageOptions,
     },
   };
 };
 
-interface SetDeletedTimelineEventsParams {
+interface SetDeletedTableEventsParams {
   id: string;
   eventIds: string[];
   isDeleted: boolean;
-  timelineById: TimelineById;
+  tableById: TableById;
 }
 
-export const setDeletedTimelineEvents = ({
+export const setDeletedTableEvents = ({
   id,
   eventIds,
   isDeleted,
-  timelineById,
-}: SetDeletedTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
+  tableById,
+}: SetDeletedTableEventsParams): TableById => {
+  const dataTable = tableById[id];
 
   const deletedEventIds = isDeleted
-    ? union(timeline.deletedEventIds, eventIds)
-    : timeline.deletedEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
+    ? union(dataTable.deletedEventIds, eventIds)
+    : dataTable.deletedEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
 
   const selectedEventIds = Object.fromEntries(
-    Object.entries(timeline.selectedEventIds).filter(
+    Object.entries(dataTable.selectedEventIds).filter(
       ([selectedEventId]) => !deletedEventIds.includes(selectedEventId)
     )
   );
 
   const isSelectAllChecked =
-    Object.keys(selectedEventIds).length > 0 ? timeline.isSelectAllChecked : false;
+    Object.keys(selectedEventIds).length > 0 ? dataTable.isSelectAllChecked : false;
 
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       deletedEventIds,
       selectedEventIds,
       isSelectAllChecked,
@@ -413,74 +384,74 @@ export const setDeletedTimelineEvents = ({
   };
 };
 
-interface SetLoadingTimelineEventsParams {
+interface SetLoadingTableEventsParams {
   id: string;
   eventIds: string[];
   isLoading: boolean;
-  timelineById: TimelineById;
+  tableById: TableById;
 }
 
-export const setLoadingTimelineEvents = ({
+export const setLoadingTableEvents = ({
   id,
   eventIds,
   isLoading,
-  timelineById,
-}: SetLoadingTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
+  tableById,
+}: SetLoadingTableEventsParams): TableById => {
+  const dataTable = tableById[id];
 
   const loadingEventIds = isLoading
-    ? union(timeline.loadingEventIds, eventIds)
-    : timeline.loadingEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
+    ? union(dataTable.loadingEventIds, eventIds)
+    : dataTable.loadingEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
 
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       loadingEventIds,
     },
   };
 };
 
-interface SetSelectedTimelineEventsParams {
+interface SetSelectedTableEventsParams {
   id: string;
-  eventIds: Record<string, TimelineNonEcsData[]>;
+  eventIds: Record<string, TableNonEcsData[]>;
   isSelectAllChecked: boolean;
   isSelected: boolean;
-  timelineById: TimelineById;
+  tableById: TableById;
 }
 
-export const setSelectedTimelineEvents = ({
+export const setSelectedTableEvents = ({
   id,
   eventIds,
   isSelectAllChecked = false,
   isSelected,
-  timelineById,
-}: SetSelectedTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
+  tableById,
+}: SetSelectedTableEventsParams): TableById => {
+  const dataTable = tableById[id];
 
   const selectedEventIds = isSelected
-    ? { ...timeline.selectedEventIds, ...eventIds }
-    : omit(Object.keys(eventIds), timeline.selectedEventIds);
+    ? { ...dataTable.selectedEventIds, ...eventIds }
+    : omit(Object.keys(eventIds), dataTable.selectedEventIds);
 
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
+      ...dataTable,
       selectedEventIds,
       isSelectAllChecked,
     },
   };
 };
 
-export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineExpandedDetail => {
-  const { tabType, timelineId, ...expandedDetails } = action;
+export const updateTableDetailsPanel = (action: TableToggleDetailPanel): DataExpandedDetail => {
+  const { tabType, id, ...expandedDetails } = action;
 
   const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
-  const expandedTabType = tabType ?? TimelineTabs.query;
+  const expandedTabType = tabType ?? 'query';
   const newExpandDetails = {
     params: expandedDetails.params ? { ...expandedDetails.params } : {},
     panelView: expandedDetails.panelView,
-  } as TimelineExpandedDetailType;
+  } as DataExpandedDetailType;
   return {
     [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
       ? newExpandDetails
@@ -488,34 +459,42 @@ export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineE
   };
 };
 
-export const addProviderToTimelineHelper = (
-  id: string,
-  provider: DataProvider,
-  timelineById: TimelineById
-): TimelineById => {
-  const timeline = timelineById[id];
-  const alreadyExistsAtIndex = timeline.dataProviders.findIndex((p) => p.id === provider.id);
-
-  if (alreadyExistsAtIndex > -1 && !isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)) {
-    provider.id = `${provider.id}-${
-      timeline.dataProviders.filter((p) => p.id === provider.id).length
-    }`;
-  }
-
-  const dataProviders =
-    alreadyExistsAtIndex > -1 && isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)
-      ? [
-          ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
-          provider,
-          ...timeline.dataProviders.slice(alreadyExistsAtIndex + 1),
-        ]
-      : [...timeline.dataProviders, provider];
+export const updateTableGraphEventId = ({
+  id,
+  graphEventId,
+  tableById,
+}: {
+  id: string;
+  graphEventId: string;
+  tableById: TableById;
+}): TableById => {
+  const table = tableById[id];
 
   return {
-    ...timelineById,
+    ...tableById,
     [id]: {
-      ...timeline,
-      dataProviders,
+      ...table,
+      graphEventId,
+    },
+  };
+};
+
+export const updateTableSessionViewConfig = ({
+  id,
+  sessionViewConfig,
+  tableById,
+}: {
+  id: string;
+  sessionViewConfig: SessionViewConfig | null;
+  tableById: TableById;
+}): TableById => {
+  const table = tableById[id];
+
+  return {
+    ...tableById,
+    [id]: {
+      ...table,
+      sessionViewConfig,
     },
   };
 };

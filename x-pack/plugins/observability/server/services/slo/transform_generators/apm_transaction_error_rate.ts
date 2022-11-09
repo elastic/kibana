@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  AggregationsCalendarInterval,
-  MappingRuntimeFieldType,
-  TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/types';
-import { ALL_VALUE } from '../../../types/schema';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { InvalidTransformError } from '../../../errors';
+import { ALL_VALUE, apmTransactionErrorRateIndicatorSchema } from '../../../types/schema';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { TransformGenerator } from '.';
 import {
@@ -18,79 +15,68 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../assets/constants';
-import {
-  apmTransactionErrorRateSLOSchema,
-  APMTransactionErrorRateSLO,
-  SLO,
-} from '../../../types/models';
+import { APMTransactionErrorRateIndicator, SLO } from '../../../types/models';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
 const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
 
-export class ApmTransactionErrorRateTransformGenerator implements TransformGenerator {
+export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
-    if (!apmTransactionErrorRateSLOSchema.is(slo)) {
-      throw new Error(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
+    if (!apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
+      throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
-      this.buildSource(slo),
+      this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(),
-      this.buildAggregations(slo)
+      this.buildCommonGroupBy(slo),
+      this.buildAggregations(slo, slo.indicator)
     );
   }
 
-  private buildTransformId(slo: APMTransactionErrorRateSLO): string {
-    return getSLOTransformId(slo.id);
+  private buildTransformId(slo: SLO): string {
+    return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildSource(slo: APMTransactionErrorRateSLO) {
+  private buildSource(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
     const queryFilter = [];
-    if (slo.indicator.params.service !== ALL_VALUE) {
+    if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'service.name': slo.indicator.params.service,
+          'service.name': indicator.params.service,
         },
       });
     }
 
-    if (slo.indicator.params.environment !== ALL_VALUE) {
+    if (indicator.params.environment !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'service.environment': slo.indicator.params.environment,
+          'service.environment': indicator.params.environment,
         },
       });
     }
 
-    if (slo.indicator.params.transaction_name !== ALL_VALUE) {
+    if (indicator.params.transaction_name !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.name': slo.indicator.params.transaction_name,
+          'transaction.name': indicator.params.transaction_name,
         },
       });
     }
 
-    if (slo.indicator.params.transaction_type !== ALL_VALUE) {
+    if (indicator.params.transaction_type !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.type': slo.indicator.params.transaction_type,
+          'transaction.type': indicator.params.transaction_type,
         },
       });
     }
 
     return {
       index: APM_SOURCE_INDEX,
-      runtime_mappings: {
-        'slo.id': {
-          type: 'keyword' as MappingRuntimeFieldType,
-          script: {
-            source: `emit('${slo.id}')`,
-          },
-        },
-      },
+      runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
           filter: [
@@ -113,46 +99,8 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
     };
   }
 
-  private buildGroupBy() {
-    return {
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          calendar_interval: '1m' as AggregationsCalendarInterval,
-        },
-      },
-      'slo.context.transaction.name': {
-        terms: {
-          field: 'transaction.name',
-        },
-      },
-      'slo.context.transaction.type': {
-        terms: {
-          field: 'transaction.type',
-        },
-      },
-      'slo.context.service.name': {
-        terms: {
-          field: 'service.name',
-        },
-      },
-      'slo.context.service.environment': {
-        terms: {
-          field: 'service.environment',
-        },
-      },
-    };
-  }
-
-  private buildAggregations(slo: APMTransactionErrorRateSLO) {
-    const goodStatusCodesFilter = this.getGoodStatusCodesFilter(
-      slo.indicator.params.good_status_codes
-    );
+  private buildAggregations(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
+    const goodStatusCodesFilter = this.getGoodStatusCodesFilter(indicator.params.good_status_codes);
 
     return {
       'slo.numerator': {

@@ -27,8 +27,10 @@ let mockUseGetEndpointActionList: {
   data?: ActionListApiResponse;
   refetch: () => unknown;
 };
-jest.mock('../../../hooks/endpoint/use_get_endpoint_action_list', () => {
-  const original = jest.requireActual('../../../hooks/endpoint/use_get_endpoint_action_list');
+jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list', () => {
+  const original = jest.requireActual(
+    '../../../hooks/response_actions/use_get_endpoint_action_list'
+  );
   return {
     ...original,
     useGetEndpointActionList: () => mockUseGetEndpointActionList,
@@ -375,7 +377,7 @@ describe('Response actions history page', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses'
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file'
       );
     });
 

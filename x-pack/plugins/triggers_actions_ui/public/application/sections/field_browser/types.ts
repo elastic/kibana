@@ -34,6 +34,10 @@ export type GetFieldTableColumns = (params: {
 export interface FieldBrowserOptions {
   createFieldButton?: CreateFieldComponent;
   getFieldTableColumns?: GetFieldTableColumns;
+  /**
+   * Categories that should be selected initially
+   */
+  preselectedCategoryIds?: string[];
 }
 
 export interface FieldBrowserProps {

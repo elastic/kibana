@@ -117,7 +117,7 @@ export function loadInitial(
 
   let activeDatasourceId: string | undefined;
   if (initialContext && 'query' in initialContext) {
-    activeDatasourceId = 'textBasedLanguages';
+    activeDatasourceId = 'textBased';
   }
 
   if (

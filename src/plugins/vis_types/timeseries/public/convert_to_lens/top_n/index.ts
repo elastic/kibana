@@ -28,7 +28,10 @@ const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<st
   return newLayers;
 };
 
-export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
+export const convertToLens: ConvertTsvbToLensVisualization = async (
+  { params: model },
+  timeRange
+) => {
   const dataViews = getDataViewsStart();
   const extendedLayers: Record<number, ExtendedLayer> = {};
   const seriesNum = model.series.filter((series) => !series.hidden).length;
@@ -86,7 +89,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
     };
   }
 
-  const configLayers = await getLayers(extendedLayers, model, dataViews);
+  const configLayers = await getLayers(extendedLayers, model, dataViews, true);
   if (configLayers === null) {
     return null;
   }

@@ -21,7 +21,7 @@ Cypress.Commands.add('loginAsEditorUser', () => {
 
 Cypress.Commands.add('loginAsMonitorUser', () => {
   return cy.loginAs({
-    username: ApmUsername.apmMonitorIndices,
+    username: ApmUsername.apmMonitorClusterAndIndices,
     password: 'changeme',
   });
 });
@@ -52,15 +52,19 @@ Cypress.Commands.add(
   }
 );
 
+Cypress.Commands.add('getByTestSubj', (selector: string) => {
+  return cy.get(`[data-test-subj="${selector}"]`);
+});
+
 Cypress.Commands.add('changeTimeRange', (value: string) => {
-  cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
+  cy.getByTestSubj('superDatePickerToggleQuickMenuButton').click();
   cy.contains(value).click();
 });
 
 Cypress.Commands.add('visitKibana', (url: string) => {
   cy.visit(url);
-  cy.get('[data-test-subj="kbnLoadingMessage"]').should('exist');
-  cy.get('[data-test-subj="kbnLoadingMessage"]').should('not.exist', {
+  cy.getByTestSubj('kbnLoadingMessage').should('exist');
+  cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
     timeout: 50000,
   });
 });
@@ -70,13 +74,13 @@ Cypress.Commands.add(
   (start: string, end: string) => {
     const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
-    cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').click();
-    cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+    cy.getByTestSubj('superDatePickerstartDatePopoverButton').click();
+    cy.getByTestSubj('superDatePickerAbsoluteDateInput')
       .eq(0)
       .clear({ force: true })
       .type(moment(start).format(format), { force: true });
-    cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').click();
-    cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+    cy.getByTestSubj('superDatePickerendDatePopoverButton').click();
+    cy.getByTestSubj('superDatePickerAbsoluteDateInput')
       .eq(1)
       .clear({ force: true })
       .type(moment(end).format(format), { force: true });
@@ -120,6 +124,16 @@ Cypress.Commands.add(
     });
   }
 );
+
+Cypress.Commands.add('dismissServiceGroupsTour', () => {
+  window.localStorage.setItem(
+    'apm.serviceGroupsTour',
+    JSON.stringify({
+      createGroup: false,
+      editGroup: false,
+    })
+  );
+});
 
 // A11y configuration
 

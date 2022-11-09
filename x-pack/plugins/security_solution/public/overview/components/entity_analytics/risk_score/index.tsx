@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
-import { EntityAnalyticsUserRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
+import { EnableRiskScore } from '../../../../risk_score/components/enable_risk_score';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../users/store/model';
-import { RiskScoresDeprecated } from '../../../../common/components/risk_score/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
@@ -19,12 +18,7 @@ import { HostsTableType, HostsType } from '../../../../hosts/store/model';
 import { getRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../../common/components/header_section';
-import {
-  useHostRiskScore,
-  useHostRiskScoreKpi,
-  useUserRiskScore,
-  useUserRiskScoreKpi,
-} from '../../../../risk_score/containers';
+import { useRiskScore, useRiskScoreKpi } from '../../../../risk_score/containers';
 
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
@@ -39,21 +33,21 @@ import { hostsActions } from '../../../../hosts/store';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 import { RISKY_HOSTS_DOC_LINK, RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
-import { EntityAnalyticsHostRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
-import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
-import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { RiskScoreHeaderTitle } from '../../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
+import { RiskScoresNoDataDetected } from '../../../../risk_score/components/risk_score_onboarding/risk_score_no_data_detected';
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../../common/components/loader';
 import { Panel } from '../../../../common/components/panel';
 import * as commonI18n from '../common/translations';
 import { usersActions } from '../../../../users/store';
+import { useNavigateToTimeline } from '../../detection_response/hooks/use_navigate_to_timeline';
+import type { TimeRange } from '../../../../common/store/inputs/model';
+import { openAlertsFilter } from '../../detection_response/utils';
 
-const TABLE_QUERY_ID = (riskEntity: RiskScoreEntity) =>
-  riskEntity === RiskScoreEntity.host ? 'hostRiskDashboardTable' : 'userRiskDashboardTable';
-const RISK_KPI_QUERY_ID = (riskEntity: RiskScoreEntity) =>
-  riskEntity === RiskScoreEntity.host
-    ? 'headerHostRiskScoreKpiQuery'
-    : 'headerUserRiskScoreKpiQuery';
+const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
+const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
+const USER_RISK_TABLE_QUERY_ID = 'userRiskDashboardTable';
+const USER_RISK_KPI_QUERY_ID = 'headerUserRiskScoreKpiQuery';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -65,8 +59,6 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
       riskEntity === RiskScoreEntity.host
         ? {
             docLink: RISKY_HOSTS_DOC_LINK,
-            kpiHook: useHostRiskScoreKpi,
-            riskScoreHook: useHostRiskScore,
             linkProps: {
               deepLinkId: SecurityPageName.hosts,
               path: getTabsOnHostsUrl(HostsTableType.risk),
@@ -79,11 +71,11 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
                 );
               },
             },
+            tableQueryId: HOST_RISK_TABLE_QUERY_ID,
+            kpiQueryId: HOST_RISK_KPI_QUERY_ID,
           }
         : {
             docLink: RISKY_USERS_DOC_LINK,
-            kpiHook: useUserRiskScoreKpi,
-            riskScoreHook: useUserRiskScore,
             linkProps: {
               deepLinkId: SecurityPageName.users,
               path: getTabsOnUsersUrl(UsersTableType.risk),
@@ -95,12 +87,40 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
                 );
               },
             },
+            tableQueryId: USER_RISK_TABLE_QUERY_ID,
+            kpiQueryId: USER_RISK_KPI_QUERY_ID,
           },
     [dispatch, riskEntity]
   );
 
-  const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID(riskEntity));
-  const columns = useMemo(() => getRiskScoreColumns(riskEntity), [riskEntity]);
+  const { openTimelineWithFilters } = useNavigateToTimeline();
+
+  const openEntityInTimeline = useCallback(
+    (entityName: string, oldestAlertTimestamp?: string) => {
+      const timeRange: TimeRange | undefined = oldestAlertTimestamp
+        ? {
+            kind: 'relative',
+            from: oldestAlertTimestamp ?? '',
+            fromStr: oldestAlertTimestamp ?? '',
+            to: new Date().toISOString(),
+            toStr: 'now',
+          }
+        : undefined;
+
+      const filter = {
+        field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+        value: entityName,
+      };
+      openTimelineWithFilters([[filter, openAlertsFilter]], timeRange);
+    },
+    [riskEntity, openTimelineWithFilters]
+  );
+
+  const { toggleStatus, setToggleStatus } = useQueryToggle(entity.tableQueryId);
+  const columns = useMemo(
+    () => getRiskScoreColumns(riskEntity, openEntityInTimeline),
+    [riskEntity, openEntityInTimeline]
+  );
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
@@ -123,24 +143,30 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     loading: isKpiLoading,
     refetch: refetchKpi,
     inspect: inspectKpi,
-  } = entity.kpiHook({
+  } = useRiskScoreKpi({
     filterQuery: severityFilter,
     skip: !toggleStatus,
     timerange,
+    riskEntity,
   });
 
   useQueryInspector({
-    queryId: RISK_KPI_QUERY_ID(riskEntity),
+    queryId: entity.kpiQueryId,
     loading: isKpiLoading,
     refetch: refetchKpi,
     setQuery,
     deleteQuery,
     inspect: inspectKpi,
   });
-  const [
-    isTableLoading,
-    { data, inspect, refetch, isDeprecated, isLicenseValid, isModuleEnabled },
-  ] = entity.riskScoreHook({
+  const {
+    data,
+    loading: isTableLoading,
+    inspect,
+    refetch,
+    isDeprecated,
+    isLicenseValid,
+    isModuleEnabled,
+  } = useRiskScore({
     filterQuery: severityFilter,
     skip: !toggleStatus,
     pagination: {
@@ -148,10 +174,12 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
       querySize: 5,
     },
     timerange,
+    riskEntity,
+    includeAlertsCount: true,
   });
 
   useQueryInspector({
-    queryId: TABLE_QUERY_ID(riskEntity),
+    queryId: entity.tableQueryId,
     loading: isTableLoading,
     refetch,
     setQuery,
@@ -174,17 +202,19 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     return null;
   }
 
-  if (!isModuleEnabled && !isTableLoading) {
-    return riskEntity === RiskScoreEntity.host ? (
-      <EntityAnalyticsHostRiskScoreDisable refetch={refreshPage} timerange={timerange} />
-    ) : (
-      <EntityAnalyticsUserRiskScoreDisable refetch={refreshPage} timerange={timerange} />
-    );
-  }
+  const status = {
+    isDisabled: !isModuleEnabled && !isTableLoading,
+    isDeprecated: isDeprecated && !isTableLoading,
+  };
 
-  if (isDeprecated && !isTableLoading) {
+  if (status.isDisabled || status.isDeprecated) {
     return (
-      <RiskScoresDeprecated entityType={riskEntity} refetch={refreshPage} timerange={timerange} />
+      <EnableRiskScore
+        {...status}
+        entityType={riskEntity}
+        refetch={refreshPage}
+        timerange={timerange}
+      />
     );
   }
 
@@ -201,7 +231,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           subtitle={
             <LastUpdatedAt isUpdating={isTableLoading || isKpiLoading} updatedAt={updatedAt} />
           }
-          id={TABLE_QUERY_ID(riskEntity)}
+          id={entity.tableQueryId}
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
           tooltip={commonI18n.HOST_RISK_TABLE_TOOLTIP}
@@ -248,7 +278,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
                 items={data ?? []}
                 columns={columns}
                 loading={isTableLoading}
-                id={TABLE_QUERY_ID(riskEntity)}
+                id={entity.tableQueryId}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

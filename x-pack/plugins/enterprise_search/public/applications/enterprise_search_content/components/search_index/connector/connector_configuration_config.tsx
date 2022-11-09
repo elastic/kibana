@@ -40,7 +40,10 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
               <EuiFlexItem>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => setIsEditing(!isEditing)}>
+                    <EuiButton
+                      data-telemetry-id="entSearchContent-connector-overview-configuration-editConfiguration"
+                      onClick={() => setIsEditing(!isEditing)}
+                    >
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.indices.configurationConnector.config.editButton.title',
                         {

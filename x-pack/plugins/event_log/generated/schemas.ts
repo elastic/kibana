@@ -115,10 +115,12 @@ export const EventSchema = schema.maybe(
             action_group_id: ecsString(),
             action_subgroup: ecsString(),
             status: ecsString(),
+            outcome: ecsString(),
           })
         ),
         alert: schema.maybe(
           schema.object({
+            flapping: ecsBoolean(),
             rule: schema.maybe(
               schema.object({
                 consumer: ecsString(),
@@ -196,6 +198,10 @@ function ecsStringOrNumber() {
 
 function ecsDate() {
   return schema.maybe(schema.string({ validate: validateDate }));
+}
+
+function ecsBoolean() {
+  return schema.maybe(schema.boolean());
 }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;

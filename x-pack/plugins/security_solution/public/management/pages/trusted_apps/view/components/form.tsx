@@ -71,6 +71,7 @@ import {
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
+import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -419,7 +420,15 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         <EuiSpacer size="xs" />
         {mode === 'create' && (
           <EuiText size="s" data-test-subj={getTestId('about')}>
-            <p>{DETAILS_HEADER_DESCRIPTION}</p>
+            <p>
+              {DETAILS_HEADER_DESCRIPTION}
+              {
+                <>
+                  <EuiSpacer size="m" />
+                  <TrustedAppsArtifactsDocsLink />
+                </>
+              }
+            </p>
           </EuiText>
         )}
         <EuiSpacer size="m" />

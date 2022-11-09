@@ -17,7 +17,7 @@ Object {
   ],
   "state": Object {
     "datasourceStates": Object {
-      "indexpattern": Object {
+      "formBased": Object {
         "layers": Object {
           "8be0156b-d423-4a39-adf1-f54d4c9f2e69": Object {
             "columnOrder": Array [
@@ -85,17 +85,11 @@ Object {
         },
         "query": Object {
           "bool": Object {
-            "filter": Array [
+            "minimum_should_match": 1,
+            "should": Array [
               Object {
-                "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "host.name",
-                      },
-                    },
-                  ],
+                "exists": Object {
+                  "field": "host.name",
                 },
               },
             ],

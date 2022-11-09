@@ -16,23 +16,25 @@ import { i18n } from '@kbn/i18n';
 import { Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 
-export const SinglePingResult = ({ ping, loading }: { ping: Ping; loading: boolean }) => {
+export const SinglePingResult = ({ ping, loading }: { ping?: Ping; loading: boolean }) => {
   const ip = !loading ? ping?.resolve?.ip : undefined;
-  const durationUs = !loading ? ping?.monitor?.duration?.us : undefined;
-  const rtt = !loading ? ping?.resolve?.rtt?.us : undefined;
+  const durationUs = !loading ? ping?.monitor?.duration?.us ?? NaN : NaN;
+  const rtt = !loading ? ping?.resolve?.rtt?.us ?? NaN : NaN;
   const url = !loading ? ping?.url?.full : undefined;
   const responseStatus = !loading ? ping?.http?.response?.status_code : undefined;
 
   return (
-    <EuiDescriptionList type="responsiveColumn" compressed={true}>
+    <EuiDescriptionList type="column" compressed={true}>
       <EuiDescriptionListTitle>IP</EuiDescriptionListTitle>
       <EuiDescriptionListDescription>{ip}</EuiDescriptionListDescription>
       <EuiDescriptionListTitle>{DURATION_LABEL}</EuiDescriptionListTitle>
       <EuiDescriptionListDescription>
-        {formatTestDuration(durationUs)}
+        {isNaN(durationUs) ? '' : formatTestDuration(durationUs)}
       </EuiDescriptionListDescription>
       <EuiDescriptionListTitle>rtt</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>{formatTestDuration(rtt)}</EuiDescriptionListDescription>
+      <EuiDescriptionListDescription>
+        {isNaN(rtt) ? '' : formatTestDuration(rtt)}
+      </EuiDescriptionListDescription>
       <EuiDescriptionListTitle>URL</EuiDescriptionListTitle>
       <EuiDescriptionListDescription>{url}</EuiDescriptionListDescription>
 

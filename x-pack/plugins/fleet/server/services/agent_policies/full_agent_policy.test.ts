@@ -37,12 +37,13 @@ function mockAgentPolicy(data: Partial<AgentPolicy>) {
   });
 }
 
-jest.mock('../settings', () => {
+jest.mock('../fleet_server_host', () => {
   return {
-    getSettings: () => {
+    getFleetServerHostsForAgentPolicy: async () => {
       return {
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
-        fleet_server_hosts: ['http://fleetserver:8220'],
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
       };
     },
   };

@@ -15,6 +15,8 @@ export const DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM =
 
 export const UPDATE_SCHEDULE_MENU_ITEM = '[data-test-subj="setScheduleBulk"]';
 
+export const ADD_RULE_ACTIONS_MENU_ITEM = '[data-test-subj="addRuleActionsBulk"]';
+
 export const APPLY_TIMELINE_RULE_BULK_MENU_ITEM = '[data-test-subj="applyTimelineTemplateBulk"]';
 
 export const TAGS_RULE_BULK_MENU_ITEM = '[data-test-subj="tagsBulkEditRule"]';
@@ -62,6 +64,14 @@ export const UPDATE_SCHEDULE_INTERVAL_INPUT =
 export const UPDATE_SCHEDULE_LOOKBACK_INPUT =
   '[data-test-subj="bulkEditRulesScheduleLookbackSelector"]';
 
-export const UPDATE_SCHEDULE_TIME_INTERVAL = '[data-test-subj="interval"]';
-
 export const UPDATE_SCHEDULE_TIME_UNIT_SELECT = '[data-test-subj="timeType"]';
+
+export const RULES_BULK_EDIT_ACTIONS_THROTTLE_INPUT =
+  '[data-test-subj="bulkEditRulesRuleActionThrottle"] [data-test-subj="select"]';
+
+export const RULES_BULK_EDIT_ACTIONS_INFO = '[data-test-subj="bulkEditRulesRuleActionInfo"]';
+
+export const RULES_BULK_EDIT_ACTIONS_WARNING = '[data-test-subj="bulkEditRulesRuleActionsWarning"]';
+
+export const RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX =
+  '[data-test-subj="bulkEditRulesOverwriteRuleActions"]';

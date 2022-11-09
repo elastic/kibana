@@ -21,11 +21,9 @@ get:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
-            type: object
-            properties:
-              $ref: '../components/schemas/case_response_properties.yaml'
+            $ref: '../components/schemas/case_response_properties.yaml'
           examples:
             getCaseResponse:
               $ref: '../components/examples/get_case_response.yaml'

@@ -1,0 +1,14 @@
+{
+  "id": "cloudLinks",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "@kibana-core"
+  },
+  "description": "Adds the links to the Elastic Cloud console",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": ["cloud", "security"]
+}

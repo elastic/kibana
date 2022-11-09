@@ -42,6 +42,11 @@ export interface DataViewPickerProps {
    */
   onChangeDataView: (newId: string) => void;
   /**
+   * Callback that is called when the user edits the current data view via flyout.
+   * The first parameter is the updated data view stub without fetched fields
+   */
+  onEditDataView?: (updatedDataViewStub: DataView) => void;
+  /**
    * The id of the selected dataview.
    */
   currentDataViewId?: string;
@@ -98,6 +103,7 @@ export const DataViewPicker = ({
   currentDataViewId,
   adHocDataViews,
   onChangeDataView,
+  onEditDataView,
   onAddField,
   onDataViewCreated,
   trigger,
@@ -114,6 +120,7 @@ export const DataViewPicker = ({
       isMissingCurrent={isMissingCurrent}
       currentDataViewId={currentDataViewId}
       onChangeDataView={onChangeDataView}
+      onEditDataView={onEditDataView}
       onAddField={onAddField}
       onDataViewCreated={onDataViewCreated}
       onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}

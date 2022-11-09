@@ -21,7 +21,7 @@ import {
   goToPage,
   sortByEnabledRules,
   waitForRulesTableToBeLoaded,
-  waitForRuleToChangeStatus,
+  waitForRuleToUpdate,
 } from '../../tasks/alerts_detection_rules';
 import { login, visit } from '../../tasks/login';
 
@@ -50,9 +50,9 @@ describe('Alerts detection rules', () => {
     waitForRulesTableToBeLoaded();
 
     enableRule(SECOND_RULE);
-    waitForRuleToChangeStatus();
+    waitForRuleToUpdate();
     enableRule(FOURTH_RULE);
-    waitForRuleToChangeStatus();
+    waitForRuleToUpdate();
 
     cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
     cy.get(RULE_SWITCH).eq(FOURTH_RULE).should('have.attr', 'role', 'switch');
@@ -74,9 +74,7 @@ describe('Alerts detection rules', () => {
     const FIRST_PAGE_SELECTOR = pageSelector(1);
     const SECOND_PAGE_SELECTOR = pageSelector(2);
 
-    cy.get(RULES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('have.class', 'euiPaginationButton-isActive');
+    cy.get(RULES_TABLE).find(FIRST_PAGE_SELECTOR).should('have.attr', 'aria-current');
 
     cy.get(RULES_TABLE)
       .find(RULE_NAME)
@@ -90,11 +88,7 @@ describe('Alerts detection rules', () => {
         cy.get(RULES_TABLE).should('not.contain', ruleNameFirstPage);
       });
 
-    cy.get(RULES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('not.have.class', 'euiPaginationButton-isActive');
-    cy.get(RULES_TABLE)
-      .find(SECOND_PAGE_SELECTOR)
-      .should('have.class', 'euiPaginationButton-isActive');
+    cy.get(RULES_TABLE).find(FIRST_PAGE_SELECTOR).should('not.have.attr', 'aria-current');
+    cy.get(RULES_TABLE).find(SECOND_PAGE_SELECTOR).should('have.attr', 'aria-current');
   });
 });

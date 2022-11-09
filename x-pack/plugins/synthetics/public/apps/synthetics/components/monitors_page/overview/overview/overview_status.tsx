@@ -9,8 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } fro
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearOverviewStatusErrorAction, selectOverviewStatus } from '../../../../state';
+import {
+  clearOverviewStatusErrorAction,
+  fetchOverviewStatusAction,
+  selectOverviewStatus,
+} from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
+import { useSyntheticsRefreshContext } from '../../../../contexts';
 
 function title(t?: number) {
   return t ?? '-';
@@ -19,6 +24,12 @@ function title(t?: number) {
 export function OverviewStatus() {
   const { status, statusError } = useSelector(selectOverviewStatus);
   const dispatch = useDispatch();
+
+  const { lastRefresh } = useSyntheticsRefreshContext();
+
+  useEffect(() => {
+    dispatch(fetchOverviewStatusAction.get());
+  }, [dispatch, lastRefresh]);
 
   useEffect(() => {
     if (statusError) {

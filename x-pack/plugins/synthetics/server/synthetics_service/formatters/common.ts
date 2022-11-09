@@ -34,6 +34,8 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.PROJECT_ID]: null,
   [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
   [ConfigKey.ORIGINAL_SPACE]: null,
+  [ConfigKey.CONFIG_HASH]: null,
+  [ConfigKey.MONITOR_QUERY_ID]: null,
 };
 
 export const arrayFormatter = (value: string[] = []) => (value.length ? value : null);

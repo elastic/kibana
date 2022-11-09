@@ -38,7 +38,7 @@ export const convertToMovingAverageParams = (
 });
 
 export const convertToOtherParentPipelineAggColumns = (
-  { agg, dataView, aggs }: ExtendedColumnConverterArgs<OtherParentPipelineAggs>,
+  { agg, dataView, aggs, visType }: ExtendedColumnConverterArgs<OtherParentPipelineAggs>,
   reducedTimeRange?: string
 ): FormulaColumn | [ParentPipelineAggColumn, AggBasedColumn] | null => {
   const { aggType } = agg;
@@ -63,7 +63,7 @@ export const convertToOtherParentPipelineAggColumns = (
   }
 
   if (PIPELINE_AGGS.includes(metric.aggType)) {
-    const formula = getFormulaForPipelineAgg({ agg, aggs, dataView });
+    const formula = getFormulaForPipelineAgg({ agg, aggs, dataView, visType });
     if (!formula) {
       return null;
     }
@@ -71,7 +71,7 @@ export const convertToOtherParentPipelineAggColumns = (
     return createFormulaColumn(formula, agg);
   }
 
-  const subMetric = convertMetricToColumns(metric, dataView, aggs);
+  const subMetric = convertMetricToColumns({ agg: metric, dataView, aggs, visType });
 
   if (subMetric === null) {
     return null;
@@ -90,7 +90,7 @@ export const convertToOtherParentPipelineAggColumns = (
 };
 
 export const convertToCumulativeSumAggColumn = (
-  { agg, dataView, aggs }: ExtendedColumnConverterArgs<METRIC_TYPES.CUMULATIVE_SUM>,
+  { agg, dataView, aggs, visType }: ExtendedColumnConverterArgs<METRIC_TYPES.CUMULATIVE_SUM>,
   reducedTimeRange?: string
 ):
   | FormulaColumn
@@ -119,7 +119,7 @@ export const convertToCumulativeSumAggColumn = (
     // create column for sum or count
     const subMetric = convertMetricAggregationColumnWithoutSpecialParams(
       subAgg,
-      { agg: metric as SchemaConfig<METRIC_TYPES.SUM | METRIC_TYPES.COUNT>, dataView },
+      { agg: metric as SchemaConfig<METRIC_TYPES.SUM | METRIC_TYPES.COUNT>, dataView, visType },
       reducedTimeRange
     );
 
@@ -144,7 +144,7 @@ export const convertToCumulativeSumAggColumn = (
       subMetric,
     ];
   } else {
-    const formula = getFormulaForPipelineAgg({ agg, aggs, dataView });
+    const formula = getFormulaForPipelineAgg({ agg, aggs, dataView, visType });
     if (!formula) {
       return null;
     }

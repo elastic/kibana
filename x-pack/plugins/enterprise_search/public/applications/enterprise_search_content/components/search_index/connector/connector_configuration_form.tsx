@@ -55,7 +55,11 @@ export const ConnectorConfigurationForm = () => {
       <EuiFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton type="submit" isLoading={status === Status.LOADING}>
+            <EuiButton
+              data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
+              type="submit"
+              isLoading={status === Status.LOADING}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.config.submitButton.title',
                 {
@@ -66,6 +70,7 @@ export const ConnectorConfigurationForm = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-telemetry-id="entSearchContent-connector-configuration-cancelEdit"
               isDisabled={status === Status.LOADING}
               onClick={() => {
                 setIsEditing(false);

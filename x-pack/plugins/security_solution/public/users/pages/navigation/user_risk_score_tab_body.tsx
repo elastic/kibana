@@ -8,8 +8,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
+import { EnableRiskScore } from '../../../risk_score/components/enable_risk_score';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { RiskScoresDeprecated } from '../../../common/components/risk_score/risk_score_deprecated';
 import type { UsersComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -19,13 +19,12 @@ import { UserRiskScoreTable } from '../../components/user_risk_score_table';
 import { usersSelectors } from '../../store';
 import {
   UserRiskScoreQueryId,
-  useUserRiskScore,
-  useUserRiskScoreKpi,
+  useRiskScore,
+  useRiskScoreKpi,
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../common/search_strategy';
-import { EntityAnalyticsUserRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
-import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { RiskScoresNoDataDetected } from '../../../risk_score/components/risk_score_onboarding/risk_score_no_data_detected';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -64,29 +63,39 @@ export const UserRiskScoreQueryTabBody = ({
 
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
-  const [
+  const {
+    data,
+    inspect,
+    isDeprecated,
+    isInspected,
+    isModuleEnabled,
     loading,
-    { data, totalCount, inspect, isInspected, isDeprecated, refetch, isModuleEnabled },
-  ] = useUserRiskScore({
+    refetch,
+    totalCount,
+  } = useRiskScore({
     filterQuery,
-    skip: querySkip,
     pagination,
+    riskEntity: RiskScoreEntity.user,
+    skip: querySkip,
     sort,
     timerange,
   });
 
-  const { severityCount, loading: isKpiLoading } = useUserRiskScoreKpi({
+  const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
     filterQuery,
+    riskEntity: RiskScoreEntity.user,
     skip: querySkip,
   });
 
-  if (!isModuleEnabled && !loading) {
-    return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
-  }
+  const status = {
+    isDisabled: !isModuleEnabled && !loading,
+    isDeprecated: isDeprecated && !loading,
+  };
 
-  if (isDeprecated && !loading) {
+  if (status.isDisabled || status.isDeprecated) {
     return (
-      <RiskScoresDeprecated
+      <EnableRiskScore
+        {...status}
         entityType={RiskScoreEntity.user}
         refetch={refetch}
         timerange={timerange}

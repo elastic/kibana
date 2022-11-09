@@ -54,7 +54,13 @@
             "description": [],
             "signature": [
               "({ capabilities }: { capabilities: ",
-              "Capabilities",
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              },
               "; }) => void"
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
@@ -80,7 +86,13 @@
                     "label": "capabilities",
                     "description": [],
                     "signature": [
-                      "Capabilities"
+                      {
+                        "pluginId": "@kbn/core-capabilities-common",
+                        "scope": "common",
+                        "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                        "section": "def-common.Capabilities",
+                        "text": "Capabilities"
+                      }
                     ],
                     "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
                     "deprecated": false,
@@ -189,7 +201,7 @@
           "\nConvert instruction variant id into display text.\n"
         ],
         "signature": [
-          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\") => string"
+          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\") => any"
         ],
         "path": "src/plugins/home/common/instruction_variant.ts",
         "deprecated": false,
@@ -1314,10 +1326,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "cloud",
-              "path": "x-pack/plugins/cloud/public/plugin.tsx"
-            },
-            {
               "plugin": "apm",
               "path": "x-pack/plugins/apm/public/plugin.ts"
             }
@@ -1737,9 +1745,21 @@
         "description": [],
         "signature": [
           "{ getSampleDatasets: () => ",
-          "Writable",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Writable",
+            "text": "Writable"
+          },
           "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { name: string; description: string; id: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
           {
             "pluginId": "home",
@@ -1772,7 +1792,13 @@
         "description": [],
         "signature": [
           "() => ",
-          "Writable",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Writable",
+            "text": "Writable"
+          },
           "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { name: string; description: string; id: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
         ],
         "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
@@ -2159,9 +2185,21 @@
           "description": [],
           "signature": [
             "{ getSampleDatasets: () => ",
-            "Writable",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "server",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-server.Writable",
+              "text": "Writable"
+            },
             "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { name: string; description: string; id: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
-            "SavedObject",
+            {
+              "pluginId": "@kbn/core-saved-objects-common",
+              "scope": "common",
+              "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+              "section": "def-common.SavedObject",
+              "text": "SavedObject"
+            },
             "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
             {
               "pluginId": "home",

@@ -18,6 +18,8 @@ const createConfig = (
     customHeaders: {},
     compression: false,
     maxSockets: Infinity,
+    maxIdleSockets: 300,
+    idleSocketTimeout: duration(30, 'seconds'),
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
@@ -41,15 +43,13 @@ describe('parseClientOptions', () => {
     );
   });
 
-  it('specifies `headers.maxSockets` Infinity and `keepAlive` true by default', () => {
+  it('specifies `maxTotalSockets` Infinity and `keepAlive` true by default', () => {
     const config = createConfig({});
 
-    expect(parseClientOptions(config, false, kibanaVersion)).toEqual(
+    expect(parseClientOptions(config, false, kibanaVersion).agent).toEqual(
       expect.objectContaining({
-        agent: {
-          keepAlive: true,
-          maxSockets: Infinity,
-        },
+        keepAlive: true,
+        maxTotalSockets: Infinity,
       })
     );
   });
@@ -119,18 +119,35 @@ describe('parseClientOptions', () => {
     });
 
     describe('`maxSockets` option', () => {
-      it('uses the specified config value', () => {
+      it('sets the agent.maxTotalSockets config value', () => {
         const options = parseClientOptions(
           createConfig({ maxSockets: 1024 }),
           false,
           kibanaVersion
         );
-        expect(options.agent).toHaveProperty('maxSockets', 1024);
+        expect(options.agent).toHaveProperty('maxTotalSockets', 1024);
       });
+    });
 
-      it('defaults to `Infinity` if not specified by the config', () => {
-        const options = parseClientOptions(createConfig({}), false, kibanaVersion);
-        expect(options.agent).toHaveProperty('maxSockets', Infinity);
+    describe('`maxIdleSockets` option', () => {
+      it('sets the agent.maxFreeSockets config value', () => {
+        const options = parseClientOptions(
+          createConfig({ maxIdleSockets: 1024 }),
+          false,
+          kibanaVersion
+        );
+        expect(options.agent).toHaveProperty('maxFreeSockets', 1024);
+      });
+    });
+
+    describe('`idleSocketTimeout` option', () => {
+      it('sets the agent.timeout config value', () => {
+        const options = parseClientOptions(
+          createConfig({ idleSocketTimeout: duration(1000, 's') }),
+          false,
+          kibanaVersion
+        );
+        expect(options.agent).toHaveProperty('timeout', 1_000_000);
       });
     });
 

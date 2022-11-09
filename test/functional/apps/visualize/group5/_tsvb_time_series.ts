@@ -11,11 +11,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, visualBuilder, timeToVisualize, dashboard, common } = getPageObjects([
+  const { visualize, visualBuilder, timeToVisualize, dashboard, header, common } = getPageObjects([
     'visualBuilder',
     'visualize',
     'timeToVisualize',
     'dashboard',
+    'header',
     'common',
   ]);
   const security = getService('security');
@@ -221,6 +222,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should create a filter for series with multiple split by terms fields one of which has formatting', async () => {
             const expectedFilterPills = ['0, win 7'];
             await visualBuilder.setMetricsGroupByTerms('bytes');
+            await header.waitUntilLoadingHasFinished();
             await visualBuilder.setAnotherGroupByTermsField('machine.os.raw');
             await visualBuilder.clickSeriesOption();
             await visualBuilder.setChartType('Bar');

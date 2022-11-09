@@ -46,7 +46,7 @@ beforeEach(() => {
   application = applicationServiceMock.createStartContract();
 });
 
-test('DashboardContainer initializes embeddables', async (done) => {
+test('DashboardContainer initializes embeddables', (done) => {
   const initialInput = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -96,7 +96,7 @@ test('DashboardContainer.addNewEmbeddable', async () => {
   expect(embeddableInContainer.id).toBe(embeddable.id);
 });
 
-test('DashboardContainer.replacePanel', async (done) => {
+test('DashboardContainer.replacePanel', (done) => {
   const ID = '123';
   const initialInput = getSampleDashboardInput({
     panels: {
@@ -139,7 +139,7 @@ test('DashboardContainer.replacePanel', async (done) => {
   });
 });
 
-test('Container view mode change propagates to existing children', async (done) => {
+test('Container view mode change propagates to existing children', async () => {
   const initialInput = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -154,7 +154,6 @@ test('Container view mode change propagates to existing children', async (done) 
   expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
   container.updateInput({ viewMode: ViewMode.EDIT });
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
-  done();
 });
 
 test('Container view mode change propagates to new children', async () => {

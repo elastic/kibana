@@ -77,14 +77,10 @@ export const errors = {
     i18n.translate('expressionXY.reusable.function.xyVis.errors.notUsedFillOpacityError', {
       defaultMessage: '`fillOpacity` argument is applicable only for area charts.',
     }),
-  valueLabelsForNotBarsOrHistogramBarsChartsError: () =>
-    i18n.translate(
-      'expressionXY.reusable.function.xyVis.errors.valueLabelsForNotBarsOrHistogramBarsChartsError',
-      {
-        defaultMessage:
-          '`valueLabels` argument is applicable only for bar charts, which are not histograms.',
-      }
-    ),
+  valueLabelsForNotBarsChartsError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.valueLabelsForNotBarChartsError', {
+      defaultMessage: '`valueLabels` argument is applicable only for bar charts.',
+    }),
   dataBoundsForNotLineChartError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
       defaultMessage: 'Only line charts can be fit to the data bounds',
@@ -126,10 +122,6 @@ export const hasBarLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLa
 
 export const hasAreaLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
   layers.some(({ seriesType }) => seriesType === SeriesTypes.AREA);
-
-export const hasHistogramBarLayer = (
-  layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
-) => layers.some(({ seriesType, isHistogram }) => seriesType === SeriesTypes.BAR && isHistogram);
 
 export const isValidExtentWithCustomMode = (extent: AxisExtentConfigResult) => {
   const isValidLowerBound =
@@ -212,13 +204,9 @@ export const validateFillOpacity = (fillOpacity: number | undefined, hasArea: bo
   }
 };
 
-export const validateValueLabels = (
-  valueLabels: ValueLabelMode,
-  hasBar: boolean,
-  hasNotHistogramBars: boolean
-) => {
-  if ((!hasBar || !hasNotHistogramBars) && valueLabels !== ValueLabelModes.HIDE) {
-    throw new Error(errors.valueLabelsForNotBarsOrHistogramBarsChartsError());
+export const validateValueLabels = (valueLabels: ValueLabelMode, hasBar: boolean) => {
+  if (!hasBar && valueLabels !== ValueLabelModes.HIDE) {
+    throw new Error(errors.valueLabelsForNotBarsChartsError());
   }
 };
 

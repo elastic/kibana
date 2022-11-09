@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { charCodeAt, safeBase64Encoder } from './base64';
+
 export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
@@ -14,6 +16,37 @@ export function createStackFrameID(fileID: FileID, addressOrLine: number): Stack
   Buffer.from(fileID, 'base64url').copy(buf);
   buf.writeBigUInt64BE(BigInt(addressOrLine), 16);
   return buf.toString('base64url');
+}
+
+/* eslint no-bitwise: ["error", { "allow": ["&"] }] */
+export function getFileIDFromStackFrameID(frameID: StackFrameID): FileID {
+  return frameID.slice(0, 21) + safeBase64Encoder[frameID.charCodeAt(21) & 0x30];
+}
+
+/* eslint no-bitwise: ["error", { "allow": ["<<=", "&"] }] */
+export function getAddressFromStackFrameID(frameID: StackFrameID): number {
+  let address = charCodeAt(frameID, 21) & 0xf;
+  address <<= 6;
+  address += charCodeAt(frameID, 22);
+  address <<= 6;
+  address += charCodeAt(frameID, 23);
+  address <<= 6;
+  address += charCodeAt(frameID, 24);
+  address <<= 6;
+  address += charCodeAt(frameID, 25);
+  address <<= 6;
+  address += charCodeAt(frameID, 26);
+  address <<= 6;
+  address += charCodeAt(frameID, 27);
+  address <<= 6;
+  address += charCodeAt(frameID, 28);
+  address <<= 6;
+  address += charCodeAt(frameID, 29);
+  address <<= 6;
+  address += charCodeAt(frameID, 30);
+  address <<= 6;
+  address += charCodeAt(frameID, 31);
+  return address;
 }
 
 export enum FrameType {
@@ -95,7 +128,7 @@ export interface StackFrameMetadata {
   // StackTrace.Type
   FrameType: FrameType;
 
-  // StackFrame.LineNumber?
+  // StackTrace.AddressOrLine
   AddressOrLine: number;
   // StackFrame.FunctionName
   FunctionName: string;
@@ -187,7 +220,7 @@ export function getCalleeLabel(metadata: StackFrameMetadata) {
   if (metadata.FunctionName !== '') {
     const sourceFilename = metadata.SourceFilename;
     const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
-    return `${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL} #${
+    return `${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL}#${
       metadata.SourceLine
     }`;
   }

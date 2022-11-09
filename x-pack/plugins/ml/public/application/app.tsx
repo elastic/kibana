@@ -145,6 +145,7 @@ export const renderApp = (
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
     dataViews: deps.data.dataViews,
+    share: deps.share,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

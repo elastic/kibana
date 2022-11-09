@@ -11,10 +11,10 @@ import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/se
 
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import { CasesRouter } from '../../types';
+import type { CasesRouter } from '../../types';
 import { createCasesRoute } from './create_cases_route';
 import { registerRoutes } from './register_routes';
-import { CaseRoute } from './types';
+import type { CaseRoute } from './types';
 import { extractWarningValueFromWarningHeader } from './utils';
 
 describe('registerRoutes', () => {

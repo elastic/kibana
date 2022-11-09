@@ -7,7 +7,7 @@
 
 import { getMapping } from './mapping';
 import { format } from './format';
-import { CasesWebhookCaseConnector } from './types';
+import type { CasesWebhookCaseConnector } from './types';
 
 export const getCaseConnector = (): CasesWebhookCaseConnector => ({
   getMapping,

@@ -15,6 +15,7 @@ import {
   SearchableSnapshotsTestBed,
   setupSearchableSnapshotsTestBed,
 } from './searchable_snapshots.helpers';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 describe('<EditPolicy /> searchable snapshots', () => {
   let testBed: SearchableSnapshotsTestBed;
@@ -142,7 +143,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
 
         await act(async () => {
           testBed = await setupSearchableSnapshotsTestBed(httpSetup, {
-            appServicesContext: { cloud: { isCloudEnabled: true } },
+            appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
           });
         });
 
@@ -171,7 +172,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
 
         await act(async () => {
           testBed = await setupSearchableSnapshotsTestBed(httpSetup, {
-            appServicesContext: { cloud: { isCloudEnabled: true } },
+            appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
           });
         });
 

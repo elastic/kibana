@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useIndicators, UseIndicatorsParams, UseIndicatorsValue } from './use_indicators';
 import { TestProvidersComponent } from '../../../common/mocks/test_providers';
 import { createFetchIndicators } from '../services/fetch_indicators';
@@ -105,6 +105,7 @@ describe('useIndicators()', () => {
 
       expect(hookResult.result.current).toMatchInlineSnapshot(`
         Object {
+          "dataUpdatedAt": 0,
           "handleRefresh": [Function],
           "indicatorCount": 0,
           "indicators": Array [],

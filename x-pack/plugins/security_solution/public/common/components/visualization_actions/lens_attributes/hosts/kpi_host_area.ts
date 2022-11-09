@@ -12,7 +12,7 @@ export const kpiHostAreaLensAttributes: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '416b6fad-1923-4f6a-a2df-b223bb287e30': {
             columnOrder: [

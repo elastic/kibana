@@ -14,6 +14,168 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-metrics-server",
+        "id": "def-server.ElasticsearchClientsMetrics",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchClientsMetrics",
+        "description": [
+          "\nMetrics related to the elasticsearch clients"
+        ],
+        "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.ElasticsearchClientsMetrics.protocol",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "protocol",
+            "description": [
+              "The protocol (or protocols) that these Agents are using"
+            ],
+            "signature": [
+              "\"http\" | \"none\" | \"mixed\" | \"https\""
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.ElasticsearchClientsMetrics.connectedNodes",
+            "type": "number",
+            "tags": [],
+            "label": "connectedNodes",
+            "description": [
+              "Number of ES nodes that ES-js client is connecting to"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.ElasticsearchClientsMetrics.nodesWithActiveSockets",
+            "type": "number",
+            "tags": [],
+            "label": "nodesWithActiveSockets",
+            "description": [
+              "Number of nodes with active connections"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.ElasticsearchClientsMetrics.nodesWithIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "nodesWithIdleSockets",
+            "description": [
+              "Number of nodes with available connections (alive but idle).\nNote that a node can have both active and idle connections at the same time"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.ElasticsearchClientsMetrics.totalActiveSockets",
+            "type": "number",
+            "tags": [],
+            "label": "totalActiveSockets",
+            "description": [
+              "Total number of active sockets (all nodes, all connections)"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.ElasticsearchClientsMetrics.totalIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "totalIdleSockets",
+            "description": [
+              "Total number of available sockets (alive but idle, all nodes, all connections)"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.ElasticsearchClientsMetrics.totalQueuedRequests",
+            "type": "number",
+            "tags": [],
+            "label": "totalQueuedRequests",
+            "description": [
+              "Total number of queued requests (all nodes, all connections)"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.ElasticsearchClientsMetrics.mostActiveNodeSockets",
+            "type": "number",
+            "tags": [],
+            "label": "mostActiveNodeSockets",
+            "description": [
+              "Number of active connections of the node with most active connections"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.ElasticsearchClientsMetrics.averageActiveSocketsPerNode",
+            "type": "number",
+            "tags": [],
+            "label": "averageActiveSocketsPerNode",
+            "description": [
+              "Average of active sockets per node (all connections)"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.ElasticsearchClientsMetrics.mostIdleNodeSockets",
+            "type": "number",
+            "tags": [],
+            "label": "mostIdleNodeSockets",
+            "description": [
+              "Number of idle connections of the node with most idle connections"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.ElasticsearchClientsMetrics.averageIdleSocketsPerNode",
+            "type": "number",
+            "tags": [],
+            "label": "averageIdleSocketsPerNode",
+            "description": [
+              "Average of available (idle) sockets per node (all connections)"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-metrics-server",
         "id": "def-server.IEventLoopDelaysMonitor",
         "type": "Interface",
         "tags": [],
@@ -233,7 +395,13 @@
             ],
             "signature": [
               "() => ",
-              "MaybePromise",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.MaybePromise",
+                "text": "MaybePromise"
+              },
               "<T>"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
@@ -351,6 +519,28 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-server.OpsMetrics.elasticsearch_client",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch_client",
+            "description": [
+              "\nMetrics related to the elasticsearch client"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.ElasticsearchClientsMetrics",
+                "text": "ElasticsearchClientsMetrics"
+              }
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
             "id": "def-server.OpsMetrics.process",
             "type": "Object",
             "tags": [
@@ -373,7 +563,76 @@
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
-            "references": []
+            "references": [
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
+                "plugin": "@kbn/core-metrics-server-internal",
+                "path": "packages/core/metrics/core-metrics-server-internal/src/ops_metrics_collector.ts"
+              },
+              {
+                "plugin": "@kbn/core-metrics-server-internal",
+                "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
+              },
+              {
+                "plugin": "@kbn/core-usage-data-server-internal",
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-usage-data-server-internal",
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-usage-data-server-internal",
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/plugins/monitoring/server/kibana_monitoring/bulk_uploader.ts"
+              },
+              {
+                "plugin": "kibanaUsageCollection",
+                "path": "src/plugins/kibana_usage_collection/server/collectors/ops_stats/ops_stats_collector.ts"
+              },
+              {
+                "plugin": "@kbn/core-metrics-server-internal",
+                "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.test.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -779,6 +1038,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-metrics-server",
+        "id": "def-server.ElasticsearchClientProtocol",
+        "type": "Type",
+        "tags": [],
+        "label": "ElasticsearchClientProtocol",
+        "description": [
+          "\nProtocol(s) used by the Elasticsearch Client"
+        ],
+        "signature": [
+          "\"http\" | \"none\" | \"mixed\" | \"https\""
+        ],
+        "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-metrics-server",
         "id": "def-server.MetricsServiceStart",

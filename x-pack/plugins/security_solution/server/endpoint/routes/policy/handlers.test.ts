@@ -55,7 +55,7 @@ describe('test policy response handler', () => {
       const response = createSearchResponse(new EndpointDocGenerator().generatePolicyResponse());
       const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
-      mockScopedClient.asCurrentUser.search.mockResponseOnce(response);
+      mockScopedClient.asInternalUser.search.mockResponseOnce(response);
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { agentId: 'id' },
       });
@@ -78,7 +78,7 @@ describe('test policy response handler', () => {
     it('should return not found when there is no response policy for host', async () => {
       const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
-      mockScopedClient.asCurrentUser.search.mockResponseOnce(createSearchResponse());
+      mockScopedClient.asInternalUser.search.mockResponseOnce(createSearchResponse());
 
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { agentId: 'id' },

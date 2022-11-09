@@ -10,7 +10,7 @@ import { fetchConnectors } from './api';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
 import * as i18n from './translations';
 import { casesQueriesKeys } from '../constants';
-import { ServerError } from '../../types';
+import type { ServerError } from '../../types';
 
 export function useGetConnectors() {
   const toasts = useToasts();

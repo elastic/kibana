@@ -9,7 +9,10 @@ import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { APMRouteHandlerResources } from '../../../../routes/typings';
 import { getInfraMetricIndices } from '../../get_infra_metric_indices';
 
-type InfraMetricsSearchParams = Omit<ESSearchRequest, 'index'>;
+type InfraMetricsSearchParams = Omit<ESSearchRequest, 'index'> & {
+  size: number;
+  track_total_hits: boolean | number;
+};
 
 export type InfraMetricsClient = ReturnType<typeof createInfraMetricsClient>;
 

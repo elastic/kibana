@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
+  calculatePermissionsFromCapabilities,
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
@@ -226,43 +227,61 @@ export const links: LinkItem = {
   ],
 };
 
-const getFilteredLinks = (linkIds: SecurityPageName[]) => ({
+const excludeLinks = (linkIds: SecurityPageName[]) => ({
   ...links,
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
+
+const getHostIsolationExceptionTotal = async (http: CoreStart['http']) => {
+  const hostIsolationExceptionsApiClientInstance =
+    HostIsolationExceptionsApiClient.getInstance(http);
+  const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+  return summaryResponse.total;
+};
 
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
-  const isEndpointRbacEnabled = ExperimentalFeaturesService.get().endpointRbacEnabled;
+  const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
+  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
+  const linksToExclude: SecurityPageName[] = [];
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const privileges = fleetAuthz
+    const { canReadActionsLogManagement, canIsolateHost, canUnIsolateHost } = fleetAuthz
       ? calculateEndpointAuthz(
           licenseService,
           fleetAuthz,
           currentUserResponse.roles,
-          isEndpointRbacEnabled
+          endpointRbacEnabled || endpointRbacV1Enabled,
+          endpointPermissions
         )
       : getEndpointAuthzInitialState();
-    if (!privileges.canAccessEndpointManagement) {
-      return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+
+    if (!canReadActionsLogManagement) {
+      linksToExclude.push(SecurityPageName.responseActionsHistory);
     }
-    if (!privileges.canIsolateHost) {
-      const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
-        core.http
-      );
-      const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
-      if (!summaryResponse.total) {
-        return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+
+    if (!canIsolateHost && canUnIsolateHost) {
+      let shouldSeeHIEToBeAbleToDeleteEntries: boolean;
+      try {
+        const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+        shouldSeeHIEToBeAbleToDeleteEntries = hostExceptionCount !== 0;
+      } catch {
+        shouldSeeHIEToBeAbleToDeleteEntries = false;
       }
+
+      if (!shouldSeeHIEToBeAbleToDeleteEntries) {
+        linksToExclude.push(SecurityPageName.hostIsolationExceptions);
+      }
+    } else if (!canIsolateHost) {
+      linksToExclude.push(SecurityPageName.hostIsolationExceptions);
     }
   } catch {
-    return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+    linksToExclude.push(SecurityPageName.hostIsolationExceptions);
   }
 
-  return links;
+  return excludeLinks(linksToExclude);
 };

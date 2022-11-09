@@ -18,6 +18,8 @@ interface Props {
   onHidePanelTitlesChange: (hideTitles: boolean) => void;
   syncColors: boolean;
   onSyncColorsChange: (syncColors: boolean) => void;
+  syncCursor: boolean;
+  onSyncCursorChange: (syncCursor: boolean) => void;
   syncTooltips: boolean;
   onSyncTooltipsChange: (syncTooltips: boolean) => void;
 }
@@ -26,6 +28,7 @@ interface State {
   useMargins: boolean;
   hidePanelTitles: boolean;
   syncColors: boolean;
+  syncCursor: boolean;
   syncTooltips: boolean;
 }
 
@@ -34,6 +37,7 @@ export class OptionsMenu extends Component<Props, State> {
     useMargins: this.props.useMargins,
     hidePanelTitles: this.props.hidePanelTitles,
     syncColors: this.props.syncColors,
+    syncCursor: this.props.syncCursor,
     syncTooltips: this.props.syncTooltips,
   };
 
@@ -57,6 +61,12 @@ export class OptionsMenu extends Component<Props, State> {
     const isChecked = evt.target.checked;
     this.props.onSyncColorsChange(isChecked);
     this.setState({ syncColors: isChecked });
+  };
+
+  handleSyncCursorChange = (evt: any) => {
+    const isChecked = evt.target.checked;
+    this.props.onSyncCursorChange(isChecked);
+    this.setState({ syncCursor: isChecked });
   };
 
   handleSyncTooltipsChange = (evt: any) => {
@@ -89,27 +99,49 @@ export class OptionsMenu extends Component<Props, State> {
             data-test-subj="dashboardPanelTitlesCheckbox"
           />
         </EuiFormRow>
-
-        <EuiFormRow>
-          <EuiSwitch
-            label={i18n.translate('dashboard.topNav.options.syncColorsBetweenPanelsSwitchLabel', {
-              defaultMessage: 'Sync color palettes across panels',
-            })}
-            checked={this.state.syncColors}
-            onChange={this.handleSyncColorsChange}
-            data-test-subj="dashboardSyncColorsCheckbox"
-          />
-        </EuiFormRow>
-
-        <EuiFormRow>
-          <EuiSwitch
-            label={i18n.translate('dashboard.topNav.options.syncTooltipsBetweenPanelsSwitchLabel', {
-              defaultMessage: 'Sync tooltips across panels',
-            })}
-            checked={this.state.syncTooltips}
-            onChange={this.handleSyncTooltipsChange}
-            data-test-subj="dashboardSyncTooltipsCheckbox"
-          />
+        <EuiFormRow label="Sync across panels">
+          <>
+            <EuiFormRow>
+              <EuiSwitch
+                label={i18n.translate(
+                  'dashboard.topNav.options.syncColorsBetweenPanelsSwitchLabel',
+                  {
+                    defaultMessage: 'Sync color palettes across panels',
+                  }
+                )}
+                checked={this.state.syncColors}
+                onChange={this.handleSyncColorsChange}
+                data-test-subj="dashboardSyncColorsCheckbox"
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiSwitch
+                label={i18n.translate(
+                  'dashboard.topNav.options.syncCursorBetweenPanelsSwitchLabel',
+                  {
+                    defaultMessage: 'Sync cursor across panels',
+                  }
+                )}
+                checked={this.state.syncCursor}
+                onChange={this.handleSyncCursorChange}
+                data-test-subj="dashboardSyncCursorCheckbox"
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiSwitch
+                label={i18n.translate(
+                  'dashboard.topNav.options.syncTooltipsBetweenPanelsSwitchLabel',
+                  {
+                    defaultMessage: 'Sync tooltips across panels',
+                  }
+                )}
+                checked={this.state.syncTooltips}
+                disabled={!Boolean(this.state.syncCursor)}
+                onChange={this.handleSyncTooltipsChange}
+                data-test-subj="dashboardSyncTooltipsCheckbox"
+              />
+            </EuiFormRow>
+          </>
         </EuiFormRow>
       </EuiForm>
     );

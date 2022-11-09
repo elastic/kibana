@@ -29,6 +29,7 @@ const logger: Logger = {
   fatal: noop,
   log: noop,
   get: () => logger,
+  isLevelEnabled: () => true,
 };
 
 export const kibanaConfigWriter = new KibanaConfigWriter(getConfigPath(), getDataPath(), logger);
@@ -48,7 +49,7 @@ export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.
         logger,
         type,
         // we use an independent AgentManager for cli_setup, no need to track performance of this one
-        agentManager: new AgentManager(),
+        agentFactoryProvider: new AgentManager(),
         kibanaVersion: kibanaPackageJson.version,
       });
     },

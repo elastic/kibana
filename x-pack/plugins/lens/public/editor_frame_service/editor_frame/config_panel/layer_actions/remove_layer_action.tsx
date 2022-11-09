@@ -22,9 +22,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LayerAction, Visualization } from '../../../../types';
 import { LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
-import { type LayerType, layerTypes } from '../../../..';
+import type { LayerType } from '../../../../../common/types';
 
 interface RemoveLayerAction {
   execute: () => void;
@@ -54,11 +55,11 @@ const getButtonCopy = (layerType: LayerType, canBeRemoved?: boolean, isOnlyLayer
   let ariaLabel;
 
   const layerTypeCopy =
-    layerType === layerTypes.DATA
+    layerType === LayerTypes.DATA
       ? i18n.translate('xpack.lens.modalTitle.layerType.data', {
           defaultMessage: 'visualization',
         })
-      : layerType === layerTypes.ANNOTATIONS
+      : layerType === LayerTypes.ANNOTATIONS
       ? i18n.translate('xpack.lens.modalTitle.layerType.annotation', {
           defaultMessage: 'annotations',
         })
@@ -80,9 +81,9 @@ const getButtonCopy = (layerType: LayerType, canBeRemoved?: boolean, isOnlyLayer
     modalDesc = modalDescClear;
   }
 
-  if (layerType === layerTypes.ANNOTATIONS) {
+  if (layerType === LayerTypes.ANNOTATIONS) {
     modalDesc = modalDescAnnotation;
-  } else if (layerType === layerTypes.REFERENCELINE) {
+  } else if (layerType === LayerTypes.REFERENCELINE) {
     modalDesc = modalDescRefLine;
   }
 
@@ -200,7 +201,7 @@ const RemoveConfirmModal = ({
 
 export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
   const { ariaLabel, modalTitle, modalDesc } = getButtonCopy(
-    props.layerType || layerTypes.DATA,
+    props.layerType || LayerTypes.DATA,
     !!props.activeVisualization.removeLayer,
     props.isOnlyLayer
   );

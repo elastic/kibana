@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '../../../../common/constants';
-import { BulkCreateCommentRequest } from '../../../../common/api';
+import type { BulkCreateCommentRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';

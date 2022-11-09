@@ -4,15 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiLink } from '@elastic/eui';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { sumBy } from 'lodash/fp';
-import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
-import { useHostRiskScoreKpi, useUserRiskScoreKpi } from '../../../../risk_score/containers';
+import { useRiskScoreKpi } from '../../../../risk_score/containers';
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
-import { Direction, RiskScoreFields, RiskSeverity } from '../../../../../common/search_strategy';
+import {
+  Direction,
+  RiskScoreEntity,
+  RiskScoreFields,
+  RiskSeverity,
+} from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { SecurityPageName } from '../../../../app/types';
@@ -23,9 +27,10 @@ import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirec
 import { UsersTableType } from '../../../../users/store/model';
 import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import { ENTITY_ANALYTICS_ANOMALIES_PANEL } from '../anomalies';
+import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${({ theme: { eui } }) => eui.euiColorDanger};
@@ -49,27 +54,28 @@ export const EntityAnalyticsHeader = () => {
     loading: hostRiskLoading,
     inspect: inspectHostRiskScore,
     refetch: refetchHostRiskScore,
-  } = useHostRiskScoreKpi({ timerange });
+  } = useRiskScoreKpi({
+    timerange,
+    riskEntity: RiskScoreEntity.host,
+  });
 
   const {
     severityCount: usersSeverityCount,
     loading: userRiskLoading,
     refetch: refetchUserRiskScore,
     inspect: inspectUserRiskScore,
-  } = useUserRiskScoreKpi({
+  } = useRiskScoreKpi({
     timerange,
+    riskEntity: RiskScoreEntity.user,
   });
 
   const { data } = useNotableAnomaliesSearch({ skip: false, from, to });
+
   const dispatch = useDispatch();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
-  const {
-    services: { ml, http },
-  } = useKibana();
-
-  const [goToHostRiskTabFilterdByCritical, hostRiskTabUrl] = useMemo(() => {
+  const [goToHostRiskTabFilteredByCritical, hostRiskTabUrl] = useMemo(() => {
     const { onClick, href } = getSecuritySolutionLinkProps({
       deepLinkId: SecurityPageName.hosts,
       path: getTabsOnHostsUrl(HostsTableType.risk),
@@ -92,7 +98,7 @@ export const EntityAnalyticsHeader = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
-  const [goToUserRiskTabFilterdByCritical, userRiskTabUrl] = useMemo(() => {
+  const [goToUserRiskTabFilteredByCritical, userRiskTabUrl] = useMemo(() => {
     const { onClick, href } = getSecuritySolutionLinkProps({
       deepLinkId: SecurityPageName.users,
       path: getTabsOnUsersUrl(UsersTableType.risk),
@@ -134,17 +140,28 @@ export const EntityAnalyticsHeader = () => {
     inspect: inspectHostRiskScore,
   });
 
-  // Anomalies are enabled if at least one job is installed
-  const areJobsEnabled = useMemo(() => data.some(({ jobId }) => !!jobId), [data]);
+  // Anomaly jobs are enabled if at least one job is started or has data
+  const areJobsEnabled = useMemo(
+    () =>
+      data.some(
+        ({ job, count }) => count > 0 || (job && isJobStarted(job.jobState, job.datafeedState))
+      ),
+    [data]
+  );
 
   const totalAnomalies = useMemo(
     () => (areJobsEnabled ? sumBy('count', data) : '-'),
     [data, areJobsEnabled]
   );
 
-  const jobsUrl = useMlHref(ml, http.basePath.get(), {
-    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-  });
+  const scrollToAnomalies = useCallback(() => {
+    const element = document.querySelector<HTMLElement>(
+      `[data-test-subj="${ENTITY_ANALYTICS_ANOMALIES_PANEL}"]`
+    );
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, []);
 
   return (
     <EuiPanel hasBorder paddingSize="l">
@@ -161,7 +178,7 @@ export const EntityAnalyticsHeader = () => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <LinkAnchor
-                  onClick={goToHostRiskTabFilterdByCritical}
+                  onClick={goToHostRiskTabFilteredByCritical}
                   href={hostRiskTabUrl}
                   data-test-subj="critical_hosts_link"
                 >
@@ -183,7 +200,7 @@ export const EntityAnalyticsHeader = () => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <LinkAnchor
-                  onClick={goToUserRiskTabFilterdByCritical}
+                  onClick={goToUserRiskTabFilteredByCritical}
                   href={userRiskTabUrl}
                   data-test-subj="critical_users_link"
                 >
@@ -202,9 +219,9 @@ export const EntityAnalyticsHeader = () => {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <LinkAnchor data-test-subj="all_anomalies_link" href={jobsUrl} target="_blank">
+              <EuiLink data-test-subj="all_anomalies_link" onClick={scrollToAnomalies}>
                 {i18n.ANOMALIES}
-              </LinkAnchor>
+              </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

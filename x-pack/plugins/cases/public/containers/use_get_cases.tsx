@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { casesQueriesKeys, DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
-import { Cases, FilterOptions, QueryParams, SortFieldCase, StatusAll, SeverityAll } from './types';
+import type { Cases, FilterOptions, QueryParams } from './types';
+import { SortFieldCase, StatusAll, SeverityAll } from './types';
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getCases } from './api';
-import { ServerError } from '../types';
+import type { ServerError } from '../types';
 
 const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
 

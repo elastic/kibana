@@ -93,10 +93,12 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
         start?: string;
         durationToDate?: string;
       } = {};
+
       for (let i = 0; i < instanceEvents.length; ++i) {
         switch (instanceEvents[i]?.event?.action) {
           case 'new-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
+            expect(instanceEvents[i]?.kibana?.alert?.flapping).to.equal(false);
             // a new alert should generate a unique UUID for the duration of its activeness
             expect(instanceEvents[i]?.event?.end).to.be(undefined);
 
@@ -107,6 +109,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
 
           case 'active-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
+            expect(instanceEvents[i]?.kibana?.alert?.flapping).to.equal(false);
             expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
             expect(instanceEvents[i]?.event?.end).to.be(undefined);
 
@@ -121,6 +124,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
 
           case 'recovered-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
+            expect(instanceEvents[i]?.kibana?.alert?.flapping).to.equal(false);
             expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
             expect(instanceEvents[i]?.event?.end).not.to.be(undefined);
             expect(

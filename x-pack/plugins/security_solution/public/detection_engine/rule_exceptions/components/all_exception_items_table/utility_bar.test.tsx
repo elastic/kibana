@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mount } from 'enzyme';
 
 import { ExceptionsViewerUtility } from './utility_bar';
 import { TestProviders } from '../../../../common/mock';
 
 describe('ExceptionsViewerUtility', () => {
   it('it renders correct item counts', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ExceptionsViewerUtility
           pagination={{
@@ -33,7 +33,7 @@ describe('ExceptionsViewerUtility', () => {
   });
 
   it('it renders last updated message', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ExceptionsViewerUtility
           pagination={{

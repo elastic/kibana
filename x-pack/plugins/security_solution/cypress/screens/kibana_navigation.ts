@@ -30,6 +30,11 @@ export const MANAGE_PAGE =
 
 export const KIBANA_NAVIGATION_TOGGLE = '[data-test-subj="toggleNavButton"]';
 
+export const OBSERVABILITY_ALERTS_PAGE =
+  '[data-test-subj="collapsibleNavGroup-observability"] [title="Alerts"]';
+
 export const SPACES_BUTTON = '[data-test-subj="spacesNavSelector"]';
+
+export const APP_LEAVE_CONFIRM_MODAL = '[data-test-subj="appLeaveConfirmModal"]';
 
 export const getGoToSpaceMenuItem = (space: string) => `[data-test-subj="space-avatar-${space}"]`;

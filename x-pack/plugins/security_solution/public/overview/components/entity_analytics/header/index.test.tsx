@@ -30,8 +30,7 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
 
 jest.mock('../../../../risk_score/containers', () => {
   return {
-    useHostRiskScoreKpi: () => ({ severityCount: mockSeverityCount }),
-    useUserRiskScoreKpi: () => ({ severityCount: mockSeverityCount }),
+    useRiskScoreKpi: () => ({ severityCount: mockSeverityCount }),
   };
 });
 

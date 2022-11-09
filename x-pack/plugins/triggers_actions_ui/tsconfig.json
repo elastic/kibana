@@ -4,16 +4,16 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
+    ".storybook/**/*",
     "server/**/*",
     "public/**/*",
     "common/**/*",
     "config.ts",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../features/tsconfig.json" },

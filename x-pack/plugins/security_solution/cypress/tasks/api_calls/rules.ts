@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import type {
   CustomRule,
   ThreatIndicatorRule,
@@ -70,6 +72,7 @@ export const createCustomRule = (
             timeline_title: timeline.title,
           }
         : {}),
+      actions: rule.actions,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
@@ -254,7 +257,8 @@ export const createCustomRuleEnabled = (
   rule: CustomRule,
   ruleId = '1',
   interval = '100m',
-  maxSignals = 500
+  maxSignals = 500,
+  actions?: RuleActionArray
 ) => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
@@ -280,6 +284,7 @@ export const createCustomRuleEnabled = (
         tags: ['rule1'],
         max_signals: maxSignals,
         building_block_type: rule.buildingBlockType,
+        actions,
       },
       headers: { 'kbn-xsrf': 'cypress-creds' },
       failOnStatusCode: false,
@@ -306,6 +311,7 @@ export const createCustomRuleEnabled = (
         tags: ['rule1'],
         max_signals: maxSignals,
         building_block_type: rule.buildingBlockType,
+        actions,
       },
       headers: { 'kbn-xsrf': 'cypress-creds' },
       failOnStatusCode: false,

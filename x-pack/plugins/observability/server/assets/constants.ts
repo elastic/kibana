@@ -12,4 +12,5 @@ export const SLO_RESOURCES_VERSION = 1;
 export const SLO_INGEST_PIPELINE_NAME = `${SLO_INDEX_TEMPLATE_NAME}.monthly`;
 export const SLO_DESTINATION_INDEX_NAME = `${SLO_INDEX_TEMPLATE_NAME}-v${SLO_RESOURCES_VERSION}`;
 
-export const getSLOTransformId = (sloId: string) => `slo-${sloId}`;
+export const getSLOTransformId = (sloId: string, sloRevision: number) =>
+  `slo-${sloId}-${sloRevision}`;

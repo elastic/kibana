@@ -39,7 +39,7 @@ describe('Pipeline Editor', () => {
   let testBed: SetupResult;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {

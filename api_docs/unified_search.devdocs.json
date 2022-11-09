@@ -11,7 +11,7 @@
         "label": "DataViewPicker",
         "description": [],
         "signature": [
-          "({ isMissingCurrent, currentDataViewId, adHocDataViews, onChangeDataView, onAddField, onDataViewCreated, trigger, selectableProps, textBasedLanguages, onSaveTextLanguageQuery, onTextLangQuerySubmit, textBasedLanguage, onCreateDefaultAdHocDataView, isDisabled, }: ",
+          "({ isMissingCurrent, currentDataViewId, adHocDataViews, onChangeDataView, onEditDataView, onAddField, onDataViewCreated, trigger, selectableProps, textBasedLanguages, onSaveTextLanguageQuery, onTextLangQuerySubmit, textBasedLanguage, onCreateDefaultAdHocDataView, isDisabled, }: ",
           "DataViewPickerPropsExtended",
           ") => JSX.Element"
         ],
@@ -24,7 +24,7 @@
             "id": "def-public.DataViewPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isMissingCurrent,\n  currentDataViewId,\n  adHocDataViews,\n  onChangeDataView,\n  onAddField,\n  onDataViewCreated,\n  trigger,\n  selectableProps,\n  textBasedLanguages,\n  onSaveTextLanguageQuery,\n  onTextLangQuerySubmit,\n  textBasedLanguage,\n  onCreateDefaultAdHocDataView,\n  isDisabled,\n}",
+            "label": "{\n  isMissingCurrent,\n  currentDataViewId,\n  adHocDataViews,\n  onChangeDataView,\n  onEditDataView,\n  onAddField,\n  onDataViewCreated,\n  trigger,\n  selectableProps,\n  textBasedLanguages,\n  onSaveTextLanguageQuery,\n  onTextLangQuerySubmit,\n  textBasedLanguage,\n  onCreateDefaultAdHocDataView,\n  isDisabled,\n}",
             "description": [],
             "signature": [
               "DataViewPickerPropsExtended"
@@ -270,11 +270,29 @@
         "description": [],
         "signature": [
           "<QT extends ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           " | ",
-          "AggregateQuery",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
           " = ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           ">(props: Omit<",
           {
             "pluginId": "unifiedSearch",
@@ -299,9 +317,21 @@
             "description": [],
             "signature": [
               "{ query?: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | QT | undefined; dataTestSubj?: string | undefined; filters?: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined; savedQuery?: ",
               {
                 "pluginId": "data",
@@ -328,16 +358,40 @@
                 "section": "def-public.TimeHistoryContract",
                 "text": "TimeHistoryContract"
               },
-              " | undefined; customSubmitButton?: React.ReactNode; screenTitle?: string | undefined; showQueryBar?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; hiddenFilterPanelOptions?: ",
+              " | undefined; customSubmitButton?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; hiddenFilterPanelOptions?: ",
               "FilterPanelOption",
               "[] | undefined; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; onQueryChange?: ((payload: { dateRange: ",
-              "TimeRange",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               "; query?: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | QT | undefined; }) => void) | undefined; onQuerySubmit?: ((payload: { dateRange: ",
-              "TimeRange",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               "; query?: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | QT | undefined; }, isUpdate?: boolean | undefined) => void) | undefined; onSaved?: ((savedQuery: ",
               {
                 "pluginId": "data",
@@ -355,7 +409,13 @@
                 "text": "SavedQuery"
               },
               ") => void) | undefined; onClearSavedQuery?: (() => void) | undefined; onRefresh?: ((payload: { dateRange: ",
-              "TimeRange",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               "; }) => void) | undefined; indicateNoData?: boolean | undefined; isClearable?: boolean | undefined; nonKqlMode?: \"text\" | \"lucene\" | undefined; displayStyle?: \"inPage\" | \"detached\" | undefined; fillSubmitButton?: boolean | undefined; dataViewPickerComponentProps?: ",
               {
                 "pluginId": "unifiedSearch",
@@ -369,7 +429,13 @@
               ") => void) | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"auto\" | \"full\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",
               " | undefined; isScreenshotMode?: boolean | undefined; onFiltersUpdated?: ((filters: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]) => void) | undefined; onRefreshChange?: ((options: { isPaused: boolean; refreshInterval: number; }) => void) | undefined; }"
             ],
             "path": "src/plugins/unified_search/public/search_bar/index.tsx",
@@ -400,7 +466,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]"
             ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
@@ -452,7 +524,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              "> | undefined"
+              ", any> | undefined"
             ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
             "deprecated": false,
@@ -544,6 +616,54 @@
                 "description": [],
                 "signature": [
                   "string"
+                ],
+                "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.onEditDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "onEditDataView",
+            "description": [
+              "\nCallback that is called when the user edits the current data view via flyout.\nThe first parameter is the updated data view stub without fetched fields"
+            ],
+            "signature": [
+              "((updatedDataViewStub: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-public.DataViewPickerProps.onEditDataView.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "updatedDataViewStub",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  }
                 ],
                 "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
                 "deprecated": false,
@@ -772,7 +892,13 @@
               "Array of filters that will be rendered as filter pills"
             ],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
@@ -806,7 +932,13 @@
             ],
             "signature": [
               "((filters: ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]) => void) | undefined"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
@@ -821,7 +953,13 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "Filter",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
@@ -923,7 +1061,13 @@
             "text": "IUnifiedSearchPluginServices"
           },
           " extends Partial<",
-          "CoreStart",
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreStart",
+            "text": "CoreStart"
+          },
           ">"
         ],
         "path": "src/plugins/unified_search/public/types.ts",
@@ -973,7 +1117,13 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              "IUiSettingsClient"
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
             ],
             "path": "src/plugins/unified_search/public/types.ts",
             "deprecated": false,
@@ -987,7 +1137,13 @@
             "label": "savedObjects",
             "description": [],
             "signature": [
-              "SavedObjectsStart"
+              {
+                "pluginId": "@kbn/core-saved-objects-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
+                "section": "def-common.SavedObjectsStart",
+                "text": "SavedObjectsStart"
+              }
             ],
             "path": "src/plugins/unified_search/public/types.ts",
             "deprecated": false,
@@ -1001,7 +1157,13 @@
             "label": "notifications",
             "description": [],
             "signature": [
-              "NotificationsStart"
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.NotificationsStart",
+                "text": "NotificationsStart"
+              }
             ],
             "path": "src/plugins/unified_search/public/types.ts",
             "deprecated": false,
@@ -1015,7 +1177,13 @@
             "label": "application",
             "description": [],
             "signature": [
-              "ApplicationStart"
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ApplicationStart",
+                "text": "ApplicationStart"
+              }
             ],
             "path": "src/plugins/unified_search/public/types.ts",
             "deprecated": false,
@@ -1029,7 +1197,13 @@
             "label": "http",
             "description": [],
             "signature": [
-              "HttpSetup"
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              }
             ],
             "path": "src/plugins/unified_search/public/types.ts",
             "deprecated": false,
@@ -1064,7 +1238,13 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              "DocLinksStart"
+              {
+                "pluginId": "@kbn/core-doc-links-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
+                "section": "def-common.DocLinksStart",
+                "text": "DocLinksStart"
+              }
             ],
             "path": "src/plugins/unified_search/public/types.ts",
             "deprecated": false,
@@ -1104,6 +1284,26 @@
                 "docId": "kibDataViewsPluginApi",
                 "section": "def-public.DataViewsServicePublic",
                 "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.dataViewEditor",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewEditor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViewEditor",
+                "scope": "public",
+                "docId": "kibDataViewEditorPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
               }
             ],
             "path": "src/plugins/unified_search/public/types.ts",
@@ -1161,6 +1361,8 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
+              " | ",
+              "DataViewByIdOrTitle",
               ")[]"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
@@ -1325,7 +1527,13 @@
             "description": [],
             "signature": [
               "((query: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               ") => void) | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
@@ -1340,7 +1548,13 @@
                 "label": "query",
                 "description": [],
                 "signature": [
-                  "Query"
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  }
                 ],
                 "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
                 "deprecated": false,
@@ -1391,7 +1605,13 @@
             "description": [],
             "signature": [
               "((query: ",
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               ") => void) | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
@@ -1406,7 +1626,13 @@
                 "label": "query",
                 "description": [],
                 "signature": [
-                  "Query"
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  }
                 ],
                 "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
                 "deprecated": false,
@@ -1835,9 +2061,9 @@
           },
           " implements ",
           {
-            "pluginId": "core",
+            "pluginId": "@kbn/core-plugins-server",
             "scope": "server",
-            "docId": "kibCorePluginApi",
+            "docId": "kibKbnCorePluginsServerPluginApi",
             "section": "def-server.Plugin",
             "text": "Plugin"
           },
@@ -1878,9 +2104,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
+                    "pluginId": "@kbn/core-plugins-server",
                     "scope": "server",
-                    "docId": "kibCorePluginApi",
+                    "docId": "kibKbnCorePluginsServerPluginApi",
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
@@ -1904,9 +2130,9 @@
             "signature": [
               "(core: ",
               {
-                "pluginId": "core",
+                "pluginId": "@kbn/core-lifecycle-server",
                 "scope": "server",
-                "docId": "kibCorePluginApi",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
                 "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
@@ -1937,9 +2163,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
+                    "pluginId": "@kbn/core-lifecycle-server",
                     "scope": "server",
-                    "docId": "kibCorePluginApi",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
                     "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
@@ -1988,9 +2214,9 @@
             "signature": [
               "(core: ",
               {
-                "pluginId": "core",
+                "pluginId": "@kbn/core-lifecycle-server",
                 "scope": "server",
-                "docId": "kibCorePluginApi",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
                 "section": "def-server.CoreStart",
                 "text": "CoreStart"
               },
@@ -2011,9 +2237,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
+                    "pluginId": "@kbn/core-lifecycle-server",
                     "scope": "server",
-                    "docId": "kibCorePluginApi",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
                     "section": "def-server.CoreStart",
                     "text": "CoreStart"
                   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionConnector, ActionTypeConnector } from '../../../common/api';
+import type { ActionConnector, ActionTypeConnector } from '../../../common/api';
 
 export const connectorsMock: ActionConnector[] = [
   {

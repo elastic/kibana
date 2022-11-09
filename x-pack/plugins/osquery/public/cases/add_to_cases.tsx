@@ -5,21 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
+
+import { CasesAttachmentWrapperContext } from '../shared_components/attachments/pack_queries_attachment_wrapper';
 import { useKibana } from '../common/lib/kibana';
 import type { AddToCaseButtonProps } from './add_to_cases_button';
 import { AddToCaseButton } from './add_to_cases_button';
 
 const CASES_OWNER: string[] = [];
 
-export const AddToCaseWrapper: React.FC<AddToCaseButtonProps> = React.memo((props) => {
+export const AddToCaseWrapper = React.memo<AddToCaseButtonProps>((props) => {
   const { cases } = useKibana().services;
+  const isCasesAttachment = useContext(CasesAttachmentWrapperContext);
+
+  if (isCasesAttachment || !props.actionId) {
+    return <></>;
+  }
+
   const casePermissions = cases.helpers.canUseCases();
   const CasesContext = cases.ui.getCasesContext();
 
   return (
     <CasesContext owner={CASES_OWNER} permissions={casePermissions}>
-      <AddToCaseButton {...props} />{' '}
+      <AddToCaseButton {...props} />
     </CasesContext>
   );
 });

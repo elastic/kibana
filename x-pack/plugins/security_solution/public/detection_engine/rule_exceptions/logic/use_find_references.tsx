@@ -5,51 +5,49 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { useEffect, useRef, useState } from 'react';
 
-import type { RuleReferenceSchema } from '../../../../common/detection_engine/schemas/response';
-import { findRuleExceptionReferences } from '../../../detections/containers/detection_engine/rules/api';
+import type { ExceptionListRuleReferencesSchema } from '../../../../common/detection_engine/rule_exceptions';
+import { findRuleExceptionReferences } from '../../rule_management/api/api';
 import { useToasts } from '../../../common/lib/kibana';
-import type { FindRulesReferencedByExceptionsListProp } from '../../../detections/containers/detection_engine/rules/types';
+import type { FindRulesReferencedByExceptionsListProp } from '../../rule_management/logic/types';
 import * as i18n from '../utils/translations';
 
-export type ReturnUseFindExceptionListReferences = [boolean, boolean, RuleReferences | null];
-
 export interface RuleReferences {
-  [key: string]: RuleReferenceSchema[];
+  [key: string]: ExceptionListRuleReferencesSchema;
 }
+
+export type FetchReferencesFunc = (
+  listsToFetch: FindRulesReferencedByExceptionsListProp[]
+) => Promise<void>;
+
+export type ReturnUseFindExceptionListReferences = [
+  boolean,
+  boolean,
+  RuleReferences | null,
+  FetchReferencesFunc | null
+];
+
 /**
  * Hook for finding what rules are referenced by a set of exception lists
- * @param ruleExceptionLists array of exception list info stored on a rule
  */
-export const useFindExceptionListReferences = (
-  ruleExceptionLists: ListArray
-): ReturnUseFindExceptionListReferences => {
+export const useFindExceptionListReferences = (): ReturnUseFindExceptionListReferences => {
   const toasts = useToasts();
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorExists, setErrorExists] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [didError, setError] = useState(false);
   const [references, setReferences] = useState<RuleReferences | null>(null);
-  const listRefs = useMemo((): FindRulesReferencedByExceptionsListProp[] => {
-    return ruleExceptionLists.map((list) => {
-      return {
-        id: list.id,
-        listId: list.list_id,
-        namespaceType: list.namespace_type,
-      };
-    });
-  }, [ruleExceptionLists]);
+  const findExceptionListAndReferencesRef = useRef<FetchReferencesFunc | null>(null);
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    const findReferences = async () => {
+    const findReferences = async (listsToFetch: FindRulesReferencedByExceptionsListProp[]) => {
       try {
         setIsLoading(true);
 
         const { references: referencesResults } = await findRuleExceptionReferences({
-          lists: listRefs,
+          lists: listsToFetch,
           signal: abortCtrl.signal,
         });
 
@@ -62,32 +60,26 @@ export const useFindExceptionListReferences = (
         }, {});
 
         if (isSubscribed) {
-          setErrorExists(false);
           setIsLoading(false);
+          setError(false);
           setReferences(results);
         }
       } catch (error) {
         if (isSubscribed) {
-          setErrorExists(true);
+          setError(true);
           setIsLoading(false);
           toasts.addError(error, { title: i18n.ERROR_FETCHING_REFERENCES_TITLE });
         }
       }
     };
 
-    if (listRefs.length === 0 && isSubscribed) {
-      setErrorExists(false);
-      setIsLoading(false);
-      setReferences(null);
-    } else {
-      findReferences();
-    }
+    findExceptionListAndReferencesRef.current = findReferences;
 
     return (): void => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [ruleExceptionLists, listRefs, toasts]);
+  }, [toasts]);
 
-  return [isLoading, errorExists, references];
+  return [isLoading, didError, references, findExceptionListAndReferencesRef.current];
 };

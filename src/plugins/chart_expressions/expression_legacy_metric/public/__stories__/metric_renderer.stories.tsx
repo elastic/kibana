@@ -43,6 +43,7 @@ const style: MetricStyle = {
 };
 
 const config: MetricVisRenderConfig = {
+  canNavigateToLens: false,
   visType,
   visData: {
     type: 'datatable',

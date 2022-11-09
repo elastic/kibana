@@ -6,7 +6,8 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { casesQueriesKeys } from '../../containers/constants';
 import { useRefreshCases } from './use_on_refresh_cases';
 

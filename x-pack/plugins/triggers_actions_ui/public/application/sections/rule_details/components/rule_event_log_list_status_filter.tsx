@@ -7,11 +7,11 @@
 
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
-import type { EcsEventOutcome } from '@kbn/core/server';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 
-const statusFilters: EcsEventOutcome[] = ['success', 'failure', 'unknown'];
+const statusFilters: RuleAlertingOutcome[] = ['success', 'failure', 'warning', 'unknown'];
 
 interface RuleEventLogListStatusFilterProps {
   selectedOptions: string[];

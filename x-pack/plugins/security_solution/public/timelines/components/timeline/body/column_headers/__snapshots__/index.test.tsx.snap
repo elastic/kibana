@@ -776,7 +776,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
     ]
   }
   tabType="query"
-  timelineId="test"
+  timelineId="timeline-test"
   trailingControlColumns={Array []}
 />
 `;
