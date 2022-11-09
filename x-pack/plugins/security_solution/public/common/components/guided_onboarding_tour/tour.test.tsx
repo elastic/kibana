@@ -97,14 +97,25 @@ describe('useTourContext', () => {
       });
     });
 
-    it('when provided, incrementStep sets activeStep to step number argument', async () => {
+    it('setStep sets activeStep to step number argument', async () => {
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
           wrapper: TourContextProvider,
         });
         await waitForNextUpdate();
-        result.current.incrementStep(tourId, 7);
+        result.current.setStep(tourId, 7);
         expect(result.current.activeStep).toBe(7);
+      });
+    });
+
+    it('does not setStep sets activeStep to non-existing step number', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
+          wrapper: TourContextProvider,
+        });
+        await waitForNextUpdate();
+        result.current.setStep(tourId, 88);
+        expect(result.current.activeStep).toBe(1);
       });
     });
   });

@@ -60,14 +60,13 @@ export const useAddToCaseActions = ({
       : [];
   }, [casesUi.helpers, ecsData, nonEcsData]);
 
-  const { activeStep, incrementStep, isTourShown } = useTourContext();
+  const { activeStep, setStep, isTourShown } = useTourContext();
 
   const afterCaseCreated = useCallback(async () => {
     if (isTourShown(SecurityStepId.alertsCases)) {
-      // user could be on step 5 or 6 at this point, increment to 7 no matter what
-      incrementStep(SecurityStepId.alertsCases, AlertsCasesTourSteps.viewCase);
+      setStep(SecurityStepId.alertsCases, AlertsCasesTourSteps.viewCase);
     }
-  }, [incrementStep, isTourShown]);
+  }, [setStep, isTourShown]);
 
   const prefillCasesValue = useMemo(
     () =>
@@ -75,7 +74,7 @@ export const useAddToCaseActions = ({
       (activeStep === AlertsCasesTourSteps.addAlertToCase ||
         activeStep === AlertsCasesTourSteps.createCase ||
         activeStep === AlertsCasesTourSteps.submitCase)
-        ? sampleCase
+        ? { initialValue: sampleCase }
         : {},
     [activeStep, isTourShown]
   );
@@ -84,7 +83,7 @@ export const useAddToCaseActions = ({
     onClose: onMenuItemClick,
     onSuccess,
     afterCaseCreated,
-    initialValue: prefillCasesValue,
+    ...prefillCasesValue,
   });
 
   const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
