@@ -1258,10 +1258,4 @@
       "@kbn/ambient-storybook-types"
     ]
   },
-  // excluding folders that we do not want to check on
-  "exclude": [
-    "**/node_modules",
-    "**/.*/",
-    "**/target/types"
-  ]
 }
