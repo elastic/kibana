@@ -59,6 +59,7 @@ exports[`render 1`] = `
     textAlign="right"
   >
     <EuiButton
+      color="primary"
       fill={true}
       isDisabled={false}
       onClick={[Function]}
@@ -132,6 +133,7 @@ exports[`should render error message 1`] = `
     textAlign="right"
   >
     <EuiButton
+      color="primary"
       fill={true}
       isDisabled={false}
       onClick={[Function]}
