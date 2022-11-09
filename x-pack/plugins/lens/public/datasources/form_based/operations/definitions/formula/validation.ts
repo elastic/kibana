@@ -16,7 +16,7 @@ import {
   parseTimeShift,
   REASON_IDS,
   REASON_ID_TYPES,
-  shallowValidateAbsoluteTimeShift,
+  validateAbsoluteTimeShift,
 } from '@kbn/data-plugin/common';
 import { DateRange } from '../../../../../../common/types';
 import {
@@ -520,7 +520,7 @@ function getAbsoluteTimeShiftErrorMessage(reason: REASON_ID_TYPES) {
   switch (reason) {
     case REASON_IDS.missingTimerange:
       return i18n.translate('xpack.lens.indexPattern.absoluteMissingTimeRange', {
-        defaultMessage: 'Invalid time shift. No Time range found as reference',
+        defaultMessage: 'Invalid time shift. No time range found as reference',
       });
     case REASON_IDS.invalidDate:
       return i18n.translate('xpack.lens.indexPattern.absoluteInvalidDate', {
@@ -562,7 +562,7 @@ function getQueryValidationErrors(
       if (parsedShift === 'invalid') {
         if (isAbsoluteTimeShift(arg.value)) {
           // try to parse as absolute time shift
-          const error = shallowValidateAbsoluteTimeShift(
+          const error = validateAbsoluteTimeShift(
             arg.value,
             dateRange
               ? {

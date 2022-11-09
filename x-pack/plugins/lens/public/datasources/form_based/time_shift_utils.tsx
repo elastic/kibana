@@ -18,7 +18,7 @@ import {
 } from '@kbn/data-plugin/common';
 import type { Duration } from 'moment';
 import type { DateRange } from '../../../common/types';
-import type { GenericIndexPatternColumn, FormBasedLayer, FormBasedPrivateState } from './types';
+import type { FormBasedLayer, FormBasedPrivateState } from './types';
 import type { FramePublicAPI, IndexPattern } from '../../types';
 
 export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {
@@ -211,7 +211,7 @@ export function getDisallowedPreviousShiftMessage(
 export function getStateTimeShiftWarningMessages(
   datatableUtilities: DatatableUtilitiesService,
   state: FormBasedPrivateState,
-  { activeData, dataViews, dateRange }: FramePublicAPI
+  { activeData, dataViews }: FramePublicAPI
 ) {
   if (!state) return;
   const warningMessages: React.ReactNode[] = [];
@@ -237,12 +237,14 @@ export function getStateTimeShiftWarningMessages(
     Object.entries(layer.columns).forEach(([columnId, column]) => {
       if (column.isBucketed) return;
       let duration: number = 0;
-      if (column.timeShift) {
-        const parsedTimeShift = parseTimeShiftWrapper(column.timeShift, dateRange);
+      // skip absolute time shifts as underneath it will be converted to be round
+      // and avoid this type of issues
+      if (column.timeShift && !isAbsoluteTimeShift(column.timeShift)) {
+        const parsedTimeShift = parseTimeShift(column.timeShift);
         if (parsedTimeShift === 'previous' || parsedTimeShift === 'invalid') {
           return;
         }
-        duration = roundToSecondsShift(parsedTimeShift) * 1000;
+        duration = parsedTimeShift.asMilliseconds();
       }
       timeShifts.add(duration);
       if (!timeShiftMap[duration]) {
@@ -295,14 +297,16 @@ export function getStateTimeShiftWarningMessages(
 
 export function getColumnTimeShiftWarnings(
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>,
-  column: GenericIndexPatternColumn,
-  dateRange: DateRange
+  timeShift: string | undefined
 ) {
   const { isValueTooSmall, isValueNotMultiple } = getLayerTimeShiftChecks(dateHistogramInterval);
 
   const warnings: string[] = [];
+  if (isAbsoluteTimeShift(timeShift)) {
+    return warnings;
+  }
 
-  const parsedLocalValue = column.timeShift && parseTimeShiftWrapper(column.timeShift, dateRange);
+  const parsedLocalValue = timeShift && parseTimeShift(timeShift);
   const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
   const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
   if (localValueTooSmall) {

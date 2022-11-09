@@ -374,7 +374,7 @@ export function FormulaEditor({
                 const startPosition = offsetToRowColumn(text, locations[id].min);
                 const endPosition = offsetToRowColumn(text, locations[id].max);
                 newWarnings.push(
-                  ...getColumnTimeShiftWarnings(dateHistogramInterval, column, dateRange).map(
+                  ...getColumnTimeShiftWarnings(dateHistogramInterval, column.timeShift).map(
                     (message) => ({
                       message,
                       startColumn: startPosition.column + 1,
@@ -451,6 +451,7 @@ export function FormulaEditor({
             unifiedSearch,
             dataViews,
             dateHistogramInterval: baseIntervalRef.current,
+            dateRange,
           });
         }
       } else {
@@ -463,6 +464,7 @@ export function FormulaEditor({
           unifiedSearch,
           dataViews,
           dateHistogramInterval: baseIntervalRef.current,
+          dateRange,
         });
       }
 
@@ -478,7 +480,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, baseIntervalRef]
+    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, baseIntervalRef, dateRange]
   );
 
   const provideSignatureHelp = useCallback(

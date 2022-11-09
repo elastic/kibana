@@ -16,6 +16,7 @@ import { generateFormula } from './generate';
 import { filterByVisibleOperation, nonNullable } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
 import { getFilter, isColumnFormatted } from '../helpers';
+import type { FormBasedLayer } from '../../../types';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
@@ -40,6 +41,11 @@ export function isFormulaIndexPatternColumn(
   column: BaseIndexPatternColumn
 ): column is FormulaIndexPatternColumn {
   return 'params' in column && 'formula' in (column as FormulaIndexPatternColumn).params;
+}
+
+export function getFormulaRootColumnId(columnId: string, layer: FormBasedLayer) {
+  const [_, rootId] = columnId.match(/(.+)X[0-9]+$/) || [];
+  return rootId && isFormulaIndexPatternColumn(layer.columns[rootId]) ? rootId : undefined;
 }
 
 export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'managedReference'> =

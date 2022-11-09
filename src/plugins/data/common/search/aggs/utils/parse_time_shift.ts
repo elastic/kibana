@@ -66,7 +66,7 @@ export const parseAbsoluteTimeShift = (
       reason: REASON_IDS.missingTimerange,
     };
   }
-  const error = shallowValidateAbsoluteTimeShift(trimmedVal, timeRange);
+  const error = validateAbsoluteTimeShift(trimmedVal, timeRange);
   if (error) {
     return {
       value: 'invalid',
@@ -96,7 +96,7 @@ export function extractTokensFromAbsTimeShift(val: string) {
  * @param timeRange
  * @returns the reason id if the absolute shift is not valid, undefined otherwise
  */
-export function shallowValidateAbsoluteTimeShift(
+export function validateAbsoluteTimeShift(
   val: string,
   timeRange: TimeRange | undefined
 ): REASON_ID_TYPES | undefined {

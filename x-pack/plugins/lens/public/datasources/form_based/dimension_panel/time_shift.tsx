@@ -9,7 +9,7 @@ import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import { type DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
 import type { DateRange } from '../../../../common/types';
 import {
   adjustTimeScaleLabelSuffix,
@@ -23,6 +23,7 @@ import {
   getLayerTimeShiftChecks,
   timeShiftOptions,
   parseTimeShiftWrapper,
+  getColumnTimeShiftWarnings,
 } from '../time_shift_utils';
 import type { IndexPattern } from '../../../types';
 
@@ -94,17 +95,16 @@ export function TimeShift({
     activeData,
     layerId
   );
-  const { isValueTooSmall, isValueNotMultiple, isInvalid, canShift } =
+  const { canShift, isValueTooSmall, isValueNotMultiple, isInvalid } =
     getLayerTimeShiftChecks(dateHistogramInterval);
 
   if (!canShift) {
     return null;
   }
 
-  const parsedLocalValue = localValue && parseTimeShiftWrapper(localValue, dateRange);
+  const parsedLocalValue = localValue && parseTimeShift(localValue);
   const isLocalValueInvalid = Boolean(parsedLocalValue && isInvalid(parsedLocalValue));
-  const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
-  const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
+  const warnings = getColumnTimeShiftWarnings(dateHistogramInterval, localValue);
 
   function getSelectedOption() {
     const goodPick = timeShiftOptions.filter(({ value }) => value === localValue);
@@ -134,22 +134,13 @@ export function TimeShift({
           defaultMessage: 'Enter the time shift number and unit',
         })}
         error={
-          (localValueTooSmall &&
-            i18n.translate('xpack.lens.indexPattern.timeShift.tooSmallHelp', {
-              defaultMessage:
-                'Time shift should to be larger than the date histogram interval. Either increase time shift or specify smaller interval in date histogram',
-            })) ||
-          (localValueNotMultiple &&
-            i18n.translate('xpack.lens.indexPattern.timeShift.noMultipleHelp', {
-              defaultMessage:
-                'Time shift should be a multiple of the date histogram interval. Either adjust time shift or date histogram interval',
-            })) ||
+          warnings[0] ||
           (isLocalValueInvalid &&
             i18n.translate('xpack.lens.indexPattern.timeShift.genericInvalidHelp', {
               defaultMessage: 'Time shift value is not valid.',
             }))
         }
-        isInvalid={Boolean(isLocalValueInvalid || localValueTooSmall || localValueNotMultiple)}
+        isInvalid={Boolean(isLocalValueInvalid || warnings.length)}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem>

@@ -13,7 +13,7 @@ import type {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '@kbn/data-plugin/public';
-import { isAbsoluteTimeShift, queryToAst } from '@kbn/data-plugin/common';
+import { calcAutoIntervalNear, isAbsoluteTimeShift, queryToAst } from '@kbn/data-plugin/common';
 import {
   buildExpression,
   buildExpressionFunction,
@@ -21,6 +21,7 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
+import moment from 'moment';
 import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
@@ -30,7 +31,7 @@ import { FormattedIndexPatternColumn } from './operations/definitions/column_typ
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
-import { parseTimeShiftWrapper, roundToSecondsShift } from './time_shift_utils';
+import { parseTimeShiftWrapper } from './time_shift_utils';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -52,13 +53,33 @@ const updatePositionIndex = (currentId: string, newIndex: number) => {
   return idParts.join('-') + (percentile ? `.${percentile}` : '');
 };
 
-function resolveTimeShift(timeShift: string | undefined, dateRange: DateRange) {
+function closestMultipleOfInterval(duration: number, interval: number) {
+  if (duration % interval === 0) {
+    return duration;
+  }
+  return Math.ceil(duration / interval) * interval;
+}
+
+function roundAbsoluteInterval(timeShift: string, dateRange: DateRange, targetBars: number) {
+  // workout the interval (most probably matching the ES one)
+  const interval = calcAutoIntervalNear(
+    targetBars,
+    moment(dateRange.toDate).diff(moment(dateRange.fromDate))
+  );
+  const duration = parseTimeShiftWrapper(timeShift, dateRange);
+  if (typeof duration !== 'string') {
+    const roundingOffset = timeShift.startsWith('start') ? interval.asMilliseconds() : 0;
+    return `${
+      (closestMultipleOfInterval(duration.asMilliseconds(), interval.asMilliseconds()) +
+        roundingOffset) /
+      1000
+    }s`;
+  }
+}
+
+function resolveTimeShift(timeShift: string | undefined, dateRange: DateRange, targetBars: number) {
   if (timeShift && isAbsoluteTimeShift(timeShift)) {
-    const duration = parseTimeShiftWrapper(timeShift, dateRange);
-    if (typeof duration !== 'string') {
-      return `${roundToSecondsShift(duration)}s`;
-    }
-    return;
+    return roundAbsoluteInterval(timeShift, dateRange, targetBars);
   }
   return timeShift;
 }
@@ -154,6 +175,7 @@ function getExpressionForLayer(
     const orderedColumnIds = esAggEntries.map(([colId]) => colId);
     let esAggsIdMap: Record<string, OriginalColumn[]> = {};
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
+    const histogramBarsTarget = uiSettings.get('histogram:barTarget');
     esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
@@ -168,7 +190,7 @@ function getExpressionForLayer(
         let aggAst = def.toEsAggsFn(
           {
             ...col,
-            timeShift: resolveTimeShift(col.timeShift, dateRange),
+            timeShift: resolveTimeShift(col.timeShift, dateRange, histogramBarsTarget),
           },
           wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
           indexPattern,
@@ -191,11 +213,11 @@ function getExpressionForLayer(
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
                   timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
-                  timeShift: resolveTimeShift(col.timeShift, dateRange),
+                  timeShift: resolveTimeShift(col.timeShift, dateRange, histogramBarsTarget),
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
-              timeShift: resolveTimeShift(col.timeShift, dateRange),
+              timeShift: resolveTimeShift(col.timeShift, dateRange, histogramBarsTarget),
             }
           ).toAst();
         }
