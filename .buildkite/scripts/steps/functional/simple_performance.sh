@@ -6,8 +6,12 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 
-ls -l
-echo "$KIBANA_BUILD_LOCATION" 
+
+if [ -d "$KIBANA_BUILD_LOCATION" ]; then
+  echo "folder exists"
+  ls -l $KIBANA_BUILD_LOCATION
+fi
+
 
 # These tests are running on static workers so we have to make sure we delete previous build of Kibana
 rm -rf "$KIBANA_BUILD_LOCATION"
@@ -46,8 +50,12 @@ echo "✅ ES is ready and will run in the background"
 curl -I -XGET "${TEST_ES_URL}/_cat/indices"
 curl -I -XGET "${TEST_ES_URL}/_cat/count?v=true"
 
-ls -l
-echo "$KIBANA_BUILD_LOCATION" 
+echo "??????"
+
+if [ -d "$KIBANA_BUILD_LOCATION" ]; then
+  echo "folder exists"
+  ls -l $KIBANA_BUILD_LOCATION
+fi
 
 cd "$KIBANA_BUILD_LOCATION"
 
