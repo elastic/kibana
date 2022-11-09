@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
@@ -59,6 +60,7 @@ import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
+import { KibanaServices } from '../common/lib/kibana';
 
 const categories = [
   {
@@ -232,13 +234,6 @@ const excludeLinks = (linkIds: SecurityPageName[]) => ({
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
 
-const getHostIsolationExceptionTotal = async (http: CoreStart['http']) => {
-  const hostIsolationExceptionsApiClientInstance =
-    HostIsolationExceptionsApiClient.getInstance(http);
-  const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
-  return summaryResponse.total;
-};
-
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
@@ -247,16 +242,22 @@ export const getManagementFilteredLinks = async (
   const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
   const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
   const linksToExclude: SecurityPageName[] = [];
+  const hasHostIsolationExceptions = licenseService.isPlatinumPlus()
+    ? true
+    : await checkArtifactHasData(
+        HostIsolationExceptionsApiClient.getInstance(KibanaServices.get().http)
+      );
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const { canReadActionsLogManagement, canIsolateHost, canUnIsolateHost } = fleetAuthz
+    const { canReadActionsLogManagement, canReadHostIsolationExceptions } = fleetAuthz
       ? calculateEndpointAuthz(
           licenseService,
           fleetAuthz,
           currentUserResponse.roles,
           endpointRbacEnabled || endpointRbacV1Enabled,
-          endpointPermissions
+          endpointPermissions,
+          hasHostIsolationExceptions
         )
       : getEndpointAuthzInitialState();
 
@@ -264,19 +265,7 @@ export const getManagementFilteredLinks = async (
       linksToExclude.push(SecurityPageName.responseActionsHistory);
     }
 
-    if (!canIsolateHost && canUnIsolateHost) {
-      let shouldSeeHIEToBeAbleToDeleteEntries: boolean;
-      try {
-        const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
-        shouldSeeHIEToBeAbleToDeleteEntries = hostExceptionCount !== 0;
-      } catch {
-        shouldSeeHIEToBeAbleToDeleteEntries = false;
-      }
-
-      if (!shouldSeeHIEToBeAbleToDeleteEntries) {
-        linksToExclude.push(SecurityPageName.hostIsolationExceptions);
-      }
-    } else if (!canIsolateHost) {
+    if (!canReadHostIsolationExceptions) {
       linksToExclude.push(SecurityPageName.hostIsolationExceptions);
     }
   } catch {
