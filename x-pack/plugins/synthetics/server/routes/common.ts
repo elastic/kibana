@@ -12,7 +12,7 @@ import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../common/runti
 import { monitorAttributes } from '../../common/types/saved_objects';
 import { syntheticsMonitorType } from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
 
-const querySchema = schema.object({
+export const QuerySchema = schema.object({
   page: schema.maybe(schema.number()),
   perPage: schema.maybe(schema.number()),
   sortField: schema.maybe(schema.string()),
@@ -27,7 +27,16 @@ const querySchema = schema.object({
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-type MonitorsQuery = TypeOf<typeof querySchema>;
+export type MonitorsQuery = TypeOf<typeof QuerySchema>;
+
+export const SEARCH_FIELDS = [
+  'name',
+  'tags.text',
+  'locations.id.text',
+  'urls',
+  'hosts',
+  'project_id.text',
+];
 
 export const getMonitors = (
   request: MonitorsQuery,
@@ -51,9 +60,9 @@ export const getMonitors = (
   const locationFilter = parseLocationFilter(syntheticsService.locations, locations);
 
   const filters =
-    getKqlFilter('tags', tags) +
-    getKqlFilter('type', monitorType) +
-    getKqlFilter('locations.id', locationFilter);
+    getKqlFilter({ field: 'tags', values: tags }) +
+    getKqlFilter({ field: 'type', values: monitorType }) +
+    getKqlFilter({ field: 'locations.id', values: locationFilter });
 
   return savedObjectsClient.find({
     type: syntheticsMonitorType,
@@ -61,7 +70,7 @@ export const getMonitors = (
     page,
     sortField: sortField === 'schedule.keyword' ? 'schedule.number' : sortField,
     sortOrder,
-    searchFields: ['name', 'tags.text', 'locations.id.text', 'urls'],
+    searchFields: ['name', 'tags.text', 'locations.id.text', 'urls', 'project_id.text'],
     search: query ? `${query}*` : undefined,
     filter: filters + filter,
     fields,
@@ -69,18 +78,32 @@ export const getMonitors = (
   });
 };
 
-export const getKqlFilter = (field: string, values?: string | string[], operator = 'OR') => {
+export const getKqlFilter = ({
+  field,
+  values,
+  operator = 'OR',
+  searchAtRoot = false,
+}: {
+  field: string;
+  values?: string | string[];
+  operator?: string;
+  searchAtRoot?: boolean;
+}) => {
   if (!values) {
     return '';
   }
-
-  const fieldKey = `${monitorAttributes}.${field}`;
-
-  if (Array.isArray(values)) {
-    return `${fieldKey}:${values.join(` ${operator} ${fieldKey}:`)}`;
+  let fieldKey = '';
+  if (searchAtRoot) {
+    fieldKey = `${field}`;
+  } else {
+    fieldKey = `${monitorAttributes}.${field}`;
   }
 
-  return `${fieldKey}:${values}`;
+  if (Array.isArray(values)) {
+    return `${fieldKey}:"${values.join(`" ${operator} ${fieldKey}:"`)}"`;
+  }
+
+  return `${fieldKey}:"${values}"`;
 };
 
 const parseLocationFilter = (serviceLocations: ServiceLocations, locations?: string | string[]) => {
