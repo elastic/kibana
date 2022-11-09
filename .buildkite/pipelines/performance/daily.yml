@@ -14,7 +14,7 @@ steps:
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
   - label: '💪 Performance Tests with Playwright config'
-    command: .buildkite/scripts/steps/functional/performance_playwright.sh
+    command: .buildkite/scripts/steps/functional/simple_performance.sh
     agents:
       queue: kb-static-scalability
     depends_on: build
