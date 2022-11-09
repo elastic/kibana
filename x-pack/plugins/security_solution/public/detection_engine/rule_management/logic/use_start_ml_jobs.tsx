@@ -12,45 +12,36 @@ import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use
 import { useEnableDataFeed } from '../../../common/components/ml_popover/hooks/use_enable_data_feed';
 
 export interface ReturnUseStartMlJobs {
-  startMlJobs: (jobIds: string[] | undefined) => Promise<boolean>;
+  startMlJobs: (jobIds: string[] | undefined) => Promise<void>;
 }
 
 export const useStartMlJobs = (): ReturnUseStartMlJobs => {
   const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
   const { loading: isLoadingJobs, jobs: mlJobs } = useSecurityJobs();
-  const startMlJobsIfNeeded = useCallback(
+  const startMlJobs = useCallback(
     async (jobIds: string[] | undefined) => {
-      let success = true;
       if (isLoadingJobs || isLoadingEnableDataFeed) {
-        return success;
+        return;
       }
 
       if (!jobIds || !jobIds.length) {
-        return success;
+        return;
       }
 
       const ruleJobs = mlJobs.filter((job) => jobIds.includes(job.id));
-      try {
-        await Promise.all(
-          ruleJobs.map(async (job) => {
-            if (isJobStarted(job.jobState, job.datafeedState)) {
-              return;
-            }
+      await Promise.all(
+        ruleJobs.map(async (job) => {
+          if (isJobStarted(job.jobState, job.datafeedState)) {
+            return true;
+          }
 
-            const latestTimestampMs = job.latestTimestampMs ?? 0;
-            const enabled = await enableDatafeed(job, latestTimestampMs, true);
-            if (!enabled) {
-              success = false;
-            }
-          })
-        );
-      } catch (error) {
-        success = false;
-      }
-      return success;
+          const latestTimestampMs = job.latestTimestampMs ?? 0;
+          await enableDatafeed(job, latestTimestampMs, true);
+        })
+      );
     },
     [enableDatafeed, isLoadingEnableDataFeed, isLoadingJobs, mlJobs]
   );
 
-  return { startMlJobs: startMlJobsIfNeeded };
+  return { startMlJobs };
 };

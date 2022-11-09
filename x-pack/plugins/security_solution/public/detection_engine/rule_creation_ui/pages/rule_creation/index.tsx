@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
@@ -289,9 +288,8 @@ const CreateRulePageComponent: React.FC = () => {
             stepIsValid(scheduleStep) &&
             stepIsValid(actionsStep)
           ) {
-            let failedToStartMlJobs = false;
             if (actionsStep.data.enabled) {
-              failedToStartMlJobs = !(await startMlJobs(defineStep.data.machineLearningJobId));
+              await startMlJobs(defineStep.data.machineLearningJobId);
             }
             const createdRule = await createRule(
               formatRule<RuleCreateProps>(
@@ -302,28 +300,7 @@ const CreateRulePageComponent: React.FC = () => {
               )
             );
 
-            if (failedToStartMlJobs) {
-              addWarning(i18n.FAILED_TO_RUN_ML_RULE(createdRule.name), {
-                text: (
-                  <>
-                    <p>{i18n.FAILED_TO_RUN_ML_RULE_TOAST_DESCRIPTION}</p>
-                    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          onClick={() => navigateToApp('ml', { openInNewTab: true })}
-                          color={'warning'}
-                        >
-                          {i18n.FAILED_TO_RUN_ML_RULE_TOAST_BUTTON}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
-                ),
-                iconType: 'iInCircle',
-              });
-            } else {
-              addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
-            }
+            addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
 
             navigateToApp(APP_UI_ID, {
               deepLinkId: SecurityPageName.rules,
@@ -333,15 +310,7 @@ const CreateRulePageComponent: React.FC = () => {
         }
       }
     },
-    [
-      updateCurrentDataState,
-      goToStep,
-      createRule,
-      navigateToApp,
-      startMlJobs,
-      addWarning,
-      addSuccess,
-    ]
+    [updateCurrentDataState, goToStep, createRule, navigateToApp, startMlJobs, addSuccess]
   );
 
   const getAccordionType = useCallback(

@@ -58,23 +58,3 @@ export const SUCCESSFULLY_CREATED_RULES = (ruleName: string) =>
       defaultMessage: '{ruleName} was created',
     }
   );
-
-export const FAILED_TO_RUN_ML_RULE = (ruleName: string) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.create.failedToRunMlRuleTitle', {
-    values: { ruleName },
-    defaultMessage: 'Machine learning rule {ruleName} was created but failed to run',
-  });
-
-export const FAILED_TO_RUN_ML_RULE_TOAST_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.create.failedToRunMlRuleToastDescription',
-  {
-    defaultMessage: 'Please go to Machine Learning to run related jobs before enabling this rule.',
-  }
-);
-
-export const FAILED_TO_RUN_ML_RULE_TOAST_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.create.failedToRunMlRuleToastButtonLabel',
-  {
-    defaultMessage: 'Go to Machine Learning page',
-  }
-);
