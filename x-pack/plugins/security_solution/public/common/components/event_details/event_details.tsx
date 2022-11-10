@@ -445,14 +445,17 @@ const EventDetailsComponent: React.FC<Props> = ({
       step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
       tourId={SecurityStepId.alertsCases}
     >
-      <StyledEuiTabbedContent
-        {...tourAnchor}
-        data-test-subj="eventDetails"
-        tabs={tabs}
-        selectedTab={selectedTab}
-        onTabClick={handleTabClick}
-        key="event-summary-tabs"
-      />
+      <>
+        <EuiSpacer size="s" />
+        <StyledEuiTabbedContent
+          {...tourAnchor}
+          data-test-subj="eventDetails"
+          tabs={tabs}
+          selectedTab={selectedTab}
+          onTabClick={handleTabClick}
+          key="event-summary-tabs"
+        />
+      </>
     </GuidedOnboardingTourStep>
   );
 };
