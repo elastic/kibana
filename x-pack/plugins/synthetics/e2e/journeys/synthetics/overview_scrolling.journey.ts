@@ -48,7 +48,7 @@ journey('Overview Scrolling', async ({ page, params }) => {
     await page.waitForSelector(`text="test monitor 0"`);
     let count = await gridItems.count();
 
-    expect(count).toBe(32);
+    expect(count <= 32).toBe(true);
 
     while (!showingAllMonitorsNode) {
       await page.mouse.wheel(0, 100);
