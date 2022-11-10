@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
+import { TotalStepDuration } from './components/step_total_duration';
 import { BreakdownLegend } from './components/timings_breakdown/breakdown_legend';
 import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
 import { ObjectWeightList } from './components/object_weight_list';
@@ -77,6 +78,7 @@ export const StepDetailPage = () => {
             <EuiFlexGroup>
               <EuiFlexItem grow={1}>
                 <NetworkTimingsDonut />
+                <TotalStepDuration />
               </EuiFlexItem>
               <EuiFlexItem grow={1}>
                 <BreakdownLegend />
