@@ -8,31 +8,31 @@
 import { i18n } from '@kbn/i18n';
 
 export const SELECTED_PROCESS = {
-  all: i18n.translate('sessionView.alertDetailsAllSelectedCategory', {
+  all: i18n.translate('xpack.sessionView.alertDetailsAllSelectedCategory', {
     defaultMessage: 'View: all alerts',
   }),
-  process: i18n.translate('sessionView.alertDetailsProcessSelectedCategory', {
+  process: i18n.translate('xpack.sessionView.alertDetailsProcessSelectedCategory', {
     defaultMessage: 'View: process alerts',
   }),
-  network: i18n.translate('sessionView.alertDetailsNetworkSelectedCategory', {
+  network: i18n.translate('xpack.sessionView.alertDetailsNetworkSelectedCategory', {
     defaultMessage: 'View: network alerts',
   }),
-  file: i18n.translate('sessionView.alertDetailsFileSelectedCategory', {
+  file: i18n.translate('xpack.sessionView.alertDetailsFileSelectedCategory', {
     defaultMessage: 'View: file alerts',
   }),
 };
 
 export const FILTER_MENU_OPTIONS = {
-  all: i18n.translate('sessionView.alertDetailsAllFilterItem', {
+  all: i18n.translate('xpack.sessionView.alertDetailsAllFilterItem', {
     defaultMessage: 'View all alerts',
   }),
-  process: i18n.translate('sessionView.alertDetailsProcessFilterItem', {
+  process: i18n.translate('xpack.sessionView.alertDetailsProcessFilterItem', {
     defaultMessage: 'View process alerts',
   }),
-  network: i18n.translate('sessionView.alertDetailsNetworkFilterItem', {
+  network: i18n.translate('xpack.sessionView.alertDetailsNetworkFilterItem', {
     defaultMessage: 'View network alerts',
   }),
-  file: i18n.translate('sessionView.alertDetailsFileFilterItem', {
+  file: i18n.translate('xpack.sessionView.alertDetailsFileFilterItem', {
     defaultMessage: 'View file alerts',
   }),
 };

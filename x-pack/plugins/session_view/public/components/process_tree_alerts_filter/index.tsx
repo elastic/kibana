@@ -137,7 +137,7 @@ export const ProcessTreeAlertsFilter = ({
 
             {totalAlertsCount !== filteredAlertsCount && (
               <FormattedMessage
-                id="xpack.sessionView.alertTotalCountStatusLabel"
+                id="xpack.sessionView.alertFilteredCountStatusLabel"
                 defaultMessage=" Showing {count} alerts"
                 values={{
                   count: (
