@@ -54,8 +54,7 @@ async function fetchKibanaStatuses({
   const requests = await Promise.allSettled(
     kibanaConfig.hosts.map(async (host) => {
       log.debug(`Fetching response from ${host}${KIBANA_STATUS_ROUTE}`);
-      const response = fetch(`${host}${KIBANA_STATUS_ROUTE}`).then((res) => res.json());
-      return response;
+      return fetch(`${host}${KIBANA_STATUS_ROUTE}`);
     })
   );
 
@@ -65,7 +64,7 @@ async function fetchKibanaStatuses({
     } else {
       log.info(
         `Got response from ${kibanaConfig.hosts[i]}${KIBANA_STATUS_ROUTE}: ${JSON.stringify(
-          r.value.status?.overall ? r.value.status.overall : r.value
+          r.value.status
         )}`
       );
     }
@@ -78,15 +77,27 @@ function mergeStatusResponses(
 ) {
   let statusCode = 200;
   for (const response of responses) {
-    if (response.status === 'rejected') {
+    if (response.status === 'rejected' || !isHealthyResponse(response.value.status)) {
       statusCode = 503;
     }
   }
 
   return {
-    body: {}, // Need to determine what response body, if any, we want to include
+    body: {}, // The control plane health check ignores the body, so we do the same
     statusCode,
   };
+}
+
+function isHealthyResponse(statusCode: number) {
+  return isSuccess(statusCode) || isUnauthorized(statusCode);
+}
+
+function isUnauthorized(statusCode: number): boolean {
+  return statusCode === 401;
+}
+
+function isSuccess(statusCode: number): boolean {
+  return statusCode >= 200 && statusCode <= 299;
 }
 
 function generateAgentConfig(sslConfig: KibanaConfig['ssl']) {
