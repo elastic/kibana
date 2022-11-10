@@ -25,10 +25,6 @@ interface UseFindingsByResourceOptions extends FindingsBaseEsQuery {
 // Maximum number of grouped findings, default limit in elasticsearch is set to 65,536 (ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html#search-settings-max-buckets)
 const MAX_BUCKETS = 60 * 1000;
 
-interface UseResourceFindingsQueryOptions extends Omit<UseFindingsByResourceOptions, 'enabled'> {
-  pitId: string;
-}
-
 export interface FindingsByResourceQuery {
   pageIndex: Pagination['pageIndex'];
   pageSize: Pagination['pageSize'];
@@ -74,7 +70,7 @@ export const getFindingsByResourceAggQuery = ({
   from,
   size,
   sortDirection,
-}: UseResourceFindingsQueryOptions): estypes.SearchRequest => ({
+}: UseFindingsByResourceOptions): estypes.SearchRequest => ({
   index: CSP_LATEST_FINDINGS_DATA_VIEW,
   body: {
     query,
