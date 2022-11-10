@@ -420,10 +420,9 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 100 });
 
-        // there are 20 unique values for the document, but only 10 alerts generated
-        expect(previewAlerts.length).eql(10);
+        expect(previewAlerts.length).eql(20);
       });
 
       // There is a limit in ES for a number of emitted values in runtime field (100)
@@ -439,10 +438,9 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
-        // there are 100 unique values for the document, but only 10 alerts generated
-        expect(previewAlerts.length).eql(10);
+        expect(previewAlerts.length).eql(100);
       });
 
       // There is a limit in ES for a number of emitted values in runtime field (100)
@@ -459,10 +457,9 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
-        // there are 200 unique values for the document, but only 10 alerts generated
-        expect(previewAlerts.length).eql(10);
+        expect(previewAlerts.length).eql(100);
       });
     });
 
