@@ -9,9 +9,7 @@
  * will import from 6.8.x to 7.x.x
  */
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
   const renderService = getService('renderable');
 
