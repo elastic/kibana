@@ -10,46 +10,72 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { DataViewSelectPopover, DataViewSelectPopoverProps } from './data_view_select_popover';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
+
+const selectedDataView = {
+  id: 'mock-data-logs-id',
+  namespaces: ['default'],
+  title: 'kibana_sample_data_logs',
+  isTimeBased: jest.fn(),
+  isPersisted: jest.fn(() => true),
+  getName: () => 'kibana_sample_data_logs',
+} as unknown as DataView;
 
 const props: DataViewSelectPopoverProps = {
   onSelectDataView: () => {},
-  dataViewName: 'kibana_sample_data_logs',
-  dataViewId: 'mock-data-logs-id',
+  onChangeMetaData: () => {},
+  dataView: selectedDataView,
 };
 
+const dataViewIds = ['mock-data-logs-id', 'mock-ecommerce-id', 'mock-test-id'];
+
 const dataViewOptions = [
-  {
-    id: 'mock-data-logs-id',
-    namespaces: ['default'],
-    title: 'kibana_sample_data_logs',
-  },
+  selectedDataView,
   {
     id: 'mock-flyghts-id',
     namespaces: ['default'],
     title: 'kibana_sample_data_flights',
+    isTimeBased: jest.fn(),
+    isPersisted: jest.fn(() => true),
+    getName: () => 'kibana_sample_data_flights',
   },
   {
     id: 'mock-ecommerce-id',
     namespaces: ['default'],
     title: 'kibana_sample_data_ecommerce',
     typeMeta: {},
+    isTimeBased: jest.fn(),
+    isPersisted: jest.fn(() => true),
+    getName: () => 'kibana_sample_data_ecommerce',
   },
   {
     id: 'mock-test-id',
     namespaces: ['default'],
     title: 'test',
     typeMeta: {},
+    isTimeBased: jest.fn(),
+    isPersisted: jest.fn(() => true),
+    getName: () => 'test',
   },
 ];
 
 const mount = () => {
   const dataViewsMock = dataViewPluginMocks.createStartContract();
-  dataViewsMock.getIdsWithTitle.mockImplementation(() => Promise.resolve(dataViewOptions));
+  dataViewsMock.getIds = jest.fn().mockImplementation(() => Promise.resolve(dataViewIds));
+  dataViewsMock.get = jest
+    .fn()
+    .mockImplementation((id: string) =>
+      Promise.resolve(dataViewOptions.find((current) => current.id === id))
+    );
+  const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
 
   return {
     wrapper: mountWithIntl(
-      <KibanaContextProvider services={{ data: { dataViews: dataViewsMock } }}>
+      <KibanaContextProvider
+        services={{ dataViews: dataViewsMock, dataViewEditor: dataViewEditorMock }}
+      >
         <DataViewSelectPopover {...props} />
       </KibanaContextProvider>
     ),
@@ -66,10 +92,10 @@ describe('DataViewSelectPopover', () => {
       wrapper.update();
     });
 
-    expect(dataViewsMock.getIdsWithTitle).toHaveBeenCalled();
+    expect(dataViewsMock.getIds).toHaveBeenCalled();
     expect(wrapper.find('[data-test-subj="selectDataViewExpression"]').exists()).toBeTruthy();
 
-    const getIdsWithTitleResult = await dataViewsMock.getIdsWithTitle.mock.results[0].value;
-    expect(getIdsWithTitleResult).toBe(dataViewOptions);
+    const getIdsResult = await dataViewsMock.getIds.mock.results[0].value;
+    expect(getIdsResult).toBe(dataViewIds);
   });
 });

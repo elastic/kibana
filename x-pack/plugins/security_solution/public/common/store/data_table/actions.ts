@@ -27,5 +27,6 @@ export {
   upsertColumn,
   updateGraphEventId,
   updateSessionViewConfig,
+  updateTotalCount,
   createTGrid,
 } from '@kbn/timelines-plugin/public';
