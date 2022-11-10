@@ -29,7 +29,8 @@ import type {
 } from '../table_list_view';
 import { TableSortSelect } from './table_sort_select';
 import { TagFilterPanel } from './tag_filter_panel';
-import type { Props as TagFilterPanelProps } from './tag_filter_panel';
+import { useTagFilterPanel } from './use_tag_filter_panel';
+import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
 import type { SortColumnField } from './table_sort_select';
 
 type State<T extends UserContentCommonSchema> = Pick<
@@ -38,11 +39,8 @@ type State<T extends UserContentCommonSchema> = Pick<
 >;
 
 type TagManagementProps = Pick<
-  TagFilterPanelProps,
-  | 'clearTagSelection'
-  | 'addOrRemoveIncludeTagFilter'
-  | 'addOrRemoveExcludeTagFilter'
-  | 'tagsToTableItemMap'
+  UseTagFilterPanelParams,
+  'addOrRemoveIncludeTagFilter' | 'addOrRemoveExcludeTagFilter' | 'tagsToTableItemMap'
 >;
 
 interface Props<T extends UserContentCommonSchema> extends State<T>, TagManagementProps {
@@ -56,6 +54,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   deleteItems: TableListViewProps<T>['deleteItems'];
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
+  clearTagSelection: () => void;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -113,6 +112,22 @@ export function Table<T extends UserContentCommonSchema>({
       }
     : undefined;
 
+  const {
+    isPopoverOpen,
+    isTransitionOn,
+    closePopover,
+    onFilterButtonClick,
+    onSelectChange,
+    options,
+    totalActiveFilters,
+  } = useTagFilterPanel({
+    query: searchQuery.query,
+    getTagList,
+    tagsToTableItemMap,
+    addOrRemoveExcludeTagFilter,
+    addOrRemoveIncludeTagFilter,
+  });
+
   const onSearchQueryChange = useCallback(
     (arg: { query: Query | null; queryText: string }) => {
       dispatch({
@@ -126,8 +141,8 @@ export function Table<T extends UserContentCommonSchema>({
     [dispatch]
   );
 
-  const searchFilters = useMemo(() => {
-    const tableSortSelectFilter: SearchFilterConfig = {
+  const tableSortSelectFilter = useMemo<SearchFilterConfig>(() => {
+    return {
       type: 'custom_component',
       component: () => {
         return (
@@ -139,35 +154,40 @@ export function Table<T extends UserContentCommonSchema>({
         );
       },
     };
+  }, [hasUpdatedAtMetadata, onSortChange, tableSort]);
 
-    const tagFilterPanel: SearchFilterConfig = {
+  const tagFilterPanel = useMemo<SearchFilterConfig>(() => {
+    return {
       type: 'custom_component',
       component: () => {
         return (
           <TagFilterPanel
-            query={searchQuery.query}
-            getTagList={getTagList}
-            tagsToTableItemMap={tagsToTableItemMap}
-            addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
-            addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+            isPopoverOpen={isPopoverOpen}
+            isTransitionOn={isTransitionOn}
+            closePopover={closePopover}
+            options={options}
+            totalActiveFilters={totalActiveFilters}
+            onFilterButtonClick={onFilterButtonClick}
+            onSelectChange={onSelectChange}
             clearTagSelection={clearTagSelection}
           />
         );
       },
     };
-
-    return [tableSortSelectFilter, tagFilterPanel];
   }, [
-    onSortChange,
-    hasUpdatedAtMetadata,
-    tableSort,
-    getTagList,
-    searchQuery.query,
-    tagsToTableItemMap,
-    addOrRemoveIncludeTagFilter,
-    addOrRemoveExcludeTagFilter,
+    isPopoverOpen,
+    isTransitionOn,
+    closePopover,
+    options,
+    totalActiveFilters,
+    onFilterButtonClick,
+    onSelectChange,
     clearTagSelection,
   ]);
+
+  const searchFilters = useMemo(() => {
+    return [tableSortSelectFilter, tagFilterPanel];
+  }, [tableSortSelectFilter, tagFilterPanel]);
 
   const search = useMemo(() => {
     return {
