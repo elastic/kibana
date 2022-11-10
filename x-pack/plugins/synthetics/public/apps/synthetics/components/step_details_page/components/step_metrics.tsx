@@ -153,5 +153,5 @@ const METRICS_LABEL = i18n.translate('xpack.synthetics.stepDetailsRoute.metrics'
 });
 
 const TOTAL_DURATION_LABEL = i18n.translate('xpack.synthetics.totalDuration.metrics', {
-  defaultMessage: 'Total duration',
+  defaultMessage: 'Step duration',
 });
