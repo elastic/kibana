@@ -282,17 +282,28 @@ async function checkEventLogAlertUuids(
   alertUuid: string,
   executionUuid: string
 ) {
-  const docs = await getEventLog({
-    getService,
-    spaceId,
-    type: 'alert',
-    id: ruleId,
-    provider: 'alerting',
-    actions: new Map([['active-instance', { equal: 1 }]]),
-    filter: `kibana.alert.rule.execution.uuid: ${executionUuid}`,
+  const retry = getService('retry');
+
+  const docs: Awaited<ReturnType<typeof getEventLog>> = [];
+  await retry.waitFor('getting event log docs', async () => {
+    docs.push(...(await getEventLogDocs()));
+    return docs.length > 0;
   });
 
+  expect(docs.length).to.be.greaterThan(0);
   for (const doc of docs) {
     expect(doc?.kibana?.alert?.uuid).to.be(alertUuid);
+  }
+
+  function getEventLogDocs() {
+    return getEventLog({
+      getService,
+      spaceId,
+      type: 'alert',
+      id: ruleId,
+      provider: 'alerting',
+      actions: new Map([['active-instance', { equal: 1 }]]),
+      filter: `kibana.alert.rule.execution.uuid: ${executionUuid}`,
+    });
   }
 }
