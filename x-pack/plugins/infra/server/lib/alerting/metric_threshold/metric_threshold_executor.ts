@@ -100,12 +100,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     const { alertWithLifecycle, savedObjectsClient, getAlertUuid, getAlertByAlertUuid } = services;
 
-    const alertFactory: MetricThresholdAlertFactory = (id, reason, additionalContext) =>
-    {
+    const alertFactory: MetricThresholdAlertFactory = (id, reason, additionalContext) => {
       let flattenedContext: AdditionalContext = {};
       additionalContext?.keys.forEach((context: string) => {
         if (additionalContext[context]) {
-          flattenedContext = { ...flattenedContext, ...flattenObject(additionalContext[context], [context + "."]) };
+          flattenedContext = {
+            ...flattenedContext,
+            ...flattenObject(additionalContext[context], [context + '.']),
+          };
         }
       });
 

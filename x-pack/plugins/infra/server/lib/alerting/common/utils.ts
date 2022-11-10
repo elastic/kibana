@@ -14,13 +14,13 @@ import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { set } from '@kbn/safer-lodash-set';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
-import { set } from '@kbn/safer-lodash-set';
 
 const ALERT_CONTEXT_CONTAINER = 'container' as const;
 const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator' as const;
@@ -222,7 +222,8 @@ export const shouldTermsAggOnContainer = (groupBy: string | string[] | undefined
 export const getContextForRecoveredAlerts = (
   alertHits: AdditionalContext | undefined | null
 ): AdditionalContext => {
-  const alertHitsSource = alertHits && alertHits.length > 0 ? unflattenObject(alertHits[0]._source) : undefined;
+  const alertHitsSource =
+    alertHits && alertHits.length > 0 ? unflattenObject(alertHits[0]._source) : undefined;
 
   return {
     cloud: alertHitsSource?.[ALERT_CONTEXT_CLOUD],
