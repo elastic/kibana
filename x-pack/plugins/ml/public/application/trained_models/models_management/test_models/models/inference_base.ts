@@ -226,7 +226,7 @@ export abstract class InferenceBase<TInferResponse> {
         this.setFinishedWithErrors(error);
         throw Error(error.reason);
       }
-      throw Error('No doc aaaggghhhhhhh'); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      throw Error('Error simulating ingest pipeline');
     }
     return doc;
   }
