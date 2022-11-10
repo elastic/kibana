@@ -27,7 +27,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
     unifiedSearchFilters,
     onSubmit,
     saveQuery,
-    clearSavedQUery,
+    clearSavedQuery,
   } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
@@ -41,7 +41,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   };
 
   const onClearSavedQuery = () => {
-    clearSavedQUery();
+    clearSavedQuery();
   };
 
   const onQuerySave = (savedQuery: SavedQuery) => {

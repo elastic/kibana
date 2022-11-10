@@ -76,7 +76,7 @@ export const useUnifiedSearch = () => {
     [filterManager, dispatch]
   );
 
-  const clearSavedQUery = useCallback(() => {
+  const clearSavedQuery = useCallback(() => {
     dispatch({
       type: 'setFilter',
       payload: filterManager.getGlobalFilters(),
@@ -95,7 +95,7 @@ export const useUnifiedSearch = () => {
     buildQuery,
     onSubmit: debounceOnSubmit,
     saveQuery,
-    clearSavedQUery,
+    clearSavedQuery,
     unifiedSearchQuery: state.query,
     unifiedSearchDateRange: getTime(),
     unifiedSearchFilters: state.filters,
