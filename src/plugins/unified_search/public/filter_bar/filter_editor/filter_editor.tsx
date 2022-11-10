@@ -38,7 +38,6 @@ import React, { Component } from 'react';
 import { XJsonLang } from '@kbn/monaco';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { css, cx } from '@emotion/css';
@@ -49,7 +48,7 @@ import {
   isFilterValid,
 } from './lib/filter_editor_utils';
 import { FiltersBuilder } from '../../filters_builder';
-import { FilterBadgeGroup } from '../../filter_badge';
+import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import { flattenFilters } from './lib/helpers';
 
 /** The default max-height of the Add/Edit Filter popover used to show "+n More" filters (e.g. `+4 More`) */
@@ -59,10 +58,11 @@ const filtersBuilderMaxHeight = css`
   max-height: ${DEFAULT_MAX_HEIGHT};
 `;
 
-const tempStyle = css`
-  font-size: 12px;
+/** @todo: should be removed, no hardcoded sizes **/
+const filterBadgeStyle = css`
   .euiFormRow__fieldWrapper {
-    line-height: 1.2rem;
+    font-size: 12px;
+    line-height: 1.5;
   }
 `;
 
@@ -199,7 +199,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
                 <EuiButton
                   fill
                   onClick={this.onSubmit}
-                  isDisabled={!this.isFilterValid()}
+                  isDisabled={!this.isFiltersValid()}
                   data-test-subj="saveFilter"
                 >
                   {this.props.mode === 'add' ? addButtonLabel : updateButtonLabel}
@@ -271,7 +271,18 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
   private renderFiltersBuilderEditor() {
     const { selectedIndexPattern, filters } = this.state;
-    const shouldShowPreview = filters && flattenFilters(filters).length > 1;
+    const flattenedFilters = flattenFilters(filters);
+
+    const shouldShowPreview =
+      selectedIndexPattern &&
+      (flattenedFilters.length > 1 ||
+        (flattenedFilters.length === 1 &&
+          isFilterValid(
+            selectedIndexPattern,
+            getFieldFromFilter(flattenedFilters[0] as FieldFilter, selectedIndexPattern),
+            getOperatorFromFilter(flattenedFilters[0]),
+            getFilterParams(flattenedFilters[0])
+          )));
 
     return (
       <>
@@ -289,8 +300,8 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
         {shouldShowPreview ? (
           <EuiFormRow
             fullWidth
-            className={tempStyle}
             hasEmptyLabelSpace={true}
+            className={filterBadgeStyle}
             label={
               <strong>
                 <FormattedMessage
@@ -307,6 +318,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
               filters={filters}
               dataViews={this.props.indexPatterns}
               booleanRelation={BooleanRelation.AND}
+              shouldShowBrackets={false}
             />
           </EuiFormRow>
         ) : null}
@@ -351,7 +363,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
-  private isFilterValid() {
+  private isFiltersValid() {
     const {
       isCustomEditorOpen,
       queryDsl,
@@ -383,13 +395,9 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
   }
 
   private onIndexPatternChange = ([selectedIndexPattern]: DataView[]) => {
-    const { uiSettings } = this.props;
-    const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
-    const emptyFilter = buildEmptyFilter(isPinned, selectedIndexPattern.id);
-    const filters = [emptyFilter];
     this.setState({
       selectedIndexPattern,
-      filters,
+      filters: [buildEmptyFilter(false, selectedIndexPattern.id)],
     });
   };
 

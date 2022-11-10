@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useReducer, useCallback, useState, useMemo } from 'react';
+import React, { useEffect, useReducer, useCallback, useState, useMemo, useRef } from 'react';
 import { EuiDragDropContext, DragDropContextProps, useEuiPaddingSize } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { type Filter, BooleanRelation } from '@kbn/es-query';
@@ -35,6 +35,7 @@ function FiltersBuilder({
   maxDepth = DEFAULT_MAX_DEPTH,
   hideOr = false,
 }: FiltersBuilderProps) {
+  const filtersRef = useRef(filters);
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');
   const sPaddingSize = useEuiPaddingSize('s');
@@ -57,10 +58,15 @@ function FiltersBuilder({
   );
 
   useEffect(() => {
-    if (state.filters !== filters) {
+    dispatch({ type: 'updateFilters', payload: { filters } });
+  }, [filters]);
+
+  useEffect(() => {
+    if (state.filters !== filtersRef.current) {
+      filtersRef.current = state.filters;
       onChange(state.filters);
     }
-  }, [filters, onChange, state.filters]);
+  }, [onChange, state.filters]);
 
   const handleMoveFilter = useCallback(
     (pathFrom: string, pathTo: string, booleanRelation: BooleanRelation) => {
