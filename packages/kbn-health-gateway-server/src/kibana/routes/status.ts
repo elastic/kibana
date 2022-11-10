@@ -9,7 +9,7 @@
 import https from 'https';
 import { URL } from 'url';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
-import nodeFetch, { RequestInit, Response } from 'node-fetch';
+import nodeFetch, { Headers, RequestInit, Response } from 'node-fetch';
 import type { IConfigService } from '@kbn/config';
 import type { Logger } from '@kbn/logging';
 import type { KibanaConfigType } from '../kibana_config';
@@ -17,8 +17,8 @@ import { KibanaConfig } from '../kibana_config';
 
 const HTTPS = 'https:';
 
-const GATEWAY_STATUS_ROUTE = '/api/status';
-const KIBANA_STATUS_ROUTE = '/api/status';
+const GATEWAY_STATUS_ROUTE = '/';
+const KIBANA_STATUS_ROUTE = '/';
 
 interface StatusRouteDependencies {
   log: Logger;
@@ -77,7 +77,10 @@ function mergeStatusResponses(
 ) {
   let statusCode = 200;
   for (const response of responses) {
-    if (response.status === 'rejected' || !isHealthyResponse(response.value.status)) {
+    if (
+      response.status === 'rejected' ||
+      !isHealthyResponse(response.value.status, response.value.headers)
+    ) {
       statusCode = 503;
     }
   }
@@ -88,16 +91,16 @@ function mergeStatusResponses(
   };
 }
 
-function isHealthyResponse(statusCode: number) {
-  return isSuccess(statusCode) || isUnauthorized(statusCode);
+function isHealthyResponse(statusCode: number, headers: Headers) {
+  return isSuccess(statusCode) || isUnauthorized(statusCode, headers);
 }
 
-function isUnauthorized(statusCode: number): boolean {
-  return statusCode === 401;
+function isUnauthorized(statusCode: number, headers: Headers): boolean {
+  return statusCode === 401 && headers.has('www-authenticate');
 }
 
 function isSuccess(statusCode: number): boolean {
-  return statusCode >= 200 && statusCode <= 299;
+  return (statusCode >= 200 && statusCode <= 299) || statusCode === 302;
 }
 
 function generateAgentConfig(sslConfig: KibanaConfig['ssl']) {
