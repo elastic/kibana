@@ -13,10 +13,10 @@ import type { GetExceptionItemProps } from '@kbn/securitysolution-exception-list
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
 import * as i18n from '../../translations';
-import type { ExceptionListWithRules } from '../../types';
-import { useListExceptionItems } from '../../../../logic/use_list_exception_items';
+import { useListExceptionItems } from '../../../detection_engine/rule_exceptions/logic/use_list_exception_items';
+import type { ExceptionListInfo } from '../use_all_exception_lists';
 
-export const useListWithSearchComponent = (list: ExceptionListWithRules) => {
+export const useListWithSearchComponent = (list: ExceptionListInfo) => {
   const [showAddExceptionFlyout, setShowAddExceptionFlyout] = useState(false);
   const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
 

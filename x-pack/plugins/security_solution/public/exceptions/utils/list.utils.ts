@@ -5,8 +5,20 @@
  * 2.0.
  */
 
+import type { Rule as UIRule } from '@kbn/securitysolution-exception-list-components';
 import { listIDsCannotBeEdited } from '../config';
 import type { ExceptionListInfo } from '../hooks/use_all_exception_lists';
+import type { Rule } from '../../detection_engine/rule_management/logic/types';
+
+export const mapListRulesToUIRules = (listRules: Rule[]): UIRule[] | [] => {
+  if (!listRules.length) return [];
+  return listRules.map((listRule) => ({
+    name: listRule.name,
+    id: listRule.id,
+    rule_id: listRule.rule_id,
+    exception_list: listRule.exceptions_list,
+  }));
+};
 
 export const checkIfListCannotBeEdited = (list: ExceptionListInfo) => {
   return !!listIDsCannotBeEdited.find((id) => id === list.list_id);

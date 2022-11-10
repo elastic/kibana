@@ -16,15 +16,15 @@ import {
   EmptyViewerState,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
-import { AddExceptionFlyout } from '../../../../components/add_exception_flyout';
-import { EditExceptionFlyout } from '../../../../components/edit_exception_flyout';
+import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
+import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
 import * as i18n from '../../translations';
-import type { ExceptionListWithRules } from '../../types';
-import { useListWithSearchComponent } from './use_list_with_search';
-import { ListExceptionItems } from '../../../../components/list_exception_items';
+import { useListWithSearchComponent } from '../../hooks/use_list_with_search';
+import { ListExceptionItems } from '../../../detection_engine/rule_exceptions/components/list_exception_items';
+import type { ExceptionListInfo } from '../../hooks';
 
 interface ListWithSearchComponentProps {
-  list: ExceptionListWithRules;
+  list: ExceptionListInfo;
   isReadOnly: boolean;
 }
 

@@ -9,6 +9,7 @@ import type {
   CreateExceptionListItemSchema,
   NamespaceType,
   UpdateExceptionListItemSchema,
+  UpdateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Pagination } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
@@ -34,4 +35,22 @@ export interface EditExceptionItem {
 export interface AddExceptionItem {
   http: HttpSetup | undefined;
   exception: CreateExceptionListItemSchema;
+}
+
+export interface UpdateExceptionList {
+  http: HttpSetup | undefined;
+  list: UpdateExceptionListSchema;
+}
+
+export interface ExportExceptionList {
+  id: string;
+  http: HttpSetup | undefined;
+  listId: string;
+  namespaceType: NamespaceType;
+}
+
+export interface DeleteExceptionList {
+  id: string;
+  http: HttpSetup | undefined;
+  namespaceType: NamespaceType;
 }

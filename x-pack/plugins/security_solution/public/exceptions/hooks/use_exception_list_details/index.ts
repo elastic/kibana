@@ -7,13 +7,13 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
-import { useKibana, useToasts } from '../../../../common/lib/kibana';
-import type { ExceptionListDetailsComponentProps } from './types';
-import { deleteList, exportList, updateList } from './api';
-import { checkIfListCannotBeEdited, mapListRulesToUIRules } from './utils';
-import * as i18n from './translations';
+import { useKibana, useToasts } from '../../../common/lib/kibana';
+import { deleteList, exportList, updateList } from '../../api';
+import { checkIfListCannotBeEdited, mapListRulesToUIRules } from '../../utils/list.utils';
+import * as i18n from '../../translations';
+import type { ExceptionListInfo } from '../use_all_exception_lists';
 
-export const useExceptionListDetails = ({ list }: ExceptionListDetailsComponentProps) => {
+export const useExceptionListDetails = (list: ExceptionListInfo) => {
   const { name: listName, description: listDescription, list_id: listId, rules: allRules } = list;
   const toasts = useToasts();
   const { services } = useKibana();
