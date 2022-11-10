@@ -53,7 +53,7 @@ export const CloudBenchmarksSection = ({
         style={{
           borderBottom: euiTheme.border.thick,
           borderBottomColor: euiTheme.colors.text,
-          marginBottom: euiTheme.size.l,
+          marginBottom: euiTheme.size.m,
           paddingBottom: euiTheme.size.s,
         }}
       >

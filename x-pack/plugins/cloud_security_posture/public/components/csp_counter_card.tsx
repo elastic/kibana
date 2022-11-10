@@ -40,8 +40,8 @@ export const CspCounterCard = (counter: CspCounterCardProps) => {
       data-test-subj={counter.id}
     >
       <EuiText color={counter.descriptionColor}>
-        <EuiTitle size="xs">
-          <h3>{counter.description}</h3>
+        <EuiTitle>
+          <h2>{counter.description}</h2>
         </EuiTitle>
       </EuiText>
       {counter.onClick && (

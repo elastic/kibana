@@ -23,13 +23,6 @@ import {
 } from '../../../common/hooks/use_navigate_findings';
 import { RULE_FAILED } from '../../../../common/constants';
 
-const defaultHeight = 360;
-
-// TODO: limit this to desktop media queries only
-const summarySectionWrapperStyle = {
-  height: defaultHeight,
-};
-
 export const dashboardColumnsGrow: Record<string, FlexItemGrowSize> = {
   first: 3,
   second: 8,
@@ -109,7 +102,7 @@ export const CloudSummarySection = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="l" style={summarySectionWrapperStyle}>
+    <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={dashboardColumnsGrow.first}>
         <EuiFlexGroup direction="column">
           {counters.map((counter) => (

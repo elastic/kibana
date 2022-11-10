@@ -15,7 +15,15 @@ import {
   Settings,
   timeFormatter,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTextProps, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  EuiTextProps,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
@@ -35,13 +43,12 @@ const getPostureScorePercentage = (postureScore: number): string => `${Math.roun
 const PercentageInfo = ({
   compact,
   postureScore,
-  totalPassed,
-  totalFindings,
 }: CloudPostureScoreChartProps['data'] & { compact: CloudPostureScoreChartProps['compact'] }) => {
+  const { euiTheme } = useEuiTheme();
   const percentage = getPostureScorePercentage(postureScore);
 
   return (
-    <EuiTitle css={{ fontSize: compact ? 22 : 42 }}>
+    <EuiTitle css={{ fontSize: compact ? euiTheme.size.l : euiTheme.size.xxl }}>
       <h3>{percentage}</h3>
     </EuiTitle>
   );
@@ -118,33 +125,38 @@ export const CloudPostureScoreChart = ({
   id,
   partitionOnElementClick,
   compact,
-}: CloudPostureScoreChartProps) => (
-  <EuiFlexGroup
-    direction="column"
-    justifyContent="spaceBetween"
-    style={{ height: '100%' }}
-    gutterSize="none"
-  >
-    <EuiFlexItem grow={2}>
-      <EuiFlexGroup direction="row" justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <PercentageInfo {...data} compact={compact} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            justifyContent="flexEnd"
-            alignItems={compact ? 'center' : 'flexStart'}
-            style={{ paddingRight: 42 }}
-          >
-            <CounterLink text="passed" count={data.totalPassed} color="success" />
-            &nbsp;{`-`}&nbsp;
-            <CounterLink text="failed" count={data.totalFailed} color="danger" />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem grow={compact ? 8 : 6}>
-      <ComplianceTrendChart trend={trend} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+}: CloudPostureScoreChartProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      justifyContent="spaceBetween"
+      style={{ height: '100%' }}
+      gutterSize="none"
+    >
+      <EuiFlexItem grow={2}>
+        <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <PercentageInfo {...data} compact={compact} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+              gutterSize="none"
+              alignItems={compact ? 'center' : 'flexStart'}
+              style={{ paddingRight: euiTheme.size.xxl }}
+            >
+              <CounterLink text="passed" count={data.totalPassed} color="success" />
+              &nbsp;{`-`}&nbsp;
+              <CounterLink text="failed" count={data.totalFailed} color="danger" />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={compact ? 8 : 6}>
+        <ComplianceTrendChart trend={trend} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
@@ -29,6 +30,7 @@ const defaultClusterTitle = i18n.translate(
 );
 
 export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
+  const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
   const shortId = cluster.meta.clusterId.slice(0, 6);
@@ -63,7 +65,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
           }
         >
           <EuiLink onClick={() => handleClusterTitleClick(cluster.meta.clusterId)} color="text">
-            <EuiTitle size="xs">
+            <EuiTitle css={{ fontSize: 20 }}>
               <h5>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.clusterTitle"
@@ -87,7 +89,10 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
           />
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={true} style={{ justifyContent: 'flex-end' }}>
+      <EuiFlexItem
+        grow={true}
+        style={{ justifyContent: 'flex-end', paddingBottom: euiTheme.size.m }}
+      >
         <CISBenchmarkIcon type={cluster.meta.benchmarkId} name={cluster.meta.benchmarkName} />
       </EuiFlexItem>
       {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
