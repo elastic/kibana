@@ -17,6 +17,7 @@ import {
   BulkActionType,
   BulkActionEditType,
 } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkEditSkipReason } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/response_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -475,28 +476,10 @@ export default ({ getService }: FtrProviderContext): void => {
             resultingTags: ['tag3'],
           },
           {
-            caseName: '3 existing tags - 2 other tags(none of them) = 3 tags',
-            existingTags: ['tag1', 'tag2', 'tag3'],
-            tagsToDelete: ['tag4', 'tag5'],
-            resultingTags: ['tag1', 'tag2', 'tag3'],
-          },
-          {
             caseName: '3 existing tags - 1 of them - 2 other tags(none of them) = 2 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToDelete: ['tag3', 'tag4', 'tag5'],
             resultingTags: ['tag1', 'tag2'],
-          },
-          {
-            caseName: '3 existing tags - 0 tags = 3 tags',
-            existingTags: ['tag1', 'tag2', 'tag3'],
-            tagsToDelete: [],
-            resultingTags: ['tag1', 'tag2', 'tag3'],
-          },
-          {
-            caseName: '0 existing tags - 2 tags = 0 tags',
-            existingTags: [],
-            tagsToDelete: ['tag4', 'tag5'],
-            resultingTags: [],
           },
           {
             caseName: '3 existing tags - 3 of them = 0 tags',
@@ -544,12 +527,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const addTagsCases = [
           {
-            caseName: '3 existing tags + 2 of them = 3 tags',
-            existingTags: ['tag1', 'tag2', 'tag3'],
-            addedTags: ['tag1', 'tag2'],
-            resultingTags: ['tag1', 'tag2', 'tag3'],
-          },
-          {
             caseName: '3 existing tags + 2 other tags(none of them) = 5 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             addedTags: ['tag4', 'tag5'],
@@ -566,12 +543,6 @@ export default ({ getService }: FtrProviderContext): void => {
             existingTags: [],
             addedTags: ['tag4', 'tag5'],
             resultingTags: ['tag4', 'tag5'],
-          },
-          {
-            caseName: '3 existing tags + 0 tags = 3 tags',
-            existingTags: ['tag1', 'tag2', 'tag3'],
-            addedTags: [],
-            resultingTags: ['tag1', 'tag2', 'tag3'],
           },
         ];
 
@@ -609,6 +580,91 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(updatedRule.tags).to.eql(resultingTags);
           });
         });
+
+        const skipTagsUpdateCases = [
+          // Delete no-ops
+          {
+            caseName: '3 existing tags - 0 tags = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToUpdate: [],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+            skipReasons: [BulkEditSkipReason.DeletedTagNonExistent],
+            operation: BulkActionEditType.delete_tags,
+          },
+          {
+            caseName: '0 existing tags - 2 tags = 0 tags',
+            existingTags: [],
+            tagsToUpdate: ['tag4', 'tag5'],
+            resultingTags: [],
+            skipReasons: [BulkEditSkipReason.DeletedTagNonExistent],
+            operation: BulkActionEditType.delete_tags,
+          },
+          {
+            caseName: '3 existing tags - 2 other tags (none of them) = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToUpdate: ['tag4', 'tag5'],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+            skipReasons: [BulkEditSkipReason.DeletedTagNonExistent],
+            operation: BulkActionEditType.delete_tags,
+          },
+          // Add no-ops
+          {
+            caseName: '3 existing tags + 2 of them = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToUpdate: ['tag1', 'tag2'],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+            skipReasons: [BulkEditSkipReason.AddedTagAlreadyExists],
+            operation: BulkActionEditType.add_tags,
+          },
+          {
+            caseName: '3 existing tags + 0 tags = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToUpdate: [],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+            skipReasons: [BulkEditSkipReason.AddedTagAlreadyExists],
+            operation: BulkActionEditType.add_tags,
+          },
+        ];
+
+        skipTagsUpdateCases.forEach(
+          ({ caseName, existingTags, tagsToUpdate, resultingTags, skipReasons, operation }) => {
+            it(`should skip rule updated for tags, case: "${caseName}"`, async () => {
+              const ruleId = 'ruleId';
+
+              await createRule(supertest, log, { ...getSimpleRule(ruleId), tags: existingTags });
+
+              const { body: bulkEditResponse } = await postBulkAction()
+                .send({
+                  query: '',
+                  action: BulkActionType.edit,
+                  [BulkActionType.edit]: [
+                    {
+                      type: operation,
+                      value: tagsToUpdate,
+                    },
+                  ],
+                })
+                .expect(200);
+
+              expect(bulkEditResponse.attributes.summary).to.eql({
+                failed: 0,
+                skipped: 1,
+                succeeded: 0,
+                total: 1,
+              });
+
+              // Check that the rules is returned as skipped with expected skip reason
+              expect(bulkEditResponse.attributes.results.skipped[0].skip_reasons).to.eql(
+                skipReasons
+              );
+
+              // Check that the no changes have been persisted
+              const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+              expect(updatedRule.tags).to.eql(resultingTags);
+            });
+          }
+        );
       });
 
       describe('index patterns actions', () => {
@@ -2087,7 +2143,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // This rule will now not have a source defined - as has been the behavior of rules since the beginning
       // this rule will use the default index patterns on rule run
-      it('should NOT error if all index patterns removed from a rule with data views when no index patterns exist on the rule and overwrite_data_views is true', async () => {
+      it('should skip if attempting to remove index patterns from a rule with only a dataView (no index patterns exist on the rule) and overwrite_data_views is true', async () => {
         const dataViewId = 'index1-*';
         const ruleId = 'ruleId';
         const rule = await createRule(supertest, log, {
@@ -2110,17 +2166,19 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 1, succeeded: 0, total: 1 });
 
-        // Check that the updated rule is returned with the response
-        expect(body.attributes.results.updated[0].index).to.eql(undefined);
-        expect(body.attributes.results.updated[0].data_view_id).to.eql(undefined);
+        // Check that the skipped rule is returned with the response
+        expect(body.attributes.results.skipped[0].id).to.eql(rule.id);
+        expect(body.attributes.results.skipped[0].skip_reasons).to.eql([
+          BulkEditSkipReason.DeletedIndexPatternNonExistent,
+        ]);
 
-        // Check that the updates have been persisted
+        // Check that no changes have been persisted.
         const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
 
         expect(setIndexRule.index).to.eql(undefined);
-        expect(setIndexRule.data_view_id).to.eql(undefined);
+        expect(setIndexRule.data_view_id).to.eql(dataViewId);
       });
 
       it('should return error if all index patterns removed from a rule with data views and overwrite_data_views is true', async () => {
@@ -2188,6 +2246,130 @@ export default ({ getService }: FtrProviderContext): void => {
         // Check that the skipped rule is returned with the response
         expect(body.attributes.results.skipped[0].id).to.eql(rule.id);
         expect(body.attributes.results.skipped[0].name).to.eql(rule.name);
+      });
+    });
+
+    describe('multiple_actions', () => {
+      it('should return one updated rule when applying two valid operations on a rule', async () => {
+        const ruleId = 'ruleId';
+        const rule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          index: ['index1-*'],
+          tags: ['tag1', 'tag2'],
+        });
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['initial-index-*'],
+              },
+              {
+                type: BulkActionEditType.add_tags,
+                value: ['tag3'],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(body.attributes.results.updated[0].tags).to.eql(['tag1', 'tag2', 'tag3']);
+        expect(body.attributes.results.updated[0].index).to.eql(['index1-*', 'initial-index-*']);
+
+        // Check that the rule has been persisted
+        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(updatedRule.index).to.eql(['index1-*', 'initial-index-*']);
+        expect(updatedRule.tags).to.eql(['tag1', 'tag2', 'tag3']);
+      });
+
+      it('should return one updated rule when applying one valid operation and one operation to be skipped on a rule', async () => {
+        const ruleId = 'ruleId';
+        const rule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          index: ['index1-*'],
+          tags: ['tag1', 'tag2'],
+        });
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
+              // Valid operation
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['initial-index-*'],
+              },
+              // Operation to be skipped
+              {
+                type: BulkActionEditType.add_tags,
+                value: ['tag1'],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(body.attributes.results.updated[0].tags).to.eql(['tag1', 'tag2']);
+        expect(body.attributes.results.updated[0].index).to.eql(['index1-*', 'initial-index-*']);
+
+        // Check that the rule has been persisted
+        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(updatedRule.index).to.eql(['index1-*', 'initial-index-*']);
+        expect(updatedRule.tags).to.eql(['tag1', 'tag2']);
+      });
+
+      it('should return one skipped rule when two (all) operations that should be skipped', async () => {
+        const ruleId = 'ruleId';
+        const rule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          index: ['index1-*'],
+          tags: ['tag1', 'tag2'],
+        });
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
+              // Operation to be skipped
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['index1-*'],
+              },
+              // Operation to be skipped
+              {
+                type: BulkActionEditType.add_tags,
+                value: ['tag1'],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, skipped: 1, succeeded: 0, total: 1 });
+
+        // Check that the skipped rule is returned with the response
+        expect(body.attributes.results.skipped[0].name).to.eql(rule.name);
+        expect(body.attributes.results.skipped[0].id).to.eql(rule.id);
+        expect(body.attributes.results.skipped[0].skip_reasons).to.eql([
+          BulkEditSkipReason.AddedTagAlreadyExists,
+          BulkEditSkipReason.AddedIndexPatternAlreadyExists,
+        ]);
+
+        // Check that no change to the rule have been persisted
+        const { body: skippedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(skippedRule.index).to.eql(['index1-*']);
+        expect(skippedRule.tags).to.eql(['tag1', 'tag2']);
       });
     });
 

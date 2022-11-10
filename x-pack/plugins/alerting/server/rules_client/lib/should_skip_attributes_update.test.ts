@@ -28,7 +28,7 @@ describe('shouldSkipAttributesUpdate', () => {
     expect(attributesUpdateSkipReasons).toEqual([]);
   });
 
-  it('should return false when the operation is not "add" or "delete" for the "tags" fields', () => {
+  it('should return false when the operation is not "add" or "delete" for the "tags" field', () => {
     const editOperation = {
       field: 'tags',
       operation: 'set',
@@ -45,7 +45,7 @@ describe('shouldSkipAttributesUpdate', () => {
     expect(attributesUpdateSkipReasons).toEqual([]);
   });
 
-  it('should return true when the operation is "add" and the value is already in the tags', () => {
+  it('should return true when the operation is "add" and the value is already in the tags array', () => {
     const editOperation = {
       field: 'tags',
       operation: 'add',
@@ -62,7 +62,7 @@ describe('shouldSkipAttributesUpdate', () => {
     expect(attributesUpdateSkipReasons).toEqual([BulkEditSkipReason.AddedTagAlreadyExists]);
   });
 
-  it('should return true when the operation is "delete" and the value is not in the tags', () => {
+  it('should return true when the operation is "delete" and the value is not in the tags array', () => {
     const editOperation = {
       field: 'tags',
       operation: 'delete',

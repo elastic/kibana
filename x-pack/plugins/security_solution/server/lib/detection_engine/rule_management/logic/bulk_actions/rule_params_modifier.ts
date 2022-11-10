@@ -83,7 +83,7 @@ const applyBulkActionEditToRuleParams = (
   // If the action is succesfully applied and the rule params are modified,
   // we update the following flag to false. As soon as the current function
   // returns this flag as false, at least once, for any action, we know that
-  // the rule needs to be marked as updated.
+  // the rule needs to be marked as having its params updated.
   let isActionSkipped = true;
 
   switch (action.type) {
@@ -152,6 +152,7 @@ const applyBulkActionEditToRuleParams = (
         timelineId: action.value.timeline_id || undefined,
         timelineTitle: action.value.timeline_title || undefined,
       };
+      isActionSkipped = false;
       break;
     }
     // update look-back period in from and meta.from fields
@@ -169,6 +170,8 @@ const applyBulkActionEditToRuleParams = (
         },
         from: `now-${from}s`,
       };
+      isActionSkipped = false;
+      break;
     }
   }
 
