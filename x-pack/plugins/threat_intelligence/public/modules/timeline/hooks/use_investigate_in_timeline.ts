@@ -42,16 +42,22 @@ export const useInvestigateInTimeline = ({
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
   const { key, value } = getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name);
-  if (!fieldAndValueValid(key, value)) {
+  const sourceEventField = IndicatorFieldEventEnrichmentMap[key];
+
+  if (!fieldAndValueValid(key, value) || !sourceEventField) {
     return {} as unknown as UseInvestigateInTimelineValue;
   }
 
-  const dataProviders: DataProvider[] = [...IndicatorFieldEventEnrichmentMap[key], key].map(
-    (e: string) => generateDataProvider(e, value as string)
+  const dataProviders: DataProvider[] = [...sourceEventField, key].map((e: string) =>
+    generateDataProvider(e, value as string)
   );
 
   const to = unwrapValue(indicator, RawIndicatorFieldId.TimeStamp) as string;
   const from = moment(to).subtract(10, 'm').toISOString();
+
+  if (!to || !from) {
+    return {} as unknown as UseInvestigateInTimelineValue;
+  }
 
   const investigateInTimelineFn = securitySolutionContext?.getUseInvestigateInTimeline({
     dataProviders,

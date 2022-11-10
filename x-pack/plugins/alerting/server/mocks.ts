@@ -30,6 +30,7 @@ const createSetupMock = () => {
 const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     listTypes: jest.fn(),
+    getAllTypes: jest.fn(),
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),

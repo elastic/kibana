@@ -17,17 +17,23 @@ interface UseEditModal {
 
 export const useEditModal = ({ listDetails, onSave }: UseEditModal) => {
   const modalFormId = useGeneratedHtmlId({ prefix: 'modalForm' });
-  const [newListDetails, setNewListDetails] = useState(listDetails);
+  const [newListDetails, setNewListDetails] = useState<ListDetails>(listDetails);
   const [showProgress, setShowProgress] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
-  const setIsTouchedValue = useCallback((): void => {
-    setError(!newListDetails.name ? i18n.LIST_NAME_REQUIRED_ERROR : undefined);
-  }, [newListDetails.name]);
+  const onBlur = useCallback(
+    ({ target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+      const { name, value } = target;
+      const trimmedValue = value.trim();
+      setNewListDetails({ ...newListDetails, [name]: trimmedValue });
+      if (name === 'name') setError(!trimmedValue ? i18n.LIST_NAME_REQUIRED_ERROR : undefined);
+    },
+    [newListDetails]
+  );
 
   const onChange = ({ target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = target;
-    setNewListDetails({ ...newListDetails, [name]: value.trim() });
+    setNewListDetails({ ...newListDetails, [name]: value });
   };
 
   const onSubmit = (e?: SyntheticEvent) => {
@@ -41,7 +47,7 @@ export const useEditModal = ({ listDetails, onSave }: UseEditModal) => {
     modalFormId,
     newListDetails,
     showProgress,
-    setIsTouchedValue,
+    onBlur,
     onChange,
     onSubmit,
   };

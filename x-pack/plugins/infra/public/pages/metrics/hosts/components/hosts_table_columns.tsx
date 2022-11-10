@@ -21,6 +21,7 @@ interface HostNodeRow extends HostMetics {
 
 export interface HostMetics {
   cpuCores: SnapshotNodeMetric;
+  diskLatency: SnapshotNodeMetric;
   rx: SnapshotNodeMetric;
   tx: SnapshotNodeMetric;
   memory: SnapshotNodeMetric;
@@ -36,7 +37,6 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     sortable: true,
     truncateText: true,
     textOnly: true,
-    render: (name: string) => <EuiText size="s">{name}</EuiText>,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.operatingSystemColumnHeader', {
@@ -56,11 +56,11 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.diskLatencyColumnHeader', {
-      defaultMessage: 'Disk Latency',
+      defaultMessage: 'Disk Latency (avg.)',
     }),
-    field: 'diskLatency',
+    field: 'diskLatency.avg',
     sortable: true,
-    render: (ds: number) => <NumberCell value={ds} unit=" ms" />,
+    render: (avg: number) => <NumberCell value={avg} unit=" ms" />,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.averageTxColumnHeader', {

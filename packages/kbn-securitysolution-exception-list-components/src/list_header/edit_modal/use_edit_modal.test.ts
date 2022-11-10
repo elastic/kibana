@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SyntheticEvent } from 'react';
+import { ChangeEvent, SyntheticEvent } from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useEditModal } from './use_edit_modal';
 
@@ -20,13 +20,15 @@ describe('useEditModal', () => {
     expect(showProgress).toBeFalsy();
   });
   it('should set error when required field is empty', () => {
-    const { result } = renderHook(() => useEditModal({ listDetails: { name: '' }, onSave }));
-    const { newListDetails, showProgress, setIsTouchedValue } = result.current;
+    const { result } = renderHook(() => useEditModal({ listDetails: { name: 'name' }, onSave }));
+    const { showProgress, onBlur } = result.current;
 
-    act(() => setIsTouchedValue());
-
+    act(() =>
+      onBlur({ target: { name: 'name', value: '' } } as unknown as ChangeEvent<HTMLInputElement>)
+    );
     expect(showProgress).toBeFalsy();
-    expect(newListDetails).toStrictEqual({ name: '' });
+    expect(result.current.newListDetails).toStrictEqual({ name: '' });
+    expect(result.current.error).toBeTruthy();
   });
   it('should call onSubmit if no errors and stop the event default', () => {
     const { result } = renderHook(() => useEditModal({ listDetails, onSave }));
