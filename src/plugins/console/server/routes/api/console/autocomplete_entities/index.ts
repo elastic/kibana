@@ -18,7 +18,7 @@ import { sanitizeHostname } from '../../../../lib/utils';
 import type { ESConfigForProxy } from '../../../../types';
 import { getRequestConfig } from '../proxy/create_handler';
 
-interface Settings {
+interface SettingsToRetrieve {
   indices: boolean;
   fields: boolean;
   templates: boolean;
@@ -31,7 +31,7 @@ const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
 // Limit the response size to 10MB, because the response can be very large and sending it to the client
 // can cause the browser to hang.
 
-const getMappings = async (settings: Settings, config: Config) => {
+const getMappings = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.fields) {
     const mappings = await getEntity('/_mapping', config);
     return mappings;
@@ -40,7 +40,7 @@ const getMappings = async (settings: Settings, config: Config) => {
   return {};
 };
 
-const getAliases = async (settings: Settings, config: Config) => {
+const getAliases = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.indices) {
     const aliases = await getEntity('/_alias', config);
     return aliases;
@@ -49,7 +49,7 @@ const getAliases = async (settings: Settings, config: Config) => {
   return {};
 };
 
-const getDataStreams = async (settings: Settings, config: Config) => {
+const getDataStreams = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.dataStreams) {
     const dataStreams = await getEntity('/_data_stream', config);
     return dataStreams;
@@ -58,7 +58,7 @@ const getDataStreams = async (settings: Settings, config: Config) => {
   return {};
 };
 
-const getLegacyTemplates = async (settings: Settings, config: Config) => {
+const getLegacyTemplates = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.templates) {
     const legacyTemplates = await getEntity('/_template', config);
     return legacyTemplates;
@@ -67,7 +67,7 @@ const getLegacyTemplates = async (settings: Settings, config: Config) => {
   return {};
 };
 
-const getIndexTemplates = async (settings: Settings, config: Config) => {
+const getIndexTemplates = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.templates) {
     const indexTemplates = await getEntity('/_index_template', config);
     return indexTemplates;
@@ -76,7 +76,7 @@ const getIndexTemplates = async (settings: Settings, config: Config) => {
   return {};
 };
 
-const getComponentTemplates = async (settings: Settings, config: Config) => {
+const getComponentTemplates = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.templates) {
     const componentTemplates = await getEntity('/_component_template', config);
     return componentTemplates;
@@ -85,6 +85,17 @@ const getComponentTemplates = async (settings: Settings, config: Config) => {
   return {};
 };
 
+/**
+ * Get the autocomplete suggestions for the given entity.
+ * We are using the raw http request in this function to retrieve the entities instead of esClient because
+ * the esClient does not handle large responses well. For example, the response size for
+ * the mappings can be very large(> 1GB) and the esClient will throw an 'Invalid string length'
+ * error when trying to parse the response. By using the raw http request, we can limit the
+ * response size and avoid the error.
+ * @param path  The path to the entity to retrieve. For example, '/_mapping' or '/_alias'.
+ * @param config The configuration for the request.
+ * @returns The entity retrieved from Elasticsearch.
+ */
 const getEntity = (path: string, config: Config) => {
   return new Promise((resolve, reject) => {
     const { hosts, kibanaVersion } = config;
@@ -143,12 +154,14 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
       validate: false,
     },
     async (context, request, response) => {
-      const settings = parse(request.url.search, { parseBooleans: true }) as unknown as Settings;
+      const settings = parse(request.url.search, {
+        parseBooleans: true,
+      }) as unknown as SettingsToRetrieve;
 
-      // If no settings are provided return 400
+      // If no settings are specified, then return 400.
       if (Object.keys(settings).length === 0) {
         return response.badRequest({
-          body: 'Request must contain a query param of autocomplete settings',
+          body: 'Request must contain at least one of the following parameters: indices, fields, templates, dataStreams',
         });
       }
 
@@ -178,7 +191,7 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
 
           // If the request failed, log the error and return an empty object
           if (result.reason instanceof Error) {
-            deps.log.error(result.reason);
+            deps.log.debug(`Failed to retrieve autocomplete suggestions: ${result.reason.message}`);
           }
 
           return {};
