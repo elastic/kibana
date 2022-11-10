@@ -6,5 +6,5 @@
  */
 
 // File storage indexes supporting endpoint Upload/download
-export const FILE_STORAGE_METADATA_INDEX_PATTERN = '.fleet-*-files';
-export const FILE_STORAGE_DATA_INDEX_PATTERN = '.fleet-*-file-data';
+export const FILE_STORAGE_METADATA_INDEX_PATTERN = '.fleet-files-*';
+export const FILE_STORAGE_DATA_INDEX_PATTERN = '.fleet-file-data-*';
