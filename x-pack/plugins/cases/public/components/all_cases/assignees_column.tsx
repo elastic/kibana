@@ -16,7 +16,7 @@ import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 import * as i18n from './translations';
 
-const COMPRESSED_AVATAR_LIMIT = 5;
+const COMPRESSED_AVATAR_LIMIT = 3;
 
 export interface AssigneesColumnProps {
   assignees: Case['assignees'];
@@ -44,13 +44,18 @@ const AssigneesColumnComponent: React.FC<AssigneesColumnProps> = ({
   const numHiddenAvatars = allAssignees.length - compressedDisplayLimit;
   const shouldShowExpandListButton = numHiddenAvatars > 0;
 
+  const limitedAvatars = useMemo(
+    () => allAssignees.slice(0, compressedDisplayLimit),
+    [allAssignees, compressedDisplayLimit]
+  );
+
   const avatarsToDisplay = useMemo(() => {
     if (isAvatarListExpanded || !shouldShowExpandListButton) {
       return allAssignees;
     }
 
-    return allAssignees.slice(0, compressedDisplayLimit);
-  }, [allAssignees, compressedDisplayLimit, isAvatarListExpanded, shouldShowExpandListButton]);
+    return limitedAvatars;
+  }, [allAssignees, isAvatarListExpanded, limitedAvatars, shouldShowExpandListButton]);
 
   if (allAssignees.length <= 0) {
     return getEmptyTagValue();

@@ -128,7 +128,7 @@ export const useCasesColumns = ({
       render: (assignees: Case['assignees']) => (
         <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
       ),
-      width: '20%',
+      width: '180px',
     });
   }
 
