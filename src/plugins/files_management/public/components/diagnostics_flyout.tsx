@@ -13,9 +13,13 @@ import {
   EuiFlyoutBody,
   EuiButton,
   EuiLoadingSpinner,
-  EuiDescriptionList,
+  EuiPanel,
   EuiTitle,
   EuiEmptyPrompt,
+  EuiStat,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { Chart, Axis, Position, HistogramBarSeries, ScaleType } from '@elastic/charts';
 import numeral from '@elastic/numeral';
@@ -57,65 +61,74 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
         ) : status === 'loading' ? (
           <EuiLoadingSpinner size="xl" />
         ) : (
-          <EuiDescriptionList
-            type="row"
-            textStyle="reverse"
-            listItems={[
-              {
-                title: i18nTexts.diagnosticsTotalCount,
-                description: Object.values(data.countByStatus).reduce(
-                  (acc, value) => acc + value,
-                  0
-                ),
-              },
-              {
-                title: i18nTexts.diagnosticsSpaceUsed,
-                description: numeral(data.storage.esFixedSizeIndex.used).format('0[.]0 b'),
-              },
-              {
-                title: i18nTexts.diagnosticsBreakdownsStatus,
-                description: (
-                  <Chart size={{ height: 200, width: 300 - 32 }}>
-                    <Axis id="y" position={Position.Left} showOverlappingTicks />
-                    <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                    <HistogramBarSeries
-                      data={Object.entries(data.countByStatus).map(([key, count]) => ({
-                        key,
-                        count,
-                      }))}
-                      id="Status"
-                      xAccessor={'key'}
-                      yAccessors={['count']}
-                      xScaleType={ScaleType.Time}
-                      yScaleType={ScaleType.Linear}
-                      timeZone="local"
-                    />
-                  </Chart>
-                ),
-              },
-              {
-                title: i18nTexts.diagnosticsBreakdownsExtension,
-                description: (
-                  <Chart size={{ height: 200, width: 300 - 32 }}>
-                    <Axis id="y" position={Position.Left} showOverlappingTicks />
-                    <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                    <HistogramBarSeries
-                      data={Object.entries(data.countByExtension).map(([key, count]) => ({
-                        key,
-                        count,
-                      }))}
-                      id="Extension"
-                      xAccessor={'key'}
-                      yAccessors={['count']}
-                      xScaleType={ScaleType.Time}
-                      yScaleType={ScaleType.Linear}
-                      timeZone="local"
-                    />
-                  </Chart>
-                ),
-              },
-            ]}
-          />
+          <>
+            <EuiPanel hasBorder hasShadow={false}>
+              <EuiTitle size="xs">
+                <h3>{i18nTexts.diagnosticsFlyoutSummarySectionTitle}</h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem grow={1}>
+                  <EuiStat
+                    title={numeral(data.storage.esFixedSizeIndex.used).format('0[.]0 b')}
+                    description={i18nTexts.diagnosticsSpaceUsed}
+                    titleSize="s"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={1}>
+                  <EuiStat
+                    title={Object.values(data.countByStatus).reduce((acc, value) => acc + value, 0)}
+                    description={i18nTexts.diagnosticsTotalCount}
+                    titleSize="s"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+            <EuiSpacer />
+            <EuiPanel hasBorder hasShadow={false}>
+              <EuiTitle size="xs">
+                <h3>{i18nTexts.diagnosticsBreakdownsStatus}</h3>
+              </EuiTitle>
+              <Chart size={{ height: 200, width: '100%' }}>
+                <Axis id="y" position={Position.Left} showOverlappingTicks />
+                <Axis id="x" position={Position.Bottom} showOverlappingTicks />
+                <HistogramBarSeries
+                  data={Object.entries(data.countByStatus).map(([key, count]) => ({
+                    key,
+                    count,
+                  }))}
+                  id="Status"
+                  xAccessor={'key'}
+                  yAccessors={['count']}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  timeZone="local"
+                />
+              </Chart>
+            </EuiPanel>
+            <EuiSpacer />
+            <EuiPanel hasBorder hasShadow={false}>
+              <EuiTitle size="xs">
+                <h3>{i18nTexts.diagnosticsBreakdownsExtension}</h3>
+              </EuiTitle>
+              <Chart size={{ height: 200, width: '100%' }}>
+                <Axis id="y" position={Position.Left} showOverlappingTicks />
+                <Axis id="x" position={Position.Bottom} showOverlappingTicks />
+                <HistogramBarSeries
+                  data={Object.entries(data.countByExtension).map(([key, count]) => ({
+                    key,
+                    count,
+                  }))}
+                  id="Extension"
+                  xAccessor={'key'}
+                  yAccessors={['count']}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  timeZone="local"
+                />
+              </Chart>
+            </EuiPanel>
+          </>
         )}
       </EuiFlyoutBody>
     </EuiFlyout>

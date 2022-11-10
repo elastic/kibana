@@ -33,6 +33,12 @@ export const i18nTexts = {
   diagnosticsFlyoutTitle: i18n.translate('filesManagement.diagnostics.flyoutTitle', {
     defaultMessage: 'Statistics',
   }),
+  diagnosticsFlyoutSummarySectionTitle: i18n.translate(
+    'filesManagement.diagnostics.summarySectionTitle',
+    {
+      defaultMessage: 'Summary',
+    }
+  ),
   failedToFetchDiagnostics: i18n.translate('filesManagement.diagnostics.errorMessage', {
     defaultMessage: 'Could not fetch statistics',
   }),
