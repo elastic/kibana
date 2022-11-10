@@ -12,5 +12,5 @@ export {
   pluginStateSavedObjects,
   pluginStateSavedObjectsId,
   pluginStateSavedObjectsType,
-  PluginStateSO,
 } from './guided_setup';
+export type { PluginStateSO } from './guided_setup';

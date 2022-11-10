@@ -15,7 +15,7 @@ import {
   PluginStateSO,
 } from '../saved_objects';
 
-// hard code the duration to 30 days for now
+// hard code the duration to 30 days for now https://github.com/elastic/kibana/issues/144997
 const activePeriodDurationInMilliseconds = 30 * 24 * 60 * 60 * 1000;
 export const calculateIsActivePeriod = (creationDate?: string): boolean => {
   if (!creationDate) return false;

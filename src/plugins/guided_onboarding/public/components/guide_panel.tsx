@@ -88,13 +88,14 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const handleStepButtonClick = async (step: GuideStepStatus, stepConfig: StepConfig) => {
     if (pluginState) {
       const { id, status } = step;
+      const guideId: GuideId = pluginState!.activeGuide!.guideId!;
 
       if (status === 'ready_to_complete') {
-        return await api.completeGuideStep(pluginState!.activeGuide!.guideId!, id);
+        return await api.completeGuideStep(guideId, id);
       }
 
       if (status === 'active' || status === 'in_progress') {
-        await api.startGuideStep(pluginState!.activeGuide!.guideId!, id);
+        await api.startGuideStep(guideId, id);
 
         if (stepConfig.location) {
           await application.navigateToApp(stepConfig.location.appID, {
@@ -102,7 +103,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           });
 
           if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
-            await api.completeGuideStep(pluginState!.activeGuide!.guideId!, id);
+            await api.completeGuideStep(guideId, id);
           }
         }
       }
