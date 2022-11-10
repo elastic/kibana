@@ -16,7 +16,6 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-// import { ArrayElement } from '../../../../../../../common/types/common';
 import type {
   TextClassificationInference,
   ZeroShotClassificationInference,
@@ -24,7 +23,6 @@ import type {
   LangIdentInference,
   FormattedTextClassificationResponse,
 } from '.';
-// import { INPUT_TYPE } from '../inference_base';
 
 export const getTextClassificationOutputComponent = (
   inferrer:
