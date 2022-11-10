@@ -125,7 +125,7 @@ export const ElasticsearchPhpClientReadme = () => {
                   />
                 </EuiText>
 
-                <EuiCodeBlock language="shell" isCopyable >
+                <EuiCodeBlock language="shell" isCopyable>
                   {`# Use composer to install the library: \n`}
                   {`$ composer require elasticsearch/elasticsearch \n`}
                   <EuiSpacer size="m" />
@@ -198,7 +198,7 @@ $ php composer.phar install `}
                   {`
 $client = ClientBuilder::create()
    ->setElasticCloudId('<cloud-id>')
-   ->setApiKey('${apiKey || '<api-key>' }')
+   ->setApiKey('${apiKey || '<api-key>'}')
    ->build();
           `}
                 </EuiCodeBlock>
