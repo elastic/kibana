@@ -48,7 +48,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
      * Creates an user with specific values
      * @param user
      */
-    async createUser(user: { name: string; roles: string[]; password?: string }) {
+    async createUser(user: { name: string; roles: string[]; password?: string }): Promise<void> {
       const { name, roles, password } = user;
       await security.user.create(name, { roles, password: password ?? 'changeme' });
     },
@@ -57,7 +57,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
      * Deletes specified users by username
      * @param names[]
      */
-    async deleteUsers(names: string[]) {
+    async deleteUsers(names: string[]): Promise<void> {
       for (const name of names) {
         await security.user.delete(name);
       }
@@ -71,7 +71,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
       predefinedRole?: ROLE;
       extraPrivileges?: string[];
       customRole?: { roleName: string; extraPrivileges: string[] };
-    }) {
+    }): Promise<void> {
       const { predefinedRole, customRole, extraPrivileges } = options;
       if (predefinedRole) {
         const roleConfig = rolesMapping[predefinedRole];
@@ -95,7 +95,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
      * Deletes specified roles by name
      * @param roles[]
      */
-    async deleteRoles(roles: string[]) {
+    async deleteRoles(roles: string[]): Promise<void> {
       for (const role of roles) {
         await security.role.delete(role);
       }
