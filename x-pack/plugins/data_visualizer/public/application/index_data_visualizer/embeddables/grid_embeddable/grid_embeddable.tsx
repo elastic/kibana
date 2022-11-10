@@ -24,7 +24,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import type { Query } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/discover-plugin/public';
-import type { SamplingOption } from '../../search_strategy/requests/build_random_sampler_agg';
+import { SamplingOption } from '../../../../../common/types/field_stats';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';

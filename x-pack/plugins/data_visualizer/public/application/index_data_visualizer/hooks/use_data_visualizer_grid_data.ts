@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import { Required } from 'utility-types';
+import type { Required } from 'utility-types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
-import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField, KBN_FIELD_TYPES, UI_SETTINGS } from '@kbn/data-plugin/common';
 import seedrandom from 'seedrandom';
-import { RandomSamplerOption } from '../constants/random_sampler';
-import {
-  DataVisualizerIndexBasedAppState,
-  SamplingOption,
-} from '../types/index_data_visualizer_state';
+import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
+import type { RandomSamplerOption } from '../constants/random_sampler';
+import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
-import { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
+import type { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
 import { useTimefilter } from './use_time_filter';
 import { dataVisualizerRefresh$ } from '../services/timefilter_refresh_service';
 import { TimeBuckets } from '../../../../common/services/time_buckets';
-import { FieldVisConfig } from '../../common/components/stats_table/types';
+import type { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
   SUPPORTED_FIELD_TYPES,
   NON_AGGREGATABLE_FIELD_TYPES,
@@ -32,13 +30,13 @@ import {
 import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
 import { kbnTypeToJobType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
-import { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
+import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
-import { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
-import { Dictionary } from '../../common/util/url_state';
-import { AggregatableField, NonAggregatableField } from '../types/overall_stats';
+import type { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
+import type { Dictionary } from '../../common/util/url_state';
+import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 
 const defaults = getDefaultPageState();
 
