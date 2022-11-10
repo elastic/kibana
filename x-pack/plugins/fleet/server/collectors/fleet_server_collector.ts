@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { isBoom } from '@hapi/boom';
 import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
 
-import { packagePolicyService, settingsService } from '../services';
+import { packagePolicyService } from '../services';
 import { getAgentStatusForAgentPolicy } from '../services/agents';
+import { listFleetServerHosts } from '../services/fleet_server_host';
 
 const DEFAULT_USAGE = {
   total_all_statuses: 0,
@@ -39,16 +39,8 @@ export const getFleetServerUsage = async (
     return DEFAULT_USAGE;
   }
 
-  const numHostsUrls = await settingsService
-    .getSettings(soClient)
-    .then((settings) => settings.fleet_server_hosts?.length ?? 0)
-    .catch((err) => {
-      if (isBoom(err) && err.output.statusCode === 404) {
-        return 0;
-      }
-
-      throw err;
-    });
+  const fleetServerHosts = await listFleetServerHosts(soClient);
+  const numHostsUrls = fleetServerHosts.items.flatMap((host) => host.host_urls).length;
 
   // Find all policies with Fleet server than query agent status
   let hasMore = true;
