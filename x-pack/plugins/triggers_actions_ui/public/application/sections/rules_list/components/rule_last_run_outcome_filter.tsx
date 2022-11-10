@@ -10,21 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiHealth } from '@elastic/eui';
 import { RuleLastRunOutcomes, RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
 import { rulesLastRunOutcomeTranslationMapping } from '../translations';
+import { getOutcomeHealthColor } from '../../../../common/lib';
 
 const sortedRuleLastRunOutcomeValues = [...RuleLastRunOutcomeValues].sort();
-
-export const getHealthColor = (status: RuleLastRunOutcomes) => {
-  switch (status) {
-    case 'succeeded':
-      return 'success';
-    case 'failed':
-      return 'danger';
-    case 'warning':
-      return 'warning';
-    default:
-      return 'subdued';
-  }
-};
 
 interface RuleLastRunOutcomeFilterProps {
   selectedOutcomes: string[];
@@ -79,7 +67,7 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
     >
       <div className="euiFilterSelect__items">
         {sortedRuleLastRunOutcomeValues.map((item: RuleLastRunOutcomes) => {
-          const healthColor = getHealthColor(item);
+          const healthColor = getOutcomeHealthColor(item);
           return (
             <EuiFilterSelectItem
               key={item}
@@ -105,3 +93,5 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
     </EuiPopover>
   );
 };
+
+export { getOutcomeHealthColor as getHealthColor };

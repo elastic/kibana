@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 
 interface RuleEventLogListStatusProps {
   status: RuleAlertingOutcome;
+  lastRunOutcomeEnabled?: boolean;
 }
 
 const statusContainerStyles = {
@@ -30,14 +31,28 @@ const STATUS_TO_COLOR: Record<RuleAlertingOutcome, string> = {
   warning: 'warning',
 };
 
+const STATUS_TO_OUTCOME: Record<RuleAlertingOutcome, string> = {
+  success: 'succeeded',
+  failure: 'failed',
+  warning: 'warning',
+  unknown: 'unknown',
+};
+
 export const RuleEventLogListStatus = (props: RuleEventLogListStatusProps) => {
-  const { status } = props;
+  const { status, lastRunOutcomeEnabled = false } = props;
   const color = STATUS_TO_COLOR[status] || 'gray';
+
+  const statusString = useMemo(() => {
+    if (lastRunOutcomeEnabled) {
+      return STATUS_TO_OUTCOME[status];
+    }
+    return status;
+  }, [lastRunOutcomeEnabled, status]);
 
   return (
     <div style={statusContainerStyles}>
       <EuiIcon type="dot" color={color} style={iconStyles} />
-      {status}
+      {statusString}
     </div>
   );
 };

@@ -480,7 +480,7 @@ export const RulesList = ({
     setShowErrors((prevValue) => {
       if (!prevValue) {
         const rulesToExpand = rulesState.data.reduce((acc, ruleItem) => {
-          if (ruleItem.executionStatus.status === 'error') {
+          if (ruleItem.lastRun?.outcome === 'failed') {
             return {
               ...acc,
               [ruleItem.id]: (

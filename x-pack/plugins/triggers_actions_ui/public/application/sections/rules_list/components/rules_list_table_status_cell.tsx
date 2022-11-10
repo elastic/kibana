@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiHealth, EuiToolTip } from '@elastic/eui';
-import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { RuleTableItem } from '../../../../types';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { getHealthColor as getOutcomeHealthColor } from './rule_last_run_outcome_filter';
-import { getHealthColor as getExecutionStatusHealthColor } from './rule_execution_status_filter';
-import { rulesLastRunOutcomeTranslationMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
+import {
+  getRuleHealthColor,
+  getIsLicenseError,
+  getRuleStatusMessage,
+} from '../../../../common/lib/rule_status_helpers';
 
 interface RulesListTableStatusCellProps {
   rule: RuleTableItem;
@@ -22,32 +22,19 @@ interface RulesListTableStatusCellProps {
 
 export const RulesListTableStatusCell = (props: RulesListTableStatusCellProps) => {
   const { rule, onManageLicenseClick } = props;
-  const { executionStatus, lastRun } = rule;
+  const { lastRun } = rule;
 
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+  const isLicenseError = getIsLicenseError(rule);
+  const healthColor = getRuleHealthColor(rule);
+  const statusMessage = getRuleStatusMessage(rule);
+  const tooltipMessage = lastRun?.outcome === 'failed' ? `Error: ${lastRun?.outcomeMsg}` : null;
 
-  const healthColor = useMemo(() => {
-    if (isRuleLastRunOutcomeEnabled) {
-      return lastRun && getOutcomeHealthColor(lastRun.outcome);
-    }
-    return getExecutionStatusHealthColor(executionStatus.status);
-  }, [isRuleLastRunOutcomeEnabled, executionStatus, lastRun]);
-
-  if (isRuleLastRunOutcomeEnabled && !lastRun) {
+  if (!statusMessage) {
     return null;
   }
 
-  const tooltipMessage = lastRun!.outcome === 'failed' ? `Error: ${lastRun?.outcomeMsg}` : null;
-  const isLicenseError = lastRun!.warning === RuleExecutionStatusErrorReasons.License;
-  const statusMessage = isLicenseError
-    ? ALERT_STATUS_LICENSE_ERROR
-    : rulesLastRunOutcomeTranslationMapping[lastRun!.outcome];
-
   const health = (
-    <EuiHealth
-      data-test-subj={`ruleStatus-${executionStatus.status}`}
-      color={healthColor || 'default'}
-    >
+    <EuiHealth data-test-subj={`ruleStatus-${lastRun?.outcome}`} color={healthColor || 'default'}>
       {statusMessage}
     </EuiHealth>
   );
