@@ -16,8 +16,8 @@ describe('validateSLO', () => {
       expect(() => validateSLO(slo)).toThrowError('Invalid objective.target');
     });
 
-    it("throws when 'objective.target' is gt 1", () => {
-      const slo = createSLO({ objective: { target: 1.0001 } });
+    it("throws when 'objective.target' is gte 1", () => {
+      const slo = createSLO({ objective: { target: 1 } });
       expect(() => validateSLO(slo)).toThrowError('Invalid objective.target');
     });
 

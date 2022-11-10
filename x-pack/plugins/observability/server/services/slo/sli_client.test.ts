@@ -15,6 +15,20 @@ import { Duration, DurationUnit } from '../../types/models';
 import { createSLO } from './fixtures/slo';
 import { DefaultSLIClient } from './sli_client';
 
+const commonEsResponse = {
+  took: 100,
+  timed_out: false,
+  _shards: {
+    total: 0,
+    successful: 0,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    hits: [],
+  },
+};
+
 describe('SLIClient', () => {
   let esClientMock: ElasticsearchClientMock;
 
@@ -32,17 +46,7 @@ describe('SLIClient', () => {
           },
         });
         esClientMock.search.mockResolvedValueOnce({
-          took: 100,
-          timed_out: false,
-          _shards: {
-            total: 0,
-            successful: 0,
-            skipped: 0,
-            failed: 0,
-          },
-          hits: {
-            hits: [],
-          },
+          ...commonEsResponse,
           aggregations: {},
         });
         const sliClient = new DefaultSLIClient(esClientMock);
@@ -61,17 +65,7 @@ describe('SLIClient', () => {
             },
           });
           esClientMock.search.mockResolvedValueOnce({
-            took: 100,
-            timed_out: false,
-            _shards: {
-              total: 0,
-              successful: 0,
-              skipped: 0,
-              failed: 0,
-            },
-            hits: {
-              hits: [],
-            },
+            ...commonEsResponse,
             aggregations: {
               good: { value: 90 },
               total: { value: 100 },
@@ -93,6 +87,7 @@ describe('SLIClient', () => {
           expect(esClientMock.search).toHaveBeenCalledWith(
             expect.objectContaining({
               index: `${SLO_DESTINATION_INDEX_NAME}*`,
+              size: 0,
               query: {
                 bool: {
                   filter: [
@@ -126,17 +121,7 @@ describe('SLIClient', () => {
             },
           });
           esClientMock.search.mockResolvedValueOnce({
-            took: 100,
-            timed_out: false,
-            _shards: {
-              total: 0,
-              successful: 0,
-              skipped: 0,
-              failed: 0,
-            },
-            hits: {
-              hits: [],
-            },
+            ...commonEsResponse,
             aggregations: {
               good: { value: 90 },
               total: { value: 100 },
@@ -192,17 +177,7 @@ describe('SLIClient', () => {
         });
 
         esClientMock.search.mockResolvedValueOnce({
-          took: 100,
-          timed_out: false,
-          _shards: {
-            total: 0,
-            successful: 0,
-            skipped: 0,
-            failed: 0,
-          },
-          hits: {
-            hits: [],
-          },
+          ...commonEsResponse,
           aggregations: {},
         });
         const sliClient = new DefaultSLIClient(esClientMock);
@@ -229,17 +204,7 @@ describe('SLIClient', () => {
             },
           });
           esClientMock.search.mockResolvedValueOnce({
-            took: 100,
-            timed_out: false,
-            _shards: {
-              total: 0,
-              successful: 0,
-              skipped: 0,
-              failed: 0,
-            },
-            hits: {
-              hits: [],
-            },
+            ...commonEsResponse,
             aggregations: {
               slices: { buckets: [] },
               good: { value: 90 },
@@ -338,17 +303,7 @@ describe('SLIClient', () => {
             },
           });
           esClientMock.search.mockResolvedValueOnce({
-            took: 100,
-            timed_out: false,
-            _shards: {
-              total: 0,
-              successful: 0,
-              skipped: 0,
-              failed: 0,
-            },
-            hits: {
-              hits: [],
-            },
+            ...commonEsResponse,
             aggregations: {
               good: { value: 90 },
               total: { value: 100 },
@@ -426,6 +381,265 @@ describe('SLIClient', () => {
             })
           );
         });
+      });
+    });
+  });
+
+  describe('fetchSLIDataFrom', () => {
+    const LONG_WINDOW = 'long_window';
+    const SHORT_WINDOW = 'short_window';
+
+    describe('for SLO defined with occurrences budgeting method', () => {
+      it('calls ES with the lookback windows aggregations', async () => {
+        const slo = createSLO({ budgeting_method: 'occurrences' });
+        const lookbackWindows = [
+          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.h) },
+          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.m) },
+        ];
+        esClientMock.search.mockResolvedValueOnce({
+          ...commonEsResponse,
+          aggregations: {
+            [LONG_WINDOW]: {
+              buckets: [
+                {
+                  key: '2022-11-08T13:53:00.000Z-2022-11-08T14:53:00.000Z',
+                  from: 1667915580000,
+                  from_as_string: '2022-11-08T13:53:00.000Z',
+                  to: 1667919180000,
+                  to_as_string: '2022-11-08T14:53:00.000Z',
+                  doc_count: 60,
+                  total: {
+                    value: 32169,
+                  },
+                  good: {
+                    value: 15748,
+                  },
+                },
+              ],
+            },
+            [SHORT_WINDOW]: {
+              buckets: [
+                {
+                  key: '2022-11-08T14:48:00.000Z-2022-11-08T14:53:00.000Z',
+                  from: 1667918880000,
+                  from_as_string: '2022-11-08T14:48:00.000Z',
+                  to: 1667919180000,
+                  to_as_string: '2022-11-08T14:53:00.000Z',
+                  doc_count: 5,
+                  total: {
+                    value: 2211,
+                  },
+                  good: {
+                    value: 772,
+                  },
+                },
+              ],
+            },
+          },
+        });
+        const sliClient = new DefaultSLIClient(esClientMock);
+
+        const result = await sliClient.fetchSLIDataFrom(slo, lookbackWindows);
+
+        expect(esClientMock.search.mock.lastCall[0]).toMatchObject({
+          aggs: {
+            [LONG_WINDOW]: {
+              date_range: {
+                field: '@timestamp',
+                ranges: [{ from: 'now-1h/m', to: 'now/m' }],
+              },
+              aggs: {
+                good: { sum: { field: 'slo.numerator' } },
+                total: { sum: { field: 'slo.denominator' } },
+              },
+            },
+            [SHORT_WINDOW]: {
+              date_range: {
+                field: '@timestamp',
+                ranges: [{ from: 'now-5m/m', to: 'now/m' }],
+              },
+              aggs: {
+                good: { sum: { field: 'slo.numerator' } },
+                total: { sum: { field: 'slo.denominator' } },
+              },
+            },
+          },
+        });
+
+        expect(result[LONG_WINDOW]).toMatchObject({ good: 15748, total: 32169 });
+        expect(result[SHORT_WINDOW]).toMatchObject({ good: 772, total: 2211 });
+      });
+    });
+
+    describe('for SLO defined with timeslices budgeting method', () => {
+      it('calls ES with the lookback windows aggregations', async () => {
+        const slo = createSLO({
+          budgeting_method: 'timeslices',
+          objective: {
+            target: 0.95,
+            timeslice_target: 0.9,
+            timeslice_window: new Duration(10, DurationUnit.m),
+          },
+        });
+
+        const lookbackWindows = [
+          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.h) },
+          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.m) },
+        ];
+        esClientMock.search.mockResolvedValueOnce({
+          ...commonEsResponse,
+          aggregations: {
+            [LONG_WINDOW]: {
+              buckets: [
+                {
+                  key: '2022-11-08T13:53:00.000Z-2022-11-08T14:53:00.000Z',
+                  from: 1667915580000,
+                  from_as_string: '2022-11-08T13:53:00.000Z',
+                  to: 1667919180000,
+                  to_as_string: '2022-11-08T14:53:00.000Z',
+                  doc_count: 60,
+                  total: {
+                    value: 32169,
+                  },
+                  good: {
+                    value: 15748,
+                  },
+                },
+              ],
+            },
+            [SHORT_WINDOW]: {
+              buckets: [
+                {
+                  key: '2022-11-08T14:48:00.000Z-2022-11-08T14:53:00.000Z',
+                  from: 1667918880000,
+                  from_as_string: '2022-11-08T14:48:00.000Z',
+                  to: 1667919180000,
+                  to_as_string: '2022-11-08T14:53:00.000Z',
+                  doc_count: 5,
+                  total: {
+                    value: 2211,
+                  },
+                  good: {
+                    value: 772,
+                  },
+                },
+              ],
+            },
+          },
+        });
+        const sliClient = new DefaultSLIClient(esClientMock);
+
+        const result = await sliClient.fetchSLIDataFrom(slo, lookbackWindows);
+
+        expect(esClientMock.search.mock.lastCall[0]).toMatchObject({
+          aggs: {
+            [LONG_WINDOW]: {
+              date_range: {
+                field: '@timestamp',
+                ranges: [{ from: 'now-1h/m', to: 'now/m' }],
+              },
+              aggs: {
+                slices: {
+                  date_histogram: {
+                    field: '@timestamp',
+                    fixed_interval: '10m',
+                  },
+                  aggs: {
+                    good: {
+                      sum: {
+                        field: 'slo.numerator',
+                      },
+                    },
+                    total: {
+                      sum: {
+                        field: 'slo.denominator',
+                      },
+                    },
+                    good_slice: {
+                      bucket_script: {
+                        buckets_path: {
+                          good: 'good',
+                          total: 'total',
+                        },
+                        script: 'params.good / params.total >= 0.9 ? 1 : 0',
+                      },
+                    },
+                    count_slice: {
+                      bucket_script: {
+                        buckets_path: {},
+                        script: '1',
+                      },
+                    },
+                  },
+                },
+                good: {
+                  sum_bucket: {
+                    buckets_path: 'slices>good_slice.value',
+                  },
+                },
+                total: {
+                  sum_bucket: {
+                    buckets_path: 'slices>count_slice.value',
+                  },
+                },
+              },
+            },
+            [SHORT_WINDOW]: {
+              date_range: {
+                field: '@timestamp',
+                ranges: [{ from: 'now-5m/m', to: 'now/m' }],
+              },
+              aggs: {
+                slices: {
+                  date_histogram: {
+                    field: '@timestamp',
+                    fixed_interval: '10m',
+                  },
+                  aggs: {
+                    good: {
+                      sum: {
+                        field: 'slo.numerator',
+                      },
+                    },
+                    total: {
+                      sum: {
+                        field: 'slo.denominator',
+                      },
+                    },
+                    good_slice: {
+                      bucket_script: {
+                        buckets_path: {
+                          good: 'good',
+                          total: 'total',
+                        },
+                        script: 'params.good / params.total >= 0.9 ? 1 : 0',
+                      },
+                    },
+                    count_slice: {
+                      bucket_script: {
+                        buckets_path: {},
+                        script: '1',
+                      },
+                    },
+                  },
+                },
+                good: {
+                  sum_bucket: {
+                    buckets_path: 'slices>good_slice.value',
+                  },
+                },
+                total: {
+                  sum_bucket: {
+                    buckets_path: 'slices>count_slice.value',
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        expect(result[LONG_WINDOW]).toMatchObject({ good: 15748, total: 32169 });
+        expect(result[SHORT_WINDOW]).toMatchObject({ good: 772, total: 2211 });
       });
     });
   });
