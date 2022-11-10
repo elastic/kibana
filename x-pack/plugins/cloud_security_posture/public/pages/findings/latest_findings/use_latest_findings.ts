@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
@@ -14,12 +13,12 @@ import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
 import type { Sort } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   from: NonNullable<NonNullable<estypes.SearchRequest['body']>['from']>;
@@ -56,13 +55,8 @@ export const showErrorToast = (
   else toasts.addDanger(extractErrorMessage(error, SEARCH_FAILED_TEXT));
 };
 
-export const getFindingsQuery = ({
-  query,
-  size,
-  from,
-  sort,
-  pitId,
-}: UseFindingsOptions & { pitId: string }) => ({
+export const getFindingsQuery = ({ query, size, from, sort }: UseFindingsOptions) => ({
+  index: CSP_LATEST_FINDINGS_DATA_VIEW,
   body: {
     query,
     sort: [{ [sort.field]: sort.direction }],
@@ -70,7 +64,6 @@ export const getFindingsQuery = ({
     from,
     aggs: getFindingsCountAggQuery(),
   },
-  pit: { id: pitId },
   ignore_unavailable: false,
 });
 
@@ -79,13 +72,12 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
     data,
     notifications: { toasts },
   } = useKibana().services;
-  const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
-  const params = { ...options, pitId: pitIdRef.current };
+  const params = { ...options };
   return useQuery(
     ['csp_findings', { params }],
     async () => {
       const {
-        rawResponse: { hits, aggregations, pit_id: newPitId },
+        rawResponse: { hits, aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
           params: getFindingsQuery(params),
@@ -99,16 +91,12 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
         page: hits.hits.map((hit) => hit._source!),
         total: number.is(hits.total) ? hits.total : 0,
         count: getAggregationCount(aggregations.count.buckets),
-        newPitId: newPitId!,
       };
     },
     {
       enabled: options.enabled,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
-      onSuccess: ({ newPitId }) => {
-        setPitId(newPitId);
-      },
     }
   );
 };
