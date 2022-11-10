@@ -171,8 +171,7 @@ export const CodeEditor: React.FC<Props> = ({
 
   const defaultStyles = codeEditorStyles();
   const hintStyles = codeEditorKeyboardHintStyles();
-  const styles = !isHintActive ? defaultStyles : {defaultStyles, hintStyles};
-
+  const styles = !isHintActive ? defaultStyles : { defaultStyles, hintStyles };
 
   const _updateDimensions = useCallback(() => {
     _editor.current?.layout();
