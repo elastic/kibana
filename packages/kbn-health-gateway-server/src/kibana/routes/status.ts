@@ -147,6 +147,7 @@ function configureFetch(kibanaConfig: KibanaConfig) {
     const fetchOptions: RequestInit = {
       ...(protocol === HTTPS && { agent }),
       signal: controller.signal,
+      redirect: 'manual',
     };
     try {
       const response = await nodeFetch(url, fetchOptions);
