@@ -100,7 +100,7 @@ export const OverviewGrid = memo(() => {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline" responsive={false}>
         <EuiFlexItem grow={false}>
           <OverviewPaginationInfo
             page={page}
@@ -112,9 +112,13 @@ export const OverviewGrid = memo(() => {
           <SortFields onSortChange={() => setPage(1)} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       {loaded && currentMonitors.length ? (
-        <EuiFlexGrid columns={4} data-test-subj="syntheticsOverviewGridItemContainer">
+        <EuiFlexGrid
+          columns={4}
+          gutterSize="m"
+          data-test-subj="syntheticsOverviewGridItemContainer"
+        >
           {currentMonitors.map((monitor) => (
             <EuiFlexItem
               key={`${monitor.id}-${monitor.location?.id}`}

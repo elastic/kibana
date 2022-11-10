@@ -10,7 +10,6 @@ import {
   EuiBadgeGroup,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiContextMenu,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -24,6 +23,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHealth,
+  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiPageSection,
@@ -31,6 +31,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTitle,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { SavedObject } from '@kbn/core/public';
 import { FetcherResult } from '@kbn/observability-plugin/public/hooks/use_fetcher';
@@ -175,30 +176,26 @@ function LocationSelect({
   const [isOpen, setIsOpen] = useState(false);
   const isDown = !!locations.find((l) => l.observer?.geo?.name === currentLocation)?.summary?.down;
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiDescriptionList align="left" compressed>
-          <EuiDescriptionListTitle>{ENABLED_ITEM_TEXT}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            <MonitorEnabled id={id} monitor={monitor} reloadPage={onEnabledChange} />
-          </EuiDescriptionListDescription>
-        </EuiDescriptionList>
-      </EuiFlexItem>
+    <EuiFlexGroup wrap={true} responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed>
           <EuiDescriptionListTitle>{LOCATION_TITLE_TEXT}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            {currentLocation}
             <EuiPopover
               button={
-                <EuiButtonIcon
-                  aria-label={LOCATION_SELECT_POPOVER_ICON_BUTTON_LABEL}
-                  color="primary"
-                  display="empty"
-                  iconType="arrowDown"
-                  onClick={() => setIsOpen(!isOpen)}
-                  size="xs"
-                />
+                <>
+                  <EuiLink
+                    aria-label={LOCATION_SELECT_POPOVER_LINK_LABEL}
+                    onClick={() => setIsOpen(!isOpen)}
+                  >
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>{currentLocation}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="arrowDown" size="s" color="inherit" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiLink>
+                </>
               }
               isOpen={isOpen}
               closePopover={() => setIsOpen(false)}
@@ -239,6 +236,24 @@ function LocationSelect({
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiDescriptionList align="left" compressed>
+          <EuiDescriptionListTitle>{ENABLED_ITEM_TEXT}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            <MonitorEnabled id={id} monitor={monitor} reloadPage={onEnabledChange} />
+          </EuiDescriptionListDescription>
+        </EuiDescriptionList>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function LoadingState() {
+  return (
+    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
@@ -278,15 +293,22 @@ export function MonitorDetailFlyout(props: Props) {
   const locationStatuses = useStatusByLocation(id);
   const locations = locationStatuses.locations?.filter((l: any) => !!l?.observer?.geo?.name) ?? [];
 
+  const isOverlay = useIsWithinMaxBreakpoint('xl');
+
   return (
-    <EuiFlyout size="s" type="push" onClose={props.onClose} paddingSize="none">
+    <EuiFlyout
+      size="600px"
+      type={isOverlay ? 'overlay' : 'push'}
+      onClose={props.onClose}
+      paddingSize="none"
+    >
       {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
-      {status === FETCH_STATUS.LOADING && <EuiLoadingSpinner size="xl" />}
+      {status === FETCH_STATUS.LOADING && <LoadingState />}
       {status === FETCH_STATUS.SUCCESS && monitorSavedObject && (
         <>
           <EuiFlyoutHeader hasBorder>
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-              <EuiFlexGroup gutterSize="s">
+              <EuiFlexGroup responsive={false} gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
                     <h2>{monitorSavedObject?.attributes[ConfigKey.NAME]}</h2>
@@ -403,6 +425,7 @@ export function MonitorDetailFlyout(props: Props) {
                     href={detailLink}
                     iconType="sortRight"
                     iconSide="right"
+                    fill
                   >
                     {GO_TO_MONITOR_LINK_TEXT}
                   </EuiButton>
@@ -551,11 +574,11 @@ const GO_TO_LOCATIONS_LABEL = i18n.translate(
   }
 );
 
-const LOCATION_SELECT_POPOVER_ICON_BUTTON_LABEL = i18n.translate(
+const LOCATION_SELECT_POPOVER_LINK_LABEL = i18n.translate(
   'xpack.synthetics.monitorList.flyout.locationSelect.iconButton.label',
   {
     defaultMessage:
-      "This icon button opens a context menu that will allow you to change the monitor's selected location. If you change the location, the flyout will display metrics for the monitor's performance in that location.",
+      "This button opens a context menu that will allow you to change the monitor's selected location. If you change the location, the flyout will display metrics for the monitor's performance in that location.",
   }
 );
 
