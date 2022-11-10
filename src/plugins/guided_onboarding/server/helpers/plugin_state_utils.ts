@@ -39,6 +39,8 @@ export const getPluginState = async (savedObjectsClient: SavedObjectsClient) => 
     }
     return pluginState;
   } else {
+    // create a SO to keep track of the correct creation date
+    await updatePluginStatus(savedObjectsClient, 'not_started');
     return {
       status: 'not_started',
       isActivePeriod: true,
