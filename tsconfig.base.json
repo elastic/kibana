@@ -18,6 +18,8 @@
       "@kbn/analytics-shippers-fullstory/*": ["packages/analytics/shippers/fullstory/*"],
       "@kbn/analytics-shippers-gainsight": ["packages/analytics/shippers/gainsight"],
       "@kbn/analytics-shippers-gainsight/*": ["packages/analytics/shippers/gainsight/*"],
+      "@kbn/content-management-inspector": ["packages/content-management/inspector"],
+      "@kbn/content-management-inspector/*": ["packages/content-management/inspector/*"],
       "@kbn/content-management-table-list": ["packages/content-management/table_list"],
       "@kbn/content-management-table-list/*": ["packages/content-management/table_list/*"],
       "@kbn/core-analytics-browser": ["packages/core/analytics/core-analytics-browser"],
@@ -1213,8 +1215,10 @@
     "useUnknownInCatchVariables": false,
     // disabled for better IDE support, enabled when running the type_check script
     "composite": false,
-    // disabled for better IDE support, enabled when running the type_check script
-    "incremental": false,
+    // enabled for improved performance
+    "incremental": true,
+    // Do not check d.ts files ts ships by default
+    "skipDefaultLibCheck": true,
     // Do not check d.ts files by default
     "skipLibCheck": true,
     // enables "core language features"
@@ -1265,7 +1269,7 @@
       "@testing-library/jest-dom",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-storybook-types",
+      "@kbn/ambient-storybook-types"
     ]
-  }
+  },
 }

@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/es_snapshots/build.sh
     label: Build ES Snapshot
+    timeout_in_minutes: 30
     agents:
       queue: c2-8
