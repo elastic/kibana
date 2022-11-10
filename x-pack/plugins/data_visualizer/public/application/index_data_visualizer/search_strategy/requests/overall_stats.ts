@@ -11,7 +11,7 @@ import { Query } from '@kbn/es-query';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { AggCardinality } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
+import { SamplingOption, buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import {
   buildBaseFilterCriteria,
   getSafeAggregationName,
@@ -24,9 +24,7 @@ export const checkAggregatableFieldsExistRequest = (
   dataViewTitle: string,
   query: Query['query'],
   aggregatableFields: string[],
-  probability: number,
-  totalCount: number,
-  browserSessionSeed: number,
+  samplingOption: SamplingOption,
   timeFieldName: string | undefined,
   earliestMs?: number,
   latestMs?: number,
@@ -76,7 +74,7 @@ export const checkAggregatableFieldsExistRequest = (
       },
     },
     ...(isPopulatedObject(aggs)
-      ? { aggs: buildRandomSamplerAggregation(aggs, probability, browserSessionSeed) }
+      ? { aggs: buildAggregationWithSamplingOption(aggs, samplingOption) }
       : {}),
     ...(isPopulatedObject(combinedRuntimeMappings)
       ? { runtime_mappings: combinedRuntimeMappings }
@@ -113,7 +111,6 @@ export function isNonAggregatableFieldOverallStats(
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: string[],
-  totalCount: number,
   datafeedConfig?: estypes.MlDatafeed
 ) => {
   const stats = {

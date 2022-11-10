@@ -24,6 +24,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import type { Query } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SamplingOption } from '../../search_strategy/requests/build_random_sampler_agg';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
@@ -34,7 +35,7 @@ import {
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { getDefaultDataVisualizerListState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
 import type { DataVisualizerTableState, SavedSearchSavedObject } from '../../../../../common/types';
-import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
+import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 
@@ -55,6 +56,7 @@ export interface DataVisualizerGridInput {
   sessionId?: string;
   fieldsToFetch?: string[];
   totalDocuments?: number;
+  samplingOption?: SamplingOption;
 }
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;

@@ -171,6 +171,7 @@ export function useFieldStatsSearchStrategy(
       maxExamples: MAX_EXAMPLES_DEFAULT,
       samplingProbability,
       browserSessionSeed: searchStrategyParams.browserSessionSeed,
+      samplingOption: searchStrategyParams.samplingOption,
     };
     const searchOptions: ISearchOptions = {
       abortSignal: abortCtrl.current.signal,

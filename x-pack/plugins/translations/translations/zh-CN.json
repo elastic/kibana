@@ -10025,8 +10025,6 @@
     "xpack.dataVisualizer.dataGrid.field.loadingLabel": "正在加载",
     "xpack.dataVisualizer.dataGrid.field.metricDistributionChart.seriesName": "分布",
     "xpack.dataVisualizer.dataGrid.field.topValuesLabel": "排名最前值",
-    "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.falseCountLabel": "false",
-    "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.trueCountLabel": "true",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.countLabel": "计数",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.distinctValueLabel": "不同值",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.metaTableTitle": "文档统计",

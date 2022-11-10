@@ -13,7 +13,10 @@ import { i18n } from '@kbn/i18n';
 import { DataViewField, KBN_FIELD_TYPES, UI_SETTINGS } from '@kbn/data-plugin/common';
 import seedrandom from 'seedrandom';
 import { RandomSamplerOption } from '../constants/random_sampler';
-import { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
+import {
+  DataVisualizerIndexBasedAppState,
+  SamplingOption,
+} from '../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
 import { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
@@ -43,6 +46,11 @@ function isDisplayField(fieldName: string): boolean {
   return !OMIT_FIELDS.includes(fieldName);
 }
 
+const DEFAULT_SAMPLING_OPTION: SamplingOption = {
+  mode: 'random_sampling',
+  seed: '',
+  probability: 0,
+};
 export const useDataVisualizerGridData = (
   input: DataVisualizerGridInput,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
@@ -76,6 +84,7 @@ export const useDataVisualizerGridData = (
     currentFilters,
     visibleFieldNames,
     fieldsToFetch,
+    samplingOption,
   } = useMemo(
     () => ({
       currentSavedSearch: input?.savedSearch,
@@ -84,6 +93,8 @@ export const useDataVisualizerGridData = (
       visibleFieldNames: input?.visibleFieldNames ?? [],
       currentFilters: input?.filters,
       fieldsToFetch: input?.fieldsToFetch,
+      /** By default, use random sampling **/
+      samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
     }),
     [input]
   );
@@ -203,6 +214,7 @@ export const useDataVisualizerGridData = (
           }
         }
       });
+
       return {
         earliest,
         latest,
@@ -217,7 +229,9 @@ export const useDataVisualizerGridData = (
         aggregatableFields,
         nonAggregatableFields,
         fieldsToFetch,
+        // @TODO: remove this
         browserSessionSeed,
+        samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -227,6 +241,8 @@ export const useDataVisualizerGridData = (
       currentDataView.id,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(searchQuery),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(samplingOption),
       samplerShardSize,
       searchSessionId,
       lastRefresh,
@@ -238,7 +254,6 @@ export const useDataVisualizerGridData = (
   const { overallStats, progress: overallStatsProgress } = useOverallStats(
     fieldStatsRequest,
     lastRefresh,
-    browserSessionSeed,
     dataVisualizerListState.probability
   );
 

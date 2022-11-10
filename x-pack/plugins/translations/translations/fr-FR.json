@@ -10020,8 +10020,6 @@
     "xpack.dataVisualizer.dataGrid.field.loadingLabel": "Chargement",
     "xpack.dataVisualizer.dataGrid.field.metricDistributionChart.seriesName": "distribution",
     "xpack.dataVisualizer.dataGrid.field.topValuesLabel": "Valeurs les plus élevées",
-    "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.falseCountLabel": "faux",
-    "xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.trueCountLabel": "vrai",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.countLabel": "compte",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.distinctValueLabel": "valeurs distinctes",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.metaTableTitle": "Statistiques des documents",

@@ -9,6 +9,10 @@ import type { Filter } from '@kbn/es-query';
 import type { Query } from '@kbn/data-plugin/common/query';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { SearchQueryLanguage } from './combined_query';
+export {
+  EMBEDDABLE_SAMPLER_OPTION,
+  SamplingOption,
+} from '../search_strategy/requests/build_random_sampler_agg';
 
 export interface ListingPageUrlState {
   pageSize: number;

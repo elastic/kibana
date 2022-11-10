@@ -16,14 +16,18 @@ import type {
 } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
+import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import type {
   Field,
   BooleanFieldStats,
   Aggs,
   FieldStatsCommonRequestParams,
 } from '../../../../../common/types/field_stats';
-import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import {
+  Bucket,
+  FieldStatsError,
+  isIKibanaSearchResponse,
+} from '../../../../../common/types/field_stats';
 import { extractErrorProperties } from '../../utils/error_utils';
 
 export const getBooleanFieldsStatsRequest = (
@@ -48,11 +52,7 @@ export const getBooleanFieldsStatsRequest = (
   });
   const searchBody = {
     query,
-    aggs: buildRandomSamplerAggregation(
-      aggs,
-      params.samplingProbability,
-      params.browserSessionSeed
-    ),
+    aggs: buildAggregationWithSamplingOption(aggs, params.samplingOption),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
 
@@ -97,6 +97,14 @@ export const fetchBooleanFieldsStats = (
             [...aggsPath, `${safeFieldName}_value_count`, 'doc_count'],
             0
           );
+
+          const fieldAgg = get(aggregations, [...aggsPath, `${safeFieldName}_values`], {});
+          const topValuesBuckets: Bucket[] = fieldAgg.buckets ?? [];
+          const sumOtherDocCount = fieldAgg.sum_other_doc_count || 0;
+          const valuesInTopBuckets =
+            topValuesBuckets?.reduce((prev, bucket) => bucket.doc_count + prev, 0) || 0;
+          const topValuesSampleSize = valuesInTopBuckets + sumOtherDocCount;
+
           const multiplier =
             count > sampleCount ? get(aggregations, [...aggsPath, 'probability'], 1) : 1;
 
@@ -105,7 +113,10 @@ export const fetchBooleanFieldsStats = (
             count: count * multiplier,
             trueCount: 0,
             falseCount: 0,
-            sampleCount,
+            topValues: topValuesBuckets.map((bucket) => ({
+              ...bucket,
+              percent: bucket.doc_count / topValuesSampleSize,
+            })),
           };
 
           const valueBuckets: Array<{ [key: string]: number }> = get(
@@ -114,7 +125,7 @@ export const fetchBooleanFieldsStats = (
             []
           );
           valueBuckets.forEach((bucket) => {
-            stats[`${bucket.key_as_string}Count`] = bucket.doc_count;
+            stats[`${bucket.key_as_string}Count` as 'trueCount' | 'falseCount'] = bucket.doc_count;
           });
           return stats;
         });

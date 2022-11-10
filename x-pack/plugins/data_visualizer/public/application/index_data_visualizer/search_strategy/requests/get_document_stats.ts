@@ -20,10 +20,7 @@ import type {
 
 const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 const DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY = 0.000001;
-const MINIMUM_SAMPLED_DOCS_THRESHOLD = 3e6 * DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY;
-// Ok so if the sample probability is p and the count you get back is N then the 90% confidence interval is (N * p - 1.64 * sqrt(N * p), N * p + 1.64 * sqrt(N * p))
-// const THRESHOLD =
-//   (doc_count / p - (1.64 * sqrt(doc_count)) / p, doc_count / p + (1.64 * sqrt(doc_count)) / p);
+
 export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyParams) => {
   const {
     index,
@@ -74,11 +71,11 @@ export const getDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   params: OverallStatsSearchStrategyParams,
   searchOptions: ISearchOptions,
-  browserSessionSeed: number,
+  browserSessionSeed: string,
   probability?: number | null,
   minimumRandomSamplerDocCount?: number
 ): Promise<DocumentCountStats> => {
-  const seed = browserSessionSeed ?? Math.abs(seedrandom().int32());
+  const seed = browserSessionSeed ?? Math.abs(seedrandom().int32()).toString();
 
   const {
     index,
@@ -115,7 +112,7 @@ export const getDocumentCountStats = async (
   // If probability is provided, use that
   // Else, make an initial query using very low p
   // so that we can calculate the next p value that's appropriate for the data set
-  const initialDefaultProbability = probability ?? 0.000001;
+  const initialDefaultProbability = probability ?? DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY;
 
   const getAggsWithRandomSampling = (p: number) => ({
     sampler: {

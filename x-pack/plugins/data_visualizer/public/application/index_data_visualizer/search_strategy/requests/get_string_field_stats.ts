@@ -16,8 +16,7 @@ import type {
   ISearchStart,
 } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { isDefined } from '../../../common/util/is_defined';
-import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
+import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import { SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {
   Aggs,
@@ -55,11 +54,7 @@ export const getStringFieldStatsRequest = (
 
   const searchBody = {
     query,
-    aggs: buildRandomSamplerAggregation(
-      aggs,
-      params.samplingProbability,
-      params.browserSessionSeed
-    ),
+    aggs: buildAggregationWithSamplingOption(aggs, params.samplingOption),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
 
@@ -94,7 +89,6 @@ export const fetchStringFieldsStats = (
 
         const aggsPath = ['sample'];
         const batchStats: StringFieldStats[] = [];
-        const sampleCount = get(aggregations, [...aggsPath, 'doc_count']);
 
         fields.forEach((field, i) => {
           const safeFieldName = field.safeFieldName;
@@ -104,14 +98,21 @@ export const fetchStringFieldsStats = (
             topAggsPath.push('top');
           }
 
-          const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
-
+          const fieldAgg = get(aggregations, [...topAggsPath], {});
+          const topValuesBuckets: Bucket[] = fieldAgg.buckets ?? [];
+          const sumOtherDocCount = fieldAgg.sum_other_doc_count || 0;
+          const valuesInTopBuckets =
+            topValuesBuckets?.reduce((prev, bucket) => bucket.doc_count + prev, 0) || 0;
+          const topValuesSampleSize = valuesInTopBuckets + sumOtherDocCount;
           const stats = {
             fieldName: field.fieldName,
-            isTopValuesSampled:
-              isDefined(params.samplingProbability) && params.samplingProbability < 1,
-            topValues,
-            sampleCount,
+            isTopValuesSampled: true,
+            topValues: topValuesBuckets.map((bucket) => ({
+              ...bucket,
+              percent: bucket.doc_count / topValuesSampleSize,
+            })),
+            topValuesSampleSize,
+            topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };
 
           batchStats.push(stats);

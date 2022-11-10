@@ -11,6 +11,25 @@ import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { TimeBucketsInterval } from '../services/time_buckets';
 
+export interface RandomSamplingOption {
+  mode: 'random_sampling';
+  seed: string;
+  probability: number;
+}
+
+export interface NormalSamplingOption {
+  mode: 'normal_sampling';
+  seed: string;
+  shardSize: number;
+}
+
+export interface NoSamplingOption {
+  mode: 'no_sampling';
+  seed: string;
+}
+
+export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
+
 export interface FieldData {
   fieldName: string;
   existsInDocs: boolean;
@@ -60,6 +79,8 @@ export interface NumericFieldStats {
   avg: number;
   isTopValuesSampled: boolean;
   topValues: Bucket[];
+  topValuesSampleSize: number;
+  topValuesSamplerShardSize: number;
   median?: number;
   distribution?: Distribution;
 }
@@ -68,6 +89,8 @@ export interface StringFieldStats {
   fieldName: string;
   isTopValuesSampled: boolean;
   topValues: Bucket[];
+  topValuesSampleSize: number;
+  topValuesSamplerShardSize: number;
 }
 
 export interface DateFieldStats {
@@ -82,7 +105,7 @@ export interface BooleanFieldStats {
   count: number;
   trueCount: number;
   falseCount: number;
-  [key: string]: number | string;
+  topValues: Bucket[];
 }
 
 export interface DocumentCountStats {
@@ -184,6 +207,7 @@ export interface FieldStatsCommonRequestParams {
   maxExamples?: number;
   samplingProbability: number | null;
   browserSessionSeed: number;
+  samplingOption: SamplingOption;
 }
 
 export interface OverallStatsSearchStrategyParams {
@@ -201,6 +225,7 @@ export interface OverallStatsSearchStrategyParams {
   nonAggregatableFields: string[];
   fieldsToFetch?: string[];
   browserSessionSeed: number;
+  samplingOption: SamplingOption;
 }
 
 export interface FieldStatsSearchStrategyReturnBase {

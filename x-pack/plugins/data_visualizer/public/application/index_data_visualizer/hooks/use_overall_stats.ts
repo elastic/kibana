@@ -16,6 +16,7 @@ import type {
   IKibanaSearchResponse,
   ISearchOptions,
 } from '@kbn/data-plugin/common';
+import { isRandomSamplingOption } from '../search_strategy/requests/build_random_sampler_agg';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   AggregatableFieldOverallStats,
@@ -91,7 +92,6 @@ function displayError(toastNotifications: ToastsStart, index: string, err: any) 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   searchStrategyParams: TParams | undefined,
   lastRefresh: number,
-  browserSessionSeed: number,
   probability?: number | null
 ): {
   progress: DataStatsFetchProgress;
@@ -136,6 +136,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         earliest,
         latest,
         runtimeFieldMap,
+        samplingOption,
       } = searchStrategyParams;
 
       const searchOptions: ISearchOptions = {
@@ -147,7 +148,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         data.search,
         searchStrategyParams,
         searchOptions,
-        browserSessionSeed,
+        samplingOption.seed,
         probability
       );
 
@@ -180,6 +181,9 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       // Have to divide into smaller requests to avoid 413 payload too large
       const aggregatableFieldsChunks = chunk(aggregatableFields, 30);
 
+      if (isRandomSamplingOption(samplingOption)) {
+        samplingOption.probability = documentCountStats.probability ?? 1;
+      }
       const aggregatableOverallStatsObs = aggregatableFieldsChunks.map((aggregatableFieldsChunk) =>
         data.search
           .search(
@@ -188,9 +192,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
                 index,
                 searchQuery,
                 aggregatableFieldsChunk,
-                documentCountStats.probability ?? 1,
-                documentCountStats.totalCount,
-                browserSessionSeed,
+                samplingOption,
                 timeFieldName,
                 earliest,
                 latest,
@@ -233,8 +235,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
           const aggregatableOverallStats = processAggregatableFieldsExistResponse(
             aggregatableOverallStatsResp,
-            aggregatableFields,
-            totalCount
+            aggregatableFields
           );
 
           const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
@@ -269,7 +270,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         // @todo displayError(toasts, searchParams!.index, extractErrorProperties(error));
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search, searchStrategyParams, toasts, lastRefresh, probability]);
 
   const cancelFetch = useCallback(() => {

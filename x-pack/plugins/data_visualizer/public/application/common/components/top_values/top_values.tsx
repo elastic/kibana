@@ -36,8 +36,7 @@ interface Props {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
-function getPercentLabel(docCount: number, totalDocuments: number): string {
-  const percent = (100 * docCount) / totalDocuments;
+function _getPercentLabel(percent: number): string {
   if (percent >= 0.1) {
     return `${roundToDecimalPlace(percent, 1)}%`;
   } else {
@@ -53,17 +52,16 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   const { fieldFormats } = data;
 
   if (stats === undefined || !stats.topValues) return null;
-  const { topValues, isTopValuesSampled, fieldName, sampleCount } = stats;
+  const { topValues, fieldName, sampleCount } = stats;
 
-  const totalDocuments = stats.totalDocuments;
+  const totalDocuments = stats.totalDocuments ?? 0;
+  const topValuesOtherCountPercent =
+    1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);
+  const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount || 0));
 
-  const topValuesOtherCount =
-    (totalDocuments ?? 0) -
-    (topValues ? topValues.map((value) => value.doc_count).reduce((v, acc) => acc + v, 0) : 0);
-
-  const countsElement = totalDocuments ? (
+  const countsElement = (
     <EuiText color="subdued" size="xs">
-      {isTopValuesSampled ? (
+      {totalDocuments > (sampleCount ?? totalDocuments) ? (
         <FormattedMessage
           id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
           defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
@@ -95,7 +93,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
         />
       )}
     </EuiText>
-  ) : null;
+  );
 
   return (
     <ExpandedRowPanel
@@ -118,15 +116,15 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
               <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
                 <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
                   <EuiProgress
-                    value={value.doc_count}
-                    max={totalDocuments}
+                    value={value.percent}
+                    max={1}
                     color={barColor}
                     size="xs"
                     label={kibanaFieldFormat(value.key, fieldFormat)}
                     className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                     valueText={`${value.doc_count}${
                       totalDocuments !== undefined
-                        ? ` (${getPercentLabel(value.doc_count, totalDocuments)})`
+                        ? ` (${_getPercentLabel(value.percent * 100)})`
                         : ''
                     }`}
                   />
@@ -213,7 +211,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                 className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                 valueText={`${topValuesOtherCount}${
                   totalDocuments !== undefined
-                    ? ` (${getPercentLabel(topValuesOtherCount, totalDocuments)})`
+                    ? ` (${_getPercentLabel(topValuesOtherCountPercent * 100)})`
                     : ''
                 }`}
               />
