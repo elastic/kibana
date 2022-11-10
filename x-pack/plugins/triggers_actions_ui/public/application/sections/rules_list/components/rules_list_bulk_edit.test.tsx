@@ -171,7 +171,7 @@ describe('Rules list bulk actions', () => {
 
     expect(wrapper.find('[data-test-subj="ruleQuickEditButton"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="disableAll"]').first().prop('isDisabled')).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="deleteAll"]').first().prop('isDisabled')).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkDelete"]').exists()).toBeTruthy();
   });
 
   describe('bulk actions', () => {
