@@ -18,6 +18,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   ALERT_DURATION,
+  ALERT_END,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { getOrRedirectToTransactionType } from '../../../context/apm_service/apm_service_context';
@@ -99,9 +100,10 @@ export function AlertDetailsAppSectionTransactionDuration({
 
   const rangeTo = alert.active
     ? 'now'
-    : moment(alert.start)
-        .subtract(ruleWindowSizeMS, 'millisecond')
+    : moment(alert.fields[ALERT_END])
+        .add(ruleWindowSizeMS, 'millisecond')
         .toISOString();
+
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { agentName } = useServiceAgentFetcher({
     serviceName,
