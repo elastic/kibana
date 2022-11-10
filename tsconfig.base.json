@@ -1211,8 +1211,10 @@
     "useUnknownInCatchVariables": false,
     // disabled for better IDE support, enabled when running the type_check script
     "composite": false,
-    // disabled for better IDE support, enabled when running the type_check script
-    "incremental": false,
+    // enabled for improved performance
+    "incremental": true,
+    // Do not check d.ts files ts ships by default
+    "skipDefaultLibCheck": true,
     // Do not check d.ts files by default
     "skipLibCheck": true,
     // enables "core language features"
@@ -1263,7 +1265,7 @@
       "@testing-library/jest-dom",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-storybook-types",
+      "@kbn/ambient-storybook-types"
     ]
-  }
+  },
 }
