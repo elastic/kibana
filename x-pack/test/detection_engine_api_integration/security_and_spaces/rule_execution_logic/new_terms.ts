@@ -377,6 +377,37 @@ export default ({ getService }: FtrProviderContext) => {
       expect(hostNames[4]).eql(['zeek-sensor-san-francisco']);
     });
 
+    describe('null values', () => {
+      it('should not generate alerts with null values for single field', async () => {
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['possibly_null_field'],
+          from: '2020-10-19T05:00:04.000Z',
+          history_window_start: '2020-10-13T05:00:04.000Z',
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).eql(0);
+      });
+
+      it('should not generate alerts with null values for multiple fields', async () => {
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['possibly_null_field', 'host.name'],
+          from: '2020-10-19T05:00:04.000Z',
+          history_window_start: '2020-10-13T05:00:04.000Z',
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).eql(0);
+      });
+    });
     describe('timestamp override and fallback', () => {
       before(async () => {
         await esArchiver.load(

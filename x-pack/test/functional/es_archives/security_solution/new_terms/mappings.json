@@ -42,6 +42,9 @@
           },
           "blob": {
             "type": "binary"
+          },
+          "possibly_null_field": {
+            "type": "keyword"
           }
         }
       },

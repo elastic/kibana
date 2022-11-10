@@ -68,14 +68,16 @@ export const transformBucketsToValues = (
       .filter((value): value is string | number => value != null);
   }
 
-  return buckets.map((bucket) =>
-    Object.values(bucket.key)
-      .filter((value): value is string | number => value != null)
-      .map((value) =>
-        Buffer.from(typeof value !== 'string' ? value.toString() : value).toString('base64')
-      )
-      .join(DELIMITER)
-  );
+  return buckets
+    .map((bucket) => Object.values(bucket.key))
+    .filter((values) => !values.some((value) => value == null))
+    .map((values) =>
+      values
+        .map((value) =>
+          Buffer.from(typeof value !== 'string' ? value.toString() : value).toString('base64')
+        )
+        .join(DELIMITER)
+    );
 };
 
 export const getNewTermsRuntimeMappings = (

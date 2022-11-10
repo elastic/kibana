@@ -95,6 +95,28 @@ describe('new terms utils', () => {
       ).toEqual(['host-0', 'host-1']);
     });
 
+    it('should filter null values for a single new terms field', () => {
+      expect(
+        transformBucketsToValues(
+          ['source.host'],
+          [
+            {
+              key: {
+                'source.host': 'host-0',
+              },
+              doc_count: 1,
+            },
+            {
+              key: {
+                'source.host': null,
+              },
+              doc_count: 3,
+            },
+          ]
+        )
+      ).toEqual(['host-0']);
+    });
+
     it('should return correct value for multiple new terms fields', () => {
       expect(
         transformBucketsToValues(
@@ -117,6 +139,30 @@ describe('new terms utils', () => {
           ]
         )
       ).toEqual(['aG9zdC0w_MTI3LjAuMC4x', 'aG9zdC0x_MTI3LjAuMC4x']);
+    });
+
+    it('should filter null values for multiple new terms fields', () => {
+      expect(
+        transformBucketsToValues(
+          ['source.host', 'source.ip'],
+          [
+            {
+              key: {
+                'source.host': 'host-0',
+                'source.ip': '127.0.0.1',
+              },
+              doc_count: 1,
+            },
+            {
+              key: {
+                'source.host': 'host-1',
+                'source.ip': null,
+              },
+              doc_count: 1,
+            },
+          ]
+        )
+      ).toEqual(['aG9zdC0w_MTI3LjAuMC4x']);
     });
   });
 
