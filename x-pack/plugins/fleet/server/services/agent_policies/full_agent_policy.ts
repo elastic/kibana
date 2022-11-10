@@ -195,7 +195,7 @@ export async function getFullAgentPolicy(
       (err) => {
         appContextService
           .getLogger()
-          ?.warn(`Unable to fleet server hosts for policy ${agentPolicy?.id} : ${err.message}`);
+          ?.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
 
         return;
       }
