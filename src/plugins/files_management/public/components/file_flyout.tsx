@@ -15,12 +15,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiSpacer,
+  EuiFlyoutFooter,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FunctionComponent } from 'react';
+import { Image } from '@kbn/files-plugin/public';
 import React from 'react';
 import { i18nTexts } from '../i18n_texts';
+import { useFilesManagementContext } from '../context';
 
 interface Props {
   file: FileJSON;
@@ -28,6 +34,7 @@ interface Props {
 }
 
 export const FileFlyout: FunctionComponent<Props> = ({ onClose, file }) => {
+  const { filesClient } = useFilesManagementContext();
   return (
     <EuiFlyout ownFocus onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder>
@@ -88,7 +95,27 @@ export const FileFlyout: FunctionComponent<Props> = ({ onClose, file }) => {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {file.mimeType?.startsWith('image/') && (
+          <>
+            <EuiSpacer size="l" />
+            <EuiHorizontalRule />
+            <EuiTitle size="s">
+              <h3>{i18nTexts.filesFlyoutPreview}</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="center" gutterSize="none">
+              <Image size="xl" alt={file.alt ?? ''} src={filesClient.getDownloadHref(file)} />
+            </EuiFlexGroup>
+          </>
+        )}
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiButtonEmpty href={filesClient.getDownloadHref(file)} iconType="download">
+            {i18nTexts.filesFlyoutDownload}
+          </EuiButtonEmpty>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

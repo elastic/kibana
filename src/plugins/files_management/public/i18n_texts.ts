@@ -75,6 +75,12 @@ export const i18nTexts = {
   filesFlyoutUpdated: i18n.translate('filesManagement.filesFlyout.updatedLabel', {
     defaultMessage: 'Updated',
   }),
+  filesFlyoutDownload: i18n.translate('filesManagement.filesFlyout.downloadButtonLabel', {
+    defaultMessage: 'Download',
+  }),
+  filesFlyoutPreview: i18n.translate('filesManagement.filesFlyout.previewSectionTitle', {
+    defaultMessage: 'Preview',
+  }),
   filesStatus: {
     AWAITING_UPLOAD: i18n.translate('filesManagement.filesFlyout.status.awaitingUpload', {
       defaultMessage: 'Awaiting upload',
