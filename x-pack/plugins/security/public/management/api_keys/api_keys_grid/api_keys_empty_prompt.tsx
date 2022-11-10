@@ -124,7 +124,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
         title={
           <h1>
             <FormattedMessage
-              id="xpack.security.management.apiKeysEmptyPrompt.emptyTitle"
+              id="xpack.security.management.apiKeysEmptyPrompt.readOnlyEmptyTitle"
               defaultMessage="You do not have permission to create API keys"
             />
           </h1>
@@ -132,7 +132,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
         body={
           <p>
             <FormattedMessage
-              id="xpack.security.management.apiKeysEmptyPrompt.emptyMessage"
+              id="xpack.security.management.apiKeysEmptyPrompt.readOnlyEmptyMessage"
               defaultMessage="Please contact your administrator for more information"
             />
           </p>
