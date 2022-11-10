@@ -60,8 +60,6 @@ export function getConnectorType(): ConnectorTypeModel<
           const parsedUrl = new URL(subActionParams.webhookUrl);
           if (parsedUrl.protocol !== 'https:') {
             errors.webhookUrl.push(translations.INVALID_PROTOCOL_WEBHOOK_URL);
-          } else if (!parsedUrl.hostname.endsWith('.tines.com')) {
-            errors.webhookUrl.push(translations.INVALID_HOSTNAME_WEBHOOK_URL);
           }
         } catch (err) {
           errors.webhookUrl.push(translations.INVALID_WEBHOOK_URL);

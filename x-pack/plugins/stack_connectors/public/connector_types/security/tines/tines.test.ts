@@ -125,20 +125,6 @@ describe('tines action params validation', () => {
     });
   });
 
-  it('should fail when webhookUrl is not a Tines URL', async () => {
-    const validation = await actionTypeModel.validateParams({
-      ...actionParams,
-      subActionParams: {
-        ...actionParams.subActionParams,
-        webhookUrl: 'https://example.wrong.com',
-      },
-    });
-    expect(validation.errors).toEqual({
-      ...defaultValidationErrors,
-      webhookUrl: ['Webhook URL does not have a valid ".tines.com" domain.'],
-    });
-  });
-
   it('should succeed when webhookUrl is a proper Tines URL', async () => {
     const validation = await actionTypeModel.validateParams({
       ...actionParams,

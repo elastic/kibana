@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { set } from 'lodash/fp';
 import { renderParameterTemplates } from './render';
 
 const params = {
@@ -62,7 +63,7 @@ describe('Tines body render', () => {
       expect(result).toEqual(testParams);
     });
 
-    it('should rendered body from variables on run action', () => {
+    it('should rendered body from variables with cleaned alerts on run action', () => {
       const result = renderParameterTemplates(params, variables);
 
       expect(result.subActionParams.body).toEqual(
@@ -74,6 +75,20 @@ describe('Tines body render', () => {
           },
         })
       );
+    });
+
+    it('should rendered body from variables on run action without context.alerts', () => {
+      const variablesWithoutAlerts = set('context.alerts', undefined, variables);
+      const result = renderParameterTemplates(params, variablesWithoutAlerts);
+
+      expect(result.subActionParams.body).toEqual(JSON.stringify(variablesWithoutAlerts));
+    });
+
+    it('should rendered body from variables on run action without context', () => {
+      const variablesWithoutContext = set('context', undefined, variables);
+      const result = renderParameterTemplates(params, variablesWithoutContext);
+
+      expect(result.subActionParams.body).toEqual(JSON.stringify(variablesWithoutContext));
     });
 
     it('should render error body', () => {

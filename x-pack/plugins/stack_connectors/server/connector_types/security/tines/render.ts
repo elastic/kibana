@@ -20,12 +20,21 @@ export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> 
 ) => {
   if (params?.subAction !== SUB_ACTION.RUN) return params;
 
-  // Remove the "kibana" entry from all alerts to reduce weight, the same data can be found in other parts of the alert object.
-  const alerts = (variables.context as Context).alerts.map(({ kibana, ...alert }) => alert);
-
   let body: string;
   try {
-    body = JSON.stringify(set('context.alerts', alerts, variables));
+    let bodyObject;
+    const alerts = (variables?.context as Context)?.alerts;
+    if (alerts) {
+      // Remove the "kibana" entry from all alerts to reduce weight, the same data can be found in other parts of the alert object.
+      bodyObject = set(
+        'context.alerts',
+        alerts.map(({ kibana, ...alert }) => alert),
+        variables
+      );
+    } else {
+      bodyObject = variables;
+    }
+    body = JSON.stringify(bodyObject);
   } catch (err) {
     body = JSON.stringify({ error: { message: err.message } });
   }
