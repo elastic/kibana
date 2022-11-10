@@ -6,23 +6,55 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { FunctionComponent } from 'react';
-import { useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
+import { useEuiTheme, EuiEmptyPrompt, EuiConfirmModal } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 
+import { isEmpty } from 'lodash';
 import { i18nTexts } from '../i18n_texts';
 import { useFilePickerContext } from '../context';
-import { FileCard } from './file_card';
+import { FileCard, FileToBeDestroyed } from './file_card';
 
-export const FileGrid: FunctionComponent = () => {
+interface FileGridProps {
+  onDeleteFile: (id: string) => void;
+}
+
+export const FileGrid: FunctionComponent<FileGridProps> = ({ onDeleteFile }) => {
   const { state } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const files = useObservable(state.files$, []);
+
+  const [fileToBeDestroyed, setFileToBeDestroyed] = useState<FileToBeDestroyed | undefined>();
+
   if (!files.length) {
     return <EuiEmptyPrompt title={<h3>{i18nTexts.emptyFileGridPrompt}</h3>} titleSize="s" />;
   }
+
+  const destroyFile = (id: string) => onDeleteFile(id);
+  const closeDestroyModal = () => setFileToBeDestroyed(undefined);
+  const showDestroyModal = (file: { id: string; name: string }) => setFileToBeDestroyed(file);
+
+  const destroyModal = () => {
+    if (!isEmpty(fileToBeDestroyed)) {
+      return (
+        <EuiConfirmModal
+          title="Delete File"
+          onCancel={closeDestroyModal}
+          onConfirm={() => destroyFile(fileToBeDestroyed!.id)}
+          cancelButtonText="Cancel"
+          confirmButtonText="Delete"
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          <p>{`You are about to delete file ${fileToBeDestroyed!.name}`}</p>
+          <p>Are you sure you want to do this?</p>
+        </EuiConfirmModal>
+      );
+    }
+  };
+
   return (
     <div
       data-test-subj="fileGrid"
@@ -33,8 +65,9 @@ export const FileGrid: FunctionComponent = () => {
       `}
     >
       {files.map((file, idx) => (
-        <FileCard key={idx} file={file} />
+        <FileCard key={idx} file={file} onClickDelete={showDestroyModal} />
       ))}
+      {destroyModal()}
     </div>
   );
 };

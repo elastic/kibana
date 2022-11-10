@@ -50,6 +50,10 @@ export interface Props<Kind extends string = string> {
    */
   onUpload?: (done: DoneNotification[]) => void;
   /**
+   * Will be called after a user has confirm deletion
+   */
+  onDeleteFile: (fileId: string) => void;
+  /**
    * The number of results to show per page.
    */
   pageSize?: number;
@@ -61,9 +65,17 @@ export interface Props<Kind extends string = string> {
   multiple?: boolean;
 }
 
-type InnerProps = Required<Pick<Props, 'onClose' | 'onDone' | 'onUpload' | 'multiple'>>;
+type InnerProps = Required<
+  Pick<Props, 'onClose' | 'onDone' | 'onUpload' | 'onDeleteFile' | 'multiple'>
+>;
 
-const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, multiple }) => {
+const Component: FunctionComponent<InnerProps> = ({
+  onClose,
+  onDone,
+  onUpload,
+  onDeleteFile,
+  multiple,
+}) => {
   const { state, kind } = useFilePickerContext();
 
   const hasFiles = useBehaviorSubject(state.hasFiles$);
@@ -108,7 +120,7 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
       ) : (
         <>
           <EuiModalBody>
-            <FileGrid />
+            <FileGrid onDeleteFile={onDeleteFile} />
             <EuiSpacer />
             <ClearFilterButton onClick={() => state.setQuery(undefined)} />
           </EuiModalBody>

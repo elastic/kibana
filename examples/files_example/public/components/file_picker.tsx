@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable no-console */
+
 import React from 'react';
 import type { FunctionComponent } from 'react';
 
@@ -25,6 +27,7 @@ export const MyFilePicker: FunctionComponent<Props> = ({ onClose, onDone, onUplo
       kind={exampleFileKind.id}
       onClose={onClose}
       onDone={onDone}
+      onDeleteFile={(id) => console.log(`File id ${id} is deleted`)}
       onUpload={(n) => onUpload(n.map(({ id }) => id))}
       pageSize={50}
       multiple
