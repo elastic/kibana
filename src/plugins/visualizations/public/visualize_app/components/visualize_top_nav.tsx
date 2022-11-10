@@ -21,7 +21,6 @@ import type {
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig, isFallbackDataView } from '../utils';
-import type { NavigateToLensContext } from '../../../common';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
@@ -65,8 +64,8 @@ const TopNav = ({
   const { setHeaderActionMenu, visualizeCapabilities } = services;
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
-  const [editInLensConfig, setEditInLensConfig] = useState<NavigateToLensContext | null>();
   const [navigateToLens, setNavigateToLens] = useState(false);
+  const [displayEditInLensItem, setDisplayEditInLensItem] = useState(false);
   // If the user has clicked the edit in lens button, we want to hide the badge.
   // The information is stored in local storage to persist across reloads.
   const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
@@ -98,30 +97,19 @@ const TopNav = ({
     [doReload]
   );
 
-  const uiStateJSON = useMemo(() => vis.uiState.toJSON(), [vis.uiState]);
   useEffect(() => {
-    const asyncGetTriggerContext = async () => {
-      if (vis.type.navigateToLens) {
-        const triggerConfig = await vis.type.navigateToLens(
-          vis,
-          services.data.query.timefilter.timefilter
+    const subscription = embeddableHandler
+      .getExpressionVariables$()
+      .subscribe((expressionVariables) => {
+        setDisplayEditInLensItem(
+          Boolean(vis.type.navigateToLens && expressionVariables?.canNavigateToLens)
         );
-        setEditInLensConfig(triggerConfig);
-      }
+      });
+    return () => {
+      subscription.unsubscribe();
     };
-    asyncGetTriggerContext();
-  }, [
-    services.data.query.timefilter.timefilter,
-    vis,
-    vis.type,
-    vis.params,
-    uiStateJSON?.vis,
-    uiStateJSON?.table,
-    vis.data.indexPattern,
-    eventEmitter,
-  ]);
+  }, [embeddableHandler, vis]);
 
-  const displayEditInLensItem = Boolean(vis.type.navigateToLens && editInLensConfig);
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
       return getTopNavConfig(
@@ -138,7 +126,6 @@ const TopNav = ({
           visualizationIdFromUrl,
           stateTransfer: services.stateTransferService,
           embeddableId,
-          editInLensConfig,
           displayEditInLensItem,
           hideLensBadge,
           setNavigateToLens,
@@ -162,7 +149,6 @@ const TopNav = ({
     visualizationIdFromUrl,
     services,
     embeddableId,
-    editInLensConfig,
     displayEditInLensItem,
     hideLensBadge,
     hideTryInLensBadge,

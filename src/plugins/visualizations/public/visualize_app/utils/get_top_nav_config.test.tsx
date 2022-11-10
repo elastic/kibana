@@ -421,52 +421,6 @@ describe('getTopNavConfig', () => {
         stateContainer,
         visualizationIdFromUrl: undefined,
         stateTransfer: createEmbeddableStateTransferMock(),
-        editInLensConfig: {
-          layers: {
-            '0': {
-              indexPatternId: 'test-id',
-              timeFieldName: 'timefield-1',
-              chartType: 'area',
-              axisPosition: 'left',
-              palette: {
-                name: 'default',
-                type: 'palette',
-              },
-              metrics: [
-                {
-                  agg: 'count',
-                  isFullReference: false,
-                  fieldName: 'document',
-                  params: {},
-                  color: '#68BC00',
-                },
-              ],
-              timeInterval: 'auto',
-            },
-          },
-          configuration: {
-            fill: 0.5,
-            legend: {
-              isVisible: true,
-              position: 'right',
-              shouldTruncate: true,
-              maxLines: 1,
-            },
-            gridLinesVisibility: {
-              x: true,
-              yLeft: true,
-              yRight: true,
-            },
-            extents: {
-              yLeftExtent: {
-                mode: 'full',
-              },
-              yRightExtent: {
-                mode: 'full',
-              },
-            },
-          },
-        },
         displayEditInLensItem: true,
         hideLensBadge: false,
       } as unknown as TopNavConfigParams,
@@ -478,7 +432,6 @@ describe('getTopNavConfig', () => {
         Object {
           "className": "visNavItem__goToLens",
           "description": "Go to Lens with your current configuration",
-          "disableButton": false,
           "emphasize": false,
           "id": "goToLens",
           "label": "Edit visualization in Lens",
