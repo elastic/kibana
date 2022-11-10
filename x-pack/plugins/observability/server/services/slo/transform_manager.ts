@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { SLO, IndicatorTypes } from '../../types/models';
+import { SLO, IndicatorTypes } from '../../domain/models';
 import { retryTransientEsErrors } from '../../utils/retry';
 import { TransformGenerator } from './transform_generators';
 
@@ -31,7 +31,7 @@ export class DefaultTransformManager implements TransformManager {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
       this.logger.error(`No transform generator found for ${slo.indicator.type} SLO type`);
-      throw new Error(`Unsupported SLO type: ${slo.indicator.type}`);
+      throw new Error(`Unsupported SLI type: ${slo.indicator.type}`);
     }
 
     const transformParams = generator.getTransformParams(slo);
@@ -40,7 +40,7 @@ export class DefaultTransformManager implements TransformManager {
         logger: this.logger,
       });
     } catch (err) {
-      this.logger.error(`Cannot create transform for ${slo.indicator.type} SLO type: ${err}`);
+      this.logger.error(`Cannot create transform for ${slo.indicator.type} SLI type: ${err}`);
       throw err;
     }
 
