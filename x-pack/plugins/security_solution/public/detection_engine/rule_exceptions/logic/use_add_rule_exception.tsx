@@ -11,8 +11,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { useEffect, useRef, useState } from 'react';
 
-import { addRuleExceptions } from '../../../detections/containers/detection_engine/rules/api';
-import type { Rule } from '../../../detections/containers/detection_engine/rules/types';
+import { addRuleExceptions } from '../../rule_management/api/api';
+import type { Rule } from '../../rule_management/logic/types';
 
 /**
  * Adds exception items to rules default exception list

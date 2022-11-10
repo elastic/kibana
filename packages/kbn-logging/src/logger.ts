@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { LogMeta } from './log_meta';
-import { LogRecord } from './log_record';
+import type { LogMeta } from './log_meta';
+import type { LogRecord } from './log_record';
+import type { LogLevelId } from './log_level';
 
 /**
  * Logger exposes all the necessary methods to log any type of information and
@@ -63,6 +64,22 @@ export interface Logger {
 
   /** @internal */
   log(record: LogRecord): void;
+
+  /**
+   * Checks if given level is currently enabled for this logger.
+   * Can be used to wrap expensive logging operations into conditional blocks
+   *
+   * @example
+   * ```ts
+   * if(logger.isLevelEnabled('info')) {
+   *   const meta = await someExpensiveOperation();
+   *   logger.info('some message', meta);
+   * }
+   * ```
+   *
+   * @param level The log level to check for.
+   */
+  isLevelEnabled(level: LogLevelId): boolean;
 
   /**
    * Returns a new {@link Logger} instance extending the current logger context.

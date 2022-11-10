@@ -23,16 +23,16 @@ jest.mock('../../hooks/use_confirm_modal', () => ({
 describe('useFleetServerHostsForm', () => {
   it('should not allow to submit an invalid form', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSucess = jest.fn();
-    const { result } = testRenderer.renderHook(() => useFleetServerHostsForm([], onSucess));
+    const onSuccess = jest.fn();
+    const { result } = testRenderer.renderHook(() => useFleetServerHostsForm(undefined, onSuccess));
 
     act(() =>
-      result.current.fleetServerHostsInput.props.onChange(['https://test.fr', 'https://test.fr'])
+      result.current.inputs.hostUrlsInput.props.onChange(['https://test.fr', 'https://test.fr'])
     );
 
     await act(() => result.current.submit());
 
-    expect(result.current.fleetServerHostsInput.props.errors).toMatchInlineSnapshot(`
+    expect(result.current.inputs.hostUrlsInput.props.errors).toMatchInlineSnapshot(`
       Array [
         Object {
           "index": 0,
@@ -44,40 +44,62 @@ describe('useFleetServerHostsForm', () => {
         },
       ]
     `);
-    expect(onSucess).not.toBeCalled();
+    expect(onSuccess).not.toBeCalled();
     expect(result.current.isDisabled).toBeTruthy();
   });
 
   it('should submit a valid form', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSucess = jest.fn();
+    const onSuccess = jest.fn();
     testRenderer.startServices.http.post.mockResolvedValue({});
-    const { result } = testRenderer.renderHook(() => useFleetServerHostsForm([], onSucess));
+    const { result } = testRenderer.renderHook(() =>
+      useFleetServerHostsForm(
+        {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: [],
+          is_default: false,
+          is_preconfigured: false,
+        },
+        onSuccess
+      )
+    );
 
-    act(() => result.current.fleetServerHostsInput.props.onChange(['https://test.fr']));
+    act(() => result.current.inputs.hostUrlsInput.props.onChange(['https://test.fr']));
 
     await act(() => result.current.submit());
-    expect(onSucess).toBeCalled();
+    expect(onSuccess).toBeCalled();
   });
 
   it('should allow the user to correct and submit a invalid form', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSucess = jest.fn();
+    const onSuccess = jest.fn();
     testRenderer.startServices.http.post.mockResolvedValue({});
-    const { result } = testRenderer.renderHook(() => useFleetServerHostsForm([], onSucess));
+    const { result } = testRenderer.renderHook(() =>
+      useFleetServerHostsForm(
+        {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: [],
+          is_default: false,
+          is_preconfigured: false,
+        },
+        onSuccess
+      )
+    );
 
     act(() =>
-      result.current.fleetServerHostsInput.props.onChange(['https://test.fr', 'https://test.fr'])
+      result.current.inputs.hostUrlsInput.props.onChange(['https://test.fr', 'https://test.fr'])
     );
 
     await act(() => result.current.submit());
-    expect(onSucess).not.toBeCalled();
+    expect(onSuccess).not.toBeCalled();
     expect(result.current.isDisabled).toBeTruthy();
 
-    act(() => result.current.fleetServerHostsInput.props.onChange(['https://test.fr']));
+    act(() => result.current.inputs.hostUrlsInput.props.onChange(['https://test.fr']));
     expect(result.current.isDisabled).toBeFalsy();
 
     await act(() => result.current.submit());
-    expect(onSucess).toBeCalled();
+    expect(onSuccess).toBeCalled();
   });
 });

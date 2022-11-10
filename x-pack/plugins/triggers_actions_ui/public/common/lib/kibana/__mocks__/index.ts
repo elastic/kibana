@@ -31,3 +31,4 @@ export const useCurrentUser = jest.fn();
 export const withKibana = jest.fn(createWithKibanaMock());
 export const KibanaContextProvider = jest.fn(createKibanaContextProviderMock());
 export const useGetUserSavedObjectPermissions = jest.fn();
+export const useSpacesData = jest.fn();

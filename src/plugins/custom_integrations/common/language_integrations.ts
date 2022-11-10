@@ -37,9 +37,9 @@ export const languageIntegrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.JavascriptDescription', {
       defaultMessage: 'Index data to Elasticsearch with the JavaScript client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/javascript-api/{branch}/introduction.html`,
+    docUrlTemplate: '',
     integrationsAppUrl: `/app/integrations/language_clients/javascript/overview`,
-    exportLanguageUiComponent: false,
+    exportLanguageUiComponent: true,
   },
   {
     id: 'ruby',

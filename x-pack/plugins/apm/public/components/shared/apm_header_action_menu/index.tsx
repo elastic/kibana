@@ -14,7 +14,7 @@ import {
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { getAlertingCapabilities } from '../../alerting/get_alerting_capabilities';
+import { getAlertingCapabilities } from '../../alerting/utils/get_alerting_capabilities';
 import { getLegacyApmHref } from '../links/apm/apm_link';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';

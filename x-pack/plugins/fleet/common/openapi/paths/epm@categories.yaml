@@ -9,3 +9,22 @@ get:
           schema:
             $ref: ../components/schemas/get_categories_response.yaml
   operationId: get-package-categories
+parameters:
+  - in: query 
+    name: prerelease
+    schema:
+      type: boolean
+      default: false
+    description: >-
+      Whether to include prerelease packages in categories count (e.g. beta, rc, preview) 
+  - in: query 
+    name: experimental
+    deprecated: true
+    schema:
+      type: boolean
+      default: false
+  - in: query 
+    name: include_policy_templates
+    schema:
+      type: boolean
+      default: false

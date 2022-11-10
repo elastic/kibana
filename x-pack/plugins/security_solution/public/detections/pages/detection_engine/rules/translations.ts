@@ -49,7 +49,14 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine
 export const EXPERIMENTAL_ON = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalOn',
   {
-    defaultMessage: 'Technical preview: On',
+    defaultMessage: 'Advanced sorting',
+  }
+);
+
+export const EXPERIMENTAL_OFF = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.experimentalOff',
+  {
+    defaultMessage: 'Advanced sorting',
   }
 );
 
@@ -57,14 +64,7 @@ export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalDescription',
   {
     defaultMessage:
-      'The experimental rules table view is in technical preview and allows for advanced sorting capabilities. If you experience performance issues when working with the table, you can turn this setting off.',
-  }
-);
-
-export const EXPERIMENTAL_OFF = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOff',
-  {
-    defaultMessage: 'Technical preview: Off',
+      'Turn this on to enable sorting for all table columns. You can turn it off if you encounter table performance issues.',
   }
 );
 
@@ -484,10 +484,17 @@ export const EDIT_RULE_SETTINGS = i18n.translate(
   }
 );
 
-export const EDIT_RULE_SETTINGS_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsToolTip',
+export const LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaActionsFeaturePrivileges',
   {
     defaultMessage: 'You do not have Kibana Actions privileges',
+  }
+);
+
+export const LACK_OF_KIBANA_SECURITY_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaSecurityPrivileges',
+  {
+    defaultMessage: 'You do not have Kibana Security privileges',
   }
 );
 
@@ -1064,9 +1071,17 @@ export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage:
-        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}. If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.",
+        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}",
     }
   );
+
+export const RULES_BULK_EDIT_SUCCESS_INDEX_EDIT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successIndexEditToastDescription',
+  {
+    defaultMessage:
+      'If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.',
+  }
+);
 
 export const RULES_BULK_EDIT_FAILURE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.errorToastTitle',

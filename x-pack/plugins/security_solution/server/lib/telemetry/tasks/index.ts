@@ -14,6 +14,7 @@ import { createTelemetryPrebuiltRuleAlertsTaskConfig } from './prebuilt_rule_ale
 import { createTelemetryTimelineTaskConfig } from './timelines';
 import { createTelemetryConfigurationTaskConfig } from './configuration';
 import { telemetryConfiguration } from '../configuration';
+import { createTelemetryFilterListArtifactTaskConfig } from './filterlists';
 
 export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
   return [
@@ -26,5 +27,6 @@ export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
     createTelemetryPrebuiltRuleAlertsTaskConfig(telemetryConfiguration.max_detection_alerts_batch),
     createTelemetryTimelineTaskConfig(),
     createTelemetryConfigurationTaskConfig(),
+    createTelemetryFilterListArtifactTaskConfig(),
   ];
 }

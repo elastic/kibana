@@ -208,8 +208,8 @@ export class SearchSessionService implements ISearchSessionService {
     return {
       ...findResponse,
       statuses: sessionStatuses.reduce<Record<string, SearchSessionStatusResponse>>(
-        (res, status, index) => {
-          res[findResponse.saved_objects[index].id] = { status };
+        (res, { status, errors }, index) => {
+          res[findResponse.saved_objects[index].id] = { status, errors };
           return res;
         },
         {}
@@ -380,7 +380,7 @@ export class SearchSessionService implements ISearchSessionService {
       this.sessionConfig
     );
 
-    return { status: sessionStatus };
+    return { status: sessionStatus.status, errors: sessionStatus.errors };
   }
 
   /**

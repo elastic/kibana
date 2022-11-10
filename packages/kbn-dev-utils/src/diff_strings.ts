@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import jestDiff from 'jest-diff';
+import { diff as jestDiff } from 'jest-diff';
 import stripAnsi from 'strip-ansi';
 import Chalk from 'chalk';
 

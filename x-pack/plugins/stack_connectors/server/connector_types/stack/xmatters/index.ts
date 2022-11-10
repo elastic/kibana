@@ -274,6 +274,20 @@ export async function executor(
     };
   }
 
+  if (result == null) {
+    const message = i18n.translate(
+      'xpack.stackConnectors.xmatters.unexpectedNullResponseErrorMessage',
+      {
+        defaultMessage: 'unexpected null response from xmatters',
+      }
+    );
+    return {
+      status: 'error',
+      actionId,
+      message,
+    };
+  }
+
   if (result.status >= 200 && result.status < 300) {
     const { status, statusText } = result;
     logger.debug(`Response from xMatters action "${actionId}": [HTTP ${status}] ${statusText}`);

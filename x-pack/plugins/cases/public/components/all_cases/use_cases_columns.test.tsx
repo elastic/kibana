@@ -52,6 +52,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "assignees",
@@ -62,13 +63,14 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "15%",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
+            "width": "80px",
           },
           Object {
             "align": "right",
@@ -130,6 +132,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "assignees",
@@ -140,13 +143,14 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "15%",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
+            "width": "80px",
           },
           Object {
             "align": "right",
@@ -199,6 +203,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "assignees",
@@ -209,7 +214,7 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "15%",
           },
           Object {
             "align": "right",
@@ -262,18 +267,20 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "15%",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
+            "width": "80px",
           },
           Object {
             "align": "right",
@@ -331,18 +338,20 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "15%",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
+            "width": "80px",
           },
           Object {
             "align": "right",
@@ -398,18 +407,20 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "15%",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
+            "width": "80px",
           },
           Object {
             "align": "right",
@@ -464,18 +475,20 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "15%",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
+            "width": "80px",
           },
           Object {
             "align": "right",
@@ -529,18 +542,20 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Name",
             "render": [Function],
+            "width": "20%",
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "truncateText": true,
+            "width": "15%",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
             "name": "Alerts",
             "render": [Function],
+            "width": "80px",
           },
           Object {
             "align": "right",

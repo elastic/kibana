@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
@@ -18,7 +18,6 @@ import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anom
 import { usersDetailsPagePath } from '../constants';
 import { TableId } from '../../../../common/types';
 import { EventsQueryTabBody } from '../../../common/components/events_tab';
-import { userNameExistsFilter } from './helpers';
 import { AuthenticationsQueryTabBody } from '../navigation';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
@@ -32,7 +31,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     to,
     type,
     detailName,
-    pageFilters = [],
+    userDetailFilter,
   }) => {
     const tabProps = {
       deleteQuery,
@@ -46,11 +45,6 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
       userName: detailName,
     };
 
-    const externalAlertPageFilters = useMemo(
-      () => [...userNameExistsFilter, ...pageFilters],
-      [pageFilters]
-    );
-
     return (
       <Switch>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.authentications})`}>
@@ -61,10 +55,9 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.events})`}>
           <EventsQueryTabBody
-            {...tabProps}
-            pageFilters={pageFilters}
+            additionalFilters={userDetailFilter}
             tableId={TableId.usersPageEvents}
-            externalAlertPageFilters={externalAlertPageFilters}
+            {...tabProps}
           />
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>

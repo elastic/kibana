@@ -7,5 +7,6 @@
   "main": "target_node/index.js",
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
-  }
+  },
+  "types": "./target_types/index.d.ts"
 }
