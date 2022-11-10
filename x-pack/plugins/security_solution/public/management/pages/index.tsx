@@ -119,7 +119,7 @@ export const ManagementContainer = memo(() => {
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
-        privilege={canSeeHostIsolationExceptionsPage}
+        hasPrivilege={canSeeHostIsolationExceptionsPage}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
