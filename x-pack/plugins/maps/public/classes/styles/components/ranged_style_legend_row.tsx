@@ -15,6 +15,7 @@ interface Props {
   maxLabel: string | number;
   propertyLabel: string;
   fieldLabel: string;
+  invert: boolean;
 }
 
 export function RangedStyleLegendRow({
@@ -23,6 +24,7 @@ export function RangedStyleLegendRow({
   maxLabel,
   propertyLabel,
   fieldLabel,
+  invert,
 }: Props) {
   return (
     <div>
@@ -41,12 +43,12 @@ export function RangedStyleLegendRow({
       <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
         <EuiFlexItem grow={true}>
           <EuiText size="xs">
-            <small>{minLabel}</small>
+            <small>{invert ? maxLabel : minLabel}</small>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiText textAlign="right" size="xs">
-            <small>{maxLabel}</small>
+            <small>{invert ? minLabel : maxLabel}</small>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

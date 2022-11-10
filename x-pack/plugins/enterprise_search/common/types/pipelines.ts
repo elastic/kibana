@@ -12,6 +12,7 @@ export interface InferencePipeline {
   modelState: TrainedModelState;
   modelStateReason?: string;
   pipelineName: string;
+  pipelineReferences: string[];
   types: string[];
 }
 
@@ -62,4 +63,11 @@ export interface AttachMlInferencePipelineResponse {
 export interface DeleteMlInferencePipelineResponse {
   deleted?: string;
   updated?: string;
+}
+
+export interface CreateMlInferencePipelineParameters {
+  destination_field?: string;
+  model_id: string;
+  pipeline_name: string;
+  source_field: string;
 }

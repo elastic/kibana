@@ -109,7 +109,13 @@
         "description": [],
         "signature": [
           "T & ",
-          "JsonObject"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.JsonObject",
+            "text": "JsonObject"
+          }
         ],
         "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
         "deprecated": false,

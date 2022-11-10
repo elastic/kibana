@@ -70,7 +70,7 @@ describe('register()', () => {
           "actions:my-action-type": Object {
             "createTaskRunner": [Function],
             "getRetry": [Function],
-            "maxAttempts": 1,
+            "maxAttempts": 3,
             "title": "My action type",
           },
         },
@@ -472,5 +472,29 @@ describe('isActionExecutable()', () => {
     expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
       notifyUsage: true,
     });
+  });
+});
+
+describe('getAllTypes()', () => {
+  test('should return empty when notihing is registered', () => {
+    const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+    const result = registry.getAllTypes();
+    expect(result).toEqual([]);
+  });
+
+  test('should return list of registered type ids', () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+    registry.register({
+      id: 'foo',
+      name: 'Foo',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor: async (options) => {
+        return { status: 'ok', actionId: options.actionId };
+      },
+    });
+    const result = registry.getAllTypes();
+    expect(result).toEqual(['foo']);
   });
 });

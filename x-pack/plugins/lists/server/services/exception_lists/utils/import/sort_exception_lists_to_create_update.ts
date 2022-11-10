@@ -21,11 +21,13 @@ export const sortExceptionListsToUpdateOrCreate = ({
   lists,
   existingLists,
   isOverwrite,
+  generateNewListId,
   user,
 }: {
   lists: ImportExceptionListSchemaDecoded[];
   existingLists: Record<string, ExceptionListSchema>;
   isOverwrite: boolean;
+  generateNewListId: boolean;
   user: string;
 }): {
   errors: BulkErrorSchema[];
@@ -99,6 +101,27 @@ export const sortExceptionListsToUpdateOrCreate = ({
             updated_by: user,
           },
           id: existingLists[listId].id,
+          type: savedObjectType,
+        },
+      ];
+    } else if (existingLists[listId] != null && generateNewListId) {
+      const attributes: ExceptionListSoSchema = {
+        ...existingLists[listId],
+        comments: undefined,
+        created_at: dateNow,
+        created_by: user,
+        description,
+        entries: undefined,
+        immutable: false,
+        item_id: undefined,
+        list_type: 'list',
+        tie_breaker_id: uuid.v4(),
+        updated_by: user,
+      };
+      results.listsToCreate = [
+        ...results.listsToCreate,
+        {
+          attributes,
           type: savedObjectType,
         },
       ];

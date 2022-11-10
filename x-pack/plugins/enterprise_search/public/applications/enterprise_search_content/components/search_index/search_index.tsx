@@ -11,14 +11,14 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
+import useObservable from 'react-use/lib/useObservable';
+
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { Status } from '../../../../../common/types/api';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
-import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import {
   SEARCH_INDEX_PATH,
   SEARCH_INDEX_SELECT_CONNECTOR_PATH,
@@ -38,6 +38,7 @@ import { SearchIndexDomainManagement } from './crawler/domain_management/domain_
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
+import { IndexViewLogic } from './index_view_logic';
 import { SearchIndexOverview } from './overview';
 import { SearchIndexPipelines } from './pipelines/pipelines';
 
@@ -55,24 +56,39 @@ export enum SearchIndexTabId {
 }
 
 export const SearchIndex: React.FC = () => {
-  const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
+  const { index, isInitialLoading } = useValues(IndexViewLogic);
+
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
 
+  /**
+   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index
+   * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
+   */
+  const { guidedOnboarding } = useValues(KibanaLogic);
+  const isDataStepActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('search', 'add_data')
+  );
+  useEffect(() => {
+    if (isDataStepActive && index?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('search', 'add_data');
+    }
+  }, [isDataStepActive, index?.count]);
+
   useEffect(() => {
     if (
-      isConnectorIndex(indexData) &&
-      indexData.connector.is_native &&
-      indexData.connector.service_type === null
+      isConnectorIndex(index) &&
+      index.connector.is_native &&
+      index.connector.service_type === null
     ) {
       KibanaLogic.values.navigateToUrl(
         generateEncodedPath(SEARCH_INDEX_SELECT_CONNECTOR_PATH, { indexName })
       );
     }
-  }, [indexData]);
+  }, [index]);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
@@ -142,8 +158,8 @@ export const SearchIndex: React.FC = () => {
 
   const tabs: EuiTabbedContentTab[] = [
     ...ALL_INDICES_TABS,
-    ...(isConnectorIndex(indexData) ? CONNECTOR_TABS : []),
-    ...(isCrawlerIndex(indexData) ? CRAWLER_TABS : []),
+    ...(isConnectorIndex(index) ? CONNECTOR_TABS : []),
+    ...(isCrawlerIndex(index) ? CRAWLER_TABS : []),
     PIPELINES_TAB,
   ];
 
@@ -164,20 +180,17 @@ export const SearchIndex: React.FC = () => {
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
       pageViewTelemetry={tabId}
-      isLoading={
-        indexApiStatus === Status.IDLE ||
-        (typeof indexData === 'undefined' && indexApiStatus === Status.LOADING)
-      }
+      isLoading={isInitialLoading}
       pageHeader={{
         pageTitle: indexName,
-        rightSideItems: getHeaderActions(indexData),
+        rightSideItems: getHeaderActions(index),
       }}
     >
       <>
-        {indexName === indexData?.name && (
+        {indexName === index?.name && (
           <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
         )}
-        {isCrawlerIndex(indexData) && <CrawlCustomSettingsFlyout />}
+        {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
       </>
     </EnterpriseSearchContentPageTemplate>
   );

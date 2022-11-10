@@ -15,7 +15,7 @@ export interface IArtifact {
   getArtifact(name: string): Promise<unknown>;
 }
 
-class Artifact implements IArtifact {
+export class Artifact implements IArtifact {
   private manifestUrl?: string;
   private readonly CDN_URL = 'https://artifacts.security.elastic.co';
   private readonly AXIOS_TIMEOUT_MS = 10_000;

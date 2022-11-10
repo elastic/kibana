@@ -11,6 +11,7 @@ import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -29,7 +30,10 @@ import {
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
-import { DimensionEditor } from './xy_config_panel/dimension_editor';
+import {
+  DataDimensionEditorDataSectionExtra,
+  DimensionEditor,
+} from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI, Suggestion } from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
@@ -347,6 +351,7 @@ export const getXyVisualization = ({
           groupLabel: getAxisName('y', { isHorizontal }),
           accessors: mappedAccessors,
           filterOperations: isNumericDynamicMetric,
+          isMetricDimension: true,
           supportsMoreColumns: true,
           requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsXY_yDimensionPanel',
@@ -606,6 +611,45 @@ export const getXyVisualization = ({
     );
   },
 
+  renderDimensionEditorDataExtra(domElement, props) {
+    const allProps = {
+      ...props,
+      datatableUtilities: data.datatableUtilities,
+      formatFactory: fieldFormats.deserialize,
+      paletteService,
+    };
+    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+    if (isReferenceLayer(layer)) {
+      return;
+    }
+    if (isAnnotationsLayer(layer)) {
+      return;
+    }
+
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <KibanaContextProvider
+            services={{
+              appName: 'lens',
+              storage,
+              uiSettings: core.uiSettings,
+              data,
+              fieldFormats,
+              savedObjects: core.savedObjects,
+              docLinks: core.docLinks,
+              http: core.http,
+              unifiedSearch,
+            }}
+          >
+            <DataDimensionEditorDataSectionExtra {...allProps} />
+          </KibanaContextProvider>
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
   toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(
       state,
@@ -832,6 +876,78 @@ export const getXyVisualization = ({
       },
     };
     return suggestion;
+  },
+
+  getVisualizationInfo(state: XYState) {
+    const isHorizontal = isHorizontalChart(state.layers);
+    const visualizationLayersInfo = state.layers.map((layer) => {
+      const dimensions = [];
+      let chartType: SeriesType | undefined;
+      let icon;
+      let label;
+      if (isDataLayer(layer)) {
+        chartType = layer.seriesType;
+        const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
+        icon = layerVisType?.icon;
+        label = layerVisType?.fullLabel || layerVisType?.label;
+        if (layer.xAccessor) {
+          dimensions.push({ name: getAxisName('x', { isHorizontal }), id: layer.xAccessor });
+        }
+        if (layer.accessors && layer.accessors.length) {
+          layer.accessors.forEach((accessor) => {
+            dimensions.push({ name: getAxisName('y', { isHorizontal }), id: accessor });
+          });
+        }
+        if (layer.splitAccessor) {
+          dimensions.push({
+            name: i18n.translate('xpack.lens.xyChart.splitSeries', {
+              defaultMessage: 'Breakdown',
+            }),
+            id: layer.splitAccessor,
+          });
+        }
+      }
+      if (isReferenceLayer(layer) && layer.accessors && layer.accessors.length) {
+        layer.accessors.forEach((accessor) => {
+          dimensions.push({
+            name: i18n.translate('xpack.lens.xyChart.layerReferenceLine', {
+              defaultMessage: 'Reference line',
+            }),
+            id: accessor,
+          });
+        });
+        label = i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
+          defaultMessage: 'Reference lines',
+        });
+        icon = IconChartBarReferenceLine;
+      }
+      if (isAnnotationsLayer(layer) && layer.annotations && layer.annotations.length) {
+        layer.annotations.forEach((annotation) => {
+          dimensions.push({
+            name: i18n.translate('xpack.lens.xyChart.layerAnnotation', {
+              defaultMessage: 'Annotation',
+            }),
+            id: annotation.id,
+          });
+        });
+        label = i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
+          defaultMessage: 'Annotations',
+        });
+        icon = IconChartBarAnnotations;
+      }
+
+      return {
+        layerId: layer.layerId,
+        layerType: layer.layerType,
+        chartType,
+        icon,
+        label,
+        dimensions,
+      };
+    });
+    return {
+      layers: visualizationLayersInfo,
+    };
   },
 });
 

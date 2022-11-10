@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "extraPublicDirs": ["common"],
   "include": [
@@ -16,7 +15,7 @@
     "../../../typings/**/*",
     "./jest_setup.ts"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },

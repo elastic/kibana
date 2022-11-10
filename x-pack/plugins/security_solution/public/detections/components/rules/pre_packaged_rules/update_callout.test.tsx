@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { render } from '@testing-library/react';
 import React from 'react';
-import { shallow } from 'enzyme';
-
-import { UpdatePrePackagedRulesCallOut } from './update_callout';
 import { useKibana } from '../../../../common/lib/kibana';
+import { TestProviders } from '../../../../common/mock';
+import { useFetchPrebuiltRulesStatusQuery } from '../../../../detection_engine/rule_management/api/hooks/use_fetch_prebuilt_rules_status_query';
+import { mockReactQueryResponse } from '../../../../detection_engine/rule_management/api/hooks/__mocks__/mock_react_query_response';
+import { UpdatePrePackagedRulesCallOut } from './update_callout';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock(
+  '../../../../detection_engine/rule_management/api/hooks/use_fetch_prebuilt_rules_status_query'
+);
 
 describe('UpdatePrePackagedRulesCallOut', () => {
   beforeAll(() => {
@@ -28,105 +33,134 @@ describe('UpdatePrePackagedRulesCallOut', () => {
     });
   });
 
-  it('renders correctly', () => {
-    const wrapper = shallow(
-      <UpdatePrePackagedRulesCallOut
-        loading={false}
-        numberOfUpdatedRules={0}
-        numberOfUpdatedTimelines={0}
-        updateRules={jest.fn()}
-      />
-    );
-
-    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
-  });
-
   it('renders callOutMessage correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines = 0', () => {
-    const wrapper = shallow(
-      <UpdatePrePackagedRulesCallOut
-        loading={false}
-        numberOfUpdatedRules={1}
-        numberOfUpdatedTimelines={0}
-        updateRules={jest.fn()}
-      />
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+      mockReactQueryResponse({
+        data: {
+          rules_custom_installed: 0,
+          rules_installed: 0,
+          rules_not_installed: 0,
+          rules_not_updated: 1,
+          timelines_updated: 0,
+          timelines_not_installed: 0,
+          timelines_not_updated: 0,
+        },
+      })
     );
 
-    expect(wrapper.find('[data-test-subj="update-callout"]').find('p').text()).toEqual(
+    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+
+    expect(getByTestId('update-callout')).toHaveTextContent(
       'You can update 1 Elastic prebuilt ruleRelease notes'
     );
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines = 0', () => {
-    const wrapper = shallow(
-      <UpdatePrePackagedRulesCallOut
-        loading={false}
-        numberOfUpdatedRules={1}
-        numberOfUpdatedTimelines={0}
-        updateRules={jest.fn()}
-      />
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+      mockReactQueryResponse({
+        data: {
+          rules_custom_installed: 0,
+          rules_installed: 0,
+          rules_not_installed: 0,
+          rules_not_updated: 1,
+          timelines_updated: 0,
+          timelines_not_installed: 0,
+          timelines_not_updated: 0,
+        },
+      })
     );
 
-    expect(wrapper.find('[data-test-subj="update-callout-button"]').prop('children')).toEqual(
+    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+
+    expect(getByTestId('update-callout-button')).toHaveTextContent(
       'Update 1 Elastic prebuilt rule'
     );
   });
 
   it('renders callOutMessage correctly: numberOfUpdatedRules = 0 and numberOfUpdatedTimelines > 0', () => {
-    const wrapper = shallow(
-      <UpdatePrePackagedRulesCallOut
-        loading={false}
-        numberOfUpdatedRules={0}
-        numberOfUpdatedTimelines={1}
-        updateRules={jest.fn()}
-      />
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+      mockReactQueryResponse({
+        data: {
+          rules_custom_installed: 0,
+          rules_installed: 0,
+          rules_not_installed: 0,
+          rules_not_updated: 0,
+          timelines_updated: 0,
+          timelines_not_installed: 0,
+          timelines_not_updated: 1,
+        },
+      })
     );
 
-    expect(wrapper.find('[data-test-subj="update-callout"]').find('p').text()).toEqual(
+    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+
+    expect(getByTestId('update-callout')).toHaveTextContent(
       'You can update 1 Elastic prebuilt timelineRelease notes'
     );
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules = 0 and numberOfUpdatedTimelines > 0', () => {
-    const wrapper = shallow(
-      <UpdatePrePackagedRulesCallOut
-        loading={false}
-        numberOfUpdatedRules={0}
-        numberOfUpdatedTimelines={1}
-        updateRules={jest.fn()}
-      />
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+      mockReactQueryResponse({
+        data: {
+          rules_custom_installed: 0,
+          rules_installed: 0,
+          rules_not_installed: 0,
+          rules_not_updated: 0,
+          timelines_updated: 0,
+          timelines_not_installed: 0,
+          timelines_not_updated: 1,
+        },
+      })
     );
 
-    expect(wrapper.find('[data-test-subj="update-callout-button"]').prop('children')).toEqual(
+    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+
+    expect(getByTestId('update-callout-button')).toHaveTextContent(
       'Update 1 Elastic prebuilt timeline'
     );
   });
 
   it('renders callOutMessage correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines > 0', () => {
-    const wrapper = shallow(
-      <UpdatePrePackagedRulesCallOut
-        loading={false}
-        numberOfUpdatedRules={1}
-        numberOfUpdatedTimelines={1}
-        updateRules={jest.fn()}
-      />
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+      mockReactQueryResponse({
+        data: {
+          rules_custom_installed: 0,
+          rules_installed: 0,
+          rules_not_installed: 0,
+          rules_not_updated: 1,
+          timelines_updated: 0,
+          timelines_not_installed: 0,
+          timelines_not_updated: 1,
+        },
+      })
     );
 
-    expect(wrapper.find('[data-test-subj="update-callout"]').find('p').text()).toEqual(
+    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+
+    expect(getByTestId('update-callout')).toHaveTextContent(
       'You can update 1 Elastic prebuilt rule and 1 Elastic prebuilt timeline. Note that this will reload deleted Elastic prebuilt rules.Release notes'
     );
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines > 0', () => {
-    const wrapper = shallow(
-      <UpdatePrePackagedRulesCallOut
-        loading={false}
-        numberOfUpdatedRules={1}
-        numberOfUpdatedTimelines={1}
-        updateRules={jest.fn()}
-      />
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+      mockReactQueryResponse({
+        data: {
+          rules_custom_installed: 0,
+          rules_installed: 0,
+          rules_not_installed: 0,
+          rules_not_updated: 1,
+          timelines_updated: 0,
+          timelines_not_installed: 0,
+          timelines_not_updated: 1,
+        },
+      })
     );
 
-    expect(wrapper.find('[data-test-subj="update-callout-button"]').prop('children')).toEqual(
+    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+
+    expect(getByTestId('update-callout-button')).toHaveTextContent(
       'Update 1 Elastic prebuilt rule and 1 Elastic prebuilt timeline'
     );
   });

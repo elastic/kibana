@@ -207,7 +207,6 @@ export function render<ExtraCore>(
         <ExploratoryViewContextProvider
           reportTypes={reportTypesList}
           dataTypes={dataTypes}
-          dataViews={{}}
           reportConfigMap={obsvReportConfigMap}
           setHeaderActionMenu={jest.fn()}
           theme$={themeServiceMock.createTheme$()}

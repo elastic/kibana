@@ -18,7 +18,7 @@ import type { Filter } from '@kbn/es-query';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
-import type { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';

@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiButton, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GuideId, GuideState } from '../../types';
@@ -39,6 +40,11 @@ const inProgressLabel = i18n.translate(
     defaultMessage: 'In progress',
   }
 );
+
+// The progress bar is rendered within EuiCard, which centers content by default
+const progressBarLabelCss = css`
+  text-align: 'left';
+`;
 
 export interface GuideCardFooterProps {
   guides: GuideState[];
@@ -97,6 +103,9 @@ export const GuideCardFooter = ({ guides, useCase, activateGuide }: GuideCardFoo
         max={numberSteps}
         size="s"
         label={inProgressLabel}
+        labelProps={{
+          css: progressBarLabelCss,
+        }}
       />
       <EuiSpacer size="l" />
       <div className="eui-textCenter">

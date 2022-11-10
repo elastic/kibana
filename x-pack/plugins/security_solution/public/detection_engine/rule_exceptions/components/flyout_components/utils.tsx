@@ -22,14 +22,14 @@ import {
 } from '../../utils/helpers';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { RuleDetailTabs } from '../../../../detections/pages/detection_engine/rules/details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 import { SecurityPageName } from '../../../../../common/constants';
 import { PopoverItems } from '../../../../common/components/popover_items';
 import type {
   ExceptionListRuleReferencesInfoSchema,
   ExceptionListRuleReferencesSchema,
-} from '../../../../../common/detection_engine/schemas/response';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+} from '../../../../../common/detection_engine/rule_exceptions';
+import type { Rule } from '../../../rule_management/logic/types';
 import * as i18n from './translations';
 
 /**
@@ -111,7 +111,7 @@ export const enrichItemsForSharedLists =
  * @param listType exception list type
  * @param items exception items to be modified
  */
-export const entrichNewExceptionItems = ({
+export const enrichNewExceptionItems = ({
   itemName,
   commentToAdd,
   addToRules,
@@ -152,7 +152,7 @@ export const entrichNewExceptionItems = ({
  * @param listType exception list type
  * @param items exception items to be modified
  */
-export const entrichExceptionItemsForUpdate = ({
+export const enrichExceptionItemsForUpdate = ({
   itemName,
   commentToAdd,
   selectedOs,
