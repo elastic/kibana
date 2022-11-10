@@ -33,3 +33,33 @@ export const getFileDataIndexName = (integrationName: string): string => {
     `Unable to define integration file data index. No '*' in index pattern: ${FILE_STORAGE_DATA_INDEX_PATTERN}`
   );
 };
+
+/**
+ * Returns back the integration name for a given File Data (chunks) index name.
+ *
+ * @example
+ * // Given a File data index pattern of `.fleet-file-data-*`:
+ *
+ * getIntegrationNameFromFileDataIndexName('.fleet-file-data-agent');
+ * // return 'agent'
+ *
+ * getIntegrationNameFromFileDataIndexName('.fleet-file-data-agent-00001');
+ * // return 'agent'
+ */
+export const getIntegrationNameFromFileDataIndexName = (indexName: string): string => {
+  const integrationNameIndexPosition = FILE_STORAGE_DATA_INDEX_PATTERN.split('-').indexOf('*');
+
+  if (integrationNameIndexPosition === -1) {
+    throw new Error(
+      `Unable to parse index name. No '*' in index pattern: ${FILE_STORAGE_DATA_INDEX_PATTERN}`
+    );
+  }
+
+  const indexPieces = indexName.split('-');
+
+  if (indexPieces[integrationNameIndexPosition]) {
+    return indexPieces[integrationNameIndexPosition];
+  }
+
+  throw new Error(`Index name ${indexName} does not seem to be a File Data storage index`);
+};

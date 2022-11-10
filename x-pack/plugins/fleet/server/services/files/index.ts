@@ -14,7 +14,10 @@ import {
   FILE_STORAGE_METADATA_INDEX_PATTERN,
 } from '../../../common/constants';
 
-import { getFileMetadataIndexName } from '../../../common/services';
+import {
+  getFileMetadataIndexName,
+  getIntegrationNameFromFileDataIndexName,
+} from '../../../common/services';
 
 import { ES_SEARCH_LIMIT } from '../../../common/constants';
 
@@ -105,7 +108,7 @@ export async function fileIdsWithoutChunksByIndex(
   chunks.hits.hits.forEach((hit) => {
     const fileId = hit._source?.bid;
     if (!fileId) return;
-    const integration = hit._index.split('-')[1];
+    const integration = getIntegrationNameFromFileDataIndexName(hit._index);
     const metadataIndex = getFileMetadataIndexName(integration);
     if (noChunkFileIdsByIndex[metadataIndex]?.delete(fileId)) {
       allFileIds.delete(fileId);
