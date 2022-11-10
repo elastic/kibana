@@ -110,8 +110,8 @@ describe('UnifiedFieldList useExistingFields', () => {
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
-        fromDate: '2019-01-01T05:00:00.000Z',
-        toDate: '2020-01-01T05:00:59.999Z',
+        fromDate: '2019-01-01',
+        toDate: '2020-01-01',
         dslQuery,
         dataView,
         timeFieldName: dataView.timeFieldName,
@@ -346,8 +346,8 @@ describe('UnifiedFieldList useExistingFields', () => {
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
-        fromDate: '2019-01-01T05:00:00.000Z',
-        toDate: '2020-01-01T05:00:59.999Z',
+        fromDate: '2019-01-01',
+        toDate: '2020-01-01',
         dslQuery,
         dataView,
         timeFieldName: dataView.timeFieldName,
@@ -371,8 +371,8 @@ describe('UnifiedFieldList useExistingFields', () => {
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        fromDate: '2019-01-01T05:00:00.000Z',
-        toDate: '2020-01-01T05:00:59.999Z',
+        fromDate: '2019-01-01',
+        toDate: '2020-01-01',
         dslQuery,
         dataView,
         timeFieldName: dataView.timeFieldName,
@@ -382,8 +382,8 @@ describe('UnifiedFieldList useExistingFields', () => {
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
       3,
       expect.objectContaining({
-        fromDate: '2019-01-01T05:00:00.000Z',
-        toDate: '2020-01-01T05:00:59.999Z',
+        fromDate: '2019-01-01',
+        toDate: '2020-01-01',
         dslQuery,
         dataView: anotherDataView,
         timeFieldName: anotherDataView.timeFieldName,
@@ -424,8 +424,8 @@ describe('UnifiedFieldList useExistingFields', () => {
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
-        fromDate: '2019-01-01T05:00:00.000Z',
-        toDate: '2020-01-01T05:00:59.999Z',
+        fromDate: '2019-01-01',
+        toDate: '2020-01-01',
         dslQuery,
         dataView,
         timeFieldName: dataView.timeFieldName,
@@ -448,8 +448,8 @@ describe('UnifiedFieldList useExistingFields', () => {
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        fromDate: '2021-01-01T05:00:00.000Z',
-        toDate: '2022-01-01T05:00:59.999Z',
+        fromDate: '2021-01-01',
+        toDate: '2022-01-01',
         dslQuery: {
           bool: {
             filter: [
@@ -497,8 +497,8 @@ describe('UnifiedFieldList useExistingFields', () => {
 
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
       expect.objectContaining({
-        fromDate: '2019-01-01T05:00:00.000Z',
-        toDate: '2020-01-01T05:00:59.999Z',
+        fromDate: '2019-01-01',
+        toDate: '2020-01-01',
         dslQuery,
         dataView,
         timeFieldName: dataView.timeFieldName,
@@ -523,8 +523,8 @@ describe('UnifiedFieldList useExistingFields', () => {
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        fromDate: '2021-01-01T05:00:00.000Z',
-        toDate: '2022-01-01T05:00:59.999Z',
+        fromDate: '2021-01-01',
+        toDate: '2022-01-01',
         dslQuery,
         dataView,
         timeFieldName: dataView.timeFieldName,

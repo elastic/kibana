@@ -140,6 +140,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
       const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
+      const dateRange = getResolvedDateRange(data.query.timefilter.timefilter);
 
       if (documentState?.fetchStatus === FetchStatus.COMPLETE) {
         dispatchSidebarStateAction({
@@ -148,13 +149,14 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             dataView: selectedDataViewRef.current,
             fieldCounts: calcFieldCounts(documentState.result),
             isPlainRecord: isPlainRecordType,
+            dateRange,
           },
         });
       } else if (documentState?.fetchStatus === FetchStatus.LOADING) {
         dispatchSidebarStateAction({
           type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
           payload: {
-            dateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+            dateRange,
             isPlainRecord: isPlainRecordType,
           },
         });

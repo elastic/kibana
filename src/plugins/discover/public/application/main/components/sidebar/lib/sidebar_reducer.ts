@@ -35,6 +35,7 @@ type DiscoverSidebarReducerAction =
         fieldCounts: DiscoverSidebarReducerState['fieldCounts'];
         isPlainRecord: boolean;
         dataView: DataView | null | undefined;
+        dateRange: DiscoverSidebarReducerState['dateRange'];
       };
     };
 
@@ -98,6 +99,7 @@ export function discoverSidebarReducer(
           action.payload.fieldCounts,
           action.payload.isPlainRecord
         ),
+        dateRange: action.payload.dateRange,
         status: DiscoverSidebarReducerStatus.COMPLETED,
       };
   }

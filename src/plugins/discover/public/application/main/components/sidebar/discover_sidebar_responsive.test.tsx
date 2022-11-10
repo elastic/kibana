@@ -332,43 +332,15 @@ describe('discover responsive sidebar', function () {
       }) as DataDocuments$,
     };
     const compWithoutDocuments = await mountComponent(propsWithoutDocuments);
-    const popularFieldsCount = findTestSubject(
-      compWithoutDocuments,
-      'fieldListGroupedPopularFields-count'
-    );
-    const selectedFieldsCount = findTestSubject(
-      compWithoutDocuments,
-      'fieldListGroupedSelectedFields-count'
-    );
     const availableFieldsCount = findTestSubject(
       compWithoutDocuments,
       'fieldListGroupedAvailableFields-count'
     );
-    const emptyFieldsCount = findTestSubject(
-      compWithoutDocuments,
-      'fieldListGroupedEmptyFields-count'
-    );
-    const metaFieldsCount = findTestSubject(
-      compWithoutDocuments,
-      'fieldListGroupedMetaFields-count'
-    );
-    const unmappedFieldsCount = findTestSubject(
-      compWithoutDocuments,
-      'fieldListGroupedUnmappedFields-count'
-    );
 
-    expect(selectedFieldsCount.text()).toBe('1');
-    expect(popularFieldsCount.text()).toBe('4');
-    expect(availableFieldsCount.text()).toBe('3');
-    expect(emptyFieldsCount.text()).toBe('20');
-    expect(metaFieldsCount.text()).toBe('2');
-    expect(unmappedFieldsCount.exists()).toBe(false);
-
-    expect(findTestSubject(compWithoutDocuments, 'fieldListGrouped__ariaDescription').text()).toBe(
-      '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
-    );
+    expect(availableFieldsCount.exists()).toBe(false);
 
     expect(mockCalcFieldCounts.mock.calls.length).toBe(0);
+    expect(ExistingFieldsServiceApi.loadFieldExisting).not.toHaveBeenCalled();
   });
 
   it('should allow selecting fields', async function () {
