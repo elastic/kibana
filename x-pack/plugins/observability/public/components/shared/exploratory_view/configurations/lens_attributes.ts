@@ -200,11 +200,19 @@ export class LensAttributes {
     indexPattern: DataView;
     layerConfig: LayerConfig;
   }): TermsIndexPatternColumn {
+    const { seriesConfig, selectedMetricField } = layerConfig;
+
     const fieldMeta = indexPattern.getFieldByName(sourceField);
+    const { metricOptions } = seriesConfig;
 
     const { sourceField: yAxisSourceField } = layerConfig.seriesConfig.yAxisColumns[0];
 
-    const isFormulaColumn = yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
+    const isFormulaColumn =
+      Boolean(
+        metricOptions &&
+          (metricOptions.find((option) => option.id === selectedMetricField) as MetricOption)
+            ?.formula
+      ) || yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
 
     return {
       sourceField,
