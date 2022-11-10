@@ -56,6 +56,7 @@ export function ServiceOverviewMobileCharts({
       device,
       osVersion,
       appVersion,
+      transactionType,
     },
   } = useApmParams('/services/{serviceName}/overview');
 
@@ -75,6 +76,7 @@ export function ServiceOverviewMobileCharts({
           start={start}
           end={end}
           environment={environment}
+          transactionType={transactionType}
           kuery={kuery}
           filters={{
             device,

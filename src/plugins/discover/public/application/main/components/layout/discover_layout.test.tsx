@@ -137,6 +137,8 @@ async function mountComponent(
     updateAdHocDataViewId: jest.fn(),
     adHocDataViewList: [],
     searchSessionManager: createSearchSessionMock().searchSessionManager,
+    savedDataViewList: [],
+    updateDataViewList: jest.fn(),
   };
 
   const component = mountWithIntl(
