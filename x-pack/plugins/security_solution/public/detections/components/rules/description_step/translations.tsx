@@ -91,6 +91,13 @@ export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ML_RUN_JOB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.mlRunJobLabel',
+  {
+    defaultMessage: 'Run job',
+  }
+);
+
 export const ML_JOB_STARTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
   {

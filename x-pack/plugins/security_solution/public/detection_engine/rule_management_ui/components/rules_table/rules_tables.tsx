@@ -36,6 +36,7 @@ import { RulesTableUtilityBar } from './rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -140,8 +141,19 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     [setPage, setPerPage, setSortingOptions]
   );
 
-  const rulesColumns = useRulesColumns({ hasCRUDPermissions: hasPermissions });
-  const monitoringColumns = useMonitoringColumns({ hasCRUDPermissions: hasPermissions });
+  const { loading: isLoadingJobs, jobs: mlJobs, startMlJobs } = useStartMlJobs();
+  const rulesColumns = useRulesColumns({
+    hasCRUDPermissions: hasPermissions,
+    isLoadingJobs,
+    mlJobs,
+    startMlJobs,
+  });
+  const monitoringColumns = useMonitoringColumns({
+    hasCRUDPermissions: hasPermissions,
+    isLoadingJobs,
+    mlJobs,
+    startMlJobs,
+  });
 
   const isSelectAllCalled = useRef(false);
 
