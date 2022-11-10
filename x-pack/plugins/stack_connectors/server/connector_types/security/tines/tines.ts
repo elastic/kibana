@@ -130,7 +130,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     if (error.response.status === 401) {
       return 'Unauthorized API Error';
     }
-    return `API Error: (${error.response?.status}) ${error.response?.statusText}`;
+    return `API Error: ${error.response?.statusText}`;
   }
 
   public async getStories(): Promise<TinesStoriesActionResponse> {

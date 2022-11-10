@@ -118,9 +118,7 @@ describe('TinesConnector', () => {
     it('should request Tines stories', async () => {
       await connector.getStories();
       expect(mockRequest).toBeCalledTimes(1);
-      const [[requestArgs]] = mockRequest.mock.calls;
-
-      expect(requestArgs).toEqual(storiesGetRequestExpected);
+      expect(mockRequest).toHaveBeenCalledWith(storiesGetRequestExpected);
     });
 
     it('should return the Tines stories reduced array', async () => {
@@ -154,9 +152,7 @@ describe('TinesConnector', () => {
       await connector.getWebhooks({ storyId: story.id });
 
       expect(mockRequest).toBeCalledTimes(1);
-      const [[requestArgs]] = mockRequest.mock.calls;
-
-      expect(requestArgs).toEqual(agentsGetRequestExpected);
+      expect(mockRequest).toHaveBeenCalledWith(agentsGetRequestExpected);
     });
 
     it('should return the Tines webhooks reduced array', async () => {
@@ -193,9 +189,7 @@ describe('TinesConnector', () => {
       });
 
       expect(mockRequest).toBeCalledTimes(1);
-      const [[requestArgs]] = mockRequest.mock.calls;
-
-      expect(requestArgs).toEqual({
+      expect(mockRequest).toHaveBeenCalledWith({
         ...ignoredRequestFields,
         method: 'post',
         data: '[]',
@@ -213,9 +207,7 @@ describe('TinesConnector', () => {
       });
 
       expect(mockRequest).toBeCalledTimes(1);
-      const [[requestArgs]] = mockRequest.mock.calls;
-
-      expect(requestArgs).toEqual({
+      expect(mockRequest).toHaveBeenCalledWith({
         ...ignoredRequestFields,
         method: 'post',
         data: '[]',

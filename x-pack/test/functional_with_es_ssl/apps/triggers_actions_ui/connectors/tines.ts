@@ -39,14 +39,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Tines', () => {
     before(async () => {
       objectRemover = new ObjectRemover(supertest);
-      // url = await simulator.start();
       simulatorUrl = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.TINES)
       );
     });
 
     after(async () => {
-      // simulator.close();
       await objectRemover.removeAll();
     });
 
@@ -144,7 +142,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('euiFlyoutCloseButton');
       });
 
-      it('should disable the run button when the message field is not filled', async () => {
+      it('should disable the run button when the fields are not filled', async () => {
         const connectorName = generateUniqueKey();
         const createdAction = await createTinesConnector(connectorName);
         objectRemover.add(createdAction.id, 'action', 'actions');

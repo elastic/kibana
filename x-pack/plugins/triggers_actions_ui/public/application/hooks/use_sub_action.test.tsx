@@ -162,7 +162,7 @@ describe('useSubAction', () => {
     expect(firstAbortCtrl.signal.aborted).toEqual(true);
   });
 
-  it('should abort on parameter change', async () => {
+  it.only('should abort on parameter change', async () => {
     const firstAbortCtrl = new AbortController();
     abortSpy = jest.spyOn(window, 'AbortController').mockImplementation(() => {
       abortSpy.mockRestore();

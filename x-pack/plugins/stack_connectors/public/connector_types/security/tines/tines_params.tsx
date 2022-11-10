@@ -18,7 +18,7 @@ import {
   EuiHighlight,
   EuiSpacer,
 } from '@elastic/eui';
-import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   JsonEditorWithMessageVariables,
   useSubAction,
@@ -69,7 +69,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
   actionParams,
   editAction,
   index,
-  messageVariables,
+  executionMode,
   errors,
 }) => {
   const { toasts } = useKibana().notifications;
@@ -82,14 +82,20 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     WebhookOption | null | undefined
   >();
 
-  const isTesting = useMemo(() => !messageVariables?.length, [messageVariables]);
+  const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
   useEffect(() => {
     if (!subAction) {
-      editAction('subAction', isTesting ? SUB_ACTION.TEST : SUB_ACTION.RUN, index);
+      editAction('subAction', isTest ? SUB_ACTION.TEST : SUB_ACTION.RUN, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTesting, subAction]);
+  }, [isTest, subAction]);
+
+  if (connectorId !== actionConnector?.id) {
+    // Story (and webhook) reset needed before requesting with a different connectorId
+    setSelectedStoryOption(null);
+    setConnectorId(actionConnector?.id);
+  }
 
   const editSubActionParams = useCallback(
     (params: TinesExecuteSubActionParams) => {
@@ -118,14 +124,6 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       ? { subActionParams: { storyId: selectedStoryOption?.value?.id } }
       : { disabled: true }),
   });
-
-  useEffect(() => {
-    if (connectorId !== actionConnector?.id) {
-      // Selected story reset needed before requesting webhooks with a different connectorId
-      setSelectedStoryOption(null);
-      setConnectorId(actionConnector?.id);
-    }
-  }, [actionConnector?.id, connectorId]);
 
   const storiesOptions = useMemo(() => stories?.map(createOption) ?? [], [stories]);
   const webhooksOptions = useMemo(() => webhooks?.map(createOption) ?? [], [webhooks]);
@@ -171,9 +169,10 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     }
 
     if (selectedStoryOption !== undefined && selectedStoryOption?.value?.id !== webhook?.storyId) {
-      // Selected story changed, update storyId param and reset selected webhook
+      // Selected story changed, update storyId param and remove the rest webhook values
       editSubActionParams({ webhook: { storyId: selectedStoryOption?.value?.id } });
-      setSelectedWebhookOption(null);
+      // reset selected webhook. Preserve undefined (not edited) to keep selector isInvalid value consistent
+      setSelectedWebhookOption((current) => (current === undefined ? undefined : null));
     }
   }, [selectedStoryOption, webhook?.storyId, stories, toasts, editSubActionParams]);
 
@@ -221,7 +220,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
         <EuiFormRow
           fullWidth
           error={errors.story}
-          isInvalid={!!errors.story?.length}
+          isInvalid={!!errors.story?.length && selectedStoryOption !== undefined}
           label={i18n.STORY_LABEL}
           helpText={i18n.STORY_HELP}
         >
@@ -244,7 +243,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
         <EuiFormRow
           fullWidth
           error={errors.webhook}
-          isInvalid={!!errors.webhook?.length}
+          isInvalid={!!errors.webhook?.length && selectedWebhookOption !== undefined}
           label={i18n.WEBHOOK_LABEL}
           helpText={i18n.WEBHOOK_HELP}
         >
@@ -302,7 +301,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           </EuiFormRow>
         </EuiFlexItem>
       )}
-      {isTesting && (
+      {isTest && (
         <EuiFlexItem>
           <JsonEditorWithMessageVariables
             paramsProperty={'body'}

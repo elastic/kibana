@@ -10,6 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
 import TinesParamsFields from './tines_params';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 const kibanaReactPath = '@kbn/kibana-react-plugin/public';
 const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
@@ -69,13 +70,6 @@ const webhook = {
 const story = { id: webhook.storyId, name: 'test story', published: false };
 const actionParams = { subActionParams: { webhook } };
 const emptyErrors = { subAction: [], subActionParams: [] };
-const messageVariables = [
-  {
-    name: 'myVar',
-    description: 'My variable description',
-    useWithTripleBracesInTemplates: true,
-  },
-];
 
 describe('TinesParamsFields renders', () => {
   beforeEach(() => {
@@ -90,7 +84,7 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
-          messageVariables={messageVariables}
+          executionMode={ActionConnectorMode.ActionForm}
         />
       );
 
@@ -117,6 +111,7 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
+          executionMode={ActionConnectorMode.Test}
         />
       );
 
@@ -142,7 +137,7 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
-          messageVariables={messageVariables}
+          executionMode={ActionConnectorMode.ActionForm}
         />
       );
       expect(mockUseSubAction).toHaveBeenCalledTimes(2);
@@ -161,7 +156,7 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
-          messageVariables={messageVariables}
+          executionMode={ActionConnectorMode.ActionForm}
         />
       );
       wrapper
@@ -193,7 +188,7 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
-          messageVariables={messageVariables}
+          executionMode={ActionConnectorMode.ActionForm}
         />
       );
       wrapper
@@ -213,7 +208,7 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
-          messageVariables={messageVariables}
+          executionMode={ActionConnectorMode.ActionForm}
         />
       );
       wrapper
@@ -250,7 +245,7 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
-          messageVariables={messageVariables}
+          executionMode={ActionConnectorMode.ActionForm}
         />
       );
       wrapper
@@ -295,7 +290,7 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
-          messageVariables={messageVariables}
+          executionMode={ActionConnectorMode.ActionForm}
         />
       );
       expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(true);
@@ -311,7 +306,7 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
-          messageVariables={messageVariables}
+          executionMode={ActionConnectorMode.ActionForm}
         />
       );
 
@@ -336,7 +331,7 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
-          messageVariables={messageVariables}
+          executionMode={ActionConnectorMode.ActionForm}
         />
       );
       expect(mockUseSubActionStories).toHaveBeenCalledWith(
@@ -357,12 +352,12 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
-          messageVariables={messageVariables}
+          executionMode={ActionConnectorMode.ActionForm}
         />
       );
 
       expect(mockToasts.warning).toHaveBeenCalledWith({
-        title: 'Can not find the saved story. Please select a valid story from the selector',
+        title: 'Cannot find the saved story. Please select a valid story from the selector',
       });
     });
 
@@ -373,12 +368,12 @@ describe('TinesParamsFields renders', () => {
           errors={emptyErrors}
           editAction={mockEditAction}
           index={index}
-          messageVariables={messageVariables}
+          executionMode={ActionConnectorMode.ActionForm}
         />
       );
 
       expect(mockToasts.warning).toHaveBeenCalledWith({
-        title: 'Can not find the saved webhook. Please select a valid webhook from the selector',
+        title: 'Cannot find the saved webhook. Please select a valid webhook from the selector',
       });
     });
 
@@ -404,7 +399,7 @@ describe('TinesParamsFields renders', () => {
             errors={emptyErrors}
             editAction={mockEditAction}
             index={index}
-            messageVariables={messageVariables}
+            executionMode={ActionConnectorMode.ActionForm}
           />
         );
         expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(false);
@@ -424,7 +419,7 @@ describe('TinesParamsFields renders', () => {
             errors={emptyErrors}
             editAction={mockEditAction}
             index={index}
-            messageVariables={messageVariables}
+            executionMode={ActionConnectorMode.ActionForm}
           />
         );
         expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(true);
@@ -438,7 +433,7 @@ describe('TinesParamsFields renders', () => {
             errors={emptyErrors}
             editAction={mockEditAction}
             index={index}
-            messageVariables={messageVariables}
+            executionMode={ActionConnectorMode.ActionForm}
           />
         );
         expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(false);
@@ -458,7 +453,7 @@ describe('TinesParamsFields renders', () => {
             errors={emptyErrors}
             editAction={mockEditAction}
             index={index}
-            messageVariables={messageVariables}
+            executionMode={ActionConnectorMode.ActionForm}
           />
         );
         expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(true);
@@ -473,7 +468,7 @@ describe('TinesParamsFields renders', () => {
             errors={emptyErrors}
             editAction={mockEditAction}
             index={index}
-            messageVariables={messageVariables}
+            executionMode={ActionConnectorMode.ActionForm}
           />
         );
         expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(false);
@@ -499,7 +494,7 @@ describe('TinesParamsFields renders', () => {
             errors={emptyErrors}
             editAction={mockEditAction}
             index={index}
-            messageVariables={messageVariables}
+            executionMode={ActionConnectorMode.ActionForm}
           />
         );
 
@@ -523,7 +518,7 @@ describe('TinesParamsFields renders', () => {
             errors={emptyErrors}
             editAction={mockEditAction}
             index={index}
-            messageVariables={messageVariables}
+            executionMode={ActionConnectorMode.ActionForm}
           />
         );
 

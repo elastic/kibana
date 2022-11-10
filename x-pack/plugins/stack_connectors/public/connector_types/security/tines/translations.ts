@@ -126,10 +126,10 @@ export const WEBHOOK_URL_FALLBACK_TITLE = i18n.translate(
     defaultMessage: 'Tines API results limit reached',
   }
 );
-export const WEBHOOK_URL_FALLBACK_TEXT = (type: 'Story' | 'Webhook') =>
+export const WEBHOOK_URL_FALLBACK_TEXT = (entity: 'Story' | 'Webhook') =>
   i18n.translate('xpack.stackConnectors.security.tines.params.webhookUrlFallbackText', {
-    values: { type, limit: API_MAX_RESULTS },
-    defaultMessage: `Not possible to retrieve more than {limit} results from the Tines {type} API. If your {type} does not appear in the list, please fill the Webhook URL below`,
+    values: { entity, limit: API_MAX_RESULTS },
+    defaultMessage: `Not possible to retrieve more than {limit} results from the Tines {entity} API. If your {entity} does not appear in the list, please fill the Webhook URL below`,
   });
 export const WEBHOOK_URL_HELP = i18n.translate(
   'xpack.stackConnectors.security.tines.params.webhookUrlHelp',
@@ -179,14 +179,14 @@ export const WEBHOOKS_ERROR = i18n.translate(
 export const STORY_NOT_FOUND_WARNING = i18n.translate(
   'xpack.stackConnectors.security.tines.params.componentWarning.storyNotFound',
   {
-    defaultMessage: 'Can not find the saved story. Please select a valid story from the selector',
+    defaultMessage: 'Cannot find the saved story. Please select a valid story from the selector',
   }
 );
 export const WEBHOOK_NOT_FOUND_WARNING = i18n.translate(
   'xpack.stackConnectors.security.tines.params.componentWarning.webhookNotFound',
   {
     defaultMessage:
-      'Can not find the saved webhook. Please select a valid webhook from the selector',
+      'Cannot find the saved webhook. Please select a valid webhook from the selector',
   }
 );
 

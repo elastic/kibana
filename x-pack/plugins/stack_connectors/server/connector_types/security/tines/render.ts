@@ -27,7 +27,7 @@ export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> 
   try {
     body = JSON.stringify(set('context.alerts', alerts, variables));
   } catch (err) {
-    body = `error generating body payload: ${err.message}`;
+    body = JSON.stringify({ error: { message: err.message } });
   }
   return set('subActionParams.body', body, params);
 };

@@ -82,7 +82,9 @@ describe('Tines body render', () => {
         throw new Error(errorMessage);
       });
       const result = renderParameterTemplates(params, variables);
-      expect(result.subActionParams.body).toEqual(`error generating body payload: ${errorMessage}`);
+      expect(result.subActionParams.body).toEqual(
+        JSON.stringify({ error: { message: errorMessage } })
+      );
     });
   });
 });
