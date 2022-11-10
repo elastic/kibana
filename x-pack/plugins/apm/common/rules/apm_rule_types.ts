@@ -258,3 +258,6 @@ export type AnomalyAlertSeverityType = ValuesType<
 // Client side registrations:
 // x-pack/plugins/apm/public/components/alerting/<alert>/index.tsx
 // x-pack/plugins/apm/public/components/alerting/register_apm_alerts
+
+export const KIBANA_ALERT_RULE_PRODUCER = 'kibana.alert.rule.producer';
+export const KIBANA_ALERT_STATUS = 'kibana.alert.status';

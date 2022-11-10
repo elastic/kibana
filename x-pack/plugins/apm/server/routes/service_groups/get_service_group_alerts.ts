@@ -15,6 +15,10 @@ import { Logger } from '@kbn/core/server';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { SavedServiceGroup } from '../../../common/service_groups';
 import { ApmAlertsClient } from './get_apm_alerts_client';
+import {
+  KIBANA_ALERT_RULE_PRODUCER,
+  KIBANA_ALERT_STATUS,
+} from '../../../common/rules/apm_rule_types';
 
 export async function getServiceGroupAlerts({
   serviceGroups,
@@ -44,8 +48,8 @@ export async function getServiceGroupAlerts({
     query: {
       bool: {
         filter: [
-          { term: { 'kibana.alert.rule.producer': 'apm' } },
-          { term: { 'kibana.alert.status': 'active' } },
+          { term: { [KIBANA_ALERT_RULE_PRODUCER]: 'apm' } },
+          { term: { [KIBANA_ALERT_STATUS]: 'active' } },
         ],
       },
     },

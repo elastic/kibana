@@ -17,9 +17,9 @@ export async function getApmAlertsClient({
   const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(
     request
   );
-  const apmAlertsIndices = (await alertsClient.getAuthorizedAlertsIndices([
+  const apmAlertsIndices = await alertsClient.getAuthorizedAlertsIndices([
     'apm',
-  ])) ?? ['.alerts*'];
+  ]);
 
   type ApmAlertsClientSearchParams = Omit<
     Parameters<typeof alertsClient.find>[0],
@@ -28,7 +28,10 @@ export async function getApmAlertsClient({
 
   return {
     search(searchParams: ApmAlertsClientSearchParams) {
-      return alertsClient.find({ index: apmAlertsIndices[0], ...searchParams });
+      return alertsClient.find({
+        index: apmAlertsIndices?.[0] ?? '.alerts*',
+        ...searchParams,
+      });
     },
   };
 }
