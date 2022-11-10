@@ -59,6 +59,13 @@ const filtersBuilderMaxHeight = css`
   max-height: ${DEFAULT_MAX_HEIGHT};
 `;
 
+const filterBadgeStyle = css`
+  .euiFormRow__fieldWrapper {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+`;
+
 export interface FilterEditorProps {
   filter: Filter;
   indexPatterns: DataView[];
@@ -283,6 +290,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
           <EuiFormRow
             fullWidth
             hasEmptyLabelSpace={true}
+            className={filterBadgeStyle}
             label={
               <strong>
                 <FormattedMessage
