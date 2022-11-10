@@ -20,7 +20,7 @@ to create or save visualizations, and the options to create and save visualizati
 refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [discrete]
-[[create-panels-with-lens]]
+[[visualize-library-create-visualizations]]
 === Create visualizations
 
 Create visualizations of your data that you can add to dashboards and *Canvas* workpads.
