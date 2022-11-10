@@ -10,6 +10,8 @@ import moment from 'moment-timezone';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { calcAutoIntervalNear } from '@kbn/data-plugin/common';
 
+const MAX_TICKS = 20; //eui range has hard limit of 20 ticks and throws when exceeded
+
 export const FROM_INDEX = 0;
 export const TO_INDEX = 1;
 
@@ -46,17 +48,19 @@ function getScaledDateFormat(interval: number): string {
   return 'ss.SSS';
 }
 
-export function getInterval(min: number, max: number, steps = 6): number {
+export function getInterval(min: number, max: number, steps = MAX_TICKS): number {
   const duration = max - min;
   let interval = calcAutoIntervalNear(steps, duration).asMilliseconds();
-  // Sometimes auto interval is not quite right and returns 2X or 3X requested ticks
-  // Adjust the interval to get closer to the requested number of ticks
+  // Sometimes auto interval is not quite right and returns 2X, 3X, 1/2X, or 1/3X  requested ticks
   const actualSteps = duration / interval;
-  if (actualSteps > steps * 1.5) {
-    const factor = Math.round(actualSteps / steps);
-    interval *= factor;
-  } else if (actualSteps < 5) {
-    interval *= 0.5;
+  if (actualSteps > MAX_TICKS) {
+    // EuiRange throws if ticks exceeds MAX_TICKS
+    // Adjust the interval to ensure MAX_TICKS is never exceeded
+    const factor = Math.ceil(actualSteps / MAX_TICKS);
+    interval = interval * factor;
+  } else if (actualSteps < MAX_TICKS / 2) {
+    // Increase number of ticks when ticks is less then half MAX_TICKS
+    interval = interval / 2;
   }
   return interval;
 }

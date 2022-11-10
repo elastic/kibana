@@ -18,6 +18,7 @@ export * from '../../common/time_slider/types';
 export interface TimeSliderSubjectState {
   range?: number;
   isOpen: boolean;
+  stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeBounds: [number, number];
   value?: [number, number];
