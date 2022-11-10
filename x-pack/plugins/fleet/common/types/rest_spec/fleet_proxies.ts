@@ -5,6 +5,15 @@
  * 2.0.
  */
 
-export * from './use_delete_proxy';
-export * from './use_delete_output';
-export * from './use_delete_fleet_server_host';
+import type { FleetProxy } from '../models';
+
+import type { ListResult } from './common';
+
+export type GetFleetProxiesResponse = ListResult<FleetProxy>;
+
+export interface PostFleetProxiesRequest {
+  body: {
+    name: string;
+    url: string;
+  };
+}
