@@ -188,7 +188,7 @@ export const createLifecycleExecutor =
 
         return state.trackedAlerts[alertId].alertUuid;
       },
-      getAlertByAlertUuid: async(alertUuid: string) => {
+      getAlertByAlertUuid: async (alertUuid: string) => {
         return await fetchAlertbyAlertUUID(ruleDataClient, alertUuid);
       },
     };

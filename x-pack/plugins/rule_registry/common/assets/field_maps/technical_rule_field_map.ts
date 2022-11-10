@@ -188,7 +188,7 @@ export const technicalRuleFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
-  }
+  },
 } as const;
 
 export type TechnicalRuleFieldMap = typeof technicalRuleFieldMap;
