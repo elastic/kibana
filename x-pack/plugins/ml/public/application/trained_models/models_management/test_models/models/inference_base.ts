@@ -154,15 +154,37 @@ export abstract class InferenceBase<TInferResponse> {
     };
   }
 
-  protected async runPipelineSimulate<T>(
-    callback: (d: estypes.IngestSimulateDocumentSimulation) => any
-  ): Promise<T[]> {
+  protected async runInfer<TRawInferResponse>(
+    getPayload: (inputText: string) => any,
+    processResponse: (resp: TRawInferResponse, inputText: string) => TInferResponse
+  ): Promise<TInferResponse[]> {
+    this.setRunning();
+    const inputText = this.getInputText();
+
+    const payload = getPayload(inputText);
+    const resp = (await this.trainedModelsApi.inferTrainedModel(
+      this.model.model_id,
+      payload,
+      DEFAULT_INFERENCE_TIME_OUT
+    )) as unknown as TRawInferResponse;
+
+    const processedResponse = processResponse(resp, inputText);
+
+    this.inferenceResult$.next([processedResponse]);
+    this.setFinished();
+
+    return [processedResponse];
+  }
+
+  protected async runPipelineSimulate(
+    processResponse: (d: estypes.IngestSimulateDocumentSimulation) => TInferResponse
+  ): Promise<TInferResponse[]> {
     this.setRunning();
     const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
       this.getPipeline(),
       this.getPipelineDocs()
     );
-    const processedResponse = docs.map((d) => callback(this.getDocFromResponse(d)));
+    const processedResponse = docs.map((d) => processResponse(this.getDocFromResponse(d)));
     this.inferenceResult$.next(processedResponse);
     this.setFinished();
     return processedResponse;

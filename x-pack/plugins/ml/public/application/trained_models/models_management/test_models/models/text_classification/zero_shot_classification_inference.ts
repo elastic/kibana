@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { DEFAULT_INFERENCE_TIME_OUT, InferenceBase } from '../inference_base';
+import { InferenceBase } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 
@@ -32,29 +32,19 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
 
   public async inferText() {
     try {
-      this.setRunning();
-      const inputText = this.getInputText();
-      const labelsText = this.labelsText$.value;
-      const inputLabels = labelsText?.split(',').map((l) => l.trim());
-      const payload = {
-        docs: [{ [this.inputField]: inputText }],
-        ...this.getInferenceConfig([{ labels: inputLabels }, { multi_label: false }]),
-      };
-      const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
-        payload,
-        DEFAULT_INFERENCE_TIME_OUT
-      )) as unknown as RawTextClassificationResponse;
-
-      const processedResponse: TextClassificationResponse = processResponse(
-        resp,
-        this.model,
-        inputText
+      return await this.runInfer<RawTextClassificationResponse>(
+        (inputText: string) => {
+          const labelsText = this.labelsText$.value;
+          const inputLabels = labelsText?.split(',').map((l) => l.trim());
+          return {
+            docs: [{ [this.inputField]: inputText }],
+            ...this.getInferenceConfig([{ labels: inputLabels }, { multi_label: false }]),
+          };
+        },
+        (resp, inputText) => {
+          return processResponse(resp, this.model, inputText);
+        }
       );
-      this.inferenceResult$.next([processedResponse]);
-      this.setFinished();
-
-      return [processedResponse];
     } catch (error) {
       this.setFinishedWithErrors(error);
       throw error;
@@ -63,7 +53,7 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
 
   protected async inferIndex() {
     try {
-      return await this.runPipelineSimulate<TextClassificationResponse>((doc) => {
+      return await this.runPipelineSimulate((doc) => {
         return {
           response: processInferenceResult(doc._source[this.inferenceType], this.model),
           rawResponse: doc._source[this.inferenceType],

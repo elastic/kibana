@@ -7,7 +7,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_INFERENCE_TIME_OUT, InferenceBase, INPUT_TYPE } from '../inference_base';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getNerOutputComponent } from './ner_output';
@@ -34,23 +34,18 @@ export class NerInference extends InferenceBase<NerResponse> {
 
   protected async inferText() {
     try {
-      this.setRunning();
-      const inputText = this.getInputText();
-      const payload = { docs: [{ [this.inputField]: inputText }] };
-      const resp = await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
-        payload,
-        DEFAULT_INFERENCE_TIME_OUT
+      return await this.runInfer<estypes.MlInferTrainedModelResponse>(
+        (inputText: string) => {
+          return { docs: [{ [this.inputField]: inputText }] };
+        },
+        (resp, inputText) => {
+          return {
+            response: parseResponse(resp),
+            rawResponse: resp,
+            inputText,
+          };
+        }
       );
-
-      const processedResponse: NerResponse = {
-        response: parseResponse(resp),
-        rawResponse: resp,
-        inputText,
-      };
-      this.inferenceResult$.next([processedResponse]);
-      this.setFinished();
-      return [processedResponse];
     } catch (error) {
       this.setFinishedWithErrors(error);
       throw error;
@@ -59,7 +54,7 @@ export class NerInference extends InferenceBase<NerResponse> {
 
   protected async inferIndex() {
     try {
-      return await this.runPipelineSimulate<NerResponse>((doc) => {
+      return await this.runPipelineSimulate((doc) => {
         return {
           response: parseResponse({ inference_results: [doc._source[this.inferenceType]] }),
           rawResponse: doc._source[this.inferenceType],

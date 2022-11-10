@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_INFERENCE_TIME_OUT, InferenceBase } from '../inference_base';
+import { InferenceBase } from '../inference_base';
 import type { InferResponse } from '../inference_base';
 import { getQuestionAnsweringInput } from './question_answering_input';
 import { getQuestionAnsweringOutputComponent } from './question_answering_output';
@@ -59,26 +59,18 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
 
   public async inferText() {
     try {
-      this.setRunning();
-      const inputText = this.getInputText();
-      const question = this.questionText$.value;
-
-      const payload = {
-        docs: [{ [this.inputField]: inputText }],
-        ...this.getInferenceConfig([this.getNumTopClassesConfig(), { question }]),
-      };
-      const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
-        payload,
-        DEFAULT_INFERENCE_TIME_OUT
-      )) as unknown as RawQuestionAnsweringResponse;
-
-      const processedResponse: QuestionAnsweringResponse = processResponse(resp, inputText);
-
-      this.inferenceResult$.next([processedResponse]);
-      this.setFinished();
-
-      return [processedResponse];
+      return await this.runInfer<RawQuestionAnsweringResponse>(
+        (inputText: string) => {
+          const question = this.questionText$.value;
+          return {
+            docs: [{ [this.inputField]: inputText }],
+            ...this.getInferenceConfig([this.getNumTopClassesConfig(), { question }]),
+          };
+        },
+        (resp, inputText) => {
+          return processResponse(resp, inputText);
+        }
+      );
     } catch (error) {
       this.setFinishedWithErrors(error);
       throw error;
@@ -87,7 +79,7 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
 
   protected async inferIndex() {
     try {
-      return await this.runPipelineSimulate<QuestionAnsweringResponse>((doc) => {
+      return await this.runPipelineSimulate((doc) => {
         const pretendRawRequest = { inference_results: [doc._source[this.inferenceType]] };
         const inputText = doc._source[this.inputField];
 

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_INFERENCE_TIME_OUT, InferenceBase, INPUT_TYPE } from '../inference_base';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { processResponse, processInferenceResult } from './common';
 import { getGeneralInputComponent } from '../text_input';
@@ -30,23 +30,17 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
 
   protected async inferText() {
     try {
-      this.setRunning();
-      const inputText = this.getInputText();
-      const payload = {
-        docs: [{ [this.inputField]: inputText }],
-        ...this.getInferenceConfig([this.getNumTopClassesConfig()]),
-      };
-      const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
-        payload,
-        DEFAULT_INFERENCE_TIME_OUT
-      )) as unknown as RawTextClassificationResponse;
-
-      const processedResponse = processResponse(resp, this.model, inputText);
-      this.inferenceResult$.next([processedResponse]);
-      this.setFinished();
-
-      return [processedResponse];
+      return await this.runInfer<RawTextClassificationResponse>(
+        (inputText: string) => {
+          return {
+            docs: [{ [this.inputField]: inputText }],
+            ...this.getInferenceConfig([this.getNumTopClassesConfig()]),
+          };
+        },
+        (resp, inputText) => {
+          return processResponse(resp, this.model, inputText);
+        }
+      );
     } catch (error) {
       this.setFinishedWithErrors(error);
       throw error;
@@ -55,7 +49,7 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
 
   protected async inferIndex() {
     try {
-      return await this.runPipelineSimulate<TextClassificationResponse>((doc) => {
+      return await this.runPipelineSimulate((doc) => {
         return {
           response: processInferenceResult(doc._source[this.inferenceType], this.model),
           rawResponse: doc._source[this.inferenceType],

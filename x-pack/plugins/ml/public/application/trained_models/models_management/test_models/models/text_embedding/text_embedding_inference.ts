@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_INFERENCE_TIME_OUT, InferenceBase, INPUT_TYPE } from '../inference_base';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getTextEmbeddingOutputComponent } from './text_embedding_output';
@@ -39,22 +39,16 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
 
   public async inferText() {
     try {
-      this.setRunning();
-      const inputText = this.getInputText();
-      const payload = {
-        docs: [{ [this.inputField]: inputText }],
-      };
-      const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
-        payload,
-        DEFAULT_INFERENCE_TIME_OUT
-      )) as unknown as RawTextEmbeddingResponse;
-
-      const processedResponse: TextEmbeddingResponse = processTextResponse(resp, inputText);
-      this.inferenceResult$.next([processedResponse]);
-      this.setFinished();
-
-      return [processedResponse];
+      return await this.runInfer<RawTextEmbeddingResponse>(
+        (inputText: string) => {
+          return {
+            docs: [{ [this.inputField]: inputText }],
+          };
+        },
+        (resp, inputText) => {
+          return processTextResponse(resp, inputText);
+        }
+      );
     } catch (error) {
       this.setFinishedWithErrors(error);
       throw error;
@@ -63,7 +57,7 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
 
   protected async inferIndex() {
     try {
-      return await this.runPipelineSimulate<TextEmbeddingResponse>((doc) => {
+      return await this.runPipelineSimulate((doc) => {
         const inputText = doc._source[this.inputField];
         return processIndexResponse(doc._source[this.inferenceType], inputText);
       });
