@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { SecurityJob } from '../../../common/components/ml_popover/types';
 import { isJobStarted } from '../../../../common/machine_learning/helpers';
@@ -14,6 +14,7 @@ import { useEnableDataFeed } from '../../../common/components/ml_popover/hooks/u
 
 export interface ReturnUseStartMlJobs {
   loading: boolean;
+  starting: boolean;
   jobs: SecurityJob[];
   startMlJobs: (jobIds: string[] | undefined) => Promise<void>;
 }
@@ -21,6 +22,7 @@ export interface ReturnUseStartMlJobs {
 export const useStartMlJobs = (): ReturnUseStartMlJobs => {
   const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
   const { loading: isLoadingJobs, jobs: mlJobs, refetch: refetchJobs } = useSecurityJobs();
+  const [isStartingJobs, setIsStartingJobs] = useState(false);
   const startMlJobs = useCallback(
     async (jobIds: string[] | undefined) => {
       if (isLoadingJobs || isLoadingEnableDataFeed) {
@@ -31,6 +33,8 @@ export const useStartMlJobs = (): ReturnUseStartMlJobs => {
         return;
       }
 
+      // The error handling happens inside `enableDatafeed`, so no need to do try/catch here
+      setIsStartingJobs(true);
       const ruleJobs = mlJobs.filter((job) => jobIds.includes(job.id));
       await Promise.all(
         ruleJobs.map(async (job) => {
@@ -42,11 +46,11 @@ export const useStartMlJobs = (): ReturnUseStartMlJobs => {
           await enableDatafeed(job, latestTimestampMs, true);
         })
       );
-
       refetchJobs();
+      setIsStartingJobs(false);
     },
     [enableDatafeed, isLoadingEnableDataFeed, isLoadingJobs, mlJobs, refetchJobs]
   );
 
-  return { loading: isLoadingJobs, jobs: mlJobs, startMlJobs };
+  return { loading: isLoadingJobs, jobs: mlJobs, starting: isStartingJobs, startMlJobs };
 };

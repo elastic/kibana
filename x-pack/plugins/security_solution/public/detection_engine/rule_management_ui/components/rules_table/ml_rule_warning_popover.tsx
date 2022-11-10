@@ -15,6 +15,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import * as i18n from './translations';
 
@@ -58,7 +59,7 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
   const button = (
     <EuiButtonIcon display={'empty'} color={'warning'} iconType={'alert'} onClick={togglePopover} />
   );
-  const popoverTitle = getCapitalizedStatusText(rule.execution_summary?.last_execution.status);
+  const popoverTitle = getCapitalizedStatusText(RuleExecutionStatus['partial failure']);
 
   return (
     <EuiPopover

@@ -240,12 +240,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
 
-  const [isStartingJobs, setIsStartingJobs] = useState(false);
-  const { startMlJobs } = useStartMlJobs();
+  const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
   const startMlJobsIfNeeded = useCallback(async () => {
-    setIsStartingJobs(true);
     await startMlJobs(rule?.machine_learning_job_id);
-    setIsStartingJobs(false);
   }, [rule, startMlJobs]);
 
   const ruleDetailTabs = useMemo(

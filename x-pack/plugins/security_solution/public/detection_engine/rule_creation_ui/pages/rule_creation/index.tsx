@@ -170,7 +170,6 @@ const CreateRulePageComponent: React.FC = () => {
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
   const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(false);
-  const [isStartingJobs, setIsStartingJobs] = useState(false);
 
   const [defineRuleData, setDefineRuleData] = useState<DefineStepRule>({
     ...stepDefineDefaultValue,
@@ -208,7 +207,7 @@ const CreateRulePageComponent: React.FC = () => {
     [activeStep]
   );
 
-  const { startMlJobs } = useStartMlJobs();
+  const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -293,9 +292,7 @@ const CreateRulePageComponent: React.FC = () => {
               if (!isMlRule(defineStep.data.ruleType) || !actionsStep.data.enabled) {
                 return;
               }
-              setIsStartingJobs(true);
               await startMlJobs(defineStep.data.machineLearningJobId);
-              setIsStartingJobs(false);
             };
             const [, createdRule] = await Promise.all([
               startMlJobsIfNeeded(),
