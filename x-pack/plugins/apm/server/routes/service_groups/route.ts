@@ -23,7 +23,7 @@ import {
 import { getServicesCounts } from './get_services_counts';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getServiceGroupAlerts } from './get_service_group_alerts';
-import { getAlertsIndices } from './get_alerts_indices';
+import { getApmAlertsClient } from './get_apm_alerts_client';
 
 const serviceGroupsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-groups',
@@ -168,17 +168,13 @@ const serviceGroupCountsRoute = createApmServerRoute({
 
     const spacesPluginStart = await plugins.spaces?.start();
 
-    const [
-      serviceGroups,
-      authorizedAlertsIndices,
-      apmEventClient,
-      activeSpace,
-    ] = await Promise.all([
-      getServiceGroups({ savedObjectsClient }),
-      getAlertsIndices(resources),
-      getApmEventClient(resources),
-      await spacesPluginStart?.spacesService.getActiveSpace(request),
-    ]);
+    const [serviceGroups, apmAlertsClient, apmEventClient, activeSpace] =
+      await Promise.all([
+        getServiceGroups({ savedObjectsClient }),
+        getApmAlertsClient(resources),
+        getApmEventClient(resources),
+        await spacesPluginStart?.spacesService.getActiveSpace(request),
+      ]);
 
     const [servicesCounts, serviceGroupAlertsCount] = await Promise.all([
       getServicesCounts({
@@ -189,7 +185,7 @@ const serviceGroupCountsRoute = createApmServerRoute({
       }),
       getServiceGroupAlerts({
         serviceGroups,
-        authorizedAlertsIndices,
+        apmAlertsClient,
         context,
         logger,
         spaceId: activeSpace?.id,

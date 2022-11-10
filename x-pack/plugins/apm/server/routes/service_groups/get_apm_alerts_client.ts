@@ -7,7 +7,9 @@
 
 import { APMRouteHandlerResources } from '../typings';
 
-export async function getAlertsIndices({
+export type ApmAlertsClient = Awaited<ReturnType<typeof getApmAlertsClient>>;
+
+export async function getApmAlertsClient({
   plugins,
   request,
 }: APMRouteHandlerResources) {
@@ -15,5 +17,18 @@ export async function getAlertsIndices({
   const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(
     request
   );
-  return alertsClient.getAuthorizedAlertsIndices(['apm']);
+  const apmAlertsIndices = (await alertsClient.getAuthorizedAlertsIndices([
+    'apm',
+  ])) ?? ['.alerts*'];
+
+  type ApmAlertsClientSearchParams = Omit<
+    Parameters<typeof alertsClient.find>[0],
+    'index'
+  >;
+
+  return {
+    search(searchParams: ApmAlertsClientSearchParams) {
+      return alertsClient.find({ index: apmAlertsIndices[0], ...searchParams });
+    },
+  };
 }
