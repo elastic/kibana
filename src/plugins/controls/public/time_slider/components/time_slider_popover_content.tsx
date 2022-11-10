@@ -30,9 +30,6 @@ export function TimeSliderPopoverContent(props: Props) {
   const ticks = props.ticks.length <= 12
     ? props.ticks
     : props.ticks.map((tick, index) => {
-        if (tick.length <= 12) {
-          return tic
-        }
         return {
           value: tick.value,
           // to avoid label overlap, only display even tick labels
