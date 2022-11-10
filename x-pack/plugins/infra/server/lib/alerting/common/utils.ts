@@ -220,7 +220,7 @@ export const shouldTermsAggOnContainer = (groupBy: string | string[] | undefined
 };
 
 export const getContextForRecoveredAlerts = (
-  alertHits: AdditionalContext | undefined
+  alertHits: AdditionalContext | undefined | null
 ): AdditionalContext => {
   const alertHitsSource = alertHits && alertHits.length > 0 ? unflattenObject(alertHits[0]._source) : undefined;
 

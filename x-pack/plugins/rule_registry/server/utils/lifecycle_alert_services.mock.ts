@@ -8,7 +8,6 @@
 import { AlertInstanceContext, AlertInstanceState } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { LifecycleAlertServices } from './create_lifecycle_executor';
-import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 
 /**
  * This wraps the alerts to enable the preservation of the generic type
@@ -38,5 +37,5 @@ export const createLifecycleAlertServicesMock = <
   alertWithLifecycle: ({ id }) => alertServices.alertFactory.create(id),
   getAlertStartedDate: jest.fn((id: string) => null),
   getAlertUuid: jest.fn((id: string) => null),
-  ruleDataClient: createRuleDataClientMock(),
+  getAlertByAlertUuid: jest.fn((id: string) => null),
 });
