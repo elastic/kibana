@@ -86,6 +86,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     },
 
     async navigateToEditMonitor() {
+      await page.waitForSelector('text=Showing');
       await this.clickByTestSubj('syntheticsMonitorListActions');
       await page.click('text=Edit', { timeout: 2 * 60 * 1000, delay: 800 });
       await this.findByText('Edit monitor');
