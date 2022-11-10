@@ -61,7 +61,7 @@ import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
 import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
 import { fetchSql } from '../application/main/utils/fetch_sql';
-import { ADHOC_DATA_VIEW_CLICK_EVENT } from '../constants';
+import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -306,7 +306,7 @@ export class SavedSearchEmbeddable
 
     if (!dataView.isPersisted()) {
       // one used adhoc data view
-      this.services.trackUiMetric?.(METRIC_TYPE.CLICK, ADHOC_DATA_VIEW_CLICK_EVENT);
+      this.services.trackUiMetric?.(METRIC_TYPE.CLICK, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
 
     const props: SearchProps = {
