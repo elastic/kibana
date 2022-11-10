@@ -72,7 +72,7 @@ export interface LifecycleAlertServices<
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
   getAlertStartedDate: (alertInstanceId: string) => string | null;
   getAlertUuid: (alertInstanceId: string) => string | null;
-  getAlertByAlertUuid: (alertUuid: string) => { [x: string]: any; } | null;
+  getAlertByAlertUuid: (alertUuid: string) => { [x: string]: any } | null;
 }
 
 export type LifecycleRuleExecutor<
@@ -187,8 +187,7 @@ export const createLifecycleExecutor =
       getAlertByAlertUuid: async (alertUuid: string) => {
         try {
           return await fetchAlertByAlertUUID(ruleDataClient, alertUuid);
-        }
-        catch (err) {
+        } catch (err) {
           return null;
         }
       },
