@@ -21,6 +21,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ValidationError } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
@@ -143,18 +144,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [getFields, onSubmit]
   );
 
-  const saveClickRef = useRef<{ onSaveClick: () => Promise<boolean> | null }>({
+  const saveClickRef = useRef<{
+    onSaveClick: () => Promise<{ errors: ValidationError<string>; index: number }> | null;
+  }>({
     onSaveClick: () => null,
   });
 
   const getData = useCallback(async () => {
-    const isResponseActionsInvalid = await saveClickRef.current.onSaveClick();
-    if (isResponseActionsInvalid) {
-      return {
-        isValid: false,
-        data: getFormData(),
-      };
-    }
+    await saveClickRef.current.onSaveClick();
 
     const result = await submit();
     return result?.isValid

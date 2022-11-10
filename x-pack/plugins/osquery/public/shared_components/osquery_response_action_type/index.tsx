@@ -116,10 +116,13 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
       ref.current.validation[item.id] = async () => {
         await handleSubmit(onSubmit)();
 
-        return isEmpty(errors);
+        return {
+          errors,
+          path: item.path,
+        };
       };
     }
-  }, [errors, handleSubmit, isValid, item.id, onSubmit, ref, watchedValues]);
+  }, [errors, handleSubmit, isValid, item.id, item.path, onSubmit, ref, watchedValues]);
 
   useEffect(() => {
     register('savedQueryId');

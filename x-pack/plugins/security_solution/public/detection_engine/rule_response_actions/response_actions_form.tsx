@@ -7,10 +7,11 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { isEmpty, map, some } from 'lodash';
+import { isEmpty, map } from 'lodash';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import type { ValidationError } from '@kbn/osquery-plugin/public/shared_imports';
+import { getCustomErrorMessage, validateForEmptyParams } from './validations';
 import { FORM_ERRORS_TITLE } from '../../detections/components/rules/rule_actions_field/translations';
 import { ResponseActionsHeader } from './response_actions_header';
 import { ResponseActionsList } from './response_actions_list';
@@ -19,7 +20,6 @@ import type { ArrayItem } from '../../shared_imports';
 import { useFormContext } from '../../shared_imports';
 import { useFormData } from '../../shared_imports';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
-import { RESPONSE_ACTION_TYPES } from '../../../common/detection_engine/rule_response_actions/schemas';
 
 const FieldErrorsContainer = styled.div`
   p {
@@ -29,7 +29,7 @@ const FieldErrorsContainer = styled.div`
 
 export interface ResponseActionValidatorRef {
   validation: {
-    [key: string]: () => Promise<boolean>;
+    [key: string]: () => Promise<{ errors: ValidationError<string>; path: string }>;
   };
 }
 
@@ -45,34 +45,53 @@ interface IProps {
 export const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }: IProps) => {
   const responseActionsValidationRef = useRef<ResponseActionValidatorRef>({ validation: {} });
   const supportedResponseActionTypes = useSupportedResponseActionTypes();
-  const [fieldErrors, setFieldErrors] = useState<string | null>(null);
+  const [uiFieldErrors, setUIFieldErrors] = useState<string | null>(null);
   const [formData] = useFormData();
   const { getFields, validate } = useFormContext();
   const fields = getFields();
 
+  // connect the custom response action validation with the wrapping form
   const validateResponseActions = useCallback(async () => {
-    const paramsErrors: Array<ValidationError<string>> = [];
     await validate();
     if (formData?.responseActions?.length) {
-      map(formData.responseActions, async (action, index) => {
-        if (action.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && isEmpty(action.params)) {
-          paramsErrors.push(fields[`responseActions[${index}].params`].errors[0]);
-        }
-      });
-      const errorsString = paramsErrors.map(({ message }) => message).join('\n');
-      setFieldErrors(errorsString);
+      // if the specific response action has a validation function, call it
+      if (!isEmpty(responseActionsValidationRef.current?.validation)) {
+        await Promise.all(
+          map(responseActionsValidationRef.current?.validation, async (validation) => {
+            const response = await validation();
+            const paramsErrors: Array<ValidationError<string>> = [];
+
+            map(response.errors, (error) => {
+              if (!isEmpty(error)) {
+                const message = !isEmpty(error.message)
+                  ? error.message
+                  : getCustomErrorMessage(error.ref.name);
+                const errorObject = {
+                  code: 'ERR_FIELD_MISSING',
+                  path: `${response.path}.params`,
+                  message: `**ResponseActions:** \n ${message}\n `,
+                };
+
+                fields[`${response.path}.params`]?.setErrors([errorObject]);
+                paramsErrors.push(errorObject);
+                const errorsString = paramsErrors
+                  ?.map((paramsError) => paramsError?.message)
+                  .join('\n');
+                setUIFieldErrors(errorsString);
+              } else {
+                setUIFieldErrors(null);
+              }
+            });
+          })
+        );
+      } else {
+        // Response Action Item created in UseArray, but not yet initialized (has no params)
+        const errorStrings = validateForEmptyParams(formData.responseActions, fields);
+
+        setUIFieldErrors(errorStrings);
+      }
     } else {
-      setFieldErrors(null);
-    }
-
-    if (!isEmpty(responseActionsValidationRef.current?.validation)) {
-      const response = await Promise.all(
-        map(responseActionsValidationRef.current?.validation, async (validation) => {
-          return validation();
-        })
-      );
-
-      return some(response, (val) => !val);
+      setUIFieldErrors(null);
     }
   }, [fields, formData.responseActions, validate]);
 
@@ -103,11 +122,11 @@ export const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }
     <>
       <EuiSpacer size="xxl" data-test-subj={'response-actions-form'} />
       <ResponseActionsHeader />
-      {fieldErrors ? (
+      {uiFieldErrors ? (
         <>
           <FieldErrorsContainer>
             <EuiCallOut title={FORM_ERRORS_TITLE} color="danger" iconType="alert">
-              <ReactMarkdown>{fieldErrors}</ReactMarkdown>
+              <ReactMarkdown>{uiFieldErrors}</ReactMarkdown>
             </EuiCallOut>
           </FieldErrorsContainer>
           <EuiSpacer />

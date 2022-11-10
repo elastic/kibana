@@ -72,6 +72,7 @@ export const ResponseActionsList = React.memo(
             </div>
           );
         })}
+        <EuiSpacer size="m" />
         {renderButton}
       </div>
     );
