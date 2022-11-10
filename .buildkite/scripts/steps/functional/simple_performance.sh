@@ -75,7 +75,7 @@ for ((i=1;i<=15;i++)); do
     --xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf" &
     export kbnPid=$!
 
-  echo "kibana started on $kbnPid";
+  echo "--- kibana started on $kbnPid";
 
   # wait until we can login to kibana
   curl 'http://localhost:5620/internal/security/login' \
@@ -110,7 +110,7 @@ for ((i=1;i<=15;i++)); do
     ((dur=dur+1))
     if [ $dur -ge $timeout ]; then
       echo "es still running after $dur seconds, killing Kibana forcefully";
-      kill -9 "$kbnPid"
+      kill -9 "$kbnPid" &>/dev/null
       sleep 5;
     fi
   done
@@ -125,7 +125,7 @@ for ((i=1;i<=15;i++)); do
     ((dur=dur+1))
     if [ $dur -ge $timeout ]; then
       echo "es still running after $dur seconds, killing ES forcefully";
-      kill -9 "$esPid"
+      kill -9 "$esPid" &>/dev/null
       sleep 5;
     fi
   done
