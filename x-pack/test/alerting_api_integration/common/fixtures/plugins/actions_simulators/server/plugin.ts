@@ -48,6 +48,7 @@ export function getExternalServiceSimulatorPath(service: ExternalServiceSimulato
   return `/api/_${NAME}/${service}`;
 }
 
+// list all urls for server.xsrf.allowlist config
 export function getAllExternalServiceSimulatorPaths(): string[] {
   const allPaths = Object.values(ExternalServiceSimulator).map((service) =>
     getExternalServiceSimulatorPath(service)
@@ -58,8 +59,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/users/test@/sendMail`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/1234567/oauth2/v2.0/token`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/oauth_token.do`);
-  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/api/v1`);
-  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/webhook`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/webhook/path/secret`);
   return allPaths;
 }
 

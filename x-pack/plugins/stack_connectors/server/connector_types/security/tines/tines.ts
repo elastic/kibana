@@ -35,7 +35,7 @@ import type {
   TinesWebhooksApiResponse,
 } from './api_schema';
 import {
-  API_RESULTS_PER_PAGE,
+  API_MAX_RESULTS,
   SUB_ACTION,
 } from '../../../../common/connector_types/security/tines/constants';
 
@@ -115,7 +115,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
   ): Promise<T & { incompleteResponse: boolean }> {
     const response = await this.request<R>({
       ...req,
-      params: { ...req.params, per_page: API_RESULTS_PER_PAGE },
+      params: { ...req.params, per_page: API_MAX_RESULTS },
     });
     return {
       ...reducer(response.data),

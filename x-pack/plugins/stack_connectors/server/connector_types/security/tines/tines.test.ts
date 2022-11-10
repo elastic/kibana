@@ -12,7 +12,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { TinesConnector } from './tines';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
-  API_RESULTS_PER_PAGE,
+  API_MAX_RESULTS,
   TINES_CONNECTOR_ID,
 } from '../../../../common/connector_types/security/tines/constants';
 
@@ -80,7 +80,7 @@ const storiesGetRequestExpected = {
     'x-user-token': token,
     'Content-Type': 'application/json',
   },
-  params: { per_page: API_RESULTS_PER_PAGE },
+  params: { per_page: API_MAX_RESULTS },
 };
 
 const agentsGetRequestExpected = {
@@ -93,7 +93,7 @@ const agentsGetRequestExpected = {
     'x-user-token': token,
     'Content-Type': 'application/json',
   },
-  params: { story_id: story.id, per_page: API_RESULTS_PER_PAGE },
+  params: { story_id: story.id, per_page: API_MAX_RESULTS },
 };
 
 describe('TinesConnector', () => {
