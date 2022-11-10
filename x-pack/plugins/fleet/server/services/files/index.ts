@@ -82,7 +82,7 @@ export async function fileIdsWithoutChunksByIndex(
             must: [
               {
                 terms: {
-                  'bid.keyword': Array.from(allFileIds),
+                  bid: Array.from(allFileIds),
                 },
               },
               {
