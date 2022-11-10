@@ -17,7 +17,7 @@ import {
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import { ADHOC_DATA_VIEW_CLICK_EVENT } from '../../../constants';
+import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { getUiActions } from '../../../kibana_services';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { GetStateReturn } from '../services/discover_state';
@@ -47,20 +47,14 @@ export const useAdHocDataViews = ({
   );
 
   useEffect(() => {
-    if (trackUiMetric && adHocDataViewList.length) {
-      trackUiMetric(METRIC_TYPE.CLICK, ADHOC_DATA_VIEW_CLICK_EVENT, adHocDataViewList.length);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adHocDataViewList]);
-
-  useEffect(() => {
     if (!dataView.isPersisted()) {
       setAdHocDataViewList((prev) => {
         const existing = prev.find((prevDataView) => prevDataView.id === dataView.id);
         return existing ? prev : [...prev, dataView];
       });
+      trackUiMetric?.(METRIC_TYPE.CLICK, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
-  }, [dataView]);
+  }, [dataView, trackUiMetric]);
 
   /**
    * Takes care of checking data view id references in filters
