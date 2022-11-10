@@ -29,7 +29,7 @@ export TEST_ES_URL=http://elastic:changeme@localhost:9200
 export TEST_ES_DISABLE_STARTUP=true
 export KIBANA_BASE_URL=http://localhost:5620
 
-for ((i=1;i<=5;i++)); do
+for ((i=1;i<=15;i++)); do
   echo "--- 🔎 Start es"
 
   cd "$KIBANA_DIR"
