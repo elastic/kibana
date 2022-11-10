@@ -175,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
       await createIndex(indexName);
       await createAlias(indexName, aliasName);
       await createComponentTemplate(componentTemplateName);
-      await createIndexTemplate(indexTemplateName, [`${dataStreamName}*`], [componentTemplateName]);
+      await createIndexTemplate(indexTemplateName, [dataStreamName], [componentTemplateName]);
       await createDataStream(dataStreamName);
       await createLegacyTemplate(legacyTemplateName);
     });
