@@ -22,12 +22,17 @@ import {
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
 
-const ALERT_CONTEXT_CONTAINER = 'container' as const;
-const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator' as const;
-const ALERT_CONTEXT_CLOUD = 'cloud' as const;
-const ALERT_CONTEXT_HOST = 'host' as const;
-const ALERT_CONTEXT_LABELS = 'labels' as const;
-const ALERT_CONTEXT_TAGS = 'tags' as const;
+const ALERT_CONTEXT_CONTAINER = 'container';
+const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator';
+const ALERT_CONTEXT_CLOUD = 'cloud';
+const ALERT_CONTEXT_HOST = 'host';
+const ALERT_CONTEXT_LABELS = 'labels';
+const ALERT_CONTEXT_TAGS = 'tags';
+
+const HOST_NAME = 'host.name';
+const HOST_HOSTNAME = 'host.hostname';
+const HOST_ID = 'host.id';
+const CONTAINER_ID = 'container.id';
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -149,11 +154,6 @@ export const getAlertDetailsUrl = (
   spaceId: string,
   alertUuid: string | null
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
-
-const HOST_NAME = 'host.name';
-const HOST_HOSTNAME = 'host.hostname';
-const HOST_ID = 'host.id';
-const CONTAINER_ID = 'container.id';
 
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const NUMBER_OF_DOCUMENTS = 10;
