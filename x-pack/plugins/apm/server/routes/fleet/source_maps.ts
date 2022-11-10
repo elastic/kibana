@@ -56,7 +56,7 @@ export async function listArtifacts({
   const apmArtifactClient = getApmArtifactClient(fleetPluginStart);
   const fleetArtifactsResponse = await apmArtifactClient.listArtifacts({
     kuery: 'type: sourcemap',
-    perPage: 50,
+    perPage: 20,
     page: 1,
     sortOrder: 'desc',
     sortField: 'created',
