@@ -6,34 +6,35 @@
  */
 
 import type {
-  From,
   RiskScore,
+  RuleInterval,
+  RuleIntervalFrom,
   Severity,
   Threat,
   ThreatSubtechnique,
   ThreatTechnique,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import type {
-  Description,
-  FalsePositives,
-  Index,
-  Interval,
-  Name,
-  Note,
-  Query,
-  References,
-  Tags,
-} from '../../common/detection_engine/schemas/common';
 
-export const getQuery = (): Query => {
+import type {
+  IndexPatternArray,
+  InvestigationGuide,
+  RuleDescription,
+  RuleFalsePositiveArray,
+  RuleQuery,
+  RuleName,
+  RuleReferenceArray,
+  RuleTagArray,
+} from '../../common/detection_engine/rule_schema';
+
+export const getQuery = (): RuleQuery => {
   return 'host.name: *';
 };
 
-export const getRuleName = (): Name => {
+export const getRuleName = (): RuleName => {
   return 'Test Rule';
 };
 
-export const getDescription = (): Description => {
+export const getDescription = (): RuleDescription => {
   return 'The rule description';
 };
 
@@ -45,19 +46,19 @@ export const getRiskScore = (): RiskScore => {
   return 17;
 };
 
-export const getTags = (): Tags => {
+export const getTags = (): RuleTagArray => {
   return ['test', 'newRule'];
 };
 
-export const getReferenceUrls = (): References => {
+export const getReferenceUrls = (): RuleReferenceArray => {
   return ['http://example.com/', 'https://example.com/'];
 };
 
-export const getFalsePositives = (): FalsePositives => {
+export const getFalsePositives = (): RuleFalsePositiveArray => {
   return ['False1', 'False2'];
 };
 
-export const getNote = (): Note => {
+export const getInvestigationGuide = (): InvestigationGuide => {
   return '# test markdown';
 };
 
@@ -88,15 +89,15 @@ export const getThreatSubtechnique = (): ThreatSubtechnique => {
   };
 };
 
-export const getInterval = (): Interval => {
+export const getInterval = (): RuleInterval => {
   return '5m';
 };
 
-export const getFrom = (): From => {
+export const getFrom = (): RuleIntervalFrom => {
   return '50000h';
 };
 
-export const getDefaultIndexPatterns = (): Index => {
+export const getDefaultIndexPatterns = (): IndexPatternArray => {
   return [
     'apm-*-transaction*',
     'auditbeat-*',

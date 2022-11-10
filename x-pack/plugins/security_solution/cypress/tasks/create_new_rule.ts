@@ -6,7 +6,7 @@
  */
 
 import type {
-  From,
+  RuleIntervalFrom,
   Threat,
   ThreatSubtechnique,
   ThreatTechnique,
@@ -120,7 +120,7 @@ import {
   getDescription,
   getFalsePositives,
   getFrom,
-  getNote,
+  getInvestigationGuide,
   getReferenceUrls,
   getRiskScore,
   getRuleName,
@@ -174,7 +174,7 @@ export const expandAdvancedSettings = () => {
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 };
 
-export const fillNote = (note: string = getNote()) => {
+export const fillNote = (note: string = getInvestigationGuide()) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(note, { force: true });
 };
 
@@ -370,7 +370,7 @@ export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRu
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 };
 
-export const fillFrom = (from: From = getFrom()) => {
+export const fillFrom = (from: RuleIntervalFrom = getFrom()) => {
   const value = from.slice(0, from.length - 1);
   const type = from.slice(from.length - 1);
   cy.get(LOOK_BACK_INTERVAL).type('{selectAll}').type(value);
