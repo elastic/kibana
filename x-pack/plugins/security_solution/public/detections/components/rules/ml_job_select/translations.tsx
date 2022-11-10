@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export default function loadTests({ loadTestFile }) {
-  describe('Settings Endpoints', () => {
-    loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./update'));
-  });
-}
+import { i18n } from '@kbn/i18n';
+
+export const CREATE_CUSTOM_JOB_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlSelectJob.createCustomJobButtonTitle',
+  {
+    defaultMessage: 'Create custom job',
+  }
+);
