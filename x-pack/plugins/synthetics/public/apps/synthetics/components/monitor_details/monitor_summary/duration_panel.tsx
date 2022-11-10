@@ -9,8 +9,8 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
-
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface DurationPanelProps {
   from: string;
@@ -23,7 +23,13 @@ export const DurationPanel = (props: DurationPanelProps) => {
       observability: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
+  const selectedLocation = useSelectedLocation();
+
   const monitorId = useMonitorQueryId();
+
+  if (!selectedLocation) {
+    return null;
+  }
 
   return (
     <ExploratoryViewEmbeddable
@@ -35,7 +41,10 @@ export const DurationPanel = (props: DurationPanelProps) => {
           name: 'Monitor duration',
           dataType: 'synthetics',
           selectedMetricField: 'monitor_duration',
-          reportDefinitions: { 'monitor.id': [monitorId] },
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation?.label],
+          },
         },
       ]}
     />

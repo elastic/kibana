@@ -15,6 +15,7 @@ import { Position } from '@elastic/charts/dist/utils/common';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Position }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
@@ -25,7 +26,13 @@ export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Positio
 
   const monitorId = useMonitorQueryId();
 
+  const selectedLocation = useSelectedLocation();
+
   const isBrowser = monitor?.type === 'browser';
+
+  if (!selectedLocation) {
+    return null;
+  }
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
@@ -50,7 +57,10 @@ export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Positio
         attributes={[
           {
             name: DURATION_BY_STEP_LABEL,
-            reportDefinitions: { 'monitor.id': [monitorId] },
+            reportDefinitions: {
+              'monitor.id': [monitorId],
+              'observer.geo.name': [selectedLocation?.label],
+            },
             selectedMetricField: isBrowser ? 'synthetics.step.duration.us' : 'monitor.duration.us',
             dataType: 'synthetics',
             time: { from: 'now-24h/h', to: 'now' },

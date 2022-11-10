@@ -10,6 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes, useTheme } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface DurationSparklinesProps {
   from: string;
@@ -26,6 +27,12 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
 
   const theme = useTheme();
 
+  const selectedLocation = useSelectedLocation();
+
+  if (!selectedLocation) {
+    return null;
+  }
+
   return (
     <>
       <ExploratoryViewEmbeddable
@@ -40,7 +47,10 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
             name: 'Monitor duration',
             dataType: 'synthetics',
             selectedMetricField: 'monitor.duration.us',
-            reportDefinitions: { config_id: [monitorId] },
+            reportDefinitions: {
+              config_id: [monitorId],
+              'observer.geo.name': [selectedLocation?.label],
+            },
             color: theme.eui.euiColorVis1,
           },
         ]}
