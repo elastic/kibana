@@ -7,11 +7,12 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
+import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import { chunk } from 'lodash';
+import { chunk, isString } from 'lodash';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RawRule } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
@@ -208,6 +209,7 @@ export class ExecutionHandler<
               kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
               alertParams: this.rule.params,
               actionParams: action.params,
+              ruleUrl: this.buildRuleUrl(),
             }),
           }),
         };
@@ -280,6 +282,23 @@ export class ExecutionHandler<
     }
 
     return executables;
+  }
+
+  private buildRuleUrl(): string | undefined {
+    if (!this.taskRunnerContext.kibanaBaseUrl || !isString(this.taskInstance.params.alertId)) {
+      return;
+    }
+
+    try {
+      const ruleUrl = new URL(
+        `${triggersActionsRoute}${getRuleDetailsRoute(this.taskInstance.params.alertId)}`,
+        this.taskRunnerContext.kibanaBaseUrl
+      );
+
+      return ruleUrl.toString();
+    } catch (error) {
+      return;
+    }
   }
 
   private async actionRunOrAddToBulk({

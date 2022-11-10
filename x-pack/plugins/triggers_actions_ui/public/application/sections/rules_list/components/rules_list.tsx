@@ -39,6 +39,7 @@ import {
   RuleExecutionStatusErrorReasons,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
 import {
   ActionType,
   Rule,
@@ -69,7 +70,7 @@ import {
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
@@ -870,7 +871,7 @@ export const RulesList = ({
         onPage={setPage}
         onRuleChanged={() => loadData()}
         onRuleClick={(rule) => {
-          const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : routeToRuleDetails;
+          const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : commonRuleDetailsRoute;
           history.push(detailsRoute.replace(`:ruleId`, rule.id));
         }}
         onRuleEditClick={(rule) => {
