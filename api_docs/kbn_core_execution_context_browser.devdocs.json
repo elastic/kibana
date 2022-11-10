@@ -31,6 +31,7 @@
         ],
         "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
@@ -44,11 +45,18 @@
             "signature": [
               "Observable",
               "<",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
@@ -61,11 +69,18 @@
             ],
             "signature": [
               "(c$: ",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               ") => void"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-browser",
@@ -75,10 +90,17 @@
                 "label": "c$",
                 "description": [],
                 "signature": [
-                  "KibanaExecutionContext"
+                  {
+                    "pluginId": "@kbn/core-execution-context-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                    "section": "def-common.KibanaExecutionContext",
+                    "text": "KibanaExecutionContext"
+                  }
                 ],
                 "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -95,10 +117,17 @@
             ],
             "signature": [
               "() => ",
-              "KibanaExecutionContext"
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              }
             ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -116,6 +145,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -134,6 +164,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -148,12 +179,25 @@
             ],
             "signature": [
               "(context?: ",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               " | undefined) => ",
-              "KibanaExecutionContext"
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              }
             ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-browser",
@@ -163,11 +207,18 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "KibanaExecutionContext",
+                  {
+                    "pluginId": "@kbn/core-execution-context-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                    "section": "def-common.KibanaExecutionContext",
+                    "text": "KibanaExecutionContext"
+                  },
                   " | undefined"
                 ],
                 "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -199,6 +250,7 @@
         ],
         "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -10,9 +10,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
@@ -419,13 +419,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               dataView={currentDataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={onAddFilter}
+              totalDocuments={overallStats.totalCount}
             />
           );
         }
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentDataView, searchQueryLanguage, searchString, onAddFilter]
+    [currentDataView, searchQueryLanguage, searchString, onAddFilter, overallStats.totalCount]
   );
 
   // Some actions open up fly-out or popup

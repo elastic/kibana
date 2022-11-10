@@ -13,3 +13,10 @@ export const ERROR_FETCH_ALERTS = i18n.translate(
     defaultMessage: `An error has occurred on alerts search`,
   }
 );
+
+export const ERROR_FETCH_BROWSER_FIELDS = i18n.translate(
+  'xpack.triggersActionsUI.components.alertTable.useFetchBrowserFieldsCapabilities.errorMessageText',
+  {
+    defaultMessage: 'An error has occurred loading browser fields',
+  }
+);

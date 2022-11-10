@@ -162,15 +162,16 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
     try {
       setIsSubmitting(true);
-      const { data, error } = isSingleAgent
-        ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
-            version,
-          })
-        : await sendPostBulkAgentUpgrade({
-            version,
-            agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            ...rolloutOptions,
-          });
+      const { error } =
+        isSingleAgent && !isScheduled
+          ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
+              version,
+            })
+          : await sendPostBulkAgentUpgrade({
+              version,
+              agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
+              ...rolloutOptions,
+            });
       if (error) {
         if (error?.statusCode === 400) {
           setErrors(error?.message);
@@ -178,44 +179,13 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         throw error;
       }
 
-      const counts = Object.entries(data || {}).reduce(
-        (acc, [agentId, result]) => {
-          ++acc.total;
-          ++acc[result.success ? 'success' : 'error'];
-          return acc;
-        },
-        {
-          total: 0,
-          success: 0,
-          error: 0,
-        }
-      );
       setIsSubmitting(false);
 
-      if (isSingleAgent && counts.success === counts.total) {
-        notifications.toasts.addSuccess(
-          i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
-            defaultMessage: 'Upgrading {count} agent',
-            values: { count: 1 },
-          })
-        );
-      } else if (counts.error === counts.total) {
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.fleet.upgradeAgents.bulkResultAllErrorsNotificationTitle', {
-            defaultMessage:
-              'Error upgrading {count, plural, one {agent} other {{count} agents} =true {all selected agents}}',
-            values: { count: isAllAgents || agentCount },
-          })
-        );
-      } else {
-        notifications.toasts.addWarning({
-          text: i18n.translate('xpack.fleet.upgradeAgents.bulkResultErrorResultsSummary', {
-            defaultMessage:
-              '{count} {count, plural, one {agent was} other {agents were}} not successful',
-            values: { count: counts.error },
-          }),
-        });
-      }
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.fleet.upgradeAgents.successNotificationTitle', {
+          defaultMessage: 'Upgrading agent(s)',
+        })
+      );
       onClose();
     } catch (error) {
       setIsSubmitting(false);

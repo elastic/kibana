@@ -42,12 +42,3 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
   response:
     response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });
-
-export const prepareEcsFieldsToValidate = (ecsMapping: Array<{ id: string }>): string[] =>
-  ecsMapping
-    ?.map((_: unknown, index: number) => [
-      `ecs_mapping[${index}].result.value`,
-      `ecs_mapping[${index}].key`,
-    ])
-    .join(',')
-    .split(',');

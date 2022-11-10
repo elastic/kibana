@@ -18,6 +18,7 @@ const prDeployments = deployments.filter((deployment: any) =>
 const deploymentsToPurge = [];
 
 const NOW = new Date().getTime() / 1000;
+const DAY_IN_SECONDS = 60 * 60 * 24;
 
 for (const deployment of prDeployments) {
   try {
@@ -37,12 +38,12 @@ for (const deployment of prDeployments) {
       )
     ) {
       console.log(
-        `Pull Request #${prNumber} no longer has the a cloud deployment label, will delete associated deployment`
+        `Pull Request #${prNumber} no longer has a cloud deployment label, will delete associated deployment`
       );
       deploymentsToPurge.push(deployment);
-    } else if (lastCommitTimestamp < NOW - 60 * 60 * 24 * 7) {
+    } else if (lastCommitTimestamp < NOW - DAY_IN_SECONDS * 2) {
       console.log(
-        `Pull Request #${prNumber} has not been updated in more than 7 days, will delete associated deployment`
+        `Pull Request #${prNumber} has not been updated in more than 2 days, will delete associated deployment`
       );
       deploymentsToPurge.push(deployment);
     }

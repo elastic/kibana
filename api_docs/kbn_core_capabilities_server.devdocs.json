@@ -23,6 +23,7 @@
         ],
         "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-server",
@@ -46,6 +47,7 @@
             ],
             "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-capabilities-server",
@@ -65,6 +67,7 @@
                 ],
                 "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -92,6 +95,7 @@
             ],
             "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-capabilities-server",
@@ -111,6 +115,7 @@
                 ],
                 "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -130,6 +135,7 @@
         ],
         "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-server",
@@ -142,7 +148,13 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>, options?: ",
               {
                 "pluginId": "@kbn/core-capabilities-server",
@@ -152,11 +164,18 @@
                 "text": "ResolveCapabilitiesOptions"
               },
               " | undefined) => Promise<",
-              "Capabilities",
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              },
               ">"
             ],
             "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-capabilities-server",
@@ -166,11 +185,18 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -192,6 +218,7 @@
                 ],
                 "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -211,6 +238,7 @@
         ],
         "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-server",
@@ -222,7 +250,8 @@
               "\nIndicates if capability switchers are supposed to return a default set of capabilities."
             ],
             "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -241,11 +270,18 @@
         ],
         "signature": [
           "() => Partial<",
-          "Capabilities",
+          {
+            "pluginId": "@kbn/core-capabilities-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+            "section": "def-common.Capabilities",
+            "text": "Capabilities"
+          },
           ">"
         ],
         "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -261,17 +297,42 @@
         ],
         "signature": [
           "(request: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>, uiCapabilities: ",
-          "Capabilities",
+          {
+            "pluginId": "@kbn/core-capabilities-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+            "section": "def-common.Capabilities",
+            "text": "Capabilities"
+          },
           ", useDefaultCapabilities: boolean) => ",
-          "MaybePromise",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.MaybePromise",
+            "text": "MaybePromise"
+          },
           "<Partial<",
-          "Capabilities",
+          {
+            "pluginId": "@kbn/core-capabilities-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+            "section": "def-common.Capabilities",
+            "text": "Capabilities"
+          },
           ">>"
         ],
         "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -282,11 +343,18 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-capabilities-server",
@@ -296,10 +364,17 @@
             "label": "uiCapabilities",
             "description": [],
             "signature": [
-              "Capabilities"
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              }
             ],
             "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-capabilities-server",
@@ -309,7 +384,8 @@
             "label": "useDefaultCapabilities",
             "description": [],
             "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

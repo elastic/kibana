@@ -7,125 +7,89 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { useDeleteCases, UseDeleteCase } from './use_delete_cases';
+import { useDeleteCases } from './use_delete_cases';
 import * as api from './api';
+import { useToasts } from '../common/lib/kibana';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
+import { casesQueriesKeys } from './constants';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useDeleteCases', () => {
   const abortCtrl = new AbortController();
-  const deleteObj = [
-    { id: '1', title: 'case 1' },
-    { id: '2', title: 'case 2' },
-    { id: '3', title: 'case 3' },
-  ];
-  const deleteArr = ['1', '2', '3'];
-  it('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isDisplayConfirmDeleteModal: false,
-        isLoading: false,
-        isError: false,
-        isDeleted: false,
-        dispatchResetIsDeleted: result.current.dispatchResetIsDeleted,
-        handleOnDeleteConfirm: result.current.handleOnDeleteConfirm,
-        handleToggleModal: result.current.handleToggleModal,
-      });
-    });
+  const addSuccess = jest.fn();
+  const addError = jest.fn();
+
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+
+  let appMockRender: AppMockRenderer;
+
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
   });
 
-  it('calls deleteCases with correct arguments', async () => {
-    const spyOnDeleteCases = jest.spyOn(api, 'deleteCases');
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
-
-      result.current.handleOnDeleteConfirm(deleteObj);
-      await waitForNextUpdate();
-      expect(spyOnDeleteCases).toBeCalledWith(deleteArr, abortCtrl.signal);
+  it('calls the api when invoked with the correct parameters', async () => {
+    const spy = jest.spyOn(api, 'deleteCases');
+    const { waitForNextUpdate, result } = renderHook(() => useDeleteCases(), {
+      wrapper: appMockRender.AppWrapper,
     });
+
+    act(() => {
+      result.current.mutate({ caseIds: ['1', '2'], successToasterTitle: 'Success title' });
+    });
+
+    await waitForNextUpdate();
+
+    expect(spy).toHaveBeenCalledWith(['1', '2'], abortCtrl.signal);
   });
 
-  it('deletes cases', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
-      result.current.handleToggleModal();
-      result.current.handleOnDeleteConfirm(deleteObj);
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isDisplayConfirmDeleteModal: false,
-        isLoading: false,
-        isError: false,
-        isDeleted: true,
-        dispatchResetIsDeleted: result.current.dispatchResetIsDeleted,
-        handleOnDeleteConfirm: result.current.handleOnDeleteConfirm,
-        handleToggleModal: result.current.handleToggleModal,
-      });
+  it('invalidates the queries correctly', async () => {
+    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+    const { waitForNextUpdate, result } = renderHook(() => useDeleteCases(), {
+      wrapper: appMockRender.AppWrapper,
     });
+
+    act(() => {
+      result.current.mutate({ caseIds: ['1', '2'], successToasterTitle: 'Success title' });
+    });
+
+    await waitForNextUpdate();
+
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
   });
 
-  it('resets is deleting', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
-      result.current.handleToggleModal();
-      result.current.handleOnDeleteConfirm(deleteObj);
-      await waitForNextUpdate();
-      expect(result.current.isDeleted).toBeTruthy();
-      result.current.handleToggleModal();
-      result.current.dispatchResetIsDeleted();
-      expect(result.current.isDeleted).toBeFalsy();
+  it('shows a success toaster', async () => {
+    const { waitForNextUpdate, result } = renderHook(() => useDeleteCases(), {
+      wrapper: appMockRender.AppWrapper,
     });
+
+    act(() => {
+      result.current.mutate({ caseIds: ['1', '2'], successToasterTitle: 'Success title' });
+    });
+
+    await waitForNextUpdate();
+
+    expect(addSuccess).toHaveBeenCalledWith('Success title');
   });
 
-  it('set isLoading to true when deleting cases', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
-      result.current.handleToggleModal();
-      result.current.handleOnDeleteConfirm(deleteObj);
-      expect(result.current.isLoading).toBe(true);
-    });
-  });
+  it('shows a toast error when the api return an error', async () => {
+    jest.spyOn(api, 'deleteCases').mockRejectedValue(new Error('useDeleteCases: Test error'));
 
-  it('unhappy path', async () => {
-    const spyOnDeleteCases = jest.spyOn(api, 'deleteCases');
-    spyOnDeleteCases.mockImplementation(() => {
-      throw new Error('Something went wrong');
+    const { waitForNextUpdate, result } = renderHook(() => useDeleteCases(), {
+      wrapper: appMockRender.AppWrapper,
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteCase>(() =>
-        useDeleteCases()
-      );
-      await waitForNextUpdate();
-      result.current.handleToggleModal();
-      result.current.handleOnDeleteConfirm(deleteObj);
-
-      expect(result.current).toEqual({
-        isDisplayConfirmDeleteModal: false,
-        isLoading: false,
-        isError: true,
-        isDeleted: false,
-        dispatchResetIsDeleted: result.current.dispatchResetIsDeleted,
-        handleOnDeleteConfirm: result.current.handleOnDeleteConfirm,
-        handleToggleModal: result.current.handleToggleModal,
-      });
+    act(() => {
+      result.current.mutate({ caseIds: ['1', '2'], successToasterTitle: 'Success title' });
     });
+
+    await waitForNextUpdate();
+
+    expect(addError).toHaveBeenCalled();
   });
 });

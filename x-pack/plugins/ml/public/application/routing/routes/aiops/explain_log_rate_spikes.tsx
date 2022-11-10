@@ -35,7 +35,11 @@ export const explainLogRateSpikesRouteFactory = (
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp(
+      'AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES',
+      navigateToPath,
+      basePath
+    ),
     {
       text: i18n.translate('xpack.ml.aiopsBreadcrumbs.explainLogRateSpikesLabel', {
         defaultMessage: 'Explain log rate spikes',

@@ -273,6 +273,33 @@ describe('AuthenticationService', () => {
         expect(authenticate).toHaveBeenCalledWith(mockRequest);
       });
 
+      it('sets authenticated state correctly with user profile id', async () => {
+        const mockRequest = httpServerMock.createKibanaRequest();
+        const mockResponse = httpServerMock.createLifecycleResponseFactory();
+        const mockUser = mockAuthenticatedUser();
+        const mockAuthHeaders = { authorization: 'Basic xxx' };
+        const mockAuthResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
+
+        authenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(
+            { ...mockUser, profile_uid: 'USER_PROFILE_ID' },
+            {
+              authHeaders: mockAuthHeaders,
+              authResponseHeaders: mockAuthResponseHeaders,
+            }
+          )
+        );
+
+        await authHandler(mockRequest, mockResponse, mockAuthToolkit);
+
+        expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
+        expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith({
+          state: { ...mockUser, profile_uid: 'USER_PROFILE_ID' },
+          requestHeaders: mockAuthHeaders,
+          responseHeaders: mockAuthResponseHeaders,
+        });
+      });
+
       it('redirects user if redirection is requested by the authenticator preserving authentication response headers if any', async () => {
         const mockResponse = httpServerMock.createLifecycleResponseFactory();
         authenticate.mockResolvedValue(

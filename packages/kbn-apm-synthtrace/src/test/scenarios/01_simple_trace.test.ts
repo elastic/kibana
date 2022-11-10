@@ -16,7 +16,11 @@ describe('simple trace', () => {
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {
-    const javaService = apm.service('opbeans-java', 'production', 'java');
+    const javaService = apm.service({
+      name: 'opbeans-java',
+      environment: 'production',
+      agentName: 'java',
+    });
     const javaInstance = javaService.instance('instance-1').containerId('instance-1');
 
     const range = timerange(
@@ -29,13 +33,13 @@ describe('simple trace', () => {
       .rate(1)
       .generator((timestamp) =>
         javaInstance
-          .transaction('GET /api/product/list')
+          .transaction({ transactionName: 'GET /api/product/list' })
           .duration(1000)
           .success()
           .timestamp(timestamp)
           .children(
             javaInstance
-              .span('GET apm-*/_search', 'db', 'elasticsearch')
+              .span({ spanName: 'GET apm-*/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
               .success()
               .duration(900)
               .timestamp(timestamp + 50)
@@ -80,6 +84,7 @@ describe('simple trace', () => {
       'service.environment': 'production',
       'service.name': 'opbeans-java',
       'service.node.name': 'instance-1',
+      'timestamp.us': 1609459200000000,
       'trace.id': '00000000000000000000000000000241',
       'transaction.duration.us': 1000000,
       'transaction.id': '0000000000000240',
@@ -109,6 +114,7 @@ describe('simple trace', () => {
       'span.name': 'GET apm-*/_search',
       'span.subtype': 'elasticsearch',
       'span.type': 'db',
+      'timestamp.us': 1609459200050000,
       'trace.id': '00000000000000000000000000000301',
       'transaction.id': '0000000000000300',
     });

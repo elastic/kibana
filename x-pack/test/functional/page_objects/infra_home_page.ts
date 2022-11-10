@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import testSubjSelector from '@kbn/test-subj-selector';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 

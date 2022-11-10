@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiCode,
   EuiCodeBlock,
   EuiLink,
   EuiTableHeaderCell,
@@ -47,22 +48,24 @@ export const markdownRenderers: TransformOptions['components'] = {
       {children}
     </EuiLink>
   ),
-  // @ts-expect-error update types
-  code: ({ language, value }) => {
-    let parsedLang = language;
+  code: ({ className, children, inline }) => {
+    let parsedLang = /language-(\w+)/.exec(className || '')?.[1] ?? '';
 
     // Some integrations export code block content that includes language tags that have since
     // been removed or deprecated in `prism.js`, the upstream depedency that handles syntax highlighting
     // in EuiCodeBlock components
-    const languageOverride = CODE_LANGUAGE_OVERRIDES[language];
+    const languageOverride = parsedLang ? CODE_LANGUAGE_OVERRIDES[parsedLang] : undefined;
 
     if (languageOverride) {
       parsedLang = languageOverride;
     }
 
+    if (inline) {
+      return <EuiCode>{children}</EuiCode>;
+    }
     return (
       <EuiCodeBlock language={parsedLang} isCopyable>
-        {value}
+        {children}
       </EuiCodeBlock>
     );
   },

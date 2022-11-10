@@ -7,6 +7,7 @@
 
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
@@ -27,21 +28,25 @@ import {
   commonUpdateVisLayerType,
   getLensCustomVisualizationMigrations,
   getLensFilterMigrations,
+  commonEnrichAnnotationLayer,
   getLensDataViewMigrations,
   commonMigrateMetricIds,
+  commonMigratePartitionChartGroups,
+  commonMigrateIndexPatternDatasource,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
   LensDocShape713,
   LensDocShape715,
   LensDocShape810,
-  LensDocShape840,
+  LensDocShape850,
   LensDocShapePre712,
   VisState716,
   VisState810,
-  VisState840,
+  VisState850,
   VisStatePre715,
   VisStatePre830,
+  XYVisState850,
 } from '../migrations/types';
 import { extract, inject } from '../../common/embeddable_factory';
 
@@ -133,8 +138,29 @@ export const makeLensEmbeddableFactory =
                 } as unknown as SerializableRecord;
               },
               '8.5.0': (state) => {
-                const lensState = state as unknown as { attributes: LensDocShape840<VisState840> };
-                const migratedLensState = commonMigrateMetricIds(lensState.attributes);
+                const lensState = state as unknown as {
+                  attributes: LensDocShape850<VisState850>;
+                };
+
+                let migratedLensState = commonMigrateMetricIds(lensState.attributes);
+                migratedLensState = commonEnrichAnnotationLayer(
+                  migratedLensState as LensDocShape850<XYVisState850>
+                );
+                migratedLensState = commonMigratePartitionChartGroups(
+                  migratedLensState as LensDocShape850<{
+                    shape: string;
+                    layers: Array<{ groups?: string[] }>;
+                  }>
+                );
+                return {
+                  ...lensState,
+                  attributes: migratedLensState,
+                } as unknown as SerializableRecord;
+              },
+              '8.6.0': (state) => {
+                const lensState = state as unknown as SavedObject<LensDocShape850<VisState850>>;
+
+                const migratedLensState = commonMigrateIndexPatternDatasource(lensState.attributes);
                 return {
                   ...lensState,
                   attributes: migratedLensState,

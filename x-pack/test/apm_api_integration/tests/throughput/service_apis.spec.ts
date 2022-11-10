@@ -110,10 +110,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_DEV_RATE = 20;
       before(async () => {
         const serviceGoProdInstance = apm
-          .service(serviceName, 'production', 'go')
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
         const serviceGoDevInstance = apm
-          .service(serviceName, 'development', 'go')
+          .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
 
         await synthtraceEsClient.index([
@@ -122,7 +122,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction('GET /api/product/list')
+                .transaction({ transactionName: 'GET /api/product/list' })
                 .duration(1000)
                 .timestamp(timestamp)
             ),
@@ -131,7 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_DEV_RATE)
             .generator((timestamp) =>
               serviceGoDevInstance
-                .transaction('GET /api/product/:id')
+                .transaction({ transactionName: 'GET /api/product/:id' })
                 .duration(1000)
                 .timestamp(timestamp)
             ),

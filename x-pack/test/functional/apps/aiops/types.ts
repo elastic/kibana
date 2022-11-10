@@ -13,6 +13,7 @@ export interface TestData {
   brushTargetTimestamp: number;
   expected: {
     totalDocCountFormatted: string;
+    analysisGroupsTable: Array<{ group: string; docCount: string }>;
     analysisTable: Array<{
       fieldName: string;
       fieldValue: string;

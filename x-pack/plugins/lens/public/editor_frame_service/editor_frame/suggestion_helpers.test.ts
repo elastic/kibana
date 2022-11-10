@@ -13,12 +13,7 @@ import {
   DatasourceMock,
   createMockFramePublicAPI,
 } from '../../mocks';
-import {
-  TableSuggestion,
-  DatasourceSuggestion,
-  Visualization,
-  VisualizeEditorContext,
-} from '../../types';
+import { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
 import { DatasourceStates, DataViewsState } from '../../state_management';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
@@ -213,7 +208,7 @@ describe('suggestion helpers', () => {
       datasourceMap,
       datasourceStates,
       visualizeTriggerFieldContext: {
-        indexPatternId: '1',
+        dataViewSpec: { id: '1' },
         fieldName: 'test',
       },
       dataViews,
@@ -243,7 +238,7 @@ describe('suggestion helpers', () => {
       mock3: createMockDatasource('a'),
     };
     const visualizeTriggerField = {
-      indexPatternId: '1',
+      dataViewSpec: { id: '1' },
       fieldName: 'test',
     };
 
@@ -273,176 +268,6 @@ describe('suggestion helpers', () => {
     );
     expect(
       multiDatasourceMap.mock3.getDatasourceSuggestionsForVisualizeField
-    ).not.toHaveBeenCalled();
-  });
-
-  it('should call getDatasourceSuggestionsForVisualizeCharts when a visualizeChartTrigger is passed', () => {
-    datasourceMap.mock.getDatasourceSuggestionsForVisualizeCharts.mockReturnValue([
-      generateSuggestion(),
-    ]);
-
-    const visualizationMap = {
-      testVis: createMockVisualization(),
-    };
-    const triggerContext = {
-      layers: [
-        {
-          indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-          xFieldName: 'order_date',
-          xMode: 'date_histogram',
-          chartType: 'area',
-          axisPosition: 'left',
-          palette: {
-            type: 'palette',
-            name: 'default',
-          },
-          metrics: [
-            {
-              agg: 'count',
-              isFullReference: false,
-              fieldName: 'document',
-              params: {},
-              color: '#68BC00',
-            },
-          ],
-          timeInterval: 'auto',
-        },
-      ],
-      type: 'lnsXY',
-      configuration: {
-        fill: '0.5',
-        legend: {
-          isVisible: true,
-          position: 'right',
-          shouldTruncate: true,
-          maxLines: true,
-        },
-        gridLinesVisibility: {
-          x: true,
-          yLeft: true,
-          yRight: true,
-        },
-        extents: {
-          yLeftExtent: {
-            mode: 'full',
-          },
-          yRightExtent: {
-            mode: 'full',
-          },
-        },
-      },
-      isVisualizeAction: true,
-    } as VisualizeEditorContext;
-
-    getSuggestions({
-      visualizationMap,
-      activeVisualization: visualizationMap.testVis,
-      visualizationState: {},
-      datasourceMap,
-      datasourceStates,
-      visualizeTriggerFieldContext: triggerContext,
-      dataViews,
-    });
-    expect(datasourceMap.mock.getDatasourceSuggestionsForVisualizeCharts).toHaveBeenCalledWith(
-      datasourceStates.mock.state,
-      triggerContext.layers,
-      dataViews.indexPatterns
-    );
-  });
-
-  it('should call getDatasourceSuggestionsForVisualizeCharts from all datasources with a state', () => {
-    const multiDatasourceStates = {
-      mock: {
-        isLoading: false,
-        state: {},
-      },
-      mock2: {
-        isLoading: false,
-        state: {},
-      },
-    };
-    const multiDatasourceMap = {
-      mock: createMockDatasource('a'),
-      mock2: createMockDatasource('a'),
-      mock3: createMockDatasource('a'),
-    };
-    const triggerContext = {
-      layers: [
-        {
-          indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-          xFieldName: 'order_date',
-          xMode: 'date_histogram',
-          chartType: 'area',
-          axisPosition: 'left',
-          palette: {
-            type: 'palette',
-            name: 'default',
-          },
-          metrics: [
-            {
-              agg: 'count',
-              isFullReference: false,
-              fieldName: 'document',
-              params: {},
-              color: '#68BC00',
-            },
-          ],
-          timeInterval: 'auto',
-        },
-      ],
-      type: 'lnsXY',
-      configuration: {
-        fill: '0.5',
-        legend: {
-          isVisible: true,
-          position: 'right',
-          shouldTruncate: true,
-          maxLines: true,
-        },
-        gridLinesVisibility: {
-          x: true,
-          yLeft: true,
-          yRight: true,
-        },
-        extents: {
-          yLeftExtent: {
-            mode: 'full',
-          },
-          yRightExtent: {
-            mode: 'full',
-          },
-        },
-      },
-      isVisualizeAction: true,
-    } as VisualizeEditorContext;
-
-    const visualizationMap = {
-      testVis: createMockVisualization(),
-    };
-    getSuggestions({
-      visualizationMap,
-      activeVisualization: visualizationMap.testVis,
-      visualizationState: {},
-      datasourceMap: multiDatasourceMap,
-      datasourceStates: multiDatasourceStates,
-      visualizeTriggerFieldContext: triggerContext,
-      dataViews,
-    });
-    expect(multiDatasourceMap.mock.getDatasourceSuggestionsForVisualizeCharts).toHaveBeenCalledWith(
-      datasourceStates.mock.state,
-      triggerContext.layers,
-      dataViews.indexPatterns
-    );
-
-    expect(
-      multiDatasourceMap.mock2.getDatasourceSuggestionsForVisualizeCharts
-    ).toHaveBeenCalledWith(
-      multiDatasourceStates.mock2.state,
-      triggerContext.layers,
-      dataViews.indexPatterns
-    );
-    expect(
-      multiDatasourceMap.mock3.getDatasourceSuggestionsForVisualizeCharts
     ).not.toHaveBeenCalled();
   });
 
@@ -745,6 +570,8 @@ describe('suggestion helpers', () => {
             getSourceId: jest.fn(),
             getFilters: jest.fn(),
             getMaxPossibleNumValues: jest.fn(),
+            isTextBasedLanguage: jest.fn(() => false),
+            hasDefaultTimeField: jest.fn(() => true),
           },
         },
         { activeId: 'testVis', state: {} },
@@ -782,6 +609,8 @@ describe('suggestion helpers', () => {
           getSourceId: jest.fn(),
           getFilters: jest.fn(),
           getMaxPossibleNumValues: jest.fn(),
+          isTextBasedLanguage: jest.fn(() => false),
+          hasDefaultTimeField: jest.fn(() => true),
         },
       };
       defaultParams[3] = {
@@ -844,6 +673,8 @@ describe('suggestion helpers', () => {
           getSourceId: jest.fn(),
           getFilters: jest.fn(),
           getMaxPossibleNumValues: jest.fn(),
+          isTextBasedLanguage: jest.fn(() => false),
+          hasDefaultTimeField: jest.fn(() => true),
         },
       };
       mockVisualization1.getSuggestions.mockReturnValue([]);

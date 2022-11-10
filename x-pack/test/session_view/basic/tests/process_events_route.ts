@@ -6,13 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  PROCESS_EVENTS_ROUTE,
-  PROCESS_EVENTS_PER_PAGE,
-} from '@kbn/session-view-plugin/common/constants';
+import { PROCESS_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { User } from '../../../rule_registry/common/lib/authentication/types';
 
+const MOCK_PAGE_SIZE = 400;
 const ALERTS_IN_FIRST_PAGE = 8;
 
 // Only events where event.action IN fork, exec, end
@@ -48,25 +46,29 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/session_view/process_events');
       await esArchiver.load('x-pack/test/functional/es_archives/session_view/alerts');
+      await esArchiver.load('x-pack/test/functional/es_archives/session_view/io_events');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/session_view/process_events');
       await esArchiver.unload('x-pack/test/functional/es_archives/session_view/alerts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
     });
 
     it(`${PROCESS_EVENTS_ROUTE} returns a page of process events`, async () => {
       const response = await supertest.get(PROCESS_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
+        pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
       });
       expect(response.status).to.be(200);
       expect(response.body.total).to.be(MOCK_TOTAL_PROCESS_EVENTS);
-      expect(response.body.events.length).to.be(PROCESS_EVENTS_PER_PAGE + ALERTS_IN_FIRST_PAGE);
+      expect(response.body.events.length).to.be(MOCK_PAGE_SIZE + ALERTS_IN_FIRST_PAGE);
     });
 
     it(`${PROCESS_EVENTS_ROUTE} returns a page of process events (w alerts) (paging forward)`, async () => {
       const response = await supertest.get(PROCESS_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
+        pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
         cursor: '2022-05-10T20:39:23.6817084Z', // paginating from the timestamp of the first alert.
       });
       expect(response.status).to.be(200);
@@ -81,6 +83,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
     it(`${PROCESS_EVENTS_ROUTE} returns a page of process events (w alerts) (paging backwards)`, async () => {
       const response = await supertest.get(PROCESS_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
+        pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
         cursor: '2022-05-10T20:39:23.6817084Z',
         forward: false,
       });
@@ -110,6 +113,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .query({
               sessionEntityId: MOCK_SESSION_ENTITY_ID,
+              pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
               cursor: '2022-05-10T20:39:23.6817084Z', // paginating from the timestamp of the first alert.
             });
           expect(response.status).to.be(200);

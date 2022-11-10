@@ -238,9 +238,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns the correct fields', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
+        // all fields that contain the UserRT definition must be included here (aka created_by, closed_by, and updated_by)
+        // see https://github.com/elastic/kibana/issues/139503
         const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
-          'title',
-          ['title', 'description'],
+          ['title', 'created_by', 'closed_by', 'updated_by'],
+          ['title', 'description', 'created_by', 'closed_by', 'updated_by'],
         ];
 
         for (const fields of queryFields) {
@@ -366,6 +368,11 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           });
+
+          // There is potential for the alert index to not be refreshed by the time the second comment is created
+          // which could attempt to update the alert status again and will encounter a conflict so this will
+          // ensure that the index is up to date before we try to update the next alert status
+          await es.indices.refresh({ index: defaultSignalsIndex });
         }
 
         const patchedCase = await createComment({

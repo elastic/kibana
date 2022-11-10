@@ -15,10 +15,7 @@ import { EnterpriseSearchContentPageTemplate } from '../layout';
 
 export const NotFound: React.FC<PageTemplateProps> = ({ pageChrome = [] }) => {
   return (
-    <EnterpriseSearchContentPageTemplate
-      pageChrome={[...pageChrome, '404']}
-      template="centeredContent"
-    >
+    <EnterpriseSearchContentPageTemplate pageChrome={[...pageChrome, '404']} customPageSections>
       <SendEnterpriseSearchTelemetry action="error" metric="not_found" />
       <NotFoundPrompt productSupportUrl={ENTERPRISE_SEARCH_CONTENT_PLUGIN.SUPPORT_URL} />
     </EnterpriseSearchContentPageTemplate>

@@ -43,11 +43,52 @@ export type {
   RulesListVisibleColumns,
 } from './types';
 
+export type {
+  ActionConnectorFieldsProps,
+  ActionParamsProps,
+  ActionTypeModel,
+  GenericValidationResult,
+} from './types';
+
+export {
+  AlertHistoryDefaultIndexName,
+  ALERT_HISTORY_PREFIX,
+  AlertHistoryDocumentTemplate,
+  AlertHistoryEsIndexConnectorId,
+  ActionConnectorMode,
+} from './types';
+
+export { useConnectorContext } from './application/context/use_connector_context';
+
 export {
   ActionForm,
   CreateConnectorFlyout,
   EditConnectorFlyout,
 } from './application/sections/action_connector_form';
+
+export type { ConnectorFormSchema } from './application/sections/action_connector_form';
+
+export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
+
+export {
+  ButtonGroupField,
+  HiddenField,
+  JsonEditorWithMessageVariables,
+  JsonFieldWrapper,
+  MustacheTextFieldWrapper,
+  PasswordField,
+  SimpleConnectorForm,
+  TextAreaWithMessageVariables,
+  TextFieldWithMessageVariables,
+  SectionLoading,
+} from './application/components';
+
+export {
+  AlertProvidedActionVariables,
+  hasMustacheTokens,
+  templateActionVariable,
+  updateActionConnector,
+} from './application/lib';
 
 export type { ActionGroupWithCondition } from './application/sections';
 
@@ -57,6 +98,7 @@ export function plugin(context: PluginInitializerContext) {
   return new Plugin(context);
 }
 
+export { useKibana } from './common';
 export type { AggregationType, Comparator } from './common';
 
 export {
@@ -74,6 +116,8 @@ export {
   getTimeFieldOptions,
   GroupByExpression,
   COMPARATORS,
+  connectorDeprecatedMessage,
+  deprecatedMessage,
 } from './common';
 
 export type {
@@ -100,7 +144,7 @@ export { loadRule } from './application/lib/rule_api/get_rule';
 export { loadAllActions } from './application/lib/action_connector_api';
 export { suspendedComponentWithProps } from './application/lib/suspended_component_with_props';
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
-export type { TIME_UNITS } from './application/constants';
+export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from './application/app';
 

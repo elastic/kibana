@@ -25,7 +25,6 @@ import { IExecutionErrors } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
-import { Rule } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -61,14 +60,16 @@ const updateButtonProps = {
 const MAX_RESULTS = 1000;
 
 export type RuleErrorLogProps = {
-  rule: Rule;
+  ruleId: string;
   runId?: string;
   refreshToken?: number;
+  spaceId?: string;
+  logFromDifferentSpace?: boolean;
   requestRefresh?: () => Promise<void>;
 } & Pick<RuleApis, 'loadActionErrorLog'>;
 
 export const RuleErrorLog = (props: RuleErrorLogProps) => {
-  const { rule, runId, loadActionErrorLog, refreshToken } = props;
+  const { ruleId, runId, loadActionErrorLog, refreshToken, spaceId, logFromDifferentSpace } = props;
 
   const { uiSettings, notifications } = useKibana().services;
 
@@ -131,7 +132,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     setIsLoading(true);
     try {
       const result = await loadActionErrorLog({
-        id: rule.id,
+        id: ruleId,
         runId,
         message: searchText,
         dateStart: getParsedDate(dateStart),
@@ -139,6 +140,8 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
         page: pagination.pageIndex,
         perPage: pagination.pageSize,
         sort: formattedSort,
+        namespace: spaceId,
+        withAuth: logFromDifferentSpace,
       });
       setLogs(result.errors);
       setPagination({

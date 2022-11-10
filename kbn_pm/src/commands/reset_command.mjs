@@ -40,8 +40,10 @@ export const command = {
       ...(await findPluginCleanPaths(log)),
     ]);
 
-    const quiet = args.getBooleanValue('quiet');
-    Bazel.expungeCache(log, { quiet });
-    Bazel.cleanDiskCache(log);
+    if (await Bazel.isInstalled(log)) {
+      const quiet = args.getBooleanValue('quiet');
+      await Bazel.expungeCache(log, { quiet });
+      await Bazel.cleanDiskCache(log);
+    }
   },
 };

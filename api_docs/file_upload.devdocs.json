@@ -13,6 +13,7 @@
         "description": [],
         "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fileUpload",
@@ -22,7 +23,8 @@
             "label": "isIndexingTriggered",
             "description": [],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -36,6 +38,7 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fileUpload",
@@ -49,6 +52,7 @@
                 ],
                 "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -63,6 +67,7 @@
                 ],
                 "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -77,6 +82,7 @@
                 ],
                 "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -94,6 +100,7 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -109,6 +116,7 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -124,6 +132,7 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -147,6 +156,7 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fileUpload",
@@ -166,6 +176,7 @@
                 ],
                 "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -183,6 +194,7 @@
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -198,6 +210,7 @@
         "description": [],
         "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fileUpload",
@@ -207,7 +220,8 @@
             "label": "indexPatternId",
             "description": [],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -217,7 +231,8 @@
             "label": "geoFieldName",
             "description": [],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -227,13 +242,26 @@
             "label": "geoFieldType",
             "description": [],
             "signature": [
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".GEO_POINT | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".GEO_SHAPE"
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -243,7 +271,8 @@
             "label": "docCount",
             "description": [],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -257,6 +286,7 @@
         "description": [],
         "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fileUpload",
@@ -266,7 +296,8 @@
             "label": "indexName",
             "description": [],
             "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -279,7 +310,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -293,6 +325,7 @@
             ],
             "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fileUpload",
@@ -306,6 +339,7 @@
                 ],
                 "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -320,6 +354,7 @@
                 ],
                 "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -337,6 +372,7 @@
             ],
             "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -352,6 +388,7 @@
             ],
             "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -374,6 +411,7 @@
       ],
       "path": "x-pack/plugins/file_upload/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -399,6 +437,7 @@
         "description": [],
         "path": "x-pack/plugins/file_upload/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fileUpload",
@@ -417,7 +456,8 @@
               }
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -431,7 +471,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -445,6 +486,7 @@
         "description": [],
         "path": "x-pack/plugins/file_upload/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fileUpload",
@@ -457,7 +499,8 @@
               "{ statusCode: number; error: string; message: string; attributes?: ErrorAttribute | undefined; }"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -467,7 +510,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -481,6 +525,7 @@
         "description": [],
         "path": "x-pack/plugins/file_upload/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fileUpload",
@@ -490,7 +535,8 @@
             "label": "charset",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -500,7 +546,8 @@
             "label": "has_header_row",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -510,7 +557,8 @@
             "label": "has_byte_order_marker",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -520,7 +568,8 @@
             "label": "format",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -533,7 +582,8 @@
               "{ [fieldName: string]: { count: number; cardinality: number; top_hits: { count: number; value: any; }[]; mean_value?: number | undefined; median_value?: number | undefined; max_value?: number | undefined; min_value?: number | undefined; earliest?: string | undefined; latest?: string | undefined; }; }"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -543,7 +593,8 @@
             "label": "sample_start",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -553,7 +604,8 @@
             "label": "num_messages_analyzed",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -564,75 +616,274 @@
             "description": [],
             "signature": [
               "{ properties: { [fieldName: string]: { type: ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".STRING | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".TEXT | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".MATCH_ONLY_TEXT | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".KEYWORD | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".VERSION | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".BOOLEAN | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".OBJECT | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".DATE | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".DATE_NANOS | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".DATE_RANGE | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".GEO_POINT | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".GEO_SHAPE | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".FLOAT | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".HALF_FLOAT | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".SCALED_FLOAT | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".DOUBLE | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".INTEGER | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".LONG | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".SHORT | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".UNSIGNED_LONG | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".AGGREGATE_METRIC_DOUBLE | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".FLOAT_RANGE | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".DOUBLE_RANGE | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".INTEGER_RANGE | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".LONG_RANGE | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".NESTED | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".BYTE | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".IP | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".IP_RANGE | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".ATTACHMENT | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".TOKEN_COUNT | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".MURMUR3 | ",
-              "ES_FIELD_TYPES",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
               ".HISTOGRAM; format?: string | undefined; }; }; }"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -642,7 +893,8 @@
             "label": "quote",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -652,7 +904,8 @@
             "label": "delimiter",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -662,7 +915,8 @@
             "label": "need_client_timezone",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -672,7 +926,8 @@
             "label": "num_lines_analyzed",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -685,7 +940,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -698,7 +954,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -711,7 +968,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -724,7 +982,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -737,7 +996,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -750,7 +1010,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -763,7 +1024,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -776,7 +1038,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -789,7 +1052,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -803,6 +1067,7 @@
         "description": [],
         "path": "x-pack/plugins/file_upload/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fileUpload",
@@ -812,7 +1077,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -825,7 +1091,8 @@
               "any[]"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -839,6 +1106,7 @@
         "description": [],
         "path": "x-pack/plugins/file_upload/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fileUpload",
@@ -851,7 +1119,8 @@
               "[key: string]:  string | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -865,6 +1134,7 @@
         "description": [],
         "path": "x-pack/plugins/file_upload/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fileUpload",
@@ -877,7 +1147,8 @@
               "{ created_by: string; } | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "fileUpload",
@@ -890,7 +1161,8 @@
               "{ [key: string]: any; }"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -36,10 +36,17 @@
             "text": "InternalOverlayBannersStart"
           },
           " extends ",
-          "OverlayBannersStart"
+          {
+            "pluginId": "@kbn/core-overlays-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+            "section": "def-common.OverlayBannersStart",
+            "text": "OverlayBannersStart"
+          }
         ],
         "path": "packages/core/overlays/core-overlays-browser-internal/src/banners/banners_service.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       }

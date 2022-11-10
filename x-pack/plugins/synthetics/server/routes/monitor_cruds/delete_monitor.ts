@@ -19,16 +19,13 @@ import {
 } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import {
-  syntheticsMonitorType,
-  syntheticsMonitor,
-} from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
   sendTelemetryEvents,
   formatTelemetryDeleteEvent,
 } from '../telemetry/monitor_upgrade_sender';
-import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
+import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
 export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -87,8 +84,11 @@ export const deleteMonitor = async ({
   syntheticsMonitorClient: SyntheticsMonitorClient;
   request: KibanaRequest;
 }) => {
-  const { logger, telemetry, kibanaVersion, encryptedSavedObjects } = server;
+  const { logger, telemetry, stackVersion, encryptedSavedObjects } = server;
+  const spaceId = server.spaces.spacesService.getSpaceId(request);
+
   const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
+  let normalizedMonitor;
   try {
     const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
       syntheticsMonitorType,
@@ -97,33 +97,38 @@ export const deleteMonitor = async ({
 
     const monitor =
       await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-        syntheticsMonitor.name,
+        syntheticsMonitorType,
         monitorId,
         {
           namespace: encryptedMonitor.namespaces?.[0],
         }
       );
 
-    const normalizedMonitor = normalizeSecrets(monitor);
+    normalizedMonitor = normalizeSecrets(monitor);
 
-    const errors = await syntheticsMonitorClient.deleteMonitor(
-      {
-        ...normalizedMonitor.attributes,
-        id:
-          (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
-          monitorId,
-      },
+    const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
+      [
+        {
+          ...normalizedMonitor.attributes,
+          id:
+            (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
+            monitorId,
+        },
+      ],
       request,
-      savedObjectsClient
+      savedObjectsClient,
+      spaceId
     );
-    await savedObjectsClient.delete(syntheticsMonitorType, monitorId);
+    const deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
+
+    const [errors] = await Promise.all([deleteSyncPromise, deletePromise]);
 
     sendTelemetryEvents(
       logger,
       telemetry,
       formatTelemetryDeleteEvent(
         monitor,
-        kibanaVersion,
+        stackVersion,
         new Date().toISOString(),
         Boolean((normalizedMonitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
         errors
@@ -132,6 +137,36 @@ export const deleteMonitor = async ({
 
     return errors;
   } catch (e) {
+    if (normalizedMonitor) {
+      await restoreDeletedMonitor({
+        monitorId,
+        normalizedMonitor: formatSecrets({
+          ...normalizedMonitor.attributes,
+        }),
+        savedObjectsClient,
+      });
+    }
     throw e;
+  }
+};
+
+const restoreDeletedMonitor = async ({
+  monitorId,
+  savedObjectsClient,
+  normalizedMonitor,
+}: {
+  monitorId: string;
+  normalizedMonitor: SyntheticsMonitorWithSecrets;
+  savedObjectsClient: SavedObjectsClientContract;
+}) => {
+  try {
+    await savedObjectsClient.get<EncryptedSyntheticsMonitor>(syntheticsMonitorType, monitorId);
+  } catch (e) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      await savedObjectsClient.create(syntheticsMonitorType, normalizedMonitor, {
+        id: monitorId,
+        overwrite: true,
+      });
+    }
   }
 };

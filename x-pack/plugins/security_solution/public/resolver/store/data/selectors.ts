@@ -46,6 +46,10 @@ export function isTreeLoading(state: DataState): boolean {
   return state.tree?.pendingRequestParameters !== undefined;
 }
 
+export function detectedBounds(state: DataState) {
+  return state.detectedBounds;
+}
+
 /**
  * If a request was made and it threw an error or returned a failure response code.
  */

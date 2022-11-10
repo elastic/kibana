@@ -43,13 +43,12 @@ import {
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
-import { ActionTypeRegistry } from './action_type_registry';
+import { ActionTypeRegistry, MAX_ATTEMPTS } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
   createEphemeralExecutionEnqueuerFunction,
   createBulkExecutionEnqueuerFunction,
 } from './create_execute_function';
-import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
 import {
   ActionExecutor,
@@ -92,16 +91,21 @@ import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
-import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import {
   isConnectorDeprecated,
   ConnectorWithOptionalDeprecation,
-} from './lib/is_conector_deprecated';
+} from './lib/is_connector_deprecated';
 import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
+import {
+  type IUnsecuredActionsClient,
+  UnsecuredActionsClient,
+} from './unsecured_actions_client/unsecured_actions_client';
+import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 
 export interface PluginSetupContract {
   registerType<
@@ -121,6 +125,7 @@ export interface PluginSetupContract {
   isPreconfiguredConnector(connectorId: string): boolean;
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
 }
 
 export interface PluginStartContract {
@@ -132,11 +137,15 @@ export interface PluginStartContract {
     options?: { notifyUsage: boolean }
   ): boolean;
 
+  getAllTypes: ActionTypeRegistry['getAllTypes'];
+
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
 
   preconfiguredActions: PreConfiguredAction[];
+
+  getUnsecuredActionsClient(): IUnsecuredActionsClient;
 
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
@@ -274,13 +283,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       this.preconfiguredActions
     );
 
-    registerBuiltInActionTypes({
-      logger: this.logger,
-      actionTypeRegistry,
-      actionsConfigUtils,
-      publicBaseUrl: core.http.basePath.publicBaseUrl,
-    });
-
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
       registerActionsUsageCollector(
@@ -358,6 +360,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
         ensureSufficientLicense(actionType);
+        actionType.maxAttempts = actionType.maxAttempts ?? MAX_ATTEMPTS;
         actionTypeRegistry.register(actionType);
       },
       registerSubActionConnectorType: <
@@ -375,6 +378,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       getSubActionConnectorClass: () => SubActionConnector,
       getCaseConnectorClass: () => CaseConnector,
+      getActionsHealth: () => {
+        return {
+          hasPermanentEncryptionKey: plugins.encryptedSavedObjects.canEncrypt,
+        };
+      },
     };
   }
 
@@ -450,6 +458,21 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           unsecuredSavedObjectsClient,
           encryptedSavedObjectsClient,
           logger: this.logger,
+        }),
+      });
+    };
+
+    const getUnsecuredActionsClient = () => {
+      const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      ]);
+
+      return new UnsecuredActionsClient({
+        internalSavedObjectsRepository,
+        executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          connectorTypeRegistry: actionTypeRegistry!,
+          preconfiguredConnectors: preconfiguredActions,
         }),
       });
     };
@@ -530,10 +553,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ) => {
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
+      getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
+      getUnsecuredActionsClient,
       preconfiguredActions,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(actionTypeRegistry, ...args),

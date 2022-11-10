@@ -32,6 +32,7 @@ import type {
   ChromeRecentlyAccessedHistoryItem,
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
+  ChromeGlobalHelpExtensionMenuLink,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
 import { LoadingIndicator } from '../loading_indicator';
@@ -60,11 +61,13 @@ export interface HeaderProps {
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Observable<boolean>;
+  globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
   navControlsLeft$: Observable<readonly ChromeNavControl[]>;
   navControlsCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
+  navControlsExtension$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -79,6 +82,7 @@ export function Header({
   onIsLockedUpdate,
   homeHref,
   breadcrumbsAppendExtension$,
+  globalHelpExtensionMenuLinks$,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -135,9 +139,16 @@ export function Header({
               {
                 items: [
                   <EuiHideFor sizes={['m', 'l', 'xl']}>
-                    <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                    <>
+                      <HeaderNavControls navControls$={observables.navControlsExtension$} />
+                      <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                    </>
+                  </EuiHideFor>,
+                  <EuiHideFor sizes={['xs', 's']}>
+                    <HeaderNavControls navControls$={observables.navControlsExtension$} />
                   </EuiHideFor>,
                   <HeaderHelpMenu
+                    globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}
                     kibanaDocLink={kibanaDocLink}

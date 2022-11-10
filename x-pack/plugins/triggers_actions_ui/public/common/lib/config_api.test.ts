@@ -17,7 +17,7 @@ describe('triggersActionsUiConfig', () => {
     expect(http.get.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/triggers_actions_ui/_config",
+          "/internal/triggers_actions_ui/_config",
         ],
       ]
     `);

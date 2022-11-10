@@ -7,13 +7,13 @@
 
 import { defineGetCspStatusRoute, INDEX_TIMEOUT_IN_MINUTES } from './status';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import {
   AgentClient,
   AgentPolicyServiceInterface,
   AgentService,
   PackageClient,
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
   PackageService,
 } from '@kbn/fleet-plugin/server';
 import {
@@ -58,7 +58,7 @@ const mockLatestCspPackageInfo: RegistryPackage = {
 describe('CspSetupStatus route', () => {
   const router = httpServiceMock.createRouter();
   let mockContext: ReturnType<typeof createCspRequestHandlerContextMock>;
-  let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+  let mockPackagePolicyService: jest.Mocked<PackagePolicyClient>;
   let mockAgentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
   let mockAgentService: jest.Mocked<AgentService>;
   let mockAgentClient: jest.Mocked<AgentClient>;
@@ -184,7 +184,8 @@ describe('CspSetupStatus route', () => {
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
-      total: 1,
+      online: 1,
+      updating: 0,
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
@@ -269,7 +270,8 @@ describe('CspSetupStatus route', () => {
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
-      total: 0,
+      online: 0,
+      updating: 0,
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
@@ -323,7 +325,8 @@ describe('CspSetupStatus route', () => {
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
-      total: 1,
+      online: 1,
+      updating: 0,
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
@@ -379,7 +382,8 @@ describe('CspSetupStatus route', () => {
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
-      total: 1,
+      online: 1,
+      updating: 0,
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act

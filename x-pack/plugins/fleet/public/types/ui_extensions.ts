@@ -8,6 +8,8 @@
 import type { EuiStepProps } from '@elastic/eui';
 import type { ComponentType, LazyExoticComponent } from 'react';
 
+import type { FleetServerAgentComponentUnit } from '../../common/types/models/agent';
+
 import type { Agent, NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
 
 /** Register a Fleet UI extension */
@@ -60,6 +62,17 @@ export interface PackagePolicyResponseExtensionComponentProps {
   onShowNeedsAttentionBadge?: (val: boolean) => void;
 }
 
+/**
+ * UI Component Extension is used on the pages displaying the ability to see
+ * a generic endpoint errors list
+ */
+export type PackageGenericErrorsListComponent = ComponentType<PackageGenericErrorsListProps>;
+
+export interface PackageGenericErrorsListProps {
+  /** A list of errors from a package */
+  packageErrors: FleetServerAgentComponentUnit[];
+}
+
 /** Extension point registration contract for Integration Policy Edit views */
 export interface PackagePolicyEditExtension {
   package: string;
@@ -72,6 +85,12 @@ export interface PackagePolicyResponseExtension {
   package: string;
   view: 'package-policy-response';
   Component: LazyExoticComponent<PackagePolicyResponseExtensionComponent>;
+}
+
+export interface PackageGenericErrorsListExtension {
+  package: string;
+  view: 'package-generic-errors-list';
+  Component: LazyExoticComponent<PackageGenericErrorsListComponent>;
 }
 
 /** Extension point registration contract for Integration Policy Edit tabs views */
@@ -111,6 +130,19 @@ export interface PackagePolicyCreateExtension {
   package: string;
   view: 'package-policy-create';
   Component: LazyExoticComponent<PackagePolicyCreateExtensionComponent>;
+}
+
+/**
+ * UI Component Extension is used on the pages displaying the ability to Create a multi step
+ * Integration Policy
+ */
+export type PackagePolicyCreateMultiStepExtensionComponent = ComponentType<{}>;
+
+/** Extension point registration contract for Integration Policy Create views in multi-step onboarding */
+export interface PackagePolicyCreateMultiStepExtension {
+  package: string;
+  view: 'package-policy-create-multi-step';
+  Component: LazyExoticComponent<PackagePolicyCreateMultiStepExtensionComponent>;
 }
 
 /**
@@ -158,4 +190,6 @@ export type UIExtensionPoint =
   | PackageCustomExtension
   | PackagePolicyCreateExtension
   | PackageAssetsExtension
-  | AgentEnrollmentFlyoutFinalStepExtension;
+  | PackageGenericErrorsListExtension
+  | AgentEnrollmentFlyoutFinalStepExtension
+  | PackagePolicyCreateMultiStepExtension;

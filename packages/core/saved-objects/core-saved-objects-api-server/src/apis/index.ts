@@ -72,3 +72,9 @@ export type {
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from './update_objects_spaces';
+export type {
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteStatus,
+  SavedObjectsBulkDeleteResponse,
+} from './bulk_delete';

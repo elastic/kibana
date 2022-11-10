@@ -11,31 +11,46 @@ import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { generateId } from '../../id_generator';
+import {
+  isDraggedDataViewField,
+  isOperationFromCompatibleGroup,
+  isOperationFromTheSameGroup,
+  renewIDs,
+} from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
-import { DimensionEditor } from './xy_config_panel/dimension_editor';
-import { LayerHeader } from './xy_config_panel/layer_header';
-import type { Visualization, AccessorConfig, FramePublicAPI } from '../../types';
 import {
-  State,
+  DataDimensionEditorDataSectionExtra,
+  DimensionEditor,
+} from './xy_config_panel/dimension_editor';
+import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
+import type { Visualization, AccessorConfig, FramePublicAPI, Suggestion } from '../../types';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
+import {
+  type State,
+  type XYLayerConfig,
+  type XYDataLayerConfig,
+  type SeriesType,
+  type PersistedState,
   visualizationTypes,
-  XYSuggestion,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  YConfig,
-  YAxisMode,
-  SeriesType,
 } from './types';
-import { layerTypes } from '../../../common';
-import { isHorizontalChart } from './state_helpers';
+import {
+  extractReferences,
+  injectReferences,
+  isHorizontalChart,
+  validateColumn,
+} from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
@@ -55,6 +70,7 @@ import {
 import {
   checkXAccessorCompatibility,
   defaultSeriesType,
+  getAnnotationsLayers,
   getAxisName,
   getDataLayers,
   getDescription,
@@ -72,13 +88,15 @@ import {
   validateLayersForDimension,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
-import { XYState } from './types';
+import type { XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
+import { createAnnotationActions } from './annotations/actions';
 
+const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
   core,
   storage,
@@ -88,6 +106,7 @@ export const getXyVisualization = ({
   useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
+  unifiedSearch,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
@@ -97,8 +116,9 @@ export const getXyVisualization = ({
   fieldFormats: FieldFormatsStart;
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
-}): Visualization<State> => ({
-  id: 'lnsXY',
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+}): Visualization<State, PersistedState> => ({
+  id: XY_ID,
   visualizationTypes,
   getVisualizationTypeId(state) {
     const type = getVisualizationType(state);
@@ -110,7 +130,7 @@ export const getXyVisualization = ({
   },
 
   getRemoveOperation(state, layerId) {
-    const dataLayers = getLayersByType(state, layerTypes.DATA).map((l) => l.layerId);
+    const dataLayers = getLayersByType(state, LayerTypes.DATA).map((l) => l.layerId);
     return dataLayers.includes(layerId) && dataLayers.length === 1 ? 'clear' : 'remove';
   },
 
@@ -121,7 +141,29 @@ export const getXyVisualization = ({
     };
   },
 
-  appendLayer(state, layerId, layerType) {
+  cloneLayer(state, layerId, newLayerId, clonedIDsMap) {
+    const toCopyLayer = state.layers.find((l) => l.layerId === layerId);
+    if (toCopyLayer) {
+      if (isAnnotationsLayer(toCopyLayer)) {
+        toCopyLayer.annotations.forEach((i) => clonedIDsMap.set(i.id, generateId()));
+      }
+      const newLayer = renewIDs(toCopyLayer, [...clonedIDsMap.keys()], (id: string) =>
+        clonedIDsMap.get(id)
+      );
+      newLayer.layerId = newLayerId;
+      return {
+        ...state,
+        layers: [...state.layers, newLayer],
+      };
+    }
+    return state;
+  },
+
+  appendLayer(state, layerId, layerType, indexPatternId) {
+    if (layerType === 'metricTrendline') {
+      return state;
+    }
+
     const firstUsedSeriesType = getDataLayers(state.layers)?.[0]?.seriesType;
     return {
       ...state,
@@ -131,12 +173,13 @@ export const getXyVisualization = ({
           seriesType: firstUsedSeriesType || state.preferredSeriesType,
           layerId,
           layerType,
+          indexPatternId,
         }),
       ],
     };
   },
 
-  clearLayer(state, layerId) {
+  clearLayer(state, layerId, indexPatternId) {
     return {
       ...state,
       layers: state.layers.map((l) =>
@@ -145,9 +188,18 @@ export const getXyVisualization = ({
           : newLayerState({
               seriesType: state.preferredSeriesType,
               layerId,
+              indexPatternId,
             })
       ),
     };
+  },
+
+  getPersistableState(state) {
+    return extractReferences(state);
+  },
+
+  fromPersistableState(state, references, initialContext) {
+    return injectReferences(state, references, initialContext);
   },
 
   getDescription,
@@ -178,7 +230,7 @@ export const getXyVisualization = ({
             position: Position.Top,
             seriesType: defaultSeriesType,
             showGridlines: false,
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           },
         ],
       }
@@ -197,6 +249,16 @@ export const getXyVisualization = ({
     ];
   },
 
+  getSupportedActionsForLayer(layerId, state, setState) {
+    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[layerIndex];
+    const actions = [];
+    if (isAnnotationsLayer(layer)) {
+      actions.push(...createAnnotationActions({ state, layerIndex, layer, setState }));
+    }
+    return actions;
+  },
+
   onIndexPatternChange(state, indexPatternId, layerId) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
@@ -204,7 +266,7 @@ export const getXyVisualization = ({
       return state;
     }
     const newLayers = [...state.layers];
-    newLayers[layerIndex] = { ...layer };
+    newLayers[layerIndex] = { ...layer, indexPatternId };
     return {
       ...state,
       layers: newLayers,
@@ -237,10 +299,6 @@ export const getXyVisualization = ({
       paletteService,
       accessors: sortedAccessors,
     });
-
-    if (isReferenceLayer(layer)) {
-      return getReferenceConfiguration({ state, frame, layer, sortedAccessors });
-    }
 
     const dataLayer: XYDataLayerConfig = layer;
 
@@ -293,8 +351,9 @@ export const getXyVisualization = ({
           groupLabel: getAxisName('y', { isHorizontal }),
           accessors: mappedAccessors,
           filterOperations: isNumericDynamicMetric,
+          isMetricDimension: true,
           supportsMoreColumns: true,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsXY_yDimensionPanel',
           enableDimensionEditor: true,
         },
@@ -319,7 +378,8 @@ export const getXyVisualization = ({
           filterOperations: isBucketed,
           supportsMoreColumns: !dataLayer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
-          required: dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor,
+          requiredMinDimensionCount:
+            dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
           enableDimensionEditor: true,
         },
       ],
@@ -329,6 +389,39 @@ export const getXyVisualization = ({
   getMainPalette: (state) => {
     if (!state || state.layers.length === 0) return;
     return getFirstDataLayer(state.layers)?.palette;
+  },
+
+  getDropProps(dropProps) {
+    if (!dropProps.source) {
+      return;
+    }
+    const srcDataView = dropProps.source.indexPatternId;
+    const targetDataView = dropProps.target.indexPatternId;
+    if (!targetDataView || srcDataView !== targetDataView) {
+      return;
+    }
+
+    if (isDraggedDataViewField(dropProps.source)) {
+      if (dropProps.source.field.type === 'document') {
+        return;
+      }
+      return dropProps.target.isNewColumn
+        ? { dropTypes: ['field_add'] }
+        : { dropTypes: ['field_replace'] };
+    }
+
+    if (isOperationFromTheSameGroup(dropProps.source, dropProps.target)) {
+      return dropProps.target.isNewColumn
+        ? { dropTypes: ['duplicate_compatible'] }
+        : { dropTypes: ['reorder'] };
+    }
+    if (isOperationFromCompatibleGroup(dropProps.source, dropProps.target)) {
+      return {
+        dropTypes: dropProps.target.isNewColumn
+          ? ['move_compatible', 'duplicate_compatible']
+          : ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
+      };
+    }
   },
 
   onDrop(props) {
@@ -378,98 +471,16 @@ export const getXyVisualization = ({
     };
   },
 
-  updateLayersConfigurationFromContext({ prevState, layerId, context }) {
-    const { chartType, axisPosition, palette, metrics, collapseFn } = context;
-    const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
-    if (!foundLayer || !isDataLayer(foundLayer)) {
-      return prevState;
-    }
-    const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
-    const axisMode = axisPosition as YAxisMode;
-    const yConfig = metrics.map<YConfig>((metric, idx) => {
-      return {
-        color: metric.color,
-        forAccessor: metric.accessor ?? foundLayer.accessors[idx],
-        ...(axisMode && { axisMode }),
-        ...(isReferenceLine && { fill: chartType === 'area' ? 'below' : ('none' as FillStyle) }),
-      };
-    });
-    const newLayer = {
-      ...foundLayer,
-      ...(chartType && { seriesType: chartType as SeriesType }),
-      ...(palette && { palette }),
-      collapseFn,
-      yConfig,
-      layerType: isReferenceLine ? layerTypes.REFERENCELINE : layerTypes.DATA,
-    } as XYLayerConfig;
-
-    const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
-
-    return {
-      ...prevState,
-      layers: newLayers,
-    };
-  },
-
-  getVisualizationSuggestionFromContext({ suggestions, context }) {
-    const visualizationStateLayers = [];
-    let datasourceStateLayers = {};
-    const fillOpacity = context.configuration.fill ? Number(context.configuration.fill) : undefined;
-    for (let suggestionIdx = 0; suggestionIdx < suggestions.length; suggestionIdx++) {
-      const currentSuggestion = suggestions[suggestionIdx] as XYSuggestion;
-      const currentSuggestionsLayers = currentSuggestion.visualizationState.layers;
-      const contextLayer = context.layers.find(
-        (layer) => layer.layerId === Object.keys(currentSuggestion.datasourceState.layers)[0]
-      );
-      if (this.updateLayersConfigurationFromContext && contextLayer) {
-        const updatedSuggestionState = this.updateLayersConfigurationFromContext({
-          prevState: currentSuggestion.visualizationState as unknown as State,
-          layerId: currentSuggestionsLayers[0].layerId as string,
-          context: contextLayer,
-        });
-
-        visualizationStateLayers.push(...updatedSuggestionState.layers);
-        datasourceStateLayers = {
-          ...datasourceStateLayers,
-          ...currentSuggestion.datasourceState.layers,
-        };
-      }
-    }
-    let suggestion = suggestions[0] as XYSuggestion;
-    suggestion = {
-      ...suggestion,
-      datasourceState: {
-        ...suggestion.datasourceState,
-        layers: {
-          ...suggestion.datasourceState.layers,
-          ...datasourceStateLayers,
-        },
-      },
-      visualizationState: {
-        ...suggestion.visualizationState,
-        fillOpacity,
-        yRightExtent: context.configuration.extents?.yRightExtent,
-        yLeftExtent: context.configuration.extents?.yLeftExtent,
-        legend: context.configuration.legend,
-        gridlinesVisibilitySettings: context.configuration.gridLinesVisibility,
-        tickLabelsVisibilitySettings: context.configuration.tickLabelsVisibility,
-        axisTitlesVisibilitySettings: context.configuration.axisTitlesVisibility,
-        valuesInLegend: true,
-        valueLabels: context.configuration.valueLabels ? 'show' : 'hide',
-        layers: visualizationStateLayers,
-      },
-    };
-    return suggestion;
-  },
-
   removeDimension({ prevState, layerId, columnId, frame }) {
     const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
       return prevState;
     }
     if (isAnnotationsLayer(foundLayer)) {
-      const newLayer = { ...foundLayer };
-      newLayer.annotations = newLayer.annotations.filter(({ id }) => id !== columnId);
+      const newLayer = {
+        ...foundLayer,
+        annotations: foundLayer.annotations.filter(({ id }) => id !== columnId),
+      };
 
       const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
       return {
@@ -520,6 +531,24 @@ export const getXyVisualization = ({
     };
   },
 
+  renderLayerPanel(domElement, props) {
+    const { onChangeIndexPattern, ...otherProps } = props;
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <LayerHeaderContent
+            {...otherProps}
+            onChangeIndexPattern={(indexPatternId) => {
+              // TODO: should it trigger an action as in the datasource?
+              onChangeIndexPattern(indexPatternId);
+            }}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
   renderLayerHeader(domElement, props) {
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
@@ -560,7 +589,62 @@ export const getXyVisualization = ({
 
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>{dimensionEditor}</I18nProvider>
+        <I18nProvider>
+          <KibanaContextProvider
+            services={{
+              appName: 'lens',
+              storage,
+              uiSettings: core.uiSettings,
+              data,
+              fieldFormats,
+              savedObjects: core.savedObjects,
+              docLinks: core.docLinks,
+              http: core.http,
+              unifiedSearch,
+            }}
+          >
+            {dimensionEditor}
+          </KibanaContextProvider>
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
+  renderDimensionEditorDataExtra(domElement, props) {
+    const allProps = {
+      ...props,
+      datatableUtilities: data.datatableUtilities,
+      formatFactory: fieldFormats.deserialize,
+      paletteService,
+    };
+    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+    if (isReferenceLayer(layer)) {
+      return;
+    }
+    if (isAnnotationsLayer(layer)) {
+      return;
+    }
+
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <KibanaContextProvider
+            services={{
+              appName: 'lens',
+              storage,
+              uiSettings: core.uiSettings,
+              data,
+              fieldFormats,
+              savedObjects: core.savedObjects,
+              docLinks: core.docLinks,
+              http: core.http,
+              unifiedSearch,
+            }}
+          >
+            <DataDimensionEditorDataSectionExtra {...allProps} />
+          </KibanaContextProvider>
+        </I18nProvider>
       </KibanaThemeProvider>,
       domElement
     );
@@ -585,7 +669,53 @@ export const getXyVisualization = ({
       eventAnnotationService
     ),
 
-  getErrorMessages(state, datasourceLayers) {
+  validateColumn(state, frame, layerId, columnId, group) {
+    const { invalid, invalidMessages } = validateColumn(state, frame, layerId, columnId, group);
+    if (!invalid) {
+      return { invalid };
+    }
+    return { invalid, invalidMessage: invalidMessages![0] };
+  },
+
+  getErrorMessages(state, frame) {
+    const { datasourceLayers, dataViews } = frame || {};
+    const errors: Array<{
+      shortMessage: string;
+      longMessage: React.ReactNode;
+    }> = [];
+
+    const annotationLayers = getAnnotationsLayers(state.layers);
+
+    if (dataViews) {
+      annotationLayers.forEach((layer) => {
+        layer.annotations.forEach((annotation) => {
+          const validatedColumn = validateColumn(
+            state,
+            { dataViews },
+            layer.layerId,
+            annotation.id
+          );
+          if (validatedColumn?.invalid && validatedColumn.invalidMessages?.length) {
+            errors.push(
+              ...validatedColumn.invalidMessages.map((invalidMessage) => ({
+                shortMessage: invalidMessage,
+                longMessage: (
+                  <FormattedMessage
+                    id="xpack.lens.xyChart.annotationError"
+                    defaultMessage="Annotation {annotationName} has an error: {errorMessage}"
+                    values={{
+                      annotationName: annotation.label,
+                      errorMessage: invalidMessage,
+                    }}
+                  />
+                ),
+              }))
+            );
+          }
+        });
+      });
+    }
+
     // Data error handling below here
     const hasNoAccessors = ({ accessors }: XYDataLayerConfig) =>
       accessors == null || accessors.length === 0;
@@ -593,11 +723,6 @@ export const getXyVisualization = ({
     const dataLayers = getDataLayers(state.layers);
     const hasNoSplitAccessor = ({ splitAccessor, seriesType }: XYDataLayerConfig) =>
       seriesType.includes('percentage') && splitAccessor == null;
-
-    const errors: Array<{
-      shortMessage: string;
-      longMessage: React.ReactNode;
-    }> = [];
 
     // check if the layers in the state are compatible with this type of chart
     if (state && state.layers.length > 1) {
@@ -696,6 +821,14 @@ export const getXyVisualization = ({
   getUniqueLabels(state) {
     return getUniqueLabels(state.layers);
   },
+  getUsedDataView(state, layerId) {
+    return getAnnotationsLayers(state.layers).find((l) => l.layerId === layerId)?.indexPatternId;
+  },
+  getUsedDataViews(state) {
+    return (
+      state?.layers.filter(isAnnotationsLayer).map(({ indexPatternId }) => indexPatternId) ?? []
+    );
+  },
   renderDimensionTrigger({
     columnId,
     label,
@@ -721,6 +854,100 @@ export const getXyVisualization = ({
       );
     }
     return null;
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as Array<Suggestion<XYState, FormBasedPersistedState>>;
+    const suggestion: Suggestion<XYState, FormBasedPersistedState> = {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState?.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...(context.configuration as XYState),
+      },
+    };
+    return suggestion;
+  },
+
+  getVisualizationInfo(state: XYState) {
+    const isHorizontal = isHorizontalChart(state.layers);
+    const visualizationLayersInfo = state.layers.map((layer) => {
+      const dimensions = [];
+      let chartType: SeriesType | undefined;
+      let icon;
+      let label;
+      if (isDataLayer(layer)) {
+        chartType = layer.seriesType;
+        const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
+        icon = layerVisType?.icon;
+        label = layerVisType?.fullLabel || layerVisType?.label;
+        if (layer.xAccessor) {
+          dimensions.push({ name: getAxisName('x', { isHorizontal }), id: layer.xAccessor });
+        }
+        if (layer.accessors && layer.accessors.length) {
+          layer.accessors.forEach((accessor) => {
+            dimensions.push({ name: getAxisName('y', { isHorizontal }), id: accessor });
+          });
+        }
+        if (layer.splitAccessor) {
+          dimensions.push({
+            name: i18n.translate('xpack.lens.xyChart.splitSeries', {
+              defaultMessage: 'Breakdown',
+            }),
+            id: layer.splitAccessor,
+          });
+        }
+      }
+      if (isReferenceLayer(layer) && layer.accessors && layer.accessors.length) {
+        layer.accessors.forEach((accessor) => {
+          dimensions.push({
+            name: i18n.translate('xpack.lens.xyChart.layerReferenceLine', {
+              defaultMessage: 'Reference line',
+            }),
+            id: accessor,
+          });
+        });
+        label = i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
+          defaultMessage: 'Reference lines',
+        });
+        icon = IconChartBarReferenceLine;
+      }
+      if (isAnnotationsLayer(layer) && layer.annotations && layer.annotations.length) {
+        layer.annotations.forEach((annotation) => {
+          dimensions.push({
+            name: i18n.translate('xpack.lens.xyChart.layerAnnotation', {
+              defaultMessage: 'Annotation',
+            }),
+            id: annotation.id,
+          });
+        });
+        label = i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
+          defaultMessage: 'Annotations',
+        });
+        icon = IconChartBarAnnotations;
+      }
+
+      return {
+        layerId: layer.layerId,
+        layerType: layer.layerType,
+        chartType,
+        icon,
+        label,
+        dimensions,
+      };
+    });
+    return {
+      layers: visualizationLayersInfo,
+    };
   },
 });
 

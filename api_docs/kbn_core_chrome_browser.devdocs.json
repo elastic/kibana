@@ -29,6 +29,7 @@
         "description": [],
         "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -38,7 +39,8 @@
             "label": "text",
             "description": [],
             "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -48,7 +50,8 @@
             "label": "tooltip",
             "description": [],
             "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -62,7 +65,8 @@
               " | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -76,6 +80,7 @@
         "description": [],
         "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -86,10 +91,17 @@
             "description": [],
             "signature": [
               "(element: HTMLDivElement) => ",
-              "UnmountCallback"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.UnmountCallback",
+                "text": "UnmountCallback"
+              }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -102,8 +114,9 @@
                 "signature": [
                   "T"
                 ],
-                "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
-                "deprecated": false
+                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -121,6 +134,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -136,6 +150,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -151,6 +166,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -170,8 +186,53 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.ChromeGlobalHelpExtensionMenuLink",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeGlobalHelpExtensionMenuLink",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+            "text": "ChromeGlobalHelpExtensionMenuLink"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeHelpExtensionMenuCustomLink",
+            "text": "ChromeHelpExtensionMenuCustomLink"
+          }
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeGlobalHelpExtensionMenuLink.priority",
+            "type": "number",
+            "tags": [],
+            "label": "priority",
+            "description": [
+              "\nHighest priority items are listed at the top of the list of links."
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -185,6 +246,7 @@
         "description": [],
         "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -196,7 +258,8 @@
               "\nProvide your plugin's name to create a header for separation"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -218,7 +281,8 @@
               "[] | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -242,6 +306,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -255,6 +320,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -275,6 +341,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -309,6 +376,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -323,7 +391,8 @@
               "\"custom\""
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -335,7 +404,8 @@
               "\nURL of the link"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -350,7 +420,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -381,6 +452,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -395,7 +467,8 @@
               "\"discuss\""
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -407,7 +480,8 @@
               "\nURL to discuss page.\ni.e. `https://discuss.elastic.co/c/${appName}`"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -438,6 +512,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -452,7 +527,8 @@
               "\"documentation\""
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -464,7 +540,8 @@
               "\nURL to documentation page.\ni.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -495,6 +572,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -509,7 +587,8 @@
               "\"github\""
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -524,7 +603,8 @@
               "string[]"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -539,7 +619,8 @@
               "string | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -553,6 +634,7 @@
         "description": [],
         "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -566,6 +648,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -581,6 +664,7 @@
         "description": [],
         "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -593,7 +677,8 @@
               "number | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -604,10 +689,17 @@
             "description": [],
             "signature": [
               "(element: HTMLElement) => ",
-              "UnmountCallback"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.UnmountCallback",
+                "text": "UnmountCallback"
+              }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -620,8 +712,9 @@
                 "signature": [
                   "T"
                 ],
-                "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
-                "deprecated": false
+                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -639,6 +732,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -662,6 +756,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -681,6 +776,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -708,6 +804,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -727,6 +824,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -754,6 +852,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -773,6 +872,55 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
                 "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeNavControls.registerExtension",
+            "type": "Function",
+            "tags": [],
+            "label": "registerExtension",
+            "description": [
+              "Register an extension to be presented to the left of the top-right side of the chrome header."
+            ],
+            "signature": [
+              "(navControl: ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeNavControl",
+                "text": "ChromeNavControl"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-common.ChromeNavControls.registerExtension.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "navControl",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-common.ChromeNavControl",
+                    "text": "ChromeNavControl"
+                  }
+                ],
+                "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+                "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -790,6 +938,7 @@
         "description": [],
         "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -801,7 +950,8 @@
               "\nA unique identifier for looking up links."
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -813,7 +963,8 @@
               "\nThe title of the application."
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -825,11 +976,18 @@
               "\nThe category the app lives in"
             ],
             "signature": [
-              "AppCategory",
+              {
+                "pluginId": "@kbn/core-application-common",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationCommonPluginApi",
+                "section": "def-common.AppCategory",
+                "text": "AppCategory"
+              },
               " | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -841,7 +999,8 @@
               "\nThe base route used to open the root of an application."
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -853,7 +1012,8 @@
               "\nThe route used to open the default path and the deep links of an application."
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -868,7 +1028,8 @@
               "number | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -883,7 +1044,8 @@
               "string | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -898,7 +1060,8 @@
               "string | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -913,7 +1076,8 @@
               "string | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -925,7 +1089,8 @@
               "\nSettled state between `url`, `baseUrl`, and `active`"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -940,7 +1105,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -955,7 +1121,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -971,6 +1138,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -996,6 +1164,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1021,6 +1190,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1034,6 +1204,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1061,6 +1232,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1078,6 +1250,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1091,6 +1264,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1110,6 +1284,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1129,6 +1304,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1146,6 +1322,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -1161,6 +1338,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1176,6 +1354,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1192,6 +1371,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1208,6 +1388,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1235,6 +1416,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1262,6 +1444,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1277,6 +1460,7 @@
         "description": [],
         "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -1286,7 +1470,8 @@
             "label": "link",
             "description": [],
             "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -1296,7 +1481,8 @@
             "label": "label",
             "description": [],
             "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -1306,7 +1492,8 @@
             "label": "id",
             "description": [],
             "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1322,6 +1509,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -1342,7 +1530,8 @@
               }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -1363,7 +1552,8 @@
               }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -1384,7 +1574,8 @@
               }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -1405,7 +1596,8 @@
               }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -1423,6 +1615,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1440,6 +1633,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1453,6 +1647,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1482,6 +1677,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1507,6 +1703,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1527,6 +1724,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1550,6 +1748,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1569,6 +1768,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1583,6 +1783,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1612,6 +1813,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1637,6 +1839,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1657,6 +1860,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1686,6 +1890,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1711,6 +1916,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1732,7 +1938,84 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeStart.getGlobalHelpExtensionMenuLinks$",
+            "type": "Function",
+            "tags": [],
+            "label": "getGlobalHelpExtensionMenuLinks$",
+            "description": [
+              "\nGet the list of the registered global help extension menu links"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+                "text": "ChromeGlobalHelpExtensionMenuLink"
+              },
+              "[]>"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeStart.registerGlobalHelpExtensionMenuLink",
+            "type": "Function",
+            "tags": [],
+            "label": "registerGlobalHelpExtensionMenuLink",
+            "description": [
+              "\nAppend a global help extension menu link"
+            ],
+            "signature": [
+              "(globalHelpExtensionMenuLink: ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+                "text": "ChromeGlobalHelpExtensionMenuLink"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-common.ChromeStart.registerGlobalHelpExtensionMenuLink.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "globalHelpExtensionMenuLink",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+                    "text": "ChromeGlobalHelpExtensionMenuLink"
+                  }
+                ],
+                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -1744,7 +2027,7 @@
             "tags": [],
             "label": "getHelpExtension$",
             "description": [
-              "\nGet an observable of the current custom help conttent"
+              "\nGet an observable of the current custom help content"
             ],
             "signature": [
               "() => ",
@@ -1761,6 +2044,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1786,6 +2070,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1806,6 +2091,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1825,6 +2111,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1840,6 +2127,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1861,6 +2149,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1886,6 +2175,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1906,6 +2196,7 @@
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1927,6 +2218,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1942,6 +2234,7 @@
         "description": [],
         "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -1952,10 +2245,17 @@
             "description": [],
             "signature": [
               "(element: HTMLDivElement) => ",
-              "UnmountCallback"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.UnmountCallback",
+                "text": "UnmountCallback"
+              }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1968,8 +2268,9 @@
                 "signature": [
                   "T"
                 ],
-                "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
-                "deprecated": false
+                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1993,6 +2294,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2009,6 +2311,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2053,6 +2356,7 @@
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../common/mock/match_media';
-import {
-  AppMockRenderer,
-  createAppMockRenderer,
-  readCasesPermissions,
-  TestProviders,
-} from '../../common/mock';
-import { EditableTitle, EditableTitleProps } from './editable_title';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
+import type { EditableTitleProps } from './editable_title';
+import { EditableTitle } from './editable_title';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('EditableTitle', () => {
@@ -27,18 +23,16 @@ describe('EditableTitle', () => {
     isLoading: false,
   };
 
+  let appMock: AppMockRenderer;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    appMock = createAppMockRenderer();
   });
 
   it('renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper).toMatchSnapshot();
+    const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
+    expect(renderResult.getByText('Test title')).toBeInTheDocument();
   });
 
   it('does not show the edit icon when the user does not have edit permissions', () => {
@@ -196,9 +190,8 @@ describe('EditableTitle', () => {
     expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
   });
 
-  it('does not submit the title when the length is longer than 64 characters', () => {
-    const longTitle =
-      'This is a title that should not be saved as it is longer than 64 characters.';
+  it('does not submit the title when the length is longer than 160 characters', () => {
+    const longTitle = 'a'.repeat(161);
 
     const wrapper = mount(
       <TestProviders>
@@ -216,7 +209,7 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
     expect(wrapper.find('.euiFormErrorText').text()).toBe(
-      'The length of the title is too long. The maximum length is 64.'
+      'The length of the title is too long. The maximum length is 160.'
     );
 
     expect(submitTitle).not.toHaveBeenCalled();
@@ -226,8 +219,7 @@ describe('EditableTitle', () => {
   });
 
   it('does not show an error after a previous edit error was displayed', () => {
-    const longTitle =
-      'This is a title that should not be saved as it is longer than 64 characters.';
+    const longTitle = 'a'.repeat(161);
 
     const shortTitle = 'My title';
     const wrapper = mount(
@@ -247,7 +239,7 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
     expect(wrapper.find('.euiFormErrorText').text()).toBe(
-      'The length of the title is too long. The maximum length is 64.'
+      'The length of the title is too long. The maximum length is 160.'
     );
 
     // write a shorter one
@@ -269,12 +261,6 @@ describe('EditableTitle', () => {
   });
 
   describe('Badges', () => {
-    let appMock: AppMockRenderer;
-
-    beforeEach(() => {
-      appMock = createAppMockRenderer();
-    });
-
     it('does not render the badge if the release is ga', () => {
       const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
 

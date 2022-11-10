@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_exporter.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
@@ -34,11 +35,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ISavedObjectsExporter",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsExporter",
+                "text": "ISavedObjectsExporter"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_exporter.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -54,6 +62,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_importer.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
@@ -64,11 +73,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ISavedObjectsImporter",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsImporter",
+                "text": "ISavedObjectsImporter"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_importer.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

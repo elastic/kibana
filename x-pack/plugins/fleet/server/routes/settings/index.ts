@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { SETTINGS_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
 import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 import { settingsService, agentPolicyService, appContextService } from '../../services';
 import type { FleetAuthzRouter } from '../security';
 
@@ -30,7 +30,7 @@ export const getSettingsHandler: FleetRequestHandler = async (context, request, 
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -59,7 +59,7 @@ export const putSettingsHandler: FleetRequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 

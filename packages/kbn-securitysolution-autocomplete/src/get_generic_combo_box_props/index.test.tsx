@@ -67,7 +67,7 @@ describe('get_generic_combo_box_props', () => {
     });
   });
 
-  test('it return "selectedOptions" items that do appear in "options"', () => {
+  test('it returns "selectedOptions" items that do appear in "options"', () => {
     const result = getGenericComboBoxProps<string>({
       options: ['option1', 'option2', 'option3'],
       selectedOptions: ['option2'],
@@ -92,6 +92,34 @@ describe('get_generic_combo_box_props', () => {
           label: 'option2',
         },
       ],
+    });
+  });
+
+  test('it returns "disabledOptions" items that do appear in "options" as disabled', () => {
+    const result = getGenericComboBoxProps<string>({
+      options: ['option1', 'option2', 'option3'],
+      selectedOptions: [],
+      disabledOptions: ['option2'],
+      getLabel: (t: string) => t,
+    });
+
+    expect(result).toEqual({
+      comboOptions: [
+        {
+          label: 'option1',
+          disabled: false,
+        },
+        {
+          label: 'option2',
+          disabled: true,
+        },
+        {
+          label: 'option3',
+          disabled: false,
+        },
+      ],
+      labels: ['option1', 'option2', 'option3'],
+      selectedComboOptions: [],
     });
   });
 });

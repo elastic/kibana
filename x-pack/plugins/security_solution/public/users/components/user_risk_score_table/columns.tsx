@@ -21,6 +21,7 @@ import type { UserRiskScoreColumns } from '.';
 import * as i18n from './translations';
 import { RiskScore } from '../../../common/components/severity/common';
 import type { RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreFields } from '../../../../common/search_strategy';
 import { UserDetailsLink } from '../../../common/components/links';
 import { UsersTableType } from '../../store/model';
 
@@ -68,7 +69,7 @@ export const getUserRiskScoreColumns = ({
     },
   },
   {
-    field: 'risk_stats.risk_score',
+    field: RiskScoreFields.userRiskScore,
     name: i18n.USER_RISK_SCORE,
     truncateText: true,
     mobileOptions: { show: true },
@@ -85,7 +86,7 @@ export const getUserRiskScoreColumns = ({
     },
   },
   {
-    field: 'risk',
+    field: RiskScoreFields.userRisk,
     name: (
       <EuiToolTip content={i18n.USER_RISK_TOOLTIP}>
         <>

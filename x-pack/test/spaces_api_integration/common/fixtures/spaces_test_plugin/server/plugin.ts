@@ -12,7 +12,7 @@ export class Plugin {
 
   public setup(core: CoreSetup) {
     // called when plugin is setting up during Kibana's startup sequence
-    core.savedObjects.registerType({
+    core.savedObjects.registerType<{ title: string }>({
       name: 'sharedtype',
       hidden: false,
       namespaceType: 'multiple',
@@ -29,7 +29,7 @@ export class Plugin {
         },
       },
     });
-    core.savedObjects.registerType({
+    core.savedObjects.registerType<{ title: string }>({
       name: 'isolatedtype',
       hidden: false,
       namespaceType: 'single',

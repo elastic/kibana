@@ -7,68 +7,44 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import uuid from 'uuid';
-import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
-import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import ReactDOM from 'react-dom';
+
+import { I18nProvider } from '@kbn/i18n-react';
+import { Subscription } from 'rxjs';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-
-import { ControlGroupContainer } from '@kbn/controls-plugin/public';
-import { Filter, TimeRange } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
-
-import { UiActionsStart } from '../../services/ui_actions';
-import { RefreshInterval, Query } from '../../services/data';
+import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   ViewMode,
   Container,
-  PanelState,
-  IEmbeddable,
-  EmbeddableInput,
-  EmbeddableStart,
-  EmbeddableOutput,
-  EmbeddableFactory,
+  type PanelState,
+  type IEmbeddable,
+  type EmbeddableInput,
+  type EmbeddableOutput,
+  type EmbeddableFactory,
   ErrorEmbeddable,
   isErrorEmbeddable,
-} from '../../services/embeddable';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+} from '@kbn/embeddable-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
-import {
-  KibanaContextProvider,
-  KibanaReactContext,
-  KibanaReactContextValue,
-  KibanaThemeProvider,
-} from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DASHBOARD_LOADED_EVENT } from '../../events';
-import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
-import { PresentationUtilPluginStart } from '../../services/presentation_util';
-import type { ScreenshotModePluginStart } from '../../services/screenshot_mode';
+import { DashboardContainerInput } from '../../types';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import {
   combineDashboardFiltersWithControlGroupFilters,
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
-
-export interface DashboardContainerServices {
-  ExitFullScreenButton: React.ComponentType<any>;
-  presentationUtil: PresentationUtilPluginStart;
-  SavedObjectFinder: React.ComponentType<any>;
-  notifications: CoreStart['notifications'];
-  application: CoreStart['application'];
-  inspector: InspectorStartContract;
-  overlays: CoreStart['overlays'];
-  screenshotMode: ScreenshotModePluginStart;
-  uiSettings: IUiSettingsClient;
-  embeddable: EmbeddableStart;
-  uiActions: UiActionsStart;
-  theme: CoreStart['theme'];
-  http: CoreStart['http'];
-  analytics?: CoreStart['analytics'];
-}
+import { pluginServices } from '../../services/plugin_services';
 
 export interface DashboardLoadedInfo {
   timeToData: number;
@@ -85,38 +61,32 @@ export interface InheritedChildInput extends IndexSignature {
   filters: Filter[];
   query: Query;
   timeRange: TimeRange;
+  timeslice?: [number, number];
   refreshConfig?: RefreshInterval;
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
+  syncCursor?: boolean;
   syncTooltips?: boolean;
   executionContext?: KibanaExecutionContext;
 }
-
-export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerServices>;
-export type DashboardReactContext = KibanaReactContext<DashboardContainerServices>;
-
-const defaultCapabilities: DashboardAppCapabilities = {
-  show: false,
-  createNew: false,
-  saveQuery: false,
-  createShortUrl: false,
-  showWriteControls: false,
-  mapsCapabilities: { save: false },
-  visualizeCapabilities: { save: false },
-  storeSearchSession: true,
-};
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   private onDestroyControlGroup?: () => void;
+  private subscriptions: Subscription = new Subscription();
+
   public controlGroup?: ControlGroupContainer;
   private domNode?: HTMLElement;
 
   private allDataViews: DataView[] = [];
+
+  /** Services that are used in the Dashboard container code */
+  private analyticsService;
+  private theme$;
 
   /**
    * Gets all the dataviews that are actively being used in the dashboard
@@ -154,39 +124,67 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   constructor(
     initialInput: DashboardContainerInput,
-    private readonly services: DashboardContainerServices,
     parent?: Container,
     controlGroup?: ControlGroupContainer | ErrorEmbeddable
   ) {
+    const {
+      embeddable: { getEmbeddableFactory },
+      settings: { isProjectEnabledInLabs },
+    } = pluginServices.getServices();
+
     super(
       {
-        dashboardCapabilities: defaultCapabilities,
         ...initialInput,
       },
       { embeddableLoaded: {} },
-      services.embeddable.getEmbeddableFactory,
+      getEmbeddableFactory,
       parent
     );
+
+    ({
+      analytics: this.analyticsService,
+      settings: {
+        theme: { theme$: this.theme$ },
+      },
+    } = pluginServices.getServices());
 
     if (
       controlGroup &&
       !isErrorEmbeddable(controlGroup) &&
-      services.presentationUtil.labsService.isProjectEnabled('labs:dashboard:dashboardControls')
+      isProjectEnabledInLabs('labs:dashboard:dashboardControls')
     ) {
       this.controlGroup = controlGroup;
-      syncDashboardControlGroup({ dashboardContainer: this, controlGroup: this.controlGroup }).then(
-        (result) => {
-          if (!result) return;
-          const { onDestroyControlGroup } = result;
-          this.onDestroyControlGroup = onDestroyControlGroup;
-        }
-      );
+      syncDashboardControlGroup({
+        dashboardContainer: this,
+        controlGroup: this.controlGroup,
+      }).then((result) => {
+        if (!result) return;
+        const { onDestroyControlGroup } = result;
+        this.onDestroyControlGroup = onDestroyControlGroup;
+      });
     }
+
+    this.subscriptions.add(
+      this.getAnyChildOutputChange$().subscribe(() => {
+        if (!this.controlGroup) {
+          return;
+        }
+
+        for (const child of Object.values(this.children)) {
+          const isLoading = child.getOutput().loading;
+          if (isLoading) {
+            this.controlGroup.anyControlOutputConsumerLoading$.next(true);
+            return;
+          }
+        }
+        this.controlGroup.anyControlOutputConsumerLoading$.next(false);
+      })
+    );
   }
 
   private onDataLoaded(data: DashboardLoadedInfo) {
-    if (this.services.analytics) {
-      reportPerformanceMetricEvent(this.services.analytics, {
+    if (this.analyticsService) {
+      reportPerformanceMetricEvent(this.analyticsService, {
         eventName: DASHBOARD_LOADED_EVENT,
         duration: data.timeToDone,
         key1: 'time_to_data',
@@ -321,23 +319,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
-    const controlsEnabled = this.services.presentationUtil.labsService.isProjectEnabled(
-      'labs:dashboard:dashboardControls'
-    );
+
     ReactDOM.render(
       <I18nProvider>
-        <KibanaContextProvider services={this.services}>
-          <KibanaThemeProvider theme$={this.services.theme.theme$}>
-            <this.services.presentationUtil.ContextProvider>
-              <DashboardViewport
-                controlsEnabled={controlsEnabled}
-                container={this}
-                controlGroup={this.controlGroup}
-                onDataLoaded={this.onDataLoaded.bind(this)}
-              />
-            </this.services.presentationUtil.ContextProvider>
-          </KibanaThemeProvider>
-        </KibanaContextProvider>
+        <KibanaThemeProvider theme$={this.theme$}>
+          <DashboardViewport
+            container={this}
+            controlGroup={this.controlGroup}
+            onDataLoaded={this.onDataLoaded.bind(this)}
+          />
+        </KibanaThemeProvider>
       </I18nProvider>,
       dom
     );
@@ -345,6 +336,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public destroy() {
     super.destroy();
+    this.subscriptions.unsubscribe();
     this.onDestroyControlGroup?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
@@ -354,14 +346,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       viewMode,
       refreshConfig,
       timeRange,
+      timeslice,
       query,
       hidePanelTitles,
       filters,
       searchSessionId,
       syncColors,
+      syncCursor,
       syncTooltips,
       executionContext,
     } = this.input;
+
     let combinedFilters = filters;
     if (this.controlGroup) {
       combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
@@ -371,12 +366,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       query,
       timeRange,
+      timeslice,
       refreshConfig,
       viewMode,
       id,
       searchSessionId,
       syncColors,
       syncTooltips,
+      syncCursor,
       executionContext,
     };
   }

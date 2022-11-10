@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import Chance from 'chance';
 import {
   DEFAULT_NO_DATA_TEST_SUBJECT,
@@ -12,6 +13,7 @@ import {
   isCommonError,
   LOADING_STATE_TEST_SUBJECT,
   PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
+  SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
 } from './cloud_posture_page';
 import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';
@@ -27,6 +29,7 @@ import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_
 const chance = new Chance();
 jest.mock('../common/api/use_setup_status_api');
 jest.mock('../common/navigation/use_navigate_to_cis_integration');
+jest.mock('../common/hooks/use_subscription_status');
 
 describe('<CloudPosturePage />', () => {
   beforeEach(() => {
@@ -35,6 +38,13 @@ describe('<CloudPosturePage />', () => {
       createReactQueryResponse({
         status: 'success',
         data: { status: 'indexed' },
+      })
+    );
+
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
       })
     );
   });
@@ -69,8 +79,64 @@ describe('<CloudPosturePage />', () => {
 
     expect(screen.getByText(children)).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
+  });
+
+  it('renders default loading state when the subscription query is loading', () => {
+    (useSubscriptionStatus as jest.Mock).mockImplementation(
+      () =>
+        createReactQueryResponse({
+          status: 'loading',
+        }) as unknown as UseQueryResult
+    );
+
+    const children = chance.sentence();
+    renderCloudPosturePage({ children });
+
+    expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
+  });
+
+  it('renders default error state when the subscription query has an error', () => {
+    (useSubscriptionStatus as jest.Mock).mockImplementation(
+      () =>
+        createReactQueryResponse({
+          status: 'error',
+          error: new Error('error'),
+        }) as unknown as UseQueryResult
+    );
+
+    const children = chance.sentence();
+    renderCloudPosturePage({ children });
+
+    expect(screen.getByTestId(ERROR_STATE_TEST_SUBJECT)).toBeInTheDocument();
+    expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
+  });
+
+  it('renders subscription not allowed prompt if subscription is not installed', () => {
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: false,
+      })
+    );
+
+    const children = chance.sentence();
+    renderCloudPosturePage({ children });
+
+    expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.getByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).toBeInTheDocument();
+    expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
   });
 
   it('renders integrations installation prompt if integration is not installed', () => {
@@ -88,6 +154,7 @@ describe('<CloudPosturePage />', () => {
     expect(screen.getByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
   });
 
@@ -105,6 +172,7 @@ describe('<CloudPosturePage />', () => {
     expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
   });
 
@@ -122,6 +190,7 @@ describe('<CloudPosturePage />', () => {
 
     expect(screen.getByTestId(ERROR_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
   });
@@ -135,6 +204,7 @@ describe('<CloudPosturePage />', () => {
     renderCloudPosturePage({ children, query });
 
     expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -149,6 +219,7 @@ describe('<CloudPosturePage />', () => {
     renderCloudPosturePage({ children, query });
 
     expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -177,6 +248,7 @@ describe('<CloudPosturePage />', () => {
       expect(screen.getByText(text, { exact: false })).toBeInTheDocument()
     );
     expect(screen.getByTestId(ERROR_STATE_TEST_SUBJECT)).toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -209,6 +281,7 @@ describe('<CloudPosturePage />', () => {
     [error, statusCode].forEach((text) => expect(screen.queryByText(text)).not.toBeInTheDocument());
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
   });
@@ -230,6 +303,7 @@ describe('<CloudPosturePage />', () => {
     expect(screen.getByText(loading)).toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
   });
@@ -245,6 +319,7 @@ describe('<CloudPosturePage />', () => {
 
     expect(screen.getByTestId(DEFAULT_NO_DATA_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -273,6 +348,7 @@ describe('<CloudPosturePage />', () => {
     expect(screen.getByText(pageTitle)).toBeInTheDocument();
     expect(screen.getAllByText(solution, { exact: false })[0]).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();

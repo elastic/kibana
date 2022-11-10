@@ -58,6 +58,7 @@ export type DatatableRenderProps = DatatableProps & {
    * ROW_CLICK_TRIGGER actions attached to it, otherwise false.
    */
   rowHasRowClickTriggerActions?: boolean[];
+  columnFilterable?: boolean[];
 };
 
 export interface DataContextType {

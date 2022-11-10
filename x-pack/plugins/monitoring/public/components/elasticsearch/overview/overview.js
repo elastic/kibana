@@ -16,7 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import { Logs } from '../../logs/logs';
 

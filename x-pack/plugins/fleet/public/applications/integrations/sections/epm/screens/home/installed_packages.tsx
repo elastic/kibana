@@ -109,6 +109,9 @@ export const InstalledPackages: React.FC<{
     useLocation().search
   );
 
+  const { http } = useStartServices();
+  const addBasePath = http.basePath.prepend;
+
   const history = useHistory();
 
   function setUrlCategory(categoryId: string) {
@@ -175,6 +178,7 @@ export const InstalledPackages: React.FC<{
     mapToCard({
       getAbsolutePath,
       getHref,
+      addBasePath,
       item,
       selectedCategory: selectedCategory || 'installed',
       packageVerificationKeyId,

@@ -27,6 +27,7 @@
         ],
         "path": "src/plugins/vis_types/heatmap/public/vis_type/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeHeatmap",
@@ -40,6 +41,7 @@
             ],
             "path": "src/plugins/vis_types/heatmap/public/vis_type/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -78,6 +80,7 @@
         ],
         "path": "src/plugins/vis_types/heatmap/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

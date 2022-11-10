@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/base/core-base-browser-mocks/src/core_context.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-base-browser-mocks",
@@ -46,6 +47,7 @@
             ],
             "path": "packages/core/base/core-base-browser-mocks/src/core_context.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -59,7 +61,8 @@
                   "{ production?: boolean | undefined; }"
                 ],
                 "path": "packages/core/base/core-base-browser-mocks/src/core_context.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

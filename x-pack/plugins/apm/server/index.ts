@@ -41,7 +41,6 @@ const configSchema = schema.object({
   ),
   telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
   metricsInterval: schema.number({ defaultValue: 30 }),
-  profilingEnabled: schema.boolean({ defaultValue: false }),
   agent: schema.object({
     migrations: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
@@ -55,6 +54,7 @@ const configSchema = schema.object({
     sourcemap: schema.string({ defaultValue: 'apm-*' }),
     onboarding: schema.string({ defaultValue: 'apm-*' }),
   }),
+  forceSyntheticSource: schema.boolean({ defaultValue: false }),
 });
 
 // plugin config
@@ -107,7 +107,6 @@ export const config: PluginConfigDescriptor<APMConfig> = {
   exposeToBrowser: {
     serviceMapEnabled: true,
     ui: true,
-    profilingEnabled: true,
   },
   schema: configSchema,
 };
@@ -118,7 +117,7 @@ export type ApmIndicesConfigName = keyof APMConfig['indices'];
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
-export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
+export { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 export { APMPlugin } from './plugin';
 export type { APMPluginSetup } from './types';
 export type {

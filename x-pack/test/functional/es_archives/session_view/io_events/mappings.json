@@ -31,7 +31,7 @@
         "process.tty.char_device.minor": {
           "type": "long"
         },
-        "host.boot.id": {
+        "host.id": {
           "type": "keyword"
         }
       }

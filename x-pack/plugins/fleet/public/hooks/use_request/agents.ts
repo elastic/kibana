@@ -6,8 +6,13 @@
  */
 
 import type {
+  GetActionStatusResponse,
   GetAgentTagsResponse,
+  GetAgentUploadsResponse,
+  PostBulkRequestDiagnosticsResponse,
   PostBulkUpdateAgentTagsRequest,
+  PostRequestBulkDiagnosticsRequest,
+  PostRequestDiagnosticsResponse,
   UpdateAgentRequest,
 } from '../../../common/types';
 
@@ -170,6 +175,42 @@ export function sendPostAgentUpgrade(
   });
 }
 
+export function sendPostRequestDiagnostics(agentId: string, options?: RequestOptions) {
+  return sendRequest<PostRequestDiagnosticsResponse>({
+    path: agentRouteService.getRequestDiagnosticsPath(agentId),
+    method: 'post',
+    ...options,
+  });
+}
+
+export function sendPostBulkRequestDiagnostics(
+  body: PostRequestBulkDiagnosticsRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<PostBulkRequestDiagnosticsResponse>({
+    path: agentRouteService.getBulkRequestDiagnosticsPath(),
+    method: 'post',
+    body,
+    ...options,
+  });
+}
+
+export function sendGetAgentUploads(agentId: string, options?: RequestOptions) {
+  return sendRequest<GetAgentUploadsResponse>({
+    path: agentRouteService.getListAgentUploads(agentId),
+    method: 'get',
+    ...options,
+  });
+}
+
+export const useGetAgentUploads = (agentId: string, options?: RequestOptions) => {
+  return useRequest<GetAgentUploadsResponse>({
+    path: agentRouteService.getListAgentUploads(agentId),
+    method: 'get',
+    ...options,
+  });
+};
+
 export function sendPostAgentAction(
   agentId: string,
   body: PostNewAgentActionRequest['body'],
@@ -192,6 +233,13 @@ export function sendPostBulkAgentUpgrade(
     method: 'post',
     body,
     ...options,
+  });
+}
+
+export function sendGetActionStatus() {
+  return sendRequest<GetActionStatusResponse>({
+    path: agentRouteService.getActionStatusPath(),
+    method: 'get',
   });
 }
 

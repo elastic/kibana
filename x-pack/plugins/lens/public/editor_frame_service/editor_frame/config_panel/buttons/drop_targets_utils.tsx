@@ -9,12 +9,10 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DragDropIdentifier, DraggingIdentifier } from '../../../../drag_drop';
+import { DragDropIdentifier } from '../../../../drag_drop';
 import {
-  Datasource,
   DropType,
   FramePublicAPI,
-  GetDropPropsArgs,
   isOperation,
   Visualization,
   DragDropOperation,
@@ -140,53 +138,6 @@ export const getAdditionalClassesOnDroppable = (dropType?: string) => {
   }
 };
 
-const isOperationFromCompatibleGroup = (op1?: DraggingIdentifier, op2?: DragDropOperation) => {
-  return (
-    isOperation(op1) &&
-    isOperation(op2) &&
-    op1.columnId !== op2.columnId &&
-    op1.groupId === op2.groupId &&
-    op1.layerId !== op2.layerId
-  );
-};
-
-export const isOperationFromTheSameGroup = (op1?: DraggingIdentifier, op2?: DragDropOperation) => {
-  return (
-    isOperation(op1) &&
-    isOperation(op2) &&
-    op1.columnId !== op2.columnId &&
-    op1.groupId === op2.groupId &&
-    op1.layerId === op2.layerId
-  );
-};
-
-export function getDropPropsForSameGroup(
-  isNewColumn?: boolean
-): { dropTypes: DropType[]; nextLabel?: string } | undefined {
-  return !isNewColumn ? { dropTypes: ['reorder'] } : { dropTypes: ['duplicate_compatible'] };
-}
-
-export const getDropProps = (
-  dropProps: GetDropPropsArgs,
-  sharedDatasource?: Datasource<unknown, unknown>
-): { dropTypes: DropType[]; nextLabel?: string } | undefined => {
-  if (sharedDatasource) {
-    return sharedDatasource?.getDropProps(dropProps);
-  } else {
-    if (isOperationFromTheSameGroup(dropProps.source, dropProps.target)) {
-      return getDropPropsForSameGroup(dropProps.target.isNewColumn);
-    }
-    if (isOperationFromCompatibleGroup(dropProps.source, dropProps.target)) {
-      return {
-        dropTypes: dropProps.target.isNewColumn
-          ? ['move_compatible', 'duplicate_compatible']
-          : ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
-      };
-    }
-  }
-  return;
-};
-
 export interface OnVisDropProps<T> {
   prevState: T;
   target: DragDropOperation;
@@ -196,11 +147,23 @@ export interface OnVisDropProps<T> {
   group?: VisualizationDimensionGroupConfig;
 }
 
-export function onDropForVisualization<T>(
+export function shouldRemoveSource(source: DragDropIdentifier, dropType: DropType) {
+  return (
+    isOperation(source) &&
+    (dropType === 'move_compatible' ||
+      dropType === 'move_incompatible' ||
+      dropType === 'combine_incompatible' ||
+      dropType === 'combine_compatible' ||
+      dropType === 'replace_compatible' ||
+      dropType === 'replace_incompatible')
+  );
+}
+
+export function onDropForVisualization<T, P = unknown>(
   props: OnVisDropProps<T>,
-  activeVisualization: Visualization<T>
+  activeVisualization: Visualization<T, P>
 ) {
-  const { prevState, target, frame, dropType, source, group } = props;
+  const { prevState, target, frame, source, group } = props;
   const { layerId, columnId, groupId } = target;
 
   const previousColumn =
@@ -215,22 +178,5 @@ export function onDropForVisualization<T>(
     frame,
   });
 
-  // remove source
-  if (
-    isOperation(source) &&
-    (dropType === 'move_compatible' ||
-      dropType === 'move_incompatible' ||
-      dropType === 'combine_incompatible' ||
-      dropType === 'combine_compatible' ||
-      dropType === 'replace_compatible' ||
-      dropType === 'replace_incompatible')
-  ) {
-    return activeVisualization.removeDimension({
-      columnId: source?.columnId,
-      layerId: source?.layerId,
-      prevState: newVisState,
-      frame,
-    });
-  }
   return newVisState;
 }

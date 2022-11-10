@@ -25,7 +25,7 @@ import {
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
 
-jest.useFakeTimers();
+jest.useFakeTimers('legacy');
 
 const logger = loggingSystemMock.createLogger();
 const license = licenseMock.create();
@@ -38,7 +38,9 @@ const createAuditConfig = (settings: Partial<ConfigType['audit']>) => {
 const config = createAuditConfig({ enabled: true });
 const { logging } = coreMock.createSetup();
 const http = httpServiceMock.createSetupContract();
-const getCurrentUser = jest.fn().mockReturnValue({ username: 'jdoe', roles: ['admin'] });
+const getCurrentUser = jest
+  .fn()
+  .mockReturnValue({ username: 'jdoe', roles: ['admin'], profile_uid: 'uid' });
 const getSpaceId = jest.fn().mockReturnValue('default');
 const getSID = jest.fn().mockResolvedValue('SESSION_ID');
 const recordAuditLoggingUsage = jest.fn();
@@ -192,7 +194,7 @@ describe('#asScoped', () => {
       event: { action: 'ACTION' },
       kibana: { space_id: 'default', session_id: 'SESSION_ID' },
       trace: { id: 'REQUEST_ID' },
-      user: { name: 'jdoe', roles: ['admin'] },
+      user: { id: 'uid', name: 'jdoe', roles: ['admin'] },
     });
     audit.stop();
   });

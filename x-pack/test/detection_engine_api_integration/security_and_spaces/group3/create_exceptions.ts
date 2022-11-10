@@ -10,15 +10,14 @@
 import expect from '@kbn/expect';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import {
-  CreateRulesSchema,
-  EqlCreateSchema,
-  QueryCreateSchema,
-  ThreatMatchCreateSchema,
-  ThresholdCreateSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type {
+  RuleCreateProps,
+  EqlRuleCreateProps,
+  QueryRuleCreateProps,
+  ThreatMatchRuleCreateProps,
+  ThresholdRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -93,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(getCreateExceptionListMinimalSchemaMock())
             .expect(200);
 
-          const ruleWithException: CreateRulesSchema = {
+          const ruleWithException: RuleCreateProps = {
             ...getSimpleRule(),
             exceptions_list: [
               {
@@ -106,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const rule = await createRule(supertest, log, ruleWithException);
-          const expected: Partial<RulesSchema> = {
+          const expected = {
             ...getSimpleRuleOutput(),
             exceptions_list: [
               {
@@ -130,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(getCreateExceptionListMinimalSchemaMock())
             .expect(200);
 
-          const ruleWithException: CreateRulesSchema = {
+          const ruleWithException: RuleCreateProps = {
             ...getSimpleRule(),
             enabled: true,
             exceptions_list: [
@@ -147,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, log, rule.id);
           const bodyToCompare = removeServerGeneratedProperties(rule);
 
-          const expected: Partial<RulesSchema> = {
+          const expected = {
             ...getSimpleRuleOutput(),
             enabled: true,
             exceptions_list: [
@@ -166,7 +165,7 @@ export default ({ getService }: FtrProviderContext) => {
           await installPrePackagedRules(supertest, log);
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(
             supertest,
@@ -200,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(
             supertest,
@@ -240,7 +239,7 @@ export default ({ getService }: FtrProviderContext) => {
           await installPrePackagedRules(supertest, log);
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(
             supertest,
@@ -278,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
           const immutableRule = await getRule(
             supertest,
@@ -327,7 +326,7 @@ export default ({ getService }: FtrProviderContext) => {
           await installPrePackagedRules(supertest, log);
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
           const immutableRule = await getRule(
             supertest,
@@ -362,7 +361,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
           const immutableRule = await getRule(
             supertest,
@@ -419,7 +418,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "eb079c62-4481-4d6e-9643-3ca499df7aaa" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/external_alerts.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/external_alerts.json
           // since this rule does not have existing exceptions_list that we are going to use for tests
           const immutableRule = await getRule(
             supertest,
@@ -473,7 +472,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(
             supertest,
@@ -523,7 +522,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(
             supertest,
@@ -624,7 +623,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           await createExceptionListItem(supertest, log, exceptionListItem);
 
-          const ruleWithException: CreateRulesSchema = {
+          const ruleWithException: RuleCreateProps = {
             name: 'Simple Rule Query',
             description: 'Simple Rule Query',
             enabled: true,
@@ -652,7 +651,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be able to execute against an exception list that does include valid entries and get back 0 signals', async () => {
-          const rule: QueryCreateSchema = {
+          const rule: QueryRuleCreateProps = {
             name: 'Simple Rule Query',
             description: 'Simple Rule Query',
             enabled: true,
@@ -679,7 +678,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates no signals when an exception is added for an EQL rule', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
           };
@@ -698,7 +697,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates no signals when an exception is added for a threshold rule', async () => {
-          const rule: ThresholdCreateSchema = {
+          const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: 'host.id',
@@ -720,7 +719,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates no signals when an exception is added for a threat match rule', async () => {
-          const rule: ThreatMatchCreateSchema = {
+          const rule: ThreatMatchRuleCreateProps = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
             severity: 'high',
@@ -773,7 +772,7 @@ export default ({ getService }: FtrProviderContext) => {
           it('generates no signals when a value list exception is added for a query rule', async () => {
             const valueListId = 'value-list-id';
             await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
-            const rule: QueryCreateSchema = {
+            const rule: QueryRuleCreateProps = {
               name: 'Simple Rule Query',
               description: 'Simple Rule Query',
               enabled: true,
@@ -805,7 +804,7 @@ export default ({ getService }: FtrProviderContext) => {
           it('generates no signals when a value list exception is added for a threat match rule', async () => {
             const valueListId = 'value-list-id';
             await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
-            const rule: ThreatMatchCreateSchema = {
+            const rule: ThreatMatchRuleCreateProps = {
               description: 'Detecting root and admin users',
               name: 'Query with a rule id',
               severity: 'high',
@@ -831,6 +830,68 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               threat_filters: [],
+            };
+
+            const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
+              [
+                {
+                  field: 'host.name',
+                  operator: 'included',
+                  type: 'list',
+                  list: {
+                    id: valueListId,
+                    type: 'keyword',
+                  },
+                },
+              ],
+            ]);
+            const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+            expect(signalsOpen.hits.hits.length).equal(0);
+          });
+
+          it('generates no signals when a value list exception is added for a threshold rule', async () => {
+            const valueListId = 'value-list-id';
+            await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
+            const rule: ThresholdRuleCreateProps = {
+              description: 'Detecting root and admin users',
+              name: 'Query with a rule id',
+              severity: 'high',
+              index: ['auditbeat-*'],
+              type: 'threshold',
+              risk_score: 55,
+              language: 'kuery',
+              rule_id: 'rule-1',
+              from: '1900-01-01T00:00:00.000Z',
+              query: 'host.name: "zeek-sensor-amsterdam"',
+              threshold: {
+                field: 'host.name',
+                value: 1,
+              },
+            };
+
+            const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
+              [
+                {
+                  field: 'host.name',
+                  operator: 'included',
+                  type: 'list',
+                  list: {
+                    id: valueListId,
+                    type: 'keyword',
+                  },
+                },
+              ],
+            ]);
+            const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+            expect(signalsOpen.hits.hits.length).equal(0);
+          });
+
+          it('generates no signals when a value list exception is added for an EQL rule', async () => {
+            const valueListId = 'value-list-id';
+            await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
+            const rule: EqlRuleCreateProps = {
+              ...getEqlRuleForSignalTesting(['auditbeat-*']),
+              query: 'configuration where host.name=="zeek-sensor-amsterdam"',
             };
 
             const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [

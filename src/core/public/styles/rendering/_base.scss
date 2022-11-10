@@ -49,6 +49,12 @@
       max-height: calc(100vh - #{$headerHeight + $euiSize});
       top: $headerHeight + $euiSize;
     }
+
+    .kbnSolutionNav__sidebar {
+      position: sticky;
+      max-height: calc(100vh - #{$headerHeight});
+      top: $headerHeight;
+    }
   }
 }
 

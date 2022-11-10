@@ -38,6 +38,7 @@ const domains: CrawlerDomain[] = [
     deduplicationEnabled: false,
     deduplicationFields: ['title'],
     availableDeduplicationFields: ['title', 'description'],
+    auth: null,
   },
   {
     id: '4567',
@@ -50,6 +51,7 @@ const domains: CrawlerDomain[] = [
     deduplicationEnabled: false,
     deduplicationFields: ['title'],
     availableDeduplicationFields: ['title', 'description'],
+    auth: null,
   },
 ];
 

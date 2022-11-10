@@ -8,6 +8,7 @@
 import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { CollapseFunction } from '../../common/expressions';
 
 const options = [
   { text: i18n.translate('xpack.lens.collapse.none', { defaultMessage: 'None' }), value: '' },
@@ -22,39 +23,41 @@ export function CollapseSetting({
   onChange,
 }: {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: CollapseFunction) => void;
 }) {
   return (
-    <EuiFormRow
-      label={
-        <EuiToolTip
-          delay="long"
-          position="top"
-          content={i18n.translate('xpack.lens.collapse.infoIcon', {
-            defaultMessage:
-              'Do not show this dimension in the visualization and aggregate all metric values which have the same value for this dimension into a single number.',
-          })}
-        >
-          <span>
-            {i18n.translate('xpack.lens.collapse.label', { defaultMessage: 'Collapse by' })}
-            {''}
-            <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
-      }
-      display="columnCompressed"
-      fullWidth
-    >
-      <EuiSelect
+    <>
+      <EuiFormRow
+        label={
+          <EuiToolTip
+            delay="long"
+            position="top"
+            content={i18n.translate('xpack.lens.collapse.infoIcon', {
+              defaultMessage:
+                'Do not show this dimension in the visualization and aggregate all metric values which have the same value for this dimension into a single number.',
+            })}
+          >
+            <span>
+              {i18n.translate('xpack.lens.collapse.label', { defaultMessage: 'Collapse by' })}
+              {''}
+              <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        }
+        display="rowCompressed"
         fullWidth
-        compressed
-        data-test-subj="indexPattern-terms-orderBy"
-        options={options}
-        value={value}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-          onChange(e.target.value);
-        }}
-      />
-    </EuiFormRow>
+      >
+        <EuiSelect
+          fullWidth
+          compressed
+          data-test-subj="indexPattern-collapse-by"
+          options={options}
+          value={value}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+            onChange(e.target.value as CollapseFunction);
+          }}
+        />
+      </EuiFormRow>
+    </>
   );
 }

@@ -34,21 +34,19 @@ function extendNodeOptions(installDir?: string) {
   };
 }
 
-export async function runKibanaServer({
-  procs,
-  config,
-  options,
-  onEarlyExit,
-}: {
+export async function runKibanaServer(options: {
   procs: ProcRunner;
   config: Config;
-  options: { installDir?: string; extraKbnOpts?: string[] };
+  installDir?: string;
+  extraKbnOpts?: string[];
+  logsDir?: string;
   onEarlyExit?: (msg: string) => void;
 }) {
-  const runOptions = config.get('kbnTestServer.runOptions');
+  const { config, procs } = options;
+  const runOptions = options.config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const devMode = !installDir;
-  const useTaskRunner = config.get('kbnTestServer.useDedicatedTaskRunner');
+  const useTaskRunner = options.config.get('kbnTestServer.useDedicatedTaskRunner');
 
   const procRunnerOpts = {
     cwd: installDir || REPO_ROOT,
@@ -60,11 +58,11 @@ export async function runKibanaServer({
     env: {
       FORCE_COLOR: 1,
       ...process.env,
-      ...config.get('kbnTestServer.env'),
+      ...options.config.get('kbnTestServer.env'),
       ...extendNodeOptions(installDir),
     },
     wait: runOptions.wait,
-    onEarlyExit,
+    onEarlyExit: options.onEarlyExit,
   };
 
   const prefixArgs = devMode
@@ -84,10 +82,14 @@ export async function runKibanaServer({
     ...(options.extraKbnOpts ?? []),
   ]);
 
+  const mainName = useTaskRunner ? 'kbn-ui' : 'kibana';
   const promises = [
     // main process
-    procs.run(useTaskRunner ? 'kbn-ui' : 'kibana', {
+    procs.run(mainName, {
       ...procRunnerOpts,
+      writeLogsToPath: options.logsDir
+        ? Path.resolve(options.logsDir, `${mainName}.log`)
+        : undefined,
       args: [
         ...prefixArgs,
         ...parseRawFlags([
@@ -110,6 +112,9 @@ export async function runKibanaServer({
     promises.push(
       procs.run('kbn-tasks', {
         ...procRunnerOpts,
+        writeLogsToPath: options.logsDir
+          ? Path.resolve(options.logsDir, 'kbn-tasks.log')
+          : undefined,
         args: [
           ...prefixArgs,
           ...parseRawFlags([

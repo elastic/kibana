@@ -28,16 +28,22 @@ interface Props {
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;
   fullWidth?: boolean;
+  compressed?: boolean;
+}
+
+export function isRangeParams(params: any): params is RangeParams {
+  return Boolean(params && 'from' in params && 'to' in params);
 }
 
 function RangeValueInputUI(props: Props) {
   const kibana = useKibana();
-  const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
 
   const formatDateChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') return value;
 
-    const momentParsedValue = moment(value).tz(tzConfig);
+    const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
+    const tz = !tzConfig || tzConfig === 'Browser' ? moment.tz.guess() : tzConfig;
+    const momentParsedValue = moment(value).tz(tz);
     if (momentParsedValue.isValid()) return momentParsedValue?.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 
     return value;
@@ -68,6 +74,7 @@ function RangeValueInputUI(props: Props) {
         startControl={
           <ValueInputType
             controlOnly
+            compressed={props.compressed}
             field={props.field}
             value={props.value ? props.value.from : undefined}
             onChange={onFromChange}
@@ -83,6 +90,7 @@ function RangeValueInputUI(props: Props) {
         endControl={
           <ValueInputType
             controlOnly
+            compressed={props.compressed}
             field={props.field}
             value={props.value ? props.value.to : undefined}
             onChange={onToChange}

@@ -9,17 +9,17 @@
 import moment from 'moment';
 import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import fs from 'fs';
+import Fsp from 'fs/promises';
 import Path from 'path';
 import { ApiDeclaration, ApiReference, ReferencedDeprecationsByPlugin } from '../types';
 import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
-export function writeDeprecationDocByPlugin(
+export async function writeDeprecationDocByPlugin(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
   log: ToolingLog
-): void {
+): Promise<void> {
   const tableMdx = Object.keys(deprecationsByPlugin)
     .sort()
     .map((key) => {
@@ -54,7 +54,7 @@ export function writeDeprecationDocByPlugin(
               (ref) =>
                 `[${ref.path.substr(
                   ref.path.lastIndexOf(Path.sep) + 1
-                )}](https://github.com/elastic/kibana/tree/master/${
+                )}](https://github.com/elastic/kibana/tree/main/${
                   ref.path
                 }#:~:text=${encodeURIComponent(api.label)})`
             )
@@ -84,5 +84,5 @@ ${tableMdx}
 
 `);
 
-  fs.writeFileSync(Path.resolve(folder, 'deprecations_by_plugin.mdx'), mdx);
+  await Fsp.writeFile(Path.resolve(folder, 'deprecations_by_plugin.mdx'), mdx);
 }

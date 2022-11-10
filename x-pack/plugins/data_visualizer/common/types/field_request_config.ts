@@ -40,6 +40,7 @@ export interface GeoPointExample {
 }
 
 export interface FieldVisStats {
+  totalDocuments?: number;
   error?: Error;
   cardinality?: number;
   count?: number;

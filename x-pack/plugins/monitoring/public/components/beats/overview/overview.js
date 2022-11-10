@@ -20,7 +20,7 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiPanel,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

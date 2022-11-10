@@ -41,6 +41,7 @@ import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { SizeLabel } from './size_label';
+import { IndexStatsPerService } from './index_stats_per_service';
 
 interface Props {
   serviceName: string;
@@ -49,25 +50,25 @@ interface Props {
 
 const ProcessorEventLabelMap = {
   [ProcessorEvent.transaction]: i18n.translate(
-    'xpack.apm.settings.storageExplorer.serviceDetails.transactions',
+    'xpack.apm.storageExplorer.serviceDetails.transactions',
     {
       defaultMessage: 'Transactions',
     }
   ),
   [ProcessorEvent.span]: i18n.translate(
-    'xpack.apm.settings.storageExplorer.serviceDetails.spans',
+    'xpack.apm.storageExplorer.serviceDetails.spans',
     {
       defaultMessage: 'Spans',
     }
   ),
   [ProcessorEvent.metric]: i18n.translate(
-    'xpack.apm.settings.storageExplorer.serviceDetails.metrics',
+    'xpack.apm.storageExplorer.serviceDetails.metrics',
     {
       defaultMessage: 'Metrics',
     }
   ),
   [ProcessorEvent.error]: i18n.translate(
-    'xpack.apm.settings.storageExplorer.serviceDetails.errors',
+    'xpack.apm.storageExplorer.serviceDetails.errors',
     {
       defaultMessage: 'Errors',
     }
@@ -155,14 +156,14 @@ export function StorageDetailsPerService({
 
   return (
     <>
-      <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
+      <EuiFlexGroup direction="column" responsive={false} gutterSize="l">
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h4>
                   {i18n.translate(
-                    'xpack.apm.settings.storageExplorer.serviceDetails.title',
+                    'xpack.apm.storageExplorer.serviceDetails.title',
                     {
                       defaultMessage: 'Service storage details',
                     }
@@ -173,7 +174,7 @@ export function StorageDetailsPerService({
             <EuiFlexItem grow={false}>
               <EuiLink href={serviceOverviewLink}>
                 {i18n.translate(
-                  'xpack.apm.settings.storageExplorer.serviceDetails.serviceOverviewLink',
+                  'xpack.apm.storageExplorer.serviceDetails.serviceOverviewLink',
                   {
                     defaultMessage: 'Go to service overview',
                   }
@@ -186,7 +187,10 @@ export function StorageDetailsPerService({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
             <EuiFlexItem>
-              <EuiPanel hasShadow={false}>
+              <EuiPanel
+                hasShadow={false}
+                data-test-subj="serviceStorageDetailsChart"
+              >
                 <Chart>
                   <Settings
                     theme={[
@@ -224,7 +228,11 @@ export function StorageDetailsPerService({
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiPanel hasShadow={false} paddingSize="l">
+              <EuiPanel
+                hasShadow={false}
+                paddingSize="l"
+                data-test-subj="serviceStorageDetailsTable"
+              >
                 {processorEventStats.map(
                   ({ processorEventLabel, docs, size }) => (
                     <>
@@ -257,6 +265,12 @@ export function StorageDetailsPerService({
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <IndexStatsPerService
+            indicesStats={data.indicesStats}
+            status={status}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

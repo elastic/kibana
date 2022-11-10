@@ -13,11 +13,4 @@ export { createPanelState } from './panel';
 
 export * from './types';
 
-export {
-  DASHBOARD_GRID_COLUMN_COUNT,
-  DEFAULT_PANEL_HEIGHT,
-  DEFAULT_PANEL_WIDTH,
-  DASHBOARD_CONTAINER_TYPE,
-} from './dashboard_constants';
-
 export { createDashboardContainerByValueRenderer } from './dashboard_container_by_value_renderer';

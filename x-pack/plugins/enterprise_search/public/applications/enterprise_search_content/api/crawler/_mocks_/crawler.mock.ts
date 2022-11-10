@@ -19,10 +19,12 @@ export const CRAWLER_DATA: CrawlerData = {
   domains: [CRAWLER_DOMAIN],
   events: [CRAWL_EVENT],
   mostRecentCrawlRequest: CRAWL_REQUEST,
+  userAgent: 'Elastic Crawler (0.0.1)',
 };
 
 export const CRAWLER_DATA_FROM_SERVER: CrawlerDataFromServer = {
   domains: [CRAWLER_DOMAIN_FROM_SERVER],
   events: [CRAWL_EVENT_FROM_SERVER],
   most_recent_crawl_request: CRAWL_REQUEST_FROM_SERVER,
+  user_agent: 'Elastic Crawler (0.0.1)',
 };

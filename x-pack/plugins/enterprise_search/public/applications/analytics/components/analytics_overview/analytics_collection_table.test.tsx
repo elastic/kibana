@@ -39,6 +39,6 @@ describe('AnalyticsCollectionTable', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject(analyticsCollections[0]);
 
-    expect(wrapper.dive().find(EuiLinkTo).first().prop('to')).toBe('/collections/example');
+    expect(wrapper.dive().find(EuiLinkTo).first().prop('to')).toBe('/collections/example/events');
   });
 });

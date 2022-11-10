@@ -29,8 +29,9 @@ export const NotObscuredByBottomBar = styled('div')`
 export const CreatePackagePolicyBottomBar: React.FC<{
   isLoading?: boolean;
   isDisabled?: boolean;
-  cancelClickHandler: React.ReactEventHandler;
+  cancelClickHandler?: React.ReactEventHandler;
   cancelUrl?: string;
+  cancelMessage?: React.ReactElement;
   actionMessage: React.ReactElement;
   onNext: () => void;
   noAnimation?: boolean;
@@ -42,6 +43,7 @@ export const CreatePackagePolicyBottomBar: React.FC<{
   cancelClickHandler,
   cancelUrl,
   actionMessage,
+  cancelMessage,
   isDisabled = false,
   noAnimation = false,
 }) => {
@@ -53,10 +55,12 @@ export const CreatePackagePolicyBottomBar: React.FC<{
           <EuiFlexItem grow={false}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicyBottomBar.backButton"
-                defaultMessage="Go back"
-              />
+              {cancelMessage || (
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicyBottomBar.backButton"
+                  defaultMessage="Go back"
+                />
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexItem>
@@ -85,7 +89,7 @@ export const CreatePackagePolicyBottomBar: React.FC<{
 };
 
 export const AgentStandaloneBottomBar: React.FC<{
-  cancelClickHandler: React.ReactEventHandler;
+  cancelClickHandler?: React.ReactEventHandler;
   cancelUrl?: string;
   onNext: () => void;
   noAnimation?: boolean;

@@ -10,7 +10,12 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiButton, EuiPageContent, EuiEmptyPrompt, EuiPageContentBody } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiEmptyPrompt,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+} from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';

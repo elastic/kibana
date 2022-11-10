@@ -9,6 +9,7 @@ import {
   AnnotationDomainType,
   AreaSeries,
   Axis,
+  BarSeries,
   Chart,
   CurveType,
   LegendItemListener,
@@ -171,6 +172,17 @@ export function TimeseriesChart({
     opacity: theme.darkMode ? 0.6 : 0.2,
   };
 
+  function getChartType(type: string) {
+    switch (type) {
+      case 'area':
+        return AreaSeries;
+      case 'bar':
+        return BarSeries;
+      default:
+        return LineSeries;
+    }
+  }
+
   return (
     <ChartContainer
       hasData={!isEmpty}
@@ -281,7 +293,7 @@ export function TimeseriesChart({
         />
 
         {allSeries.map((serie) => {
-          const Series = serie.type === 'area' ? AreaSeries : LineSeries;
+          const Series = getChartType(serie.type);
 
           return (
             <Series

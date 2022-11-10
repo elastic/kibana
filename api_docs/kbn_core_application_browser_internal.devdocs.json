@@ -31,6 +31,7 @@
         ],
         "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
@@ -44,6 +45,7 @@
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -58,6 +60,7 @@
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -73,12 +76,25 @@
         "description": [],
         "signature": [
           "(app: ",
-          "App",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.App",
+            "text": "App"
+          },
           "<unknown>) => ",
-          "PublicAppInfo"
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.PublicAppInfo",
+            "text": "PublicAppInfo"
+          }
         ],
         "path": "packages/core/application/core-application-browser-internal/src/utils/get_app_info.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
@@ -88,11 +104,18 @@
             "label": "app",
             "description": [],
             "signature": [
-              "App",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.App",
+                "text": "App"
+              },
               "<unknown>"
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/get_app_info.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -110,15 +133,28 @@
         ],
         "signature": [
           "(url: string, basePath: ",
-          "IBasePath",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.IBasePath",
+            "text": "IBasePath"
+          },
           ", apps: Map<string, ",
-          "App",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.App",
+            "text": "App"
+          },
           "<unknown>>, currentUrl?: string) => ",
           "ParsedAppUrl",
           " | undefined"
         ],
         "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
@@ -132,6 +168,7 @@
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -142,10 +179,17 @@
             "label": "basePath",
             "description": [],
             "signature": [
-              "IBasePath"
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.IBasePath",
+                "text": "IBasePath"
+              }
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -157,11 +201,18 @@
             "description": [],
             "signature": [
               "Map<string, ",
-              "App",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.App",
+                "text": "App"
+              },
               "<unknown>>"
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -176,6 +227,7 @@
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -196,6 +248,7 @@
         ],
         "path": "packages/core/application/core-application-browser-internal/src/utils/relative_to_absolute.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
@@ -209,6 +262,7 @@
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/relative_to_absolute.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -229,6 +283,7 @@
         ],
         "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-internal",
@@ -242,6 +297,7 @@
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -253,6 +309,7 @@
             "description": [],
             "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser-internal",
@@ -265,7 +322,8 @@
                   "boolean | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-application-browser-internal",
@@ -278,7 +336,8 @@
                   "boolean | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-application-browser-internal",
@@ -291,7 +350,8 @@
                   "boolean | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

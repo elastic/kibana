@@ -27,6 +27,7 @@
         ],
         "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -38,10 +39,17 @@
         "description": [],
         "signature": [
           "{ readonly isSetupOnHold: jest.MockInstance<boolean, []>; readonly holdSetupUntilResolved: jest.MockInstance<void, [reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>]>; } & ",
-          "PrebootServicePreboot"
+          {
+            "pluginId": "@kbn/core-preboot-server",
+            "scope": "server",
+            "docId": "kibKbnCorePrebootServerPluginApi",
+            "section": "def-server.PrebootServicePreboot",
+            "text": "PrebootServicePreboot"
+          }
         ],
         "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -55,6 +63,7 @@
         "description": [],
         "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-preboot-server-mocks",
@@ -68,6 +77,7 @@
             ],
             "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -90,6 +100,7 @@
             ],
             "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -112,6 +123,7 @@
             ],
             "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

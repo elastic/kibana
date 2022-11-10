@@ -41,6 +41,7 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -60,6 +61,7 @@
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -88,6 +90,7 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -107,6 +110,7 @@
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -135,6 +139,7 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/primary/primary.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -154,6 +159,7 @@
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/primary/primary.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -182,6 +188,7 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -201,6 +208,7 @@
             ],
             "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -231,6 +239,7 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/popover/popover.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -250,6 +259,7 @@
             ],
             "path": "packages/shared-ux/button_toolbar/src/popover/popover.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -269,6 +279,7 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -280,7 +291,8 @@
               "The accessible button label."
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -295,7 +307,8 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -311,6 +324,7 @@
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -327,7 +341,8 @@
               "string | undefined"
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -343,6 +358,7 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -354,7 +370,8 @@
               "Required accessible legend for the whole group"
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -376,7 +393,8 @@
               "[]"
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -404,6 +422,7 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/primary/primary.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -413,7 +432,8 @@
             "label": "label",
             "description": [],
             "path": "packages/shared-ux/button_toolbar/src/buttons/primary/primary.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -429,6 +449,7 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
@@ -441,7 +462,8 @@
               "NamedSlots"
             ],
             "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -459,10 +481,11 @@
         "signature": [
           "{ onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; iconSide?: ",
           "ButtonContentIconSide",
-          " | undefined; }"
+          "; }"
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -479,6 +502,7 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/popover/popover.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -511,6 +535,7 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false

@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { ReactWrapper } from 'enzyme';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
@@ -61,8 +59,6 @@ export const defaultState = {
   dataViews: {
     indexPatterns: {},
     indexPatternRefs: [],
-    existingFields: {},
-    isFirstExistenceFetch: false,
   },
 };
 

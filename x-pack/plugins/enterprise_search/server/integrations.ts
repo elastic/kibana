@@ -396,4 +396,79 @@ export const registerEnterpriseSearchIntegrations = (
     shipper: 'enterprise_search',
     isBeta: false,
   });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'native_connector',
+    title: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.nativeConnectorName',
+      {
+        defaultMessage: 'Use a connector',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.nativeConnectorDescription',
+      {
+        defaultMessage: 'Search over your data sources with a native Enterprise Search connector.',
+      }
+    ),
+    categories: ['elastic_stack', 'enterprise_search'],
+    uiInternalPath:
+      '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoEnterpriseSearch',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'mongodb',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.mongoDBName', {
+      defaultMessage: 'MongoDB',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.mongoDBDescription',
+      {
+        defaultMessage: 'Search over your MongoDB content with Enterprise Search.',
+      }
+    ),
+    categories: ['datastore', 'enterprise_search'],
+    uiInternalPath:
+      '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
+    icons: [
+      {
+        type: 'svg',
+        src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/mongodb.svg'),
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'mysql',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.mysqlName', {
+      defaultMessage: 'MySQL',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.mysqlDescription',
+      {
+        defaultMessage: 'Search over your MySQL content with Enterprise Search.',
+      }
+    ),
+    categories: ['datastore', 'enterprise_search'],
+    uiInternalPath:
+      '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
+    icons: [
+      {
+        type: 'svg',
+        src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/mysql.svg'),
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
 };

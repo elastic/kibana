@@ -41,10 +41,19 @@ export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
   };
 }
 
+type ApiErrorResponse = Omit<request.Response, 'body'> & {
+  body: {
+    statusCode: number;
+    error: string;
+    message: string;
+    attributes: object;
+  };
+};
+
 export type ApmApiSupertest = ReturnType<typeof createApmApiClient>;
 
 export class ApmApiError extends Error {
-  res: request.Response;
+  res: ApiErrorResponse;
 
   constructor(res: request.Response, endpoint: string) {
     super(

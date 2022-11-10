@@ -42,6 +42,10 @@ exports[`has defaults for config 1`] = `
 Object {
   "autoListen": true,
   "compression": Object {
+    "brotli": Object {
+      "enabled": false,
+      "quality": 3,
+    },
     "enabled": true,
   },
   "cors": Object {

@@ -6,12 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonGroup, EuiBetaBadge } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import {
+  EuiTabs,
+  EuiTab,
+  useEuiPaddingSize,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { VIEW_MODE } from './constants';
-import './_index.scss';
+import { SHOW_FIELD_STATISTICS } from '../../../common';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export const DocumentViewModeToggle = ({
   viewMode,
@@ -20,23 +30,47 @@ export const DocumentViewModeToggle = ({
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) => {
-  const toggleButtons = useMemo(
-    () => [
-      {
-        id: VIEW_MODE.DOCUMENT_LEVEL,
-        label: i18n.translate('discover.viewModes.document.label', {
-          defaultMessage: 'Documents',
-        }),
-        'data-test-subj': 'dscViewModeDocumentButton',
-      },
-      {
-        id: VIEW_MODE.AGGREGATED_LEVEL,
-        label: (
-          <div className="fieldStatsButton" data-test-subj="dscViewModeFieldStatsButton">
+  const { uiSettings } = useDiscoverServices();
+
+  const tabsCss = css`
+    padding: 0 ${useEuiPaddingSize('s')};
+    background-color: ${euiThemeVars.euiPageBackgroundColor};
+  `;
+
+  const badgeCellCss = css`
+    margin-left: ${useEuiPaddingSize('s')};
+  `;
+
+  const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
+
+  if (!showViewModeToggle) {
+    return null;
+  }
+
+  return (
+    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle">
+      <EuiTab
+        isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
+        onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
+        className="dscViewModeToggle__tab"
+        data-test-subj="dscViewModeDocumentButton"
+      >
+        <FormattedMessage id="discover.viewModes.document.label" defaultMessage="Documents" />
+      </EuiTab>
+      <EuiTab
+        isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
+        onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
+        className="dscViewModeToggle__tab"
+        data-test-subj="dscViewModeFieldStatsButton"
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+          <EuiFlexItem>
             <FormattedMessage
               id="discover.viewModes.fieldStatistics.label"
               defaultMessage="Field statistics"
             />
+          </EuiFlexItem>
+          <EuiFlexItem css={badgeCellCss}>
             <EuiBetaBadge
               label={i18n.translate('discover.viewModes.fieldStatistics.betaTitle', {
                 defaultMessage: 'Beta',
@@ -44,22 +78,9 @@ export const DocumentViewModeToggle = ({
               size="s"
               className="fieldStatsBetaBadge"
             />
-          </div>
-        ),
-      },
-    ],
-    []
-  );
-
-  return (
-    <EuiButtonGroup
-      className={'dscViewModeToggle'}
-      legend={i18n.translate('discover.viewModes.legend', { defaultMessage: 'View modes' })}
-      buttonSize={'compressed'}
-      options={toggleButtons}
-      idSelected={viewMode}
-      onChange={(id: string) => setDiscoverViewMode(id as VIEW_MODE)}
-      data-test-subj={'dscViewModeToggle'}
-    />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiTab>
+    </EuiTabs>
   );
 };

@@ -69,7 +69,7 @@ export const FleetArtifactsCard = memo<FleetArtifactsCardProps>(
       return {
         backButtonLabel: i18n.translate(
           'xpack.securitySolution.endpoint.fleetCustomExtension.backButtonLabel',
-          { defaultMessage: 'Return to Endpoint Security integrations' }
+          { defaultMessage: 'Return to Elastic Defend integration' }
         ),
         onBackButtonNavigateTo: [
           INTEGRATIONS_PLUGIN_ID,

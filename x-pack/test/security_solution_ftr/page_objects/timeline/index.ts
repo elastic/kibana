@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import testSubjSelector from '@kbn/test-subj-selector';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { FtrService } from '../../../functional/ftr_provider_context';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../helpers/super_date_picker';
 

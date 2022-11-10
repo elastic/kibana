@@ -18,4 +18,5 @@ export interface ChartBase {
       color?: string;
     };
   };
+  description?: string;
 }

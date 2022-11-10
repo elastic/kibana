@@ -13,6 +13,7 @@ export type {
   FormSchema,
   ValidationError,
   ValidationFunc,
+  ArrayItem,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 export {
   getUseField,

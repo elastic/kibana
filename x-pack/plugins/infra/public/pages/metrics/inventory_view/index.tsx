@@ -6,15 +6,10 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { FilterBar } from './components/filter_bar';
-
-import { DocumentTitle } from '../../../components/document_title';
-
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
@@ -27,6 +22,7 @@ import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
+import { fullHeightContentStyles } from '../../../page_template.styles';
 
 export const SnapshotPage = () => {
   const {
@@ -49,21 +45,11 @@ export const SnapshotPage = () => {
 
   return (
     <EuiErrorBoundary>
-      <DocumentTitle
-        title={(previousTitle: string) =>
-          i18n.translate('xpack.infra.infrastructureSnapshotPage.documentTitle', {
-            defaultMessage: '{previousTitle} | Inventory',
-            values: {
-              previousTitle,
-            },
-          })
-        }
-      />
       {isLoading && !source ? (
         <SourceLoadingPage />
       ) : metricIndicesExist ? (
         <>
-          <InventoryPageWrapper className={APP_WRAPPER_CLASS}>
+          <div className={APP_WRAPPER_CLASS}>
             <SavedViewProvider
               shouldLoadDefault={optionsSource === 'default'}
               viewType={'inventory-view'}
@@ -75,8 +61,10 @@ export const SnapshotPage = () => {
                   pageTitle: inventoryTitle,
                   rightSideItems: [<SavedViews />],
                 }}
-                pageBodyProps={{
-                  paddingSize: 'none',
+                pageSectionProps={{
+                  contentProps: {
+                    css: fullHeightContentStyles,
+                  },
                 }}
               >
                 <SnapshotContainer
@@ -94,7 +82,7 @@ export const SnapshotPage = () => {
                 />
               </MetricsPageTemplate>
             </SavedViewProvider>
-          </InventoryPageWrapper>
+          </div>
         </>
       ) : hasFailedLoadingSource ? (
         <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
@@ -104,16 +92,3 @@ export const SnapshotPage = () => {
     </EuiErrorBoundary>
   );
 };
-
-// This is added to facilitate a full height layout whereby the
-// inner container will set it's own height and be scrollable.
-// The "fullHeight" prop won't help us as it only applies to certain breakpoints.
-export const InventoryPageWrapper = euiStyled.div`
-  .euiPage .euiPageContentBody {
-    display: flex;
-    flex-direction: column;
-    flex: 1 0 auto;
-    width: 100%;
-    height: 100%;
-  }
-`;

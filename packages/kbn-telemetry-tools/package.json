@@ -5,7 +5,5 @@
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "main": "./target_node/index.js",
   "private": true,
-  "kibana": {
-    "devOnly": true
-  }
+  "types": "./target_types/index.d.ts"
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="27px" height="40px" viewBox="0 0 27 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>add</title>
+    <defs>
+        <filter x="-28.4%" y="-17.1%" width="156.8%" height="134.3%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="0.9" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.65 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-2">
+            <stop stop-color="#5CD331" offset="0%"></stop>
+            <stop stop-color="#078C04" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="add" filter="url(#filter-1)" transform="translate(4.000000, 4.500000)">
+            <g id="circle" transform="translate(1.000000, 13.500000)" fill="url(#linearGradient-2)">
+                <path d="M0,9 C0,13.97 4.03,18 9,18 L9,18 C13.97,18 18,13.97 18,9 L18,9 C18,4.029 13.97,0 9,0 L9,0 C4.03,0 0,4.029 0,9"></path>
+            </g>
+            <g id="arrow">
+                <polygon id="arrow-border" fill="#FFFFFF" points="0 16 0 0 11.6000004 11.6081174 4.55353306 11.6081174 4.40241581 11.7320012"></polygon>
+                <polygon fill="#000000" points="1 2.29999995 1 13.4999998 3.969 10.6309258 4.129 10.4917767 9.165 10.5"></polygon>
+            </g>
+            <g transform="translate(5.000000, 17.500000)" fill="#FFFFFF" fill-rule="nonzero" id="Path">
+                <path d="M5.25,0 C5.52614237,0 5.75,0.223857625 5.75,0.5 L5.75,4.25 L9.5,4.25 C9.77614237,4.25 10,4.47385763 10,4.75 L10,5.25 C10,5.52614237 9.77614237,5.75 9.5,5.75 L5.75,5.75 L5.75,9.5 C5.75,9.77614237 5.52614237,10 5.25,10 L4.75,10 C4.47385763,10 4.25,9.77614237 4.25,9.5 L4.25,5.75 L0.5,5.75 C0.223857625,5.75 0,5.52614237 0,5.25 L0,4.75 C0,4.47385763 0.223857625,4.25 0.5,4.25 L4.25,4.25 L4.25,0.5 C4.25,0.223857625 4.47385763,0 4.75,0 L5.25,0 Z"></path>
+            </g>
+        </g>
+    </g>
+</svg>

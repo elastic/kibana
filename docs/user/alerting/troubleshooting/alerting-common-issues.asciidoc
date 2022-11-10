@@ -72,7 +72,7 @@ By default, only users with a `superuser` role can query the experimental[] {kib
 
 *Solution*
 
-By default, rules have a `5m` timeout. Rules that run longer than this timeout are automatically cancelled to prevent them from consuming too much of {kib}'s resources. Alerts and actions that may have been scheduled before the rule timed out are discarded. When a rule times out, you will see this error in the {kib} logs:
+By default, rules have a `5m` timeout. Rules that run longer than this timeout are automatically canceled to prevent them from consuming too much of {kib}'s resources. Alerts and actions that may have been scheduled before the rule timed out are discarded. When a rule times out, you will see this error in the {kib} logs:
 
 [source,sh]
 --------------------------------------------------
@@ -243,7 +243,7 @@ Use the <<get-rule-api,get rule API>> to retrieve additional information about r
 
 [float]
 [[rule-cannot-decrypt-api-key]]
-==== Rule cannot decrypt apiKey
+==== Rule cannot decrypt API key
 
 *Problem*:
 
@@ -266,3 +266,24 @@ This error happens when the `xpack.encryptedSavedObjects.encryptionKey` value us
 | Generate a new API key for the rule by disabling then enabling the rule.
 
 |===
+
+[float]
+[[known-issue-upgrade-rule]]
+==== Rules stop running after upgrade
+
+*Problem*:
+
+Alerting rules that were created or edited in 8.2 stop running after you upgrade
+to 8.3.0 or 8.3.1. The following error occurs:
+
+[source,text]
+----
+<rule-type>:<UUID>: execution failed - security_exception: [security_exception] Reason: missing authentication credentials for REST request [/_security/user/_has_privileges], caused by: ""
+----
+
+*Solution*:
+
+Upgrade to 8.3.2 or later releases to avoid the problem. To fix failing rules,
+go to *{stack-manage-app} > {rules-ui}* and multi-select the rules. Choose
+**Manage rules > Update API Keys** to generate new API keys. For more details
+about API key authorization, refer to <<alerting-authorization>>.

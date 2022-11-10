@@ -11,3 +11,4 @@ export type {
   RuleRegistrySearchRequestPagination,
 } from './search_strategy';
 export { BASE_RAC_ALERTS_API_PATH } from './constants';
+export type { BrowserFields, BrowserField } from './types';

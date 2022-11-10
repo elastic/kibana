@@ -23,6 +23,7 @@ import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
+import { getCloudEnterpriseSearchHost } from './shared/get_cloud_enterprise_search_host/get_cloud_enterprise_search_host';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
@@ -39,7 +40,8 @@ export const renderApp = (
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
   const { publicUrl, errorConnectingMessage, ...initialData } = data;
-  externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
+  const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
+  externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
 
   const noProductAccess: ProductAccess = {
     hasAppSearchAccess: false,
@@ -54,10 +56,13 @@ export const renderApp = (
   const store = getContext().store;
 
   const unmountKibanaLogic = mountKibanaLogic({
+    capabilities: core.application.capabilities,
     config,
     productAccess,
     charts: plugins.charts,
     cloud: plugins.cloud,
+    uiSettings: core.uiSettings,
+    guidedOnboarding: plugins.guidedOnboarding,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
     security: plugins.security,

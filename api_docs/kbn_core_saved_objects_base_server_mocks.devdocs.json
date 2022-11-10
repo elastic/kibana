@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-mocks/src/serializer.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
@@ -34,11 +35,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ISavedObjectsSerializer",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsSerializer",
+                "text": "ISavedObjectsSerializer"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-mocks/src/serializer.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -54,6 +62,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-mocks/src/saved_objects_type_registry.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
@@ -64,13 +73,20 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ISavedObjectTypeRegistry",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              },
               " & Pick<",
               "SavedObjectTypeRegistry",
               ", \"registerType\">>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-mocks/src/saved_objects_type_registry.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ServiceStatusLevels } from '@kbn/core-base-common';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
 import type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,

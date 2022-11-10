@@ -30,4 +30,10 @@ export const casesAllUser: User = {
   roles: [casesAll.name],
 };
 
-export const users = [casesReadDeleteUser, casesNoDeleteUser, casesAllUser];
+export const casesAllUser2: User = {
+  username: 'cases_all_user2',
+  password: 'password',
+  roles: [casesAll.name],
+};
+
+export const users = [casesReadDeleteUser, casesNoDeleteUser, casesAllUser, casesAllUser2];

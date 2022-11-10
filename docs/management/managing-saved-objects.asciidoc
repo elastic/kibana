@@ -1,11 +1,10 @@
 [[managing-saved-objects]]
-== Saved Objects
+== Manage saved objects
 
-The *Saved Objects* UI helps you keep track of and manage your saved objects. These objects
-store data for later use, including dashboards, visualizations, maps, data views,
-Canvas workpads, and more.
+Edit, import, export, and copy your saved objects. These objects include
+dashboards, visualizations, maps, {data-sources}, *Canvas* workpads, and other saved objects.
 
-To get started, open the main menu, then click *Stack Management > Saved Objects*.
+To get started, open the main menu, and then click *Stack Management > Saved Objects*.
 
 [role="screenshot"]
 image::images/management-saved-objects.png[Saved Objects]
@@ -13,23 +12,24 @@ image::images/management-saved-objects.png[Saved Objects]
 [float]
 === Required permissions
 
-The `Saved Objects Management` {kib} privilege is required to access the *Saved Objects* UI.
+To access *Saved Objects*, you must have the required `Saved Objects Management` {kib} privilege.
 
-To add the privilege, open the menu, then click *Stack Management > Roles*.
+To add the privilege, open the main menu, and then click *Stack Management > Roles*.
 
-NOTE:
-Granting access to Saved Objects Management will authorize users to manage all saved objects in {kib}, including objects that are managed by applications they may not otherwise be authorized to access.
+NOTE: Granting access to `Saved Objects Management` authorizes users to
+manage all saved objects in {kib}, including objects that are managed by
+applications they may not otherwise be authorized to access.
 
 
 [float]
 [[managing-saved-objects-view]]
 === View and delete
 
-* To view and edit an object in its associated application, click the object title.
+* To view and edit a saved object in its associated application, click the object title.
 
 * To show objects that use this object, so you know the
 impact of deleting it, click the actions icon image:images/actions_icon.png[Actions icon]
-and select *Relationships*.
+and then select *Relationships*.
 
 * To delete one or more objects, select their checkboxes, and then click *Delete*.
 
@@ -37,21 +37,57 @@ and select *Relationships*.
 [[managing-saved-objects-export-objects]]
 === Import and export
 
-Using the import and export actions, you can move objects between different
-{kib} instances. This action is useful when you
-have multiple environments for development and production.
-Import and export also work well when you have a large number
-of objects to update and want to batch the process.
+Use import and export to move objects between different {kib} instances.
+These actions are useful when you have multiple environments for development and production.
+Import and export also work well when you have a large number of objects to update and want to batch the process.
 
-In addition to the user interface, {kib} provides beta <<saved-objects-api-import, import>> and <<saved-objects-api-export, export>> APIs if
-you want to automate this process.
+{kib} also provides <<saved-objects-api-import, import>> and
+<<saved-objects-api-export, export>> APIs to automate this process.
+
+
+[float]
+==== Import
+
+Import multiple objects in a single operation.
+
+. In the toolbar, click *Import*.
+. Select the NDJSON file that
+includes the objects you want to import.
+. Select the import options. By default,
+saved objects already in {kib} are overwritten.
+. Click *Import*.
+
+NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
+limits the number of saved objects to include in the file. The
+<<savedObjects-maxImportPayloadBytes, `savedObjects.maxImportPayloadBytes`>> setting limits the overall
+size of the file that you can import.
+
+
+[float]
+==== Export
+
+Export objects by selection or type.
+
+* To export specific objects, select them in the table, and then click *Export*.
+* To export objects by type, click *Export objects* in the toolbar.
+
+{kib} creates an NDJSON with all your saved objects. By default, the NDJSON includes child objects related to the saved
+objects. Exported dashboards include their associated {data-sources}.
+
+NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
+limits the number of saved objects that you can export.
 
 [float]
 ==== Compatibility across versions
 
-With each release, {kib} introduces changes to the way saved objects are stored. When importing a saved object, {kib} will run the necessary migrations to ensure that the imported saved objects are compatible with the current version.
+With each release, {kib} introduces changes to the way saved objects are stored.
+When importing a saved object, {kib} runs the necessary migrations to ensure
+that the imported saved objects are compatible with the current version.
 
-However, saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of {kib}. See the table below for compatibility examples:
+However, saved objects can only be imported into the same version,
+a newer minor on the same major, or the next major.
+Exported saved objects are not backward compatible and cannot be imported
+into an older version of {kib}. For example:
 
 |=======
 | Exporting version | Importing version | Compatible?
@@ -62,33 +98,6 @@ However, saved objects can only be imported into the same version, a newer minor
 | 6.8.1 | 8.0.0 | No
 |=======
 
-[float]
-==== Import
-
-You can import multiple objects in a single operation. Click *Import* and
-navigate to the NDJSON file that
-represents the objects to import.  By default,
-saved objects already in {kib} are overwritten.
-
-NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
-limits the number of saved objects which may be included in this file. Similarly, the
-<<savedObjects-maxImportPayloadBytes, `savedObjects.maxImportPayloadBytes`>> setting limits the overall
-size of the file that can be imported.
-
-
-[float]
-==== Export
-
-You have two options for exporting saved objects.
-
-* Select the checkboxes of objects that you want to export, and then click *Export*.
-* Click *Export x objects*, and export objects by type.
-
-This action creates an NDJSON with all your saved objects. By default, the NDJSON includes child objects that are related to the saved
-objects. Exported dashboards include their associated data views.
-
-NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
-limits the number of saved objects which may be exported.
 
 
 [float]
@@ -96,12 +105,16 @@ limits the number of saved objects which may be exported.
 [[managing-saved-objects-copy-to-space]]
 === Copy to other {kib} spaces
 
-To copy a saved object to another space, click the actions icon image:images/actions_icon.png[Actions icon]
-and select *Copy to spaces*. From here, you can select the spaces in which to copy the object.
-You can also select whether to automatically overwrite any conflicts in the target spaces, or
-resolve them manually.
+Copy saved objects and their related objects between spaces.
 
-WARNING: The copy operation automatically includes child objects that are related to the saved objects. If you don't want this behavior, use
+. Click the actions icon image:images/actions_icon.png[Actions icon].
+. Click *Copy to spaces*.
+. Select the spaces in which to copy the object.
+. Specify whether to automatically overwrite any objects that already exist
+in the target spaces, or resolve them on a per-object basis.
++
+The copy operation automatically includes child objects that are related to
+the saved object. If you don't want this behavior, use
 the <<spaces-api-copy-saved-objects, copy saved objects to space API>> instead.
 
 [float]
@@ -109,13 +122,18 @@ the <<spaces-api-copy-saved-objects, copy saved objects to space API>> instead.
 [[managing-saved-objects-share-to-space]]
 === Share to other {kib} spaces
 
-To share a saved object to another space -- which makes a single saved object available in multiple spaces -- click the actions icon
-image:images/actions_icon.png[Actions icon] and select *Share to spaces*. From here, you can select the spaces in which to share the object,
-or indicate that you want the object to be shared to _all spaces_, which includes those that exist now and any created in the future.
+Make a single saved object available in multiple spaces.
 
-Not all saved object types are shareable. If an object is shareable, the Spaces column shows which spaces it exists in. You can also click
+. Click the actions icon
+image:images/actions_icon.png[Actions icon].
+. Select *Share to spaces*.
+. Select the spaces in which to share the object.
+Or, indicate that you want the object to be shared to _all spaces_,
+which includes those that exist now and any created in the future.
++
+Not all saved object types are shareable. If an object is shareable, the *Spaces* column shows where the object exists. You can click
 those space icons to open the Share UI.
-
-WARNING: The share operation automatically includes child objects that are related to the saved objects.
++
+The share operation automatically includes child objects that are related to the saved objects.
 
 include::saved-objects/saved-object-ids.asciidoc[]

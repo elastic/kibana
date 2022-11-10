@@ -5,88 +5,37 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState, useRef } from 'react';
-
+import { useQuery } from '@tanstack/react-query';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import * as i18n from './translations';
-import { useHttp, useToasts } from '../common/lib/kibana';
+import { useHttp } from '../common/lib/kibana';
 import { getCasesMetrics } from '../api';
-import { CasesMetrics } from './types';
+import type { CasesMetrics } from './types';
+import { useCasesToast } from '../common/use_cases_toast';
+import type { ServerError } from '../types';
+import { casesQueriesKeys } from './constants';
 
-interface CasesMetricsState extends CasesMetrics {
-  isLoading: boolean;
-  isError: boolean;
-}
-
-const initialData: CasesMetricsState = {
-  mttr: 0,
-  isLoading: true,
-  isError: false,
-};
-
-export interface UseGetCasesMetrics extends CasesMetricsState {
-  fetchCasesMetrics: () => void;
-}
-
-export const useGetCasesMetrics = (): UseGetCasesMetrics => {
+export const useGetCasesMetrics = () => {
   const http = useHttp();
   const { owner } = useCasesContext();
-  const [casesMetricsState, setCasesMetricsState] = useState<CasesMetricsState>(initialData);
-  const toasts = useToasts();
-  const isCancelledRef = useRef(false);
-  const abortCtrlRef = useRef(new AbortController());
+  const { showErrorToast } = useCasesToast();
 
-  const fetchCasesMetrics = useCallback(async () => {
-    try {
-      isCancelledRef.current = false;
-      abortCtrlRef.current.abort();
-      abortCtrlRef.current = new AbortController();
-      setCasesMetricsState({
-        ...initialData,
-        isLoading: true,
-      });
-
-      const response = await getCasesMetrics({
+  return useQuery<CasesMetrics, ServerError>(
+    casesQueriesKeys.casesMetrics(),
+    () => {
+      const abortCtrlRef = new AbortController();
+      return getCasesMetrics({
         http,
-        signal: abortCtrlRef.current.signal,
+        signal: abortCtrlRef.signal,
         query: { owner, features: ['mttr'] },
       });
-
-      if (!isCancelledRef.current) {
-        setCasesMetricsState({
-          ...response,
-          isLoading: false,
-          isError: false,
-        });
-      }
-    } catch (error) {
-      if (!isCancelledRef.current) {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: i18n.ERROR_TITLE }
-          );
-        }
-        setCasesMetricsState({
-          mttr: 0,
-          isLoading: false,
-          isError: true,
-        });
-      }
+    },
+    {
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ERROR_TITLE });
+      },
     }
-  }, [http, owner, toasts]);
-
-  useEffect(() => {
-    fetchCasesMetrics();
-
-    return () => {
-      isCancelledRef.current = true;
-      abortCtrlRef.current.abort();
-    };
-  }, [fetchCasesMetrics]);
-
-  return {
-    ...casesMetricsState,
-    fetchCasesMetrics,
-  };
+  );
 };
+
+export type UseGetCasesMetrics = ReturnType<typeof useGetCasesMetrics>;

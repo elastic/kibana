@@ -17,7 +17,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { IntervalField, QueryIdField, QueryDescriptionField, VersionField } from '../../form';
+import {
+  IntervalField,
+  QueryIdField,
+  QueryDescriptionField,
+  VersionField,
+  ResultsTypeField,
+} from '../../form';
 import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
@@ -92,7 +98,10 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="play" onClick={handleTogglePlayground}>
-              Test configuration
+              <FormattedMessage
+                id="xpack.osquery.savedQueries.form.packConfigSection.testConfigButtonLabel"
+                defaultMessage="Test configuration"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -122,6 +131,8 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
           <IntervalField euiFieldProps={intervalEuiFieldProps} />
           <EuiSpacer size="m" />
           <VersionField euiFieldProps={versionEuiFieldProps} />
+          <EuiSpacer size="m" />
+          <ResultsTypeField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
         <EuiFlexItem>
           <PlatformCheckBoxGroupField euiFieldProps={euiFieldProps} />

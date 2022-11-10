@@ -10,14 +10,14 @@ import { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 
 export async function fetchLicenses(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   filterQuery?: string
 ): Promise<AlertLicense[]> {
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'cluster_stats',
@@ -50,7 +50,11 @@ export async function fetchLicenses(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
+            createDatasetFilter(
+              'cluster_stats',
+              'cluster_stats',
+              getElasticsearchDataset('cluster_stats')
+            ),
             {
               range: {
                 timestamp: {

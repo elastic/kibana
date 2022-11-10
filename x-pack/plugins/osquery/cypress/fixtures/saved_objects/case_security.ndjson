@@ -1,0 +1,42 @@
+{
+  "attributes": {
+    "assignees": [],
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": [],
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2022-09-14T08:29:25.376Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "description": "Test security description",
+    "duration": null,
+    "external_service": null,
+    "owner": "securitySolution",
+    "settings": {
+      "syncAlerts": true
+    },
+    "severity": "low",
+    "status": "open",
+    "tags": [
+      "security"
+    ],
+    "title": "Test Security Case",
+    "updated_at": null,
+    "updated_by": null
+  },
+  "coreMigrationVersion": "8.5.0",
+  "id": "5760cad0-3407-11ed-b29d-758c6c3e798d",
+  "migrationVersion": {
+    "cases": "8.5.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2022-09-14T08:29:25.376Z",
+  "version": "WzE0OTk0LDFd"
+}

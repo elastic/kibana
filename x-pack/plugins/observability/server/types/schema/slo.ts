@@ -6,67 +6,24 @@
  */
 
 import * as t from 'io-ts';
+import { durationType } from './duration';
 
-const allOrAnyString = t.union([t.literal('ALL'), t.string]);
+const occurencesBudgetingMethodSchema = t.literal<string>('occurrences');
+const timeslicesBudgetingMethodSchema = t.literal<string>('timeslices');
 
-const apmTransactionDurationIndicatorSchema = t.type({
-  type: t.literal('slo.apm.transaction_duration'),
-  params: t.type({
-    environment: allOrAnyString,
-    service: allOrAnyString,
-    transaction_type: allOrAnyString,
-    transaction_name: allOrAnyString,
-    'threshold.us': t.number,
-  }),
-});
-
-const apmTransactionErrorRateIndicatorSchema = t.type({
-  type: t.literal('slo.apm.transaction_error_rate'),
-  params: t.intersection([
-    t.type({
-      environment: allOrAnyString,
-      service: allOrAnyString,
-      transaction_type: allOrAnyString,
-      transaction_name: allOrAnyString,
-    }),
-    t.partial({
-      good_status_codes: t.array(
-        t.union([t.literal('2xx'), t.literal('3xx'), t.literal('4xx'), t.literal('5xx')])
-      ),
-    }),
-  ]),
-});
-
-export const rollingTimeWindowSchema = t.type({
-  duration: t.string,
-  is_rolling: t.literal(true),
-});
-
-export const indicatorSchema = t.union([
-  apmTransactionDurationIndicatorSchema,
-  apmTransactionErrorRateIndicatorSchema,
+const budgetingMethodSchema = t.union([
+  occurencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
 ]);
 
-const sloOptionalSettingsSchema = t.partial({
-  settings: t.partial({
-    destination_index: t.string,
-  }),
-});
-
-const createSLOBodySchema = t.intersection([
-  t.type({
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    time_window: rollingTimeWindowSchema,
-    budgeting_method: t.literal('occurrences'),
-    objective: t.type({
-      target: t.number,
-    }),
-  }),
-  sloOptionalSettingsSchema,
+const objectiveSchema = t.intersection([
+  t.type({ target: t.number }),
+  t.partial({ timeslice_target: t.number, timeslice_window: durationType }),
 ]);
 
-export const createSLOParamsSchema = t.type({
-  body: createSLOBodySchema,
-});
+export {
+  budgetingMethodSchema,
+  occurencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
+  objectiveSchema,
+};

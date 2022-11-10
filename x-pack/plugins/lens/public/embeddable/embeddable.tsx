@@ -7,9 +7,19 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { DataViewBase, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  DataViewBase,
+  EsQueryConfig,
+  Filter,
+  Query,
+  AggregateQuery,
+  TimeRange,
+  isOfQueryType,
+} from '@kbn/es-query';
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
@@ -54,7 +64,7 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
@@ -70,6 +80,7 @@ import {
   DatasourceMap,
   Datasource,
   IndexPatternMap,
+  OperationDescriptor,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -77,9 +88,14 @@ import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
-import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
+import {
+  getActiveDatasourceIdFromDoc,
+  getIndexPatternsObjects,
+  getSearchWarningMessages,
+  inferTimeField,
+} from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
-import { convertDataViewIntoLensIndexPattern } from '../indexpattern_service/loader';
+import { convertDataViewIntoLensIndexPattern } from '../data_views_service/loader';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -92,14 +108,38 @@ export interface LensUnwrapResult {
   metaInfo?: LensUnwrapMetaInfo;
 }
 
+interface ChartInfo {
+  layers: ChartLayerDescriptor[];
+  visualizationType: string;
+  filters: Document['state']['filters'];
+  query: Document['state']['query'];
+}
+
+export interface ChartLayerDescriptor {
+  dataView?: DataView;
+  layerId: string;
+  layerType: string;
+  chartType?: string;
+  icon?: IconType;
+  label?: string;
+  dimensions: Array<{
+    name: string;
+    id: string;
+    role: 'split' | 'metric';
+    operation: OperationDescriptor;
+  }>;
+}
+
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  timeslice?: [number, number];
   palette?: PaletteOutput;
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
+  noPadding?: boolean;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
   onFilter?: (data: ClickTriggerEvent['data']) => void;
@@ -149,7 +189,7 @@ export interface ViewUnderlyingDataArgs {
   indexPatternId: string;
   timeRange: TimeRange;
   filters: Filter[];
-  query: Query | undefined;
+  query: Query | AggregateQuery | undefined;
   columns: string[];
 }
 
@@ -199,9 +239,21 @@ function getViewUnderlyingDataArgs({
   if (error || !meta) {
     return;
   }
+  const luceneOrKuery: Query[] = [];
+  const aggregateQuery: AggregateQuery[] = [];
+
+  if (Array.isArray(query)) {
+    query.forEach((q) => {
+      if (isOfQueryType(q)) {
+        luceneOrKuery.push(q);
+      } else {
+        aggregateQuery.push(q);
+      }
+    });
+  }
 
   const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
-    query as Query,
+    luceneOrKuery.length > 0 ? luceneOrKuery : (query as Query),
     filters,
     meta,
     dataViews,
@@ -212,7 +264,7 @@ function getViewUnderlyingDataArgs({
     indexPatternId: meta.id,
     timeRange,
     filters: newFilters,
-    query: newQuery,
+    query: aggregateQuery.length > 0 ? aggregateQuery[0] : newQuery,
     columns: meta.columns,
   };
 }
@@ -232,6 +284,7 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
+  private warningDomNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
   private errors: ErrorMessage[] | undefined;
@@ -279,13 +332,21 @@ export class Embeddable
 
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
+    let containerStateChangedCalledAlready = false;
     this.initializeSavedVis(initialInput)
-      .then(() => this.onContainerStateChanged(initialInput))
+      .then(() => {
+        if (!containerStateChangedCalledAlready) {
+          this.onContainerStateChanged(initialInput);
+        } else {
+          this.reload();
+        }
+      })
       .catch((e) => this.onFatalError(e));
 
-    this.subscription = this.getUpdated$().subscribe(() =>
-      this.onContainerStateChanged(this.input)
-    );
+    this.subscription = this.getUpdated$().subscribe(() => {
+      containerStateChangedCalledAlready = true;
+      this.onContainerStateChanged(this.input);
+    });
 
     const input$ = this.getInput$();
     this.embeddableTitle = this.getTitle();
@@ -456,6 +517,7 @@ export class Embeddable
     this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
 
     await this.initializeOutput();
+
     this.isInitialized = true;
   }
 
@@ -468,15 +530,23 @@ export class Embeddable
     const cleanedFilters = containerState.filters
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
+    const nextTimeRange =
+      containerState.timeslice !== undefined
+        ? {
+            from: new Date(containerState.timeslice[0]).toISOString(),
+            to: new Date(containerState.timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : containerState.timeRange;
     if (
-      !isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
+      !isEqual(nextTimeRange, this.externalSearchContext.timeRange) ||
       !isEqual(containerState.query, this.externalSearchContext.query) ||
       !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
       this.externalSearchContext.searchSessionId !== containerState.searchSessionId ||
       this.embeddableTitle !== this.getTitle()
     ) {
       this.externalSearchContext = {
-        timeRange: containerState.timeRange,
+        timeRange: nextTimeRange,
         query: containerState.query,
         filters: cleanedFilters,
         searchSessionId: containerState.searchSessionId,
@@ -486,6 +556,35 @@ export class Embeddable
     }
 
     return isDirty;
+  }
+
+  private handleWarnings(adapters?: Partial<DefaultInspectorAdapters>) {
+    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
+
+    if (!activeDatasourceId || !adapters?.requests) {
+      return;
+    }
+
+    const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
+    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+
+    const requestWarnings = getSearchWarningMessages(
+      adapters.requests,
+      activeDatasource,
+      docDatasourceState,
+      {
+        searchService: this.deps.data.search,
+      }
+    );
+
+    if (requestWarnings.length && this.warningDomNode) {
+      render(
+        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <Warnings warnings={requestWarnings} compressed />
+        </KibanaThemeProvider>,
+        this.warningDomNode
+      );
+    }
   }
 
   private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
@@ -501,6 +600,8 @@ export class Embeddable
       loading: false,
       error: type === 'error' ? error : undefined,
     });
+
+    this.handleWarnings(adapters);
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -528,10 +629,18 @@ export class Embeddable
 
     const executionContext = this.getExecutionContext();
 
-    trackUiCounterEvents(
-      [...datasourceEvents, ...visualizationEvents, ...getExecutionContextEvents(executionContext)],
-      executionContext
-    );
+    const events = [
+      ...datasourceEvents,
+      ...visualizationEvents,
+      ...getExecutionContextEvents(executionContext),
+    ];
+
+    const adHocDataViews = Object.values(this.savedVis?.state.adHocDataViews || {});
+    adHocDataViews.forEach(() => {
+      events.push('ad_hoc_data_view');
+    });
+
+    trackUiCounterEvents(events, executionContext);
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
@@ -560,6 +669,25 @@ export class Embeddable
     }
   }
 
+  private getError(): Error | undefined {
+    const message =
+      typeof this.errors?.[0]?.longMessage === 'string'
+        ? this.errors[0].longMessage
+        : this.errors?.[0]?.shortMessage;
+
+    if (message != null) {
+      return new Error(message);
+    }
+
+    if (!this.expression) {
+      return new Error(
+        i18n.translate('xpack.lens.embeddable.failure', {
+          defaultMessage: "Visualization couldn't be displayed",
+        })
+      );
+    }
+  }
+
   /**
    *
    * @param {HTMLElement} domNode
@@ -580,7 +708,7 @@ export class Embeddable
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
-      error: undefined,
+      error: this.getError(),
     });
     this.renderComplete.dispatchInProgress();
 
@@ -606,15 +734,30 @@ export class Embeddable
           renderMode={input.renderMode}
           syncColors={input.syncColors}
           syncTooltips={input.syncTooltips}
+          syncCursor={input.syncCursor}
           hasCompatibleActions={this.hasCompatibleActions}
           className={input.className}
           style={input.style}
           executionContext={this.getExecutionContext()}
           canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-          onRuntimeError={() => {
+          onRuntimeError={(message) => {
+            this.updateOutput({ error: new Error(message) });
             this.logError('runtime');
           }}
           noPadding={this.visDisplayOptions?.noPadding}
+        />
+        <div
+          css={css({
+            position: 'absolute',
+            zIndex: 2,
+            left: 0,
+            bottom: 0,
+          })}
+          ref={(el) => {
+            if (el) {
+              this.warningDomNode = el;
+            }
+          }}
         />
       </KibanaThemeProvider>,
       domNode
@@ -656,6 +799,7 @@ export class Embeddable
         this.savedVis.state.filters,
         this.savedVis.references
       ),
+      disableShardWarnings: true,
     };
 
     if (this.externalSearchContext.query) {
@@ -961,6 +1105,46 @@ export class Embeddable
     };
   }
 
+  public getChartInfo(): Readonly<ChartInfo | undefined> {
+    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
+    if (!activeDatasourceId || !this.savedVis?.visualizationType) {
+      return undefined;
+    }
+
+    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+    const dataSourceInfo = this.deps.datasourceMap[activeDatasourceId].getDatasourceInfo(
+      docDatasourceState,
+      this.savedVis?.references,
+      this.indexPatterns
+    );
+    const chartInfo = this.deps.visualizationMap[
+      this.savedVis.visualizationType
+    ].getVisualizationInfo?.(this.savedVis?.state.visualization);
+
+    const layers = chartInfo?.layers.map((l) => {
+      const dataSource = dataSourceInfo.find((info) => info.layerId === l.layerId);
+      const updatedDimensions = l.dimensions.map((d) => {
+        return {
+          ...d,
+          ...dataSource?.columns.find((c) => c.id === d.id)!,
+        };
+      });
+      return {
+        ...l,
+        dataView: dataSource?.dataView,
+        dimensions: updatedDimensions,
+      };
+    });
+    return layers
+      ? {
+          layers,
+          visualizationType: this.savedVis.visualizationType,
+          filters: this.savedVis.state.filters,
+          query: this.savedVis.state.query,
+        }
+      : undefined;
+  }
+
   private get visDisplayOptions(): VisualizationDisplayOptions | undefined {
     if (
       !this.savedVis?.visualizationType ||
@@ -968,6 +1152,17 @@ export class Embeddable
     ) {
       return;
     }
-    return this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+
+    let displayOptions =
+      this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+
+    if (this.input.noPadding !== undefined) {
+      displayOptions = {
+        ...displayOptions,
+        noPadding: this.input.noPadding,
+      };
+    }
+
+    return displayOptions;
   }
 }

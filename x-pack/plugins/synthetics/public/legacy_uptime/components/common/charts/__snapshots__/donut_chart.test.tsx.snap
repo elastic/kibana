@@ -233,6 +233,17 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": true,
               },
             },
+            "flamegraph": Object {
+              "navigation": Object {
+                "buttonBackgroundColor": "rgb(204, 228, 245)",
+                "buttonDisabledBackgroundColor": "rgba(211, 218, 230, 0.15)",
+                "buttonDisabledTextColor": "rgb(162, 171, 186)",
+                "buttonTextColor": "rgb(0, 97, 166)",
+                "textColor": "rgb(52, 55, 65)",
+              },
+              "scrollbarThumb": "rgb(52, 55, 65)",
+              "scrollbarTrack": "rgb(211, 218, 230)",
+            },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
               "barThicknessMinSizeRatio": 0.1,
@@ -403,6 +414,8 @@ exports[`DonutChart component passes correct props without errors for valid prop
             "metric": Object {
               "background": "#FFFFFF",
               "barBackground": "#EDF0F5",
+              "border": "#EDF0F5",
+              "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {
                 "darkColor": "#343741",

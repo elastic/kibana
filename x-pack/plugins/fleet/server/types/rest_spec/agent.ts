@@ -113,6 +113,32 @@ export const PutAgentReassignRequestSchema = {
   }),
 };
 
+export const PostRequestDiagnosticsActionRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+};
+
+export const PostBulkRequestDiagnosticsActionRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    batchSize: schema.maybe(schema.number()),
+  }),
+};
+
+export const ListAgentUploadsRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+};
+
+export const GetAgentUploadFileRequestSchema = {
+  params: schema.object({
+    fileId: schema.string(),
+    fileName: schema.string(),
+  }),
+};
+
 export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
     policy_id: schema.string(),
@@ -157,5 +183,13 @@ export const GetAgentDataRequestSchema = {
   query: schema.object({
     agentsIds: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     previewData: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const GetActionStatusRequestSchema = {
+  query: schema.object({
+    page: schema.number({ defaultValue: 0 }),
+    perPage: schema.number({ defaultValue: 20 }),
+    kuery: schema.maybe(schema.string()),
   }),
 };

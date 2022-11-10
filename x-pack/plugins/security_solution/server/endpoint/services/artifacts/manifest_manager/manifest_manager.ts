@@ -21,7 +21,7 @@ import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import type { ListResult } from '@kbn/fleet-plugin/common';
-import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import type { ManifestSchema } from '../../../../../common/endpoint/schema/manifest';
@@ -92,7 +92,7 @@ export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
   artifactClient: EndpointArtifactClientInterface;
   exceptionListClient: ExceptionListClient;
-  packagePolicyService: PackagePolicyServiceInterface;
+  packagePolicyService: PackagePolicyClient;
   logger: Logger;
   cache: LRU<string, Buffer>;
   experimentalFeatures: ExperimentalFeatures;
@@ -109,7 +109,7 @@ const manifestsEqual = (manifest1: ManifestSchema, manifest2: ManifestSchema) =>
 export class ManifestManager {
   protected artifactClient: EndpointArtifactClientInterface;
   protected exceptionListClient: ExceptionListClient;
-  protected packagePolicyService: PackagePolicyServiceInterface;
+  protected packagePolicyService: PackagePolicyClient;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
   protected cache: LRU<string, Buffer>;

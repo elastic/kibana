@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useState, useEffect } from 'react';
+import React, { useCallback, useContext, useState, useEffect, useRef } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiPopover,
+  EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -37,6 +38,11 @@ import { TestRun } from '../test_now_mode/test_now_mode';
 import { monitorManagementListSelector } from '../../../state/selectors';
 
 import { kibanaService } from '../../../state/kibana_service';
+
+import {
+  PRIVATE_AVAILABLE_LABEL,
+  TEST_SCHEDULED_LABEL,
+} from '../../overview/monitor_list/translations';
 
 export interface ActionBarProps {
   monitor: SyntheticsMonitor;
@@ -63,9 +69,13 @@ export const ActionBar = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean | undefined>(undefined);
+  const mouseMoveTimeoutIds = useRef<[number, number]>([0, 0]);
   const isReadOnly = monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
 
-  const hasServiceManagedLocation = monitor.locations?.some((loc) => loc.isServiceManaged);
+  const isAnyPublicLocationSelected = monitor.locations?.some((loc) => loc.isServiceManaged);
+  const isOnlyPrivateLocations =
+    !locations.some((loc) => loc.isServiceManaged) ||
+    ((monitor.locations?.length ?? 0) > 0 && !isAnyPublicLocationSelected);
 
   const { data, status } = useFetcher(() => {
     if (!isSaving || !isValid) {
@@ -139,37 +149,65 @@ export const ActionBar = ({
             <EuiFlexItem grow={false}>
               <WarningText>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</WarningText>
             </EuiFlexItem>
+
             {onTestNow && (
               <EuiFlexItem grow={false}>
                 {/* Popover is used instead of EuiTooltip until the resolution of https://github.com/elastic/eui/issues/5604 */}
-                <EuiPopover
-                  repositionOnScroll={true}
-                  button={
-                    <EuiButton
-                      css={{ width: '100%' }}
-                      fill
-                      size="s"
-                      color="success"
-                      iconType="play"
-                      disabled={!isValid || isTestRunInProgress || !hasServiceManagedLocation}
-                      data-test-subj={'monitorTestNowRunBtn'}
-                      onClick={() => onTestNow()}
-                      onMouseEnter={() => {
-                        setIsPopoverOpen(true);
-                      }}
-                      onMouseLeave={() => {
-                        setIsPopoverOpen(false);
-                      }}
-                    >
-                      {testRun ? RE_RUN_TEST_LABEL : RUN_TEST_LABEL}
-                    </EuiButton>
-                  }
-                  isOpen={isPopoverOpen}
+                <EuiOutsideClickDetector
+                  onOutsideClick={() => {
+                    setIsPopoverOpen(false);
+                  }}
                 >
-                  <EuiText style={{ width: 260, outline: 'none' }}>
-                    <p>{TEST_NOW_DESCRIPTION}</p>
-                  </EuiText>
-                </EuiPopover>
+                  <EuiPopover
+                    repositionOnScroll={true}
+                    ownFocus={false}
+                    initialFocus={''}
+                    button={
+                      <EuiButton
+                        css={{ width: '100%' }}
+                        fill
+                        size="s"
+                        color="success"
+                        iconType="play"
+                        disabled={!isValid || isTestRunInProgress || !isAnyPublicLocationSelected}
+                        data-test-subj={'monitorTestNowRunBtn'}
+                        onClick={() => onTestNow()}
+                        onMouseOver={() => {
+                          // We need this custom logic to display a popover even when button is disabled.
+                          clearTimeout(mouseMoveTimeoutIds.current[1]);
+                          if (mouseMoveTimeoutIds.current[0] === 0) {
+                            mouseMoveTimeoutIds.current[0] = setTimeout(() => {
+                              clearTimeout(mouseMoveTimeoutIds.current[1]);
+                              setIsPopoverOpen(true);
+                            }, 250) as unknown as number;
+                          }
+                        }}
+                        onMouseOut={() => {
+                          // We need this custom logic to display a popover even when button is disabled.
+                          clearTimeout(mouseMoveTimeoutIds.current[1]);
+                          mouseMoveTimeoutIds.current[1] = setTimeout(() => {
+                            clearTimeout(mouseMoveTimeoutIds.current[0]);
+                            setIsPopoverOpen(false);
+                            mouseMoveTimeoutIds.current = [0, 0];
+                          }, 100) as unknown as number;
+                        }}
+                      >
+                        {testRun ? RE_RUN_TEST_LABEL : RUN_TEST_LABEL}
+                      </EuiButton>
+                    }
+                    isOpen={isPopoverOpen}
+                  >
+                    <EuiText style={{ width: 260, outline: 'none' }}>
+                      <p>
+                        {isTestRunInProgress
+                          ? TEST_SCHEDULED_LABEL
+                          : isOnlyPrivateLocations || (isValid && !isAnyPublicLocationSelected)
+                          ? PRIVATE_AVAILABLE_LABEL
+                          : TEST_NOW_DESCRIPTION}
+                      </p>
+                    </EuiText>
+                  </EuiPopover>
+                </EuiOutsideClickDetector>
               </EuiFlexItem>
             )}
 

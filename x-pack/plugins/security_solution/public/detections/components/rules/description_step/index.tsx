@@ -18,7 +18,7 @@ import { buildRelatedIntegrationsDescription } from '../related_integrations/int
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-} from '../../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/detection_engine/rule_schema';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -48,7 +48,7 @@ import { buildMlJobsDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
 import { THREAT_QUERY_LABEL } from './translations';
-import { filterEmptyThreats } from '../../../pages/detection_engine/rules/create/helpers';
+import { filterEmptyThreats } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -176,12 +176,14 @@ export const getDescriptionItem = (
     const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);
     const query = get('queryBar.query.query', data);
     const savedId = get('queryBar.saved_id', data);
+    const savedQueryName = get('queryBar.title', data);
     return buildQueryBarDescription({
       field,
       filters,
       filterManager,
       query,
       savedId,
+      savedQueryName,
       indexPatterns,
     });
   } else if (field === 'eqlOptions') {

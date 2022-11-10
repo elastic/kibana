@@ -20,10 +20,17 @@
         "description": [],
         "signature": [
           "() => ",
-          "OpsProcessMetrics"
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.OpsProcessMetrics",
+            "text": "OpsProcessMetrics"
+          }
         ],
         "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/process.mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -42,6 +49,7 @@
         "description": [],
         "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
@@ -52,11 +60,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "MetricsCollector",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.MetricsCollector",
+                "text": "MetricsCollector"
+              },
               "<any>>"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -69,10 +84,17 @@
             "description": [],
             "signature": [
               "() => ",
-              "OpsProcessMetrics"
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.OpsProcessMetrics",
+                "text": "OpsProcessMetrics"
+              }
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -88,6 +110,7 @@
         "description": [],
         "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/collector.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
@@ -98,11 +121,18 @@
             "description": [],
             "signature": [
               "<T = any>(collectReturnValue?: any) => jest.Mocked<",
-              "MetricsCollector",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.MetricsCollector",
+                "text": "MetricsCollector"
+              },
               "<T>>"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/collector.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -116,7 +146,8 @@
                   "any"
                 ],
                 "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/collector.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -132,6 +163,7 @@
         "description": [],
         "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
@@ -142,12 +174,25 @@
             "description": [],
             "signature": [
               "(overwrites?: Partial<",
-              "IntervalHistogram",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.IntervalHistogram",
+                "text": "IntervalHistogram"
+              },
               ">) => ",
-              "IntervalHistogram"
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.IntervalHistogram",
+                "text": "IntervalHistogram"
+              }
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -161,7 +206,8 @@
                   "{ fromTimestamp?: string | undefined; lastUpdatedAt?: string | undefined; min?: number | undefined; max?: number | undefined; mean?: number | undefined; exceeds?: number | undefined; stddev?: number | undefined; percentiles?: { 50: number; 75: number; 95: number; 99: number; } | undefined; }"
                 ],
                 "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -174,10 +220,17 @@
             "description": [],
             "signature": [
               "() => ",
-              "EventLoopDelaysMonitor"
+              {
+                "pluginId": "@kbn/core-metrics-collectors-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
+                "section": "def-server.EventLoopDelaysMonitor",
+                "text": "EventLoopDelaysMonitor"
+              }
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

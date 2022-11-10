@@ -14,7 +14,7 @@ import { ApiScope, PluginOrPackage, Reference } from '../types';
 import {
   getKibanaPlatformPackage,
   getKibanaPlatformPlugin,
-} from '../tests/kibana_platform_plugin_mock';
+} from '../integration_tests/kibana_platform_plugin_mock';
 
 const plugin = getKibanaPlatformPlugin('pluginA');
 const packageA = getKibanaPlatformPackage('@kbn/package-a');
@@ -135,7 +135,7 @@ it('test full file imports with a matching plugin', () => {
         "pluginId": "pluginA",
         "scope": "public",
         "section": undefined,
-        "text": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index",
+        "text": "packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_a/public/foo/index",
       },
       " something",
     ]

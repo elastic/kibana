@@ -36,7 +36,7 @@ import type {
   PackageVerificationResult,
 } from '../../../types';
 import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common/constants';
-import { IngestManagerError, PackageOutdatedError } from '../../../errors';
+import { FleetError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { licenseService } from '../..';
 import { appContextService } from '../../app_context';
@@ -113,7 +113,7 @@ export async function ensureInstalledPackage(options: {
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion
     ? { name: pkgName, version: pkgVersion }
-    : await Registry.fetchFindLatestPackageOrThrow(pkgName);
+    : await Registry.fetchFindLatestPackageOrThrow(pkgName, { prerelease: true });
 
   const installedPackageResult = await isPackageVersionOrLaterInstalled({
     savedObjectsClient,
@@ -170,14 +170,14 @@ export async function handleInstallPackageFailure({
   spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  error: IngestManagerError | Boom.Boom | Error;
+  error: FleetError | Boom.Boom | Error;
   pkgName: string;
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
   esClient: ElasticsearchClient;
   spaceId: string;
 }) {
-  if (error instanceof IngestManagerError) {
+  if (error instanceof FleetError) {
     return;
   }
   const logger = appContextService.getLogger();
@@ -234,6 +234,7 @@ interface InstallRegistryPackageParams {
   force?: boolean;
   neverIgnoreVerificationError?: boolean;
   ignoreConstraints?: boolean;
+  prerelease?: boolean;
 }
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -301,8 +302,9 @@ async function installPackageFromRegistry({
     const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
+        prerelease: true,
       }),
-      Registry.getRegistryPackage(pkgName, pkgVersion, {
+      Registry.getPackage(pkgName, pkgVersion, {
         ignoreUnverified: force && !neverIgnoreVerificationError,
       }),
     ]);

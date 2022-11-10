@@ -7,13 +7,14 @@
  */
 
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+
+import { RuntimeField, RuntimePrimitiveTypes, FieldSpec } from '../types';
+import { stubLogstashFields } from '../field.stub';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { last, map } from 'lodash';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
-import { stubLogstashFields } from '../field.stub';
 import { DataViewField } from '../fields';
-import { FieldSpec, RuntimeField, RuntimeTypeExceptComposite } from '../types';
 import { DataView } from './data_view';
 
 class MockFieldFormatter {}
@@ -262,10 +263,10 @@ describe('IndexPattern', () => {
       },
       fields: {
         a: {
-          type: 'keyword' as RuntimeTypeExceptComposite,
+          type: 'keyword' as RuntimePrimitiveTypes,
         },
         b: {
-          type: 'long' as RuntimeTypeExceptComposite,
+          type: 'long' as RuntimePrimitiveTypes,
         },
       },
     };
@@ -405,6 +406,19 @@ describe('IndexPattern', () => {
     });
   });
 
+  describe('getIndexPattern', () => {
+    test('should return the index pattern, labeled title on the data view spec', () => {
+      expect(indexPattern.getIndexPattern()).toBe(
+        stubbedSavedObjectIndexPattern().attributes.title
+      );
+    });
+
+    test('setIndexPattern', () => {
+      indexPattern.setIndexPattern('test');
+      expect(indexPattern.getIndexPattern()).toBe('test');
+    });
+  });
+
   describe('getFormatterForField', () => {
     test('should return the default one for empty objects', () => {
       indexPattern.setFieldFormat('scriptedFieldWithEmptyFormatter', {});
@@ -451,7 +465,7 @@ describe('IndexPattern', () => {
         metaFields: [],
       });
       expect(restoredPattern.id).toEqual(indexPattern.id);
-      expect(restoredPattern.title).toEqual(indexPattern.title);
+      expect(restoredPattern.getIndexPattern()).toEqual(indexPattern.getIndexPattern());
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
     });

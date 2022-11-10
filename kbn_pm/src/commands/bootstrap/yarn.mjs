@@ -7,20 +7,20 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
+import Fsp from 'fs/promises';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
 import { maybeRealpath, isFile, isDirectory } from '../../lib/fs.mjs';
 
 // yarn integrity file checker
-export function removeYarnIntegrityFileIfExists() {
+export async function removeYarnIntegrityFileIfExists() {
   try {
-    const nodeModulesRealPath = maybeRealpath(Path.resolve(REPO_ROOT, 'node_modules'));
+    const nodeModulesRealPath = await maybeRealpath(Path.resolve(REPO_ROOT, 'node_modules'));
     const yarnIntegrityFilePath = Path.resolve(nodeModulesRealPath, '.yarn-integrity');
 
     // check if the file exists and delete it in that case
-    if (isFile(yarnIntegrityFilePath)) {
-      Fs.unlinkSync(yarnIntegrityFilePath);
+    if (await isFile(yarnIntegrityFilePath)) {
+      await Fsp.unlink(yarnIntegrityFilePath);
     }
   } catch {
     // no-op
@@ -28,26 +28,18 @@ export function removeYarnIntegrityFileIfExists() {
 }
 
 // yarn and bazel integration checkers
-function areNodeModulesPresent() {
-  try {
-    return isDirectory(Path.resolve(REPO_ROOT, 'node_modules'));
-  } catch {
-    return false;
-  }
+async function areNodeModulesPresent() {
+  return await isDirectory(Path.resolve(REPO_ROOT, 'node_modules'));
 }
 
-function haveBazelFoldersBeenCreatedBefore() {
-  try {
-    return (
-      isDirectory(Path.resolve(REPO_ROOT, 'bazel-bin/packages')) ||
-      isDirectory(Path.resolve(REPO_ROOT, 'bazel-kibana/packages')) ||
-      isDirectory(Path.resolve(REPO_ROOT, 'bazel-out/host'))
-    );
-  } catch {
-    return false;
-  }
+async function haveBazelFoldersBeenCreatedBefore() {
+  return (
+    (await isDirectory(Path.resolve(REPO_ROOT, 'bazel-bin/packages'))) ||
+    (await isDirectory(Path.resolve(REPO_ROOT, 'bazel-kibana/packages'))) ||
+    (await isDirectory(Path.resolve(REPO_ROOT, 'bazel-out/host')))
+  );
 }
 
-export function haveNodeModulesBeenManuallyDeleted() {
-  return !areNodeModulesPresent() && haveBazelFoldersBeenCreatedBefore();
+export async function haveNodeModulesBeenManuallyDeleted() {
+  return !(await areNodeModulesPresent()) && (await haveBazelFoldersBeenCreatedBefore());
 }

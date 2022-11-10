@@ -31,6 +31,7 @@ import type { FieldFormInternal } from '../field_editor';
 interface Props {
   links: { runtimePainless: string };
   existingConcreteFields?: Array<{ name: string; type: string }>;
+  placeholder?: string;
 }
 
 const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessContext => {
@@ -52,7 +53,7 @@ const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessConte
   }
 };
 
-const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
+const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Props) => {
   const monacoEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorValidationSubscription = useRef<Subscription>();
   const fieldCurrentValue = useRef<string>('');
@@ -221,6 +222,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
               id="runtimeFieldScript"
               error={errorMessage}
               isInvalid={!isValid}
+              data-test-subj="scriptFieldRow"
               helpText={
                 <FormattedMessage
                   id="indexPatternFieldEditor.editor.form.source.scriptFieldHelpText"
@@ -276,6 +278,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
                     defaultMessage: 'Script editor',
                   }
                 )}
+                placeholder={placeholder}
               />
             </EuiFormRow>
           </>

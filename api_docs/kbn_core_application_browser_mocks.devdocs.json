@@ -31,7 +31,13 @@
         "description": [],
         "signature": [
           "{ createSubHistory: jest.MockInstance<",
-          "ScopedHistory",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.ScopedHistory",
+            "text": "ScopedHistory"
+          },
           "<unknown>, [basePath: string]>; createHref: jest.MockInstance<string, [location: ",
           "LocationDescriptorObject",
           "<unknown>, options?: { prependBasePath?: boolean | undefined; } | undefined]>; length: number; action: ",
@@ -51,11 +57,18 @@
           ", [listener: ",
           "LocationListener",
           "<unknown>]>; } & ",
-          "ScopedHistory",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.ScopedHistory",
+            "text": "ScopedHistory"
+          },
           "<unknown>"
         ],
         "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -69,6 +82,7 @@
         "description": [],
         "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-mocks",
@@ -82,6 +96,7 @@
             ],
             "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -94,11 +109,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ApplicationSetup",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ApplicationSetup",
+                "text": "ApplicationSetup"
+              },
               ">"
             ],
             "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -111,11 +133,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ApplicationStart",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ApplicationStart",
+                "text": "ApplicationStart"
+              },
               ">"
             ],
             "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -133,6 +162,7 @@
             ],
             "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -150,6 +180,7 @@
             ],
             "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -162,13 +193,26 @@
             "description": [],
             "signature": [
               "(parts?: Partial<",
-              "AppMountParameters",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppMountParameters",
+                "text": "AppMountParameters"
+              },
               "<unknown>>) => ",
-              "AppMountParameters",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppMountParameters",
+                "text": "AppMountParameters"
+              },
               "<unknown>"
             ],
             "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -180,19 +224,44 @@
                 "description": [],
                 "signature": [
                   "{ element?: HTMLElement | undefined; history?: ",
-                  "ScopedHistory",
+                  {
+                    "pluginId": "@kbn/core-application-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                    "section": "def-common.ScopedHistory",
+                    "text": "ScopedHistory"
+                  },
                   "<unknown> | undefined; appBasePath?: string | undefined; onAppLeave?: ((handler: ",
-                  "AppLeaveHandler",
+                  {
+                    "pluginId": "@kbn/core-application-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                    "section": "def-common.AppLeaveHandler",
+                    "text": "AppLeaveHandler"
+                  },
                   ") => void) | undefined; setHeaderActionMenu?: ((menuMount: ",
-                  "MountPoint",
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
                   "<HTMLElement> | undefined) => void) | undefined; theme$?: ",
                   "Observable",
                   "<",
-                  "CoreTheme",
+                  {
+                    "pluginId": "@kbn/core-theme-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreThemeBrowserPluginApi",
+                    "section": "def-common.CoreTheme",
+                    "text": "CoreTheme"
+                  },
                   "> | undefined; }"
                 ],
                 "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -208,6 +277,7 @@
         "description": [],
         "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser-mocks",
@@ -230,6 +300,7 @@
             ],
             "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -243,7 +314,8 @@
                   "{ pathname?: string | undefined; search?: string | undefined; state?: unknown; hash?: string | undefined; key?: string | undefined; }"
                 ],
                 "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

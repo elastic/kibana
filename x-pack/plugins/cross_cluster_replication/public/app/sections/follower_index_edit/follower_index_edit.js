@@ -13,8 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiConfirmModal,
-  EuiPageContentBody,
-  EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
 } from '@elastic/eui';
 

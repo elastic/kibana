@@ -8,6 +8,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
+import type { StatusResponse } from '@kbn/core-status-common-internal';
 import { createSecuritySuperuser } from './security_user_services';
 
 export interface RuntimeServices {
@@ -115,4 +116,25 @@ export const createKbnClient = ({
   }
 
   return new KbnClient({ log, url: kbnUrl });
+};
+
+/**
+ * Retrieves the Stack (kibana/ES) version from the `/api/status` kibana api
+ * @param kbnClient
+ */
+export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> => {
+  const status = (
+    await kbnClient.request<StatusResponse>({
+      method: 'GET',
+      path: '/api/status',
+    })
+  ).data;
+
+  if (!status?.version?.number) {
+    throw new Error(
+      `unable to get stack version from '/api/status' \n${JSON.stringify(status, null, 2)}`
+    );
+  }
+
+  return status.version.number;
 };

@@ -6,6 +6,7 @@
  */
 
 import nodeCrypto from '@elastic/node-crypto';
+import { createHash } from 'crypto';
 
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -62,6 +63,14 @@ export class EncryptedSavedObjectsPlugin
       this.logger.warn(
         'Saved objects encryption key is not set. This will severely limit Kibana functionality. ' +
           'Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+      );
+    } else {
+      const hashedEncryptionKey = createHash('sha3-256')
+        .update(config.encryptionKey)
+        .digest('base64');
+
+      this.logger.info(
+        `Hashed 'xpack.encryptedSavedObjects.encryptionKey' for this instance: ${hashedEncryptionKey}`
       );
     }
 

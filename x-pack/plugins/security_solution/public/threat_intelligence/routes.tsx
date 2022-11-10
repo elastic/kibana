@@ -6,20 +6,24 @@
  */
 
 import React, { memo } from 'react';
-import { Redirect } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecuritySolutionPluginContext } from '@kbn/threat-intelligence-plugin/public';
 import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/public';
 import type { SourcererDataView } from '@kbn/threat-intelligence-plugin/public/types';
+import type { Store } from 'redux';
+import { useSelector } from 'react-redux';
+import { useInvestigateInTimeline } from './use_investigate_in_timeline';
+import { getStore, inputsSelectors } from '../common/store';
 import { useKibana } from '../common/lib/kibana';
 import { FiltersGlobal } from '../common/components/filters_global';
 import { SpyRoute } from '../common/utils/route/spy_routes';
-import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { licenseService } from '../common/hooks/use_license';
 import { SecurityPageName } from '../app/types';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { useSourcererDataView } from '../common/containers/sourcerer';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
+import { SiemSearchBar } from '../common/components/search_bar';
+import { useGlobalTime } from '../common/containers/use_global_time';
 
 const ThreatIntelligence = memo(() => {
   const { threatIntelligence } = useKibana().services;
@@ -27,16 +31,21 @@ const ThreatIntelligence = memo(() => {
 
   const sourcererDataView = useSourcererDataView();
 
-  const enabled = useIsExperimentalFeatureEnabled('threatIntelligenceEnabled');
-  if (!enabled) {
-    return <Redirect to="/" />;
-  }
+  const securitySolutionStore = getStore() as Store;
 
   const securitySolutionContext: SecuritySolutionPluginContext = {
     getFiltersGlobalComponent: () => FiltersGlobal,
     getPageWrapper: () => SecuritySolutionPageWrapper,
     licenseService,
     sourcererDataView: sourcererDataView as unknown as SourcererDataView,
+    getSecuritySolutionStore: securitySolutionStore,
+    getUseInvestigateInTimeline: useInvestigateInTimeline,
+
+    useQuery: () => useSelector(inputsSelectors.globalQuerySelector()),
+    useFilters: () => useSelector(inputsSelectors.globalFiltersQuerySelector()),
+    useGlobalTime,
+
+    SiemSearchBar,
   };
 
   return (

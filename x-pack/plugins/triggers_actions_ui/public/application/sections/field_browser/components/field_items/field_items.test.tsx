@@ -128,12 +128,6 @@ describe('field_items', () => {
           width: '225px',
         },
         {
-          field: 'description',
-          name: 'Description',
-          sortable: true,
-          width: '400px',
-        },
-        {
           field: 'category',
           name: 'Category',
           sortable: true,
@@ -188,12 +182,10 @@ describe('field_items', () => {
       );
 
       expect(getAllByText('Name').at(0)).toBeInTheDocument();
-      expect(getAllByText('Description').at(0)).toBeInTheDocument();
       expect(getAllByText('Category').at(0)).toBeInTheDocument();
 
       expect(getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
       expect(getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
-      expect(getByTestId(`field-${timestampFieldId}-description`)).toBeInTheDocument();
       expect(getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
     });
 

@@ -113,9 +113,6 @@ module.exports = {
     `integration_tests/`,
   ],
 
-  // This option allows use of a custom test runner
-  testRunner: 'jest-circus/runner',
-
   // A map from regular expressions to paths to transformers
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/babel_transform.js',
@@ -127,7 +124,7 @@ module.exports = {
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor and react-monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|d3-interpolate|d3-color))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|react-monaco-editor|d3-interpolate|d3-color))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
   ],
 

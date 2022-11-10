@@ -223,14 +223,22 @@ type UserSettingsTemplateName = `${TemplateBaseName}${typeof USER_SETTINGS_TEMPL
 const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
   name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX);
 
-function buildComponentTemplates(params: {
+export function buildComponentTemplates(params: {
   mappings: IndexTemplateMappings;
   templateName: string;
   registryElasticsearch: RegistryElasticsearch | undefined;
   packageName: string;
+  pipelineName?: string;
   defaultSettings: IndexTemplate['template']['settings'];
 }) {
-  const { templateName, registryElasticsearch, packageName, defaultSettings, mappings } = params;
+  const {
+    templateName,
+    registryElasticsearch,
+    packageName,
+    defaultSettings,
+    mappings,
+    pipelineName,
+  } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
 
@@ -256,6 +264,7 @@ function buildComponentTemplates(params: {
         ...templateSettings,
         index: {
           ...templateSettings.index,
+          ...(pipelineName ? { default_pipeline: pipelineName } : {}),
           mapping: {
             ...templateSettings?.mapping,
             total_fields: {
@@ -366,7 +375,7 @@ export function prepareTemplate({
   pkg,
   dataStream,
 }: {
-  pkg: Pick<PackageInfo, 'name' | 'version'>;
+  pkg: Pick<PackageInfo, 'name' | 'version' | 'type'>;
   dataStream: RegistryDataStream;
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = pkg;
@@ -392,12 +401,12 @@ export function prepareTemplate({
     mappings,
     packageName,
     templateName,
+    pipelineName,
     registryElasticsearch: dataStream.elasticsearch,
   });
 
   const template = getTemplate({
     templateIndexPattern,
-    pipelineName,
     packageName,
     composedOfTemplates: Object.keys(componentTemplates),
     templatePriority,

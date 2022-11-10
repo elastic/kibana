@@ -1,0 +1,14 @@
+{
+  "id": "guidedOnboarding",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Journey Onboarding",
+    "githubTeam": "platform-onboarding"
+  },
+  "description": "Guided onboarding framework",
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["kibanaReact"],
+  "optionalPlugins": ["cloud"]
+}

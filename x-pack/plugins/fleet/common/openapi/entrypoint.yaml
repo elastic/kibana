@@ -57,6 +57,8 @@ paths:
     $ref: paths/agents@bulk_upgrade.yaml
   /agents/current_upgrades:
     $ref: paths/agents@current_upgrades.yaml
+  /agents/action_status:
+    $ref: paths/agents@action_status.yaml
   '/agents/{agentId}':
     $ref: 'paths/agents@{agent_id}.yaml'
   '/agents/{agentId}/actions':
@@ -122,6 +124,11 @@ paths:
     $ref: paths/agent_download_sources@{source_id}.yaml
   /logstash_api_keys:
     $ref: paths/logstash_api_keys.yaml
+  # Fleet server hosts
+  /fleet_server_hosts:
+    $ref: paths/fleet_server_hosts.yaml
+  /fleet_server_hosts/{itemId}:
+    $ref: paths/fleet_server_hosts@{item_id}.yaml
 components:
   securitySchemes:
     basicAuth:

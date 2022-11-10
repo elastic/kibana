@@ -206,6 +206,25 @@ describe('kuery functions', () => {
         expect(result).toEqual(expected);
       });
 
+      test('should create a wildcard query for keyword fields', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                wildcard: {
+                  'machine.os.keyword': 'win*',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'win*');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+
+        expect(result).toEqual(expected);
+      });
+
       test('should support scripted fields', () => {
         const node = nodeTypes.function.buildNode('is', 'script string', 'foo');
         const result = is.toElasticsearchQuery(node, indexPattern);
@@ -341,6 +360,23 @@ describe('kuery functions', () => {
         const result = is.toElasticsearchQuery(node, indexPattern, { nestedIgnoreUnmapped: true });
 
         expect(result).toEqual(expected);
+      });
+
+      test('should use a term query for keyword fields', () => {
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'Win 7');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+        expect(result).toEqual({
+          bool: {
+            should: [
+              {
+                term: {
+                  'machine.os.keyword': 'Win 7',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
       });
     });
   });

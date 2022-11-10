@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   Logger,
   SavedObject,
@@ -13,7 +13,7 @@ import {
   SavedObjectsType,
 } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../common/constants';
-import { ESCaseAttributes } from '../services/cases/types';
+import type { ESCaseAttributes } from '../services/cases/types';
 import { handleExport } from './import_export/export';
 import { caseMigrations } from './migrations';
 
@@ -48,6 +48,9 @@ export const createCaseSavedObjectType = (
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       created_at: {
@@ -62,6 +65,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -108,6 +114,9 @@ export const createCaseSavedObjectType = (
               email: {
                 type: 'keyword',
               },
+              profile_uid: {
+                type: 'keyword',
+              },
             },
           },
           connector_name: {
@@ -148,6 +157,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },

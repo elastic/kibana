@@ -1,6 +1,5 @@
 [[rule-type-es-query]]
-[role="xpack"]
-=== {es} query
+== {es} query
 
 The {es} query rule type runs a user-configured query, compares the number of 
 matches to a configured threshold, and schedules actions to run when the 
@@ -8,14 +7,14 @@ threshold condition is met.
 
 
 [float]
-==== Create the rule
+=== Create the rule
 
 Fill in the <<defining-rules-general-details, rule details>>, then select 
 *{es} query*.
 
 
 [float]
-==== Define the conditions
+=== Define the conditions
 
 Define properties to detect the condition.
 
@@ -27,7 +26,7 @@ the *time window*.
 Size:: Specifies the number of documents to pass to the configured actions when 
 the threshold condition is met.
 {es} query:: Specifies the ES DSL query. The number of documents that 
-match this query is evaluated against the threshold condition. Only the `query`, `fields` and `runtime_mappings`
+match this query is evaluated against the threshold condition. Only the `query`, `fields`, `_source` and `runtime_mappings`
 fields are used, other DSL fields are not considered. 
 Threshold:: Defines a threshold value and a comparison operator  (`is above`, 
 `is above or equals`, `is below`, `is below or equals`, or `is between`). The 
@@ -38,11 +37,11 @@ Time window:: Defines how far back to search for documents, using the
 value higher than the *check every* value in the 
 <<defining-rules-general-details, general rule details>>, to avoid gaps in 
 detection.
-Exclude the hits from previous run:: Turn on to avoid alert duplication by
+Exclude matches from previous run:: Turn on to avoid alert duplication by
 excluding documents that have already been detected by the previous rule run.
 
 [float]
-==== Add action variables
+=== Add action variables
 
 <<defining-rules-actions-details, Add an action>> to run when the rule condition 
 is met. The following variables are specific to the {es} query rule. You can 
@@ -109,7 +108,7 @@ Labels:
 --
 
 [float]
-==== Test your query
+=== Test your query
 
 Use the *Test query* feature to verify that your query DSL is valid.
 
@@ -125,11 +124,12 @@ image::user/alerting/images/rule-types-es-query-valid.png[Test {es} query return
 image::user/alerting/images/rule-types-es-query-invalid.png[Test {es} query shows error when invalid]
 
 [float]
-==== Handling multiple matches of the same document
+=== Handling multiple matches of the same document
 
-This rule type checks for duplication of document matches across multiple runs.
-If you configure the rule with a schedule interval smaller than the time window,
-and a document matches a query in multiple runs, it is alerted on only once.
+By default, *Exclude matches from previous run* is turned on and the rule checks
+for duplication of document matches across multiple runs. If you configure the
+rule with a schedule interval smaller than the time window and a document
+matches a query in multiple runs, it is alerted on only once.
 
 The rule uses the timestamp of the matches to avoid alerting on the same match 
 multiple times. The timestamp of the latest match is used for evaluating the 

@@ -12,7 +12,6 @@ import {
   EXTENDED_DATA_LAYER,
   REFERENCE_LINE_LAYER,
   LAYERED_XY_VIS,
-  EXTENDED_ANNOTATION_LAYER,
   REFERENCE_LINE,
 } from '../constants';
 import { commonXYArgs } from './common_xy_args';
@@ -26,11 +25,17 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
   args: {
     ...commonXYArgs,
     layers: {
-      types: [EXTENDED_DATA_LAYER, REFERENCE_LINE_LAYER, EXTENDED_ANNOTATION_LAYER, REFERENCE_LINE],
+      types: [EXTENDED_DATA_LAYER, REFERENCE_LINE_LAYER, REFERENCE_LINE],
       help: i18n.translate('expressionXY.layeredXyVis.layers.help', {
         defaultMessage: 'Layers of visual series',
       }),
       multi: true,
+    },
+    annotations: {
+      types: ['event_annotations_result'],
+      help: i18n.translate('expressionXY.layeredXyVis.annotations.help', {
+        defaultMessage: 'Annotations',
+      }),
     },
     splitColumnAccessor: {
       types: ['vis_dimension', 'string'],

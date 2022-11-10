@@ -28,9 +28,6 @@ import { appliesToText, operatorToText } from './utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-// Raise the popovers above GuidePageSideNav
-const POPOVER_STYLE = { zIndex: '200' };
-
 export class ConditionExpression extends Component {
   static propTypes = {
     index: PropTypes.number.isRequired,
@@ -102,7 +99,7 @@ export class ConditionExpression extends Component {
 
   renderAppliesToPopover() {
     return (
-      <div style={POPOVER_STYLE}>
+      <div>
         <EuiPopoverTitle>
           <FormattedMessage
             id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
@@ -129,7 +126,7 @@ export class ConditionExpression extends Component {
 
   renderOperatorValuePopover() {
     return (
-      <div style={POPOVER_STYLE}>
+      <div>
         <EuiPopoverTitle>
           <FormattedMessage
             id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
@@ -189,7 +186,7 @@ export class ConditionExpression extends Component {
             }
             isOpen={this.state.isAppliesToOpen}
             closePopover={this.closeAppliesTo}
-            panelPaddingSize="none"
+            panelPaddingSize="s"
             ownFocus
             anchorPosition="downLeft"
           >
@@ -216,7 +213,7 @@ export class ConditionExpression extends Component {
             }
             isOpen={this.state.isOperatorValueOpen}
             closePopover={this.closeOperatorValue}
-            panelPaddingSize="none"
+            panelPaddingSize="s"
             ownFocus
             withTitle
             anchorPosition="downLeft"

@@ -35,7 +35,9 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
       return;
     }
 
-    const indexTemplate = serializeTemplate(stripEmptyFields(template) as TemplateDeserialized);
+    const indexTemplate = serializeTemplate(
+      stripEmptyFields(template, { types: ['string'] }) as TemplateDeserialized
+    );
     const { data, error } = await simulateIndexTemplate(indexTemplate);
     let filteredTemplate = data;
 

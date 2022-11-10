@@ -11,29 +11,28 @@ import { I18nProvider } from '@kbn/i18n-react';
 import {
   EuiIcon,
   EuiSpacer,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
   EuiPage,
   EuiImage,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import { emptyScreenStrings } from '../../../dashboard_strings';
+import { pluginServices } from '../../../services/plugin_services';
 
 export interface DashboardEmptyScreenProps {
   isEditMode?: boolean;
-  uiSettings: IUiSettingsClient;
-  http: HttpStart;
-  isReadonlyMode?: boolean;
 }
 
-export function DashboardEmptyScreen({
-  isEditMode,
-  uiSettings,
-  http,
-  isReadonlyMode,
-}: DashboardEmptyScreenProps) {
+export function DashboardEmptyScreen({ isEditMode }: DashboardEmptyScreenProps) {
+  const {
+    dashboardCapabilities: { showWriteControls },
+    http: { basePath },
+    settings: { uiSettings },
+  } = pluginServices.getServices();
+  const isReadonlyMode = !showWriteControls;
+
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME
     ? '/plugins/home/assets/welcome_graphic_dark_2x.png'
@@ -53,7 +52,7 @@ export function DashboardEmptyScreen({
             paddingSize="none"
             className="dshStartScreen__pageContent"
           >
-            <EuiImage url={http.basePath.prepend(emptyStateGraphicURL)} alt="" />
+            <EuiImage url={basePath.prepend(emptyStateGraphicURL)} alt="" />
             <EuiText size="m">
               <p style={{ fontWeight: 'bold' }}>{mainText}</p>
             </EuiText>

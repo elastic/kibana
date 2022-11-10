@@ -46,7 +46,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
               defaultMessage: 'Status',
             }),
-            description: <AgentHealth agent={agent} />,
+            description: <AgentHealth agent={agent} showOfflinePreviousStatus={true} />,
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
@@ -57,6 +57,12 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             ) : (
               '-'
             ),
+          },
+          {
+            title: i18n.translate('xpack.fleet.agentDetails.lastCheckinMessageLabel', {
+              defaultMessage: 'Last checkin message',
+            }),
+            description: agent.last_checkin_message ? agent.last_checkin_message : '-',
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
@@ -182,15 +188,19 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             description: (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
           },
         ].map(({ title, description }) => {
+          const tooltip =
+            typeof description === 'string' && description.length > 20 ? description : '';
           return (
             <EuiFlexGroup>
               <FlexItemWithMinWidth grow={3}>
                 <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
               </FlexItemWithMinWidth>
               <FlexItemWithMinWidth grow={7}>
-                <EuiDescriptionListDescription className="eui-textTruncate">
-                  {description}
-                </EuiDescriptionListDescription>
+                <EuiToolTip position="top" content={tooltip}>
+                  <EuiDescriptionListDescription className="eui-textTruncate">
+                    {description}
+                  </EuiDescriptionListDescription>
+                </EuiToolTip>
               </FlexItemWithMinWidth>
             </EuiFlexGroup>
           );

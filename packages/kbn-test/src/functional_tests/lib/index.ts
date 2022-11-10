@@ -8,6 +8,4 @@
 
 export { runKibanaServer } from './run_kibana_server';
 export { runElasticsearch } from './run_elasticsearch';
-export type { CreateFtrOptions, CreateFtrParams } from './run_ftr';
-export { runFtr, hasTests, assertNoneExcluded } from './run_ftr';
-export { runCli } from './run_cli';
+export * from './run_ftr';

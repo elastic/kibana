@@ -24,6 +24,7 @@ const bodySchema = schema.object({
     schema.literal('ip_field'),
     schema.literal('keyword_field'),
     schema.literal('long_field'),
+    schema.literal('composite_field'),
   ]),
   document: schema.object({}, { unknowns: 'allow' }),
 });

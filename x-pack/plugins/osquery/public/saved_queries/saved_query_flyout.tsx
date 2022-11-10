@@ -54,8 +54,6 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
   const onSubmit = useCallback(
     async (payload: SavedQueryFormData) => {
       const serializedData = serializer(payload);
-      // TODO CHECK THIS
-      // @ts-expect-error update types
       await createSavedQueryMutation.mutateAsync(serializedData).then(() => onClose());
     },
     [createSavedQueryMutation, onClose, serializer]

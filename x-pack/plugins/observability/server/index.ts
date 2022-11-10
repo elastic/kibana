@@ -32,7 +32,18 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
     alertDetails: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+      apm: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      metrics: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      logs: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      uptime: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
     }),
   }),
 });
@@ -51,3 +62,5 @@ export const plugin = (initContext: PluginInitializerContext) =>
 
 export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
 export { createOrUpdateIndex, unwrapEsResponse, WrappedElasticsearchClientError };
+
+export { uiSettings } from './ui_settings';

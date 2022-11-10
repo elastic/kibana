@@ -16,7 +16,6 @@ import {
   EuiDescriptionList,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getRuleList } from '../findings/findings_flyout/rule_tab';
@@ -26,9 +25,7 @@ import * as TEST_SUBJECTS from './test_subjects';
 
 interface RuleFlyoutProps {
   onClose(): void;
-  toggleRule(rule: RuleSavedObject): void;
   rule: RuleSavedObject;
-  canUpdate: boolean;
 }
 
 const tabs = [
@@ -50,7 +47,7 @@ const tabs = [
 
 type RuleTab = typeof tabs[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule, toggleRule, canUpdate }: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
 
   return (
@@ -78,9 +75,7 @@ export const RuleFlyout = ({ onClose, rule, toggleRule, canUpdate }: RuleFlyoutP
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {tab === 'overview' && (
-          <RuleOverviewTab rule={rule} toggleRule={() => toggleRule(rule)} canUpdate={canUpdate} />
-        )}
+        {tab === 'overview' && <RuleOverviewTab rule={rule} />}
         {tab === 'remediation' && (
           <EuiDescriptionList
             compressed={false}
@@ -92,29 +87,8 @@ export const RuleFlyout = ({ onClose, rule, toggleRule, canUpdate }: RuleFlyoutP
   );
 };
 
-const RuleOverviewTab = ({
-  rule,
-  toggleRule,
-  canUpdate,
-}: {
-  rule: RuleSavedObject;
-  toggleRule(): void;
-  canUpdate: RuleFlyoutProps['canUpdate'];
-}) => (
+const RuleOverviewTab = ({ rule }: { rule: RuleSavedObject }) => (
   <EuiFlexGroup direction="column">
-    <EuiFlexItem>
-      <span>
-        <EuiSwitch
-          disabled={!canUpdate}
-          label={i18n.translate('xpack.csp.rules.ruleFlyout.overviewTab.activatedSwitchLabel', {
-            defaultMessage: 'Activated',
-          })}
-          checked={rule.attributes.enabled}
-          onChange={toggleRule}
-          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
-        />
-      </span>
-    </EuiFlexItem>
     <EuiFlexItem>
       <EuiDescriptionList listItems={getRuleList(rule.attributes.metadata)} />
     </EuiFlexItem>

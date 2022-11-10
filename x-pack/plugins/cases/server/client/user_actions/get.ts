@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from '@kbn/core/server';
-import {
-  CaseUserActionsResponse,
-  CaseUserActionsResponseRt,
-  CaseUserActionResponse,
-} from '../../../common/api';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { CaseUserActionsResponse, CaseUserActionResponse } from '../../../common/api';
+import { CaseUserActionsResponseRt } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import { UserActionGet } from './client';
+import type { UserActionGet } from './client';
 
 export const get = async (
   { caseId }: UserActionGet,

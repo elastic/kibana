@@ -9,6 +9,7 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT,
+  CONTAINER,
   CLOUD,
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_REGION,
@@ -27,7 +28,7 @@ import {
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { should } from './get_service_metadata_icons';
 
 type ServiceMetadataDetailsRaw = Pick<
@@ -49,15 +50,16 @@ export interface ServiceMetadataDetails {
     };
   };
   container?: {
+    ids?: string[];
+    image?: string;
     os?: string;
-    isContainerized?: boolean;
     totalNumberInstances?: number;
-    type?: ContainerType;
   };
   serverless?: {
     type?: string;
     functionNames?: string[];
     faasTriggerTypes?: string[];
+    hostArchitecture?: string;
   };
   cloud?: {
     provider?: string;
@@ -67,23 +69,27 @@ export interface ServiceMetadataDetails {
     projectName?: string;
     serviceName?: string;
   };
+  kubernetes?: {
+    deployments?: string[];
+    namespaces?: string[];
+    replicasets?: string[];
+    containerImages?: string[];
+  };
 }
 
 export async function getServiceMetadataDetails({
   serviceName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
 }: {
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }): Promise<ServiceMetadataDetails> {
-  const { apmEventClient } = setup;
-
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...rangeQuery(start, end),
@@ -97,9 +103,11 @@ export async function getServiceMetadataDetails({
         ProcessorEvent.metric,
       ],
     },
+    sort: [{ '@timestamp': { order: 'desc' as const } }],
     body: {
+      track_total_hits: 1,
       size: 1,
-      _source: [SERVICE, AGENT, HOST, CONTAINER_ID, KUBERNETES, CLOUD],
+      _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],
       query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {
@@ -112,6 +120,12 @@ export async function getServiceMetadataDetails({
         availabilityZones: {
           terms: {
             field: CLOUD_AVAILABILITY_ZONE,
+            size: 10,
+          },
+        },
+        containerIds: {
+          terms: {
+            field: CONTAINER_ID,
             size: 10,
           },
         },
@@ -181,10 +195,12 @@ export async function getServiceMetadataDetails({
   const containerDetails =
     host || container || totalNumberInstances || kubernetes
       ? {
-          os: host?.os?.platform,
           type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
-          isContainerized: !!container?.id,
+          os: host?.os?.platform,
           totalNumberInstances,
+          ids: response.aggregations?.containerIds.buckets.map(
+            (bucket) => bucket.key as string
+          ),
         }
       : undefined;
 
@@ -198,6 +214,7 @@ export async function getServiceMetadataDetails({
           faasTriggerTypes: response.aggregations?.faasTriggerTypes.buckets.map(
             (bucket) => bucket.key as string
           ),
+          hostArchitecture: host?.architecture,
         }
       : undefined;
 

@@ -214,7 +214,7 @@ describe('fetchCpuUsageNodeStats', () => {
     await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size, filterQuery);
     expect(params).toStrictEqual({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.node_stats-*,metrics-elasticsearch.node_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.node_stats-*,metrics-elasticsearch.stack_monitoring.node_stats-*',
       filter_path: ['aggregations'],
       body: {
         size: 0,
@@ -227,7 +227,9 @@ describe('fetchCpuUsageNodeStats', () => {
                   should: [
                     { term: { type: 'node_stats' } },
                     { term: { 'metricset.name': 'node_stats' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
+                    {
+                      term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' },
+                    },
                   ],
                   minimum_should_match: 1,
                 },

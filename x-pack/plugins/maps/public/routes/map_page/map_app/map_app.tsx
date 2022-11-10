@@ -13,6 +13,7 @@ import { AppLeaveAction, AppMountParameters } from '@kbn/core/public';
 import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import { SavedQuery, QueryStateChange, QueryState } from '@kbn/data-plugin/public';
 import {
@@ -333,6 +334,24 @@ export class MapApp extends React.Component<Props, State> {
   };
 
   async _initMap() {
+    // Handle redirect with adhoc data view spec provided via history location state (MAPS_APP_LOCATOR)
+    const historyLocationState = this.props.history.location?.state as
+      | {
+          dataViewSpec: DataViewSpec;
+        }
+      | undefined;
+    if (historyLocationState?.dataViewSpec?.id) {
+      const dataViewService = getIndexPatternService();
+      try {
+        const dataView = await dataViewService.get(historyLocationState.dataViewSpec.id);
+        if (!dataView.isPersisted()) {
+          await dataViewService.create(historyLocationState.dataViewSpec);
+        }
+      } catch (error) {
+        // ignore errors, not a critical error for viewing map - layer(s) using data view will surface error
+      }
+    }
+
     try {
       await this.props.savedMap.whenReady();
     } catch (err) {

@@ -117,13 +117,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test for actions on a field', async () => {
       await PageObjects.discover.clickDocViewerTab(0);
-      await testSubjects.click('openFieldActionsButton-Cancelled');
+      if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
+        await testSubjects.click('openFieldActionsButton-Cancelled');
+      } else {
+        await testSubjects.existOrFail('fieldActionsGroup-Cancelled');
+      }
       await a11y.testAppSnapshot();
     });
 
     it('a11y test for data-grid table with columns', async () => {
       await testSubjects.click('toggleColumnButton-Cancelled');
-      await testSubjects.click('openFieldActionsButton-Carrier');
+      if (await testSubjects.exists('openFieldActionsButton-Carrier')) {
+        await testSubjects.click('openFieldActionsButton-Carrier');
+      } else {
+        await testSubjects.existOrFail('fieldActionsGroup-Carrier');
+      }
       await testSubjects.click('toggleColumnButton-Carrier');
       await testSubjects.click('euiFlyoutCloseButton');
       await toasts.dismissAllToasts();
@@ -136,23 +144,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for chart options panel', async () => {
-      await testSubjects.click('discoverChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test for data grid with hidden chart', async () => {
-      await testSubjects.click('discoverChartToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
       await a11y.testAppSnapshot();
-      await testSubjects.click('discoverChartOptionsToggle');
-      await testSubjects.click('discoverChartToggle');
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
     });
 
     it('a11y test for time interval panel', async () => {
-      await testSubjects.click('discoverChartOptionsToggle');
-      await testSubjects.click('discoverTimeIntervalPanel');
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramTimeIntervalPanel');
       await a11y.testAppSnapshot();
       await testSubjects.click('contextMenuPanelTitleButton');
-      await testSubjects.click('discoverChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
     });
 
     it('a11y test for data grid sort panel', async () => {

@@ -50,9 +50,10 @@ export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = true }:
 
     // cleanup the listener
     return () => {
+      onClick();
       document.removeEventListener('keydown', onKeyDown, false);
     };
-  }, [onKeyDown, toggleChrome, setIsFullscreen]);
+  }, [onKeyDown, toggleChrome, setIsFullscreen, onClick]);
 
   useEffect(() => {
     if (!isMounted() && toggleChrome) {

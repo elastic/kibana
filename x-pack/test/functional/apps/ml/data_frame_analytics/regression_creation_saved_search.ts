@@ -19,6 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote_small', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote_small');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote_small');
+      await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded(
+        'ft_farequote_small'
+      );
+      await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded('ft_farequote_small');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -115,6 +119,97 @@ export default function ({ getService }: FtrProviderContext) {
                   data_counts:
                     '{"training_docs_count":320,"test_docs_count":1283,"skipped_docs_count":0}',
                   description: 'Regression job based on a saved search with kuery query',
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '8/8' } },
+            ],
+          } as AnalyticsTableRowDetails,
+        },
+      },
+      {
+        suiteTitle: 'with filter and kuery query',
+        jobType: 'regression',
+        jobId: `fq_saved_search_4_${dateNow}`,
+        jobDescription: 'Regression job based on a saved search with filter and kuery query',
+        source: 'ft_farequote_filter_and_kuery',
+        get destinationIndex(): string {
+          return `user-${this.jobId}`;
+        },
+        runtimeFields: {
+          uppercase_airline: {
+            type: 'keyword',
+            script: 'emit(params._source.airline.toUpperCase())',
+          },
+        },
+        dependentVariable: 'responsetime',
+        trainingPercent: 20,
+        modelMemory: '20mb',
+        createIndexPattern: true,
+        expected: {
+          source: 'ft_farequote_small',
+          runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+          row: {
+            memoryStatus: 'ok',
+            type: 'regression',
+            status: 'stopped',
+            progress: '100',
+          },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: `fq_saved_search_4_${dateNow}`,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":58,"test_docs_count":232,"skipped_docs_count":0}',
+                  description: 'Regression job based on a saved search with filter and kuery query',
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '8/8' } },
+            ],
+          } as AnalyticsTableRowDetails,
+        },
+      },
+      {
+        suiteTitle: 'with filter and lucene query',
+        jobType: 'regression',
+        jobId: `fq_saved_search_5_${dateNow}`,
+        jobDescription: 'Regression job based on a saved search with filter and lucene query',
+        source: 'ft_farequote_filter_and_lucene',
+        get destinationIndex(): string {
+          return `user-${this.jobId}`;
+        },
+        runtimeFields: {
+          uppercase_airline: {
+            type: 'keyword',
+            script: 'emit(params._source.airline.toUpperCase())',
+          },
+        },
+        dependentVariable: 'responsetime',
+        trainingPercent: 20,
+        modelMemory: '20mb',
+        createIndexPattern: true,
+        expected: {
+          source: 'ft_farequote_small',
+          runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+          row: {
+            memoryStatus: 'ok',
+            type: 'regression',
+            status: 'stopped',
+            progress: '100',
+          },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: `fq_saved_search_5_${dateNow}`,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":58,"test_docs_count":232,"skipped_docs_count":0}',
+                  description:
+                    'Regression job based on a saved search with filter and lucene query',
                 },
               },
               { section: 'progress', expectedEntries: { Phase: '8/8' } },

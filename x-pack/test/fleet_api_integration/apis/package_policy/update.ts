@@ -30,6 +30,7 @@ export default function (providerContext: FtrProviderContext) {
     let managedAgentPolicyId: string;
     let packagePolicyId: string;
     let packagePolicyId2: string;
+    let packagePolicyId3: string;
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').load(
@@ -107,6 +108,30 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
       packagePolicyId2 = packagePolicyResponse2.item.id;
+
+      const { body: packagePolicyResponse3 } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'update-package-policy-with_required_variables-1',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          inputs: {
+            'with_required_variables-test_input': {
+              streams: {
+                'with_required_variables.log': {
+                  vars: { test_var_required: 'I am required' },
+                },
+              },
+            },
+          },
+          package: {
+            name: 'with_required_variables',
+            version: '0.1.0',
+          },
+        });
+      packagePolicyId3 = packagePolicyResponse3.item.id;
     });
 
     after(async function () {
@@ -267,6 +292,55 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         });
+    });
+
+    describe('Simplified package policy', async () => {
+      it('should work with valid values', async function () {
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId3}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+      });
+
+      it('should return a 400 with invalid inputs', async function () {
+        const { body } = await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId3}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-i-do-not-exists': {},
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
+        expect(body.message).eql('Input not found: with_required_variables-i-do-not-exists');
+      });
     });
   });
 }

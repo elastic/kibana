@@ -5,27 +5,23 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  CasesFindResponse,
-  CasesFindRequest,
-  CasesFindRequestRt,
-  throwErrors,
-  CasesFindResponseRt,
-  excess,
-} from '../../../common/api';
+import type { CasesFindResponse, CasesFindRequest } from '../../../common/api';
+import { CasesFindRequestRt, throwErrors, CasesFindResponseRt, excess } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
 import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
-import { CasesClientArgs } from '..';
-import { ConstructQueryParams } from '../types';
+import type { CasesClientArgs } from '..';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import type { CasesFindQueryParams } from '../types';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -37,7 +33,7 @@ export const find = async (
   clientArgs: CasesClientArgs
 ): Promise<CasesFindResponse> => {
   const {
-    services: { caseService },
+    services: { caseService, licensingService },
     authorization,
     logger,
   } = clientArgs;
@@ -53,7 +49,23 @@ export const find = async (
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
 
-    const queryArgs: ConstructQueryParams = {
+    /**
+     * Assign users to a case is only available to Platinum+
+     */
+
+    if (!isEmpty(queryParams.assignees)) {
+      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+      if (!hasPlatinumLicenseOrGreater) {
+        throw Boom.forbidden(
+          'In order to filter cases by assignees, you must be subscribed to an Elastic Platinum license'
+        );
+      }
+
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+    }
+
+    const queryArgs: CasesFindQueryParams = {
       tags: queryParams.tags,
       reporters: queryParams.reporters,
       sortByField: queryParams.sortField,
@@ -70,6 +82,7 @@ export const find = async (
       status: undefined,
       authorizationFilter,
     });
+
     const caseQueryOptions = constructQueryOptions({ ...queryArgs, authorizationFilter });
 
     const [cases, statusStats] = await Promise.all([

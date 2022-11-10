@@ -63,7 +63,9 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT
   | typeof ML_PAGES.AIOPS
   | typeof ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES
-  | typeof ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
+  | typeof ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT
+  | typeof ML_PAGES.AIOPS_LOG_CATEGORIZATION
+  | typeof ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
   MlGenericUrlPageState | undefined
 >;
 
@@ -269,6 +271,7 @@ export type MlLocatorState =
   | CalendarEditUrlState
   | FilterEditUrlState
   | MlGenericUrlState
+  | NotificationsUrlState
   | TrainedModelsUrlState
   | TrainedModelsNodesUrlState;
 
@@ -284,4 +287,13 @@ export type TrainedModelsUrlState = MLPageState<
 export type TrainedModelsNodesUrlState = MLPageState<
   typeof ML_PAGES.TRAINED_MODELS_NODES,
   TrainedModelsNodesQueryState | undefined
+>;
+
+export interface NotificationsQueryState {
+  level: string;
+}
+
+export type NotificationsUrlState = MLPageState<
+  typeof ML_PAGES.NOTIFICATIONS,
+  NotificationsQueryState | undefined
 >;

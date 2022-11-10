@@ -18,7 +18,7 @@ export enum API_URLS {
   PING_HISTOGRAM = `/internal/uptime/ping/histogram`,
   SNAPSHOT_COUNT = `/internal/uptime/snapshot/count`,
   SYNTHETICS_SUCCESSFUL_CHECK = `/internal/uptime/synthetics/check/success`,
-  JOURNEY_CREATE = `/internal/uptime/journey/{checkGroup}`,
+  JOURNEY = `/internal/uptime/journey/{checkGroup}`,
   JOURNEY_FAILED_STEPS = `/internal/uptime/journeys/failed_steps`,
   JOURNEY_SCREENSHOT = `/internal/uptime/journey/screenshot/{checkGroup}/{stepIndex}`,
   JOURNEY_SCREENSHOT_BLOCKS = `/internal/uptime/journey/screenshot/block`,
@@ -45,7 +45,11 @@ export enum API_URLS {
   TRIGGER_MONITOR = '/internal/uptime/service/monitors/trigger',
   SERVICE_ALLOWED = '/internal/uptime/service/allowed',
   SYNTHETICS_APIKEY = '/internal/uptime/service/api_key',
+  SYNTHETICS_HAS_ZIP_URL_MONITORS = '/internal/uptime/fleet/has_zip_url_monitors',
 
   // Project monitor public endpoint
-  SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/service/project/monitors',
+  SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/project/{projectName}/monitors',
+  SYNTHETICS_MONITORS_PROJECT_UPDATE = '/api/synthetics/project/{projectName}/monitors/_bulk_update',
+  SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
+  SYNTHETICS_MONITORS_PROJECT_LEGACY = '/api/synthetics/service/project/monitors',
 }

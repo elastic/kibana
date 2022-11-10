@@ -15,7 +15,7 @@ import { parseRunCliFlags } from './utils/parse_run_cli_flags';
 import { getCommonServices } from './utils/get_common_services';
 import { ApmSynthtraceKibanaClient } from '../lib/apm/client/apm_synthtrace_kibana_client';
 import { StreamAggregator } from '../lib/stream_aggregator';
-import { ServiceLatencyAggregator } from '../lib/apm/aggregators/service_latency_aggregator';
+import { ServicMetricsAggregator } from '../lib/apm/aggregators/service_metrics_aggregator';
 
 function options(y: Argv) {
   return y
@@ -30,6 +30,11 @@ function options(y: Argv) {
     })
     .option('kibana', {
       describe: 'Kibana target, used to bootstrap datastreams/mappings/templates/settings',
+      string: true,
+    })
+    .option('apm', {
+      describe:
+        'APM Server target. Send data to APM over the intake API instead of generating ES documents',
       string: true,
     })
     .option('cloudId', {
@@ -98,6 +103,11 @@ function options(y: Argv) {
       describe: 'Force writing to legacy indices',
       boolean: true,
     })
+    .option('skipPackageInstall', {
+      describe: 'Skip automatically installing the package',
+      boolean: true,
+      default: false,
+    })
     .option('scenarioOpts', {
       describe: 'Options specific to the scenario',
       coerce: (arg) => {
@@ -144,7 +154,7 @@ export function runSynthtrace() {
 
         const runOptions = parseRunCliFlags(argv);
 
-        const { logger, apmEsClient } = getCommonServices(runOptions);
+        const { logger, apmEsClient, apmIntakeClient } = getCommonServices(runOptions);
 
         const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
         const to = new Date(toMs);
@@ -181,12 +191,14 @@ export function runSynthtrace() {
               kibanaUrl = await kibanaClient.discoverLocalKibana();
             }
             if (!kibanaUrl) throw Error('kibanaUrl could not be determined');
-            await kibanaClient.installApmPackage(
-              kibanaUrl,
-              version,
-              runOptions.username,
-              runOptions.password
-            );
+            if (!argv.skipPackageInstall) {
+              await kibanaClient.installApmPackage(
+                kibanaUrl,
+                version,
+                runOptions.username,
+                runOptions.password
+              );
+            }
           }
         }
 
@@ -195,7 +207,7 @@ export function runSynthtrace() {
         }
         const aggregators: StreamAggregator[] = [];
         const registry = new Map<string, () => StreamAggregator[]>([
-          ['service', () => [new ServiceLatencyAggregator()]],
+          ['service', () => [new ServicMetricsAggregator()]],
         ]);
         if (runOptions.streamProcessors && runOptions.streamProcessors.length > 0) {
           for (const processorName of runOptions.streamProcessors) {
@@ -210,7 +222,11 @@ export function runSynthtrace() {
           }
         }
         if (argv.clean) {
-          await apmEsClient.clean(aggregators.map((a) => a.getDataStreamName() + '-*'));
+          if (argv.apm) {
+            await apmEsClient.clean(['metrics-apm.service-*']);
+          } else {
+            await apmEsClient.clean(aggregators.map((a) => a.getDataStreamName() + '-*'));
+          }
         }
         if (runOptions.gcpRepository) {
           await apmEsClient.registerGcpRepository(runOptions.gcpRepository);
@@ -234,7 +250,7 @@ export function runSynthtrace() {
           await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, version);
 
         if (live) {
-          await startLiveDataUpload(apmEsClient, logger, runOptions, to, version);
+          await startLiveDataUpload(apmEsClient, apmIntakeClient, logger, runOptions, to, version);
         }
       }
     )

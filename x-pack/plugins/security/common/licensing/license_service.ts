@@ -86,6 +86,7 @@ export class SecurityLicenseService {
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
+        allowUserProfileCollaboration: false,
         layout:
           rawLicense !== undefined && !rawLicense?.isAvailable
             ? 'error-xpack-unavailable'
@@ -105,9 +106,11 @@ export class SecurityLicenseService {
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
+        allowUserProfileCollaboration: false,
       };
     }
 
+    const isLicenseStandardOrBetter = rawLicense.hasAtLeast('standard');
     const isLicenseGoldOrBetter = rawLicense.hasAtLeast('gold');
     const isLicensePlatinumOrBetter = rawLicense.hasAtLeast('platinum');
     return {
@@ -122,6 +125,7 @@ export class SecurityLicenseService {
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleFieldLevelSecurity: isLicensePlatinumOrBetter,
       allowRbac: true,
+      allowUserProfileCollaboration: isLicenseStandardOrBetter,
     };
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESFilter } from '@kbn/es-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
@@ -18,10 +18,10 @@ import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getDerivedServiceAnnotations({
-  setup,
+  apmEventClient,
   serviceName,
   environment,
   searchAggregatedTransactions,
@@ -30,13 +30,11 @@ export async function getDerivedServiceAnnotations({
 }: {
   serviceName: string;
   environment: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
@@ -52,6 +50,7 @@ export async function getDerivedServiceAnnotations({
           ],
         },
         body: {
+          track_total_hits: false,
           size: 0,
           query: {
             bool: {
@@ -83,6 +82,7 @@ export async function getDerivedServiceAnnotations({
             ],
           },
           body: {
+            track_total_hits: false,
             size: 1,
             query: {
               bool: {

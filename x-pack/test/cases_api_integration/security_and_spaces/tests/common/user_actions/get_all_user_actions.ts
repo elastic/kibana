@@ -197,37 +197,6 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(deleteTagsUserAction.payload).to.eql({ tags: ['defacement'] });
     });
 
-    it('creates an add and delete assignees user action', async () => {
-      const theCase = await createCase(
-        supertest,
-        getPostCaseRequest({ assignees: [{ uid: '1' }] })
-      );
-      await updateCase({
-        supertest,
-        params: {
-          cases: [
-            {
-              id: theCase.id,
-              version: theCase.version,
-              assignees: [{ uid: '2' }, { uid: '3' }],
-            },
-          ],
-        },
-      });
-
-      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const addAssigneesUserAction = userActions[1];
-      const deleteAssigneesUserAction = userActions[2];
-
-      expect(userActions.length).to.eql(3);
-      expect(addAssigneesUserAction.type).to.eql('assignees');
-      expect(addAssigneesUserAction.action).to.eql('add');
-      expect(addAssigneesUserAction.payload).to.eql({ assignees: [{ uid: '2' }, { uid: '3' }] });
-      expect(deleteAssigneesUserAction.type).to.eql('assignees');
-      expect(deleteAssigneesUserAction.action).to.eql('delete');
-      expect(deleteAssigneesUserAction.payload).to.eql({ assignees: [{ uid: '1' }] });
-    });
-
     it('creates an update title user action', async () => {
       const newTitle = 'Such a great title';
       const theCase = await createCase(supertest, postCaseReq);

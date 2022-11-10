@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import fs from 'fs';
+import Fsp from 'fs/promises';
 import Path from 'path';
 import dedent from 'dedent';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -31,12 +31,12 @@ interface TotalStats {
 /**
  * @param folder The location the mdx file will be written too.
  */
-export function writePluginDirectoryDoc(
+export async function writePluginDirectoryDoc(
   folder: string,
   pluginApiMap: { [key: string]: PluginApi },
   pluginStatsMap: { [key: string]: PluginMetaInfo },
   log: ToolingLog
-): void {
+): Promise<void> {
   log.debug(`Writing plugin directory file`);
 
   const uniqueTeams: string[] = [];
@@ -112,7 +112,7 @@ ${getDirectoryTable(pluginApiMap, pluginStatsMap, false)}
 
 `) + '\n\n';
 
-  fs.writeFileSync(Path.resolve(folder, 'plugin_directory.mdx'), mdx);
+  await Fsp.writeFile(Path.resolve(folder, 'plugin_directory.mdx'), mdx);
 }
 
 function getDirectoryTable(

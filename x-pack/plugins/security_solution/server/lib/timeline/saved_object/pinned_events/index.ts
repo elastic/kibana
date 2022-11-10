@@ -254,19 +254,11 @@ export const convertSavedObjectToSavedPinnedEvent = (
     }, identity)
   );
 
-// we have to use any here because the SavedObjectAttributes interface is like below
-// export interface SavedObjectAttributes {
-//   [key: string]: SavedObjectAttributes | string | number | boolean | null;
-// }
-// then this interface does not allow types without index signature
-// this is limiting us with our type for now so the easy way was to use any
-
 export const pickSavedPinnedEvent = (
   pinnedEventId: string | null,
   savedPinnedEvent: SavedPinnedEvent,
   userInfo: AuthenticatedUser | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any => {
+) => {
   const dateNow = new Date().valueOf();
   if (pinnedEventId == null) {
     savedPinnedEvent.created = dateNow;

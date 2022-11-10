@@ -6,14 +6,16 @@
  */
 
 import React from 'react';
-import { EuiCommentProps, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 
-import { Actions, NONE_CONNECTOR_ID, PushedUserAction } from '../../../common/api';
-import { UserActionBuilder, UserActionResponse } from './types';
+import type { PushedUserAction } from '../../../common/api';
+import { Actions, NONE_CONNECTOR_ID } from '../../../common/api';
+import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
-import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { CaseExternalService } from '../../containers/types';
+import type { CaseServices } from '../../containers/use_get_case_user_actions';
+import type { CaseExternalService } from '../../containers/types';
 
 const getPushInfo = (
   caseServices: CaseServices,
@@ -109,6 +111,7 @@ const getFooters = ({
 
 export const createPushedUserActionBuilder: UserActionBuilder = ({
   userAction,
+  userProfiles,
   caseServices,
   index,
   handleOutlineComment,
@@ -135,6 +138,7 @@ export const createPushedUserActionBuilder: UserActionBuilder = ({
 
     const label = getLabelTitle(pushedUserAction, firstPush);
     const commonBuilder = createCommonUpdateUserActionBuilder({
+      userProfiles,
       userAction,
       handleOutlineComment,
       label,

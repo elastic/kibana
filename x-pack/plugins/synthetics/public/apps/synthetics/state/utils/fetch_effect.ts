@@ -8,6 +8,7 @@
 import { call, put } from 'redux-saga/effects';
 import { PayloadAction } from '@reduxjs/toolkit';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { IHttpSerializedFetchError, serializeHttpFetchError } from './http_error';
 
 /**
  * Factory function for a fetch effect. It expects three action creators,
@@ -23,7 +24,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 export function fetchEffectFactory<T, R, S, F>(
   fetch: (request: T) => Promise<R>,
   success: (response: R) => PayloadAction<S>,
-  fail: (error: IHttpFetchError) => PayloadAction<F>
+  fail: (error: IHttpSerializedFetchError) => PayloadAction<F>
 ) {
   return function* (action: PayloadAction<T>): Generator {
     try {
@@ -32,14 +33,14 @@ export function fetchEffectFactory<T, R, S, F>(
         // eslint-disable-next-line no-console
         console.error(response);
 
-        yield put(fail(response as IHttpFetchError));
+        yield put(fail(serializeHttpFetchError(response as IHttpFetchError)));
       } else {
         yield put(success(response as R));
       }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);
-      yield put(fail(error as IHttpFetchError));
+      yield put(fail(serializeHttpFetchError(error)));
     }
   };
 }

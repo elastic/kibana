@@ -93,7 +93,7 @@ describe('SearchSource', () => {
       aggs: aggsMock,
       getConfig: getConfigMock,
       search: mockSearchMethod,
-      onResponse: (_, res) => res,
+      onResponse: jest.fn().mockImplementation((_, res) => res),
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);
@@ -903,6 +903,13 @@ describe('SearchSource', () => {
       expect(Object.keys(JSON.parse(searchSourceJSON))).toEqual(['highlightAll', 'from', 'sort']);
     });
 
+    test('should add pit', () => {
+      const pit = { id: 'flimflam', keep_alive: '1m' };
+      searchSource.setField('pit', pit);
+      const { searchSourceJSON } = searchSource.serialize();
+      expect(searchSourceJSON).toBe(JSON.stringify({ pit }));
+    });
+
     test('should serialize filters', () => {
       const filter = [
         {
@@ -976,7 +983,11 @@ describe('SearchSource', () => {
       },
     ];
 
-    const indexPattern123 = { id: '123', isPersisted: () => true } as DataView;
+    const indexPattern123 = {
+      id: '123',
+      isPersisted: jest.fn(() => true),
+      toSpec: jest.fn(),
+    } as unknown as DataView;
 
     test('should return serialized fields', () => {
       searchSource.setField('index', indexPattern123);
@@ -984,6 +995,7 @@ describe('SearchSource', () => {
         return filter;
       });
       const serializedFields = searchSource.getSerializedFields();
+      expect(indexPattern123.toSpec).toHaveBeenCalledTimes(0);
       expect(serializedFields).toMatchSnapshot();
     });
 
@@ -993,10 +1005,18 @@ describe('SearchSource', () => {
       const childSearchSource = searchSource.createChild();
       childSearchSource.setField('timeout', '100');
       const serializedFields = childSearchSource.getSerializedFields(true);
+      expect(indexPattern123.toSpec).toHaveBeenCalledTimes(0);
       expect(serializedFields).toMatchObject({
         timeout: '100',
         parent: { index: '123', from: 123 },
       });
+    });
+
+    test('should use spec', () => {
+      indexPattern123.isPersisted = jest.fn(() => false);
+      searchSource.setField('index', indexPattern123);
+      searchSource.getSerializedFields(true, false);
+      expect(indexPattern123.toSpec).toHaveBeenCalledWith(false);
     });
   });
 
@@ -1014,6 +1034,7 @@ describe('SearchSource', () => {
 
         expect(next).toBeCalledTimes(2);
         expect(complete).toBeCalledTimes(1);
+        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
         expect(next.mock.calls[0]).toMatchObject([
           { isPartial: true, isRunning: true, rawResponse: { test: 1 } },
         ]);
@@ -1202,6 +1223,7 @@ describe('SearchSource', () => {
         expect(fetchSub.next).toHaveBeenCalledTimes(2);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
+        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
 
         expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(0);
       });
@@ -1272,6 +1294,7 @@ describe('SearchSource', () => {
 
         const resp = await lastValueFrom(fetch$);
 
+        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);

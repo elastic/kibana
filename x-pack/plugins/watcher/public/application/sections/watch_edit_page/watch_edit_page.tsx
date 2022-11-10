@@ -8,7 +8,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { isEqual } from 'lodash';
 
-import { EuiPageContent } from '@elastic/eui';
+import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 

@@ -25,6 +25,7 @@
         ],
         "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/get-repo-files",
@@ -40,6 +41,7 @@
             ],
             "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -56,6 +58,7 @@
             ],
             "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],

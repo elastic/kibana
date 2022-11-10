@@ -85,6 +85,16 @@ export const PreconfiguredOutputsSchema = schema.arrayOf(
   }
 );
 
+export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    is_default: schema.boolean({ defaultValue: false }),
+    host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
+  }),
+  { defaultValue: [] }
+);
+
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
   schema.object({
     ...AgentPolicyBaseSchema,

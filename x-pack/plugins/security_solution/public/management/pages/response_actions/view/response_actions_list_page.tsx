@@ -5,15 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
+import { RESPONSE_ACTIONS_HISTORY } from '../../../../app/translations';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { ResponseActionsLog } from '../../../components/endpoint_response_actions_list/response_actions_log';
 import { UX_MESSAGES } from '../../../components/endpoint_response_actions_list/translations';
 
 export const ResponseActionsListPage = () => {
+  const [hideHeader, setHideHeader] = useState(true);
+  const resetPageHeader = useCallback((isData: boolean) => {
+    setHideHeader(!isData);
+  }, []);
   return (
-    <AdministrationListPage data-test-subj="responseActionsPage" title={UX_MESSAGES.pageTitle}>
-      <ResponseActionsLog showHostNames={true} />
+    <AdministrationListPage
+      data-test-subj="responseActionsPage"
+      title={RESPONSE_ACTIONS_HISTORY}
+      subtitle={UX_MESSAGES.pageSubTitle}
+      hideHeader={hideHeader}
+    >
+      <ResponseActionsLog
+        showHostNames={true}
+        isFlyout={false}
+        setIsDataInResponse={resetPageHeader}
+      />
     </AdministrationListPage>
   );
 };

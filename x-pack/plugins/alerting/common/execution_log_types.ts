@@ -26,6 +26,18 @@ export const actionErrorLogSortableColumns = [
   'event.action',
 ];
 
+export const EMPTY_EXECUTION_KPI_RESULT = {
+  success: 0,
+  unknown: 0,
+  failure: 0,
+  warning: 0,
+  activeAlerts: 0,
+  newAlerts: 0,
+  recoveredAlerts: 0,
+  erroredActions: 0,
+  triggeredActions: 0,
+};
+
 export type ExecutionLogSortFields = typeof executionLogSortableColumns[number];
 
 export type ActionErrorLogSortFields = typeof actionErrorLogSortableColumns[number];
@@ -48,6 +60,9 @@ export interface IExecutionLog {
   es_search_duration_ms: number;
   schedule_delay_ms: number;
   timed_out: boolean;
+  rule_id: string;
+  space_ids: string[];
+  rule_name: string;
 }
 
 export interface IExecutionErrors {
@@ -66,3 +81,5 @@ export interface IExecutionLogResult {
   total: number;
   data: IExecutionLog[];
 }
+
+export type IExecutionKPIResult = typeof EMPTY_EXECUTION_KPI_RESULT;

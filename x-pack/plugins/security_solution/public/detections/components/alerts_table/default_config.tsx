@@ -12,14 +12,14 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
-import { RowRendererId } from '../../../../common/types/timeline';
+import type { SubsetTGridModel } from '@kbn/timelines-plugin/public';
+import { tableDefaults } from '../../../common/store/data_table/defaults';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
-  columns,
-  rulePreviewColumns,
+  getColumns,
+  getRulePreviewColumns,
 } from '../../configurations/security_solution_detections/columns';
+import type { LicenseService } from '../../../../common/license';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => {
   const combinedQuery =
@@ -152,17 +152,16 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
       ]
     : [];
 
-export const alertsDefaultModel: SubsetTimelineModel = {
-  ...timelineDefaults,
-  columns,
+export const getAlertsDefaultModel = (license?: LicenseService): SubsetTGridModel => ({
+  ...tableDefaults,
+  columns: getColumns(license),
   showCheckboxes: true,
-  excludedRowRendererIds: Object.values(RowRendererId),
-};
+});
 
-export const alertsPreviewDefaultModel: SubsetTimelineModel = {
-  ...alertsDefaultModel,
-  columns: rulePreviewColumns,
-  defaultColumns: rulePreviewColumns,
+export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetTGridModel => ({
+  ...getAlertsDefaultModel(license),
+  columns: getColumns(license),
+  defaultColumns: getRulePreviewColumns(license),
   sort: [
     {
       columnId: 'kibana.alert.original_time',
@@ -171,7 +170,7 @@ export const alertsPreviewDefaultModel: SubsetTimelineModel = {
       sortDirection: 'desc',
     },
   ],
-};
+});
 
 export const requiredFieldsForActions = [
   '@timestamp',

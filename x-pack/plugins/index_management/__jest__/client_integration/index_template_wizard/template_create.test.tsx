@@ -80,7 +80,7 @@ describe('<TemplateCreate />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
 
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
     httpRequestsMockHelpers.setLoadNodesPluginsResponse([]);
@@ -587,5 +587,34 @@ describe('<TemplateCreate />', () => {
       expect(exists('saveTemplateError')).toBe(true);
       expect(find('saveTemplateError').text()).toContain(error.message);
     });
+  });
+
+  test('preview data stream', async () => {
+    await act(async () => {
+      testBed = await setup(httpSetup);
+    });
+    testBed.component.update();
+
+    const { actions } = testBed;
+    // Logistics
+    await actions.completeStepOne({
+      name: TEMPLATE_NAME,
+      indexPatterns: DEFAULT_INDEX_PATTERNS,
+      dataStream: {},
+    });
+
+    await act(async () => {
+      await actions.previewTemplate();
+    });
+
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      `${API_BASE_PATH}/index_templates/simulate`,
+      expect.objectContaining({
+        body: JSON.stringify({
+          index_patterns: DEFAULT_INDEX_PATTERNS,
+          data_stream: {},
+        }),
+      })
+    );
   });
 });

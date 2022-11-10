@@ -5,23 +5,36 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiProgress,
+  EuiSpacer,
+  EuiText,
+  useIsWithinMaxBreakpoint,
+  useIsWithinMinBreakpoint,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { ShapeTreeNode } from '@elastic/charts';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
+
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { SecurityPageName } from '../../../../../common/constants';
-import { useNavigation } from '../../../../common/lib/kibana';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import type { LegendItem } from '../../../../common/components/charts/legend_item';
+import type { EntityFilter } from './use_alerts_by_status';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
   ALERTS_TEXT,
+  ALERTS_BY_SEVERITY_TEXT,
+  INVESTIGATE_IN_TIMELINE,
   STATUS_ACKNOWLEDGED,
   STATUS_CLOSED,
   STATUS_CRITICAL_LABEL,
@@ -31,16 +44,16 @@ import {
   STATUS_OPEN,
 } from '../translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { VIEW_ALERTS } from '../../../pages/translations';
-import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
+import { SEVERITY_COLOR } from '../utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { ChartLabel } from './chart_label';
 import { Legend } from '../../../../common/components/charts/legend';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
-import { LinkButton } from '../../../../common/components/links';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
+import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
+import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 
-const donutHeight = 120;
 const StyledFlexItem = styled(EuiFlexItem)`
   padding: 0 4px;
 `;
@@ -52,6 +65,8 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
 
 interface AlertsByStatusProps {
   signalIndexName: string | null;
+  entityFilter?: EntityFilter;
+  additionalFilters?: ESBoolQuery[];
 }
 
 const legendField = 'kibana.alert.severity';
@@ -63,28 +78,35 @@ const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
 ];
 const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status';
 
-export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
+const eventKindSignalFilter: EntityFilter = {
+  field: 'event.kind',
+  value: 'signal',
+};
+
+export const AlertsByStatus = ({
+  additionalFilters,
+  signalIndexName,
+  entityFilter,
+}: AlertsByStatusProps) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
-  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
-  const { navigateTo } = useNavigation();
-  const goToAlerts = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateTo({
-        deepLinkId: SecurityPageName.alerts,
-        path: getDetectionEngineUrl(urlSearch),
-      });
-    },
-    [navigateTo, urlSearch]
-  );
+  const { openTimelineWithFilters } = useNavigateToTimeline();
+  const { onClick: goToAlerts, href } = useGetSecuritySolutionLinkProps()({
+    deepLinkId: SecurityPageName.alerts,
+  });
+
+  const isLargerBreakpoint = useIsWithinMinBreakpoint('xl');
+  const isSmallBreakpoint = useIsWithinMaxBreakpoint('s');
+  const donutHeight = isSmallBreakpoint || isLargerBreakpoint ? 120 : 90;
 
   const detailsButtonOptions = useMemo(
     () => ({
-      name: VIEW_ALERTS,
-      href: formatUrl(getDetectionEngineUrl()),
-      onClick: goToAlerts,
+      name: entityFilter ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
+      href: entityFilter ? undefined : href,
+      onClick: entityFilter
+        ? () => openTimelineWithFilters([[entityFilter, eventKindSignalFilter]])
+        : goToAlerts,
     }),
-    [formatUrl, goToAlerts]
+    [entityFilter, href, goToAlerts, openTimelineWithFilters]
   );
 
   const {
@@ -92,9 +114,11 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
     isLoading: loading,
     updatedAt,
   } = useAlertsByStatus({
+    additionalFilters,
+    entityFilter,
     signalIndexName,
-    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
     skip: !toggleStatus,
+    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
   });
   const legendItems: LegendItem[] = useMemo(
     () =>
@@ -131,8 +155,8 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
           )}
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
-            title={ALERTS_TEXT}
-            titleSize="s"
+            title={entityFilter ? ALERTS_BY_SEVERITY_TEXT : ALERTS_TEXT}
+            titleSize="m"
             subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple
             toggleStatus={toggleStatus}

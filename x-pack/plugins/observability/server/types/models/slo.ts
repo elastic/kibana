@@ -6,28 +6,30 @@
  */
 
 import * as t from 'io-ts';
+import {
+  budgetingMethodSchema,
+  dateType,
+  indicatorSchema,
+  objectiveSchema,
+  timeWindowSchema,
+} from '../schema';
 
-import { indicatorSchema, rollingTimeWindowSchema } from '../schema';
-
-const baseSLOSchema = t.type({
+const sloSchema = t.type({
   id: t.string,
   name: t.string,
   description: t.string,
   indicator: indicatorSchema,
-  time_window: rollingTimeWindowSchema,
-  budgeting_method: t.literal('occurrences'),
-  objective: t.type({
-    target: t.number,
-  }),
-  settings: t.partial({
-    destination_index: t.string,
-  }),
+  time_window: timeWindowSchema,
+  budgeting_method: budgetingMethodSchema,
+  objective: objectiveSchema,
+  revision: t.number,
+  created_at: dateType,
+  updated_at: dateType,
 });
 
-const storedSLOSchema = t.intersection([
-  baseSLOSchema,
-  t.type({ created_at: t.string, updated_at: t.string }),
-]);
+export { sloSchema };
 
-export type SLO = t.TypeOf<typeof baseSLOSchema>;
-export type StoredSLO = t.TypeOf<typeof storedSLOSchema>;
+type SLO = t.TypeOf<typeof sloSchema>;
+type StoredSLO = t.OutputOf<typeof sloSchema>;
+
+export type { SLO, StoredSLO };

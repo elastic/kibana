@@ -1,0 +1,13 @@
+{
+  "id": "stackConnectors",
+  "owner": {
+    "name": "Response Ops",
+    "githubTeam": "response-ops"
+  },
+  "server": true,
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "stack_connectors"],
+  "requiredPlugins": ["actions", "esUiShared", "triggersActionsUi"],
+  "ui": true
+}

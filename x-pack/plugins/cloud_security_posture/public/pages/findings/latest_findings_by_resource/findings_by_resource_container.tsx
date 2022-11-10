@@ -6,8 +6,11 @@
  */
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -29,6 +32,7 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
+import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY } from '../../../../common/constants';
 
 const getDefaultQuery = ({
   query,
@@ -46,11 +50,19 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
     <Route
       exact
       path={findingsNavigation.findings_by_resource.path}
-      render={() => <LatestFindingsByResource dataView={dataView} />}
+      render={() => (
+        <TrackApplicationView viewId={findingsNavigation.findings_by_resource.id}>
+          <LatestFindingsByResource dataView={dataView} />
+        </TrackApplicationView>
+      )}
     />
     <Route
       path={findingsNavigation.resource_findings.path}
-      render={() => <ResourceFindings dataView={dataView} />}
+      render={() => (
+        <TrackApplicationView viewId={findingsNavigation.resource_findings.id}>
+          <ResourceFindings dataView={dataView} />
+        </TrackApplicationView>
+      )}
     />
   </Switch>
 );
@@ -58,6 +70,10 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+  const [pageSize, setPageSize] = useLocalStorage(
+    LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY,
+    urlQuery.pageSize
+  );
 
   /**
    * Page URL query to ES query
@@ -72,13 +88,29 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
    * Page ES query result
    */
   const findingsGroupByResource = useFindingsByResource({
-    ...getPaginationQuery(urlQuery),
+    ...getPaginationQuery({
+      pageIndex: urlQuery.pageIndex,
+      pageSize: pageSize || urlQuery.pageSize,
+    }),
     sortDirection: urlQuery.sortDirection,
     query: baseEsQuery.query,
     enabled: !baseEsQuery.error,
   });
 
   const error = findingsGroupByResource.error || baseEsQuery.error;
+
+  const handleDistributionClick = (evaluation: Evaluation) => {
+    setUrlQuery({
+      pageIndex: 0,
+      filters: getFilters({
+        filters: urlQuery.filters,
+        dataView,
+        field: 'result.evaluation',
+        value: evaluation,
+        negate: false,
+      }),
+    });
+  };
 
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
@@ -89,26 +121,32 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={findingsGroupByResource.isFetching}
       />
-      <PageTitle>
-        <PageTitleText
-          title={
-            <CloudPosturePageTitle
-              isBeta
-              title={i18n.translate(
-                'xpack.csp.findings.findingsByResource.findingsByResourcePageTitle',
-                { defaultMessage: 'Findings' }
-              )}
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <PageTitle>
+            <PageTitleText
+              title={
+                <CloudPosturePageTitle
+                  title={i18n.translate(
+                    'xpack.csp.findings.findingsByResource.findingsByResourcePageTitle',
+                    { defaultMessage: 'Findings' }
+                  )}
+                />
+              }
             />
-          }
-        />
-      </PageTitle>
+          </PageTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: 400 }}>
+          {!error && <FindingsGroupBySelector type="resource" />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {error && <ErrorCallout error={error} />}
       {!error && (
         <>
-          <FindingsGroupBySelector type="resource" />
           {findingsGroupByResource.isSuccess && !!findingsGroupByResource.data.page.length && (
             <FindingsDistributionBar
               {...{
+                distributionOnClick: handleDistributionClick,
                 type: i18n.translate('xpack.csp.findings.findingsByResource.tableRowTypeLabel', {
                   defaultMessage: 'Resources',
                 }),
@@ -128,17 +166,18 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             loading={findingsGroupByResource.isFetching}
             items={findingsGroupByResource.data?.page || []}
             pagination={getPaginationTableParams({
-              pageSize: urlQuery.pageSize,
+              pageSize: pageSize || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: findingsGroupByResource.data?.total || 0,
             })}
-            setTableOptions={({ sort, page }) =>
+            setTableOptions={({ sort, page }) => {
+              setPageSize(page.size);
               setUrlQuery({
                 sortDirection: sort?.direction,
                 pageIndex: page.index,
                 pageSize: page.size,
-              })
-            }
+              });
+            }}
             sorting={{
               sort: { field: 'failed_findings', direction: urlQuery.sortDirection },
             }}

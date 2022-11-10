@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { anomaliesTableData } from '../api/anomalies_table_data';
@@ -14,7 +14,9 @@ import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import * as i18n from './translations';
 import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { useInstalledSecurityJobs } from '../hooks/use_installed_security_jobs';
+import { useFetch, REQUEST_NAMES } from '../../../hooks/use_fetch';
+import { useMlCapabilities } from '../hooks/use_ml_capabilities';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 
 interface Args {
   influencers?: InfluencerInput[];
@@ -24,6 +26,8 @@ interface Args {
   skip?: boolean;
   criteriaFields?: CriteriaFields[];
   filterQuery?: estypes.QueryDslQueryContainer;
+  jobIds: string[];
+  aggregationInterval: string;
 }
 
 type Return = [boolean, Anomalies | null];
@@ -57,74 +61,48 @@ export const useAnomaliesTableData = ({
   threshold = -1,
   skip = false,
   filterQuery,
+  jobIds,
+  aggregationInterval,
 }: Args): Return => {
-  const [tableData, setTableData] = useState<Anomalies | null>(null);
-  const { isMlUser, jobs } = useInstalledSecurityJobs();
-  const [loading, setLoading] = useState(true);
+  const mlCapabilities = useMlCapabilities();
+  const isMlUser = hasMlUserPermissions(mlCapabilities);
+
   const { addError } = useAppToasts();
   const timeZone = useTimeZone();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
-  const jobIds = jobs.map((job) => job.id);
   const startDateMs = useMemo(() => new Date(startDate).getTime(), [startDate]);
   const endDateMs = useMemo(() => new Date(endDate).getTime(), [endDate]);
 
+  const {
+    fetch,
+    data = null,
+    isLoading,
+    error,
+  } = useFetch(REQUEST_NAMES.ANOMALIES_TABLE, anomaliesTableData, { disabled: skip });
+
   useEffect(() => {
-    let isSubscribed = true;
-    const abortCtrl = new AbortController();
-    setLoading(true);
-
-    async function fetchAnomaliesTableData(
-      influencersInput: InfluencerInput[],
-      criteriaFieldsInput: CriteriaFields[],
-      earliestMs: number,
-      latestMs: number
-    ) {
-      if (skip) {
-        setLoading(false);
-      } else if (isMlUser && !skip && jobIds.length > 0) {
-        try {
-          const data = await anomaliesTableData(
-            {
-              jobIds,
-              criteriaFields: criteriaFieldsInput,
-              influencersFilterQuery: filterQuery,
-              aggregationInterval: 'auto',
-              threshold: getThreshold(anomalyScore, threshold),
-              earliestMs,
-              latestMs,
-              influencers: influencersInput,
-              dateFormatTz: timeZone,
-              maxRecords: 500,
-              maxExamples: 10,
-            },
-            abortCtrl.signal
-          );
-          if (isSubscribed) {
-            setTableData(data);
-            setLoading(false);
-          }
-        } catch (error) {
-          if (isSubscribed) {
-            addError(error, { title: i18n.SIEM_TABLE_FETCH_FAILURE });
-            setLoading(false);
-          }
-        }
-      } else if (!isMlUser && isSubscribed) {
-        setLoading(false);
-      } else if (jobIds.length === 0 && isSubscribed) {
-        setLoading(false);
-      } else if (isSubscribed) {
-        setTableData(null);
-        setLoading(true);
-      }
+    if (error) {
+      addError(error, { title: i18n.SIEM_TABLE_FETCH_FAILURE });
     }
+  }, [error, addError]);
 
-    fetchAnomaliesTableData(influencers, criteriaFields, startDateMs, endDateMs);
-    return () => {
-      isSubscribed = false;
-      abortCtrl.abort();
-    };
+  useEffect(() => {
+    if (isMlUser && jobIds.length > 0) {
+      fetch({
+        jobIds,
+        criteriaFields,
+        influencersFilterQuery: filterQuery,
+        aggregationInterval,
+        threshold: getThreshold(anomalyScore, threshold),
+        earliestMs: startDateMs,
+        latestMs: endDateMs,
+        influencers,
+        dateFormatTz: timeZone,
+        maxRecords: 500,
+        maxExamples: 10,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -133,11 +111,11 @@ export const useAnomaliesTableData = ({
     influencersOrCriteriaToString(criteriaFields),
     startDateMs,
     endDateMs,
-    skip,
     isMlUser,
+    aggregationInterval,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     jobIds.sort().join(),
   ]);
 
-  return [loading, tableData];
+  return [isLoading, data];
 };

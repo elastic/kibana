@@ -6,22 +6,28 @@
  * Side Public License, v 1.
  */
 
+import { asyncForEachWithLimit } from '@kbn/std';
 import { snakeToCamel } from '../utils';
 import { PluginApi, ApiDeclaration } from '../types';
 import { writePluginDoc } from './write_plugin_mdx_docs';
 import { WritePluginDocsOpts } from './types';
 
-export function writePluginDocSplitByFolder(
+// There is no science behind this 10.
+// When it was first introduced, it was using synchronous APIs, so the concurrency was 1.
+// Feel free to adapt it when more data is gathered.
+const CONCURRENT_WRITES = 10;
+
+export async function writePluginDocSplitByFolder(
   folder: string,
   { doc, plugin, pluginStats, log }: WritePluginDocsOpts
 ) {
   const apisByFolder = splitApisByFolder(doc);
 
   log.debug(`Split ${doc.id} into ${apisByFolder.length} services`);
-  apisByFolder.forEach((docDef) => {
+  await asyncForEachWithLimit(apisByFolder, CONCURRENT_WRITES, async (docDef) => {
     // TODO: we should probably see if we can break down these stats by service folder. As it is, they will represent stats for
     // the entire plugin.
-    writePluginDoc(folder, { doc: docDef, plugin, pluginStats, log });
+    await writePluginDoc(folder, { doc: docDef, plugin, pluginStats, log });
   });
 }
 

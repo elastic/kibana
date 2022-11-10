@@ -847,6 +847,63 @@ describe('estimateCapacity', () => {
       },
     });
   });
+
+  test("estimates minutes_to_drain_overdue even if there isn't any overdue task", async () => {
+    expect(
+      estimateCapacity(
+        logger,
+        mockStats(
+          { max_workers: 10, poll_interval: 3000 },
+          {
+            overdue: undefined,
+            owner_ids: 1,
+            overdue_non_recurring: 0,
+            capacity_requirements: {
+              per_minute: 60,
+              per_hour: 0,
+              per_day: 0,
+            },
+          },
+          {
+            execution: {
+              duration: {},
+              duration_by_persistence: {
+                ephemeral: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                non_recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+                recurring: {
+                  p50: 400,
+                  p90: 500,
+                  p95: 1200,
+                  p99: 1500,
+                },
+              },
+              // no non-recurring executions in the system in recent history
+              persistence: {
+                ephemeral: 0,
+                non_recurring: 0,
+                recurring: 100,
+              },
+              result_frequency_percent_as_number: {},
+            },
+          }
+        )
+      ).value.observed
+    ).toMatchObject({
+      observed_kibana_instances: 1,
+      minutes_to_drain_overdue: 0,
+      max_throughput_per_minute: 200,
+    });
+  });
 });
 
 function mockStats(

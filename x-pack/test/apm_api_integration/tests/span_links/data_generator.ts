@@ -10,7 +10,7 @@ import uuid from 'uuid';
 
 function getProducerInternalOnly() {
   const producerInternalOnlyInstance = apm
-    .service('producer-internal-only', 'production', 'go')
+    .service({ name: 'producer-internal-only', environment: 'production', agentName: 'go' })
     .instance('instance a');
 
   const events = timerange(
@@ -21,13 +21,13 @@ function getProducerInternalOnly() {
     .rate(1)
     .generator((timestamp) => {
       return producerInternalOnlyInstance
-        .transaction(`Transaction A`)
+        .transaction({ transactionName: `Transaction A` })
         .timestamp(timestamp)
         .duration(1000)
         .success()
         .children(
           producerInternalOnlyInstance
-            .span(`Span A`, 'external', 'http')
+            .span({ spanName: `Span A`, spanType: 'external', spanSubtype: 'http' })
             .timestamp(timestamp + 50)
             .duration(100)
             .success()
@@ -57,7 +57,7 @@ function getProducerInternalOnly() {
 
 function getProducerExternalOnly() {
   const producerExternalOnlyInstance = apm
-    .service('producer-external-only', 'production', 'java')
+    .service({ name: 'producer-external-only', environment: 'production', agentName: 'java' })
     .instance('instance b');
 
   const events = timerange(
@@ -68,13 +68,13 @@ function getProducerExternalOnly() {
     .rate(1)
     .generator((timestamp) => {
       return producerExternalOnlyInstance
-        .transaction(`Transaction B`)
+        .transaction({ transactionName: `Transaction B` })
         .timestamp(timestamp)
         .duration(1000)
         .success()
         .children(
           producerExternalOnlyInstance
-            .span(`Span B`, 'external', 'http')
+            .span({ spanName: `Span B`, spanType: 'external', spanSubtype: 'http' })
             .defaults({
               'span.links': [{ trace: { id: 'trace#1' }, span: { id: 'span#1' } }],
             })
@@ -82,7 +82,7 @@ function getProducerExternalOnly() {
             .duration(100)
             .success(),
           producerExternalOnlyInstance
-            .span(`Span B.1`, 'external', 'http')
+            .span({ spanName: `Span B.1`, spanType: 'external', spanSubtype: 'http' })
             .timestamp(timestamp + 50)
             .duration(100)
             .success()
@@ -130,7 +130,7 @@ function getProducerConsumer({
   const externalTraceId = uuid.v4();
 
   const producerConsumerInstance = apm
-    .service('producer-consumer', 'production', 'ruby')
+    .service({ name: 'producer-consumer', environment: 'production', agentName: 'ruby' })
     .instance('instance c');
 
   const events = timerange(
@@ -141,7 +141,7 @@ function getProducerConsumer({
     .rate(1)
     .generator((timestamp) => {
       return producerConsumerInstance
-        .transaction(`Transaction C`)
+        .transaction({ transactionName: `Transaction C` })
         .defaults({
           'span.links': [
             producerInternalOnlySpanASpanLink,
@@ -154,7 +154,7 @@ function getProducerConsumer({
         .success()
         .children(
           producerConsumerInstance
-            .span(`Span C`, 'external', 'http')
+            .span({ spanName: `Span C`, spanType: 'external', spanSubtype: 'http' })
             .timestamp(timestamp + 50)
             .duration(100)
             .success()
@@ -200,7 +200,7 @@ function getConsumerMultiple({
   producerConsumerTransactionCLink: SpanLink;
 }) {
   const consumerMultipleInstance = apm
-    .service('consumer-multiple', 'production', 'nodejs')
+    .service({ name: 'consumer-multiple', environment: 'production', agentName: 'nodejs' })
     .instance('instance d');
 
   const events = timerange(
@@ -211,14 +211,14 @@ function getConsumerMultiple({
     .rate(1)
     .generator((timestamp) => {
       return consumerMultipleInstance
-        .transaction(`Transaction D`)
+        .transaction({ transactionName: `Transaction D` })
         .defaults({ 'span.links': [producerInternalOnlySpanALink, producerConsumerSpanCLink] })
         .timestamp(timestamp)
         .duration(1000)
         .success()
         .children(
           consumerMultipleInstance
-            .span(`Span E`, 'external', 'http')
+            .span({ spanName: `Span E`, spanType: 'external', spanSubtype: 'http' })
             .defaults({
               'span.links': [producerExternalOnlySpanBLink, producerConsumerTransactionCLink],
             })

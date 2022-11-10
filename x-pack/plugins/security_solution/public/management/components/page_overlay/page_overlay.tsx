@@ -13,6 +13,7 @@ import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
 import {
   FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET,
@@ -22,7 +23,6 @@ import {
   SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
   TIMELINE_EUI_THEME_ZINDEX_LEVEL,
 } from '../../../timelines/components/timeline/styles';
-import { useIsMounted } from '../../hooks/use_is_mounted';
 
 const OverlayRootContainer = styled.div`
   border: none;
@@ -77,9 +77,9 @@ const OverlayRootContainer = styled.div`
 `;
 
 const PAGE_OVERLAY_CSS_CLASSNAME = 'securitySolution-pageOverlay';
-const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
-const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
-const PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-fullScreen`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-fullScreen`;
 
 const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   body.${PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME} {
@@ -154,7 +154,7 @@ export interface PageOverlayProps {
   isHidden?: boolean;
 
   /**
-   * Setting this to `true` (defualt) will enable scrolling inside of the overlay
+   * Setting this to `true` (default) will enable scrolling inside of the overlay
    */
   enableScrolling?: boolean;
 
@@ -194,7 +194,8 @@ export interface PageOverlayProps {
 
 /**
  * A generic component for taking over the entire Kibana UI main content area (everything below the
- * top header that includes the breadcrumbs).
+ * top header that includes the breadcrumbs). This component adds nothing more than a blank page - its up
+ * to the `children` pass to actually display any type of intractable UI for the user.
  */
 export const PageOverlay = memo<PageOverlayProps>(
   ({
@@ -246,7 +247,7 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     // Capture the URL `pathname` that the overlay was opened for
     useEffect(() => {
-      if (isMounted) {
+      if (isMounted()) {
         setOpenedOnPathName((prevState) => {
           if (isHidden) {
             return null;
@@ -270,7 +271,7 @@ export const PageOverlay = memo<PageOverlayProps>(
     // If `hideOnUrlPathNameChange` is true, then determine if the pathname changed and if so, call `onHide()`
     useEffect(() => {
       if (
-        isMounted &&
+        isMounted() &&
         onHide &&
         hideOnUrlPathnameChange &&
         !isHidden &&
@@ -283,7 +284,7 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     // Handle adding class names to the `document.body` DOM element
     useEffect(() => {
-      if (isMounted) {
+      if (isMounted()) {
         if (isHidden) {
           unSetDocumentBodyOverlayIsVisible();
           unSetDocumentBodyLock();

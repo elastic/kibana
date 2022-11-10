@@ -23,6 +23,7 @@
         ],
         "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsFinder",
@@ -42,6 +43,7 @@
             ],
             "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -69,6 +71,7 @@
         ],
         "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsFinder",
@@ -78,7 +81,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsFinder",
@@ -88,7 +92,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsFinder",
@@ -99,12 +104,19 @@
             "description": [],
             "signature": [
               "(savedObject: ",
-              "SimpleSavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
               "<T>) => ",
               "IconType"
             ],
             "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsFinder",
@@ -114,11 +126,18 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SimpleSavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SimpleSavedObject",
+                    "text": "SimpleSavedObject"
+                  },
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -133,11 +152,18 @@
             "description": [],
             "signature": [
               "((savedObject: ",
-              "SimpleSavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
               "<T>) => string) | undefined"
             ],
             "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsFinder",
@@ -147,11 +173,18 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SimpleSavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SimpleSavedObject",
+                    "text": "SimpleSavedObject"
+                  },
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -166,11 +199,18 @@
             "description": [],
             "signature": [
               "((savedObject: ",
-              "SimpleSavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
               "<T>) => boolean) | undefined"
             ],
             "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsFinder",
@@ -180,11 +220,18 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SimpleSavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SimpleSavedObject",
+                    "text": "SimpleSavedObject"
+                  },
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -199,11 +246,18 @@
             "description": [],
             "signature": [
               "((savedObject: ",
-              "SimpleSavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
               "<T>) => string) | undefined"
             ],
             "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsFinder",
@@ -213,11 +267,18 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SimpleSavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SimpleSavedObject",
+                    "text": "SimpleSavedObject"
+                  },
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -234,7 +295,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsFinder",
@@ -247,7 +309,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -267,6 +330,7 @@
         ],
         "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

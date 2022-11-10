@@ -14,6 +14,7 @@ export { EmptyPlaceholder } from './empty_placeholder';
 
 export { useCommonChartStyles } from './common_chart_styles';
 export * from './endzones';
+export * from './warnings';
 
 /**
  * The Lazily-loaded `ColorPicker` component.  Consumers should use `React.Suspense` or

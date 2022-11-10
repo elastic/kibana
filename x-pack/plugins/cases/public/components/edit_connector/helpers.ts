@@ -6,8 +6,8 @@
  */
 
 import { isConnectorUserAction, isCreateCaseUserAction } from '../../../common/utils/user_actions';
-import { ConnectorTypeFields } from '../../../common/api';
-import { CaseUserActions } from '../../containers/types';
+import type { ConnectorTypeFields } from '../../../common/api';
+import type { CaseUserActions } from '../../containers/types';
 
 export const getConnectorFieldsFromUserActions = (
   id: string,

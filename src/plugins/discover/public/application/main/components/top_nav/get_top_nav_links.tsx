@@ -33,6 +33,10 @@ export const getTopNavLinks = ({
   searchSource,
   onOpenSavedSearch,
   isPlainRecord,
+  persistDataView,
+  adHocDataViews,
+  updateDataViewList,
+  updateAdHocDataViewId,
 }: {
   dataView: DataView;
   navigateTo: (url: string) => void;
@@ -43,6 +47,10 @@ export const getTopNavLinks = ({
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
   isPlainRecord: boolean;
+  adHocDataViews: DataView[];
+  updateDataViewList: (dataView: DataView[]) => Promise<void>;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -70,12 +78,14 @@ export const getTopNavLinks = ({
     description: i18n.translate('discover.localMenu.alertsDescription', {
       defaultMessage: 'Alerts',
     }),
-    run: (anchorElement: HTMLElement) => {
+    run: async (anchorElement: HTMLElement) => {
       openAlertsPopover({
         I18nContext: services.core.i18n.Context,
         anchorElement,
         searchSource: savedSearch.searchSource,
         services,
+        adHocDataViews,
+        updateDataViewList,
         savedQueryId: state.appStateContainer.getState().savedQuery,
       });
     },
@@ -105,17 +115,19 @@ export const getTopNavLinks = ({
     testId: 'discoverSaveButton',
     iconType: 'save',
     emphasize: true,
-    run: (anchorElement: HTMLElement) =>
+    run: (anchorElement: HTMLElement) => {
       onSaveSearch({
         savedSearch,
         services,
         dataView,
         navigateTo,
         state,
+        updateAdHocDataViewId,
         onClose: () => {
           anchorElement?.focus();
         },
-      }),
+      });
+    },
   };
 
   const openSearch = {
@@ -146,7 +158,8 @@ export const getTopNavLinks = ({
     }),
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
-      if (!services.share) {
+      const updatedDataView = await persistDataView(dataView);
+      if (!services.share || !updatedDataView) {
         return;
       }
       const sharingData = await getSharingData(

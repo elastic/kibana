@@ -37,7 +37,9 @@ export const setMonitor = async ({
   if (id) {
     return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
   } else {
-    return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
+    return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor, undefined, {
+      preserve_namespace: true,
+    });
   }
 };
 

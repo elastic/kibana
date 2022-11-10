@@ -11,3 +11,5 @@ export const MESSAGE_LEVEL = {
   SUCCESS: 'success',
   WARNING: 'warning',
 } as const;
+
+export type MessageLevel = typeof MESSAGE_LEVEL[keyof typeof MESSAGE_LEVEL];

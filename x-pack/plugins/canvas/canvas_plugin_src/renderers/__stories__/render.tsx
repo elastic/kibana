@@ -15,6 +15,7 @@ export const defaultHandlers: RendererHandlers = {
   getFilter: () => 'filter',
   getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isSyncCursorEnabled: () => true,
   isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
   onComplete: (fn) => undefined,

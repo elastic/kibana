@@ -26,25 +26,30 @@ import {
   DomainConfigFromServer,
   CrawlerDomainsWithMetaFromServer,
   CrawlerDomainsWithMeta,
+  BasicCrawlerAuth,
+  CrawlerAuth,
+  RawCrawlerAuth,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
   const {
-    id,
-    name,
-    sitemaps,
-    created_on: createdOn,
-    last_visited_at: lastCrawl,
-    document_count: documentCount,
+    auth,
+    available_deduplication_fields: availableDeduplicationFields,
     crawl_rules: crawlRules,
-    default_crawl_rule: defaultCrawlRule,
-    entry_points: entryPoints,
+    created_on: createdOn,
     deduplication_enabled: deduplicationEnabled,
     deduplication_fields: deduplicationFields,
-    available_deduplication_fields: availableDeduplicationFields,
+    default_crawl_rule: defaultCrawlRule,
+    document_count: documentCount,
+    entry_points: entryPoints,
+    id,
+    last_visited_at: lastCrawl,
+    name,
+    sitemaps,
   } = payload;
 
   const clientPayload: CrawlerDomain = {
+    auth,
     availableDeduplicationFields,
     crawlRules,
     createdOn,
@@ -177,13 +182,19 @@ export function crawlRequestWithDetailsServerToClient(
 }
 
 export function crawlerDataServerToClient(payload: CrawlerDataFromServer): CrawlerData {
-  const { domains, events, most_recent_crawl_request: mostRecentCrawlRequest } = payload;
+  const {
+    domains,
+    events,
+    most_recent_crawl_request: mostRecentCrawlRequest,
+    user_agent: userAgent,
+  } = payload;
 
   return {
     domains: domains.map((domain) => crawlerDomainServerToClient(domain)),
     events: events.map((event) => crawlEventServerToClient(event)),
     mostRecentCrawlRequest:
       mostRecentCrawlRequest && crawlRequestServerToClient(mostRecentCrawlRequest),
+    userAgent,
   };
 }
 
@@ -229,3 +240,11 @@ export const crawlerDomainsWithMetaServerToClient = ({
   domains: results.map(crawlerDomainServerToClient),
   meta,
 });
+
+export function isBasicCrawlerAuth(auth: CrawlerAuth): auth is BasicCrawlerAuth {
+  return auth !== null && (auth as BasicCrawlerAuth).type === 'basic';
+}
+
+export function isRawCrawlerAuth(auth: CrawlerAuth): auth is RawCrawlerAuth {
+  return auth !== null && (auth as RawCrawlerAuth).type === 'raw';
+}

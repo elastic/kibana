@@ -14,6 +14,7 @@ import {
 } from './common';
 import { BrowserFields, ConfigKey } from '../../../common/runtime_types/monitor_management';
 import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../common/constants/monitor_defaults';
+import { tlsFormatters } from './tls';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
@@ -66,12 +67,9 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.JOURNEY_FILTERS_TAGS]: (fields) =>
     arrayFormatter(fields[ConfigKey.JOURNEY_FILTERS_TAGS]),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
-  [ConfigKey.JOURNEY_ID]: null,
-  [ConfigKey.PROJECT_ID]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: (fields) =>
     stringToObjectFormatter(fields[ConfigKey.PLAYWRIGHT_OPTIONS] || ''),
-  [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
-  [ConfigKey.ORIGINAL_SPACE]: null,
   [ConfigKey.TEXT_ASSERTION]: null,
   ...commonFormatters,
+  ...tlsFormatters,
 };

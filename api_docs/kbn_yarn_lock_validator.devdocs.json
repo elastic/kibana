@@ -33,6 +33,7 @@
         ],
         "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -48,7 +49,13 @@
         ],
         "signature": [
           "(log: ",
-          "SomeDevLog",
+          {
+            "pluginId": "@kbn/some-dev-log",
+            "scope": "server",
+            "docId": "kibKbnSomeDevLogPluginApi",
+            "section": "def-server.SomeDevLog",
+            "text": "SomeDevLog"
+          },
           ", yarnLock: ",
           {
             "pluginId": "@kbn/yarn-lock-validator",
@@ -61,6 +68,7 @@
         ],
         "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/yarn-lock-validator",
@@ -70,10 +78,17 @@
             "label": "log",
             "description": [],
             "signature": [
-              "SomeDevLog"
+              {
+                "pluginId": "@kbn/some-dev-log",
+                "scope": "server",
+                "docId": "kibKbnSomeDevLogPluginApi",
+                "section": "def-server.SomeDevLog",
+                "text": "SomeDevLog"
+              }
             ],
             "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -94,6 +109,7 @@
             ],
             "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -113,6 +129,7 @@
         ],
         "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/yarn-lock-validator",
@@ -127,7 +144,8 @@
               "[key: string]:  { version: string; resolved: string; integrity: string; dependencies?: { [key: string]: string; } | undefined; optionalDependencies?: { [key: string]: string; } | undefined; }"
             ],
             "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

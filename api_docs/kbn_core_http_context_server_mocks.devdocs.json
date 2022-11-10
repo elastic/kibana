@@ -23,28 +23,89 @@
         "description": [],
         "signature": [
           "{ registerContext: jest.MockInstance<",
-          "IContextContainer",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.IContextContainer",
+            "text": "IContextContainer"
+          },
           ", [pluginOpaqueId: symbol, contextName: \"resolve\", provider: ",
-          "IContextProvider",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.IContextProvider",
+            "text": "IContextProvider"
+          },
           "<",
-          "RequestHandlerContextBase",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          },
           ", \"resolve\">]>; createHandler: jest.MockInstance<(request: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>, response: ",
-          "KibanaResponseFactory",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
           ") => Promise<",
-          "IKibanaResponse",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
           "<any>>, [pluginOpaqueId: symbol, handler: ",
-          "RequestHandler",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RequestHandler",
+            "text": "RequestHandler"
+          },
           "<unknown, unknown, unknown, ",
-          "RequestHandlerContextBase",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          },
           ", any, ",
-          "KibanaResponseFactory",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
           ">]>; } & ",
-          "IContextContainer"
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.IContextContainer",
+            "text": "IContextContainer"
+          }
         ],
         "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -58,6 +119,7 @@
         "description": [],
         "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-context-server-mocks",
@@ -78,6 +140,7 @@
             ],
             "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -91,7 +154,8 @@
                   "any"
                 ],
                 "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -107,6 +171,7 @@
         "description": [],
         "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-context-server-mocks",
@@ -120,6 +185,7 @@
             ],
             "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -137,6 +203,7 @@
             ],
             "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -150,7 +217,8 @@
                   "{}"
                 ],
                 "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -168,6 +236,7 @@
             ],
             "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -181,7 +250,8 @@
                   "{}"
                 ],
                 "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

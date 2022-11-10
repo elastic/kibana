@@ -6,8 +6,65 @@
  */
 
 import http from 'http';
+import { isEmpty } from 'lodash';
+import { getDataFromRequest } from './data_handler';
 
-export const initPlugin = async () => http.createServer(handler);
+/**
+ * This server records the data from a create incident request. It only saves the most recent request. When building tests,
+ * each test should create a new server to avoid stale or overwritten data.
+ */
+export class RecordingServiceNowSimulator {
+  private _incident: Record<string, unknown> | undefined;
+  private _server: http.Server | undefined;
+  private _allRequestData: Array<Record<string, unknown>> = [];
+
+  private constructor() {}
+
+  public static async start() {
+    const sim = new RecordingServiceNowSimulator();
+    sim._server = http.createServer(sim.handler);
+    return sim;
+  }
+
+  public close() {
+    this._server?.close();
+  }
+
+  private handler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
+    const data = await getDataFromRequest(request);
+    const pathName = request.url!;
+
+    if (isCreateRequest(pathName)) {
+      this._incident = data;
+    }
+
+    if (!isEmpty(data)) {
+      this._allRequestData.push(data);
+    }
+
+    return handleSendingResponse(request, response, data);
+  };
+
+  public get incident() {
+    return this._incident;
+  }
+
+  public get server() {
+    return this._server!;
+  }
+
+  public get allRequestData() {
+    return this._allRequestData!;
+  }
+}
+
+const isCreateRequest = (pathName: string) => {
+  return (
+    pathName === '/api/now/v2/table/incident' || pathName === '/api/now/v2/table/sn_si_incident'
+  );
+};
+
+export const initPlugin = async () => http.createServer(requestHandler);
 
 const sendResponse = (response: http.ServerResponse, data: any) => {
   response.statusCode = 200;
@@ -15,18 +72,17 @@ const sendResponse = (response: http.ServerResponse, data: any) => {
   response.end(JSON.stringify(data, null, 4));
 };
 
-const handler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
-  const buffers = [];
-  let data: Record<string, unknown> = {};
+const requestHandler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
+  const data: Record<string, unknown> = await getDataFromRequest(request);
 
-  if (request.method === 'POST') {
-    for await (const chunk of request) {
-      buffers.push(chunk);
-    }
+  return handleSendingResponse(request, response, data);
+};
 
-    data = JSON.parse(Buffer.concat(buffers).toString());
-  }
-
+const handleSendingResponse = async (
+  request: http.IncomingMessage,
+  response: http.ServerResponse,
+  data: Record<string, unknown>
+) => {
   const pathName = request.url!;
 
   if (pathName.includes('elastic_api/health')) {
@@ -63,10 +119,7 @@ const handler = async (request: http.IncomingMessage, response: http.ServerRespo
   }
 
   // Create incident
-  if (
-    pathName === '/api/now/v2/table/incident' ||
-    pathName === '/api/now/v2/table/sn_si_incident'
-  ) {
+  if (isCreateRequest(pathName)) {
     return sendResponse(response, {
       result: { sys_id: '123', number: 'INC01', sys_created_on: '2020-03-10 12:24:20' },
     });

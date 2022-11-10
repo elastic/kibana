@@ -21,6 +21,7 @@
         "description": [],
         "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
@@ -41,6 +42,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-server",
@@ -54,6 +56,7 @@
                 ],
                 "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -73,6 +76,7 @@
         ],
         "path": "packages/core/deprecations/core-deprecations-server/src/request_handler_context.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
@@ -83,11 +87,18 @@
             "description": [],
             "signature": [
               "() => Promise<",
-              "DomainDeprecationDetails",
+              {
+                "pluginId": "@kbn/core-deprecations-common",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                "section": "def-common.DomainDeprecationDetails",
+                "text": "DomainDeprecationDetails"
+              },
               "[]>"
             ],
             "path": "packages/core/deprecations/core-deprecations-server/src/request_handler_context.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -105,6 +116,7 @@
         ],
         "path": "packages/core/deprecations/core-deprecations-server/src/request_handler_context.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
@@ -123,7 +135,8 @@
               }
             ],
             "path": "packages/core/deprecations/core-deprecations-server/src/request_handler_context.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -139,6 +152,7 @@
         ],
         "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
@@ -160,6 +174,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-server",
@@ -179,6 +194,7 @@
                 ],
                 "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -196,6 +212,7 @@
         "description": [],
         "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
@@ -205,10 +222,17 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "IScopedClusterClient"
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              }
             ],
             "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-deprecations-server",
@@ -218,10 +242,17 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -235,6 +266,7 @@
         "description": [],
         "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
@@ -253,13 +285,26 @@
                 "text": "GetDeprecationsContext"
               },
               ") => ",
-              "MaybePromise",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.MaybePromise",
+                "text": "MaybePromise"
+              },
               "<",
-              "DeprecationsDetails",
+              {
+                "pluginId": "@kbn/core-deprecations-common",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                "section": "def-common.DeprecationsDetails",
+                "text": "DeprecationsDetails"
+              },
               "[]>"
             ],
             "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-server",
@@ -279,6 +324,7 @@
                 ],
                 "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],

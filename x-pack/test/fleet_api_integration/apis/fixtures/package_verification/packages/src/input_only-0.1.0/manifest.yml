@@ -1,0 +1,45 @@
+format_version: 1.0.0
+name: input_only
+title: Custom Logs
+description: >-
+  Read lines from active log files with Elastic Agent.
+type: input
+version: 0.1.0
+license: basic
+categories:
+  - custom
+policy_templates:
+  - name: first_policy_template
+    type: logs
+    title: Custom log file
+    description: Collect your custom log files.
+    input: logfile
+    template_path: input.yml.hbs
+    vars:
+      - name: paths
+        type: text
+        title: Paths
+        multi: true
+        required: true
+        show_user: true
+      - name: tags
+        type: text
+        title: Tags
+        multi: true
+        required: true
+        show_user: false
+      - name: ignore_older
+        type: text
+        title: Ignore events older than
+        required: false
+        default: 72h
+icons:
+  - src: "/img/sample-logo.svg"
+    type: "image/svg+xml"
+screenshots:
+  - src: "/img/sample-screenshot.png"
+    title: "Sample screenshot"
+    size: "600x600"
+    type: "image/png"
+owner:
+  github: elastic/integrations

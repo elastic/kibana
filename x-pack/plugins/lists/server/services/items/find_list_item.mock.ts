@@ -30,6 +30,7 @@ export const getFindListItemOptionsMock = (): FindListItemOptions => {
     listItemIndex: LIST_ITEM_INDEX,
     page: 1,
     perPage: 25,
+    runtimeMappings: undefined,
     searchAfter: undefined,
     sortField: undefined,
     sortOrder: undefined,

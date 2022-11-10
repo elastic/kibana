@@ -12,3 +12,4 @@ export { builtInGroupByTypes } from './group_by_types';
 export const VIEW_LICENSE_OPTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
 export const PLUGIN_ID = 'triggersActions';
+export const CONNECTORS_PLUGIN_ID = 'triggersActionsConnectors';

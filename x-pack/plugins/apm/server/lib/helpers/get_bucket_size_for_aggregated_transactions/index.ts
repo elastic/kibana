@@ -12,12 +12,17 @@ export function getBucketSizeForAggregatedTransactions({
   end,
   numBuckets = 50,
   searchAggregatedTransactions,
+  searchAggregatedServiceMetrics,
 }: {
   start: number;
   end: number;
   numBuckets?: number;
   searchAggregatedTransactions?: boolean;
+  searchAggregatedServiceMetrics?: boolean;
 }) {
-  const minBucketSize = searchAggregatedTransactions ? 60 : undefined;
+  const minBucketSize =
+    searchAggregatedTransactions || searchAggregatedServiceMetrics
+      ? 60
+      : undefined;
   return getBucketSize({ start, end, numBuckets, minBucketSize });
 }

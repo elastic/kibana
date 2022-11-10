@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import testSubject from '@kbn/test-subj-selector';
+import { subj as testSubject } from '@kbn/test-subj-selector';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 

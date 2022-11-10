@@ -8,8 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Columns, Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
 import { PaginatedTable } from '../../../common/components/paginated_table';
 
@@ -18,10 +17,7 @@ import { getUserRiskScoreColumns } from './columns';
 import * as i18nUsers from '../../pages/translations';
 import * as i18n from './translations';
 import { usersModel, usersSelectors, usersActions } from '../../store';
-import type {
-  UserRiskScoreFields,
-  UserRiskScoreItem,
-} from '../../../../common/search_strategy/security_solution/users/common';
+import type { UserRiskScoreItem } from '../../../../common/search_strategy/security_solution/users/common';
 import type { SeverityCount } from '../../../common/components/severity/types';
 import { SeverityBadges } from '../../../common/components/severity/severity_badges';
 import { SeverityBar } from '../../../common/components/severity/severity_bar';
@@ -29,14 +25,11 @@ import { SeverityFilterGroup } from '../../../common/components/severity/severit
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import type {
+  RiskScoreFields,
   RiskScoreSortField,
   RiskSeverity,
-  UsersRiskScore,
+  UserRiskScore,
 } from '../../../../common/search_strategy';
-
-const IconWrapper = styled.span`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -52,7 +45,7 @@ export const rowItems: ItemsPerRow[] = [
 const tableType = usersModel.UsersTableType.risk;
 
 interface UserRiskScoreTableProps {
-  data: UsersRiskScore[];
+  data: UserRiskScore[];
   id: string;
   isInspect: boolean;
   loading: boolean;
@@ -64,9 +57,9 @@ interface UserRiskScoreTableProps {
 }
 
 export type UserRiskScoreColumns = [
-  Columns<UserRiskScoreItem[UserRiskScoreFields.userName]>,
-  Columns<UserRiskScoreItem[UserRiskScoreFields.riskScore]>,
-  Columns<UserRiskScoreItem[UserRiskScoreFields.risk]>
+  Columns<UserRiskScoreItem[RiskScoreFields.userName]>,
+  Columns<UserRiskScoreItem[RiskScoreFields.userRiskScore]>,
+  Columns<UserRiskScoreItem[RiskScoreFields.userRisk]>
 ];
 
 const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
@@ -154,23 +147,8 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
     </EuiFlexGroup>
   );
 
-  const headerTitle = (
-    <>
-      {i18nUsers.NAVIGATION_RISK_TITLE}
-      <IconWrapper>
-        <EuiIconTip
-          color="subdued"
-          content={i18n.USER_RISK_TABLE_TOOLTIP}
-          position="right"
-          size="l"
-          type="iInCircle"
-        />
-      </IconWrapper>
-    </>
-  );
-
   const getUserRiskScoreFilterQuerySelector = useMemo(
-    () => usersSelectors.usersRiskScoreSeverityFilterSelector(),
+    () => usersSelectors.userRiskScoreSeverityFilterSelector(),
     []
   );
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
@@ -203,7 +181,8 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
         />
       }
       headerSupplement={risk}
-      headerTitle={headerTitle}
+      headerTitle={i18nUsers.NAVIGATION_RISK_TITLE}
+      headerTooltip={i18n.USER_RISK_TABLE_TOOLTIP}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
       isInspect={isInspect}

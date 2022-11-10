@@ -26,6 +26,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
+import type { Query } from '@kbn/es-query';
+import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
@@ -94,7 +96,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const { overallAnnotations } = explorerState;
 
-    const { filterActive } = useObservable(
+    const { filterActive, queryString } = useObservable(
       anomalyExplorerCommonStateService.getFilterSettings$(),
       anomalyExplorerCommonStateService.getFilterSettings()
     );
@@ -171,9 +173,17 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY ? { viewBy: viewBySwimlaneFieldName } : {}),
           jobIds: selectedJobs?.map((v) => v.id),
           timeRange: globalTimeRange,
+          ...(isDefined(queryString) && queryString !== ''
+            ? {
+                query: {
+                  query: queryString,
+                  language: SEARCH_QUERY_LANGUAGE.KUERY,
+                } as Query,
+              }
+            : {}),
         });
       },
-      [openCasesModalCallback, selectedJobs, globalTimeRange, viewBySwimlaneFieldName]
+      [openCasesModalCallback, selectedJobs, globalTimeRange, viewBySwimlaneFieldName, queryString]
     );
 
     const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
@@ -513,6 +523,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             }}
             jobIds={selectedJobs.map(({ id }) => id)}
             viewBy={viewBySwimlaneFieldName!}
+            queryString={queryString}
           />
         )}
       </>

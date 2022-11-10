@@ -38,6 +38,7 @@
         ],
         "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_container.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-browser-internal",
@@ -48,11 +49,18 @@
             "description": [],
             "signature": [
               "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; readonly child?: ",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               " | undefined; }"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_container.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser-internal",
@@ -66,6 +74,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-browser-internal",
@@ -76,11 +85,18 @@
                 "description": [],
                 "signature": [
                   "Readonly<",
-                  "KibanaExecutionContext",
+                  {
+                    "pluginId": "@kbn/core-execution-context-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                    "section": "def-common.KibanaExecutionContext",
+                    "text": "KibanaExecutionContext"
+                  },
                   ">"
                 ],
                 "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_container.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -98,6 +114,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -110,11 +127,18 @@
             "description": [],
             "signature": [
               "() => Readonly<",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_container.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }

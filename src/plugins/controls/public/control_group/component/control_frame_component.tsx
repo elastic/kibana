@@ -13,17 +13,61 @@ import {
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
+  EuiIcon,
+  EuiLink,
   EuiLoadingChart,
+  EuiPopover,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
-import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ControlGroupReduxState } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
+import { TIME_SLIDER_CONTROL } from '../../../common';
+
+interface ControlFrameErrorProps {
+  error: Error;
+}
+
+const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const popoverButton = (
+    <EuiText className="errorEmbeddableCompact__button" size="xs">
+      <EuiLink
+        className="eui-textTruncate"
+        color="subdued"
+        onClick={() => setPopoverOpen((open) => !open)}
+      >
+        <EuiIcon type="alert" color="danger" />
+        <FormattedMessage
+          id="controls.frame.error.message"
+          defaultMessage="An error has occurred. Read more"
+        />
+      </EuiLink>
+    </EuiText>
+  );
+
+  return (
+    <EuiPopover
+      button={popoverButton}
+      isOpen={isPopoverOpen}
+      anchorClassName="errorEmbeddableCompact__popoverAnchor"
+      closePopover={() => setPopoverOpen(false)}
+    >
+      <Markdown
+        markdown={error.message}
+        openLinksInNewTab={true}
+        data-test-subj="errorMessageMarkdown"
+      />
+    </EuiPopover>
+  );
+};
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -39,7 +83,7 @@ export const ControlFrame = ({
   embeddableType,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const [hasFatalError, setHasFatalError] = useState(false);
+  const [fatalError, setFatalError] = useState<Error>();
 
   const {
     useEmbeddableSelector: select,
@@ -60,19 +104,14 @@ export const ControlFrame = ({
   const usingTwoLineLayout = controlStyle === 'twoLine';
 
   useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
-      embeddable.render(embeddableRoot.current);
+    if (embeddableRoot.current) {
+      embeddable?.render(embeddableRoot.current);
     }
     const inputSubscription = embeddable
       ?.getInput$()
       .subscribe((newInput) => setTitle(newInput.title));
     const errorSubscription = embeddable?.getOutput$().subscribe({
-      error: (error: Error) => {
-        if (!embeddableRoot.current) return;
-        const errorEmbeddable = new ErrorEmbeddable(error, { id: embeddable.id }, undefined, true);
-        errorEmbeddable.render(embeddableRoot.current);
-        setHasFatalError(true);
-      },
+      error: setFatalError,
     });
     return () => {
       inputSubscription?.unsubscribe();
@@ -87,7 +126,7 @@ export const ControlFrame = ({
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
     >
-      {!hasFatalError && (
+      {!fatalError && embeddableType !== TIME_SLIDER_CONTROL && (
         <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
           <EditControlButton embeddableId={embeddableId} />
         </EuiToolTip>
@@ -118,8 +157,22 @@ export const ControlFrame = ({
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
     'controlFrame--oneLine': controlStyle === 'oneLine',
-    'controlFrame--fatalError': hasFatalError,
+    'controlFrame--fatalError': !!fatalError,
   });
+
+  function renderEmbeddablePrepend() {
+    if (typeof embeddable?.renderPrepend === 'function') {
+      return embeddable.renderPrepend();
+    }
+
+    return usingTwoLineLayout ? undefined : (
+      <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
+        <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
+          {title}
+        </EuiFormLabel>
+      </EuiToolTip>
+    );
+  }
 
   const form = (
     <EuiFormControlLayout
@@ -130,22 +183,23 @@ export const ControlFrame = ({
       prepend={
         <>
           {(embeddable && customPrepend) ?? null}
-          {usingTwoLineLayout ? undefined : (
-            <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
-              <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-                {title}
-              </EuiFormLabel>
-            </EuiToolTip>
-          )}
+          {renderEmbeddablePrepend()}
         </>
       }
     >
-      {embeddable && (
+      {embeddable && !fatalError && (
         <div
           className={embeddableParentClassNames}
           id={`controlFrame--${embeddableId}`}
           ref={embeddableRoot}
-        />
+        >
+          {fatalError && <ControlFrameError error={fatalError} />}
+        </div>
+      )}
+      {fatalError && (
+        <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>
+          {<ControlFrameError error={fatalError} />}
+        </div>
       )}
       {!embeddable && (
         <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>

@@ -34,7 +34,17 @@
         "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
         "deprecated": true,
         "removeBy": "8.8.0",
-        "references": [],
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts"
+          },
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-injected-metadata-browser",
@@ -48,6 +58,7 @@
             ],
             "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-injected-metadata-browser",
@@ -61,6 +72,7 @@
                 ],
                 "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -75,6 +87,7 @@
                 ],
                 "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -97,7 +110,17 @@
         "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
         "deprecated": true,
         "removeBy": "8.8.0",
-        "references": [],
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
+          },
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-injected-metadata-browser",
@@ -111,6 +134,7 @@
             ],
             "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-injected-metadata-browser",
@@ -124,6 +148,7 @@
                 ],
                 "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -138,6 +163,7 @@
                 ],
                 "path": "packages/core/injected-metadata/core-injected-metadata-browser/src/contract.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],

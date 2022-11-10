@@ -19,7 +19,7 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
   type: string;
-  /** {@inheritdoc SavedObjectAttributes} */
+  /** The data for a Saved Object is stored as an object in the `attributes` property. **/
   attributes: Partial<T>;
   /**
    * Optional namespace string to use when searching for this object. If this is defined, it will supersede the namespace ID that is in

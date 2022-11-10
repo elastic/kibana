@@ -13,6 +13,7 @@
         "description": [],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -27,7 +28,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -43,7 +45,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -55,7 +58,8 @@
               "\nDetermine if the status of the license is active."
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -70,7 +74,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -85,7 +90,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -104,6 +110,7 @@
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
+            "trackAdoption": false,
             "references": []
           },
           {
@@ -116,7 +123,8 @@
               "\nSignature of the license content."
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -128,7 +136,8 @@
               "\nDetermine if the license container has information."
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -145,6 +154,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -161,7 +171,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -177,6 +188,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -194,6 +206,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licensing",
@@ -209,6 +222,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -229,6 +243,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licensing",
@@ -244,6 +259,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -260,6 +276,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -280,6 +297,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licensing",
@@ -295,6 +313,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -312,6 +331,7 @@
         "description": [],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -326,7 +346,8 @@
               "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -341,7 +362,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -355,6 +377,7 @@
         "description": [],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -364,7 +387,8 @@
             "label": "isAvailable",
             "description": [],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -374,7 +398,8 @@
             "label": "isEnabled",
             "description": [],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -390,6 +415,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -401,7 +427,8 @@
               "\nUID for license."
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -416,7 +443,8 @@
               "\"invalid\" | \"active\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -428,7 +456,8 @@
               "\nUnix epoch of the expiration date of the license."
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -443,7 +472,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -462,6 +492,7 @@
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
+            "trackAdoption": false,
             "references": [
               {
                 "plugin": "apm",
@@ -520,6 +551,10 @@
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
@@ -541,7 +576,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -550,6 +589,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -587,6 +634,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -600,7 +648,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -614,7 +663,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -624,7 +674,8 @@
             "label": "signature",
             "description": [],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -644,6 +695,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -658,6 +710,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -672,6 +725,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -690,6 +744,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -703,6 +758,7 @@
       "description": [],
       "path": "x-pack/plugins/licensing/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "licensing",
@@ -724,6 +780,7 @@
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
+          "trackAdoption": false,
           "references": [
             {
               "plugin": "security",
@@ -732,10 +789,6 @@
             {
               "plugin": "licenseManagement",
               "path": "x-pack/plugins/license_management/public/plugin.ts"
-            },
-            {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/application/license/check_license.tsx"
             },
             {
               "plugin": "ml",
@@ -798,6 +851,7 @@
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
+          "trackAdoption": false,
           "references": [],
           "children": [],
           "returnComment": []
@@ -815,7 +869,8 @@
             "FeatureUsageServiceSetup"
           ],
           "path": "x-pack/plugins/licensing/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -830,6 +885,7 @@
       "description": [],
       "path": "x-pack/plugins/licensing/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "licensing",
@@ -847,7 +903,8 @@
             ">"
           ],
           "path": "x-pack/plugins/licensing/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "licensing",
@@ -865,6 +922,7 @@
           ],
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -881,7 +939,8 @@
             "FeatureUsageServiceStart"
           ],
           "path": "x-pack/plugins/licensing/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -916,7 +975,13 @@
             "text": "RequestHandler"
           },
           "<P, Q, B, Context, any, ",
-          "KibanaResponseFactory",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
           ">) => ",
           {
             "pluginId": "core",
@@ -926,11 +991,18 @@
             "text": "RequestHandler"
           },
           "<P, Q, B, Context, any, ",
-          "KibanaResponseFactory",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
           ">"
         ],
         "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -950,6 +1022,7 @@
             ],
             "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -968,11 +1041,18 @@
                 "text": "RequestHandler"
               },
               "<P, Q, B, Context, any, ",
-              "KibanaResponseFactory",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
               ">"
             ],
             "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1000,6 +1080,7 @@
         ],
         "path": "x-pack/plugins/licensing/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -1012,7 +1093,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1026,6 +1108,7 @@
         "description": [],
         "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -1041,6 +1124,7 @@
             ],
             "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licensing",
@@ -1054,6 +1138,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1068,6 +1153,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1085,6 +1171,7 @@
         "description": [],
         "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -1100,6 +1187,7 @@
             ],
             "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licensing",
@@ -1115,6 +1203,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1131,6 +1220,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1152,6 +1242,7 @@
             ],
             "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1167,6 +1258,7 @@
         "description": [],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -1181,7 +1273,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1197,7 +1290,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1209,7 +1303,8 @@
               "\nDetermine if the status of the license is active."
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1224,7 +1319,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1239,7 +1335,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1258,6 +1355,7 @@
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
+            "trackAdoption": false,
             "references": []
           },
           {
@@ -1270,7 +1368,8 @@
               "\nSignature of the license content."
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1282,7 +1381,8 @@
               "\nDetermine if the license container has information."
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1299,6 +1399,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1315,7 +1416,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1331,6 +1433,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1348,6 +1451,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licensing",
@@ -1363,6 +1467,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1383,6 +1488,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licensing",
@@ -1398,6 +1504,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1414,6 +1521,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1434,6 +1542,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licensing",
@@ -1449,6 +1558,7 @@
                 ],
                 "path": "x-pack/plugins/licensing/common/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1466,6 +1576,7 @@
         "description": [],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -1480,7 +1591,8 @@
               "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1495,7 +1607,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1509,6 +1622,7 @@
         "description": [],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -1518,7 +1632,8 @@
             "label": "isAvailable",
             "description": [],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1528,7 +1643,8 @@
             "label": "isEnabled",
             "description": [],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1544,6 +1660,7 @@
         ],
         "path": "x-pack/plugins/licensing/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -1562,7 +1679,8 @@
               }
             ],
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1575,7 +1693,8 @@
               "ILicense"
             ],
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1591,6 +1710,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -1602,7 +1722,8 @@
               "\nUID for license."
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1617,7 +1738,8 @@
               "\"invalid\" | \"active\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1629,7 +1751,8 @@
               "\nUnix epoch of the expiration date of the license."
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1644,7 +1767,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1663,6 +1787,7 @@
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
+            "trackAdoption": false,
             "references": [
               {
                 "plugin": "apm",
@@ -1721,6 +1846,10 @@
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
@@ -1742,7 +1871,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1751,6 +1884,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1788,6 +1929,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licensing",
@@ -1801,7 +1943,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1815,7 +1958,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "licensing",
@@ -1825,7 +1969,8 @@
             "label": "signature",
             "description": [],
             "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1841,6 +1986,7 @@
         "description": [],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1859,6 +2005,7 @@
         ],
         "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1872,7 +2019,8 @@
               "ILicense"
             ],
             "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1889,6 +2037,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1903,6 +2052,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1917,6 +2067,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1935,6 +2086,7 @@
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1948,6 +2100,7 @@
       "description": [],
       "path": "x-pack/plugins/licensing/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "licensing",
@@ -1969,6 +2122,7 @@
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
+          "trackAdoption": false,
           "references": [
             {
               "plugin": "spaces",
@@ -2031,6 +2185,10 @@
               "path": "x-pack/plugins/searchprofiler/server/plugin.ts"
             },
             {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/executors/query.ts"
+            },
+            {
               "plugin": "snapshotRestore",
               "path": "x-pack/plugins/snapshot_restore/server/services/license.ts"
             },
@@ -2091,6 +2249,7 @@
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
+          "trackAdoption": false,
           "references": [
             {
               "plugin": "mapsEms",
@@ -2119,7 +2278,8 @@
             }
           ],
           "path": "x-pack/plugins/licensing/server/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -2134,6 +2294,7 @@
       "description": [],
       "path": "x-pack/plugins/licensing/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "licensing",
@@ -2151,7 +2312,8 @@
             ">"
           ],
           "path": "x-pack/plugins/licensing/server/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "licensing",
@@ -2169,6 +2331,7 @@
           ],
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -2183,7 +2346,13 @@
           ],
           "signature": [
             "(clusterClient: ",
-            "IClusterClient",
+            {
+              "pluginId": "@kbn/core-elasticsearch-server",
+              "scope": "server",
+              "docId": "kibKbnCoreElasticsearchServerPluginApi",
+              "section": "def-server.IClusterClient",
+              "text": "IClusterClient"
+            },
             ", pollingFrequency: number) => { license$: ",
             "Observable",
             "<",
@@ -2194,6 +2363,7 @@
           ],
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "licensing",
@@ -2203,10 +2373,17 @@
               "label": "clusterClient",
               "description": [],
               "signature": [
-                "IClusterClient"
+                {
+                  "pluginId": "@kbn/core-elasticsearch-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                  "section": "def-server.IClusterClient",
+                  "text": "IClusterClient"
+                }
               ],
               "path": "x-pack/plugins/licensing/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -2221,6 +2398,7 @@
               ],
               "path": "x-pack/plugins/licensing/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2245,7 +2423,8 @@
             }
           ],
           "path": "x-pack/plugins/licensing/server/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

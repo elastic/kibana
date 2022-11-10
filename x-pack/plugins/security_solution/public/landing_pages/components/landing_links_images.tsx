@@ -57,7 +57,7 @@ const SecuritySolutionLink = withSecuritySolutionLink(Link);
 
 export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
   <EuiFlexGroup direction="column">
-    {items.map(({ title, description, image, id, isBeta }) => (
+    {items.map(({ title, description, image, id, isBeta, betaOptions }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
         <SecuritySolutionLink deepLinkId={id} tabIndex={-1}>
           {/* Empty onClick is to force hover style on `EuiPanel` */}
@@ -78,7 +78,7 @@ export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
                 <PrimaryEuiTitle size="s">
                   <FlexTitle>
                     <TitleText>{title}</TitleText>
-                    {isBeta && <NavItemBetaBadge />}
+                    {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
                   </FlexTitle>
                 </PrimaryEuiTitle>
                 <LandingLinksDescripton size="s" color="text">
@@ -114,7 +114,7 @@ const SecuritySolutionCard = withSecuritySolutionLink(PrimaryTitleCard);
 
 export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ items }) => (
   <EuiFlexGroup direction="row" wrap>
-    {items.map(({ id, image, title, description, isBeta }) => (
+    {items.map(({ id, image, title, description, isBeta, betaOptions }) => (
       <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>
         <SecuritySolutionCard
           deepLinkId={id}
@@ -136,7 +136,7 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
             <PrimaryEuiTitle size="xs">
               <FlexTitle>
                 <TitleText>{title}</TitleText>
-                {isBeta && <NavItemBetaBadge />}
+                {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
               </FlexTitle>
             </PrimaryEuiTitle>
           }

@@ -110,7 +110,7 @@ export const DocumentCountContent: FC<Props> = ({
 
   const ProbabilityUsed =
     randomSamplerPreference !== RANDOM_SAMPLER_OPTION.OFF && isDefined(samplingProbability) ? (
-      <>
+      <div data-test-subj="dvRandomSamplerAutomaticProbabilityMsg">
         <EuiSpacer size="m" />
 
         <FormattedMessage
@@ -118,7 +118,7 @@ export const DocumentCountContent: FC<Props> = ({
           defaultMessage="Probability used: {samplingProbability}%"
           values={{ samplingProbability: samplingProbability * 100 }}
         />
-      </>
+      </div>
     ) : null;
 
   return (
@@ -127,7 +127,8 @@ export const DocumentCountContent: FC<Props> = ({
         <TotalCountHeader totalCount={totalCount} approximate={approximate} loading={loading} />
         <EuiFlexItem grow={false}>
           <EuiPopover
-            id="dscSamplingOptions"
+            data-test-subj="dvRandomSamplerOptionsPopover"
+            id="dataVisualizerSamplingOptions"
             button={
               <EuiToolTip
                 content={i18n.translate('xpack.dataVisualizer.samplingOptionsButton', {
@@ -138,7 +139,7 @@ export const DocumentCountContent: FC<Props> = ({
                   size="xs"
                   iconType="gear"
                   onClick={onShowSamplingOptions}
-                  data-test-subj="discoverSamplingOptionsToggle"
+                  data-test-subj="dvRandomSamplerOptionsButton"
                   aria-label={i18n.translate('xpack.dataVisualizer.samplingOptionsButton', {
                     defaultMessage: 'Sampling options',
                   })}
@@ -157,6 +158,7 @@ export const DocumentCountContent: FC<Props> = ({
               <EuiSpacer size="m" />
 
               <EuiFormRow
+                data-test-subj="dvRandomSamplerOptionsFormRow"
                 label={i18n.translate(
                   'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerRowLabel',
                   {
@@ -165,6 +167,7 @@ export const DocumentCountContent: FC<Props> = ({
                 )}
               >
                 <EuiSelect
+                  data-test-subj="dvRandomSamplerOptionsSelect"
                   options={RANDOM_SAMPLER_SELECT_OPTIONS}
                   value={randomSamplerPreference}
                   onChange={(e) =>
@@ -212,6 +215,7 @@ export const DocumentCountContent: FC<Props> = ({
                         }
                       }}
                       step={RANDOM_SAMPLER_STEP}
+                      data-test-subj="dvRandomSamplerProbabilityRange"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>

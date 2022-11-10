@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  KibanaRequest,
+import type {
   Logger,
-  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsBulkResponse,
@@ -20,25 +18,24 @@ import {
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { nodeBuilder, KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import {
-  GetCaseIdsByAlertIdAggs,
+import type {
   CaseResponse,
   CasesFindRequest,
   CommentAttributes,
   User,
   CaseAttributes,
   CaseStatuses,
-  caseStatuses,
 } from '../../../common/api';
-import { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import { caseStatuses } from '../../../common/api';
+import type { CaseSavedObject, SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
@@ -51,11 +48,11 @@ import {
   transformBulkResponseToExternalModel,
   transformFindResponseToExternalModel,
 } from './transform';
-import { ESCaseAttributes } from './types';
-import { AttachmentService } from '../attachments';
-import { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
+import type { ESCaseAttributes } from './types';
+import type { AttachmentService } from '../attachments';
+import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError } from '../../common/error';
-import { IndexRefresh } from '../types';
+import type { IndexRefresh } from '../types';
 
 interface GetCaseIdsByAlertIdArgs {
   alertId: string;
@@ -95,17 +92,13 @@ interface PostCaseArgs extends IndexRefresh {
 interface PatchCase extends IndexRefresh {
   caseId: string;
   updatedAttributes: Partial<CaseAttributes & PushedArgs>;
-  originalCase: SavedObject<CaseAttributes>;
+  originalCase: CaseSavedObject;
   version?: string;
 }
 type PatchCaseArgs = PatchCase;
 
 interface PatchCasesArgs extends IndexRefresh {
   cases: Array<Omit<PatchCase, 'refresh'>>;
-}
-
-interface GetUserArgs {
-  request: KibanaRequest;
 }
 
 interface CasesMapWithPageInfo {
@@ -127,25 +120,30 @@ interface GetReportersArgs {
   filter?: KueryNode;
 }
 
+interface GetCaseIdsByAlertIdAggs {
+  references: {
+    doc_count: number;
+    caseIds: {
+      buckets: Array<{ key: string }>;
+    };
+  };
+}
+
 export class CasesService {
   private readonly log: Logger;
-  private readonly authentication?: SecurityPluginSetup['authc'];
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly attachmentService: AttachmentService;
 
   constructor({
     log,
-    authentication,
     unsecuredSavedObjectsClient,
     attachmentService,
   }: {
     log: Logger;
-    authentication?: SecurityPluginSetup['authc'];
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     attachmentService: AttachmentService;
   }) {
     this.log = log;
-    this.authentication = authentication;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.attachmentService = attachmentService;
   }
@@ -231,13 +229,13 @@ export class CasesService {
 
     const casesWithComments = new Map<string, CaseResponse>();
     for (const [id, caseInfo] of casesMap.entries()) {
-      const { alerts, nonAlerts } = commentTotals.get(id) ?? { alerts: 0, nonAlerts: 0 };
+      const { alerts, userComments } = commentTotals.get(id) ?? { alerts: 0, userComments: 0 };
 
       casesWithComments.set(
         id,
         flattenCaseSavedObject({
           savedObject: caseInfo,
-          totalComment: nonAlerts,
+          totalComment: userComments,
           totalAlerts: alerts,
         })
       );
@@ -310,7 +308,7 @@ export class CasesService {
     }
   }
 
-  public async getCase({ id: caseId }: GetCaseArgs): Promise<SavedObject<CaseAttributes>> {
+  public async getCase({ id: caseId }: GetCaseArgs): Promise<CaseSavedObject> {
     try {
       this.log.debug(`Attempting to GET case ${caseId}`);
       const caseSavedObject = await this.unsecuredSavedObjectsClient.get<ESCaseAttributes>(
@@ -503,6 +501,8 @@ export class CasesService {
             username,
             full_name: user.full_name ?? null,
             email: user.email ?? null,
+            // TODO: verify that adding a new field is ok, shouldn't be a breaking change
+            profile_uid: user.profile_uid,
           };
         }) ?? []
       );
@@ -542,36 +542,7 @@ export class CasesService {
     }
   }
 
-  public getUser({ request }: GetUserArgs) {
-    try {
-      this.log.debug(`Attempting to authenticate a user`);
-      if (this.authentication != null) {
-        const user = this.authentication.getCurrentUser(request);
-        if (!user) {
-          return {
-            username: null,
-            full_name: null,
-            email: null,
-          };
-        }
-        return user;
-      }
-      return {
-        username: null,
-        full_name: null,
-        email: null,
-      };
-    } catch (error) {
-      this.log.error(`Error on GET user: ${error}`);
-      throw error;
-    }
-  }
-
-  public async postNewCase({
-    attributes,
-    id,
-    refresh,
-  }: PostCaseArgs): Promise<SavedObject<CaseAttributes>> {
+  public async postNewCase({ attributes, id, refresh }: PostCaseArgs): Promise<CaseSavedObject> {
     try {
       this.log.debug(`Attempting to POST a new case`);
       const transformedAttributes = transformAttributesToESModel(attributes);

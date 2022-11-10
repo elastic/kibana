@@ -18,7 +18,7 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
-import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
+import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import type { KqlMode } from '../../../store/timeline/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';

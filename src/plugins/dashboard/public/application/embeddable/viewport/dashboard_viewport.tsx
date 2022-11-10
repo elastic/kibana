@@ -8,32 +8,31 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
+
 import {
   CalloutProps,
   ControlGroupContainer,
   LazyControlsCallout,
 } from '@kbn/controls-plugin/public';
-import { ViewMode } from '../../../services/embeddable';
-import {
-  DashboardContainer,
-  DashboardReactContextValue,
-  DashboardLoadedInfo,
-} from '../dashboard_container';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { context } from '@kbn/kibana-react-plugin/public';
+import { ExitFullScreenButton as ExitFullScreenButtonUi } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+
+import { DashboardContainer, DashboardLoadedInfo } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
-import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { withSuspense } from '../../../services/presentation_util';
+import { pluginServices } from '../../../services/plugin_services';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
   controlGroup?: ControlGroupContainer;
-  controlsEnabled?: boolean;
   onDataLoaded?: (data: DashboardLoadedInfo) => void;
 }
 
 interface State {
   isFullScreenMode: boolean;
-  controlGroupReady: boolean;
   useMargins: boolean;
   title: string;
   description?: string;
@@ -45,8 +44,6 @@ const ControlsCallout = withSuspense<CalloutProps>(LazyControlsCallout);
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
-  public declare readonly context: DashboardReactContextValue;
-
   private controlsRoot: React.RefObject<HTMLDivElement>;
 
   private subscription?: Subscription;
@@ -59,7 +56,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     this.controlsRoot = React.createRef();
 
     this.state = {
-      controlGroupReady: !this.props.controlGroup,
       isFullScreenMode,
       panelCount: Object.values(panels).length,
       useMargins,
@@ -87,9 +83,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     if (this.props.controlGroup && this.controlsRoot.current) {
       this.props.controlGroup.render(this.controlsRoot.current);
     }
-    if (this.props.controlGroup) {
-      this.props.controlGroup?.untilReady().then(() => this.setState({ controlGroupReady: true }));
-    }
   }
 
   public componentWillUnmount() {
@@ -106,11 +99,18 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   };
 
   public render() {
-    const { container, controlsEnabled, controlGroup } = this.props;
+    const { container, controlGroup } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
     const { isEmbeddedExternally, isFullScreenMode, panelCount, title, description, useMargins } =
       this.state;
-    const hideAnnouncements = Boolean(this.context.services.uiSettings.get('hideAnnouncements'));
+
+    const {
+      settings: { isProjectEnabledInLabs, uiSettings },
+      chrome,
+    } = pluginServices.getServices();
+    const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
+
+    const hideAnnouncements = Boolean(uiSettings.get('hideAnnouncements'));
 
     return (
       <>
@@ -147,26 +147,19 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
         >
           {isFullScreenMode && (
-            <this.context.services.ExitFullScreenButton
+            // TODO: Replace with Shared UX ExitFullScreenButton once https://github.com/elastic/kibana/issues/140311 is resolved
+            <ExitFullScreenButtonUi
+              chrome={chrome as CoreStart['chrome']}
               onExitFullScreenMode={this.onExitFullScreenMode}
               toggleChrome={!isEmbeddedExternally}
             />
           )}
           {this.props.container.getPanelCount() === 0 && (
             <div className="dshDashboardEmptyScreen">
-              <DashboardEmptyScreen
-                isReadonlyMode={
-                  !this.props.container.getInput().dashboardCapabilities?.showWriteControls
-                }
-                isEditMode={isEditMode}
-                uiSettings={this.context.services.uiSettings}
-                http={this.context.services.http}
-              />
+              <DashboardEmptyScreen isEditMode={isEditMode} />
             </div>
           )}
-          {this.state.controlGroupReady && (
-            <DashboardGrid container={container} onDataLoaded={this.props.onDataLoaded} />
-          )}
+          <DashboardGrid container={container} onDataLoaded={this.props.onDataLoaded} />
         </div>
       </>
     );

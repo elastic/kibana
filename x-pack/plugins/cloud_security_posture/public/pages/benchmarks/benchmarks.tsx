@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiFieldSearch,
   EuiFieldSearchProps,
@@ -30,6 +31,7 @@ import {
 } from './use_csp_benchmark_integrations';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
+import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../../common/constants';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -45,8 +47,8 @@ const AddCisIntegrationButton = () => {
       isDisabled={!cisIntegrationLink}
     >
       <FormattedMessage
-        id="xpack.csp.benchmarks.benchmarksPageHeader.addCisIntegrationButtonLabel"
-        defaultMessage="Add a CIS integration"
+        id="xpack.csp.benchmarks.benchmarksPageHeader.addKSPMIntegrationButtonLabel"
+        defaultMessage="Add a KSPM integration"
       />
     </EuiButton>
   );
@@ -126,10 +128,14 @@ const BenchmarkSearchField = ({
 };
 
 export const Benchmarks = () => {
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY,
+    10
+  );
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
     name: '',
     page: 1,
-    perPage: 10,
+    perPage: pageSize || 10,
     sortField: 'package_policy.name',
     sortOrder: 'asc',
   });
@@ -143,7 +149,6 @@ export const Benchmarks = () => {
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
         pageTitle={
           <CloudPosturePageTitle
-            isBeta
             title={i18n.translate(
               'xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle',
               { defaultMessage: 'Benchmark Integrations' }
@@ -170,7 +175,7 @@ export const Benchmarks = () => {
         error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
         loading={queryResult.isFetching}
         pageIndex={query.page}
-        pageSize={query.perPage}
+        pageSize={pageSize || query.perPage}
         sorting={{
           // @ts-expect-error - EUI types currently do not support sorting by nested fields
           sort: { field: query.sortField, direction: query.sortOrder },
@@ -178,6 +183,7 @@ export const Benchmarks = () => {
         }}
         totalItemCount={totalItemCount}
         setQuery={({ page, sort }) => {
+          setPageSize(page.size);
           setQuery((current) => ({
             ...current,
             page: page.index,

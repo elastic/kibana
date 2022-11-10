@@ -9,7 +9,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import type { BundledPackage } from '../../../types';
-import { IngestManagerError } from '../../../errors';
+import { FleetError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { splitPkgKey } from '../registry';
 
@@ -19,7 +19,15 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
   const bundledPackageLocation = config?.developer?.bundledPackageLocation;
 
   if (!bundledPackageLocation) {
-    throw new IngestManagerError('xpack.fleet.developer.bundledPackageLocation is not configured');
+    throw new FleetError('xpack.fleet.developer.bundledPackageLocation is not configured');
+  }
+
+  // If the bundled package directory is missing, we log a warning during setup,
+  // so we can safely ignore this case here and just retun and empty array
+  try {
+    await fs.stat(bundledPackageLocation);
+  } catch (error) {
+    return [];
   }
 
   try {

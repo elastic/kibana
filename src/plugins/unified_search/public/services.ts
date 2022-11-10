@@ -9,7 +9,6 @@
 import { ThemeServiceStart, OverlayStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { AutocompleteStart } from '.';
 
 export const [getIndexPatterns, setIndexPatterns] =
   createGetterSetter<DataViewsContract>('IndexPatterns');
@@ -17,6 +16,3 @@ export const [getIndexPatterns, setIndexPatterns] =
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
-
-export const [getAutocomplete, setAutocomplete] =
-  createGetterSetter<AutocompleteStart>('Autocomplete');

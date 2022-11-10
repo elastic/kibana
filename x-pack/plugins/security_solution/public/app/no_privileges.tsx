@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { EmptyPage } from '../common/components/empty_page';
 import { useKibana } from '../common/lib/kibana';

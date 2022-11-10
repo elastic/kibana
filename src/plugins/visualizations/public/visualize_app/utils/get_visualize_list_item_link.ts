@@ -17,8 +17,13 @@ export const getVisualizeListItemLink = (
   application: ApplicationStart,
   kbnUrlStateStorage: IKbnUrlStateStorage,
   editApp: string | undefined,
-  editUrl: string
+  editUrl: string,
+  error: string | undefined = undefined
 ) => {
+  if (error) {
+    return undefined;
+  }
+
   // for visualizations the editApp is undefined
   let url = application.getUrlForApp(editApp ?? VISUALIZE_APP_NAME, {
     path: editApp ? editUrl : `#${editUrl}`,

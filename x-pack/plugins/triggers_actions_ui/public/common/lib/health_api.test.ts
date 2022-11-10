@@ -17,7 +17,7 @@ describe('triggersActionsUiHealth', () => {
     expect(http.get.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/triggers_actions_ui/_health",
+          "/internal/triggers_actions_ui/_health",
         ],
       ]
     `);

@@ -95,6 +95,7 @@ export interface CreateTestEsClusterOptions {
    */
   license?: 'basic' | 'gold' | 'trial'; // | 'oss'
   log: ToolingLog;
+  writeLogsToPath?: string;
   /**
    * Node-specific configuration if you wish to run a multi-node
    * cluster. One node will be added for each item in the array.
@@ -168,6 +169,7 @@ export function createTestEsCluster<
     password = 'changeme',
     license = 'basic',
     log,
+    writeLogsToPath,
     basePath = Path.resolve(REPO_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
@@ -272,6 +274,7 @@ export function createTestEsCluster<
             skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
             skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
             onEarlyExit,
+            writeLogsToPath,
           });
         });
       }

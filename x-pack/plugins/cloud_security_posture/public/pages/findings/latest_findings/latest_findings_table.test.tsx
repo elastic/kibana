@@ -11,13 +11,14 @@ import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsTable } from './latest_findings_table';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
-import type { CspFinding } from '../types';
 import type { EcsEvent } from '@kbn/logging';
 import { TestProvider } from '../../../test/test_provider';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 
 const chance = new Chance();
 
 const getFakeFindings = (name: string): CspFinding & { id: string } => ({
+  cluster_id: chance.guid(),
   id: chance.word(),
   result: {
     expected: {

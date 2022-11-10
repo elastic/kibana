@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/journeys",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true,
+  "runtimeDeps": [],
+  "typeDeps": [],
+}

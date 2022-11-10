@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FC } from 'react';
+import React, { FC } from 'react';
 import { Paywall } from '../../components/paywall';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSecurityContext } from '../../hooks/use_security_context';
@@ -23,7 +22,7 @@ export const EnterpriseGuard: FC = ({ children }) => {
   }
 
   return (
-    <SecuritySolutionPluginTemplateWrapper template="noData">
+    <SecuritySolutionPluginTemplateWrapper isEmptyState>
       <Paywall
         licenseManagementHref={http.basePath.prepend('/app/management/stack/license_management')}
       />

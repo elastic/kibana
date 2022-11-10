@@ -8,10 +8,7 @@
 import { merge } from 'lodash';
 import { Logger, SavedObjectsClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import { APMDataTelemetry } from '../types';
@@ -20,7 +17,11 @@ type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 
 type TelemetryTaskExecutor = (params: {
   indices: ApmIndicesConfig;
-  search<TSearchRequest extends ESSearchRequest>(
+  search<
+    TSearchRequest extends ESSearchRequest & { index: string | string[] } & {
+      body: { timeout: string };
+    }
+  >(
     params: TSearchRequest
   ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
   indicesStats(
@@ -48,6 +49,7 @@ export interface TelemetryTask {
 }
 
 export type CollectTelemetryParams = Parameters<TelemetryTaskExecutor>[0] & {
+  isProd: boolean;
   logger: Logger;
 };
 
@@ -58,6 +60,7 @@ export function collectDataTelemetry({
   indicesStats,
   transportRequest,
   savedObjectsClient,
+  isProd,
 }: CollectTelemetryParams) {
   return tasks.reduce((prev, task) => {
     return prev.then(async (data) => {
@@ -83,8 +86,10 @@ export function collectDataTelemetry({
           },
         });
       } catch (err) {
-        logger.warn(`Failed executing APM telemetry task ${task.name}`);
-        logger.warn(err);
+        // catch error and log as debug in production env and warn in dev env
+        const logLevel = isProd ? logger.debug : logger.warn;
+        logLevel(`Failed executing the APM telemetry task: "${task.name}"`);
+        logLevel(err);
         return data;
       }
     });

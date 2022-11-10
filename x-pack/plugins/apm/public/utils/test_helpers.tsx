@@ -19,11 +19,6 @@ import { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '@kbn/core/types/elasticsearch';
-import { APMConfig } from '../../server';
 import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 
@@ -112,95 +107,6 @@ export function expectTextsInDocument(output: any, texts: string[]) {
     expect(output.getByText(text)).toBeInTheDocument();
   });
 }
-
-interface MockSetup {
-  apmEventClient: any;
-  internalClient: any;
-  config: APMConfig;
-  indices: {
-    sourcemap: string;
-    error: string;
-    onboarding: string;
-    span: string;
-    transaction: string;
-    metric: string;
-    apmAgentConfigurationIndex: string;
-    apmCustomLinkIndex: string;
-  };
-}
-
-interface Options {
-  mockResponse?: (
-    request: ESSearchRequest
-  ) => ESSearchResponse<unknown, ESSearchRequest>;
-}
-
-export async function inspectSearchParams(
-  fn: (mockSetup: MockSetup) => Promise<any>,
-  options: Options = {}
-) {
-  const spy = jest.fn().mockImplementation(async (request) => {
-    return options.mockResponse
-      ? options.mockResponse(request)
-      : {
-          hits: {
-            hits: {
-              total: {
-                value: 0,
-              },
-            },
-          },
-        };
-  });
-
-  let response;
-  let error;
-
-  const mockSetup = {
-    apmEventClient: { search: spy } as any,
-    internalClient: { search: spy } as any,
-    config: new Proxy(
-      {},
-      {
-        get: (_, key) => {
-          switch (key) {
-            default:
-              return 'myIndex';
-
-            case 'xpack.apm.metricsInterval':
-              return 30;
-          }
-        },
-      }
-    ) as APMConfig,
-    indices: {
-      sourcemap: 'myIndex',
-      error: 'myIndex',
-      onboarding: 'myIndex',
-      span: 'myIndex',
-      transaction: 'myIndex',
-      metric: 'myIndex',
-      apmAgentConfigurationIndex: 'myIndex',
-      apmCustomLinkIndex: 'myIndex',
-    },
-  };
-  try {
-    response = await fn(mockSetup);
-  } catch (err) {
-    error = err;
-    // we're only extracting the search params
-  }
-
-  return {
-    params: spy.mock.calls[0][0],
-    response,
-    error,
-    spy,
-    teardown: () => spy.mockClear(),
-  };
-}
-
-export type SearchParamsMock = Awaited<ReturnType<typeof inspectSearchParams>>;
 
 export function renderWithTheme(
   component: React.ReactNode,

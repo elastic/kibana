@@ -43,7 +43,7 @@ export default function (providerContext: FtrProviderContext) {
     // Use the custom log package to test the fleet final pipeline
     before(async () => {
       const { body: getPackagesRes } = await supertest.get(
-        `/api/fleet/epm/packages?experimental=true`
+        `/api/fleet/epm/packages?prerelease=true`
       );
       const logPackage = getPackagesRes.items.find((p: any) => p.name === 'log');
       if (!logPackage) {

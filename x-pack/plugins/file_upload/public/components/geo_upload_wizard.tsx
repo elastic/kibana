@@ -40,6 +40,7 @@ interface State {
   indexNameError?: string;
   dataViewResp?: object;
   phase: PHASE;
+  smallChunks: boolean;
 }
 
 export class GeoUploadWizard extends Component<FileUploadComponentProps, State> {
@@ -52,6 +53,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     importStatus: '',
     indexName: '',
     phase: PHASE.CONFIGURE,
+    smallChunks: false,
   };
 
   componentDidMount() {
@@ -146,6 +148,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     this.setState({
       importStatus: getWritingToIndexMsg(0),
     });
+    this._geoFileImporter.setSmallChunks(this.state.smallChunks);
     const importResults = await this._geoFileImporter.import(
       initializeImportResp.id,
       this.state.indexName,
@@ -281,6 +284,10 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     }
   };
 
+  _onSmallChunksChange = (smallChunks: boolean) => {
+    this.setState({ smallChunks });
+  };
+
   render() {
     if (this.state.phase === PHASE.IMPORT) {
       return (
@@ -311,10 +318,12 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         indexNameError={this.state.indexNameError}
         onFileClear={this._onFileClear}
         onFileSelect={this._onFileSelect}
+        smallChunks={this.state.smallChunks}
         onGeoFieldTypeSelect={this._onGeoFieldTypeSelect}
         onIndexNameChange={this._onIndexNameChange}
         onIndexNameValidationStart={this.props.disableImportBtn}
         onIndexNameValidationEnd={this.props.enableImportBtn}
+        onSmallChunksChange={this._onSmallChunksChange}
       />
     );
   }

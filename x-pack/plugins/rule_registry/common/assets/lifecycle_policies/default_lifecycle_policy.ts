@@ -7,6 +7,9 @@
 
 export const defaultLifecyclePolicy = {
   policy: {
+    _meta: {
+      managed: true,
+    },
     phases: {
       hot: {
         actions: {

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { EuiText, EuiButton } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 
 interface LogEntryRateSetupContentProps {
@@ -21,7 +22,7 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup', delay: 15000 });
 
   return (
-    <EuiEmptyPrompt
+    <KibanaPageTemplate.EmptyPrompt
       data-test-subj="logEntryRateSetupPage"
       title={
         <h2>

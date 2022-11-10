@@ -11,14 +11,21 @@ export { fetchHistogramsForFields } from './src/fetch_histograms_for_fields';
 export { getSamplerAggregationsResponsePath } from './src/get_sampler_aggregations_response_path';
 export { numberValidator } from './src/validate_number';
 
-export type { FieldsForHistograms } from './src/fetch_histograms_for_fields';
+export type {
+  FieldsForHistograms,
+  NumericChartData,
+  NumericHistogramField,
+} from './src/fetch_histograms_for_fields';
 export type {
   AggCardinality,
   ChangePoint,
+  ChangePointGroup,
+  ChangePointGroupHistogram,
   ChangePointHistogram,
   ChangePointHistogramItem,
   HistogramField,
   NumericColumnStats,
   NumericColumnStatsMap,
+  FieldValuePair,
 } from './src/types';
 export type { NumberValidationResult } from './src/validate_number';

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiPopover,
@@ -25,14 +25,15 @@ import {
   EuiButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
-import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IUnifiedSearchPluginServices } from '../types';
 import type { DataViewPickerPropsExtended } from '.';
-import { DataViewsList } from './dataview_list';
+import type { DataViewListItemEnhanced } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
+import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
+import { DataViewSelector } from './data_view_selector';
 
 // local storage key for the text based languages transition modal
 const TEXT_LANG_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
@@ -61,6 +62,7 @@ export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
+  savedDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
@@ -70,10 +72,13 @@ export function ChangeDataView({
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  isDisabled,
+  onEditDataView,
+  onCreateDefaultAdHocDataView,
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
+  const [dataViewsList, setDataViewsList] = useState<DataViewListItemEnhanced[]>([]);
   const [triggerLabel, setTriggerLabel] = useState('');
   const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
     Boolean(textBasedLanguage)
@@ -81,8 +86,8 @@ export function ChangeDataView({
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
-  const kibana = useKibana<IDataPluginServices>();
-  const { application, data, storage } = kibana.services;
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
+  const { application, data, storage, dataViews, dataViewEditor } = kibana.services;
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
@@ -93,7 +98,9 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      const dataViewsRefs: DataViewListItemEnhanced[] = savedDataViews
+        ? savedDataViews
+        : await data.dataViews.getIdsWithTitle();
       if (adHocDataViews?.length) {
         adHocDataViews.forEach((adHocDataView) => {
           if (adHocDataView.id) {
@@ -101,6 +108,7 @@ export function ChangeDataView({
               title: adHocDataView.title,
               name: adHocDataView.name,
               id: adHocDataView.id,
+              isAdhoc: true,
             });
           }
         });
@@ -108,7 +116,7 @@ export function ChangeDataView({
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
   useEffect(() => {
     if (trigger.label) {
@@ -126,6 +134,10 @@ export function ChangeDataView({
     }
   }, [isTextBasedLangSelected, textBasedLanguage]);
 
+  const isAdHocSelected = useMemo(() => {
+    return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
+  }, [adHocDataViews, currentDataViewId]);
+
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
     return (
@@ -140,9 +152,22 @@ export function ChangeDataView({
         iconType="arrowDown"
         title={triggerLabel}
         fullWidth={fullWidth}
+        disabled={isDisabled}
+        textProps={{ className: 'eui-textTruncate' }}
         {...rest}
       >
-        {triggerLabel}
+        <>
+          {isAdHocSelected && (
+            <EuiIcon
+              type={adhoc}
+              color="primary"
+              css={css`
+                margin-right: ${euiTheme.size.s};
+              `}
+            />
+          )}
+          {triggerLabel}
+        </>
       </EuiButton>
     );
   };
@@ -164,21 +189,35 @@ export function ChangeDataView({
             defaultMessage: 'Add a field to this data view',
           })}
         </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          key="manage"
-          icon="indexSettings"
-          data-test-subj="indexPattern-manage-field"
-          onClick={() => {
-            setPopoverIsOpen(false);
-            application.navigateToApp('management', {
-              path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
-            });
-          }}
-        >
-          {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
-            defaultMessage: 'Manage this data view',
-          })}
-        </EuiContextMenuItem>,
+        onEditDataView || dataViewEditor.userPermissions.editDataView() ? (
+          <EuiContextMenuItem
+            key="manage"
+            icon="indexSettings"
+            data-test-subj="indexPattern-manage-field"
+            onClick={async () => {
+              if (onEditDataView) {
+                const dataView = await dataViews.get(currentDataViewId!);
+                dataViewEditor.openEditor({
+                  editData: dataView,
+                  onSave: (updatedDataView) => {
+                    onEditDataView(updatedDataView);
+                  },
+                });
+              } else {
+                application.navigateToApp('management', {
+                  path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
+                });
+              }
+              setPopoverIsOpen(false);
+            }}
+          >
+            {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
+              defaultMessage: 'Manage this data view',
+            })}
+          </EuiContextMenuItem>
+        ) : (
+          <React.Fragment />
+        ),
         <EuiHorizontalRule margin="none" />
       );
     }
@@ -233,6 +272,16 @@ export function ChangeDataView({
                 onClick={() => {
                   setPopoverIsOpen(false);
                   onDataViewCreated();
+                  // go to dataview mode
+                  if (isTextBasedLangSelected) {
+                    setIsTextBasedLangSelected(false);
+                    // clean up the Text based language query
+                    onTextLangQuerySubmit?.({
+                      language: 'kuery',
+                      query: '',
+                    });
+                    setTriggerLabel(trigger.label);
+                  }
                 }}
                 size="xs"
                 iconType="plusInCircleFilled"
@@ -246,9 +295,13 @@ export function ChangeDataView({
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-
-        <DataViewsList
+        <DataViewSelector
+          currentDataViewId={currentDataViewId}
+          searchListInputId={searchListInputId}
           dataViewsList={dataViewsList}
+          selectableProps={selectableProps}
+          isTextBasedLangSelected={isTextBasedLangSelected}
+          setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
             const dataView = await data.dataViews.get(newId);
             await data.dataViews.refreshFields(dataView);
@@ -260,7 +313,7 @@ export function ChangeDataView({
               setIsTextBasedLangSelected(false);
               // clean up the Text based language query
               onTextLangQuerySubmit?.({
-                language: 'kql',
+                language: 'kuery',
                 query: '',
               });
               onChangeDataView(newId);
@@ -269,10 +322,7 @@ export function ChangeDataView({
               onChangeDataView(newId);
             }
           }}
-          currentDataViewId={currentDataViewId}
-          selectableProps={selectableProps}
-          searchListInputId={searchListInputId}
-          isTextBasedLangSelected={isTextBasedLangSelected}
+          onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
         />
       </>
     );
@@ -333,7 +383,7 @@ export function ChangeDataView({
       setIsTextBasedLangSelected(false);
       // clean up the Text based language query
       onTextLangQuerySubmit?.({
-        language: 'kql',
+        language: 'kuery',
         query: '',
       });
       if (selectedDataViewId) {

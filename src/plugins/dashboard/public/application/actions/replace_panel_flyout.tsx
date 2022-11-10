@@ -8,25 +8,23 @@
 
 import React from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { NotificationsStart, Toast } from '@kbn/core/public';
-import { DashboardPanelState } from '../embeddable';
+import { Toast } from '@kbn/core/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
-  EmbeddableStart,
   IContainer,
   IEmbeddable,
   SavedObjectEmbeddableInput,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+import { DashboardPanelState } from '../embeddable';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';
+import { pluginServices } from '../../services/plugin_services';
 
 interface Props {
   container: IContainer;
   savedObjectsFinder: React.ComponentType<any>;
   onClose: () => void;
-  notifications: NotificationsStart;
   panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
-  getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
 }
 
 export class ReplacePanelFlyout extends React.Component<Props> {
@@ -39,13 +37,17 @@ export class ReplacePanelFlyout extends React.Component<Props> {
   }
 
   public showToast = (name: string) => {
+    const {
+      notifications: { toasts },
+    } = pluginServices.getServices();
+
     // To avoid the clutter of having toast messages cover flyout
     // close previous toast message before creating a new one
     if (this.lastToast) {
-      this.props.notifications.toasts.remove(this.lastToast);
+      toasts.remove(this.lastToast);
     }
 
-    this.lastToast = this.props.notifications.toasts.addSuccess({
+    this.lastToast = toasts.addSuccess({
       title: dashboardReplacePanelAction.getSuccessMessage(name),
       'data-test-subj': 'addObjectToContainerSuccess',
     });
@@ -84,11 +86,15 @@ export class ReplacePanelFlyout extends React.Component<Props> {
   };
 
   public render() {
+    const {
+      embeddable: { getEmbeddableFactories },
+    } = pluginServices.getServices();
+
     const SavedObjectFinder = this.props.savedObjectsFinder;
     const savedObjectsFinder = (
       <SavedObjectFinder
         noItemsMessage={dashboardReplacePanelAction.getNoMatchingObjectsMessage()}
-        savedObjectMetaData={[...this.props.getEmbeddableFactories()]
+        savedObjectMetaData={[...getEmbeddableFactories()]
           .filter(
             (embeddableFactory) =>
               Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType

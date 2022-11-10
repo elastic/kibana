@@ -15,12 +15,12 @@ import { createCoreContext, createHttpServer } from '@kbn/core-http-server-mocks
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
-
-import { registerStatusRoute } from '../../../status/routes/status';
-import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '../../../status/types';
-import { statusServiceMock } from '../../../status/status_service.mock';
+import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '@kbn/core-status-common';
+import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+
+import { registerStatusRoute } from '@kbn/core-status-server-internal';
 
 const coreId = Symbol('core');
 

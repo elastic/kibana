@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { groupBy } from 'lodash';
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
@@ -52,6 +52,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const [assetSavedObjects, setAssetsSavedObjects] = useState<undefined | AssetSavedObject[]>();
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasPermissionError, setHasPermissionError] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchAssetSavedObjects = async () => {
@@ -94,6 +95,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
                 // Ignore privilege errors
                 .catch((e: any) => {
                   if (e?.body?.statusCode === 403) {
+                    setHasPermissionError(true);
                     return { resolved_objects: [] };
                   } else {
                     throw e;
@@ -160,6 +162,23 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           />
         </h2>
       </EuiTitle>
+    );
+  } else if (hasPermissionError) {
+    content = (
+      <EuiCallOut
+        color="warning"
+        title={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.assets.assetsPermissionErrorTitle"
+            defaultMessage="Permission errors"
+          />
+        }
+      >
+        <FormattedMessage
+          id="xpack.fleet.epm.packageDetails.assets.assetsPermissionError"
+          defaultMessage="You do not have permission to retrieve the Kibana saved object for that integration. Contact your administrator."
+        />
+      </EuiCallOut>
     );
   } else if (assetSavedObjects === undefined || assetSavedObjects.length === 0) {
     if (customAssetsExtension) {

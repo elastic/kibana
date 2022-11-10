@@ -23,6 +23,7 @@ import {
 } from '../../../../../../../common/constants/search';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 interface ErrorMessage {
   query: string;
@@ -55,6 +56,19 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   const [searchInput, setSearchInput] = useState<Query>(query);
   const [idToSelectedMap, setIdToSelectedMap] = useState<{ [id: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
+
+  const { services } = useMlKibana();
+  const {
+    unifiedSearch,
+    data,
+    storage,
+    appName,
+    notifications,
+    http,
+    docLinks,
+    uiSettings,
+    dataViews,
+  } = services;
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
@@ -197,6 +211,17 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
               disableAutoFocus={true}
               dataTestSubj="mlDFAnalyticsQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
+              appName={appName}
+              deps={{
+                unifiedSearch,
+                notifications,
+                http,
+                docLinks,
+                uiSettings,
+                data,
+                storage,
+                dataViews,
+              }}
             />
           </EuiFlexItem>
           {filters && filters.options && (

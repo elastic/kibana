@@ -28,6 +28,7 @@ const mockEvents = mockTimelineData.filter((i, index) => index <= 11);
 
 const mockSearch = jest.fn();
 
+jest.mock('../../common/lib/apm/use_track_http_request');
 jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
+import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
 import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
 import {
   State,
@@ -21,7 +22,6 @@ import {
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
-import { LayerType } from '../../../common';
 
 export function getAxisName(
   axis: 'x' | 'y' | 'yLeft' | 'yRight',
@@ -64,46 +64,41 @@ export function getAxisName(
 export function checkXAccessorCompatibility(state: XYState, datasourceLayers: DatasourceLayers) {
   const dataLayers = getDataLayers(state.layers);
   const errors = [];
-  const hasDateHistogramSet = dataLayers.some(
+  const hasDateHistogramSetIndex = dataLayers.findIndex(
     checkScaleOperation('interval', 'date', datasourceLayers)
   );
-  const hasNumberHistogram = dataLayers.some(
+  const hasNumberHistogramIndex = dataLayers.findIndex(
     checkScaleOperation('interval', 'number', datasourceLayers)
   );
-  const hasOrdinalAxis = dataLayers.some(
+  const hasOrdinalAxisIndex = dataLayers.findIndex(
     checkScaleOperation('ordinal', undefined, datasourceLayers)
   );
-  if (state.layers.length > 1 && hasDateHistogramSet && hasNumberHistogram) {
-    errors.push({
-      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
-        defaultMessage: `Wrong data type for {axis}.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXLong', {
-        defaultMessage: `Data type mismatch for the {axis}. Cannot mix date and number interval types.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-    });
-  }
-  if (state.layers.length > 1 && (hasDateHistogramSet || hasNumberHistogram) && hasOrdinalAxis) {
-    errors.push({
-      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
-        defaultMessage: `Wrong data type for {axis}.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXOrdinalLong', {
-        defaultMessage: `Data type mismatch for the {axis}, use a different function.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-    });
+  if (state.layers.length > 1) {
+    const erroredLayers = [hasDateHistogramSetIndex, hasNumberHistogramIndex, hasOrdinalAxisIndex]
+      .filter((v) => v >= 0)
+      .sort((a, b) => a - b);
+    if (erroredLayers.length > 1) {
+      const [firstLayer, ...otherLayers] = erroredLayers;
+      const axis = getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) });
+      for (const otherLayer of otherLayers) {
+        errors.push({
+          shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
+            defaultMessage: `Wrong data type for {axis}.`,
+            values: {
+              axis,
+            },
+          }),
+          longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXLong', {
+            defaultMessage: `The {axis} data in layer {firstLayer} is incompatible with the data in layer {secondLayer}. Select a new function for the {axis}.`,
+            values: {
+              axis,
+              firstLayer: firstLayer + 1,
+              secondLayer: otherLayer + 1,
+            },
+          }),
+        });
+      }
+    }
   }
   return errors;
 }
@@ -275,10 +270,18 @@ const newLayerFn = {
     layerType: layerTypes.REFERENCELINE,
     accessors: [],
   }),
-  [layerTypes.ANNOTATIONS]: ({ layerId }: { layerId: string }): XYAnnotationLayerConfig => ({
+  [layerTypes.ANNOTATIONS]: ({
+    layerId,
+    indexPatternId,
+  }: {
+    layerId: string;
+    indexPatternId: string;
+  }): XYAnnotationLayerConfig => ({
     layerId,
     layerType: layerTypes.ANNOTATIONS,
     annotations: [],
+    indexPatternId,
+    ignoreGlobalFilters: true,
   }),
 };
 
@@ -286,12 +289,14 @@ export function newLayerState({
   layerId,
   layerType = layerTypes.DATA,
   seriesType,
+  indexPatternId,
 }: {
   layerId: string;
-  layerType?: LayerType;
+  layerType?: XYLayerType;
   seriesType: SeriesType;
+  indexPatternId: string;
 }) {
-  return newLayerFn[layerType]({ layerId, seriesType });
+  return newLayerFn[layerType]({ layerId, seriesType, indexPatternId });
 }
 
 export function getLayersByType(state: State, byType?: string) {

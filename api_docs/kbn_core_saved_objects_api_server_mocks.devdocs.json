@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_client.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
@@ -34,11 +35,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_client.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -54,6 +62,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/scoped_client_provider.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
@@ -69,6 +78,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/scoped_client_provider.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -84,6 +94,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/repository.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
@@ -94,11 +105,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ISavedObjectsRepository",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/repository.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

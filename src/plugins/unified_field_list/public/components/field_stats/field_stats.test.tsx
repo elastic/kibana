@@ -92,6 +92,13 @@ describe('UnifiedFieldList <FieldStats />', () => {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'geo_shape',
+          displayName: 'geo_shape',
+          type: 'geo_shape',
+          aggregatable: true,
+          searchable: true,
+        },
       ],
       getFormatterForField: jest.fn(() => ({
         convert: jest.fn((s: unknown) => JSON.stringify(s)),
@@ -101,10 +108,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     defaultProps = {
       services: mockedServices,
       dataViewOrDataViewId: dataView,
-      field: {
-        name: 'bytes',
-        type: 'number',
-      } as unknown as DataViewField,
+      field: dataView.fields.find((f) => f.name === 'bytes')!,
       fromDate: 'now-7d',
       toDate: 'now',
       query: { query: '', language: 'lucene' },
@@ -200,50 +204,64 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
   it('should not request field stats for range fields', async () => {
     const wrapper = await mountWithIntl(
-      <FieldStats
-        {...defaultProps}
-        field={
-          {
-            name: 'ip_range',
-            displayName: 'ip_range',
-            type: 'ip_range',
-          } as DataViewField
-        }
-      />
+      <FieldStats {...defaultProps} field={dataView.fields.find((f) => f.name === 'ip_range')!} />
     );
-
-    await wrapper.update();
-
-    expect(loadFieldStats).not.toHaveBeenCalled();
-  });
-
-  it('should not request field stats for geo fields', async () => {
-    const wrapper = await mountWithIntl(
-      <FieldStats
-        {...defaultProps}
-        field={
-          {
-            name: 'geo_shape',
-            displayName: 'geo_shape',
-            type: 'geo_shape',
-          } as DataViewField
-        }
-      />
-    );
-
-    await wrapper.update();
-
-    expect(loadFieldStats).not.toHaveBeenCalled();
-  });
-
-  it('should render nothing if no data is found', async () => {
-    const wrapper = mountWithIntl(<FieldStats {...defaultProps} />);
 
     await wrapper.update();
 
     expect(loadFieldStats).toHaveBeenCalled();
 
-    expect(wrapper.text()).toBe('');
+    expect(wrapper.text()).toBe('Analysis is not available for this field.');
+  });
+
+  it('should not request field stats for geo fields', async () => {
+    const wrapper = await mountWithIntl(
+      <FieldStats {...defaultProps} field={dataView.fields.find((f) => f.name === 'geo_shape')!} />
+    );
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalled();
+
+    expect(wrapper.text()).toBe('Analysis is not available for this field.');
+  });
+
+  it('should render a message if no data is found', async () => {
+    const wrapper = await mountWithIntl(<FieldStats {...defaultProps} />);
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalled();
+
+    expect(wrapper.text()).toBe('No field data for the current search.');
+  });
+
+  it('should render a message if no data is found in sample', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const wrapper = mountWithIntl(<FieldStats {...defaultProps} />);
+
+    await wrapper.update();
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 10000,
+        sampledDocuments: 5000,
+        sampledValues: 0,
+      });
+    });
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.text()).toBe('No field data for 5000 sample records.');
   });
 
   it('should render Top Values field stats correctly for a keyword field', async () => {
@@ -333,19 +351,93 @@ describe('UnifiedFieldList <FieldStats />', () => {
     const firstValue = stats.childAt(0);
 
     expect(stats).toHaveLength(1);
-    expect(firstValue.find('[data-test-subj="testing-topValues-value"]').first().text()).toBe(
-      '"success"'
-    );
-    expect(firstValue.find('[data-test-subj="testing-topValues-valueCount"]').first().text()).toBe(
-      '41.5%'
-    );
+    expect(
+      firstValue.find('[data-test-subj="testing-topValues-formattedFieldValue"]').first().text()
+    ).toBe('"success"');
+    expect(
+      firstValue.find('[data-test-subj="testing-topValues-formattedPercentage"]').first().text()
+    ).toBe('41.5%');
 
     expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
-      '100% of 1624 documents'
+      'Calculated from 1624 records.'
     );
 
     expect(wrapper.text()).toBe(
-      'Top values"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%100% of 1624 documents'
+      'Top values"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%Calculated from 1624 records.'
+    );
+  });
+
+  it('should render Examples correctly for a non-aggregatable field', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const wrapper = mountWithIntl(
+      <FieldStats
+        {...defaultProps}
+        field={
+          {
+            name: 'test_text',
+            type: 'string',
+            aggregatable: false,
+          } as unknown as DataViewField
+        }
+      />
+    );
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 1624,
+        sampledDocuments: 1624,
+        sampledValues: 3248,
+        topValues: {
+          buckets: [
+            {
+              count: 1349,
+              key: 'success',
+            },
+            {
+              count: 1206,
+              key: 'info',
+            },
+            {
+              count: 329,
+              key: 'security',
+            },
+            {
+              count: 164,
+              key: 'warning',
+            },
+            {
+              count: 111,
+              key: 'error',
+            },
+            {
+              count: 89,
+              key: 'login',
+            },
+          ],
+        },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(EuiProgress)).toHaveLength(6);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.text()).toBe(
+      'Examples"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%Calculated from 1624 records.'
     );
   });
 
@@ -449,10 +541,10 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(wrapper.find('[data-test-subj="testing-topValues"]')).toHaveLength(0);
     expect(wrapper.find('[data-test-subj="testing-histogram"]')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
-      '13 documents'
+      'Calculated from 13 records.'
     );
 
-    expect(wrapper.text()).toBe('Time distribution13 documents');
+    expect(wrapper.text()).toBe('Time distributionCalculated from 13 records.');
   });
 
   it('should render Top Values & Distribution field stats correctly for a number field', async () => {
@@ -500,7 +592,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     await act(async () => {
       resolveFunction!({
-        totalDocuments: 23,
+        totalDocuments: 100,
         sampledDocuments: 23,
         sampledValues: 23,
         histogram: {
@@ -537,7 +629,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
 
     expect(wrapper.text()).toBe(
-      'Toggle either theTop valuesDistribution1273.9%1326.1%100% of 23 documents'
+      'Toggle either theTop valuesDistribution1273.9%1326.1%Calculated from 23 sample records.'
     );
   });
 });

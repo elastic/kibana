@@ -16,9 +16,11 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiText,
+  EuiCallOut,
+  EuiHighlight,
   EuiTextColor,
 } from '@elastic/eui';
-import type { FunctionComponent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -28,10 +30,12 @@ import { getUserDisplayName } from './user_profile';
 import type { UserProfileWithAvatar } from './user_avatar';
 import { UserAvatar } from './user_avatar';
 
+const NULL_OPTION_KEY = 'null';
+
 /**
  * Props of {@link UserProfilesSelectable} component
  */
-export interface UserProfilesSelectableProps
+export interface UserProfilesSelectableProps<Option extends UserProfileWithAvatar | null>
   extends Pick<
     EuiSelectableProps,
     | 'height'
@@ -44,23 +48,30 @@ export interface UserProfilesSelectableProps
   /**
    * List of users to be rendered as suggestions.
    */
-  defaultOptions?: UserProfileWithAvatar[];
+  defaultOptions?: Option[];
 
   /**
-   * List of selected users.
+   * List of selected users or `null` (no users).
    */
-  selectedOptions?: UserProfileWithAvatar[];
+  selectedOptions?: Option[];
 
   /**
    * List of users from search results. Should be updated based on the search term provided by `onSearchChange` callback.
    */
-  options?: UserProfileWithAvatar[];
+  options?: Option[];
 
   /**
-   * Passes back the list of selected users.
-   * @param options List of selected users
+   * Maximum number of users allowed to be selected.
+   *
+   * This limit is not enforced and only used to show a warning message.
    */
-  onChange?(options: UserProfileWithAvatar[]): void;
+  limit?: number;
+
+  /**
+   * Passes back the current selection.
+   * @param options Either the list of selected users or `null` (no users).
+   */
+  onChange?(options: Option[]): void;
 
   /**
    * Passes back the search term.
@@ -84,21 +95,37 @@ export interface UserProfilesSelectableProps
   searchInputId?: string;
 
   /**
-   * Returns text for selected status.
+   * Returns message for number of selected users.
    * @param selectedCount Number of selected users
    */
   selectedStatusMessage?(selectedCount: number): ReactNode;
 
   /**
-   * Text for label of clear button.
+   * Returns message when maximum number of selected users are reached.
+   * @param limit Maximum number of users allowed to be selected
+   */
+  limitReachedMessage?(limit: number): ReactNode;
+
+  /**
+   * Label for clear button.
    */
   clearButtonLabel?: ReactNode;
+
+  /**
+   * Label of "no users" option.
+   */
+  nullOptionLabel?: string;
+
+  /**
+   * Label for default options group separator.
+   */
+  defaultOptionsLabel?: string;
 }
 
 /**
  * Renders a selectable component given a list of user profiles
  */
-export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectableProps> = ({
+export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | null>({
   selectedOptions,
   defaultOptions,
   options,
@@ -106,6 +133,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
   onSearchChange,
   isLoading = false,
   singleSelection = false,
+  limit,
   height,
   loadingMessage,
   noMatchesMessage,
@@ -114,14 +142,21 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
   searchPlaceholder,
   searchInputId,
   selectedStatusMessage,
+  limitReachedMessage,
+  nullOptionLabel,
+  defaultOptionsLabel,
   clearButtonLabel,
-}) => {
+}: UserProfilesSelectableProps<Option>) => {
   const [displayedOptions, setDisplayedOptions] = useState<SelectableOption[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const selectedCount = selectedOptions ? selectedOptions.length : 0;
+  const limitReached = limit ? selectedCount >= limit : false;
 
   // Resets all displayed options
   const resetDisplayedOptions = () => {
     if (options) {
-      setDisplayedOptions(options.map(toSelectableOption));
+      setDisplayedOptions(options.map((option) => toSelectableOption(option, nullOptionLabel)));
       return;
     }
 
@@ -133,11 +168,13 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
     let index = values.findIndex((option) => option.isGroupLabel);
     if (index === -1) {
       const length = values.push({
-        label: i18n.translate('userProfileComponents.userProfilesSelectable.suggestedLabel', {
-          defaultMessage: 'Suggested',
-        }),
+        label:
+          defaultOptionsLabel ??
+          i18n.translate('userProfileComponents.userProfilesSelectable.defaultOptionsLabel', {
+            defaultMessage: 'Suggested',
+          }),
         isGroupLabel: true,
-      } as SelectableOption);
+      });
       index = length - 1;
     }
     return index;
@@ -156,8 +193,8 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
       // Get any newly added selected options
       const selectedOptionsToAdd: SelectableOption[] = selectedOptions
         ? selectedOptions
-            .filter((profile) => !nextOptions.find((option) => option.key === profile.uid))
-            .map(toSelectableOption)
+            .filter((profile) => !nextOptions.find((option) => isMatchingOption(option, profile)))
+            .map((option) => toSelectableOption(option, nullOptionLabel))
         : [];
 
       // Get any newly added default options
@@ -165,10 +202,10 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
         ? defaultOptions
             .filter(
               (profile) =>
-                !nextOptions.find((option) => option.key === profile.uid) &&
-                !selectedOptionsToAdd.find((option) => option.key === profile.uid)
+                !nextOptions.find((option) => isMatchingOption(option, profile)) &&
+                !selectedOptionsToAdd.find((option) => isMatchingOption(option, profile))
             )
-            .map(toSelectableOption)
+            .map((option) => toSelectableOption(option, nullOptionLabel))
         : [];
 
       // Merge in any new options and add group separator if necessary
@@ -189,48 +226,70 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
     setDisplayedOptions((values) =>
       values.map((option) => {
         if (selectedOptions) {
-          const match = selectedOptions.find((p) => p.uid === option.key);
-          return { ...option, checked: match ? 'on' : undefined };
+          const match = selectedOptions.find((profile) => isMatchingOption(option, profile));
+          const checked = match === undefined ? undefined : 'on';
+          const disabled = checked ? false : limitReached;
+          return {
+            ...option,
+            checked,
+            disabled,
+            prepend: option.data ? (
+              <UserAvatar
+                user={option.data.user}
+                avatar={option.data.data?.avatar}
+                size="s"
+                isDisabled={disabled}
+              />
+            ) : undefined,
+          };
         }
-        return { ...option, checked: undefined };
+        return { ...option, checked: undefined, disabled: undefined };
       })
     );
   };
 
   useEffect(resetDisplayedOptions, [options]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(updateDisplayedOptions, [defaultOptions, selectedOptions]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(updateCheckedStatus, [options, defaultOptions, selectedOptions]);
-
-  const selectedCount = selectedOptions ? selectedOptions.length : 0;
+  useEffect(updateCheckedStatus, [options, defaultOptions, selectedOptions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <EuiSelectable
       options={displayedOptions}
       // @ts-expect-error: Type of `nextOptions` in EuiSelectable does not match what's actually being passed back so need to manually override it
-      onChange={(nextOptions: Array<EuiSelectableOption<{ data: UserProfileWithAvatar }>>) => {
+      onChange={(
+        nextOptions: Array<EuiSelectableOption<{ data: Partial<UserProfileWithAvatar> }>>
+      ) => {
         if (!onChange) {
           return;
         }
 
         // Take all selected options from `nextOptions` unless already in `props.selectedOptions`
-        const values: UserProfileWithAvatar[] = nextOptions
+        // @ts-expect-error
+        const values: Option[] = nextOptions
           .filter((option) => {
             if (option.isGroupLabel || option.checked !== 'on') {
               return false;
             }
-            if (selectedOptions && selectedOptions.find((p) => p.uid === option.key)) {
+            if (
+              selectedOptions &&
+              selectedOptions.find((profile) => isMatchingOption(option, profile)) !== undefined
+            ) {
               return false;
             }
             return true;
           })
-          .map((option) => option.data);
+          .map((option) => (option.key === NULL_OPTION_KEY ? null : option.data));
 
         // Add all options from `props.selectedOptions` unless they have been deselected in `nextOptions`
         if (selectedOptions && !singleSelection) {
           selectedOptions.forEach((profile) => {
-            const match = nextOptions.find((o) => o.key === profile.uid);
-            if (!match || match.checked === 'on') {
-              values.push(profile);
+            const match = nextOptions.find((option) => isMatchingOption(option, profile));
+            if (match === undefined || match.checked === 'on') {
+              if (match && match.key === NULL_OPTION_KEY) {
+                values.unshift(profile);
+              } else {
+                values.push(profile);
+              }
             }
           });
         }
@@ -246,7 +305,11 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
           i18n.translate('userProfileComponents.userProfilesSelectable.searchPlaceholder', {
             defaultMessage: 'Search',
           }),
-        onChange: onSearchChange,
+        value: searchTerm,
+        onChange: (value) => {
+          setSearchTerm(value);
+          onSearchChange?.(value);
+        },
         isLoading,
         isClearable: !isLoading,
         id: searchInputId,
@@ -257,45 +320,102 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
       noMatchesMessage={noMatchesMessage}
       emptyMessage={emptyMessage}
       errorMessage={errorMessage}
+      renderOption={(option, searchValue) => {
+        if (option.user) {
+          return (
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="s"
+              responsive={false}
+            >
+              <EuiFlexItem>
+                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+              </EuiFlexItem>
+              {option.user.email && option.user.email !== option.label ? (
+                <EuiFlexItem grow={false}>
+                  <EuiTextColor color={option.disabled ? 'disabled' : 'subdued'}>
+                    {searchValue ? (
+                      <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
+                    ) : (
+                      option.user.email
+                    )}
+                  </EuiTextColor>
+                </EuiFlexItem>
+              ) : undefined}
+            </EuiFlexGroup>
+          );
+        }
+        return <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>;
+      }}
     >
       {(list, search) => (
         <>
           <EuiPanel hasShadow={false} paddingSize="s">
             {search}
-            <EuiSpacer size="s" />
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {selectedStatusMessage ? (
-                    selectedStatusMessage(selectedCount)
+            {!singleSelection ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {selectedStatusMessage ? (
+                        selectedStatusMessage(selectedCount)
+                      ) : (
+                        <FormattedMessage
+                          id="userProfileComponents.userProfilesSelectable.selectedStatusMessage"
+                          defaultMessage="{count, plural, one {# user selected} other {# users selected}}"
+                          values={{ count: selectedCount }}
+                        />
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {selectedCount ? (
+                      <EuiButtonEmpty
+                        size="xs"
+                        flush="right"
+                        onClick={() => onChange?.([])}
+                        style={{ height: '1rem' }}
+                      >
+                        {clearButtonLabel ?? (
+                          <FormattedMessage
+                            id="userProfileComponents.userProfilesSelectable.clearButtonLabel"
+                            defaultMessage="Remove all users"
+                          />
+                        )}
+                      </EuiButtonEmpty>
+                    ) : undefined}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            ) : undefined}
+          </EuiPanel>
+          {limit && selectedCount >= limit ? (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EuiCallOut
+                title={
+                  limitReachedMessage ? (
+                    limitReachedMessage(limit)
                   ) : (
                     <FormattedMessage
-                      id="userProfileComponents.userProfilesSelectable.selectedStatusMessage"
-                      defaultMessage="{count, plural, one {# user selected} other {# users selected}}"
-                      values={{ count: selectedCount }}
+                      id="userProfileComponents.userProfilesSelectable.limitReachedMessage"
+                      defaultMessage="You've selected the maximum of {count, plural, one {# user} other {# users}}"
+                      values={{ count: limit }}
                     />
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {selectedCount ? (
-                  <EuiButtonEmpty
-                    size="xs"
-                    flush="right"
-                    onClick={() => onChange?.([])}
-                    style={{ height: '1rem' }}
-                  >
-                    {clearButtonLabel ?? (
-                      <FormattedMessage
-                        id="userProfileComponents.userProfilesSelectable.clearButtonLabel"
-                        defaultMessage="Remove all users"
-                      />
-                    )}
-                  </EuiButtonEmpty>
-                ) : undefined}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
+                  )
+                }
+                color="warning"
+                size="s"
+              />
+            </>
+          ) : undefined}
           <EuiHorizontalRule margin="none" />
           {list}
         </>
@@ -304,15 +424,32 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
   );
 };
 
-type SelectableOption = EuiSelectableOption<UserProfileWithAvatar>;
+type SelectableOption = EuiSelectableOption<Partial<UserProfileWithAvatar>>;
 
-function toSelectableOption(userProfile: UserProfileWithAvatar): SelectableOption {
-  // @ts-ignore: `isGroupLabel` is not required here but TS complains
+function toSelectableOption(
+  userProfile: UserProfileWithAvatar | null,
+  nullOptionLabel?: string
+): SelectableOption {
+  if (userProfile) {
+    return {
+      key: userProfile.uid,
+      label: getUserDisplayName(userProfile.user),
+      data: userProfile,
+    };
+  }
   return {
-    key: userProfile.uid,
-    prepend: <UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} size="s" />,
-    label: getUserDisplayName(userProfile.user),
-    append: <EuiTextColor color="subdued">{userProfile.user.email}</EuiTextColor>,
-    data: userProfile,
+    key: NULL_OPTION_KEY,
+    label:
+      nullOptionLabel ??
+      i18n.translate('userProfileComponents.userProfilesSelectable.nullOptionLabel', {
+        defaultMessage: 'No users',
+      }),
   };
+}
+
+function isMatchingOption<Option extends UserProfileWithAvatar | null>(
+  option: SelectableOption,
+  profile: Option
+) {
+  return option.key === (profile ? profile.uid : NULL_OPTION_KEY);
 }

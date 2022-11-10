@@ -39,6 +39,7 @@
         ],
         "path": "packages/home/sample_data_card/src/mocks/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/home-sample-data-card",
@@ -54,6 +55,7 @@
             ],
             "path": "packages/home/sample_data_card/src/mocks/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -76,6 +78,7 @@
         ],
         "path": "packages/home/sample_data_card/src/mocks/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -109,6 +112,7 @@
         ],
         "path": "packages/home/sample_data_card/src/mocks/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/home-sample-data-card",
@@ -128,6 +132,7 @@
             ],
             "path": "packages/home/sample_data_card/src/mocks/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -156,6 +161,7 @@
         ],
         "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/home-sample-data-card",
@@ -175,6 +181,7 @@
             ],
             "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -203,6 +210,7 @@
         ],
         "path": "packages/home/sample_data_card/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/home-sample-data-card",
@@ -224,6 +232,7 @@
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -252,6 +261,7 @@
         ],
         "path": "packages/home/sample_data_card/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/home-sample-data-card",
@@ -273,6 +283,7 @@
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -290,6 +301,7 @@
         "description": [],
         "path": "packages/home/sample_data_card/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/home-sample-data-card",
@@ -302,7 +314,8 @@
               "{ application: { navigateToUrl: NavigateToUrl; }; http: { basePath: { prepend: (path: string) => string; }; delete: (path: string) => Promise<unknown>; post: (path: string) => Promise<unknown>; }; notifications: { toasts: { addDanger: NotifyFn; addSuccess: NotifyFn; }; }; uiSettings: { get: (key: string, defaultOverride?: any) => any; isDefault: (key: string) => boolean; set: (key: string, value: any) => Promise<boolean>; }; }"
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/home-sample-data-card",
@@ -315,7 +328,8 @@
               "{ clearCache: () => void; }"
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -349,6 +363,7 @@
         ],
         "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/home-sample-data-card",
@@ -363,7 +378,8 @@
               "SampleDataSet"
             ],
             "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -379,6 +395,7 @@
         ],
         "path": "packages/home/sample_data_card/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/home-sample-data-card",
@@ -392,6 +409,7 @@
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/home-sample-data-card",
@@ -405,6 +423,7 @@
                 ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -422,6 +441,7 @@
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/home-sample-data-card",
@@ -435,6 +455,7 @@
                 ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -452,6 +473,7 @@
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/home-sample-data-card",
@@ -465,6 +487,7 @@
                 ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -479,6 +502,7 @@
                 ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -496,6 +520,7 @@
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -509,7 +534,8 @@
                   "string | NotifyInputFields"
                 ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -525,6 +551,7 @@
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -538,7 +565,8 @@
                   "string | NotifyInputFields"
                 ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -554,6 +582,7 @@
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/home-sample-data-card",
@@ -567,6 +596,7 @@
                 ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -581,6 +611,7 @@
                 ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -602,10 +633,11 @@
           "\nParameters drawn from the Storybook arguments collection that customize a component story."
         ],
         "signature": [
-          "{ status: any; description: any; name: any; includeAppLinks: any; simulateErrors: any; }"
+          "{ name: any; description: any; status: any; includeAppLinks: any; simulateErrors: any; }"
         ],
         "path": "packages/home/sample_data_card/src/mocks/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

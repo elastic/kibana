@@ -17,7 +17,8 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
           aria-controls="accordion-variables"
           aria-expanded={false}
           aria-labelledby="generated-id"
-          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiAccordion__iconButton"
+          className="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
+          disabled={false}
           onClick={[Function]}
           tabIndex={-1}
           type="button"
@@ -36,6 +37,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
           aria-controls="accordion-variables"
           aria-expanded={false}
           className="euiAccordion__button emotion-euiAccordion__button"
+          disabled={false}
           id="generated-id"
           onClick={[Function]}
           type="button"
@@ -44,7 +46,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
             className="euiAccordion__buttonContent"
           >
             <span
-              className="euiToolTipAnchor"
+              className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
               onMouseOut={[Function]}
               onMouseOver={[Function]}
             >
@@ -61,13 +63,14 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
           className="euiAccordion__optionalAction emotion-euiAccordion__optionalAction"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Add a variable"
-              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -126,7 +129,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
                               className="euiPopover__anchor css-16vtueo-render"
                             >
                               <button
-                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                                className="euiButtonEmpty euiButtonEmpty--xSmall euiButtonEmpty--flushRight css-9t7nyf-empty-primary"
                                 disabled={false}
                                 onClick={[Function]}
                                 type="button"
@@ -361,13 +364,14 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
                             className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
                           >
                             <span
-                              className="euiToolTipAnchor"
+                              className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                               onMouseOut={[Function]}
                               onMouseOver={[Function]}
                             >
                               <button
                                 aria-labelledby="generated-id"
-                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                className="euiButtonIcon euiButtonIcon--xSmall euiTableCellContent__hoverItem emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                disabled={false}
                                 onClick={[Function]}
                                 type="button"
                               >
@@ -399,14 +403,15 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
                                   className="euiPopover__anchor css-16vtueo-render"
                                 >
                                   <span
-                                    className="euiToolTipAnchor"
+                                    className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
                                     <button
                                       aria-label="All actions"
-                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                      className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
                                       data-test-subj="euiCollapsedItemActionsButton"
+                                      disabled={false}
                                       onClick={[Function]}
                                       onFocus={[Function]}
                                       type="button"
@@ -514,13 +519,14 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
                             className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
                           >
                             <span
-                              className="euiToolTipAnchor"
+                              className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                               onMouseOut={[Function]}
                               onMouseOver={[Function]}
                             >
                               <button
                                 aria-labelledby="generated-id"
-                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                className="euiButtonIcon euiButtonIcon--xSmall euiTableCellContent__hoverItem emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                disabled={false}
                                 onClick={[Function]}
                                 type="button"
                               >
@@ -552,14 +558,15 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
                                   className="euiPopover__anchor css-16vtueo-render"
                                 >
                                   <span
-                                    className="euiToolTipAnchor"
+                                    className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
                                     <button
                                       aria-label="All actions"
-                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                      className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
                                       data-test-subj="euiCollapsedItemActionsButton"
+                                      disabled={false}
                                       onClick={[Function]}
                                       onFocus={[Function]}
                                       type="button"
@@ -667,13 +674,14 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
                             className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
                           >
                             <span
-                              className="euiToolTipAnchor"
+                              className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                               onMouseOut={[Function]}
                               onMouseOver={[Function]}
                             >
                               <button
                                 aria-labelledby="generated-id"
-                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                className="euiButtonIcon euiButtonIcon--xSmall euiTableCellContent__hoverItem emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                disabled={false}
                                 onClick={[Function]}
                                 type="button"
                               >
@@ -705,14 +713,15 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
                                   className="euiPopover__anchor css-16vtueo-render"
                                 >
                                   <span
-                                    className="euiToolTipAnchor"
+                                    className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
                                     <button
                                       aria-label="All actions"
-                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                      className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
                                       data-test-subj="euiCollapsedItemActionsButton"
+                                      disabled={false}
                                       onClick={[Function]}
                                       onFocus={[Function]}
                                       type="button"

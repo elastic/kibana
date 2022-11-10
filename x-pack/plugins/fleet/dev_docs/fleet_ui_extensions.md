@@ -35,6 +35,12 @@ export class Plugin {
 
     registerExtension({
       package: 'endpoint',
+      view: 'package-policy-create-multi-step',
+      component: LazyEndpointPolicyCreateMultiStepExtension,
+    });
+
+    registerExtension({
+      package: 'endpoint',
       view: 'package-detail-custom',
       component: getLazyEndpointPackageCustomExtension(core, plugins),
     });
@@ -43,6 +49,12 @@ export class Plugin {
         package: 'endpoint',
         view: 'package-policy-response',
         Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+      });
+
+    registerExtension({
+        package: 'endpoint',
+        view: 'package-generic-errors-list',
+        Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
       });
   }
   //...

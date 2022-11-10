@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { TTYPlayerDeps, TTYPlayer } from '.';
+import userEvent from '@testing-library/user-event';
 
 describe('TTYPlayer component', () => {
   beforeAll(() => {
@@ -28,6 +29,8 @@ describe('TTYPlayer component', () => {
         dispatchEvent: jest.fn(),
       })),
     });
+
+    global.ResizeObserver = require('resize-observer-polyfill');
   });
 
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -47,6 +50,7 @@ describe('TTYPlayer component', () => {
       sessionViewIOEventsMock?.events?.[0]?._source?.process?.entry_leader?.entity_id;
 
     props = {
+      show: true,
       sessionEntityId: mockSessionEntityId,
       onClose: jest.fn(),
       onJumpToEvent: jest.fn(),
@@ -77,6 +81,39 @@ describe('TTYPlayer component', () => {
       renderResult = mockedContext.render(<TTYPlayer {...props} />);
 
       await waitForApiCall();
+    });
+
+    it('renders a message warning when max_bytes exceeded', async () => {
+      renderResult = mockedContext.render(<TTYPlayer {...props} />);
+
+      await waitForApiCall();
+      await new Promise((r) => setTimeout(r, 10));
+
+      const seekToEndBtn = renderResult.getByTestId('sessionView:TTYPlayerControlsEnd');
+
+      act(() => {
+        userEvent.click(seekToEndBtn);
+      });
+
+      waitFor(() => expect(renderResult.queryAllByText('Data limit reached')).toHaveLength(1));
+      expect(renderResult.queryByText('[ VIEW POLICIES ]')).toBeFalsy();
+    });
+
+    it('renders a message warning when max_bytes exceeded with link to policies page', async () => {
+      renderResult = mockedContext.render(
+        <TTYPlayer {...props} canAccessEndpointManagement={true} />
+      );
+
+      await waitForApiCall();
+      await new Promise((r) => setTimeout(r, 10));
+
+      const seekToEndBtn = renderResult.getByTestId('sessionView:TTYPlayerControlsEnd');
+
+      act(() => {
+        userEvent.click(seekToEndBtn);
+      });
+
+      waitFor(() => expect(renderResult.queryAllByText('[ VIEW POLICIES ]')).toHaveLength(1));
     });
   });
 });

@@ -20,6 +20,7 @@ export interface FindingsEvaluation {
 
 export interface Stats extends FindingsEvaluation {
   postureScore: Score;
+  resourcesEvaluated?: number;
 }
 
 export interface GroupedFindingsEvaluation extends FindingsEvaluation {
@@ -33,9 +34,10 @@ export interface PostureTrend extends Stats {
 export interface Cluster {
   meta: {
     clusterId: string;
+    clusterName?: string;
     benchmarkName: string;
     benchmarkId: BenchmarkId;
-    lastUpdate: number; // unix epoch time
+    lastUpdate: string;
   };
   stats: Stats;
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
@@ -84,20 +86,10 @@ export interface CspRulesStatus {
 export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 
 export interface Benchmark {
-  package_policy: Pick<
-    PackagePolicy,
-    | 'id'
-    | 'name'
-    | 'policy_id'
-    | 'namespace'
-    | 'package'
-    | 'updated_at'
-    | 'updated_by'
-    | 'created_at'
-    | 'created_by'
-  >;
+  package_policy: PackagePolicy;
   agent_policy: AgentPolicyStatus;
   rules: CspRulesStatus;
 }
 
 export type BenchmarkId = CspRuleMetadata['benchmark']['id'];
+export type BenchmarkName = CspRuleMetadata['benchmark']['name'];

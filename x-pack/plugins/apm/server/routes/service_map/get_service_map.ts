@@ -16,7 +16,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { Setup } from '../../lib/helpers/setup_request';
+import { MlClient } from '../../lib/helpers/get_ml_client';
 import {
   DEFAULT_ANOMALIES,
   getServiceAnomalies,
@@ -26,34 +26,45 @@ import { getTraceSampleIds } from './get_trace_sample_ids';
 import { transformServiceMapResponses } from './transform_service_map_responses';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
+import { ServiceGroup } from '../../../common/service_groups';
+import { serviceGroupQuery } from '../../lib/service_group_query';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMConfig } from '../..';
 
 export interface IEnvOptions {
-  setup: Setup;
+  mlClient?: MlClient;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceNames?: string[];
   environment: string;
   searchAggregatedTransactions: boolean;
   logger: Logger;
   start: number;
   end: number;
+  serviceGroup: ServiceGroup | null;
 }
 
 async function getConnectionData({
-  setup,
+  config,
+  apmEventClient,
   serviceNames,
   environment,
   start,
   end,
+  serviceGroup,
 }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
-      setup,
+      config,
+      apmEventClient,
       serviceNames,
       environment,
       start,
       end,
+      serviceGroup,
     });
 
-    const chunks = chunk(traceIds, setup.config.serviceMapMaxTracesPerRequest);
+    const chunks = chunk(traceIds, config.serviceMapMaxTracesPerRequest);
 
     const init = {
       connections: [],
@@ -70,7 +81,7 @@ async function getConnectionData({
         Promise.all(
           chunks.map((traceIdsChunk) =>
             getServiceMapFromTraceIds({
-              setup,
+              apmEventClient,
               traceIds: traceIdsChunk,
               start,
               end,
@@ -95,11 +106,12 @@ async function getServicesData(
 ) {
   const {
     environment,
-    setup,
+    apmEventClient,
     searchAggregatedTransactions,
     start,
     end,
     maxNumberOfServices,
+    serviceGroup,
   } = options;
   const params = {
     apm: {
@@ -110,6 +122,7 @@ async function getServicesData(
       ],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
@@ -117,6 +130,7 @@ async function getServicesData(
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...termsQuery(SERVICE_NAME, ...(options.serviceNames ?? [])),
+            ...serviceGroupQuery(serviceGroup),
           ],
         },
       },
@@ -137,8 +151,6 @@ async function getServicesData(
       },
     },
   };
-
-  const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(
     'get_service_stats_for_service_map',

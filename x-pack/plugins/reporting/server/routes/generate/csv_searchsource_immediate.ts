@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { incrementApiUsageCounter } from '..';
@@ -13,7 +14,6 @@ import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import type { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
 import { PassThroughStream } from '../../lib';
-import type { BaseParams } from '../../types';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { RequestHandler } from '../lib/request_handler';
 
@@ -55,7 +55,11 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         body: schema.object({
           columns: schema.maybe(schema.arrayOf(schema.string())),
           searchSource: schema.object({}, { unknowns: 'allow' }),
-          browserTimezone: schema.string({ defaultValue: 'UTC' }),
+          browserTimezone: schema.string({
+            defaultValue: 'UTC',
+            validate: (value) =>
+              moment.tz.zone(value) ? undefined : `Invalid timezone "${typeof value}".`,
+          }),
           title: schema.string(),
           version: schema.maybe(schema.string()),
         }),
@@ -76,7 +80,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         const eventLog = reporting.getEventLogger({
           jobtype: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
           created_by: user && user.username,
-          payload: { browserTimezone: (req.params as BaseParams).browserTimezone },
+          payload: { browserTimezone: req.body.browserTimezone },
         });
         const logError = (error: Error) => {
           logger.error(error);

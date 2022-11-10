@@ -24,6 +24,11 @@ import {
   SELECT_TABLE,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
+  CLOSE_FLYOUT,
+  OPEN_ANALYZER_BTN,
+  TAKE_ACTION_BTN,
+  TAKE_ACTION_MENU,
+  ADD_ENDPOINT_EXCEPTION_BTN,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -40,10 +45,44 @@ import {
   CELL_EXPANSION_POPOVER,
   USER_DETAILS_LINK,
 } from '../screens/alerts_details';
+import { FIELD_INPUT } from '../screens/exceptions';
 
 export const addExceptionFromFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
-  cy.get(ADD_EXCEPTION_BTN).click();
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_EXCEPTION_BTN).trigger('click');
+      return $el.find(FIELD_INPUT);
+    })
+    .should('be.visible');
+};
+
+export const openAddEndpointExceptionFromFirstAlert = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_ENDPOINT_EXCEPTION_BTN).trigger('click');
+      return $el.find(FIELD_INPUT);
+    })
+    .should('be.visible');
+};
+
+export const openAddExceptionFromAlertDetails = () => {
+  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
+
+  cy.root()
+    .pipe(($el) => {
+      $el.find(TAKE_ACTION_BTN).trigger('click');
+      return $el.find(TAKE_ACTION_MENU);
+    })
+    .should('be.visible');
+
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_EXCEPTION_BTN).trigger('click');
+      return $el.find(ADD_EXCEPTION_BTN);
+    })
+    .should('not.be.visible');
 };
 
 export const closeFirstAlert = () => {
@@ -81,6 +120,8 @@ export const expandFirstAlert = () => {
     .should('exist')
     .pipe(($el) => $el.trigger('click'));
 };
+
+export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
 
@@ -153,6 +194,10 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
 
 export const investigateFirstAlertInTimeline = () => {
   cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
+};
+
+export const openAnalyzerForFirstAlertInTimeline = () => {
+  cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
 export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: number) => {

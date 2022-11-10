@@ -7,7 +7,7 @@
 
 import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX, CONNECTORS_VERSION } from '..';
 
-import { setupConnectorsIndices } from './setup_indices';
+import { defaultConnectorsPipelineMeta, setupConnectorsIndices } from './setup_indices';
 
 describe('Setup Indices', () => {
   const mockClient = {
@@ -29,6 +29,7 @@ describe('Setup Indices', () => {
   const connectorsMappings = {
     _meta: {
       version: CONNECTORS_VERSION,
+      pipeline: defaultConnectorsPipelineMeta,
     },
     properties: {
       api_key_id: {
@@ -37,14 +38,105 @@ describe('Setup Indices', () => {
       configuration: {
         type: 'object',
       },
+      description: { type: 'text' },
       error: { type: 'keyword' },
+      features: {
+        properties: {
+          filtering_advanced_config: { type: 'boolean' },
+          filtering_rules: { type: 'boolean' },
+        },
+      },
+      filtering: {
+        properties: {
+          active: {
+            properties: {
+              advanced_snippet: {
+                properties: {
+                  created_at: { type: 'date' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'object' },
+                },
+              },
+              rules: {
+                properties: {
+                  created_at: { type: 'date' },
+                  field: { type: 'keyword' },
+                  id: { type: 'keyword' },
+                  order: { type: 'short' },
+                  policy: { type: 'keyword' },
+                  rule: { type: 'keyword' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'keyword' },
+                },
+              },
+              validation: {
+                properties: {
+                  errors: {
+                    properties: {
+                      ids: { type: 'keyword' },
+                      messages: { type: 'text' },
+                    },
+                  },
+                  state: { type: 'keyword' },
+                },
+              },
+            },
+          },
+          domain: { type: 'keyword' },
+          draft: {
+            properties: {
+              advanced_snippet: {
+                properties: {
+                  created_at: { type: 'date' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'object' },
+                },
+              },
+              rules: {
+                properties: {
+                  created_at: { type: 'date' },
+                  field: { type: 'keyword' },
+                  id: { type: 'keyword' },
+                  order: { type: 'short' },
+                  policy: { type: 'keyword' },
+                  rule: { type: 'keyword' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'keyword' },
+                },
+              },
+              validation: {
+                properties: {
+                  errors: {
+                    properties: {
+                      ids: { type: 'keyword' },
+                      messages: { type: 'text' },
+                    },
+                  },
+                  state: { type: 'keyword' },
+                },
+              },
+            },
+          },
+        },
+      },
       index_name: { type: 'keyword' },
+      is_native: { type: 'boolean' },
       language: { type: 'keyword' },
+      last_deleted_document_count: { type: 'long' },
+      last_indexed_document_count: { type: 'long' },
       last_seen: { type: 'date' },
       last_sync_error: { type: 'keyword' },
       last_sync_status: { type: 'keyword' },
       last_synced: { type: 'date' },
       name: { type: 'keyword' },
+      pipeline: {
+        properties: {
+          extract_binary_content: { type: 'boolean' },
+          name: { type: 'keyword' },
+          reduce_whitespace: { type: 'boolean' },
+          run_ml_inference: { type: 'boolean' },
+        },
+      },
       scheduling: {
         properties: {
           enabled: { type: 'boolean' },
@@ -63,14 +155,41 @@ describe('Setup Indices', () => {
     },
     properties: {
       completed_at: { type: 'date' },
-      connector: { properties: connectorsMappings.properties },
       connector_id: {
         type: 'keyword',
       },
       created_at: { type: 'date' },
       deleted_document_count: { type: 'integer' },
-      error: {
-        type: 'keyword',
+      error: { type: 'keyword' },
+      filtering: {
+        properties: {
+          advanced_snippet: {
+            properties: {
+              created_at: { type: 'date' },
+              updated_at: { type: 'date' },
+              value: { type: 'object' },
+            },
+          },
+          domain: { type: 'keyword' },
+          rules: {
+            properties: {
+              created_at: { type: 'date' },
+              field: { type: 'keyword' },
+              id: { type: 'keyword' },
+              order: { type: 'short' },
+              policy: { type: 'keyword' },
+              rule: { type: 'keyword' },
+              updated_at: { type: 'date' },
+              value: { type: 'keyword' },
+            },
+          },
+          warnings: {
+            properties: {
+              ids: { type: 'keyword' },
+              messages: { type: 'text' },
+            },
+          },
+        },
       },
       indexed_document_count: { type: 'integer' },
       status: {

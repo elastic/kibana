@@ -48,6 +48,8 @@ export {
   // Should probably be removed
   SO_SEARCH_LIMIT,
   // Statuses
+  // Authz
+  ENDPOINT_PRIVILEGES,
 } from './constants';
 export {
   // Route services
@@ -60,6 +62,7 @@ export {
   fleetSetupRouteService,
   // Package policy helpers
   isValidNamespace,
+  INVALID_NAMESPACE_CHARACTERS,
   // TODO Should probably not be exposed by Fleet
   decodeCloudId,
 } from './services';

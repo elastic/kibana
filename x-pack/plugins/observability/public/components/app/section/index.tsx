@@ -49,6 +49,7 @@ export function SectionContainer({
         initialIsOpen={initialIsOpen}
         id={title}
         buttonContentClassName="accordion-button"
+        data-test-subj={`accordion-${title}`}
         buttonContent={
           <>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

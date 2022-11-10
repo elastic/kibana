@@ -11,7 +11,7 @@ configuration.
 [float]
 [[alerting-prerequisites]]
 === Prerequisites
-If you are using an *on-premises* Elastic Stack deployment:
+If you are using an *on-premises* {stack} deployment:
 
 * In the `kibana.yml` configuration file, add the 
 <<general-alert-action-settings,`xpack.encryptedSavedObjects.encryptionKey`>> 
@@ -19,7 +19,7 @@ setting.
 * For emails to have a footer with a link back to {kib}, set the 
 <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
 
-If you are using an *on-premises* Elastic Stack deployment with 
+If you are using an *on-premises* {stack} deployment with 
 <<using-kibana-with-security, *security*>>:
 
 * If you are unable to access {kib} {alert-features}, ensure that you have not 
@@ -98,3 +98,10 @@ user without those privileges updates the rule, the rule will no longer
 function. Conversely, if a user with greater or administrator privileges 
 modifies the rule, it will begin running with increased privileges.
 ==============================================
+
+[float]
+[[alerting-ccs-setup]]
+=== {ccs-cap}
+
+If you want to use alerting rules with {ccs}, you must configure 
+{ref}/remote-clusters-privileges.html#clusters-privileges-ccs-kibana[privileges for {ccs-init} and {kib}].

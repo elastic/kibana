@@ -29,7 +29,7 @@ import { extractIndexPatternValues } from '../../../common/index_patterns_utils'
 import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
 import { VisPicker } from './vis_picker';
 import { fetchFields, VisFields } from '../lib/fetch_fields';
-import { getDataStart, getCoreStart } from '../../services';
+import { getDataStart, getCoreStart, getUnifiedSearchStart } from '../../services';
 import type { TimeseriesVisParams } from '../../types';
 import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
 
@@ -189,6 +189,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
         services={{
           appName: APP_NAME,
           storage: this.localStorage,
+          unifiedSearch: getUnifiedSearchStart(),
           data: getDataStart(),
           ...getCoreStart(),
         }}

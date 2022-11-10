@@ -6,21 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { get, hasIn } from 'lodash';
-import { RangeFilter, isScriptedRangeFilter, isRangeFilter, Filter, FILTERS } from '@kbn/es-query';
+import { get } from 'lodash';
+import {
+  ScriptedRangeFilter,
+  RangeFilter,
+  isScriptedRangeFilter,
+  isRangeFilter,
+  Filter,
+  FILTERS,
+} from '@kbn/es-query';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { FilterValueFormatter } from '../../../../../common';
-
-const getFormattedValueFn = (left: any, right: any) => {
-  return (formatter?: FilterValueFormatter) => {
-    let displayValue = `${left} to ${right}`;
-    if (formatter) {
-      const convert = formatter.getConverterFor('text');
-      displayValue = `${convert(left)} to ${convert(right)}`;
-    }
-    return displayValue;
-  };
-};
+export function getRangeDisplayValue(
+  { meta: { params } }: RangeFilter | ScriptedRangeFilter,
+  formatter?: FieldFormat
+) {
+  const left = params.gte ?? params.gt ?? -Infinity;
+  const right = params.lte ?? params.lt ?? Infinity;
+  if (!formatter) return `${left} to ${right}`;
+  const convert = formatter.getConverterFor('text');
+  return `${convert(left)} to ${convert(right)}`;
+}
 
 const getFirstRangeKey = (filter: RangeFilter) =>
   filter.query.range && Object.keys(filter.query.range)[0];
@@ -33,15 +39,7 @@ function getParams(filter: RangeFilter) {
     ? get(filter.query, 'script.script.params')
     : getRangeByKey(filter, key);
 
-  let left = hasIn(params, 'gte') ? params.gte : params.gt;
-  if (left == null) left = -Infinity;
-
-  let right = hasIn(params, 'lte') ? params.lte : params.lt;
-  if (right == null) right = Infinity;
-
-  const value = getFormattedValueFn(left, right);
-
-  return { type: FILTERS.RANGE, key, value, params };
+  return { type: FILTERS.RANGE, key, value: params, params };
 }
 
 export const isMapRangeFilter = (filter: any): filter is RangeFilter =>

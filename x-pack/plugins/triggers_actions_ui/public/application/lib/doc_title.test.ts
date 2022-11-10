@@ -9,7 +9,7 @@ import { getCurrentDocTitle } from './doc_title';
 
 describe('getCurrentDocTitle', () => {
   test('if change calls return the proper doc title ', async () => {
-    expect(getCurrentDocTitle('home') === 'Rules and Connectors').toBeTruthy();
+    expect(getCurrentDocTitle('home') === 'Rules').toBeTruthy();
     expect(getCurrentDocTitle('connectors') === 'Connectors').toBeTruthy();
     expect(getCurrentDocTitle('rules') === 'Rules').toBeTruthy();
   });

@@ -70,6 +70,17 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     if (
       (await doAnyChangesMatch([
+        /^x-pack\/plugins\/threat_intelligence/,
+        /^x-pack\/test\/threat_intelligence_cypress/,
+        /^x-pack\/plugins\/security_solution\/public\/threat_intelligence/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/threat_intelligence.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
         /^src\/plugins\/data/,
         /^x-pack\/plugins\/actions/,
         /^x-pack\/plugins\/alerting/,
@@ -90,7 +101,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/apm/])) ||
+      (await doAnyChangesMatch([/^x-pack\/plugins\/apm/, /^packages\/kbn-apm-synthtrace/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));

@@ -717,6 +717,7 @@ export class ExceptionListClient {
     perPage,
     pit,
     page,
+    search,
     searchAfter,
     sortField,
     sortOrder,
@@ -750,6 +751,7 @@ export class ExceptionListClient {
       perPage,
       pit,
       savedObjectsClient,
+      search,
       searchAfter,
       sortField,
       sortOrder,
@@ -764,6 +766,7 @@ export class ExceptionListClient {
    * @param options.perPage How many per page to return
    * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in
    * @param options.page The page number or "undefined" if there is no page number to continue from
+   * @param options.search The simple query search parameter if there is one, otherwise "undefined" can be sent in
    * @param options.searchAfter The search_after parameter if there is one, otherwise "undefined" can be sent in
    * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
    * @param options.sortOder The sort order string of "asc", "desc", otherwise "undefined" if there is no preference
@@ -776,6 +779,7 @@ export class ExceptionListClient {
     perPage,
     pit,
     page,
+    search,
     searchAfter,
     sortField,
     sortOrder,
@@ -793,6 +797,7 @@ export class ExceptionListClient {
           page,
           perPage,
           pit,
+          search,
           searchAfter,
           sortField,
           sortOrder,
@@ -809,6 +814,7 @@ export class ExceptionListClient {
       perPage,
       pit,
       savedObjectsClient,
+      search,
       searchAfter,
       sortField,
       sortOrder,
@@ -898,6 +904,7 @@ export class ExceptionListClient {
    * @param options.perPage How many per page to return
    * @param options.page The page number or "undefined" if there is no page number to continue from
    * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in
+   * @param options.search The simple query search parameter if there is one, otherwise "undefined" can be sent in
    * @param options.searchAfter The search_after parameter if there is one, otherwise "undefined" can be sent in
    * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
    * @param options.sortOrder The sort order of "asc" or "desc", otherwise "undefined" can be sent in
@@ -908,6 +915,7 @@ export class ExceptionListClient {
     perPage,
     page,
     pit,
+    search,
     searchAfter,
     sortField,
     sortOrder,
@@ -922,6 +930,7 @@ export class ExceptionListClient {
       perPage,
       pit,
       savedObjectsClient,
+      search,
       searchAfter,
       sortField,
       sortOrder,
@@ -975,6 +984,7 @@ export class ExceptionListClient {
     exceptionsToImport,
     maxExceptionsImportSize,
     overwrite,
+    generateNewListId,
   }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
     const { savedObjectsClient, user } = this;
 
@@ -995,6 +1005,7 @@ export class ExceptionListClient {
 
     return importExceptions({
       exceptions: parsedObjects,
+      generateNewListId,
       overwrite,
       savedObjectsClient,
       user,
@@ -1029,6 +1040,7 @@ export class ExceptionListClient {
 
     return importExceptions({
       exceptions: parsedObjects,
+      generateNewListId: false,
       overwrite,
       savedObjectsClient,
       user,

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes } from '@kbn/core/public';
 import { SavedObjectMetaData } from '@kbn/saved-objects-plugin/public';
 import { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
@@ -35,7 +34,7 @@ export interface EmbeddableFactory<
     TEmbeddableInput,
     TEmbeddableOutput
   >,
-  TSavedObjectAttributes extends SavedObjectAttributes = SavedObjectAttributes
+  TSavedObjectAttributes = unknown
 > extends PersistableState<EmbeddableStateWithType> {
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.

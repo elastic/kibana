@@ -35,6 +35,7 @@ export const WarningsPopover = ({
           onClick={onButtonClick}
           iconType="alert"
           className="lnsWorkspaceWarning__button"
+          data-test-subj="lens-editor-warning-button"
         >
           {warningsCount}
           <span className="lnsWorkspaceWarning__buttonText">
@@ -53,7 +54,11 @@ export const WarningsPopover = ({
     >
       <ul className="lnsWorkspaceWarningList">
         {React.Children.map(children, (child, index) => (
-          <li key={index} className="lnsWorkspaceWarningList__item">
+          <li
+            key={index}
+            className="lnsWorkspaceWarningList__item"
+            data-test-subj="lens-editor-warning"
+          >
             <EuiText size="s">{child}</EuiText>
           </li>
         ))}

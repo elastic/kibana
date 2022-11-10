@@ -13,7 +13,7 @@ import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
-import type { PackSavedObject } from './types';
+import type { PackItem, PackSavedObject } from './types';
 
 interface UseCreatePackProps {
   withRedirect?: boolean;
@@ -31,7 +31,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
   return useMutation<
     { data: PackSavedObject },
     { body: { error: string; message: string } },
-    PackSavedObject
+    Omit<PackItem, 'id'>
   >(
     (payload) =>
       http.post('/api/osquery/packs', {

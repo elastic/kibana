@@ -30,6 +30,8 @@ import { useCreateTimeline } from '../properties/use_create_timeline';
 import * as commonI18n from '../properties/translations';
 import * as i18n from './translations';
 import { formSchema } from './schema';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
 const CommonUseField = getUseField({ component: Field });
 interface TimelineTitleAndDescriptionProps {
@@ -44,6 +46,7 @@ interface TimelineTitleAndDescriptionProps {
 // the unsaved timeline / template
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
   ({ closeSaveTimeline, initialFocus, timelineId, showWarning }) => {
+    const { startTransaction } = useStartTransaction();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const {
       isSaving,
@@ -98,6 +101,11 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       defaultValue: initialState,
     });
     const { isSubmitted, isSubmitting, submit } = form;
+
+    const onSubmit = useCallback(() => {
+      startTransaction({ name: TIMELINE_ACTIONS.SAVE });
+      submit();
+    }, [submit, startTransaction]);
 
     const handleCancel = useCallback(() => {
       if (showWarning) {
@@ -236,7 +244,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                     size="s"
                     isDisabled={isSaving || isSubmitting}
                     fill={true}
-                    onClick={submit}
+                    onClick={onSubmit}
                     data-test-subj="save-button"
                   >
                     {saveButtonTitle}

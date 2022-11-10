@@ -14,7 +14,6 @@ import type { CustomHelpers } from 'joi';
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
 const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
-const SCALABILITY_DURATION_PATTERN = /^[1-9]\d{0,}[m|s]$/;
 // it will search both --inspect and --inspect-brk
 const INSPECTING = !!process.execArgv.find((arg) => arg.includes('--inspect'));
 
@@ -71,6 +70,7 @@ const dockerServerSchema = () =>
       port: requiredWhenEnabled(Joi.number()),
       portInContainer: requiredWhenEnabled(Joi.number()),
       waitForLogLine: Joi.alternatives(Joi.object().instance(RegExp), Joi.string()).optional(),
+      waitForLogLineTimeoutMs: Joi.number().integer().optional(),
       waitFor: Joi.func().optional(),
       args: Joi.array().items(Joi.string()).optional(),
     })
@@ -163,6 +163,7 @@ export const schema = Joi.object()
       .keys({
         enabled: Joi.boolean().default(!!process.env.CI && !process.env.DISABLE_JUNIT_REPORTER),
         reportName: Joi.string(),
+        metadata: Joi.object().unknown(true).default(),
       })
       .default(),
 
@@ -260,68 +261,18 @@ export const schema = Joi.object()
     apps: Joi.object().pattern(ID_PATTERN, appUrlPartsSchema()).default(),
 
     // settings for the saved objects svc
+    esArchiver: Joi.object()
+      .keys({
+        baseDirectory: Joi.string().optional(),
+      })
+      .default(),
+
+    // settings for the saved objects svc
     kbnArchiver: Joi.object()
       .keys({
         directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/kbn_archiver')),
       })
       .default(),
-
-    /**
-     * Optional settings to list test data archives, that will be loaded during the 'beforeTests'
-     * lifecycle phase and unloaded during the 'cleanup' lifecycle phase.
-     */
-    testData: Joi.object()
-      .keys({
-        kbnArchives: Joi.array().items(Joi.string()).default([]),
-        esArchives: Joi.array().items(Joi.string()).default([]),
-      })
-      .default(),
-
-    /**
-     * Optional settings to enable scalability testing for single user performance journey.
-     * If defined, 'scalabilitySetup' must include 'warmup' and 'test' stage array,
-     * 'maxDuration', e.g. '10m' to limit execution time to 10 minutes.
-     * Each stage must include 'action', 'duration' and 'maxUsersCount'.
-     * In addition, 'rampConcurrentUsers' requires 'minUsersCount' to ramp users from
-     * min to max within provided time duration.
-     */
-    scalabilitySetup: Joi.object()
-      .keys({
-        warmup: Joi.array()
-          .items(
-            Joi.object().keys({
-              action: Joi.string()
-                .valid('constantConcurrentUsers', 'rampConcurrentUsers')
-                .required(),
-              duration: Joi.string().pattern(SCALABILITY_DURATION_PATTERN).required(),
-              minUsersCount: Joi.number().when('action', {
-                is: 'rampConcurrentUsers',
-                then: Joi.number().required().less(Joi.ref('maxUsersCount')),
-                otherwise: Joi.forbidden(),
-              }),
-              maxUsersCount: Joi.number().required().greater(0),
-            })
-          )
-          .required(),
-        test: Joi.array()
-          .items(
-            Joi.object().keys({
-              action: Joi.string()
-                .valid('constantConcurrentUsers', 'rampConcurrentUsers')
-                .required(),
-              duration: Joi.string().pattern(SCALABILITY_DURATION_PATTERN).required(),
-              minUsersCount: Joi.number().when('action', {
-                is: 'rampConcurrentUsers',
-                then: Joi.number().required().less(Joi.ref('maxUsersCount')),
-                otherwise: Joi.forbidden(),
-              }),
-              maxUsersCount: Joi.number().required().greater(0),
-            })
-          )
-          .required(),
-        maxDuration: Joi.string().pattern(SCALABILITY_DURATION_PATTERN).required(),
-      })
-      .optional(),
 
     // settings for the kibanaServer.uiSettings module
     uiSettings: Joi.object()

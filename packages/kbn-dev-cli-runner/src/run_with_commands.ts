@@ -11,7 +11,8 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
 import { RunContext, RunOptions } from './run';
-import { getFlags, FlagOptions, mergeFlagOptions } from './flags';
+import { getFlags, FlagOptions, mergeFlagOptions, DEFAULT_FLAG_ALIASES } from './flags';
+import { FlagsReader } from './flags_reader';
 import { Cleanup } from './cleanup';
 import { getHelpForAllCommands, getCommandLevelHelp } from './help';
 import { Metrics } from './metrics';
@@ -116,6 +117,12 @@ export class RunWithCommands<T> {
           procRunner,
           statsMeta: metrics.meta,
           addCleanupTask: cleanup.add.bind(cleanup),
+          flagsReader: new FlagsReader(commandFlags, {
+            aliases: {
+              ...commandFlagOptions.alias,
+              ...DEFAULT_FLAG_ALIASES,
+            },
+          }),
         };
 
         const extendedContext = {

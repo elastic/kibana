@@ -77,6 +77,7 @@ describe('When using `getActionDetailsById()', () => {
       isExpired: false,
       startedAt: '2022-04-27T16:08:47.449Z',
       comment: doc?.EndpointActions.data.comment,
+      status: 'successful',
       createdBy: doc?.user.id,
       parameters: doc?.EndpointActions.data.parameters,
       outputs: {},

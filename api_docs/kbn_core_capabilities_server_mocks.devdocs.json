@@ -22,18 +22,27 @@
         "label": "CapabilitiesServiceContract",
         "description": [],
         "signature": [
-          "{ setup: (setupDeps: ",
-          "SetupDeps",
-          ") => ",
-          "CapabilitiesSetup",
+          "{ setup: (setupDeps: SetupDeps) => ",
+          {
+            "pluginId": "@kbn/core-capabilities-server",
+            "scope": "server",
+            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+            "section": "def-server.CapabilitiesSetup",
+            "text": "CapabilitiesSetup"
+          },
           "; start: () => ",
-          "CapabilitiesStart",
-          "; preboot: (prebootDeps: ",
-          "PrebootSetupDeps",
-          ") => void; }"
+          {
+            "pluginId": "@kbn/core-capabilities-server",
+            "scope": "server",
+            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+            "section": "def-server.CapabilitiesStart",
+            "text": "CapabilitiesStart"
+          },
+          "; preboot: (prebootDeps: PrebootSetupDeps) => void; }"
         ],
         "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -47,6 +56,7 @@
         "description": [],
         "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-server-mocks",
@@ -68,6 +78,7 @@
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -80,11 +91,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "CapabilitiesSetup",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "server",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-server.CapabilitiesSetup",
+                "text": "CapabilitiesSetup"
+              },
               ">"
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -97,11 +115,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "CapabilitiesStart",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "server",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-server.CapabilitiesStart",
+                "text": "CapabilitiesStart"
+              },
               ">"
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -114,10 +139,17 @@
             "description": [],
             "signature": [
               "() => ",
-              "Capabilities"
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              }
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
