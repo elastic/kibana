@@ -17,8 +17,8 @@ import { KibanaConfig } from '../kibana_config';
 
 const HTTPS = 'https:';
 
-const GATEWAY_STATUS_ROUTE = '/';
-const KIBANA_STATUS_ROUTE = '/';
+const GATEWAY_ROOT_ROUTE = '/';
+const KIBANA_ROOT_ROUTE = '/';
 
 interface StatusRouteDependencies {
   log: Logger;
@@ -27,22 +27,22 @@ interface StatusRouteDependencies {
 
 type Fetch = (path: string) => Promise<Response>;
 
-export function createStatusRoute({ config, log }: StatusRouteDependencies) {
+export function createRootRoute({ config, log }: StatusRouteDependencies) {
   const kibanaConfig = new KibanaConfig(config.atPathSync<KibanaConfigType>('kibana'));
   const fetch = configureFetch(kibanaConfig);
 
   return {
     method: 'GET',
-    path: GATEWAY_STATUS_ROUTE,
+    path: GATEWAY_ROOT_ROUTE,
     handler: async (req: Request, h: ResponseToolkit) => {
-      const responses = await fetchKibanaStatuses({ fetch, kibanaConfig, log });
-      const { body, statusCode } = mergeStatusResponses(responses);
+      const responses = await fetchKibanaRoots({ fetch, kibanaConfig, log });
+      const { body, statusCode } = mergeResponses(responses);
       return h.response(body).type('application/json').code(statusCode);
     },
   };
 }
 
-async function fetchKibanaStatuses({
+async function fetchKibanaRoots({
   fetch,
   kibanaConfig,
   log,
@@ -53,17 +53,17 @@ async function fetchKibanaStatuses({
 }) {
   const requests = await Promise.allSettled(
     kibanaConfig.hosts.map(async (host) => {
-      log.debug(`Fetching response from ${host}${KIBANA_STATUS_ROUTE}`);
-      return fetch(`${host}${KIBANA_STATUS_ROUTE}`);
+      log.debug(`Fetching response from ${host}${KIBANA_ROOT_ROUTE}`);
+      return fetch(`${host}${KIBANA_ROOT_ROUTE}`);
     })
   );
 
   return requests.map((r, i) => {
     if (r.status === 'rejected') {
-      log.error(`Unable to retrieve status from ${kibanaConfig.hosts[i]}${KIBANA_STATUS_ROUTE}`);
+      log.error(`No response from ${kibanaConfig.hosts[i]}${KIBANA_ROOT_ROUTE}`);
     } else {
       log.info(
-        `Got response from ${kibanaConfig.hosts[i]}${KIBANA_STATUS_ROUTE}: ${JSON.stringify(
+        `Got response from ${kibanaConfig.hosts[i]}${KIBANA_ROOT_ROUTE}: ${JSON.stringify(
           r.value.status
         )}`
       );
@@ -72,7 +72,7 @@ async function fetchKibanaStatuses({
   });
 }
 
-function mergeStatusResponses(
+function mergeResponses(
   responses: Array<PromiseFulfilledResult<Response> | PromiseRejectedResult>
 ) {
   let statusCode = 200;
