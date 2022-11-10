@@ -58,8 +58,8 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
       }
 
       try {
-        const { vis } = getJobsItemsFromEmbeddable(context.embeddable);
-        return isCompatibleVisualizationType(vis);
+        const { chartInfo } = await getJobsItemsFromEmbeddable(context.embeddable);
+        return isCompatibleVisualizationType(chartInfo);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error attempting to check for ML job compatibility', error);

@@ -54,6 +54,7 @@ import type { FormatSelectorOptions } from './datasources/form_based/dimension_p
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 export interface IndexPatternRef {
   id: string;
@@ -137,7 +138,11 @@ export interface TableSuggestionColumn {
 export interface DataSourceInfo {
   layerId: string;
   dataView?: DataView;
-  columns: Array<{ id: string; role: 'split' | 'metric'; operation: OperationDescriptor }>;
+  columns: Array<{
+    id: string;
+    role: 'split' | 'metric';
+    operation: OperationDescriptor & { type: string; fields?: string[]; filter?: Query };
+  }>;
 }
 
 export interface VisualizationInfo {
@@ -499,8 +504,8 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceInfo: (
     state: T,
     references?: SavedObjectReference[],
-    dataViews?: DataView[]
-  ) => DataSourceInfo[];
+    dataViewsService?: DataViewsServicePublic
+  ) => Promise<DataSourceInfo[]>;
 }
 
 export interface DatasourceFixAction<T> {

@@ -9,11 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { mergeWith, uniqBy, isEqual } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  Embeddable,
-  LensSavedObjectAttributes,
-  XYDataLayerConfig,
-} from '@kbn/lens-plugin/public';
+import type { ChartInfo, Embeddable, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
@@ -37,6 +33,7 @@ import {
 import { createQueries } from '../utils/new_job_utils';
 import { isCompatibleLayer, createDetectors, getJobsItemsFromEmbeddable } from './utils';
 import { VisualizationExtractor } from './visualization_extractor';
+import { getLens } from '../../../util/dependency_cache';
 
 type Dashboard = Embeddable['parent'];
 
@@ -69,13 +66,19 @@ export class QuickJobCreator {
     runInRealTime: boolean,
     layerIndex: number
   ): Promise<CreateState> {
-    const { query, filters, to, from, vis, dashboard } = getJobsItemsFromEmbeddable(embeddable);
+    const { query, filters, to, from, dashboard, chartInfo } = await getJobsItemsFromEmbeddable(
+      embeddable
+    );
     if (query === undefined || filters === undefined) {
       throw new Error('Cannot create job, query and filters are undefined');
     }
 
+    if (!chartInfo) {
+      throw new Error('Cannot create job, chart info is undefined');
+    }
+
     const { jobConfig, datafeedConfig, start, end, jobType } = await this.createJob(
-      vis,
+      chartInfo,
       from,
       to,
       query,
@@ -191,10 +194,15 @@ export class QuickJobCreator {
     filters: Filter[],
     layerIndex: number | undefined
   ) {
+    const lens = getLens();
+    const chartInfo = await (await (await lens.stateHelperApi()).chartInfo).getChartInfo(vis);
+    if (!chartInfo) {
+      throw new Error('Cannot create job, chart info is undefined');
+    }
     try {
       const { jobConfig, datafeedConfig, jobType, start, end, includeTimeRange } =
         await this.createJob(
-          vis,
+          chartInfo,
           startString,
           endString,
           query,
@@ -228,7 +236,7 @@ export class QuickJobCreator {
   }
 
   async createJob(
-    vis: LensSavedObjectAttributes,
+    chartInfo: ChartInfo,
     startString: string,
     endString: string,
     query: Query,
@@ -237,7 +245,7 @@ export class QuickJobCreator {
     layerIndex: number | undefined
   ) {
     const { jobConfig, datafeedConfig, jobType } = await this.createADJobFromLensSavedObject(
-      vis,
+      chartInfo,
       query,
       filters,
       bucketSpan,
@@ -283,23 +291,20 @@ export class QuickJobCreator {
   }
 
   private async createADJobFromLensSavedObject(
-    vis: LensSavedObjectAttributes,
+    chartInfo: ChartInfo,
     query: Query,
     filters: Filter[],
     bucketSpan: string,
     layerIndex?: number
   ) {
-    const visualization = vis.state.visualization as { layers: XYDataLayerConfig[] };
-
-    const compatibleLayers = visualization.layers.filter(isCompatibleLayer);
+    const compatibleLayers = chartInfo.layers.filter(isCompatibleLayer);
 
     const selectedLayer =
-      layerIndex !== undefined ? visualization.layers[layerIndex] : compatibleLayers[0];
+      layerIndex !== undefined ? chartInfo.layers[layerIndex] : compatibleLayers[0];
 
-    const visExtractor = new VisualizationExtractor(this.dataViewClient);
+    const visExtractor = new VisualizationExtractor();
     const { fields, timeField, splitField, dataView } = await visExtractor.extractFields(
-      selectedLayer,
-      vis
+      selectedLayer
     );
 
     const jobConfig = createEmptyJob();
@@ -307,7 +312,7 @@ export class QuickJobCreator {
 
     const combinedFiltersAndQueries = this.combineQueriesAndFilters(
       { query, filters },
-      { query: vis.state.query, filters: vis.state.filters },
+      { query: chartInfo.query, filters: chartInfo.filters },
       dataView
     );
 
@@ -315,10 +320,10 @@ export class QuickJobCreator {
 
     jobConfig.analysis_config.detectors = createDetectors(fields, splitField);
 
-    jobConfig.data_description.time_field = timeField.sourceField;
+    jobConfig.data_description.time_field = timeField.operation.fields?.[0];
     jobConfig.analysis_config.bucket_span = bucketSpan;
-    if (splitField) {
-      jobConfig.analysis_config.influencers = [splitField.sourceField];
+    if (splitField && splitField.operation.fields) {
+      jobConfig.analysis_config.influencers = [splitField.operation.fields[0]];
     }
     const isSingleMetric = splitField === null && jobConfig.analysis_config.detectors.length === 1;
     const jobType = isSingleMetric ? JOB_TYPE.SINGLE_METRIC : JOB_TYPE.MULTI_METRIC;
