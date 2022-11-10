@@ -8,10 +8,30 @@ import styled from 'styled-components';
 import { EuiBasicTable } from '@elastic/eui';
 
 // @ts-expect-error TS2769
-export const BasicTableWithoutBorderBottom = styled(EuiBasicTable)`
+export const StyledBasicTable = styled(EuiBasicTable)`
   .euiTableRow {
     .euiTableRowCell {
       border-bottom: none !important;
+    }
+  }
+
+  .timelines__hoverActionButton {
+    opacity: 0;
+  }
+
+  .EntityAnalyticsTableHoverActions {
+    .hoverActions-active {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
+      }
+    }
+
+    &:hover {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
+      }
     }
   }
 `;

@@ -31,6 +31,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { ENTITY_ANALYTICS_ANOMALIES_PANEL } from '../anomalies';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import { FormattedCount } from '../../../../common/components/formatted_number';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${({ theme: { eui } }) => eui.euiColorDanger};
@@ -150,7 +151,7 @@ export const EntityAnalyticsHeader = () => {
   );
 
   const totalAnomalies = useMemo(
-    () => (areJobsEnabled ? sumBy('count', data) : '-'),
+    () => (areJobsEnabled ? <FormattedCount count={sumBy('count', data)} /> : '-'),
     [data, areJobsEnabled]
   );
 
@@ -165,14 +166,18 @@ export const EntityAnalyticsHeader = () => {
 
   return (
     <EuiPanel hasBorder paddingSize="l">
-      <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexGroup justifyContent="spaceAround" responsive={false}>
         {isPlatinumOrTrialLicense && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
               <EuiFlexItem className="eui-textCenter">
                 <StyledEuiTitle data-test-subj="critical_hosts_quantity" size="l">
                   <span>
-                    {hostsSeverityCount ? hostsSeverityCount[RiskSeverity.critical] : '-'}
+                    {hostsSeverityCount ? (
+                      <FormattedCount count={hostsSeverityCount[RiskSeverity.critical]} />
+                    ) : (
+                      '-'
+                    )}
                   </span>
                 </StyledEuiTitle>
               </EuiFlexItem>
@@ -190,11 +195,15 @@ export const EntityAnalyticsHeader = () => {
         )}
         {isPlatinumOrTrialLicense && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
               <EuiFlexItem className="eui-textCenter">
                 <StyledEuiTitle data-test-subj="critical_users_quantity" size="l">
                   <span>
-                    {usersSeverityCount ? usersSeverityCount[RiskSeverity.critical] : '-'}
+                    {usersSeverityCount ? (
+                      <FormattedCount count={usersSeverityCount[RiskSeverity.critical]} />
+                    ) : (
+                      '-'
+                    )}
                   </span>
                 </StyledEuiTitle>
               </EuiFlexItem>
@@ -212,7 +221,7 @@ export const EntityAnalyticsHeader = () => {
         )}
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             <EuiFlexItem className="eui-textCenter">
               <EuiTitle data-test-subj="anomalies_quantity" size="l">
                 <span>{totalAnomalies}</span>
