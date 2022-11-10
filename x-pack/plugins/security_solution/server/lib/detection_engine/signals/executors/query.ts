@@ -62,8 +62,12 @@ export const queryExecutor = async ({
       exceptionFilter: runOpts.exceptionFilter,
     });
 
+    const license = await firstValueFrom(licensing.license$);
+    const hasPlatinumLicense = license.hasAtLeast('platinum');
+    const hasGoldLicense = license.hasAtLeast('gold');
+
     const result =
-      ruleParams.alertSuppression?.groupBy != null
+      ruleParams.alertSuppression?.groupBy != null && hasPlatinumLicense
         ? await groupAndBulkCreate({
             runOpts,
             services,
@@ -93,9 +97,6 @@ export const queryExecutor = async ({
             })),
             state: {},
           };
-
-    const license = await firstValueFrom(licensing.license$);
-    const hasGoldLicense = license.hasAtLeast('gold');
 
     if (hasGoldLicense) {
       if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
