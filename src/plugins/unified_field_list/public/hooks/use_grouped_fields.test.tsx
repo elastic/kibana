@@ -45,13 +45,42 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     });
   });
 
+  it('should work correctly in loading state', async () => {
+    const props: GroupedFieldsParams<DataViewField> = {
+      dataViewId: dataView.id!,
+      allFields: null,
+      services: mockedServices,
+    };
+    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+      initialProps: props,
+    });
+
+    await waitForNextUpdate();
+
+    expect(result.current.fieldGroups).toMatchSnapshot();
+    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
+    expect(result.current.fieldsExistInIndex).toBe(false);
+    expect(result.current.scrollToTopResetCounter).toBeTruthy();
+
+    rerender({
+      ...props,
+      dataViewId: null, // for text-based queries
+      allFields: null,
+    });
+
+    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
+    expect(result.current.fieldsExistInIndex).toBe(true);
+    expect(result.current.scrollToTopResetCounter).toBeTruthy();
+  });
+
   it('should work correctly for no data', async () => {
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
-      initialProps: {
-        dataViewId: dataView.id!,
-        allFields: [],
-        services: mockedServices,
-      },
+    const props: GroupedFieldsParams<DataViewField> = {
+      dataViewId: dataView.id!,
+      allFields: [],
+      services: mockedServices,
+    };
+    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+      initialProps: props,
     });
 
     await waitForNextUpdate();
@@ -73,15 +102,27 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ]);
 
     expect(fieldGroups).toMatchSnapshot();
+    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(result.current.fieldsExistInIndex).toBe(false);
+
+    rerender({
+      ...props,
+      dataViewId: null, // for text-based queries
+      allFields: [],
+    });
+
+    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(result.current.fieldsExistInIndex).toBe(true);
   });
 
   it('should work correctly with fields', async () => {
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
-      initialProps: {
-        dataViewId: dataView.id!,
-        allFields,
-        services: mockedServices,
-      },
+    const props: GroupedFieldsParams<DataViewField> = {
+      dataViewId: dataView.id!,
+      allFields,
+      services: mockedServices,
+    };
+    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+      initialProps: props,
     });
 
     await waitForNextUpdate();
@@ -101,6 +142,18 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'EmptyFields-0',
       'MetaFields-3',
     ]);
+
+    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(result.current.fieldsExistInIndex).toBe(true);
+
+    rerender({
+      ...props,
+      dataViewId: null, // for text-based queries
+      allFields,
+    });
+
+    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(result.current.fieldsExistInIndex).toBe(true);
   });
 
   it('should work correctly when filtered', async () => {
@@ -266,6 +319,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'MetaFields-0',
     ]);
+
+    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(result.current.fieldsExistInIndex).toBe(true);
   });
 
   it('should work correctly when details are overwritten', async () => {
@@ -335,6 +391,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'MetaFields-3',
     ]);
 
+    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(result.current.fieldsExistInIndex).toBe(true);
+
     rerender({
       ...props,
       dataViewId: anotherDataView.id!,
@@ -357,6 +416,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'MetaFields-0',
     ]);
+
+    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
+    expect(result.current.fieldsExistInIndex).toBe(true);
   });
 
   it('should work correctly when popular fields limit is present', async () => {
@@ -432,7 +494,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ]);
   });
 
-  it('should work correctly and when custom selected fields are provided', async () => {
+  it('should work correctly when custom selected fields are provided', async () => {
     const customSortedFields = [
       allFieldsIncludingUnmapped[allFieldsIncludingUnmapped.length - 1],
       allFields[2],

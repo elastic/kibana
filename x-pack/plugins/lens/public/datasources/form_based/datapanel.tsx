@@ -279,8 +279,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     },
   });
   const fieldsExistenceReader = useExistingFieldsReader();
-  const fieldsExistenceStatus =
-    fieldsExistenceReader.getFieldsExistenceStatus(currentIndexPatternId);
 
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
@@ -347,7 +345,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [core.uiSettings]
   );
 
-  const { fieldGroups, scrollToTopResetCounter } = useGroupedFields<IndexPatternField>({
+  const fieldListGroupedProps = useGroupedFields<IndexPatternField>({
     dataViewId: currentIndexPatternId,
     allFields,
     services: {
@@ -610,12 +608,9 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         </EuiFlexItem>
         <EuiFlexItem>
           <FieldListGrouped<IndexPatternField>
-            fieldGroups={fieldGroups}
-            fieldsExistenceStatus={fieldsExistenceStatus}
-            fieldsExistInIndex={!!allFields.length}
+            {...fieldListGroupedProps}
             renderFieldItem={renderFieldItem}
             screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
-            scrollToTopResetCounter={scrollToTopResetCounter}
             data-test-subj="lnsIndexPattern"
           />
         </EuiFlexItem>

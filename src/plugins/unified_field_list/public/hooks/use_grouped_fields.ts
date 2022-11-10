@@ -17,16 +17,17 @@ import {
   type FieldsGroup,
   type FieldListItem,
   FieldsGroupNames,
+  ExistenceFetchStatus,
 } from '../types';
 import { type ExistingFieldsReader } from './use_existing_fields';
 
 export interface GroupedFieldsParams<T extends FieldListItem> {
   dataViewId: string | null; // `null` is for text-based queries
-  allFields: T[];
+  allFields: T[] | null; // `null` is for loading indicator
   services: {
     dataViews: DataViewsContract;
   };
-  fieldsExistenceReader?: ExistingFieldsReader;
+  fieldsExistenceReader?: ExistingFieldsReader; // use `undefined` for text-based queries
   isAffectedByGlobalFilter?: boolean;
   popularFieldsLimit?: number;
   sortedSelectedFields?: T[];
@@ -41,6 +42,8 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
 export interface GroupedFieldsResult<T extends FieldListItem> {
   fieldGroups: FieldListGroups<T>;
   scrollToTopResetCounter: number;
+  fieldsExistenceStatus: ExistenceFetchStatus;
+  fieldsExistInIndex: boolean;
 }
 
 export function useGroupedFields<T extends FieldListItem = DataViewField>({
@@ -301,12 +304,32 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     ) as FieldListGroups<T>;
   }, [unfilteredFieldGroups, onFilterField]);
 
+  const hasDataLoaded = Boolean(allFields);
+  const allFieldsLength = allFields?.length;
+
+  const fieldsExistInIndex = useMemo(() => {
+    return dataViewId ? Boolean(allFieldsLength) : true;
+  }, [dataViewId, allFieldsLength]);
+
+  const fieldsExistenceStatus = useMemo(() => {
+    if (!hasDataLoaded) {
+      return ExistenceFetchStatus.unknown; // to show loading indicator in the list
+    }
+    if (!dataViewId || !fieldsExistenceReader) {
+      // ex. for text-based queries
+      return ExistenceFetchStatus.succeeded;
+    }
+    return fieldsExistenceReader.getFieldsExistenceStatus(dataViewId);
+  }, [dataViewId, hasDataLoaded, fieldsExistenceReader]);
+
   return useMemo(
     () => ({
       fieldGroups,
       scrollToTopResetCounter,
+      fieldsExistInIndex,
+      fieldsExistenceStatus,
     }),
-    [fieldGroups, scrollToTopResetCounter]
+    [fieldGroups, scrollToTopResetCounter, fieldsExistInIndex, fieldsExistenceStatus]
   );
 }
 

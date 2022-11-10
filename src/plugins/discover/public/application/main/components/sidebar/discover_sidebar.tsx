@@ -20,7 +20,6 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import {
-  ExistenceFetchStatus,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
@@ -42,7 +41,6 @@ import { getUiActions } from '../../../../kibana_services';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../hooks/use_saved_search';
 
-const EMPTY_FIELD_LIST: DataViewField[] = [];
 const fieldSearchDescriptionId = htmlIdGenerator()();
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
@@ -247,10 +245,10 @@ export function DiscoverSidebarComponent({
       }
     }, []);
   const fieldsExistenceReader = useExistingFieldsReader();
-  const { fieldGroups, scrollToTopResetCounter } = useGroupedFields({
-    dataViewId: (!isPlainRecord && selectedDataView?.id) || null,
+  const fieldListGroupedProps = useGroupedFields({
+    dataViewId: (!isPlainRecord && selectedDataView?.id) || null, // passing `null` for text-based queries
     fieldsExistenceReader: !isPlainRecord ? fieldsExistenceReader : undefined,
-    allFields: allFields || EMPTY_FIELD_LIST,
+    allFields,
     popularFieldsLimit: !isPlainRecord ? popularFieldsLimit : 0,
     sortedSelectedFields: selectedFields,
     isAffectedByGlobalFilter: isGlobalFilterApplied,
@@ -350,17 +348,8 @@ export function DiscoverSidebarComponent({
         </EuiFlexItem>
         <EuiFlexItem>
           <FieldListGrouped
-            fieldGroups={fieldGroups}
-            fieldsExistenceStatus={
-              allFields
-                ? isPlainRecord || !selectedDataView.id
-                  ? ExistenceFetchStatus.succeeded
-                  : fieldsExistenceReader.getFieldsExistenceStatus(selectedDataView.id)
-                : ExistenceFetchStatus.unknown
-            }
+            {...fieldListGroupedProps}
             renderFieldItem={renderFieldItem}
-            fieldsExistInIndex={isPlainRecord ? true : Boolean(allFields?.length)}
-            scrollToTopResetCounter={scrollToTopResetCounter}
             screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
           />
         </EuiFlexItem>
