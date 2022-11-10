@@ -49,7 +49,7 @@ import {
   isFilterValid,
 } from './lib/filter_editor_utils';
 import { FiltersBuilder } from '../../filters_builder';
-import { FilterBadgeGroup } from '../../filter_badge';
+import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import { flattenFilters } from './lib/helpers';
 
 /** The default max-height of the Add/Edit Filter popover used to show "+n More" filters (e.g. `+4 More`) */
@@ -272,15 +272,17 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
   private renderFiltersBuilderEditor() {
     const { selectedIndexPattern, filters } = this.state;
+    const flattenedFilters = flattenFilters(filters);
+
     const shouldShowPreview =
       selectedIndexPattern &&
-      (filters.length > 1 ||
-        (filters.length === 1 &&
+      (flattenedFilters.length > 1 ||
+        (flattenedFilters.length === 1 &&
           isFilterValid(
             selectedIndexPattern,
-            getFieldFromFilter(filters[0] as FieldFilter, selectedIndexPattern),
-            getOperatorFromFilter(filters[0]),
-            getFilterParams(filters[0])
+            getFieldFromFilter(flattenedFilters[0] as FieldFilter, selectedIndexPattern),
+            getOperatorFromFilter(flattenedFilters[0]),
+            getFilterParams(flattenedFilters[0])
           )));
 
     return (
@@ -317,6 +319,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
               filters={filters}
               dataViews={this.props.indexPatterns}
               booleanRelation={BooleanRelation.AND}
+              shouldShowBrackets={false}
             />
           </EuiFormRow>
         ) : null}

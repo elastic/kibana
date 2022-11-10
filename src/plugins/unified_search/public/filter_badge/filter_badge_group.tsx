@@ -18,6 +18,7 @@ export interface FilterBadgeGroupProps {
   filters: Filter[];
   dataViews: DataView[];
   filterLabelStatus?: string;
+  shouldShowBrackets?: boolean;
   booleanRelation?: BooleanRelation;
 }
 
@@ -38,6 +39,7 @@ export function FilterBadgeGroup({
   dataViews,
   filterLabelStatus,
   booleanRelation,
+  shouldShowBrackets = true,
 }: FilterBadgeGroupProps) {
   return (
     <FilterBadgeErrorBoundary>
@@ -45,7 +47,7 @@ export function FilterBadgeGroup({
         <>
           <FilterExpressionBadge
             filter={filter}
-            shouldShowBrackets={arrayRef.length > 1}
+            shouldShowBrackets={shouldShowBrackets && (filter.meta.negate || arrayRef.length > 1)}
             dataViews={dataViews}
             filterLabelStatus={filterLabelStatus}
           />
