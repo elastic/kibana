@@ -393,8 +393,8 @@ describe('SLIClient', () => {
       it('calls ES with the lookback windows aggregations', async () => {
         const slo = createSLO({ budgeting_method: 'occurrences' });
         const lookbackWindows = [
-          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.h) },
-          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.m) },
+          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.Hour) },
+          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.Minute) },
         ];
         esClientMock.search.mockResolvedValueOnce({
           ...commonEsResponse,
@@ -478,13 +478,13 @@ describe('SLIClient', () => {
           objective: {
             target: 0.95,
             timeslice_target: 0.9,
-            timeslice_window: new Duration(10, DurationUnit.m),
+            timeslice_window: new Duration(10, DurationUnit.Minute),
           },
         });
 
         const lookbackWindows = [
-          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.h) },
-          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.m) },
+          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.Hour) },
+          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.Minute) },
         ];
         esClientMock.search.mockResolvedValueOnce({
           ...commonEsResponse,
