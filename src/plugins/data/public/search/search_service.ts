@@ -241,11 +241,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       onResponse: (request, response, options) => {
         if (!options.disableShardFailureWarning) {
           const { rawResponse } = response;
+
           handleWarnings({
             request: request.body,
             response: rawResponse,
             theme,
             sessionId: options.sessionId,
+            requestId: request.id,
           });
         }
         return response;
@@ -286,12 +288,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           if (!rawResponse) {
             return;
           }
-
           handleWarnings({
             request: request.json as SearchRequest,
             response: rawResponse,
             theme,
             callback,
+            requestId: request.id,
           });
         });
       },

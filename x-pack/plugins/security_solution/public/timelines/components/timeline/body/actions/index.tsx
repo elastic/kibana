@@ -8,14 +8,16 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { GuidedOnboardingTourStep } from '../../../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../../../common/components/top_n/helpers';
 import { useTourContext } from '../../../../../common/components/guided_onboarding_tour';
-import { SecurityStepId } from '../../../../../common/components/guided_onboarding_tour/tour_config';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../../../common/components/guided_onboarding_tour/tour_config';
 import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
@@ -65,7 +67,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   onEventDetailsPanelOpened,
   onRowSelected,
   onRuleChange,
-  refetch,
   showCheckboxes,
   showNotes,
   timelineId,
@@ -205,7 +206,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
     scopedActions,
   ]);
 
-  const { isTourShown, incrementStep } = useTourContext();
+  const { activeStep, isTourShown, incrementStep } = useTourContext();
 
   const isTourAnchor = useMemo(
     () =>
@@ -217,11 +218,15 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   const onExpandEvent = useCallback(() => {
-    if (isTourAnchor) {
+    if (
+      isTourAnchor &&
+      activeStep === AlertsCasesTourSteps.expandEvent &&
+      isTourShown(SecurityStepId.alertsCases)
+    ) {
       incrementStep(SecurityStepId.alertsCases);
     }
     onEventDetailsPanelOpened();
-  }, [incrementStep, isTourAnchor, onEventDetailsPanelOpened]);
+  }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
 
   return (
     <ActionsContainer>
@@ -244,8 +249,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
       )}
       <GuidedOnboardingTourStep
         isTourAnchor={isTourAnchor}
-        step={2}
-        stepId={SecurityStepId.alertsCases}
+        onClick={onExpandEvent}
+        step={AlertsCasesTourSteps.expandEvent}
+        tourId={SecurityStepId.alertsCases}
       >
         <div key="expand-event">
           <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
@@ -298,7 +304,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
           ecsRowData={ecsData}
           scopeId={timelineId}
           disabled={isContextMenuDisabled}
-          refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />
         {isDisabled === false ? (

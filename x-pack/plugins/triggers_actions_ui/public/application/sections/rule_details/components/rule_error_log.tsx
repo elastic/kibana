@@ -63,11 +63,13 @@ export type RuleErrorLogProps = {
   ruleId: string;
   runId?: string;
   refreshToken?: number;
+  spaceId?: string;
+  logFromDifferentSpace?: boolean;
   requestRefresh?: () => Promise<void>;
 } & Pick<RuleApis, 'loadActionErrorLog'>;
 
 export const RuleErrorLog = (props: RuleErrorLogProps) => {
-  const { ruleId, runId, loadActionErrorLog, refreshToken } = props;
+  const { ruleId, runId, loadActionErrorLog, refreshToken, spaceId, logFromDifferentSpace } = props;
 
   const { uiSettings, notifications } = useKibana().services;
 
@@ -138,6 +140,8 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
         page: pagination.pageIndex,
         perPage: pagination.pageSize,
         sort: formattedSort,
+        namespace: spaceId,
+        withAuth: logFromDifferentSpace,
       });
       setLogs(result.errors);
       setPagination({

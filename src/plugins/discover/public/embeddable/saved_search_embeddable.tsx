@@ -65,6 +65,8 @@ import { ADHOC_DATA_VIEW_CLICK_EVENT } from '../constants';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
+    savedSearchId?: string;
+    filters?: Filter[];
     settings?: DiscoverGridSettings;
     description?: string;
     sharedItemTitle?: string;
@@ -309,6 +311,8 @@ export class SavedSearchEmbeddable
 
     const props: SearchProps = {
       columns: this.savedSearch.columns,
+      savedSearchId: this.savedSearch.id,
+      filters: this.savedSearch.searchSource.getField('filter') as Filter[],
       dataView,
       isLoading: false,
       sort,
@@ -457,6 +461,8 @@ export class SavedSearchEmbeddable
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
+    searchProps.filters = this.savedSearch.searchSource.getField('filter') as Filter[];
+    searchProps.savedSearchId = this.savedSearch.id;
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
@@ -486,6 +492,7 @@ export class SavedSearchEmbeddable
     if (!this.searchProps) {
       throw new Error('Search props not defined');
     }
+    super.render(domNode as HTMLElement);
 
     this.node = domNode;
 
@@ -522,6 +529,10 @@ export class SavedSearchEmbeddable
         </I18nProvider>,
         domNode
       );
+      this.updateOutput({
+        ...this.getOutput(),
+        rendered: true,
+      });
       return;
     }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
@@ -541,12 +552,23 @@ export class SavedSearchEmbeddable
         </I18nProvider>,
         domNode
       );
-    }
 
-    this.updateOutput({
-      ...this.getOutput(),
-      rendered: true,
-    });
+      const hasError = this.getOutput().error !== undefined;
+
+      if (this.searchProps!.isLoading === false && props.searchProps.rows !== undefined) {
+        this.renderComplete.dispatchComplete();
+        this.updateOutput({
+          ...this.getOutput(),
+          rendered: true,
+        });
+      } else if (hasError) {
+        this.renderComplete.dispatchError();
+        this.updateOutput({
+          ...this.getOutput(),
+          rendered: true,
+        });
+      }
+    }
   }
 
   private async load(searchProps: SearchProps, forceFetch = false) {

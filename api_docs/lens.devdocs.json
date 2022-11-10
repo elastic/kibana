@@ -2556,6 +2556,20 @@
         "children": [
           {
             "parentPluginId": "lens",
+            "id": "def-public.LegacyMetricState.autoScaleMetricAlignment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoScaleMetricAlignment",
+            "description": [],
+            "signature": [
+              "\"left\" | \"right\" | \"center\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.LegacyMetricState.layerId",
             "type": "string",
             "tags": [],
@@ -6018,7 +6032,7 @@
             "tags": [],
             "label": "renderDimensionEditor",
             "description": [
-              "\nAdditional editor that gets rendered inside the dimension popover.\nThis can be used to configure dimension-specific options"
+              "\nAdditional editor that gets rendered inside the dimension popover in the \"appearance\" section.\nThis can be used to configure dimension-specific options"
             ],
             "signature": [
               "((domElement: Element, props: ",
@@ -6070,7 +6084,7 @@
             "tags": [],
             "label": "renderDimensionEditorAdditionalSection",
             "description": [
-              "\nAdditional editor that gets rendered inside the dimension popover.\nThis can be used to configure dimension-specific options"
+              "\nAdditional editor that gets rendered inside the dimension popover in an additional section below \"appearance\".\nThis can be used to configure dimension-specific options"
             ],
             "signature": [
               "((domElement: Element, props: ",
@@ -6099,6 +6113,58 @@
               {
                 "parentPluginId": "lens",
                 "id": "def-public.Visualization.renderDimensionEditorAdditionalSection.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationDimensionEditorProps",
+                  "<T>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.renderDimensionEditorDataExtra",
+            "type": "Function",
+            "tags": [],
+            "label": "renderDimensionEditorDataExtra",
+            "description": [
+              "\nAdditional editor that gets rendered inside the data section.\nThis can be used to configure dimension-specific options"
+            ],
+            "signature": [
+              "((domElement: Element, props: ",
+              "VisualizationDimensionEditorProps",
+              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.renderDimensionEditorDataExtra.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "domElement",
+                "description": [],
+                "signature": [
+                  "Element"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.renderDimensionEditorDataExtra.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -8857,7 +8923,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; }"
+          "<object>[] | undefined; showInspector?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx",
         "deprecated": false,
@@ -11522,45 +11588,6 @@
       },
       {
         "parentPluginId": "lens",
-        "id": "def-common.ExistingFields",
-        "type": "Interface",
-        "tags": [],
-        "label": "ExistingFields",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.ExistingFields.indexPatternTitle",
-            "type": "string",
-            "tags": [],
-            "label": "indexPatternTitle",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.ExistingFields.existingFieldNames",
-            "type": "Array",
-            "tags": [],
-            "label": "existingFieldNames",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
         "id": "def-common.LegacyMetricState",
         "type": "Interface",
         "tags": [],
@@ -11570,6 +11597,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.LegacyMetricState.autoScaleMetricAlignment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoScaleMetricAlignment",
+            "description": [],
+            "signature": [
+              "\"left\" | \"right\" | \"center\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "lens",
             "id": "def-common.LegacyMetricState.layerId",

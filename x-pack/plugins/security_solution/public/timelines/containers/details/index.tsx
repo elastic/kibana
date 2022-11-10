@@ -16,6 +16,7 @@ import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
+  SearchHit,
   TimelineEventsDetailsItem,
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
@@ -47,7 +48,7 @@ export const useTimelineEventsDetails = ({
 }: UseTimelineEventsDetailsProps): [
   boolean,
   EventsArgs['detailsData'],
-  object | undefined,
+  SearchHit | undefined,
   EventsArgs['ecs'],
   () => Promise<void>
 ] => {
@@ -67,7 +68,7 @@ export const useTimelineEventsDetails = ({
     useState<EventsArgs['detailsData']>(null);
   const [ecsData, setEcsData] = useState<EventsArgs['ecs']>(null);
 
-  const [rawEventData, setRawEventData] = useState<object | undefined>(undefined);
+  const [rawEventData, setRawEventData] = useState<SearchHit | undefined>(undefined);
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
       if (request == null || skip || isEmpty(request.eventId)) {

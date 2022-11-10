@@ -37,10 +37,12 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//lodash",
   "@npm//moment-timezone",
+  "@npm//chalk",
   "@npm//elastic-apm-node",
   "//packages/kbn-safer-lodash-set",
   "//packages/kbn-config-schema",
   "//packages/kbn-std",
+  "//packages/core/logging/core-logging-common-internal",
 ]
 
 TYPES_DEPS = [
@@ -48,12 +50,14 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//rxjs",
-  "@npm//@types/moment-timezone",
+  "@npm//moment-timezone",
   "@npm//elastic-apm-node",
+  "@npm//chalk",
   "//packages/kbn-safer-lodash-set:npm_module_types",
   "//packages/kbn-logging:npm_module_types",
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/core/base/core-base-server-internal:npm_module_types",
+  "//packages/core/logging/core-logging-common-internal:npm_module_types",
   "//packages/core/logging/core-logging-server:npm_module_types",
 ]
 

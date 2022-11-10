@@ -4,6 +4,7 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
+    "allowJs": true
   },
   "include": [
     "common/**/*",
