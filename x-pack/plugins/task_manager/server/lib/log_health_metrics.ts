@@ -31,9 +31,8 @@ export function logHealthMetrics(
   config: TaskManagerConfig,
   shouldRunTasks: boolean
 ) {
-  let logLevel: LogLevel = config.monitored_stats_health_verbose_log.log_as_info
-    ? LogLevel.Info
-    : LogLevel.Debug;
+  let logLevel: LogLevel =
+    config.monitored_stats_health_verbose_log.level === 'info' ? LogLevel.Info : LogLevel.Debug;
   const enabled = config.monitored_stats_health_verbose_log.enabled;
   const healthWithoutCapacity: MonitoredHealth = {
     ...monitoredHealth,
