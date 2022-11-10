@@ -60,6 +60,7 @@ describe('links', () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue({
       canIsolateHost: true,
       canUnIsolateHost: true,
+      canAccessEndpointManagement: true,
       canReadActionsLogManagement: true,
     });
 
@@ -75,6 +76,7 @@ describe('links', () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue({
         canIsolateHost: true,
         canUnIsolateHost: true,
+        canAccessEndpointManagement: true,
         canReadActionsLogManagement: false,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
@@ -95,6 +97,7 @@ describe('links', () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue({
         canIsolateHost: false,
         canUnIsolateHost: false,
+        canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
       });
 
@@ -112,9 +115,29 @@ describe('links', () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue({
         canIsolateHost: false,
         canUnIsolateHost: true,
+        canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
+
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+      expect(filteredLinks).toEqual({
+        ...links,
+        links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
+      });
+    });
+
+    it('should return all but HIE when HAS isolation permission AND has HIE entry but not superuser', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
+        canIsolateHost: false,
+        canUnIsolateHost: true,
+        canAccessEndpointManagement: false,
+        canReadActionsLogManagement: true,
+      });
+      fakeHttpServices.get.mockResolvedValue({ total: 1 });
 
       const filteredLinks = await getManagementFilteredLinks(
         coreMockStarted,
@@ -130,6 +153,7 @@ describe('links', () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue({
         canIsolateHost: false,
         canUnIsolateHost: true,
+        canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 1 });

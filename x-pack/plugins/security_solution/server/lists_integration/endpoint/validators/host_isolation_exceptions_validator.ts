@@ -60,18 +60,20 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     return item.listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID;
   }
 
-  protected async validateHasWritePrivilege(): Promise<void> {
-    return super.validateHasPrivilege('canWriteHostIsolationExceptions');
-  }
+  // TODO: 8.7 rbac
+  // protected async validateHasWritePrivilege(): Promise<void> {
+  //   return super.validateHasPrivilege('canWriteHostIsolationExceptions');
+  // }
 
-  protected async validateHasReadPrivilege(): Promise<void> {
-    return super.validateHasPrivilege('canReadHostIsolationExceptions');
-  }
+  // TODO: 8.7 rbac
+  // protected async validateHasReadPrivilege(): Promise<void> {
+  //   return super.validateHasPrivilege('canReadHostIsolationExceptions');
+  // }
 
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
-    await this.validateHasWritePrivilege();
+    // TODO add this to 8.7 rbac await this.validateHasWritePrivilege();
     await this.validateCanIsolateHosts();
     await this.validateHostIsolationData(item);
     await this.validateByPolicyItem(item);
@@ -84,7 +86,8 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
   ): Promise<UpdateExceptionListItemOptions> {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
-    await this.validateHasWritePrivilege();
+    // TODO add this to 8.7 rbac add
+    // await this.validateHasWritePrivilege();
     await this.validateCanIsolateHosts();
     await this.validateHostIsolationData(updatedItem);
     await this.validateByPolicyItem(updatedItem);
@@ -93,27 +96,39 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
   }
 
   async validatePreGetOneItem(): Promise<void> {
-    await this.validateHasReadPrivilege();
+    // TODO: for 8.7 rbac replace with
+    // await this.validateHasReadPrivilege();
+    await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreSummary(): Promise<void> {
-    await this.validateHasReadPrivilege();
+    // TODO: for 8.7 rbac replace with
+    // await this.validateHasReadPrivilege();
+    await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreDeleteItem(): Promise<void> {
-    await this.validateHasWritePrivilege();
+    // TODO: for 8.7 rbac replace with
+    // await this.validateHasWritePrivilege();
+    await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreExport(): Promise<void> {
-    await this.validateHasReadPrivilege();
+    // TODO: for 8.7 rbac replace with
+    // await this.validateHasReadPrivilege();
+    await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreSingleListFind(): Promise<void> {
-    await this.validateHasReadPrivilege();
+    // TODO: for 8.7 rbac replace with
+    // await this.validateHasReadPrivilege();
+    await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreMultiListFind(): Promise<void> {
-    await this.validateHasReadPrivilege();
+    // TODO: for 8.7 rbac replace with
+    // await this.validateHasReadPrivilege();
+    await this.validateCanManageEndpointArtifacts();
   }
 
   async validatePreImport(): Promise<void> {

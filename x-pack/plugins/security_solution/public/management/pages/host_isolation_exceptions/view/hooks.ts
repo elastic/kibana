@@ -30,8 +30,11 @@ export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   const { data: summary, isFetching, refetch: checkIfHasExceptions, isFetched } = apiQuery;
 
   const canSeeMenu = useMemo(() => {
-    return privileges.canIsolateHost || Boolean(summary?.total);
-  }, [privileges.canIsolateHost, summary?.total]);
+    return (
+      privileges.canAccessEndpointManagement &&
+      (privileges.canIsolateHost || Boolean(summary?.total))
+    );
+  }, [privileges.canIsolateHost, privileges.canAccessEndpointManagement, summary?.total]);
 
   useEffect(() => {
     if (!privileges.canIsolateHost && !privileges.loading && !isFetched && !isFetching) {

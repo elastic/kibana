@@ -31,6 +31,7 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
+import { useCanSeeHostIsolationExceptionsMenu } from './host_isolation_exceptions/view/hooks';
 import { PrivilegedRoute } from '../components/privileged_route';
 
 const EndpointTelemetry = () => (
@@ -86,6 +87,8 @@ export const ManagementContainer = memo(() => {
     canReadEndpointList,
   } = useUserPrivileges().endpointPrivileges;
 
+  const canSeeHostIsolationExceptionsPage = useCanSeeHostIsolationExceptionsMenu();
+
   // Lets wait until we can verify permissions
   if (loading) {
     return <EuiLoadingSpinner />;
@@ -113,9 +116,10 @@ export const ManagementContainer = memo(() => {
         component={EventFilterTelemetry}
         hasPrivilege={canReadEventFilters}
       />
-      <Route
+      <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
+        hasPrivilege={canSeeHostIsolationExceptionsPage}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}

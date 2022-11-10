@@ -36,16 +36,33 @@ describe('host isolation exceptions hooks', () => {
       useEndpointPrivilegesMock.mockReset();
     });
 
-    it('should return true if has the correct privileges', () => {
-      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: true });
+    it('should return TRUE if IS superuser AND canIsolateHost', () => {
+      useEndpointPrivilegesMock.mockReturnValue({
+        canIsolateHost: true,
+        canAccessEndpointManagement: true,
+      });
       const { result } = renderHook(() => useCanSeeHostIsolationExceptionsMenu(), {
         wrapper: TestProviders,
       });
       expect(result.current).toBe(true);
     });
 
-    it('should return false if does not have privileges and there are not existing host isolation items', () => {
-      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
+    it('should return FALSE if NOT superuser AND canIsolateHost', () => {
+      useEndpointPrivilegesMock.mockReturnValue({
+        canIsolateHost: true,
+        canAccessEndpointManagement: false,
+      });
+      const { result } = renderHook(() => useCanSeeHostIsolationExceptionsMenu(), {
+        wrapper: TestProviders,
+      });
+      expect(result.current).toBe(false);
+    });
+
+    it('should return FALSE if IS superuser AND and !canIsolateHost and there are no existing host isolation items', () => {
+      useEndpointPrivilegesMock.mockReturnValue({
+        canIsolateHost: false,
+        canAccessEndpointManagement: true,
+      });
       mockedApis.responseProvider.exceptionsSummary.mockReturnValue({
         total: 0,
         linux: 0,
@@ -58,8 +75,11 @@ describe('host isolation exceptions hooks', () => {
       expect(result.current).toBe(false);
     });
 
-    it('should return true if does not have privileges and there are existing host isolation items', async () => {
-      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
+    it('should return TRUE if IS superuser AND and !canIsolateHost and there are existing host isolation items', async () => {
+      useEndpointPrivilegesMock.mockReturnValue({
+        canIsolateHost: false,
+        canAccessEndpointManagement: true,
+      });
       const { result, waitForNextUpdate } = renderHook(
         () => useCanSeeHostIsolationExceptionsMenu(),
         {
