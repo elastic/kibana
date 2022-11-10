@@ -444,7 +444,11 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldListItem(field: string) {
-    return await this.testSubjects.click(`field-${field}`);
+    await this.testSubjects.click(`field-${field}`);
+
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.find.byCssSelector('[data-popover-open="true"]'));
+    });
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {

@@ -58,6 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
       );
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('global discover all privileges', () => {
@@ -507,6 +508,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await kibanaServer.uiSettings.unset('defaultIndex');
         await esSupertest
           .post('/_aliases')
           .send({
