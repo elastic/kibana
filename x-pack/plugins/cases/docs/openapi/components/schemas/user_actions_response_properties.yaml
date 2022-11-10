@@ -10,6 +10,7 @@ properties:
     example: 22df07d0-03b1-11ed-920c-974bfa104448
   comment_id:
     type: string
+    nullable: true
     example: 578608d0-03b1-11ed-920c-974bfa104448
   created_at:
     type: string
@@ -27,6 +28,7 @@ properties:
       - $ref: 'payload_assignees.yaml'
       - $ref: 'payload_connector.yaml'
       - $ref: 'payload_create_case.yaml'
+      - $ref: 'payload_delete.yaml'
       - $ref: 'payload_description.yaml'
       - $ref: 'payload_pushed.yaml'
       - $ref: 'payload_settings.yaml'
@@ -35,6 +37,5 @@ properties:
       - $ref: 'payload_tags.yaml'
       - $ref: 'payload_title.yaml'
       - $ref: 'payload_user_comment.yaml'
-    nullable: true
-  type: 
+  type:
     $ref: 'action_types.yaml'
