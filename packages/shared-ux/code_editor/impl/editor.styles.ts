@@ -11,20 +11,20 @@ import { css } from '@emotion/react';
 
 const { euiTheme } = useEuiTheme();
 
-export const CodeEditorMonacoStyles = () => css`
+export const codeEditorMonacoStyles = () => css`
    {
     animation: none !important; // Removes textarea EUI blue underline animation from EUI
   }
 `;
 
-export const CodeEditorStyles = () => css`
+export const codeEditorStyles = () => css`
    {
     position: relative;
     height: 100%;
   }
 `;
 
-export const CodeEditorControlsStyles = () => css`
+export const codeEditorControlsStyles = () => css`
    {
     top: ${euiTheme.size.xs};
     right: ${euiTheme.base};
@@ -33,7 +33,7 @@ export const CodeEditorControlsStyles = () => css`
   }
 `;
 
-export const CodeEditorFullScreenStyles = () => css`
+export const codeEditorFullScreenStyles = () => css`
    {
     position: absolute;
     left: 0;
@@ -45,7 +45,7 @@ export const CodeEditorFullScreenStyles = () => css`
   }
 `;
 
-export const CodeEditorPlaceholderStyles = () => css`
+export const codeEditorPlaceholderStyles = () => css`
    {
     color: ${euiTheme.colors.subduedText};
     width: max-content;
@@ -53,7 +53,7 @@ export const CodeEditorPlaceholderStyles = () => css`
   }
 `;
 
-export const CodeEditorKeyboardHintStyles = () => css`
+export const codeEditorKeyboardHintStyles = () => css`
    {
     position: absolute;
     top: 0;

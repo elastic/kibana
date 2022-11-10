@@ -8,9 +8,6 @@
 import { registerLanguage } from '@kbn/monaco';
 import { CssLang, HandlebarsLang, MarkdownLang, YamlLang, HJson } from './languages';
 
-// const LANG =  <Lang, 'css' | 'handlebars' | 'markdown' | 'hjson' | 'markdown' | 'yaml'>;
-// const Lang: LangModuleType = { ID: LANG, lexerRules, languageConfiguration };
-
 registerLanguage(CssLang);
 registerLanguage(HandlebarsLang);
 registerLanguage(MarkdownLang);

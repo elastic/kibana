@@ -71,7 +71,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/react",
   "@npm//@elastic/eui",
-  "@npm//@types/react-resize-detector:npm_module_types",
+  # "@npm//@types/react-resize-detector:npm_module_types",
   "//packages/kbn-monaco:npm_module_types",
   "//packages/kbn-ambient-ui-types",
   "@npm//@types/classnames",

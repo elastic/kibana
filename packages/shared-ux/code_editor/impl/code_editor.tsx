@@ -21,14 +21,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import classNames from 'classnames';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
 import { createPlaceholderWidget } from './placeholder_widget';
+import { codeEditorKeyboardHintStyles, codeEditorStyles } from './editor.styles';
 
 export interface Props {
   /** Width of editor. Defaults to 100%. */
@@ -138,7 +139,7 @@ export const CodeEditor: React.FC<Props> = ({
   hoverProvider,
   placeholder,
   languageConfiguration,
-  'aria-label': ariaLabel = i18n.translate('kibana-react.kibanaCodeEditor.ariaLabel', {
+  'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
   }),
   isCopyable = false,
@@ -169,9 +170,10 @@ export const CodeEditor: React.FC<Props> = ({
 
   const [isHintActive, setIsHintActive] = useState(true);
 
-  const promptClasses = classNames('kibanaCodeEditor__keyboardHint', {
-    'kibanaCodeEditor__keyboardHint--isInactive': !isHintActive,
-  });
+  const defaultStyles = codeEditorStyles();
+  const hintStyles = codeEditorKeyboardHintStyles();
+  const styles = !isHintActive ? defaultStyles : {defaultStyles, hintStyles};
+
 
   const _updateDimensions = useCallback(() => {
     _editor.current?.layout();
@@ -227,20 +229,20 @@ export const CodeEditor: React.FC<Props> = ({
   const renderPrompt = useCallback(() => {
     const enterKey = (
       <strong>
-        {i18n.translate('kibana-react.kibanaCodeEditor.enterKeyLabel', {
+        {i18n.translate('sharedUXPackages.codeEditor.enterKeyLabel', {
           defaultMessage: 'Enter',
           description:
-            'The name used for the Enter key on keyword. Will be {key} in kibana-react.kibanaCodeEditor.startEditing(ReadOnly).',
+            'The name used for the Enter key on keyword. Will be {key} in sharedUXPackages.codeEditor.startEditing(ReadOnly).',
         })}
       </strong>
     );
 
     const escapeKey = (
       <strong>
-        {i18n.translate('kibana-react.kibanaCodeEditor.escapeKeyLabel', {
+        {i18n.translate('sharedUXPackages.codeEditor.escapeKeyLabel', {
           defaultMessage: 'Esc',
           description:
-            'The label of the Escape key as printed on the keyboard. Will be {key} inside kibana-react.kibanaCodeEditor.stopEditing(ReadOnly).',
+            'The label of the Escape key as printed on the keyboard. Will be {key} inside sharedUXPackages.codeEditor.stopEditing(ReadOnly).',
         })}
       </strong>
     );
@@ -253,13 +255,13 @@ export const CodeEditor: React.FC<Props> = ({
             <p>
               {isReadOnly ? (
                 <FormattedMessage
-                  id="kibana-react.kibanaCodeEditor.startEditingReadOnly"
+                  id="sharedUXPackages.codeEditor.startEditingReadOnly"
                   defaultMessage="Press {key} to start interacting with the code."
                   values={{ key: enterKey }}
                 />
               ) : (
                 <FormattedMessage
-                  id="kibana-react.kibanaCodeEditor.startEditing"
+                  id="sharedUXPackages.codeEditor.startEditing"
                   defaultMessage="Press {key} to start editing."
                   values={{ key: enterKey }}
                 />
@@ -268,13 +270,13 @@ export const CodeEditor: React.FC<Props> = ({
             <p>
               {isReadOnly ? (
                 <FormattedMessage
-                  id="kibana-react.kibanaCodeEditor.stopEditingReadOnly"
+                  id="sharedUXPackages.codeEditor.stopEditingReadOnly"
                   defaultMessage="Press {key} to stop interacting with the code."
                   values={{ key: escapeKey }}
                 />
               ) : (
                 <FormattedMessage
-                  id="kibana-react.kibanaCodeEditor.stopEditing"
+                  id="sharedUXPackages.codeEditor.stopEditing"
                   defaultMessage="Press {key} to stop editing."
                   values={{ key: escapeKey }}
                 />
@@ -284,7 +286,7 @@ export const CodeEditor: React.FC<Props> = ({
         }
       >
         <div
-          className={promptClasses}
+          css={styles}
           id={htmlIdGenerator('codeEditor')()}
           ref={editorHint}
           tabIndex={0}
@@ -296,7 +298,7 @@ export const CodeEditor: React.FC<Props> = ({
         />
       </EuiToolTip>
     );
-  }, [onKeyDownHint, promptClasses, startEditing]);
+  }, [onKeyDownHint, startEditing]);
 
   const _editorWillMount = useCallback(
     (__monaco: unknown) => {
