@@ -207,7 +207,7 @@ Add goal and single value visualizations to your dashboard to answer the followi
 * How many flights have been delayed?
 
 [discrete]
-[[components-of-a-bar-chart]]
+[[components-of-goal-and-signle-value-visualizations]]
 ==== Components of goal and single value visualizations
 
 All goal and single value visualizations include the same set of components for visualizing your data. 
