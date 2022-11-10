@@ -33,7 +33,7 @@ describe('APIKeysGridPage', () => {
   // since we are using EuiErrorBoundary and react will console.error any errors
   const consoleWarnMock = jest.spyOn(console, 'error').mockImplementation();
 
-  let coreStart: any;
+  let coreStart: ReturnType<typeof coreMock.createStart>;
   const theme$ = themeServiceMock.createTheme$();
   const apiClientMock = apiKeysAPIClientMock.create();
   const { authc } = securityMock.createSetup();
