@@ -8,15 +8,29 @@
 import React, { useMemo } from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import type { ResponseActionValidatorRef } from '../response_actions_form';
-import type { ArrayItem } from '../../../shared_imports';
+import type { ArrayItem, ValidationFunc } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
 import { NOT_AVAILABLE, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
+import { UseField } from '../../../shared_imports';
 
 interface IProps {
   item: ArrayItem;
   formRef: React.RefObject<ResponseActionValidatorRef>;
 }
+
+const emptyParamsValidator = (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
+  const [{ path }] = args;
+
+  return {
+    code: 'ERR_FIELD_MISSING',
+    path,
+    message: '**ResponseActions:**\n Osquery Response Action is not available.\n ',
+  };
+};
+
+const GhostFormField = () => <></>;
 
 export const OsqueryResponseAction = React.memo((props: IProps) => {
   const { osquery, application } = useKibana().services;
@@ -24,9 +38,10 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
     () => osquery?.OsqueryResponseActionTypeForm,
     [osquery?.OsqueryResponseActionTypeForm]
   );
+  const isMounted = useIsMounted();
 
   if (osquery) {
-    const { disabled, permissionDenied } = osquery?.fetchInstallationStatus();
+    const { disabled, permissionDenied } = osquery.fetchInstallationStatus();
     const disabledOsqueryPermission = !(
       application?.capabilities?.osquery?.writeLiveQueries ||
       (application?.capabilities?.osquery?.runSavedQueries &&
@@ -37,6 +52,17 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
     if (permissionDenied || disabledOsqueryPermission) {
       return (
         <>
+          <UseField
+            path={`${props.item.path}.params`}
+            component={GhostFormField}
+            config={{
+              validations: [
+                {
+                  validator: emptyParamsValidator,
+                },
+              ],
+            }}
+          />
           <EuiEmptyPrompt
             title={<h2>{PERMISSION_DENIED}</h2>}
             titleSize="xs"
@@ -61,15 +87,28 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
 
     if (disabled) {
       return (
-        <EuiEmptyPrompt
-          iconType="logoOsquery"
-          title={<h2>{SHORT_EMPTY_TITLE}</h2>}
-          titleSize="xs"
-          body={<p>{NOT_AVAILABLE}</p>}
-        />
+        <>
+          <UseField
+            path={`${props.item.path}.params`}
+            component={GhostFormField}
+            config={{
+              validations: [
+                {
+                  validator: emptyParamsValidator,
+                },
+              ],
+            }}
+          />
+          <EuiEmptyPrompt
+            iconType="logoOsquery"
+            title={<h2>{SHORT_EMPTY_TITLE}</h2>}
+            titleSize="xs"
+            body={<p>{NOT_AVAILABLE}</p>}
+          />
+        </>
       );
     }
-    if (OsqueryForm) {
+    if (isMounted() && OsqueryForm) {
       return <OsqueryForm {...props} />;
     }
   }
