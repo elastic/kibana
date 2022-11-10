@@ -32,7 +32,6 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
     return null;
   }
 
-
   return (
     <>
       <ExploratoryViewEmbeddable

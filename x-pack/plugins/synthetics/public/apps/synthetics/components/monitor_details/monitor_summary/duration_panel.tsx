@@ -31,7 +31,6 @@ export const DurationPanel = (props: DurationPanelProps) => {
     return null;
   }
 
-
   return (
     <ExploratoryViewEmbeddable
       customHeight="70px"

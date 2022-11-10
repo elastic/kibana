@@ -33,7 +33,6 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
     return null;
   }
 
-
   return (
     <ExploratoryViewEmbeddable
       customHeight="70px"
