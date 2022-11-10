@@ -83,7 +83,7 @@ const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, toolti
 function filterChartableItems(items: estypes.SearchHit[], resultsField?: string) {
   return (
     items
-      ?.map((d) =>
+      .map((d) =>
         getProcessedFields(d.fields ?? {}, (key: string) =>
           key.startsWith(`${resultsField}.feature_importance`)
         )
@@ -458,7 +458,25 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             </>
           )}
 
-          {splom.items.length > 0 && <VegaChart vegaSpec={vegaSpec} />}
+          {splom.items.length > 0 && (
+            <>
+              <VegaChart vegaSpec={vegaSpec} />
+              {splom.backgroundItems.length ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiFormRow
+                    fullWidth
+                    helpText={i18n.translate('xpack.ml.splom.backgroundLayerHelpText', {
+                      defaultMessage:
+                        'The portion of the data not reflecting the current filter is presented in a blurred gray.',
+                    })}
+                  >
+                    <></>
+                  </EuiFormRow>
+                </>
+              ) : null}
+            </>
+          )}
         </div>
       )}
     </>
