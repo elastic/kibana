@@ -16,9 +16,11 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LoadWhenInView } from '@kbn/observability-plugin/public';
 
 import { useEarliestStartDate } from '../hooks/use_earliest_start_data';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
+import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { DurationSparklines } from './duration_sparklines';
 import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
@@ -27,7 +29,7 @@ import { DurationPanel } from './duration_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
 import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
-import { TestRunsTable } from './test_runs_table';
+import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorErrorsCount } from './monitor_errors_count';
 
 export const MonitorSummary = () => {
@@ -44,15 +46,10 @@ export const MonitorSummary = () => {
     <>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-            <EuiTitle size="xs">
-              <h3>{MONITOR_DETAILS_LABEL}</h3>
-            </EuiTitle>
-            <MonitorDetailsPanel />
-          </EuiPanel>
+          <MonitorDetailsPanel />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel hasShadow={false} hasBorder paddingSize="m" css={{ height: 158 }}>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="m" css={{ height: 120 }}>
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
@@ -109,8 +106,13 @@ export const MonitorSummary = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {/* <EuiSpacer size="l" /> */}
-      {/* <EuiPanel style={{ height: 100 }}>/!* TODO: Add status panel*!/</EuiPanel> */}
+      <EuiSpacer size="m" />
+      <MonitorStatusPanel
+        from={'now-24h'}
+        to={'now'}
+        brushable={false}
+        showViewHistoryButton={true}
+      />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
@@ -121,14 +123,12 @@ export const MonitorSummary = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <TestRunsTable paginable={false} from={from} to={to} />
+      <LoadWhenInView placeholderTitle={LAST_10_TEST_RUNS}>
+        <TestRunsTable paginable={false} from={from} to={to} />
+      </LoadWhenInView>
     </>
   );
 };
-
-const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails', {
-  defaultMessage: 'Monitor details',
-});
 
 const SUMMARY_LABEL = i18n.translate('xpack.synthetics.detailsPanel.summary', {
   defaultMessage: 'Summary',

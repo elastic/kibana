@@ -51,7 +51,7 @@ describe('FilterValueButton', function () {
         expect(screen.getByText('Not Chrome')).toBeInTheDocument();
         expect(screen.getByTitle('Not Chrome')).toBeInTheDocument();
         const btn = screen.getByRole('button');
-        expect(btn.classList).toContain('euiButtonEmpty--danger');
+        expect(btn.classList[4]).toContain('empty-danger');
       });
     });
 
