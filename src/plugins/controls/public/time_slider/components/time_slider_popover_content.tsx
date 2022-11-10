@@ -15,6 +15,7 @@ interface Props {
   value: [number, number];
   onChange: (value?: [number, number]) => void;
   onClear: () => void;
+  stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
@@ -42,7 +43,7 @@ export function TimeSliderPopoverContent(props: Props) {
           showTicks={true}
           min={props.timeRangeMin}
           max={props.timeRangeMax}
-          step={1}
+          step={props.stepSize}
           ticks={props.ticks}
           isDraggable
         />

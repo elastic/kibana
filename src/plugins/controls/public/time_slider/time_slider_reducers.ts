@@ -20,8 +20,9 @@ export const timeSliderReducers = {
   },
   setTimeRangeBounds: (
     state: WritableDraft<TimeSliderReduxState>,
-    action: PayloadAction<{ timeRangeBounds: [number, number]; ticks: EuiRangeTick[] }>
+    action: PayloadAction<{ stepSize: number, timeRangeBounds: [number, number]; ticks: EuiRangeTick[] }>
   ) => {
+    state.componentState.stepSize = action.payload.stepSize;
     state.componentState.ticks = action.payload.ticks;
     state.componentState.timeRangeBounds = action.payload.timeRangeBounds;
   },

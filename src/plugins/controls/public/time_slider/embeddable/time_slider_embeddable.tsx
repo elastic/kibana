@@ -25,7 +25,7 @@ import { ControlGroupContainer } from '../../control_group/embeddable/control_gr
 import { TimeSlider, TimeSliderPrepend } from '../components';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
-import { getMomentTimezone, getTicks, FROM_INDEX, TO_INDEX } from '../time_utils';
+import { getMomentTimezone, getStepSize, getTicks, FROM_INDEX, TO_INDEX, roundDownToNextStepSizeFactor, roundUpToNextStepSizeFactor } from '../time_utils';
 
 export class TimeSliderControlEmbeddable extends Embeddable<
   TimeSliderControlEmbeddableInput,
@@ -67,6 +67,8 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const timeRangeBounds = this.timeRangeToBounds(
       input.timeRange ? input.timeRange : getDefaultTimeRange()
     );
+    const ticks = getTicks(timeRangeBounds[FROM_INDEX], timeRangeBounds[TO_INDEX], this.getTimezone());
+    const stepSize = getStepSize(ticks);
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       TimeSliderReduxState,
       typeof timeSliderReducers
@@ -75,7 +77,8 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       reducers: timeSliderReducers,
       initialComponentState: {
         isOpen: false,
-        ticks: getTicks(timeRangeBounds[FROM_INDEX], timeRangeBounds[TO_INDEX], this.getTimezone()),
+        stepSize,
+        ticks,
         timeRangeBounds,
       },
     });
@@ -118,9 +121,11 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const nextBounds = this.timeRangeToBounds(input.timeRange);
     const { actions, dispatch, getState } = this.reduxEmbeddableTools;
     if (!_.isEqual(nextBounds, getState().componentState.timeRangeBounds)) {
+      const ticks = getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone());
       dispatch(
         actions.setTimeRangeBounds({
-          ticks: getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone()),
+          stepSize: getStepSize(ticks),
+          ticks,
           timeRangeBounds: nextBounds,
         })
       );
@@ -130,6 +135,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
   private syncWithTimeRange() {
     const { actions, dispatch, getState } = this.reduxEmbeddableTools;
+    const stepSize = getState().componentState.stepSize;
     const timesliceStartAsPercentageOfTimeRange =
       getState().explicitInput.timesliceStartAsPercentageOfTimeRange;
     const timesliceEndAsPercentageOfTimeRange =
@@ -140,9 +146,11 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     ) {
       const timeRangeBounds = getState().componentState.timeRangeBounds;
       const timeRange = timeRangeBounds[TO_INDEX] - timeRangeBounds[FROM_INDEX];
+      const from = timeRangeBounds[FROM_INDEX] + timesliceStartAsPercentageOfTimeRange * timeRange;
+      const to = timeRangeBounds[FROM_INDEX] + timesliceEndAsPercentageOfTimeRange * timeRange;
       const value = [
-        timeRangeBounds[FROM_INDEX] + timesliceStartAsPercentageOfTimeRange * timeRange,
-        timeRangeBounds[FROM_INDEX] + timesliceEndAsPercentageOfTimeRange * timeRange,
+        roundDownToNextStepSizeFactor(from, stepSize),
+        roundUpToNextStepSizeFactor(to, stepSize),
       ] as [number, number];
       dispatch(actions.publishValue({ value }));
       dispatch(actions.setValue({ value }));

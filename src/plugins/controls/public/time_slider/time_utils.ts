@@ -50,7 +50,7 @@ function getScaledDateFormat(interval: number): string {
 
 export function getInterval(min: number, max: number, steps = MAX_TICKS): number {
   const duration = max - min;
-  let interval = calcAutoIntervalNear(steps, duration).asMilliseconds();
+  let interval = calcAutoIntervalNear(MAX_TICKS, duration).asMilliseconds();
   // Sometimes auto interval is not quite right and returns 2X, 3X, 1/2X, or 1/3X  requested ticks
   const actualSteps = duration / interval;
   if (actualSteps > MAX_TICKS) {
@@ -71,7 +71,7 @@ export function getTicks(min: number, max: number, timezone: string): EuiRangeTi
 
   let tick = Math.ceil(min / interval) * interval;
   const ticks: EuiRangeTick[] = [];
-  while (tick < max) {
+  while (tick <= max) {
     ticks.push({
       value: tick,
       label: moment.tz(tick, getMomentTimezone(timezone)).format(format),
@@ -80,4 +80,27 @@ export function getTicks(min: number, max: number, timezone: string): EuiRangeTi
   }
 
   return ticks;
+}
+
+export function getStepSize(ticks: EuiRangeTick[]) {
+  if (ticks.length < 2) {
+    return 1;
+  }
+  
+  const tickRange = ticks[1].value - ticks[0].value;
+  return calcAutoIntervalNear(5, tickRange).asMilliseconds();
+}
+
+export function roundDownToNextStepSizeFactor(value: number, stepSize: number) {
+  const remainder = value % stepSize;
+  return remainder === 0
+    ? value
+    : value - remainder;
+}
+
+export function roundUpToNextStepSizeFactor(value: number, stepSize: number) {
+  const remainder = value % stepSize;
+  return remainder === 0
+    ? value
+    : value + (stepSize - remainder);
 }
