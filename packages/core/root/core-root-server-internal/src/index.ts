@@ -6,3 +6,6 @@
  * Side Public License, v 1.
  */
 
+export { Server } from './server';
+export { bootstrap } from './bootstrap';
+export { Root } from './root';
