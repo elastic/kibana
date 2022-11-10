@@ -250,18 +250,23 @@ export const getManagementFilteredLinks = async (
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const { canReadActionsLogManagement, canIsolateHost, canUnIsolateHost } = fleetAuthz
-      ? calculateEndpointAuthz(
-          licenseService,
-          fleetAuthz,
-          currentUserResponse.roles,
-          endpointRbacEnabled || endpointRbacV1Enabled,
-          endpointPermissions
-        )
-      : getEndpointAuthzInitialState();
+    const { canReadEndpointList, canReadActionsLogManagement, canIsolateHost, canUnIsolateHost } =
+      fleetAuthz
+        ? calculateEndpointAuthz(
+            licenseService,
+            fleetAuthz,
+            currentUserResponse.roles,
+            endpointRbacEnabled || endpointRbacV1Enabled,
+            endpointPermissions
+          )
+        : getEndpointAuthzInitialState();
 
     if (!canReadActionsLogManagement) {
       linksToExclude.push(SecurityPageName.responseActionsHistory);
+    }
+
+    if (!canReadEndpointList) {
+      linksToExclude.push(SecurityPageName.endpoints);
     }
 
     if (!canIsolateHost && canUnIsolateHost) {

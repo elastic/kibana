@@ -31,7 +31,6 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
 } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -70,6 +69,8 @@ import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/const
 import type { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -132,6 +133,7 @@ export const EndpointList = () => {
     endpointsTotalError,
     metadataTransformStats,
   } = useEndpointSelector(selector);
+  const { canReadEndpointList } = useUserPrivileges().endpointPrivileges;
   const { search } = useFormatUrl(SecurityPageName.administration);
   const { search: searchParams } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -142,6 +144,11 @@ export const EndpointList = () => {
   const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
+
+  const fleetAuthz = services.fleet?.authz;
+  const fleetAuthzForCurrentUser =
+    fleetAuthz.packagePrivileges?.endpoint?.actions.readEndpointList.executePackageAction ?? false;
+  console.log(canReadEndpointList, fleetAuthzForCurrentUser);
 
   const backLinkOptions = useMemo<BackToExternalAppButtonProps>(() => {
     if (routeState?.backLink) {
@@ -581,6 +588,7 @@ export const EndpointList = () => {
     handleSelectableOnChange,
     selectionOptions,
     handleCreatePolicyClick,
+    canReadEndpointList,
   ]);
 
   const hasListData = listData && listData.length > 0;
@@ -699,6 +707,7 @@ export const EndpointList = () => {
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
+        {canReadEndpointList && !fleetAuthzForCurrentUser && <EuiText>{'hi'}</EuiText>}
         {areEndpointsEnrolling && !hasErrorFindingTotals && (
           <>
             <EuiCallOut size="s" data-test-subj="endpointsEnrollingNotification">
