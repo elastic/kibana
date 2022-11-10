@@ -18,13 +18,14 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
 import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../services/package_prerelease';
 
 import { getRegistryDataStreamAssetBaseName } from '../../../../../../../../../common/services';
-
+import type { ExperimentalIndexingFeature } from '../../../../../../../../../common/types/models/epm';
 import type {
   NewPackagePolicy,
   NewPackagePolicyInputStream,
@@ -119,6 +120,59 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
         ).length,
       [advancedVars, inputStreamValidationResults?.vars]
     );
+
+    const dataStreamInfo = packageInfo.data_streams?.find(
+      (ds) => ds.dataset === packagePolicyInputStream.data_stream.dataset
+    );
+
+    const isFeatureEnabled = (feature: ExperimentalIndexingFeature) =>
+      packagePolicy.package?.experimental_data_stream_features?.some(
+        ({ data_stream: dataStream, features }) =>
+          dataStream === getRegistryDataStreamAssetBaseName(packagePolicyInputStream.data_stream) &&
+          features[feature]
+      ) ?? false;
+
+    const newExperimentalIndexingFeature = {
+      synthetic_source: isFeatureEnabled('synthetic_source'),
+      TSDB: isFeatureEnabled('TSDB') || dataStreamInfo?.elasticsearch?.index_mode === 'time_series',
+    };
+
+    const onIndexingSettingChange = (
+      features: Partial<Record<ExperimentalIndexingFeature, boolean>>
+    ) => {
+      if (!packagePolicy.package) {
+        return;
+      }
+
+      const newExperimentalDataStreamFeatures = [
+        ...(packagePolicy.package.experimental_data_stream_features ?? []),
+      ];
+
+      const dataStream = getRegistryDataStreamAssetBaseName(packagePolicyInputStream.data_stream);
+
+      const existingSettingRecord = newExperimentalDataStreamFeatures.find(
+        (x) => x.data_stream === dataStream
+      );
+
+      if (existingSettingRecord) {
+        existingSettingRecord.features = {
+          ...existingSettingRecord.features,
+          ...features,
+        };
+      } else {
+        newExperimentalDataStreamFeatures.push({
+          data_stream: dataStream,
+          features: { ...newExperimentalIndexingFeature, ...features },
+        });
+      }
+
+      updatePackagePolicy({
+        package: {
+          ...packagePolicy.package,
+          experimental_data_stream_features: newExperimentalDataStreamFeatures,
+        },
+      });
+    };
 
     return (
       <>
@@ -311,15 +365,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         <EuiSpacer size="s" />
                         <EuiFlexItem>
                           <EuiSwitch
-                            checked={
-                              packagePolicy.package?.experimental_data_stream_features?.some(
-                                ({ data_stream: dataStream, features }) =>
-                                  dataStream ===
-                                    getRegistryDataStreamAssetBaseName(
-                                      packagePolicyInputStream.data_stream
-                                    ) && features.synthetic_source
-                              ) ?? false
-                            }
+                            checked={newExperimentalIndexingFeature.synthetic_source}
                             label={
                               <FormattedMessage
                                 id="xpack.fleet.createPackagePolicy.experimentalFeatures.syntheticSourceLabel"
@@ -327,42 +373,37 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               />
                             }
                             onChange={(e) => {
-                              if (!packagePolicy.package) {
-                                return;
-                              }
-
-                              const newExperimentalDataStreamFeatures = [
-                                ...(packagePolicy.package.experimental_data_stream_features ?? []),
-                              ];
-
-                              const dataStream = getRegistryDataStreamAssetBaseName(
-                                packagePolicyInputStream.data_stream
-                              );
-
-                              const existingSettingRecord = newExperimentalDataStreamFeatures.find(
-                                (x) => x.data_stream === dataStream
-                              );
-
-                              if (existingSettingRecord) {
-                                existingSettingRecord.features.synthetic_source = e.target.checked;
-                              } else {
-                                newExperimentalDataStreamFeatures.push({
-                                  data_stream: dataStream,
-                                  features: {
-                                    synthetic_source: e.target.checked,
-                                  },
-                                });
-                              }
-
-                              updatePackagePolicy({
-                                package: {
-                                  ...packagePolicy.package,
-                                  experimental_data_stream_features:
-                                    newExperimentalDataStreamFeatures,
-                                },
+                              onIndexingSettingChange({
+                                synthetic_source: e.target.checked,
                               });
                             }}
                           />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiToolTip
+                            content={
+                              <FormattedMessage
+                                id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBTooltip"
+                                defaultMessage="Enabling this feature is irreversible"
+                              />
+                            }
+                          >
+                            <EuiSwitch
+                              disabled={newExperimentalIndexingFeature.TSDB}
+                              checked={newExperimentalIndexingFeature.TSDB}
+                              label={
+                                <FormattedMessage
+                                  id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBLabel"
+                                  defaultMessage="Time-series indexing (TSDB)"
+                                />
+                              }
+                              onChange={(e) => {
+                                onIndexingSettingChange({
+                                  TSDB: e.target.checked,
+                                });
+                              }}
+                            />
+                          </EuiToolTip>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>

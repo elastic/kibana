@@ -43,7 +43,8 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     );
 
     const isOptInChanged =
-      existingOptIn?.features.synthetic_source !== featureMapEntry.features.synthetic_source;
+      existingOptIn?.features.synthetic_source !== featureMapEntry.features.synthetic_source ||
+      existingOptIn?.features.TSDB !== featureMapEntry.features.TSDB;
 
     // If the feature opt-in status in unchanged, we don't need to update any component templates
     if (!isOptInChanged) {
@@ -74,6 +75,31 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       // @ts-expect-error - TODO: Remove when ES client typings include support for synthetic source
       body,
     });
+
+    if (featureMapEntry.features.TSDB) {
+      const indexTemplateRes = await esClient.indices.getIndexTemplate({
+        name: featureMapEntry.data_stream,
+      });
+      const indexTemplate = indexTemplateRes.index_templates[0].index_template;
+
+      const indexTemplateBody = {
+        ...indexTemplate,
+        template: {
+          ...(indexTemplate.template ?? {}),
+          settings: {
+            ...(indexTemplate.template?.settings ?? {}),
+            index: {
+              mode: 'time_series',
+            },
+          },
+        },
+      };
+
+      await esClient.indices.putIndexTemplate({
+        name: featureMapEntry.data_stream,
+        body: indexTemplateBody,
+      });
+    }
   }
 
   // Update the installation object to persist the experimental feature map

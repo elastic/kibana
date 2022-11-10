@@ -14,8 +14,10 @@ import { handleExperimentalDatastreamFeatureOptIn } from './experimental_datastr
 
 function getNewTestPackagePolicy({
   isSyntheticSourceEnabled,
+  isTSDBEnabled,
 }: {
   isSyntheticSourceEnabled: boolean;
+  isTSDBEnabled: boolean;
 }): NewPackagePolicy {
   const packagePolicy: NewPackagePolicy = {
     name: 'Test policy',
@@ -33,6 +35,7 @@ function getNewTestPackagePolicy({
           data_stream: 'metrics-test.test',
           features: {
             synthetic_source: isSyntheticSourceEnabled,
+            TSDB: isTSDBEnabled,
           },
         },
       ],
@@ -44,8 +47,10 @@ function getNewTestPackagePolicy({
 
 function getExistingTestPackagePolicy({
   isSyntheticSourceEnabled,
+  isTSDBEnabled,
 }: {
   isSyntheticSourceEnabled: boolean;
+  isTSDBEnabled: boolean;
 }): PackagePolicy {
   const packagePolicy: PackagePolicy = {
     id: 'test-policy',
@@ -64,6 +69,7 @@ function getExistingTestPackagePolicy({
           data_stream: 'metrics-test.test',
           features: {
             synthetic_source: isSyntheticSourceEnabled,
+            TSDB: isTSDBEnabled,
           },
         },
       ],
@@ -90,12 +96,18 @@ describe('experimental_datastream_features', () => {
 
   describe('when package policy does not exist (create)', () => {
     it('updates component template', async () => {
-      const packagePolicy = getNewTestPackagePolicy({ isSyntheticSourceEnabled: true });
+      const packagePolicy = getNewTestPackagePolicy({
+        isSyntheticSourceEnabled: true,
+        isTSDBEnabled: false,
+      });
 
       soClient.get.mockResolvedValueOnce({
         attributes: {
           experimental_data_stream_features: [
-            { data_stream: 'metrics-test.test', features: { synthetic_source: false } },
+            {
+              data_stream: 'metrics-test.test',
+              features: { synthetic_source: false, TSDB: false },
+            },
           ],
         },
         id: 'mocked',
@@ -140,12 +152,18 @@ describe('experimental_datastream_features', () => {
   describe('when package policy exists (update)', () => {
     describe('when opt in status in unchanged', () => {
       it('does not update component template', async () => {
-        const packagePolicy = getExistingTestPackagePolicy({ isSyntheticSourceEnabled: true });
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: true,
+          isTSDBEnabled: false,
+        });
 
         soClient.get.mockResolvedValueOnce({
           attributes: {
             experimental_data_stream_features: [
-              { data_stream: 'metrics-test.test', features: { synthetic_source: true } },
+              {
+                data_stream: 'metrics-test.test',
+                features: { synthetic_source: true, TSDB: false },
+              },
             ],
           },
           id: 'mocked',
@@ -162,12 +180,18 @@ describe('experimental_datastream_features', () => {
 
     describe('when opt in status is changed', () => {
       it('updates component template', async () => {
-        const packagePolicy = getExistingTestPackagePolicy({ isSyntheticSourceEnabled: true });
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: true,
+          isTSDBEnabled: false,
+        });
 
         soClient.get.mockResolvedValueOnce({
           attributes: {
             experimental_data_stream_features: [
-              { data_stream: 'metrics-test.test', features: { synthetic_source: false } },
+              {
+                data_stream: 'metrics-test.test',
+                features: { synthetic_source: false, TSDB: false },
+              },
             ],
           },
           id: 'mocked',
