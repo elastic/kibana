@@ -143,7 +143,7 @@ export const useCasesColumns = ({
       render: (assignees: Case['assignees']) => (
         <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
       ),
-      width: '180px',
+      width: !isSelectorView ? '180px' : undefined,
     });
   }
 
