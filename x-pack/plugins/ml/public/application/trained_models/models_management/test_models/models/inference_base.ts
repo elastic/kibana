@@ -154,6 +154,20 @@ export abstract class InferenceBase<TInferResponse> {
     };
   }
 
+  protected async runPipelineSimulate<T>(
+    callback: (d: estypes.IngestSimulateDocumentSimulation) => any
+  ): Promise<T[]> {
+    this.setRunning();
+    const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
+      this.getPipeline(),
+      this.getPipelineDocs()
+    );
+    const processedResponse = docs.map((d) => callback(this.getDocFromResponse(d)));
+    this.inferenceResult$.next(processedResponse);
+    this.setFinished();
+    return processedResponse;
+  }
+
   protected abstract getProcessors(): estypes.IngestProcessorContainer[];
 
   protected getPipelineDocs() {

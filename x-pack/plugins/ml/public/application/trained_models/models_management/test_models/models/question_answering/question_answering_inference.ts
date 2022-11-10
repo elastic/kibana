@@ -87,23 +87,12 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
 
   protected async inferIndex() {
     try {
-      this.setRunning();
-      const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
-        this.getPipeline(),
-        this.getPipelineDocs()
-      );
-
-      const processedResponse: QuestionAnsweringResponse[] = docs.map((d) => {
-        const doc = this.getDocFromResponse(d);
+      return await this.runPipelineSimulate<QuestionAnsweringResponse>((doc) => {
         const pretendRawRequest = { inference_results: [doc._source[this.inferenceType]] };
         const inputText = doc._source[this.inputField];
 
         return processResponse(pretendRawRequest, inputText);
       });
-
-      this.inferenceResult$.next(processedResponse);
-      this.setFinished();
-      return processedResponse;
     } catch (error) {
       this.setFinishedWithErrors(error);
       throw error;

@@ -63,25 +63,13 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
 
   protected async inferIndex() {
     try {
-      this.setRunning();
-      const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
-        this.getPipeline(),
-        this.getPipelineDocs()
-      );
-
-      const processedResponse: TextClassificationResponse[] = docs.map((d) => {
-        const doc = this.getDocFromResponse(d);
-
+      return await this.runPipelineSimulate<TextClassificationResponse>((doc) => {
         return {
           response: processInferenceResult(doc._source[this.inferenceType], this.model),
           rawResponse: doc._source[this.inferenceType],
           inputText: doc._source[this.inputField],
         };
       });
-
-      this.inferenceResult$.next(processedResponse);
-      this.setFinished();
-      return processedResponse;
     } catch (error) {
       this.setFinishedWithErrors(error);
       throw error;

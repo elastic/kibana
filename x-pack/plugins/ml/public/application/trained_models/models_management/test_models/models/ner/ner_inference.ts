@@ -59,25 +59,13 @@ export class NerInference extends InferenceBase<NerResponse> {
 
   protected async inferIndex() {
     try {
-      this.setRunning();
-      const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
-        this.getPipeline(),
-        this.getPipelineDocs()
-      );
-
-      const processedResponse: NerResponse[] = docs.map((d) => {
-        const doc = this.getDocFromResponse(d);
-
+      return await this.runPipelineSimulate<NerResponse>((doc) => {
         return {
           response: parseResponse({ inference_results: [doc._source[this.inferenceType]] }),
           rawResponse: doc._source[this.inferenceType],
           inputText: doc._source[this.inputField],
         };
       });
-
-      this.inferenceResult$.next(processedResponse);
-      this.setFinished();
-      return processedResponse;
     } catch (error) {
       this.setFinishedWithErrors(error);
       throw error;
