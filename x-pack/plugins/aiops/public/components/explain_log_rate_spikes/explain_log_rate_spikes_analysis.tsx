@@ -9,6 +9,7 @@ import React, { useEffect, useMemo, useState, FC } from 'react';
 import { isEqual } from 'lodash';
 
 import {
+  EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFormRow,
@@ -71,6 +72,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     WindowParameters | undefined
   >();
   const [groupResults, setGroupResults] = useState<boolean>(false);
+  const [overrides, setOverrides] = useState<
+    ApiExplainLogRateSpikes['body']['overrides'] | undefined
+  >(undefined);
+  const [shouldStart, setShouldStart] = useState(false);
 
   const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setGroupResults(e.target.checked);
@@ -97,22 +102,54 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       grouping: true,
       flushFix: true,
       ...windowParameters,
+      overrides,
     },
     { reducer: streamReducer, initialState }
   );
+
+  useEffect(() => {
+    if (!isRunning) {
+      const { loaded, remainingFieldCandidates, groupsMissing } = data;
+
+      if (
+        (Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
+        groupsMissing
+      ) {
+        setOverrides({ loaded, remainingFieldCandidates, changePoints: data.changePoints });
+      } else {
+        setOverrides(undefined);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRunning]);
 
   const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
   // Start handler clears possibly hovered or pinned
   // change points on analysis refresh.
-  function startHandler() {
+  function startHandler(continueAnalysis = false) {
+    if (!continueAnalysis) {
+      setOverrides(undefined);
+    }
+
     // Reset grouping to false and clear all row selections when restarting the analysis.
     setGroupResults(false);
     clearAllRowState();
 
     setCurrentAnalysisWindowParameters(windowParameters);
-    start();
+
+    // We trigger hooks updates above so we cannot directly call `start()` here
+    // because it would be run with stale arguments.
+    setShouldStart(true);
   }
+
+  useEffect(() => {
+    if (shouldStart) {
+      start();
+      setShouldStart(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldStart]);
 
   useEffect(() => {
     setCurrentAnalysisWindowParameters(windowParameters);
@@ -169,7 +206,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
         isRunning={isRunning}
-        onRefresh={startHandler}
+        onRefresh={() => startHandler(false)}
         onCancel={cancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
       />
@@ -195,6 +232,16 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
                   ))}
                 </ul>
               )}
+              {overrides !== undefined ? (
+                <p>
+                  <EuiButton size="s" onClick={() => startHandler(true)}>
+                    <FormattedMessage
+                      id="xpack.aiops.explainLogRateSpikesPage.tryToContinueAnalysisButtonText"
+                      defaultMessage="Try to continue analysis"
+                    />
+                  </EuiButton>
+                </p>
+              ) : null}
             </EuiText>
           </EuiCallOut>
           <EuiSpacer size="xs" />
