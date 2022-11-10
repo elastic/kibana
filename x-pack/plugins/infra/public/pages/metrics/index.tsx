@@ -31,9 +31,6 @@ import { MetricDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
 import { HostsPage } from './hosts';
 import { SourceLoadingPage } from '../../components/source_loading_page';
-import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
-import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
-import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
 
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { SavedViewProvider } from '../../containers/saved_view/saved_view';
@@ -95,18 +92,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
               </HeaderMenuPortal>
             )}
             <Switch>
-              <Route
-                path={'/inventory'}
-                render={() => (
-                  <WaffleOptionsProvider>
-                    <WaffleTimeProvider>
-                      <WaffleFiltersProvider>
-                        <SnapshotPage />
-                      </WaffleFiltersProvider>
-                    </WaffleTimeProvider>
-                  </WaffleOptionsProvider>
-                )}
-              />
+              <Route path={'/inventory'} component={SnapshotPage} />
               <Route
                 path={'/explorer'}
                 render={(props) => (

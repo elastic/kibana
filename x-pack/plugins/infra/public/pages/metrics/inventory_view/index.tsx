@@ -17,12 +17,14 @@ import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { LayoutView } from './components/layout_view';
 import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
-import { useWaffleOptionsContext } from './hooks/use_waffle_options';
+import { useWaffleOptionsContext, WaffleOptionsProvider } from './hooks/use_waffle_options';
 import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
 import { fullHeightContentStyles } from '../../../page_template.styles';
+import { WaffleTimeProvider } from './hooks/use_waffle_time';
+import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
 
 export const SnapshotPage = () => {
   const {
@@ -50,38 +52,44 @@ export const SnapshotPage = () => {
       ) : metricIndicesExist ? (
         <>
           <div className={APP_WRAPPER_CLASS}>
-            <SavedViewProvider
-              shouldLoadDefault={optionsSource === 'default'}
-              viewType={'inventory-view'}
-              defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
-            >
-              <MetricsPageTemplate
-                hasData={metricIndicesExist}
-                pageHeader={{
-                  pageTitle: inventoryTitle,
-                  rightSideItems: [<SavedViews />],
-                }}
-                pageSectionProps={{
-                  contentProps: {
-                    css: fullHeightContentStyles,
-                  },
-                }}
-              >
-                <SnapshotContainer
-                  render={({ loading, nodes, reload, interval }) => (
-                    <>
-                      <FilterBar interval={interval} />
-                      <LayoutView
-                        loading={loading}
-                        nodes={nodes}
-                        reload={reload}
-                        interval={interval}
+            <WaffleOptionsProvider>
+              <WaffleTimeProvider>
+                <WaffleFiltersProvider>
+                  <SavedViewProvider
+                    shouldLoadDefault={optionsSource === 'default'}
+                    viewType={'inventory-view'}
+                    defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
+                  >
+                    <MetricsPageTemplate
+                      hasData={metricIndicesExist}
+                      pageHeader={{
+                        pageTitle: inventoryTitle,
+                        rightSideItems: [<SavedViews />],
+                      }}
+                      pageSectionProps={{
+                        contentProps: {
+                          css: fullHeightContentStyles,
+                        },
+                      }}
+                    >
+                      <SnapshotContainer
+                        render={({ loading, nodes, reload, interval }) => (
+                          <>
+                            <FilterBar interval={interval} />
+                            <LayoutView
+                              loading={loading}
+                              nodes={nodes}
+                              reload={reload}
+                              interval={interval}
+                            />
+                          </>
+                        )}
                       />
-                    </>
-                  )}
-                />
-              </MetricsPageTemplate>
-            </SavedViewProvider>
+                    </MetricsPageTemplate>
+                  </SavedViewProvider>
+                </WaffleFiltersProvider>
+              </WaffleTimeProvider>
+            </WaffleOptionsProvider>
           </div>
         </>
       ) : hasFailedLoadingSource ? (
