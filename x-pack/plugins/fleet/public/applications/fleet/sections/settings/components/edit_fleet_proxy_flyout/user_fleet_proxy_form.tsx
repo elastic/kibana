@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   sendPostFleetProxy,
-  sendPostFleetServerHost,
   sendPutFleetServerHost,
   useInput,
   useStartServices,

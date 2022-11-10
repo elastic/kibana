@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { FLEET_PROXY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 import { FleetProxyUnauthorizedError } from '../errors';
-import { FleetProxy, FleetProxySOAttributes, NewFleetProxy } from '../types';
+import type { FleetProxy, FleetProxySOAttributes, NewFleetProxy } from '../types';
 
 export async function listFleetProxies(soClient: SavedObjectsClientContract) {
   const res = await soClient.find<FleetProxySOAttributes>({

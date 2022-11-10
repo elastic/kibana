@@ -12,6 +12,7 @@ import {
 } from '../../types';
 
 import type { FleetAuthzRouter } from '../security';
+
 import {
   getAllFleetProxyHandler,
   postFleetProxyHandler,
