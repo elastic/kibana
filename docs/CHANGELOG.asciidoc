@@ -87,6 +87,9 @@ Machine Learning::
 * Explain Log Rate Spikes: Wrap analysis in try/catch block {kibana-pull}143651[#143651]
 * Explain Log Rate Spikes: Fix uncompressed streams and backpressure handling {kibana-pull}142970[#142970]
 
+Osquery::
+* Fixes a bug that prevented users from viewing Osquery results if they were in a non-default {kib} space {kibana-pull}144210[#144210]
+
 Platform::
 Fixes the execution pipeline not to stop on a flaky subexpression {kibana-pull}143852[#143852]
 
