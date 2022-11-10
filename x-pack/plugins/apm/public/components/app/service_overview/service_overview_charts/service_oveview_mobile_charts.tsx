@@ -14,6 +14,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiTitle } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
@@ -34,9 +37,6 @@ import {
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { EuiTitle } from '@elastic/eui';
-import { EuiHorizontalRule } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
 interface Props {
   latencyChartHeight: number;
   rowDirection: 'column' | 'row';
