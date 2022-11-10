@@ -184,49 +184,51 @@ const indices: IndexDefinition[] = [
         canceled_at: { type: 'date' },
         completed_at: { type: 'date' },
         connector: {
-          configuration: { type: 'object' },
-          filtering: {
-            properties: {
-              advanced_snippet: {
-                properties: {
-                  created_at: { type: 'date' },
-                  updated_at: { type: 'date' },
-                  value: { type: 'object' },
+          properties: {
+            configuration: { type: 'object' },
+            filtering: {
+              properties: {
+                advanced_snippet: {
+                  properties: {
+                    created_at: { type: 'date' },
+                    updated_at: { type: 'date' },
+                    value: { type: 'object' },
+                  },
                 },
-              },
-              domain: { type: 'keyword' },
-              rules: {
-                properties: {
-                  created_at: { type: 'date' },
-                  field: { type: 'keyword' },
-                  id: { type: 'keyword' },
-                  order: { type: 'short' },
-                  policy: { type: 'keyword' },
-                  rule: { type: 'keyword' },
-                  updated_at: { type: 'date' },
-                  value: { type: 'keyword' },
+                domain: { type: 'keyword' },
+                rules: {
+                  properties: {
+                    created_at: { type: 'date' },
+                    field: { type: 'keyword' },
+                    id: { type: 'keyword' },
+                    order: { type: 'short' },
+                    policy: { type: 'keyword' },
+                    rule: { type: 'keyword' },
+                    updated_at: { type: 'date' },
+                    value: { type: 'keyword' },
+                  },
                 },
-              },
-              warnings: {
-                properties: {
-                  ids: { type: 'keyword' },
-                  messages: { type: 'text' },
+                warnings: {
+                  properties: {
+                    ids: { type: 'keyword' },
+                    messages: { type: 'text' },
+                  },
                 },
               },
             },
-          },
-          id: { type: 'keyword' },
-          index_name: { type: 'keyword' },
-          language: { type: 'keyword' },
-          pipeline: {
-            properties: {
-              extract_binary_content: { type: 'boolean' },
-              name: { type: 'keyword' },
-              reduce_whitespace: { type: 'boolean' },
-              run_ml_inference: { type: 'boolean' },
+            id: { type: 'keyword' },
+            index_name: { type: 'keyword' },
+            language: { type: 'keyword' },
+            pipeline: {
+              properties: {
+                extract_binary_content: { type: 'boolean' },
+                name: { type: 'keyword' },
+                reduce_whitespace: { type: 'boolean' },
+                run_ml_inference: { type: 'boolean' },
+              },
             },
+            service_type: { type: 'keyword' },
           },
-          service_type: { type: 'keyword' },
         },
         created_at: { type: 'date' },
         deleted_document_count: { type: 'integer' },
