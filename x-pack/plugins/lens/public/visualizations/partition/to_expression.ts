@@ -210,9 +210,10 @@ const generateTreemapVisAst: GenerateExpressionAstFunction = (...rest) => {
 
 const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => {
   const { metrics, ...args } = generateCommonArguments(...rest);
+
   return buildExpression([
     buildExpressionFunction<MosaicVisExpressionFunctionDefinition>('mosaicVis', {
-      ...args,
+      ...{ ...args, metricsToLabels: undefined },
       metric: metrics,
       // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
       buckets: rest[2]
