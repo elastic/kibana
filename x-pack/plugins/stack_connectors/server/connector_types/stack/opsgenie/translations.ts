@@ -14,3 +14,10 @@ export const UNKNOWN_ERROR = i18n.translate('xpack.stackConnectors.opsgenie.unkn
 export const OPSGENIE_NAME = i18n.translate('xpack.stackConnectors.opsgenie.name', {
   defaultMessage: 'Opsgenie',
 });
+
+export const MESSAGE_NON_EMPTY = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.nonEmptyMessageField',
+  {
+    defaultMessage: 'must be populated with a value other than just whitespace',
+  }
+);

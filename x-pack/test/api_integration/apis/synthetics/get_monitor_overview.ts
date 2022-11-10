@@ -6,14 +6,14 @@
  */
 
 import { SimpleSavedObject } from '@kbn/core/public';
-import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { SyntheticsMonitor, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS, API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[GET] /internal/synthetics/overview', function () {
+  describe('GetMonitorsOverview', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (let i = 0; i < 20; i++) {
         monitors.push({
           ..._monitors[0],
-          name: `${_monitors[0].name}${i}`,
+          name: `${_monitors[0].name} ${i}`,
         });
       }
     });
@@ -82,8 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(apiResponse.body.allMonitorIds.sort()).eql(
             savedMonitors.map((monitor) => monitor.id).sort()
           );
-          expect(apiResponse.body.pages).to.have.keys(['0', '1']);
-          expect(apiResponse.body.pages[1].length).eql(20);
+          expect(apiResponse.body.monitors.length).eql(40);
         } finally {
           await Promise.all(
             savedMonitors.map((monitor) => {
@@ -93,22 +92,23 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      it('adjusts pagination correctly', async () => {
-        let savedMonitors: SimpleSavedObject[] = [];
+      it('accepts search queries', async () => {
+        let savedMonitors: Array<SimpleSavedObject<SyntheticsMonitor>> = [];
         try {
           const savedResponse = await Promise.all(monitors.map(saveMonitor));
           savedMonitors = savedResponse;
 
-          const apiResponse = await supertest.get(
-            SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW + '?perPage=5'
-          );
+          const apiResponse = await supertest.get(SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW).query({
+            query: '19',
+          });
 
-          expect(apiResponse.body.total).eql(monitors.length * 2);
+          expect(apiResponse.body.total).eql(2);
           expect(apiResponse.body.allMonitorIds.sort()).eql(
-            savedMonitors.map((monitor) => monitor.id).sort()
+            savedMonitors
+              .filter((monitor) => monitor.attributes.name.includes('19'))
+              .map((monitor) => monitor.id)
           );
-          expect(apiResponse.body.pages).to.have.keys(['0', '1', '2', '3', '4']);
-          expect(apiResponse.body.pages[1].length).eql(5);
+          expect(apiResponse.body.monitors.length).eql(2);
         } finally {
           await Promise.all(
             savedMonitors.map((monitor) => {
