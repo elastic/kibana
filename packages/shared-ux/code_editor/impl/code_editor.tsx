@@ -21,7 +21,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -172,8 +171,7 @@ export const CodeEditor: React.FC<Props> = ({
 
   const defaultStyles = codeEditorStyles();
   const hintStyles = codeEditorKeyboardHintStyles();
-  const styles = !isHintActive ? defaultStyles : {defaultStyles, hintStyles};
-
+  const styles = !isHintActive ? defaultStyles : { defaultStyles, hintStyles };
 
   const _updateDimensions = useCallback(() => {
     _editor.current?.layout();
