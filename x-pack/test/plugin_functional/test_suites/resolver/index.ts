@@ -11,7 +11,7 @@ import { WebElementWrapper } from '../../../../../test/functional/services/lib/w
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const expectedDifference = 0.09;
+const expectedDifference = 0.096;
 
 const waitForPanAnimationToFinish = () =>
   new Promise((resolve) => setTimeout(resolve, panAnimationDuration + 1));
