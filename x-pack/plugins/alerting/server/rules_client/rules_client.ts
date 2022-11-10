@@ -35,6 +35,7 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkDeleteObject,
   SavedObjectsUpdateResponse,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
@@ -54,10 +55,6 @@ import {
   SAVED_OBJECT_REL_PRIMARY,
 } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import {
-  BulkActionSkipResult,
-  BulkEditSkipReason,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/response_schema';
 import {
   Rule,
   PartialRule,
@@ -79,6 +76,7 @@ import {
   RuleSnooze,
   RuleSnoozeSchedule,
   RawAlertInstance as RawAlert,
+  RawRuleAction,
 } from '../types';
 import {
   validateRuleTypeParams,
@@ -144,7 +142,6 @@ import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 import { getActiveScheduledSnoozes } from '../lib/is_rule_snoozed';
 import { isSnoozeExpired } from '../lib';
-import { shouldSkipAttributesUpdate } from './lib/should_skip_attributes_update';
 import { isDetectionEngineAADRuleType } from '../saved_objects/migrations/utils';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
@@ -302,8 +299,8 @@ export type BulkEditOperation =
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<{
   modifiedParams: Params;
   isParamsUpdateSkipped: boolean;
-  skipReasons: BulkEditSkipReason[];
 }>;
+
 export interface BulkEditOptionsFilter<Params extends RuleTypeParams> {
   filter?: string | KueryNode;
   operations: BulkEditOperation[];
@@ -319,6 +316,20 @@ export interface BulkEditOptionsIds<Params extends RuleTypeParams> {
 export type BulkEditOptions<Params extends RuleTypeParams> =
   | BulkEditOptionsFilter<Params>
   | BulkEditOptionsIds<Params>;
+
+export type BulkEditSkipReason = 'RULE_NOT_MODIFIED';
+
+export interface BulkActionSkipResult {
+  id: Rule['id'];
+  name?: Rule['name'];
+  skip_reason: BulkEditSkipReason;
+}
+export interface BulkEditActionResults {
+  updated: Rule[];
+  created: Rule[];
+  deleted: Rule[];
+  skipped: BulkActionSkipResult[];
+}
 
 interface BulkOptionsFilter {
   filter?: string | KueryNode;
@@ -470,6 +481,10 @@ interface ScheduleTaskOptions {
 }
 
 type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE';
+
+type ApiKeysMap = Map<string, { oldApiKey?: string; newApiKey?: string }>;
+
+type RuleType = ReturnType<RuleTypeRegistry['get']>;
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
@@ -2351,34 +2366,7 @@ export class RulesClient {
     });
 
     // update schedules only if schedule operation is present
-    const scheduleOperation = options.operations.find(
-      (
-        operation
-      ): operation is Extract<BulkEditOperation, { field: Extract<BulkEditFields, 'schedule'> }> =>
-        operation.field === 'schedule'
-    );
-
-    if (scheduleOperation?.value) {
-      const taskIds = updatedRules.reduce<string[]>((acc, rule) => {
-        if (rule.scheduledTaskId) {
-          acc.push(rule.scheduledTaskId);
-        }
-        return acc;
-      }, []);
-
-      try {
-        await this.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value);
-        this.logger.debug(
-          `Successfully updated schedules for underlying tasks: ${taskIds.join(', ')}`
-        );
-      } catch (error) {
-        this.logger.error(
-          `Failure to update schedules for underlying tasks: ${taskIds.join(
-            ', '
-          )}. TaskManager bulkUpdateSchedules failed with Error: ${error.message}`
-        );
-      }
-    }
+    this.bulkUpdateSchedules(options.operations, updatedRules);
 
     return { rules: updatedRules, skipped, errors, total };
   }
@@ -2411,265 +2399,29 @@ export class RulesClient {
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const skipped: BulkActionSkipResult[] = [];
     const errors: BulkOperationError[] = [];
-    const apiKeysToInvalidate: string[] = [];
-    const apiKeysMap = new Map<string, { oldApiKey?: string; newApiKey?: string }>();
+    const apiKeysMap: ApiKeysMap = new Map();
+
     const username = await this.getUserName();
 
     for await (const response of rulesFinder.find()) {
       await pMap(
         response.saved_objects,
-        async (rule) => {
-          let isAttributesUpdateSkipped = true;
-          const attributesUpdateSkipReasons: BulkEditSkipReason[] = [];
-
-          try {
-            if (rule.attributes.apiKey) {
-              apiKeysMap.set(rule.id, { oldApiKey: rule.attributes.apiKey });
-            }
-
-            const ruleType = this.ruleTypeRegistry.get(rule.attributes.alertTypeId);
-
-            let attributes = cloneDeep(rule.attributes);
-            let ruleActions = {
-              actions: this.injectReferencesIntoActions(
-                rule.id,
-                rule.attributes.actions,
-                rule.references || []
-              ),
-            };
-
-            for (const operation of operations) {
-              const { field } = operation;
-              if (field === 'snoozeSchedule' || field === 'apiKey') {
-                if (rule.attributes.actions.length) {
-                  try {
-                    await this.actionsAuthorization.ensureAuthorized('execute');
-                  } catch (error) {
-                    throw Error(`Rule not authorized for bulk ${field} update - ${error.message}`);
-                  }
-                }
-              }
-            }
-
-            let hasUpdateApiKeyOperation = false;
-
-            for (const operation of operations) {
-              // Check if the update should be skipped for the current action.
-              // If it should, save the skip reasons in attributesUpdateSkipReasons
-              // and continue to the next operation before without
-              // the `isAttributesUpdateSkipped` flag to false.
-              if (shouldSkipAttributesUpdate(operation, attributes, attributesUpdateSkipReasons)) {
-                continue;
-              }
-              switch (operation.field) {
-                case 'actions':
-                  await this.validateActions(ruleType, { ...attributes, actions: operation.value });
-                  ruleActions = applyBulkEditOperation(operation, ruleActions);
-                  break;
-                case 'snoozeSchedule':
-                  // Silently skip adding snooze or snooze schedules on security
-                  // rules until we implement snoozing of their rules
-                  if (attributes.consumer === AlertConsumers.SIEM) {
-                    break;
-                  }
-                  if (operation.operation === 'set') {
-                    const snoozeAttributes = getBulkSnoozeAttributes(attributes, operation.value);
-                    try {
-                      verifySnoozeScheduleLimit(snoozeAttributes);
-                    } catch (error) {
-                      throw Error(`Error updating rule: could not add snooze - ${error.message}`);
-                    }
-                    attributes = {
-                      ...attributes,
-                      ...snoozeAttributes,
-                    };
-                  }
-                  if (operation.operation === 'delete') {
-                    const idsToDelete = operation.value && [...operation.value];
-                    if (idsToDelete?.length === 0) {
-                      attributes.snoozeSchedule?.forEach((schedule) => {
-                        if (schedule.id) {
-                          idsToDelete.push(schedule.id);
-                        }
-                      });
-                    }
-                    attributes = {
-                      ...attributes,
-                      ...getBulkUnsnoozeAttributes(attributes, idsToDelete),
-                    };
-                  }
-                  break;
-                case 'apiKey': {
-                  hasUpdateApiKeyOperation = true;
-                  break;
-                }
-                default:
-                  attributes = applyBulkEditOperation(operation, attributes);
-              }
-              isAttributesUpdateSkipped = false;
-            }
-
-            // validate schedule interval
-            if (attributes.schedule.interval) {
-              const isIntervalInvalid =
-                parseDuration(attributes.schedule.interval as string) <
-                this.minimumScheduleIntervalInMs;
-              if (isIntervalInvalid && this.minimumScheduleInterval.enforce) {
-                throw Error(
-                  `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
-                );
-              } else if (isIntervalInvalid && !this.minimumScheduleInterval.enforce) {
-                this.logger.warn(
-                  `Rule schedule interval (${attributes.schedule.interval}) for "${ruleType.id}" rule type with ID "${attributes.id}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
-                );
-              }
-            }
-
-            const {
-              modifiedParams: ruleParams,
-              isParamsUpdateSkipped,
-              skipReasons: paramUpdateSkipReasons,
-            } = paramsModifier
-              ? await paramsModifier(attributes.params as Params)
-              : {
-                  modifiedParams: attributes.params as Params,
-                  isParamsUpdateSkipped: true,
-                  skipReasons: [],
-                };
-
-            // validate rule params
-            const validatedAlertTypeParams = validateRuleTypeParams(
-              ruleParams,
-              ruleType.validate?.params
-            );
-            const validatedMutatedAlertTypeParams = validateMutatedRuleTypeParams(
-              validatedAlertTypeParams,
-              rule.attributes.params,
-              ruleType.validate?.params
-            );
-
-            const {
-              actions: rawAlertActions,
-              references,
-              params: updatedParams,
-            } = await this.extractReferences(
-              ruleType,
-              ruleActions.actions,
-              validatedMutatedAlertTypeParams
-            );
-
-            const shouldUpdateApiKey = attributes.enabled || hasUpdateApiKeyOperation;
-
-            // create API key
-            let createdAPIKey = null;
-            try {
-              createdAPIKey = shouldUpdateApiKey
-                ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, attributes.name))
-                : null;
-            } catch (error) {
-              throw Error(`Error updating rule: could not create API key - ${error.message}`);
-            }
-
-            const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-
-            // collect generated API keys
-            if (apiKeyAttributes.apiKey) {
-              apiKeysMap.set(rule.id, {
-                ...apiKeysMap.get(rule.id),
-                newApiKey: apiKeyAttributes.apiKey,
-              });
-            }
-
-            // get notifyWhen
-            const notifyWhen = getRuleNotifyWhenType(
-              attributes.notifyWhen ?? null,
-              attributes.throttle ?? null
-            );
-
-            const updatedAttributes = this.updateMeta({
-              ...attributes,
-              ...apiKeyAttributes,
-              params: updatedParams as RawRule['params'],
-              actions: rawAlertActions,
-              notifyWhen,
-              updatedBy: username,
-              updatedAt: new Date().toISOString(),
-            });
-
-            // add mapped_params
-            const mappedParams = getMappedParams(updatedParams);
-
-            if (Object.keys(mappedParams).length) {
-              updatedAttributes.mapped_params = mappedParams;
-            }
-
-            if (isAttributesUpdateSkipped && isParamsUpdateSkipped) {
-              skipped.push({
-                id: rule.id,
-                name: rule.attributes.name,
-                skip_reasons: [...attributesUpdateSkipReasons, ...paramUpdateSkipReasons],
-              });
-            } else {
-              rules.push({
-                ...rule,
-                references,
-                attributes: updatedAttributes,
-              });
-            }
-          } catch (error) {
-            errors.push({
-              message: error.message,
-              rule: {
-                id: rule.id,
-                name: rule.attributes?.name,
-              },
-            });
-            this.auditLogger?.log(
-              ruleAuditEvent({
-                action: RuleAuditAction.BULK_EDIT,
-                error,
-              })
-            );
-          }
-        },
-        { concurrency: API_KEY_GENERATE_CONCURRENCY }
+        this.updateRuleAttributesAndParamsInMemory({
+          operations,
+          paramsModifier,
+          apiKeysMap,
+          rules,
+          skipped,
+          errors,
+          username,
+        }),
+        {
+          concurrency: API_KEY_GENERATE_CONCURRENCY,
+        }
       );
     }
 
-    let result;
-    try {
-      result = await this.unsecuredSavedObjectsClient.bulkCreate(rules, { overwrite: true });
-    } catch (e) {
-      // avoid unused newly generated API keys
-      if (apiKeysMap.size > 0) {
-        await bulkMarkApiKeysForInvalidation(
-          {
-            apiKeys: Array.from(apiKeysMap.values()).reduce<string[]>((acc, value) => {
-              if (value.newApiKey) {
-                acc.push(value.newApiKey);
-              }
-              return acc;
-            }, []),
-          },
-          this.logger,
-          this.unsecuredSavedObjectsClient
-        );
-      }
-      throw e;
-    }
-
-    result.saved_objects.map(({ id, error }) => {
-      const oldApiKey = apiKeysMap.get(id)?.oldApiKey;
-      const newApiKey = apiKeysMap.get(id)?.newApiKey;
-
-      // if SO wasn't saved and has new API key it will be invalidated
-      if (error && newApiKey) {
-        apiKeysToInvalidate.push(newApiKey);
-        // if SO saved and has old Api Key it will be invalidate
-      } else if (!error && oldApiKey) {
-        apiKeysToInvalidate.push(oldApiKey);
-      }
-    });
+    const { result, apiKeysToInvalidate } = await this.saveBulkUpdatedRules(rules, apiKeysMap);
 
     return {
       apiKeysToInvalidate,
@@ -2678,6 +2430,253 @@ export class RulesClient {
       rules,
       skipped,
     };
+  }
+
+  private updateRuleAttributesAndParamsInMemory<Params extends RuleTypeParams>({
+    operations,
+    paramsModifier,
+    apiKeysMap,
+    rules,
+    skipped,
+    errors,
+    username,
+  }: {
+    operations: BulkEditOptions<Params>['operations'];
+    paramsModifier: BulkEditOptions<Params>['paramsModifier'];
+    apiKeysMap: ApiKeysMap;
+    rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+    skipped: BulkActionSkipResult[];
+    errors: BulkOperationError[];
+    username: string | null;
+  }) {
+    return async (rule: SavedObjectsFindResult<RawRule>) => {
+      try {
+        if (rule.attributes.apiKey) {
+          apiKeysMap.set(rule.id, { oldApiKey: rule.attributes.apiKey });
+        }
+
+        const ruleType = this.ruleTypeRegistry.get(rule.attributes.alertTypeId);
+
+        this.ensureAuthorizationForBulkUpdate(operations, rule);
+
+        const { attributes, ruleActions, hasUpdateApiKeyOperation, isAttributesUpdateSkipped } =
+          await this.getUpdatedAttributesFromOperations(operations, rule, ruleType);
+
+        this.validateScheduleInterval(
+          attributes.schedule.interval as string,
+          ruleType.id,
+          attributes.id as string
+        );
+
+        const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
+          ? await paramsModifier(attributes.params as Params)
+          : {
+              modifiedParams: attributes.params as Params,
+              isParamsUpdateSkipped: true,
+            };
+
+        // If neither attributes nor parameters were updated, mark
+        // the rule as skipped and continue to the next rule.
+        if (isAttributesUpdateSkipped && isParamsUpdateSkipped) {
+          skipped.push({
+            id: rule.id,
+            name: rule.attributes.name,
+            skip_reason: 'RULE_NOT_MODIFIED',
+          });
+          return;
+        }
+
+        // validate rule params
+        const validatedAlertTypeParams = validateRuleTypeParams(
+          ruleParams,
+          ruleType.validate?.params
+        );
+        const validatedMutatedAlertTypeParams = validateMutatedRuleTypeParams(
+          validatedAlertTypeParams,
+          rule.attributes.params,
+          ruleType.validate?.params
+        );
+
+        const {
+          actions: rawAlertActions,
+          references,
+          params: updatedParams,
+        } = await this.extractReferences(
+          ruleType,
+          ruleActions.actions,
+          validatedMutatedAlertTypeParams
+        );
+
+        const { apiKeyAttributes } = await this.createAndCollectApiKeys(
+          rule,
+          ruleType,
+          apiKeysMap,
+          attributes,
+          hasUpdateApiKeyOperation,
+          username
+        );
+
+        const { updatedAttributes } = this.updateAttributesAndMapParams(
+          attributes,
+          apiKeyAttributes,
+          updatedParams,
+          rawAlertActions,
+          username
+        );
+
+        rules.push({
+          ...rule,
+          references,
+          attributes: updatedAttributes,
+        });
+      } catch (error) {
+        errors.push({
+          message: error.message,
+          rule: {
+            id: rule.id,
+            name: rule.attributes?.name,
+          },
+        });
+        this.auditLogger?.log(
+          ruleAuditEvent({
+            action: RuleAuditAction.BULK_EDIT,
+            error,
+          })
+        );
+      }
+    };
+  }
+
+  private async ensureAuthorizationForBulkUpdate(
+    operations: BulkEditOperation[],
+    rule: SavedObjectsFindResult<RawRule>
+  ) {
+    for (const operation of operations) {
+      const { field } = operation;
+      if (field === 'snoozeSchedule' || field === 'apiKey') {
+        if (rule.attributes.actions.length) {
+          try {
+            await this.actionsAuthorization.ensureAuthorized('execute');
+          } catch (error) {
+            throw Error(`Rule not authorized for bulk ${field} update - ${error.message}`);
+          }
+        }
+      }
+    }
+  }
+
+  private async getUpdatedAttributesFromOperations(
+    operations: BulkEditOperation[],
+    rule: SavedObjectsFindResult<RawRule>,
+    ruleType: RuleType
+  ) {
+    let attributes = cloneDeep(rule.attributes);
+    let ruleActions = {
+      actions: this.injectReferencesIntoActions(
+        rule.id,
+        rule.attributes.actions,
+        rule.references || []
+      ),
+    };
+
+    let hasUpdateApiKeyOperation = false;
+    let isAttributesUpdateSkipped = true;
+
+    for (const operation of operations) {
+      // Check if the update should be skipped for the current action.
+      // If it should, save the skip reasons in attributesUpdateSkipReasons
+      // and continue to the next operation before without
+      // the `isAttributesUpdateSkipped` flag to false.
+      switch (operation.field) {
+        case 'actions': {
+          await this.validateActions(ruleType, { ...attributes, actions: operation.value });
+
+          const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+            operation,
+            ruleActions
+          );
+          if (isAttributeModified) {
+            ruleActions = modifiedAttributes;
+            isAttributesUpdateSkipped = false;
+          }
+          break;
+        }
+        case 'snoozeSchedule': {
+          // Silently skip adding snooze or snooze schedules on security
+          // rules until we implement snoozing of their rules
+          if (rule.attributes.consumer === AlertConsumers.SIEM) {
+            break;
+          }
+          if (operation.operation === 'set') {
+            const snoozeAttributes = getBulkSnoozeAttributes(rule.attributes, operation.value);
+            try {
+              verifySnoozeScheduleLimit(snoozeAttributes);
+            } catch (error) {
+              throw Error(`Error updating rule: could not add snooze - ${error.message}`);
+            }
+            attributes = {
+              ...attributes,
+              ...snoozeAttributes,
+            };
+          }
+          if (operation.operation === 'delete') {
+            const idsToDelete = operation.value && [...operation.value];
+            if (idsToDelete?.length === 0) {
+              attributes.snoozeSchedule?.forEach((schedule) => {
+                if (schedule.id) {
+                  idsToDelete.push(schedule.id);
+                }
+              });
+            }
+            attributes = {
+              ...attributes,
+              ...getBulkUnsnoozeAttributes(attributes, idsToDelete),
+            };
+          }
+          break;
+        }
+        case 'apiKey': {
+          hasUpdateApiKeyOperation = true;
+          break;
+        }
+        default: {
+          const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+            operation,
+            rule.attributes
+          );
+
+          if (isAttributeModified) {
+            attributes = {
+              ...attributes,
+              ...modifiedAttributes,
+            };
+            isAttributesUpdateSkipped = false;
+          }
+        }
+      }
+    }
+    return {
+      attributes,
+      ruleActions,
+      hasUpdateApiKeyOperation,
+      isAttributesUpdateSkipped,
+    };
+  }
+
+  private validateScheduleInterval(scheduleInterval: string, ruleTypeId: string, ruleId: string) {
+    if (scheduleInterval) {
+      const isIntervalInvalid =
+        parseDuration(scheduleInterval as string) < this.minimumScheduleIntervalInMs;
+      if (isIntervalInvalid && this.minimumScheduleInterval.enforce) {
+        throw Error(
+          `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+        );
+      } else if (isIntervalInvalid && !this.minimumScheduleInterval.enforce) {
+        this.logger.warn(
+          `Rule schedule interval (${scheduleInterval}) for "${ruleTypeId}" rule type with ID "${ruleId}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+        );
+      }
+    }
   }
 
   private getShouldScheduleTask = async (scheduledTaskId: string | null | undefined) => {
@@ -3134,6 +3133,41 @@ export class RulesClient {
     return { errors, rules: disabledRules, taskIdsToDisable, taskIdsToDelete };
   };
 
+  private async createAndCollectApiKeys(
+    rule: SavedObjectsFindResult<RawRule>,
+    ruleType: RuleType,
+    apiKeysMap: ApiKeysMap,
+    attributes: RawRule,
+    hasUpdateApiKeyOperation: boolean,
+    username: string | null
+  ) {
+    const shouldUpdateApiKey = attributes.enabled || hasUpdateApiKeyOperation;
+
+    // create API key
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = shouldUpdateApiKey
+        ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, attributes.name))
+        : null;
+    } catch (error) {
+      throw Error(`Error updating rule: could not create API key - ${error.message}`);
+    }
+
+    const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
+
+    // collect generated API keys
+    if (apiKeyAttributes.apiKey) {
+      apiKeysMap.set(rule.id, {
+        ...apiKeysMap.get(rule.id),
+        newApiKey: apiKeyAttributes.apiKey,
+      });
+    }
+
+    return {
+      apiKeyAttributes,
+    };
+  }
+
   private apiKeyAsAlertAttributes(
     apiKey: CreateAPIKeyResult | null,
     username: string | null
@@ -3147,6 +3181,118 @@ export class RulesClient {
           apiKeyOwner: null,
           apiKey: null,
         };
+  }
+
+  private updateAttributesAndMapParams(
+    attributes: RawRule,
+    apiKeyAttributes: Pick<RawRule, 'apiKey' | 'apiKeyOwner'>,
+    updatedParams: RuleTypeParams,
+    rawAlertActions: RawRuleAction[],
+    username: string | null
+  ) {
+    // get notifyWhen
+    const notifyWhen = getRuleNotifyWhenType(
+      attributes.notifyWhen ?? null,
+      attributes.throttle ?? null
+    );
+
+    const updatedAttributes = this.updateMeta({
+      ...attributes,
+      ...apiKeyAttributes,
+      params: updatedParams as RawRule['params'],
+      actions: rawAlertActions,
+      notifyWhen,
+      updatedBy: username,
+      updatedAt: new Date().toISOString(),
+    });
+
+    // add mapped_params
+    const mappedParams = getMappedParams(updatedParams);
+
+    if (Object.keys(mappedParams).length) {
+      updatedAttributes.mapped_params = mappedParams;
+    }
+
+    return {
+      updatedAttributes,
+    };
+  }
+
+  private async bulkUpdateSchedules(
+    operations: BulkEditOperation[],
+    updatedRules: Array<Rule | RuleWithLegacyId>
+  ) {
+    const scheduleOperation = operations.find(
+      (
+        operation
+      ): operation is Extract<BulkEditOperation, { field: Extract<BulkEditFields, 'schedule'> }> =>
+        operation.field === 'schedule'
+    );
+
+    if (scheduleOperation?.value) {
+      const taskIds = updatedRules.reduce<string[]>((acc, rule) => {
+        if (rule.scheduledTaskId) {
+          acc.push(rule.scheduledTaskId);
+        }
+        return acc;
+      }, []);
+
+      try {
+        await this.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value);
+        this.logger.debug(
+          `Successfully updated schedules for underlying tasks: ${taskIds.join(', ')}`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failure to update schedules for underlying tasks: ${taskIds.join(
+            ', '
+          )}. TaskManager bulkUpdateSchedules failed with Error: ${error.message}`
+        );
+      }
+    }
+  }
+
+  private async saveBulkUpdatedRules(
+    rules: Array<SavedObjectsBulkUpdateObject<RawRule>>,
+    apiKeysMap: ApiKeysMap
+  ) {
+    const apiKeysToInvalidate: string[] = [];
+    let result;
+    try {
+      result = await this.unsecuredSavedObjectsClient.bulkCreate(rules, { overwrite: true });
+    } catch (e) {
+      // avoid unused newly generated API keys
+      if (apiKeysMap.size > 0) {
+        await bulkMarkApiKeysForInvalidation(
+          {
+            apiKeys: Array.from(apiKeysMap.values()).reduce<string[]>((acc, value) => {
+              if (value.newApiKey) {
+                acc.push(value.newApiKey);
+              }
+              return acc;
+            }, []),
+          },
+          this.logger,
+          this.unsecuredSavedObjectsClient
+        );
+      }
+      throw e;
+    }
+
+    result.saved_objects.map(({ id, error }) => {
+      const oldApiKey = apiKeysMap.get(id)?.oldApiKey;
+      const newApiKey = apiKeysMap.get(id)?.newApiKey;
+
+      // if SO wasn't saved and has new API key it will be invalidated
+      if (error && newApiKey) {
+        apiKeysToInvalidate.push(newApiKey);
+        // if SO saved and has old Api Key it will be invalidate
+      } else if (!error && oldApiKey) {
+        apiKeysToInvalidate.push(oldApiKey);
+      }
+    });
+
+    return { result, apiKeysToInvalidate };
   }
 
   public async updateApiKey({ id }: { id: string }): Promise<void> {

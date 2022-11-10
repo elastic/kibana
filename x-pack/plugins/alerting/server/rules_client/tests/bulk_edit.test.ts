@@ -1251,7 +1251,7 @@ describe('bulkEdit()', () => {
         paramsModifier: async (params) => {
           params.index = ['test-index-*'];
 
-          return params;
+          return { modifiedParams: params, isParamsUpdateSkipped: false, skipReasons: [] };
         },
       });
 
@@ -1294,7 +1294,7 @@ describe('bulkEdit()', () => {
         paramsModifier: async (params) => {
           params.index = ['test-index-*'];
 
-          return params;
+          return { modifiedParams: params, isParamsUpdateSkipped: false, skipReasons: [] };
         },
       });
 

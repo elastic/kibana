@@ -7,7 +7,6 @@
 
 import moment from 'moment';
 import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
-import { BulkEditSkipReason } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/response_schema';
 import type { IndexPatternRuleParams, RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
@@ -45,26 +44,18 @@ const isDeletedIndexPatternsNonExistent = (
 
 const shouldSkipIndexPatternsBulkAction = (
   ruleParams: IndexPatternRuleParams,
-  action: BulkActionEditPayloadIndexPatterns,
-  skipReasons: BulkEditSkipReason[]
+  action: BulkActionEditPayloadIndexPatterns
 ) => {
   if (isDataViewExistsAndNotOverriden(ruleParams, action)) {
-    skipReasons.push(BulkEditSkipReason.DataViewExistsAndNotOverriden);
     return true;
   }
 
   if (action.type === BulkActionEditType.add_index_patterns) {
-    if (isAddedIndexPatternsAlreadyExist(ruleParams, action)) {
-      skipReasons.push(BulkEditSkipReason.AddedIndexPatternAlreadyExists);
-      return true;
-    }
+    return isAddedIndexPatternsAlreadyExist(ruleParams, action);
   }
 
   if (action.type === BulkActionEditType.delete_index_patterns) {
-    if (isDeletedIndexPatternsNonExistent(ruleParams, action)) {
-      skipReasons.push(BulkEditSkipReason.DeletedIndexPatternNonExistent);
-      return true;
-    }
+    return isDeletedIndexPatternsNonExistent(ruleParams, action);
   }
 
   return false;
@@ -72,12 +63,10 @@ const shouldSkipIndexPatternsBulkAction = (
 
 const applyBulkActionEditToRuleParams = (
   existingRuleParams: RuleAlertType['params'],
-  action: BulkActionEditForRuleParams,
-  skipReasons: BulkEditSkipReason[]
+  action: BulkActionEditForRuleParams
 ): {
   ruleParams: RuleAlertType['params'];
   isActionSkipped: boolean;
-  skipReasons: BulkEditSkipReason[];
 } => {
   let ruleParams = { ...existingRuleParams };
   // If the action is succesfully applied and the rule params are modified,
@@ -95,7 +84,7 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
 
-      if (shouldSkipIndexPatternsBulkAction(ruleParams, action, skipReasons)) {
+      if (shouldSkipIndexPatternsBulkAction(ruleParams, action)) {
         break;
       }
 
@@ -113,7 +102,7 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
 
-      if (shouldSkipIndexPatternsBulkAction(ruleParams, action, skipReasons)) {
+      if (shouldSkipIndexPatternsBulkAction(ruleParams, action)) {
         break;
       }
 
@@ -133,7 +122,7 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
       );
 
-      if (shouldSkipIndexPatternsBulkAction(ruleParams, action, skipReasons)) {
+      if (shouldSkipIndexPatternsBulkAction(ruleParams, action)) {
         break;
       }
 
@@ -175,7 +164,7 @@ const applyBulkActionEditToRuleParams = (
     }
   }
 
-  return { ruleParams, isActionSkipped, skipReasons };
+  return { ruleParams, isActionSkipped };
 };
 
 /**
@@ -189,14 +178,9 @@ export const ruleParamsModifier = (
   actions: BulkActionEditForRuleParams[]
 ) => {
   let isParamsUpdateSkipped = true;
-  const skipReasons: BulkEditSkipReason[] = [];
 
   const modifiedParams = actions.reduce((acc, action) => {
-    const { ruleParams, isActionSkipped } = applyBulkActionEditToRuleParams(
-      acc,
-      action,
-      skipReasons
-    );
+    const { ruleParams, isActionSkipped } = applyBulkActionEditToRuleParams(acc, action);
 
     // The rule was updated with at least one action, so mark our rule as updated
     if (!isActionSkipped) {
@@ -211,5 +195,5 @@ export const ruleParamsModifier = (
     modifiedParams.version += 1;
   }
 
-  return { modifiedParams, isParamsUpdateSkipped, skipReasons };
+  return { modifiedParams, isParamsUpdateSkipped };
 };

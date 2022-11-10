@@ -9,9 +9,8 @@ import pMap from 'p-map';
 import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { BulkActionSkipResult } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/response_schema';
 import { convertRuleIdsToKueryNode } from '../../lib';
-import { BulkOperationError } from '../rules_client';
+import { BulkActionSkipResult, BulkOperationError } from '../rules_client';
 import { RawRule } from '../../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 
@@ -65,7 +64,7 @@ export const retryIfBulkEditConflicts = async (
       resultSavedObjects,
       errors: localErrors,
       rules: localRules,
-      skipped,
+      skipped: localSkipped,
     } = await bulkEditOperation(filter);
 
     const conflictErrorMap = resultSavedObjects.reduce<Map<string, { message: string }>>(
@@ -81,6 +80,7 @@ export const retryIfBulkEditConflicts = async (
     const results = [...accResults, ...resultSavedObjects.filter((res) => res.error === undefined)];
     const apiKeysToInvalidate = [...accApiKeysToInvalidate, ...localApiKeysToInvalidate];
     const errors = [...accErrors, ...localErrors];
+    const skipped = [...accSkipped, ...localSkipped];
 
     if (conflictErrorMap.size === 0) {
       return {
@@ -133,7 +133,8 @@ export const retryIfBulkEditConflicts = async (
             retries - 1,
             apiKeysToInvalidate,
             results,
-            errors
+            errors,
+            accSkipped
           ),
         {
           concurrency: 1,

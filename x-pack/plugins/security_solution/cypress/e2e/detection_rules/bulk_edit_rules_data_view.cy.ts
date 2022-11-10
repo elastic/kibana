@@ -56,7 +56,7 @@ const DATA_VIEW_ID = 'auditbeat';
 
 const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
 
-const expectedNumberOfCustomRulesToBeEdited = 3;
+const expectedNumberOfCustomRulesToBeEdited = 6;
 
 const indexDataSource = { dataView: DATA_VIEW_ID, type: 'dataView' } as const;
 
@@ -203,7 +203,7 @@ describe('Detection rules, bulk edit, index pattern and data view', () => {
         ...getNewRule(),
         dataSource: {
           type: 'indexPatterns',
-          index: ['index-1-*', 'index-2-*'],
+          index: ['test-index-1-*'],
         },
       },
       '2'
@@ -238,6 +238,7 @@ describe('Detection rules, bulk edit, index pattern and data view', () => {
 
     openBulkEditAddIndexPatternsForm();
     typeIndexPatterns(expectedIndexPatterns);
+    checkOverwriteDataViewCheckbox();
     submitBulkEditForm();
 
     waitForBulkEditActionToFinish({
@@ -246,7 +247,6 @@ describe('Detection rules, bulk edit, index pattern and data view', () => {
 
     // check if rule still has data view and index patterns field does not exist
     goToRuleDetails();
-    getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
-    assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
+    assertDetailsNotExist(DATA_VIEW_DETAILS);
   });
 });

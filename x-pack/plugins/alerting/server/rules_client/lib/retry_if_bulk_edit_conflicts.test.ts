@@ -28,6 +28,7 @@ const mockSuccessfulResult = {
     { id: '2', type: 'alert', attributes: { name: 'Test rule 2' }, references: [] },
   ],
   errors: [],
+  skipped: [],
 };
 
 async function OperationSuccessful() {
@@ -78,6 +79,7 @@ describe('retryIfBulkEditConflicts', () => {
     expect(result).toEqual({
       apiKeysToInvalidate: [],
       errors: [],
+      skipped: [],
       results: [
         {
           attributes: {},

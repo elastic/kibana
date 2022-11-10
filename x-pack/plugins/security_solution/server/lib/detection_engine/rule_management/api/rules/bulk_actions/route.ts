@@ -15,9 +15,13 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import type {
+  BulkActionSkipResult,
+  BulkEditActionResults,
+} from '@kbn/alerting-plugin/server/rules_client';
 import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
 
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
@@ -33,16 +37,13 @@ import {
 } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import type {
   NormalizedRuleError,
-  BulkActionError,
   RuleDetailsInError,
-  BulkEditActionResponse,
-  BulkActionSkipResult,
 } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/response_schema';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../../../utils/route_limited_concurrency_tag';
-import type { PromisePoolOutcome } from '../../../../../../utils/promise_pool';
+import type { PromisePoolError, PromisePoolOutcome } from '../../../../../../utils/promise_pool';
 import { initPromisePool } from '../../../../../../utils/promise_pool';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { deleteRules } from '../../../logic/crud/delete_rules';
@@ -67,6 +68,27 @@ import {
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
 const MAX_ROUTE_CONCURRENCY = 5;
+
+export type BulkActionError =
+  | PromisePoolError<string>
+  | PromisePoolError<RuleAlertType>
+  | BulkOperationError;
+
+export interface BulkEditActionSummary {
+  failed: number;
+  skipped: number;
+  succeeded: number;
+  total: number;
+}
+export interface BulkEditActionResponse {
+  success?: boolean;
+  rules_count?: number;
+  attributes: {
+    results: BulkEditActionResults;
+    summary: BulkEditActionSummary;
+    errors?: NormalizedRuleError[];
+  };
+}
 
 const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[] => {
   const errorsMap = new Map<string, NormalizedRuleError>();
