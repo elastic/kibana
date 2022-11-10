@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  useEuiPaddingSize,
 } from '@elastic/eui';
 
 import { SelectedModel } from './selected_model';
@@ -28,6 +29,8 @@ interface Props {
   onClose: () => void;
 }
 export const TestTrainedModelFlyout: FC<Props> = ({ modelId, onClose }) => {
+  const mediumPadding = useEuiPaddingSize('m');
+
   const trainedModelsApiService = useTrainedModelsApiService();
   const [inputType, setInputType] = useState<INPUT_TYPE>(INPUT_TYPE.TEXT);
   const [model, setModel] = useState<estypes.MlTrainedModelConfig | null>(null);
@@ -56,22 +59,25 @@ export const TestTrainedModelFlyout: FC<Props> = ({ modelId, onClose }) => {
               />
             </h2>
           </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
+          <EuiSpacer size="s" />
           <EuiTitle size="xs">
             <h4>{model.model_id}</h4>
           </EuiTitle>
-
-          <EuiSpacer size="m" />
-
-          <EuiTabs size="s">
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiTabs
+            size="m"
+            css={{
+              marginTop: `-${mediumPadding}`,
+            }}
+          >
             <EuiTab
               isSelected={inputType === INPUT_TYPE.TEXT}
               onClick={() => setInputType(INPUT_TYPE.TEXT)}
             >
               <FormattedMessage
                 id="xpack.ml.trainedModels.testModelsFlyout.textTab"
-                defaultMessage="Text"
+                defaultMessage="Test using text"
               />
             </EuiTab>
             <EuiTab
@@ -80,10 +86,12 @@ export const TestTrainedModelFlyout: FC<Props> = ({ modelId, onClose }) => {
             >
               <FormattedMessage
                 id="xpack.ml.trainedModels.testModelsFlyout.indexTab"
-                defaultMessage="Index"
+                defaultMessage="Test using existing ndex"
               />
             </EuiTab>
           </EuiTabs>
+
+          <EuiSpacer size="m" />
 
           <SelectedModel model={model} inputType={inputType} />
         </EuiFlyoutBody>
