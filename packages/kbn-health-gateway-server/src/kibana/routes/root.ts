@@ -20,14 +20,14 @@ const HTTPS = 'https:';
 const GATEWAY_ROOT_ROUTE = '/';
 const KIBANA_ROOT_ROUTE = '/';
 
-interface StatusRouteDependencies {
+interface RootRouteDependencies {
   log: Logger;
   config: IConfigService;
 }
 
 type Fetch = (path: string) => Promise<Response>;
 
-export function createRootRoute({ config, log }: StatusRouteDependencies) {
+export function createRootRoute({ config, log }: RootRouteDependencies) {
   const kibanaConfig = new KibanaConfig(config.atPathSync<KibanaConfigType>('kibana'));
   const fetch = configureFetch(kibanaConfig);
 
