@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Pagination } from '@elastic/eui';
-import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
-import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, Sort } from '../types';
@@ -75,7 +72,6 @@ export const getFindingsByResourceAggQuery = ({
   query,
   from,
   size,
-  pitId,
   sortDirection,
 }: UseResourceFindingsQueryOptions): estypes.SearchRequest => ({
   body: {
@@ -121,7 +117,6 @@ export const getFindingsByResourceAggQuery = ({
         },
       },
     },
-    pit: { id: pitId },
   },
   ignore_unavailable: false,
 });
@@ -132,14 +127,13 @@ export const useFindingsByResource = (options: UseFindingsByResourceOptions) => 
     notifications: { toasts },
   } = useKibana().services;
 
-  const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
-  const params = { ...options, pitId: pitIdRef.current };
+  const params = { ...options };
 
   return useQuery(
     ['csp_findings_resource', { params }],
     async () => {
       const {
-        rawResponse: { aggregations, pit_id: newPitId },
+        rawResponse: { aggregations },
       } = await lastValueFrom(
         data.search.search<FindingsAggRequest, FindingsAggResponse>({
           params: getFindingsByResourceAggQuery(params),
@@ -158,19 +152,12 @@ export const useFindingsByResource = (options: UseFindingsByResourceOptions) => 
         page: aggregations.resources.buckets.map(createFindingsByResource),
         total: aggregations.resource_total.value,
         count: getAggregationCount(aggregations.count.buckets),
-        newPitId: newPitId!,
       };
     },
     {
       enabled: options.enabled,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
-      onSuccess: ({ newPitId }) => {
-        setPitId(newPitId);
-      },
-      // Refetching on an interval to ensure the PIT window stays open
-      refetchInterval: FINDINGS_REFETCH_INTERVAL_MS,
-      refetchIntervalInBackground: true,
     }
   );
 };
