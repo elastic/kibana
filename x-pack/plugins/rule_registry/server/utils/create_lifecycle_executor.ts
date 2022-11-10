@@ -10,7 +10,7 @@ import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
 import { v4 } from 'uuid';
-import { difference, drop, remove } from 'lodash';
+import { difference, remove } from 'lodash';
 import {
   RuleExecutorOptions,
   Alert,
@@ -44,9 +44,7 @@ import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
 import { getCommonAlertFields } from './get_common_alert_fields';
-
-const MAX_CAPACITY = 20;
-const MAX_FLAP_COUNT = 4;
+import { atCapacity, isFlapping, updateFlappingHistory } from './flapping_utils';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
 
@@ -247,6 +245,7 @@ export const createLifecycleExecutor =
         const isRecovered = !currentAlerts[alertId];
         const isActive = !isRecovered;
 
+        // duplicating this logic to determine flapping at this level
         let flappingHistory: boolean[] = [];
         if (isNew) {
           flappingHistory = updateFlappingHistory([], false);
@@ -383,29 +382,3 @@ export const createLifecycleExecutor =
       trackedAlertsRecovered: writeAlerts ? nextTrackedAlertsRecovered : {},
     };
   };
-
-function updateFlappingHistory(flappingHistory: boolean[], state: boolean) {
-  if (atCapacity(flappingHistory)) {
-    const diff = getCapcityDiff(flappingHistory);
-    flappingHistory = drop(flappingHistory, diff);
-  }
-  flappingHistory.push(state);
-  return flappingHistory;
-}
-
-function isFlapping(flappingHistory: boolean[]): boolean {
-  if (atCapacity(flappingHistory)) {
-    const numStateChanges = flappingHistory.filter((f) => f).length;
-    return numStateChanges >= MAX_FLAP_COUNT;
-  }
-  return false;
-}
-
-function atCapacity(flappingHistory: boolean[] = []): boolean {
-  return flappingHistory.length >= MAX_CAPACITY;
-}
-
-function getCapcityDiff(flappingHistory: boolean[] = []) {
-  const len = flappingHistory.length;
-  return len + 1 - MAX_CAPACITY;
-}
