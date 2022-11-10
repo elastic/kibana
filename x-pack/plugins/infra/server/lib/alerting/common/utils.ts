@@ -234,7 +234,7 @@ export const flattenAdditionalContext = (
     });
   }
   return flattenedContext;
-}
+};
 
 export const getContextForRecoveredAlerts = (
   alertHits: AdditionalContext | undefined | null
