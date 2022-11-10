@@ -34,6 +34,7 @@ import type { EuiButtonIconProps } from '@elastic/eui';
 import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -54,7 +55,6 @@ import type { FormatSelectorOptions } from './datasources/form_based/dimension_p
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 export interface IndexPatternRef {
   id: string;
