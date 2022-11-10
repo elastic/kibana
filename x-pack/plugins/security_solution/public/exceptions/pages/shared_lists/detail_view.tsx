@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiTitle } from '@elastic/eui';
-import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
-import { NotFoundPage } from '../../app/404';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
+import { NotFoundPage } from '../../../app/404';
 
 export const ExceptionListsDetailView = memo(() => {
   const { exceptionListId: listId } = useParams<{

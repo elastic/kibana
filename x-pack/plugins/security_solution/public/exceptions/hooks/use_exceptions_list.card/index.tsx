@@ -55,15 +55,6 @@ export const useExceptionsListCard = ({
     setShowEditExceptionFlyout(true);
   };
 
-  // const filters = useMemo(
-  //   (): string =>
-  //     getFilters({
-  //       filters: filterOptions,
-  //       namespaceTypes,
-  //       hideLists,
-  //     }),
-  //   [namespaceTypes, filterOptions, hideLists]
-  // );
   const {
     lastUpdated,
     exceptionViewerStatus,
