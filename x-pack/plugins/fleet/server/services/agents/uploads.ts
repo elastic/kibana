@@ -13,6 +13,8 @@ import { createEsFileClient } from '@kbn/files-plugin/server';
 
 import type { ResponseHeaders } from '@kbn/core-http-server';
 
+import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common/services';
+
 import type { AgentDiagnostics } from '../../../common/types/models';
 import { appContextService } from '../app_context';
 import {
@@ -23,8 +25,8 @@ import {
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-const FILE_STORAGE_METADATA_AGENT_INDEX = '.fleet-agent-files';
-const FILE_STORAGE_DATA_AGENT_INDEX = '.fleet-agent-file-data';
+const FILE_STORAGE_METADATA_AGENT_INDEX = getFileMetadataIndexName('agent');
+const FILE_STORAGE_DATA_AGENT_INDEX = getFileDataIndexName('agent');
 
 export async function getAgentUploads(
   esClient: ElasticsearchClient,

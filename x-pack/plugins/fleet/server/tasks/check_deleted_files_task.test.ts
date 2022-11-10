@@ -13,11 +13,13 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { createAppContextStartContractMock } from '../mocks';
 import {
   FILE_STORAGE_DATA_INDEX_PATTERN,
   FILE_STORAGE_METADATA_INDEX_PATTERN,
-} from '../constants/fleet_es_assets';
+} from '../../common/constants';
+
+import { createAppContextStartContractMock } from '../mocks';
+
 import { appContextService } from '../services';
 
 import { CheckDeletedFilesTask, TYPE, VERSION } from './check_deleted_files_task';
