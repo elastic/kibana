@@ -24,6 +24,7 @@ import type {
   VisualizationDimensionGroupConfig,
   Suggestion,
   VisualizeEditorContext,
+  VisualizationInfo,
 } from '../../types';
 import { getSortedGroups, toExpression, toPreviewExpression } from './to_expression';
 import {
@@ -39,6 +40,10 @@ import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionDataExtraEditor, DimensionEditor, PieToolbar } from './toolbar';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
+
+const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
+  defaultMessage: 'Metric',
+});
 
 function newLayerState(layerId: string): PieLayerState {
   return {
@@ -299,9 +304,7 @@ export const getPieVisualization = ({
         ? i18n.translate('xpack.lens.pie.groupMetricLabel', {
             defaultMessage: 'Metrics',
           })
-        : i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
-            defaultMessage: 'Metric',
-          });
+        : metricLabel;
 
       return {
         groupId: 'metric',
@@ -581,15 +584,14 @@ export const getPieVisualization = ({
 
   getVisualizationInfo(state: PieVisualizationState) {
     const layer = state.layers[0];
-    const dimensions = [];
-    if (layer.metric) {
+    const dimensions: VisualizationInfo['layers'][number]['dimensions'] = [];
+
+    layer.metrics.forEach((metric) => {
       dimensions.push({
-        id: layer.metric,
-        name: i18n.translate('xpack.lens.pie.groupsizeLabel', {
-          defaultMessage: 'Size by',
-        }),
+        id: metric,
+        name: metricLabel,
       });
-    }
+    });
 
     if (state.shape === 'mosaic' && layer.secondaryGroups && layer.secondaryGroups.length) {
       layer.secondaryGroups.forEach((accessor) => {
