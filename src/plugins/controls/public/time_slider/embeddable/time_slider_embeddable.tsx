@@ -25,7 +25,15 @@ import { ControlGroupContainer } from '../../control_group/embeddable/control_gr
 import { TimeSlider, TimeSliderPrepend } from '../components';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
-import { getMomentTimezone, getStepSize, getTicks, FROM_INDEX, TO_INDEX, roundDownToNextStepSizeFactor, roundUpToNextStepSizeFactor } from '../time_utils';
+import {
+  getMomentTimezone,
+  getStepSize,
+  getTicks,
+  FROM_INDEX,
+  TO_INDEX,
+  roundDownToNextStepSizeFactor,
+  roundUpToNextStepSizeFactor,
+} from '../time_utils';
 
 export class TimeSliderControlEmbeddable extends Embeddable<
   TimeSliderControlEmbeddableInput,
@@ -67,7 +75,11 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const timeRangeBounds = this.timeRangeToBounds(
       input.timeRange ? input.timeRange : getDefaultTimeRange()
     );
-    const ticks = getTicks(timeRangeBounds[FROM_INDEX], timeRangeBounds[TO_INDEX], this.getTimezone());
+    const ticks = getTicks(
+      timeRangeBounds[FROM_INDEX],
+      timeRangeBounds[TO_INDEX],
+      this.getTimezone()
+    );
     const stepSize = getStepSize(ticks);
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       TimeSliderReduxState,

@@ -13,7 +13,12 @@ import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
 import { TimeSliderPopoverButton } from './time_slider_popover_button';
 import { TimeSliderPopoverContent } from './time_slider_popover_content';
-import { FROM_INDEX, TO_INDEX, roundDownToNextStepSizeFactor, roundUpToNextStepSizeFactor } from '../time_utils';
+import {
+  FROM_INDEX,
+  TO_INDEX,
+  roundDownToNextStepSizeFactor,
+  roundUpToNextStepSizeFactor,
+} from '../time_utils';
 
 import './index.scss';
 

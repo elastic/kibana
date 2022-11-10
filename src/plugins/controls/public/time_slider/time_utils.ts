@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { calcAutoIntervalNear } from '@kbn/data-plugin/common';
 
-const MAX_TICKS = 20; //eui range has hard limit of 20 ticks and throws when exceeded
+const MAX_TICKS = 20; // eui range has hard limit of 20 ticks and throws when exceeded
 
 export const FROM_INDEX = 0;
 export const TO_INDEX = 1;
@@ -86,21 +86,17 @@ export function getStepSize(ticks: EuiRangeTick[]) {
   if (ticks.length < 2) {
     return 1;
   }
-  
+
   const tickRange = ticks[1].value - ticks[0].value;
   return calcAutoIntervalNear(5, tickRange).asMilliseconds();
 }
 
 export function roundDownToNextStepSizeFactor(value: number, stepSize: number) {
   const remainder = value % stepSize;
-  return remainder === 0
-    ? value
-    : value - remainder;
+  return remainder === 0 ? value : value - remainder;
 }
 
 export function roundUpToNextStepSizeFactor(value: number, stepSize: number) {
   const remainder = value % stepSize;
-  return remainder === 0
-    ? value
-    : value + (stepSize - remainder);
+  return remainder === 0 ? value : value + (stepSize - remainder);
 }
