@@ -11,7 +11,7 @@ import { ALERT_UUID } from '../../common/technical_rule_data_field_names';
 
 type RuleDataClient = PublicContract<IRuleDataClient>;
 
-export const fetchAlertbyAlertUUID = async (ruleDataClient: RuleDataClient, alertUuid: string) => {
+export const fetchAlertByAlertUUID = async (ruleDataClient: RuleDataClient, alertUuid: string) => {
   const request = {
     body: {
       query: {

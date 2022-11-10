@@ -44,7 +44,7 @@ import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
 import { getCommonAlertFields } from './get_common_alert_fields';
-import { fetchAlertbyAlertUUID } from './fetch_alert_by_uuid';
+import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
 
@@ -64,10 +64,6 @@ export type LifecycleAlertService<
   fields: ExplicitAlertFields;
 }) => Alert<InstanceState, InstanceContext, ActionGroupIds>;
 
-export interface AdditionalContext {
-  [x: string]: any;
-}
-
 export interface LifecycleAlertServices<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
@@ -76,7 +72,7 @@ export interface LifecycleAlertServices<
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
   getAlertStartedDate: (alertInstanceId: string) => string | null;
   getAlertUuid: (alertInstanceId: string) => string | null;
-  getAlertByAlertUuid: (alertUuid: string) => Promise<AdditionalContext> | null;
+  getAlertByAlertUuid: (alertUuid: string) => { [x: string]: any; } | null;
 }
 
 export type LifecycleRuleExecutor<
@@ -189,7 +185,12 @@ export const createLifecycleExecutor =
         return state.trackedAlerts[alertId].alertUuid;
       },
       getAlertByAlertUuid: async (alertUuid: string) => {
-        return await fetchAlertbyAlertUUID(ruleDataClient, alertUuid);
+        try {
+          return await fetchAlertByAlertUUID(ruleDataClient, alertUuid);
+        }
+        catch (err) {
+          return null;
+        }
       },
     };
 
