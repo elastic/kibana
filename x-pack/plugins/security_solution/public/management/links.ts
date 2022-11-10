@@ -284,7 +284,7 @@ export const getManagementFilteredLinks = async (
       if (!shouldBeAbleToDeleteEntries) {
         linksToExclude.push(SecurityPageName.hostIsolationExceptions);
       }
-    } else if (!canIsolateHost) {
+    } else if (!canIsolateHost || !canAccessEndpointManagement) {
       linksToExclude.push(SecurityPageName.hostIsolationExceptions);
     }
   } catch {
