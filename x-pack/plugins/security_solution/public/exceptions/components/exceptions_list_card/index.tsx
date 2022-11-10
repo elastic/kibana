@@ -142,7 +142,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                               onClick={goToExceptionDetail}
                             >
                               {listName}
-                            </EuiLink>{' '}
+                            </EuiLink>
                           </EuiText>
                         </EuiFlexItem>
                         <EuiFlexItem grow>
