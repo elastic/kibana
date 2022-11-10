@@ -71,13 +71,11 @@ export function getTicks(min: number, max: number, timezone: string): EuiRangeTi
 
   let tick = Math.ceil(min / interval) * interval;
   const ticks: EuiRangeTick[] = [];
-  let hasLabel = true;
   while (tick <= max) {
     ticks.push({
       value: tick,
-      label: hasLabel ? moment.tz(tick, getMomentTimezone(timezone)).format(format) : <></>,
+      label: moment.tz(tick, getMomentTimezone(timezone)).format(format),
     });
-    hasLabel = !hasLabel;
     tick += interval;
   }
 
