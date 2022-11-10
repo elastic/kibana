@@ -45,6 +45,15 @@
           },
           "possibly_null_field": {
             "type": "keyword"
+          },
+          "large_array_10": {
+            "type": "keyword"
+          },
+          "large_array_20": {
+            "type": "keyword"
+          },
+          "large_array_5": {
+            "type": "keyword"
           }
         }
       },

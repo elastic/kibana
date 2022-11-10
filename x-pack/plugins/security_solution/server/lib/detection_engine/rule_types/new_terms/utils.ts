@@ -94,20 +94,30 @@ export const getNewTermsRuntimeMappings = (
       script: {
         params: { fields: newTermsFields },
         source: `
-          void traverseDocFields(def doc, def fields, def index, def line) {
-            if (index === fields.length) {
-              emit(line);
-            } else {
-              for (field in doc[fields[index]]) {
-                def delimiter = index === 0 ? '' : '${DELIMITER}';
-                def nextLine = line + delimiter + String.valueOf(field).encodeBase64();
-
-                traverseDocFields(doc, fields, index + 1, nextLine);
+          def stack = new Stack();
+          // ES has limit in 100 values for runtime field, after this query will fail
+          int emitLimit = 100;
+          stack.add([0, '']);
+          
+          while (stack.length > 0) {
+              if (emitLimit == 0) {
+                break;
               }
-            }
+              def tuple = stack.pop();
+              def index = tuple[0];
+              def line = tuple[1];    
+              if (index === params['fields'].length) {
+                emit(line);
+                emitLimit = emitLimit - 1;
+              } else {
+                for (field in doc[params['fields'][index]]) {
+                    def delimiter = index === 0 ? '' : '${DELIMITER}';
+                    def nextLine = line + delimiter + String.valueOf(field).encodeBase64();
+          
+                    stack.add([index + 1, nextLine])
+                }
+              }
           }
-
-          traverseDocFields(doc, params['fields'], 0, '');
         `,
       },
     },

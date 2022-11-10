@@ -408,6 +408,64 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).eql(0);
       });
     });
+
+    describe('large arrays values', () => {
+      it('should generate alerts for unique values in large array for single field from a single document', async () => {
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['large_array_20'],
+          from: '2020-10-19T05:00:04.000Z',
+          history_window_start: '2020-10-13T05:00:04.000Z',
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        // there are 20 unique values for the document, but only 10 alerts generated
+        expect(previewAlerts.length).eql(10);
+      });
+
+      // There is a limit in ES for a number of emitted values in runtime field (100)
+      // This test ensures rule run doesn't fail if processed fields in runtime script generates 100 values, hard limit for ES
+      // For this test case: large_array_10 & large_array_5 have 100 unique combination in total
+      it('should generate alerts for array fields that have 100 unique combination of values in runtime field', async () => {
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['large_array_10', 'large_array_5'],
+          from: '2020-10-19T05:00:04.000Z',
+          history_window_start: '2020-10-13T05:00:04.000Z',
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        // there are 100 unique values for the document, but only 10 alerts generated
+        expect(previewAlerts.length).eql(10);
+      });
+
+      // There is a limit in ES for a number of emitted values in runtime field (100)
+      // This test ensures rule run doesn't fail if processed fields in runtime script generates 200 values
+      // In case of this test case: large_array_10 & large_array_20 have 200 unique combination in total
+      // Rule run should not fail and should generate alerts
+      it('should generate alert for array fields that have more than 200 unique combination of values in runtime field', async () => {
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['large_array_10', 'large_array_20'],
+          from: '2020-10-19T05:00:04.000Z',
+          history_window_start: '2020-10-13T05:00:04.000Z',
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        // there are 200 unique values for the document, but only 10 alerts generated
+        expect(previewAlerts.length).eql(10);
+      });
+    });
+
     describe('timestamp override and fallback', () => {
       before(async () => {
         await esArchiver.load(
