@@ -217,11 +217,11 @@ export const mathematicalFunctions = {
             'unifiedSearch.query.textBasedLanguagesEditor.documentation.roundFunction.markdown',
             {
               defaultMessage: `### round
-Returns a number rounded to the decimal, specified by the precision. The default is to round to an integer.
+Returns a number rounded to the decimal, specified by he closest integer value. The default is to round to an integer.
 
 \`\`\`
 from index where field="value" | 
-eval rounded = round(field, 3)
+eval rounded = round(field)
 \`\`\`
               `,
               description:
@@ -245,30 +245,6 @@ export const operators = {
     }
   ),
   items: [
-    {
-      label: i18n.translate(
-        'unifiedSearch.query.textBasedLanguagesEditor.documentation.equalOperator',
-        {
-          defaultMessage: 'Equality',
-        }
-      ),
-      description: (
-        <Markdown
-          markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.equalOperator.markdown',
-            {
-              defaultMessage: `### Equality (=)
-\`\`\`
-from index | stats average = avg(field) | eval new_average = average + 1
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
     {
       label: i18n.translate(
         'unifiedSearch.query.textBasedLanguagesEditor.documentation.AddOperator',
