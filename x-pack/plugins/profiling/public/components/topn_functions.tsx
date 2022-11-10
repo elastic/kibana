@@ -212,6 +212,9 @@ export const TopNFunctionsTable = ({
         defaultMessage: 'Rank',
       }),
       align: 'right',
+      render: (_, { rank }) => {
+        return <EuiText style={{ whiteSpace: 'nowrap', fontSize: 'inherit' }}>{rank}</EuiText>;
+      },
     },
     {
       field: TopNFunctionSortField.Frame,
