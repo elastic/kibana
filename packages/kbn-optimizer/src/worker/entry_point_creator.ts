@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// this is a skip for the errors created when typechecking with isolatedModules
 // @ts-ignore
 module.exports = function ({
   entries,
