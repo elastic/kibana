@@ -313,7 +313,7 @@ export default function ({ getService }: FtrProviderContext) {
             canManageApiKeys: false,
             canEnable: false,
             isEnabled: true,
-            isValidApiKey: false,
+            isValidApiKey: true,
           });
         } finally {
           await supertestWithAuth
