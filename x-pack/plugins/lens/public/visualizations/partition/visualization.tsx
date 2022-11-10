@@ -36,7 +36,7 @@ import {
 } from '../../../common';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { DimensionEditor, PieToolbar } from './toolbar';
+import { DimensionDataExtraEditor, DimensionEditor, PieToolbar } from './toolbar';
 import { checkTableForContainsSmallValues } from './render_helpers';
 
 function newLayerState(layerId: string): PieLayerState {
@@ -272,6 +272,7 @@ export const getPieVisualization = ({
       groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
         defaultMessage: 'Size by',
       }),
+      isMetricDimension: true,
       dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.groupSizeLabel', {
         defaultMessage: 'Size',
       }),
@@ -352,6 +353,16 @@ export const getPieVisualization = ({
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
         <I18nProvider>
           <DimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+  renderDimensionEditorDataExtra(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <DimensionDataExtraEditor {...props} paletteService={paletteService} />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement

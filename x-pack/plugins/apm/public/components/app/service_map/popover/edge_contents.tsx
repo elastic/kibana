@@ -49,7 +49,7 @@ export function EdgeContents({ elementData }: ContentsProps) {
       ` [ span where service.name == "${sourceService}" and span.destination.service.resource == "${edgeData.targetData[SPAN_DESTINATION_SERVICE_RESOURCE]}" ]`;
   }
 
-  const url = apmRouter.link('/traces/explorer', {
+  const url = apmRouter.link('/traces/explorer/waterfall', {
     query: {
       ...query,
       type: TraceSearchType.eql,
