@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -138,18 +139,62 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
             </EuiFlexGroup>
           </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiImage
-              alt="Illustration of Elastic data integrations"
-              className="homDataAdd__illustration"
-              src={
-                addBasePath('/plugins/kibanaReact/assets/') +
-                (isDarkMode
-                  ? 'illustration_integrations_darkmode.svg'
-                  : 'illustration_integrations_lightmode.svg')
-              }
-            />
-          </EuiFlexItem>
+          {isCloudEnabled && (
+            <EuiFlexItem>
+              <EuiPanel paddingSize="l">
+                <EuiFlexGroup className="moveYourData__panel" alignItems="center" gutterSize="xl">
+                  <EuiFlexItem>
+                    <EuiImage
+                      alt="Illustration of Elastic data integrations"
+                      className="moveYourData__illustration"
+                      src={
+                        addBasePath('/plugins/kibanaReact/assets/') +
+                        (isDarkMode
+                          ? 'illustration-cloud-migration.svg'
+                          : 'illustration-cloud-migration.svg')
+                      }
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h4>
+                        <FormattedMessage
+                          id="home.addData.moveYourDataTitle"
+                          defaultMessage="Move your data to Elastic Cloud"
+                        />
+                      </h4>
+                    </EuiTitle>
+
+                    <EuiSpacer size="s" />
+
+                    <EuiText size="s">
+                      <FormattedMessage
+                        id="home.addData.moveYourDataToElasticCloud"
+                        defaultMessage="Moving to Elastic Cloud is easy. Learn more about how it can help you save time and money"
+                      />
+                    </EuiText>
+
+                    <EuiSpacer size="m" />
+
+                    {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                    <EuiButton
+                      color="primary"
+                      href={addBasePath('/app/management/data/migrate_data')}
+                      onClick={(event: MouseEvent) => {
+                        trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud');
+                        createAppNavigationHandler('/app/management/data/migrate_data')(event);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="home.addData.moveYourDataButtonLabel"
+                        defaultMessage="Explore the benefits"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     );
