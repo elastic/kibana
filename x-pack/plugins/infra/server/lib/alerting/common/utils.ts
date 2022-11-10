@@ -20,7 +20,7 @@ import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
-import { unflattenObject } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/lib';
+import { set } from '@kbn/safer-lodash-set';
 
 const ALERT_CONTEXT_CONTAINER = 'container' as const;
 const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator' as const;
@@ -233,3 +233,46 @@ export const getContextForRecoveredAlerts = (
     tags: alertHitsSource?.[ALERT_CONTEXT_TAGS],
   };
 };
+
+export const unflattenObject = <T extends object = AdditionalContext>(object: object): T =>
+  Object.entries(object).reduce((acc, [key, value]) => {
+    set(acc, key, value);
+    return acc;
+  }, {} as T);
+
+/**
+ * Wrap the key with [] if it is a key from an Array
+ * @param key The object key
+ * @param isArrayItem Flag to indicate if it is the key of an Array
+ */
+const renderKey = (key: string, isArrayItem: boolean): string => (isArrayItem ? `[${key}]` : key);
+
+export const flattenObject = (
+  obj: AdditionalContext,
+  prefix: string[] = [],
+  isArrayItem = false
+): AdditionalContext =>
+  Object.keys(obj).reduce<AdditionalContext>((acc, k) => {
+    const nextValue = obj[k];
+
+    if (typeof nextValue === 'object' && nextValue !== null) {
+      const isNextValueArray = Array.isArray(nextValue);
+      const dotSuffix = isNextValueArray ? '' : '.';
+
+      if (Object.keys(nextValue).length > 0) {
+        return {
+          ...acc,
+          ...flattenObject(
+            nextValue,
+            [...prefix, `${renderKey(k, isArrayItem)}${dotSuffix}`],
+            isNextValueArray
+          ),
+        };
+      }
+    }
+
+    const fullPath = `${prefix.join('')}${renderKey(k, isArrayItem)}`;
+    acc[fullPath] = nextValue;
+
+    return acc;
+  }, {});

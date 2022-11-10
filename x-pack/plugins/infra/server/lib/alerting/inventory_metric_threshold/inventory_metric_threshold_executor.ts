@@ -33,13 +33,13 @@ import {
 import {
   AdditionalContext,
   createScopedLogger,
+  flattenObject,
   getAlertDetailsUrl,
   getContextForRecoveredAlerts,
   getViewInInventoryAppUrl,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
 import { evaluateCondition, ConditionResult } from './evaluate_condition';
-import { flattenObject } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/lib';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS

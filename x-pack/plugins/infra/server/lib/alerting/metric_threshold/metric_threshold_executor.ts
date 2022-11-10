@@ -35,12 +35,12 @@ import {
   UNGROUPED_FACTORY_KEY,
   hasAdditionalContext,
   validGroupByForContext,
+  flattenObject,
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
-import { flattenObject } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/lib';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
