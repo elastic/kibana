@@ -94,7 +94,10 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       let flattenedContext: AdditionalContext = {};
       additionalContext?.keys.forEach((context: string) => {
         if (additionalContext[context]) {
-          flattenedContext = { ...flattenedContext, ...flattenObject(additionalContext[context], [context + "."]) };
+          flattenedContext = {
+            ...flattenedContext,
+            ...flattenObject(additionalContext[context], [context + '.']),
+          };
         }
       });
 
@@ -103,7 +106,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         fields: {
           [ALERT_REASON]: reason,
           [ALERT_RULE_PARAMETERS]: params as any, // the type assumes the object is already flattened when writing the same way as when reading https://github.com/elastic/kibana/blob/main/x-pack/plugins/rule_registry/common/field_map/runtime_type_from_fieldmap.ts#L60
-          ...flattenedContext
+          ...flattenedContext,
         },
       });
     };
