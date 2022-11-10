@@ -234,6 +234,7 @@ export class APMPlugin
           indices,
           options: {
             includeFrozen,
+            forceSyntheticSource: currentConfig.forceSyntheticSource,
           },
         });
       },

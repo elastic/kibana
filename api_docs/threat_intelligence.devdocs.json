@@ -284,7 +284,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "Query"
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              }
             ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
@@ -301,7 +307,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]"
             ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
@@ -319,7 +331,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "TimeRange"
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              }
             ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,

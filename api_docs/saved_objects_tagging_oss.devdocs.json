@@ -182,7 +182,13 @@
             "label": "tagReferences",
             "description": [],
             "signature": [
-              "SavedObjectsFindOptionsReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsFindOptionsReference",
+                "text": "SavedObjectsFindOptionsReference"
+              },
               "[]"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -247,72 +253,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedObjectsTaggingOss",
-        "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectSaveModalTagSelectorComponentProps",
-        "description": [
-          "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector | SavedObjectSaveModalTagSelector component}\n"
-        ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "savedObjectsTaggingOss",
-            "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.initialSelection",
-            "type": "Array",
-            "tags": [],
-            "label": "initialSelection",
-            "description": [
-              "\nIds of the initially selected tags.\nChanging the value of this prop after initial mount will not rerender the component (see component description for more details)"
-            ],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedObjectsTaggingOss",
-            "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.onTagsSelected",
-            "type": "Function",
-            "tags": [],
-            "label": "onTagsSelected",
-            "description": [
-              "\ntags selection callback"
-            ],
-            "signature": [
-              "(ids: string[]) => void"
-            ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjectsTaggingOss",
-                "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.onTagsSelected.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "ids",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -471,7 +411,13 @@
                 "text": "SavedObject"
               },
               "<",
-              "SavedObjectAttributes",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectAttributes",
+                "text": "SavedObjectAttributes"
+              },
               ">) => object is ",
               {
                 "pluginId": "savedObjectsTaggingOss",
@@ -501,7 +447,13 @@
                     "text": "SavedObject"
                   },
                   "<",
-                  "SavedObjectAttributes",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectAttributes",
+                    "text": "SavedObjectAttributes"
+                  },
                   ">"
                 ],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -583,7 +535,13 @@
               " | undefined) => ",
               "EuiTableFieldDataColumnType",
               "<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>>"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -626,7 +584,13 @@
             ],
             "signature": [
               "(tagName: string) => ",
-              "SavedObjectsFindOptionsReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsFindOptionsReference",
+                "text": "SavedObjectsFindOptionsReference"
+              },
               " | undefined"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -737,9 +701,21 @@
             ],
             "signature": [
               "(references: (",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               " | ",
-              "SavedObjectsFindOptionsReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsFindOptionsReference",
+                "text": "SavedObjectsFindOptionsReference"
+              },
               ")[]) => string[]"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -755,9 +731,21 @@
                 "description": [],
                 "signature": [
                   "(",
-                  "SavedObjectReference",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
                   " | ",
-                  "SavedObjectsFindOptionsReference",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SavedObjectsFindOptionsReference",
+                    "text": "SavedObjectsFindOptionsReference"
+                  },
                   ")[]"
                 ],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -813,9 +801,21 @@
             ],
             "signature": [
               "(references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[], newTagIds: string[]) => ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -830,7 +830,13 @@
                 "label": "references",
                 "description": [],
                 "signature": [
-                  "SavedObjectReference",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -1086,7 +1092,13 @@
             ],
             "signature": [
               "{ references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]; }"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -1215,6 +1227,41 @@
     "misc": [
       {
         "parentPluginId": "savedObjectsTaggingOss",
+        "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectSaveModalTagSelectorComponentProps",
+        "description": [
+          "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector | SavedObjectSaveModalTagSelector component}\n"
+        ],
+        "signature": [
+          "Omit<",
+          "_EuiComboBoxProps",
+          "<",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          " | { type: \"__create_option__\"; }>, \"options\" | \"selectedOptions\" | \"append\" | \"prepend\" | \"fullWidth\" | \"compressed\" | \"async\" | \"isClearable\" | \"singleSelection\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          " | { type: \"__create_option__\"; }>> & { initialSelection: string[]; onTagsSelected: (ids: string[]) => void; }"
+        ],
+        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.SavedObjectTagDecoratorTypeGuard",
         "type": "Type",
         "tags": [],
@@ -1230,7 +1277,13 @@
             "text": "SavedObject"
           },
           "<",
-          "SavedObjectAttributes",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          },
           ">) => object is ",
           {
             "pluginId": "savedObjectsTaggingOss",
@@ -1261,7 +1314,13 @@
                 "text": "SavedObject"
               },
               "<",
-              "SavedObjectAttributes",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectAttributes",
+                "text": "SavedObjectAttributes"
+              },
               ">"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -1287,7 +1346,13 @@
             "text": "SavedObject"
           },
           "<",
-          "SavedObjectAttributes",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          },
           "> & { getTags(): string[]; setTags(tags: string[]): void; }"
         ],
         "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts",

@@ -13,11 +13,16 @@ function isUndefinedOrNull(value: any): value is undefined | null {
   return value === undefined || value === null;
 }
 
+interface TermQueryOpts {
+  queryEmptyString: boolean;
+}
+
 export function termQuery<T extends string>(
   field: T,
-  value: string | boolean | number | undefined | null
+  value: string | boolean | number | undefined | null,
+  opts: TermQueryOpts = { queryEmptyString: true }
 ): QueryDslQueryContainer[] {
-  if (isUndefinedOrNull(value)) {
+  if (isUndefinedOrNull(value) || (!opts.queryEmptyString && value === '')) {
     return [];
   }
 

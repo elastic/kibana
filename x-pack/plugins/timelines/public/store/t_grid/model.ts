@@ -26,7 +26,7 @@ export interface TGridModelSettings {
   showCheckboxes: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: SortColumnTable[];
-  title: string;
+  title?: string;
   unit?: (n: number) => string | React.ReactNode;
 }
 export interface TGridModel extends TGridModelSettings {
@@ -62,12 +62,15 @@ export interface TGridModel extends TGridModelSettings {
   sessionViewConfig: SessionViewConfig | null;
   /** updated saved object timestamp */
   updated?: number;
+  /** Total number of fetched events/alerts */
+  totalCount: number;
 }
 
 export type SubsetTGridModel = Readonly<
   Pick<
     TGridModel,
     | 'columns'
+    | 'selectAll'
     | 'defaultColumns'
     | 'dataViewId'
     | 'deletedEventIds'
@@ -85,5 +88,7 @@ export type SubsetTGridModel = Readonly<
     | 'graphEventId'
     | 'sessionViewConfig'
     | 'queryFields'
+    | 'title'
+    | 'totalCount'
   >
 >;

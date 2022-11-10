@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "extraPublicDirs": ["common"],
   "include": [
@@ -15,7 +14,7 @@
     "storybook/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
     { "path": "../embeddable/tsconfig.json" },

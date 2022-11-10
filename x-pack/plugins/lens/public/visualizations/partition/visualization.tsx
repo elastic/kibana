@@ -36,7 +36,7 @@ import {
 } from '../../../common';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { DimensionEditor, PieToolbar } from './toolbar';
+import { DimensionDataExtraEditor, DimensionEditor, PieToolbar } from './toolbar';
 import { checkTableForContainsSmallValues } from './render_helpers';
 
 function newLayerState(layerId: string): PieLayerState {
@@ -272,6 +272,7 @@ export const getPieVisualization = ({
       groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
         defaultMessage: 'Size by',
       }),
+      isMetricDimension: true,
       dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.groupSizeLabel', {
         defaultMessage: 'Size',
       }),
@@ -352,6 +353,16 @@ export const getPieVisualization = ({
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
         <I18nProvider>
           <DimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+  renderDimensionEditorDataExtra(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <DimensionDataExtraEditor {...props} paletteService={paletteService} />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement
@@ -496,5 +507,63 @@ export const getPieVisualization = ({
           },
         ]
       : [];
+  },
+
+  getVisualizationInfo(state: PieVisualizationState) {
+    const layer = state.layers[0];
+    const dimensions = [];
+    if (layer.metric) {
+      dimensions.push({
+        id: layer.metric,
+        name: i18n.translate('xpack.lens.pie.groupsizeLabel', {
+          defaultMessage: 'Size by',
+        }),
+      });
+    }
+
+    if (state.shape === 'mosaic' && layer.secondaryGroups && layer.secondaryGroups.length) {
+      layer.secondaryGroups.forEach((accessor) => {
+        dimensions.push({
+          name: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
+            defaultMessage: 'Horizontal axis',
+          }),
+          id: accessor,
+        });
+      });
+    }
+
+    if (layer.primaryGroups && layer.primaryGroups.length) {
+      let name = i18n.translate('xpack.lens.pie.treemapGroupLabel', {
+        defaultMessage: 'Group by',
+      });
+      if (state.shape === 'mosaic') {
+        name = i18n.translate('xpack.lens.pie.verticalAxisLabel', {
+          defaultMessage: 'Vertical axis',
+        });
+      }
+      if (state.shape === 'donut' || state.shape === 'pie') {
+        name = i18n.translate('xpack.lens.pie.sliceGroupLabel', {
+          defaultMessage: 'Slice by',
+        });
+      }
+      layer.primaryGroups.forEach((accessor) => {
+        dimensions.push({
+          name,
+          id: accessor,
+        });
+      });
+    }
+
+    return {
+      layers: [
+        {
+          layerId: layer.layerId,
+          layerType: layer.layerType,
+          chartType: state.shape,
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
   },
 });

@@ -14,6 +14,7 @@ import { HoverActions } from '.';
 import type { DataProvider } from '../../../../common/types';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';
 import { getDraggableId } from '../drag_and_drop/helpers';
+import { useTopNPopOver } from './utils';
 
 const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
   const links = draggableElement?.querySelectorAll('.euiLink') ?? [];
@@ -55,7 +56,6 @@ export const useHoverActions = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
-  const [showTopN, setShowTopN] = useState<boolean>(false);
   const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
   const id = useMemo(
     () => (!scopeId ? timelineIdFind ?? tableIdFind : scopeId),
@@ -78,19 +78,7 @@ export const useHoverActions = ({
     }, 0); // invoked on the next tick, because we want to restore focus first
   }, [keyboardHandlerRef]);
 
-  const toggleTopN = useCallback(() => {
-    setShowTopN((prevShowTopN) => {
-      const newShowTopN = !prevShowTopN;
-      if (newShowTopN === false) {
-        handleClosePopOverTrigger();
-      }
-      return newShowTopN;
-    });
-  }, [handleClosePopOverTrigger]);
-
-  const closeTopN = useCallback(() => {
-    setShowTopN(false);
-  }, []);
+  const { closeTopN, toggleTopN, isShowingTopN } = useTopNPopOver(handleClosePopOverTrigger);
 
   const values = useMemo(() => {
     const val = dataProvider.queryMatch.value;
@@ -110,7 +98,7 @@ export const useHoverActions = ({
     // display links as additional content in the hover menu to enable keyboard
     // navigation of links (when the draggable contains them):
     const additionalContent =
-      hoverActionsOwnFocus && !showTopN && draggableContainsLinks(containerRef.current) ? (
+      hoverActionsOwnFocus && !isShowingTopN && draggableContainsLinks(containerRef.current) ? (
         <ProviderContentWrapper
           data-test-subj={`draggable-link-content-${dataProvider.queryMatch.field}`}
         >
@@ -133,7 +121,7 @@ export const useHoverActions = ({
         onFilterAdded={onFilterAdded}
         ownFocus={hoverActionsOwnFocus}
         showOwnFocus={false}
-        showTopN={showTopN}
+        showTopN={isShowingTopN}
         scopeId={id}
         toggleTopN={toggleTopN}
         values={values}
@@ -141,7 +129,7 @@ export const useHoverActions = ({
     );
   }, [
     hoverActionsOwnFocus,
-    showTopN,
+    isShowingTopN,
     dataProvider,
     render,
     closeTopN,
@@ -167,7 +155,7 @@ export const useHoverActions = ({
   }, [hoverActionsOwnFocus, keyboardHandlerRef]);
 
   const onCloseRequested = useCallback(() => {
-    setShowTopN(false);
+    closeTopN();
 
     if (hoverActionsOwnFocus) {
       setHoverActionsOwnFocus(false);
@@ -176,7 +164,7 @@ export const useHoverActions = ({
         onFocus(); // return focus to this draggable on the next tick, because we owned focus
       }, 0);
     }
-  }, [onFocus, hoverActionsOwnFocus]);
+  }, [onFocus, hoverActionsOwnFocus, closeTopN]);
 
   const openPopover = useCallback(() => {
     setHoverActionsOwnFocus(true);
@@ -193,7 +181,7 @@ export const useHoverActions = ({
       onFocus,
       openPopover,
       setContainerRef,
-      showTopN,
+      isShowingTopN,
     }),
     [
       closePopOverTrigger,
@@ -204,7 +192,7 @@ export const useHoverActions = ({
       onFocus,
       openPopover,
       setContainerRef,
-      showTopN,
+      isShowingTopN,
     ]
   );
 };

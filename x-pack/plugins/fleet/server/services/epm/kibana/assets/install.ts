@@ -141,6 +141,7 @@ export async function installKibanaAssetsAndReferences({
   pkgTitle,
   paths,
   installedPkg,
+  spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -151,6 +152,7 @@ export async function installKibanaAssetsAndReferences({
   pkgTitle: string;
   paths: string[];
   installedPkg?: SavedObject<Installation>;
+  spaceId: string;
 }) {
   const kibanaAssets = await getKibanaAssets(paths);
   if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
@@ -167,7 +169,6 @@ export async function installKibanaAssetsAndReferences({
     pkgName,
     kibanaAssets,
   });
-
   await withPackageSpan('Create and assign package tags', () =>
     tagKibanaAssets({
       savedObjectTagAssignmentService,
@@ -175,6 +176,7 @@ export async function installKibanaAssetsAndReferences({
       kibanaAssets,
       pkgTitle,
       pkgName,
+      spaceId,
     })
   );
 

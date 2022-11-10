@@ -17,6 +17,9 @@ export const SnapshotNodePathRT = rt.intersection([
   rt.partial({
     ip: rt.union([rt.string, rt.null]),
   }),
+  rt.partial({
+    os: rt.union([rt.string, rt.null]),
+  }),
 ]);
 
 const SnapshotNodeMetricOptionalRT = rt.partial({

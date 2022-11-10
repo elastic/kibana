@@ -17,11 +17,13 @@ jest.mock('../../kibana_services', () => {
   const { chromeServiceMock, applicationServiceMock } =
     jest.requireActual('@kbn/core/public/mocks');
   const { uiSettingsServiceMock } = jest.requireActual('@kbn/core-ui-settings-browser-mocks');
+  const { cloudMock } = jest.requireActual('@kbn/cloud-plugin/public/mocks');
 
   const uiSettingsMock = uiSettingsServiceMock.createSetupContract();
   uiSettingsMock.get.mockReturnValue(false);
   return {
     getServices: () => ({
+      cloud: cloudMock.createSetup(),
       chrome: chromeServiceMock.createStartContract(),
       application: applicationServiceMock.createStartContract(),
       trackUiMetric: jest.fn(),
@@ -56,7 +58,7 @@ describe('getting started', () => {
 
   test('skip button should disable home welcome screen', async () => {
     const component = mountWithIntl(<GettingStarted />);
-    const skipButton = findTestSubject(component, 'onboarding--skipUseCaseTourLink');
+    const skipButton = findTestSubject(component, 'onboarding--skipGuideLink');
     skipButton.simulate('click');
 
     expect(localStorage.getItem(KEY_ENABLE_WELCOME)).toBe('false');

@@ -18,16 +18,17 @@ import {
   TRACE_ID,
   TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../lib/helpers/setup_request';
 import { getLinkedChildrenCountBySpanId } from '../span_links/get_linked_children';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMConfig } from '../..';
 
 export async function getTraceItems(
   traceId: string,
-  setup: Setup,
+  config: APMConfig,
+  apmEventClient: APMEventClient,
   start: number,
   end: number
 ) {
-  const { apmEventClient, config } = setup;
   const maxTraceItems = config.ui.maxTraceItems;
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
@@ -80,7 +81,7 @@ export async function getTraceItems(
     await Promise.all([
       errorResponsePromise,
       traceResponsePromise,
-      getLinkedChildrenCountBySpanId({ traceId, setup, start, end }),
+      getLinkedChildrenCountBySpanId({ traceId, apmEventClient, start, end }),
     ]);
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;

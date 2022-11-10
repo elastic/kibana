@@ -5,7 +5,6 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getSpanLinksDetails } from './get_span_links_details';
 import { getLinkedChildrenOfSpan } from './get_linked_children';
@@ -13,6 +12,7 @@ import { kueryRt, rangeRt } from '../default_api_types';
 import { SpanLinkDetails } from '../../../common/span_links';
 import { processorEventRt } from '../../../common/processor_event';
 import { getLinkedParentsOfSpan } from './get_linked_parents';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const linkedParentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents',
@@ -36,9 +36,9 @@ const linkedParentsRoute = createApmServerRoute({
     const {
       params: { query, path },
     } = resources;
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const linkedParents = await getLinkedParentsOfSpan({
-      setup,
+      apmEventClient,
       traceId: path.traceId,
       spanId: path.spanId,
       start: query.start,
@@ -48,7 +48,7 @@ const linkedParentsRoute = createApmServerRoute({
 
     return {
       spanLinksDetails: await getSpanLinksDetails({
-        setup,
+        apmEventClient,
         spanLinks: linkedParents,
         kuery: query.kuery,
         start: query.start,
@@ -76,9 +76,9 @@ const linkedChildrenRoute = createApmServerRoute({
     const {
       params: { query, path },
     } = resources;
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const linkedChildren = await getLinkedChildrenOfSpan({
-      setup,
+      apmEventClient,
       traceId: path.traceId,
       spanId: path.spanId,
       start: query.start,
@@ -87,7 +87,7 @@ const linkedChildrenRoute = createApmServerRoute({
 
     return {
       spanLinksDetails: await getSpanLinksDetails({
-        setup,
+        apmEventClient,
         spanLinks: linkedChildren,
         kuery: query.kuery,
         start: query.start,

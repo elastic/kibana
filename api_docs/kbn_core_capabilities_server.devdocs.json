@@ -148,7 +148,13 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>, options?: ",
               {
                 "pluginId": "@kbn/core-capabilities-server",
@@ -158,7 +164,13 @@
                 "text": "ResolveCapabilitiesOptions"
               },
               " | undefined) => Promise<",
-              "Capabilities",
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              },
               ">"
             ],
             "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
@@ -173,7 +185,13 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
@@ -252,7 +270,13 @@
         ],
         "signature": [
           "() => Partial<",
-          "Capabilities",
+          {
+            "pluginId": "@kbn/core-capabilities-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+            "section": "def-common.Capabilities",
+            "text": "Capabilities"
+          },
           ">"
         ],
         "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
@@ -273,13 +297,37 @@
         ],
         "signature": [
           "(request: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>, uiCapabilities: ",
-          "Capabilities",
+          {
+            "pluginId": "@kbn/core-capabilities-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+            "section": "def-common.Capabilities",
+            "text": "Capabilities"
+          },
           ", useDefaultCapabilities: boolean) => ",
-          "MaybePromise",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.MaybePromise",
+            "text": "MaybePromise"
+          },
           "<Partial<",
-          "Capabilities",
+          {
+            "pluginId": "@kbn/core-capabilities-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+            "section": "def-common.Capabilities",
+            "text": "Capabilities"
+          },
           ">>"
         ],
         "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
@@ -295,7 +343,13 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
@@ -310,7 +364,13 @@
             "label": "uiCapabilities",
             "description": [],
             "signature": [
-              "Capabilities"
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              }
             ],
             "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
             "deprecated": false,

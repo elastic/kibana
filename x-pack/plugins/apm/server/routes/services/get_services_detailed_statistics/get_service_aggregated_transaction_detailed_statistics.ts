@@ -24,16 +24,16 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { calculateFailedTransactionRateFromServiceMetrics } from '../../../lib/helpers/transaction_error_rate';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getDocumentTypeFilterForServiceMetrics } from '../../../lib/helpers/service_metrics';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServiceAggregatedTransactionDetailedStats({
   serviceNames,
   environment,
   kuery,
-  setup,
+  apmEventClient,
   searchAggregatedServiceMetrics,
   offset,
   start,
@@ -43,14 +43,13 @@ export async function getServiceAggregatedTransactionDetailedStats({
   serviceNames: string[];
   environment: string;
   kuery: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedServiceMetrics: boolean;
   offset?: string;
   start: number;
   end: number;
   randomSampler: RandomSampler;
 }) {
-  const { apmEventClient } = setup;
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -185,7 +184,7 @@ export async function getServiceAggregatedDetailedStatsPeriods({
   serviceNames,
   environment,
   kuery,
-  setup,
+  apmEventClient,
   searchAggregatedServiceMetrics,
   offset,
   start,
@@ -195,7 +194,7 @@ export async function getServiceAggregatedDetailedStatsPeriods({
   serviceNames: string[];
   environment: string;
   kuery: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedServiceMetrics: boolean;
   offset?: string;
   start: number;
@@ -207,7 +206,7 @@ export async function getServiceAggregatedDetailedStatsPeriods({
       serviceNames,
       environment,
       kuery,
-      setup,
+      apmEventClient,
       searchAggregatedServiceMetrics,
       start,
       end,

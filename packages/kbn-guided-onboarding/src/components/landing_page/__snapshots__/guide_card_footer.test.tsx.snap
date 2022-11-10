@@ -16,9 +16,11 @@ exports[`guide card footer snapshots should render the footer when the guide has
     className="eui-textCenter"
   >
     <EuiButton
+      color="primary"
       data-test-subj="onboarding--guideCard--view--search"
       fill={true}
       onClick={[Function]}
+      size="m"
     >
       View guide
     </EuiButton>
@@ -31,9 +33,11 @@ exports[`guide card footer snapshots should render the footer when the guide has
   className="eui-textCenter"
 >
   <EuiButton
+    color="primary"
     data-test-subj="onboarding--guideCard--view--search"
     fill={true}
     onClick={[Function]}
+    size="m"
   >
     View guide
   </EuiButton>
@@ -44,6 +48,19 @@ exports[`guide card footer snapshots should render the footer when the guide is 
 <Fragment>
   <EuiProgress
     label="In progress"
+    labelProps={
+      Object {
+        "css": Object {
+          "map": undefined,
+          "name": "x46p4t",
+          "next": undefined,
+          "styles": "
+  text-align: 'left';
+",
+          "toString": [Function],
+        },
+      }
+    }
     max={2}
     size="s"
     value={1}
@@ -56,9 +73,11 @@ exports[`guide card footer snapshots should render the footer when the guide is 
     className="eui-textCenter"
   >
     <EuiButton
+      color="primary"
       data-test-subj="onboarding--guideCard--continue--search"
       fill={true}
       onClick={[Function]}
+      size="m"
     >
       Continue
     </EuiButton>
@@ -70,6 +89,19 @@ exports[`guide card footer snapshots should render the footer when the guide is 
 <Fragment>
   <EuiProgress
     label="In progress"
+    labelProps={
+      Object {
+        "css": Object {
+          "map": undefined,
+          "name": "x46p4t",
+          "next": undefined,
+          "styles": "
+  text-align: 'left';
+",
+          "toString": [Function],
+        },
+      }
+    }
     max={2}
     size="s"
     value={1}
@@ -82,9 +114,11 @@ exports[`guide card footer snapshots should render the footer when the guide is 
     className="eui-textCenter"
   >
     <EuiButton
+      color="primary"
       data-test-subj="onboarding--guideCard--continue--search"
       fill={true}
       onClick={[Function]}
+      size="m"
     >
       Continue
     </EuiButton>
@@ -97,9 +131,11 @@ exports[`guide card footer snapshots should render the footer when the guided on
   className="eui-textCenter"
 >
   <EuiButton
+    color="primary"
     data-test-subj="onboarding--guideCard--view--search"
     fill={true}
     onClick={[Function]}
+    size="m"
   >
     View guide
   </EuiButton>

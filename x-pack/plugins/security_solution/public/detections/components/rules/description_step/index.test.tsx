@@ -21,7 +21,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
-} from '../../../pages/detection_engine/rules/all/__mocks__/mock';
+} from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import * as i18n from './translations';
