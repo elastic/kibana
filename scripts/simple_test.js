@@ -85,8 +85,14 @@ async function simpleTest() {
   var page = await context.newPage();
   page.on('console', (msg) => console.log(msg.text()));
   var client = await context.newCDPSession(page);
+  await client.send('Network.emulateNetworkConditions', {
+    latency: 100,
+    downloadThroughput: 750_000,
+    uploadThroughput: 750_000,
+    offline: false,
+  });
   await client.send('Network.clearBrowserCache');
-  // await client.send('Network.setCacheDisabled', { cacheDisabled: true });
+  await client.send('Network.setCacheDisabled', { cacheDisabled: true });
   await page.goto(`${baseUrl}/app/dashboards#/view/92b143a0-2e9c-11ed-b1b6-a504560b392c`);
   await waitForVisualizations(page, 1);
   await sleep(5000);
