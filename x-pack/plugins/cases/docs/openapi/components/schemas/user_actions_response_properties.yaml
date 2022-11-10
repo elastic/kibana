@@ -1,4 +1,14 @@
 type: object
+required:
+  - action
+  - action_id
+  - case_id
+  - comment_id
+  - created_at
+  - created_by
+  - owner
+  - payload
+  - type
 properties:
   action:
     $ref: 'actions.yaml'

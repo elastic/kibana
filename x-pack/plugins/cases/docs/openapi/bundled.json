@@ -1939,6 +1939,24 @@
       }
     },
     "schemas": {
+      "assignees": {
+        "type": "array",
+        "description": "An array containing users that are assigned to the case.",
+        "nullable": true,
+        "items": {
+          "type": "object",
+          "required": [
+            "uid"
+          ],
+          "properties": {
+            "uid": {
+              "type": "string",
+              "description": "A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.",
+              "example": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+            }
+          }
+        }
+      },
       "connector_properties_none": {
         "title": "Create or update case request properties for no connector",
         "required": [
@@ -2354,22 +2372,7 @@
         ],
         "properties": {
           "assignees": {
-            "type": "array",
-            "description": "An array containing users that are assigned to the case.",
-            "nullable": true,
-            "items": {
-              "type": "object",
-              "required": [
-                "uid"
-              ],
-              "properties": {
-                "uid": {
-                  "type": "string",
-                  "description": "A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.",
-                  "example": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
-                }
-              }
-            }
+            "$ref": "#/components/schemas/assignees"
           },
           "connector": {
             "oneOf": [
@@ -2828,22 +2831,7 @@
         ],
         "properties": {
           "assignees": {
-            "type": "array",
-            "description": "An array containing users that are assigned to the case.",
-            "nullable": true,
-            "items": {
-              "type": "object",
-              "required": [
-                "uid"
-              ],
-              "properties": {
-                "uid": {
-                  "type": "string",
-                  "description": "A unique identifier for the user profile. You can use the get user profile API to retrieve more details.",
-                  "example": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
-                }
-              }
-            }
+            "$ref": "#/components/schemas/assignees"
           },
           "closed_at": {
             "type": "string",
@@ -2991,22 +2979,7 @@
               ],
               "properties": {
                 "assignees": {
-                  "type": "array",
-                  "description": "An array containing users that are assigned to the case.",
-                  "nullable": true,
-                  "items": {
-                    "type": "object",
-                    "required": [
-                      "uid"
-                    ],
-                    "properties": {
-                      "uid": {
-                        "type": "string",
-                        "description": "A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.",
-                        "example": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/assignees"
                 },
                 "connector": {
                   "oneOf": [
@@ -3416,15 +3389,7 @@
         "type": "object",
         "properties": {
           "assignees": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "uid": {
-                  "type": "string"
-                }
-              }
-            }
+            "$ref": "#/components/schemas/assignees"
           }
         }
       },
@@ -3529,6 +3494,9 @@
       "payload_create_case": {
         "type": "object",
         "properties": {
+          "assignees": {
+            "$ref": "#/components/schemas/assignees"
+          },
           "connector": {
             "type": "object",
             "properties": {
@@ -3761,6 +3729,17 @@
       },
       "user_actions_response_properties": {
         "type": "object",
+        "required": [
+          "action",
+          "action_id",
+          "case_id",
+          "comment_id",
+          "created_at",
+          "created_by",
+          "owner",
+          "payload",
+          "type"
+        ],
         "properties": {
           "action": {
             "$ref": "#/components/schemas/actions"
