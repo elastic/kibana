@@ -19,7 +19,7 @@ import styled from 'styled-components';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { isMlRule, isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -289,19 +289,25 @@ const CreateRulePageComponent: React.FC = () => {
             stepIsValid(scheduleStep) &&
             stepIsValid(actionsStep)
           ) {
-            if (actionsStep.data.enabled) {
+            const startMlJobsIfNeeded = async () => {
+              if (!isMlRule(defineStep.data.ruleType) || !actionsStep.data.enabled) {
+                return;
+              }
               setIsStartingJobs(true);
               await startMlJobs(defineStep.data.machineLearningJobId);
               setIsStartingJobs(false);
-            }
-            const createdRule = await createRule(
-              formatRule<RuleCreateProps>(
-                defineStep.data,
-                aboutStep.data,
-                scheduleStep.data,
-                actionsStep.data
-              )
-            );
+            };
+            const [, createdRule] = await Promise.all([
+              startMlJobsIfNeeded(),
+              createRule(
+                formatRule<RuleCreateProps>(
+                  defineStep.data,
+                  aboutStep.data,
+                  scheduleStep.data,
+                  actionsStep.data
+                )
+              ),
+            ]);
 
             addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
 

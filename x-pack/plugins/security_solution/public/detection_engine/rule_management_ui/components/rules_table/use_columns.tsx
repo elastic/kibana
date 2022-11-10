@@ -9,9 +9,8 @@ import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eu
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
-import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
   SecurityPageName,
@@ -46,21 +45,17 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from './ml_rule_warning_popover';
-import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
 interface ColumnsProps {
   hasCRUDPermissions: boolean;
+  isLoadingJobs: boolean;
+  mlJobs: SecurityJob[];
+  startMlJobs: (jobIds: string[] | undefined) => Promise<void>;
 }
 
-const useEnabledColumn = ({
-  hasCRUDPermissions,
-  startMlJobsIfNeeded,
-}: {
-  hasCRUDPermissions: boolean;
-  startMlJobsIfNeeded: (rule: Rule) => Promise<void>;
-}): TableColumn => {
+const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): TableColumn => {
   const hasMlPermissions = useHasMlPermissions();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
@@ -87,7 +82,7 @@ const useEnabledColumn = ({
           <RuleSwitch
             id={rule.id}
             enabled={rule.enabled}
-            startMlJobsIfNeeded={() => startMlJobsIfNeeded(rule)}
+            startMlJobsIfNeeded={() => startMlJobs(rule.machine_learning_job_id)}
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
               !hasCRUDPermissions ||
@@ -100,7 +95,7 @@ const useEnabledColumn = ({
       width: '95px',
       sortable: true,
     }),
-    [hasMlPermissions, hasActionsPrivileges, hasCRUDPermissions, loadingIds, startMlJobsIfNeeded]
+    [hasMlPermissions, hasActionsPrivileges, hasCRUDPermissions, loadingIds, startMlJobs]
   );
 };
 
@@ -135,13 +130,13 @@ const useRuleNameColumn = (): TableColumn => {
 const useRuleExecutionStatusColumn = ({
   sortable,
   width,
-  loadingJobs,
-  jobs,
+  isLoadingJobs,
+  mlJobs,
 }: {
   sortable: boolean;
   width: string;
-  loadingJobs: boolean;
-  jobs: SecurityJob[];
+  isLoadingJobs: boolean;
+  mlJobs: SecurityJob[];
 }): TableColumn => {
   return useMemo(
     () => ({
@@ -157,7 +152,7 @@ const useRuleExecutionStatusColumn = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <MlRuleWarningPopover rule={item} loadingJobs={loadingJobs} jobs={jobs} />
+              <MlRuleWarningPopover rule={item} loadingJobs={isLoadingJobs} jobs={mlJobs} />
             </EuiFlexItem>
           </EuiFlexGroup>
         );
@@ -166,7 +161,7 @@ const useRuleExecutionStatusColumn = ({
       truncateText: true,
       width,
     }),
-    [jobs, loadingJobs, sortable, width]
+    [isLoadingJobs, mlJobs, sortable, width]
   );
 };
 
@@ -220,28 +215,27 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
   return useMemo(() => ({ actions, width: '40px' }), [actions]);
 };
 
-export const useRulesColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
+export const useRulesColumns = ({
+  hasCRUDPermissions,
+  isLoadingJobs,
+  mlJobs,
+  startMlJobs,
+}: ColumnsProps): TableColumn[] => {
   const actionsColumn = useActionsColumn();
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-
-  const { loading: loadingJobs, jobs, refetch: refetchJobs } = useSecurityJobs();
-  const { startMlJobs } = useStartMlJobs();
-  const startMlJobsIfNeeded = useCallback(
-    async (rule: Rule) => {
-      await startMlJobs?.(rule.machine_learning_job_id);
-      refetchJobs();
-    },
-    [refetchJobs, startMlJobs]
-  );
-  const enabledColumn = useEnabledColumn({ hasCRUDPermissions, startMlJobsIfNeeded });
-
+  const enabledColumn = useEnabledColumn({
+    hasCRUDPermissions,
+    isLoadingJobs,
+    mlJobs,
+    startMlJobs,
+  });
   const executionStatusColumn = useRuleExecutionStatusColumn({
     sortable: !!isInMemorySorting,
     width: '16%',
-    loadingJobs,
-    jobs,
+    isLoadingJobs,
+    mlJobs,
   });
 
   return useMemo(
@@ -339,29 +333,28 @@ export const useRulesColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColu
   );
 };
 
-export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
+export const useMonitoringColumns = ({
+  hasCRUDPermissions,
+  isLoadingJobs,
+  mlJobs,
+  startMlJobs,
+}: ColumnsProps): TableColumn[] => {
   const docLinks = useKibana().services.docLinks;
   const actionsColumn = useActionsColumn();
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-
-  const { loading: loadingJobs, jobs, refetch: refetchJobs } = useSecurityJobs();
-  const { startMlJobs } = useStartMlJobs();
-  const startMlJobsIfNeeded = useCallback(
-    async (rule: Rule) => {
-      await startMlJobs?.(rule.machine_learning_job_id);
-      refetchJobs();
-    },
-    [refetchJobs, startMlJobs]
-  );
-  const enabledColumn = useEnabledColumn({ hasCRUDPermissions, startMlJobsIfNeeded });
-
+  const enabledColumn = useEnabledColumn({
+    hasCRUDPermissions,
+    isLoadingJobs,
+    mlJobs,
+    startMlJobs,
+  });
   const executionStatusColumn = useRuleExecutionStatusColumn({
     sortable: !!isInMemorySorting,
     width: '12%',
-    loadingJobs,
-    jobs,
+    isLoadingJobs,
+    mlJobs,
   });
 
   return useMemo(

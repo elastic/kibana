@@ -7,11 +7,14 @@
 
 import { useCallback } from 'react';
 
+import type { SecurityJob } from '../../../common/components/ml_popover/types';
 import { isJobStarted } from '../../../../common/machine_learning/helpers';
 import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useEnableDataFeed } from '../../../common/components/ml_popover/hooks/use_enable_data_feed';
 
 export interface ReturnUseStartMlJobs {
+  loading: boolean;
+  jobs: SecurityJob[];
   startMlJobs: (jobIds: string[] | undefined) => Promise<void>;
 }
 
@@ -45,5 +48,5 @@ export const useStartMlJobs = (): ReturnUseStartMlJobs => {
     [enableDatafeed, isLoadingEnableDataFeed, isLoadingJobs, mlJobs, refetchJobs]
   );
 
-  return { startMlJobs };
+  return { loading: isLoadingJobs, jobs: mlJobs, startMlJobs };
 };

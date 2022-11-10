@@ -28,6 +28,8 @@ import type { Rule } from '../../../rule_management/logic';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 
+const POPOVER_WIDTH = '340px';
+
 interface MlRuleWarningPopoverComponentProps {
   rule: Rule;
   loadingJobs: boolean;
@@ -66,7 +68,7 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
       anchorPosition="leftCenter"
     >
       <EuiPopoverTitle>{popoverTitle}</EuiPopoverTitle>
-      <div style={{ width: '340px' }}>
+      <div style={{ width: POPOVER_WIDTH }}>
         <EuiText size="s">
           <p>{i18n.ML_RULE_JOBS_WARNING_DESCRIPTION}</p>
         </EuiText>
