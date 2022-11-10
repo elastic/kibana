@@ -172,8 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
     await ml.dataVisualizerIndexBased.assertTotalFieldsCount(testData.expected.totalFieldsCount);
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/143007
-  describe.skip('data view management', function () {
+  describe('data view management', function () {
     this.tags(['ml']);
     const indexPatternTitle = 'ft_farequote';
     before(async () => {
