@@ -96,6 +96,18 @@ const createAbortableSearchServiceMock = () => {
   };
 };
 
+const createRuleMonitoringServiceMock = () => {
+  const mock = {
+    setLastRunMetricsTotalSearchDurationMs: jest.fn(),
+    setLastRunMetricsTotalIndexingDurationMs: jest.fn(),
+    setLastRunMetricsTotalAlertsDetected: jest.fn(),
+    setLastRunMetricsTotalAlertsCreated: jest.fn(),
+    setLastRunMetricsGapDurationS: jest.fn(),
+  } as unknown as jest.Mocked<PublicRuleMonitoringService>;
+
+  return mock;
+};
+
 const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
@@ -118,6 +130,7 @@ const createRuleExecutorServicesMock = <
     shouldStopExecution: () => true,
     search: createAbortableSearchServiceMock(),
     searchSourceClient: searchSourceCommonMock,
+    ruleMonitoringService: createRuleMonitoringServiceMock(),
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
@@ -127,18 +140,6 @@ export const alertsMock = {
   createSetup: createSetupMock,
   createStart: createStartMock,
   createRuleExecutorServices: createRuleExecutorServicesMock,
-};
-
-const createRuleMonitoringServiceMock = () => {
-  const mock = {
-    setLastRunMetricsTotalSearchDurationMs: jest.fn(),
-    setLastRunMetricsTotalIndexingDurationMs: jest.fn(),
-    setLastRunMetricsTotalAlertsDetected: jest.fn(),
-    setLastRunMetricsTotalAlertsCreated: jest.fn(),
-    setLastRunMetricsGapDurationS: jest.fn(),
-  } as unknown as jest.Mocked<PublicRuleMonitoringService>;
-
-  return mock;
 };
 
 export const ruleMonitoringServiceMock = { create: createRuleMonitoringServiceMock };
