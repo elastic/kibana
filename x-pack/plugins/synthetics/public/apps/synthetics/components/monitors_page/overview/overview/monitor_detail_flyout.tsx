@@ -279,7 +279,7 @@ export function MonitorDetailFlyout(props: Props) {
   const locations = locationStatuses.locations?.filter((l: any) => !!l?.observer?.geo?.name) ?? [];
 
   return (
-    <EuiFlyout size="s" type="push" onClose={props.onClose} paddingSize="none">
+    <EuiFlyout size="s" type="push" onClose={props.onClose} paddingSize="none" maxWidth={true}>
       {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
       {status === FETCH_STATUS.LOADING && <EuiLoadingSpinner size="xl" />}
       {status === FETCH_STATUS.SUCCESS && monitorSavedObject && (

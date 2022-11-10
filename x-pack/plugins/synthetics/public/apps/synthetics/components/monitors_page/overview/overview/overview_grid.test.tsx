@@ -70,8 +70,8 @@ describe('Overview Grid', () => {
           loaded: true,
           loading: false,
           status: {
-            downConfigs: [],
-            upConfigs: [],
+            downConfigs: {},
+            upConfigs: {},
           },
         },
         serviceLocations: {
@@ -119,8 +119,8 @@ describe('Overview Grid', () => {
           loaded: true,
           loading: false,
           status: {
-            downConfigs: [],
-            upConfigs: [],
+            downConfigs: {},
+            upConfigs: {},
           },
         },
         serviceLocations: {

@@ -107,30 +107,32 @@ export async function queryMonitorStatus(
   }
   let up = 0;
   let down = 0;
-  const upConfigs: OverviewStatusMetaData[] = [];
-  const downConfigs: OverviewStatusMetaData[] = [];
+  const upConfigs: Record<string, OverviewStatusMetaData> = {};
+  const downConfigs: Record<string, OverviewStatusMetaData> = {};
   for await (const response of promises) {
     response.aggregations?.id.buckets.forEach(({ location }: { key: string; location: any }) => {
       location.buckets.forEach(({ status }: { key: string; status: any }) => {
         const downCount = status.hits.hits[0]._source.summary.down;
         const upCount = status.hits.hits[0]._source.summary.up;
         const configId = status.hits.hits[0]._source.config_id;
-        const heartbeatId = status.hits.hits[0]._source.monitor.id;
+        const monitorQueryId = status.hits.hits[0]._source.monitor.id;
         const locationName = status.hits.hits[0]._source.observer?.geo?.name;
         if (upCount > 0) {
           up += 1;
-          upConfigs.push({
+          upConfigs[`${configId}-${locationName}`] = {
             configId,
-            heartbeatId,
+            monitorQueryId,
             location: locationName,
-          });
+            status: 'up',
+          };
         } else if (downCount > 0) {
           down += 1;
-          downConfigs.push({
+          downConfigs[`${configId}-${locationName}`] = {
             configId,
-            heartbeatId,
+            monitorQueryId,
             location: locationName,
-          });
+            status: 'down',
+          };
         }
       });
     });

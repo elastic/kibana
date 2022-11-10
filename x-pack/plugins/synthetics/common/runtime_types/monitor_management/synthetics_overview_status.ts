@@ -8,17 +8,18 @@
 import * as t from 'io-ts';
 
 export const OverviewStatusMetaDataCodec = t.interface({
-  heartbeatId: t.string,
+  monitorQueryId: t.string,
   configId: t.string,
   location: t.string,
+  status: t.string,
 });
 
 export const OverviewStatusType = t.type({
   up: t.number,
   down: t.number,
   disabledCount: t.number,
-  upConfigs: t.array(OverviewStatusMetaDataCodec),
-  downConfigs: t.array(OverviewStatusMetaDataCodec),
+  upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
 });
 
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusType>;
