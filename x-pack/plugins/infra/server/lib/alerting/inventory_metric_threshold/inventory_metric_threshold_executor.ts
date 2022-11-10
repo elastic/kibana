@@ -31,6 +31,7 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import {
+  AdditionalContext,
   createScopedLogger,
   getAlertDetailsUrl,
   getViewInInventoryAppUrl,
@@ -54,7 +55,7 @@ type InventoryMetricThresholdAlert = Alert<
 type InventoryMetricThresholdAlertFactory = (
   id: string,
   reason: string,
-  additionalContext?: [x: string] | null,
+  additionalContext?: AdditionalContext | null,
   threshold?: number | undefined,
   value?: number | undefined
 ) => InventoryMetricThresholdAlert;
