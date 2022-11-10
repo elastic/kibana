@@ -44,7 +44,7 @@ export function validateSLO(slo: SLO) {
 }
 
 function isValidTargetNumber(value: number): boolean {
-  return value > 0 && value <= 1;
+  return value > 0 && value < 1;
 }
 
 function isValidTimeWindowDuration(duration: Duration): boolean {

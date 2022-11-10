@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EventsPanel renders 1`] = `
+<FlyoutPanel
+  title="Events"
+>
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "State",
+          "width": "50%",
+        },
+        Object {
+          "field": "date",
+          "name": "Time",
+          "width": "50%",
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "title": "Canceled",
+        },
+        Object {
+          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "title": "Cancelation requested",
+        },
+        Object {
+          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "title": "Completed",
+        },
+        Object {
+          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "title": "Last updated",
+        },
+        Object {
+          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "title": "Sync started",
+        },
+        Object {
+          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "title": "Sync requested manually",
+        },
+      ]
+    }
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
+    responsive={true}
+    tableLayout="fixed"
+  />
+</FlyoutPanel>
+`;
+
+exports[`EventsPanel renders with some values missing 1`] = `
+<FlyoutPanel
+  title="Events"
+>
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "State",
+          "width": "50%",
+        },
+        Object {
+          "field": "date",
+          "name": "Time",
+          "width": "50%",
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "title": "Canceled",
+        },
+        Object {
+          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "title": "Completed",
+        },
+        Object {
+          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "title": "Last updated",
+        },
+        Object {
+          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "title": "Sync started",
+        },
+        Object {
+          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "title": "Sync requested manually",
+        },
+      ]
+    }
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
+    responsive={true}
+    tableLayout="fixed"
+  />
+</FlyoutPanel>
+`;
