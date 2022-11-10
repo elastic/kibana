@@ -15,6 +15,10 @@ export function oneWeek(): Duration {
   return new Duration(1, DurationUnit.w);
 }
 
+export function sixHours(): Duration {
+  return new Duration(6, DurationUnit.h);
+}
+
 export function oneMinute(): Duration {
   return new Duration(1, DurationUnit.m);
 }
