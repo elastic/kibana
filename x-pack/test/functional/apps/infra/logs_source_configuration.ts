@@ -54,9 +54,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraLogs.navigateToTab('settings');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
-        const documentTitle = await browser.getTitle();
 
-        expect(documentTitle).to.contain('Settings - Logs - Observability - Elastic');
+        retry.try(async () => {
+          const documentTitle = await browser.getTitle();
+          expect(documentTitle).to.contain('Settings - Logs - Observability - Elastic');
+        });
       });
 
       it('can change the log indices to a pattern that matches nothing', async () => {
