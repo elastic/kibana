@@ -10,4 +10,4 @@ export * from './use_exceptions_list.card';
 export * from './use_import_exception_list';
 export * from './use_list_exception_items';
 export * from './use_list_with_search';
-export * from './use_exception_list_details';
+export * from './use_list_detail_view';

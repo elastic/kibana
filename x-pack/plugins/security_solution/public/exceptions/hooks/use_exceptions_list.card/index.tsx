@@ -14,7 +14,7 @@ import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import { useGeneratedHtmlId } from '@elastic/eui';
 import type { ExceptionListInfo } from '../use_all_exception_lists';
 import { useListExceptionItems } from '../use_list_exception_items';
-import * as i18n from '../../translations/list_details';
+import * as i18n from '../../translations';
 import { checkIfListCannotBeEdited } from '../../utils/list.utils';
 
 interface ListAction {
