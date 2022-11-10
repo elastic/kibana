@@ -100,7 +100,6 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   filters: [],
   globalFullScreen: false,
   graphEventId: undefined,
-  hasAlertsCrud: true,
   id: '',
   indexNames: mockIndexNames,
   indexPattern: mockIndexPattern,

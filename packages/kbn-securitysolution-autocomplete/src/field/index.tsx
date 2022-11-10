@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { FieldProps } from './types';
 import { useField } from './use_field';
@@ -62,7 +63,10 @@ export const FieldComponent: React.FC<FieldProps> = ({
         data-test-subj="fieldAutocompleteComboBox"
         style={fieldWidth}
         onCreateOption={handleCreateCustomOption}
-        customOptionText="Add {searchValue} as your occupation"
+        customOptionText={i18n.translate('autocomplete.customOptionText', {
+          defaultMessage: 'Add {searchValuePlaceholder} as a custom field',
+          values: { searchValuePlaceholder: '{searchValue}' },
+        })}
         fullWidth
       />
     );
