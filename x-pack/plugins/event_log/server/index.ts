@@ -10,6 +10,8 @@ import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/serve
 import { ConfigSchema, IEventLogConfig } from './types';
 import { Plugin } from './plugin';
 
+export { millisToNanos, nanosToMillis } from '../common';
+
 export type {
   IEventLogService,
   IEventLogger,
