@@ -7,10 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { EuiButtonIcon, EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { PROJECT_MONITOR_DISCLAIMER } from '../../../../apps/synthetics/components/monitors_page/management/monitor_list_table/actions';
 import { deleteMonitor } from '../../../state/api';
 import { kibanaService } from '../../../state/kibana_service';
 
@@ -19,10 +26,12 @@ export const DeleteMonitor = ({
   name,
   onUpdate,
   isDisabled,
+  isProjectMonitor,
 }: {
   id: string;
   name: string;
   isDisabled?: boolean;
+  isProjectMonitor?: boolean;
   onUpdate: () => void;
 }) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -80,6 +89,14 @@ export const DeleteMonitor = ({
       buttonColor="danger"
       defaultFocusedButton="confirm"
     >
+      {isProjectMonitor && (
+        <>
+          <EuiCallOut color="warning" iconType="help">
+            <p>{PROJECT_MONITOR_DISCLAIMER}</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <p>{DELETE_DESCRIPTION_LABEL}</p>
     </EuiConfirmModal>
   );
