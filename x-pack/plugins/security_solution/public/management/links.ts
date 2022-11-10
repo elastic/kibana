@@ -244,22 +244,29 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
-  const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
-  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
+  const { endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
+  const hasPermissionsForSecuritySolution = calculatePermissionsFromCapabilities(
+    core.application.capabilities
+  );
   const linksToExclude: SecurityPageName[] = [];
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const { canReadEndpointList, canReadActionsLogManagement, canIsolateHost, canUnIsolateHost } =
-      fleetAuthz
-        ? calculateEndpointAuthz(
-            licenseService,
-            fleetAuthz,
-            currentUserResponse.roles,
-            endpointRbacEnabled || endpointRbacV1Enabled,
-            endpointPermissions
-          )
-        : getEndpointAuthzInitialState();
+    const {
+      canReadActionsLogManagement,
+      canUnIsolateHost,
+      canIsolateHost,
+      canAccessEndpointManagement,
+      canReadEndpointList,
+    } = fleetAuthz
+      ? calculateEndpointAuthz(
+          licenseService,
+          fleetAuthz,
+          currentUserResponse.roles,
+          endpointRbacV1Enabled,
+          hasPermissionsForSecuritySolution
+        )
+      : getEndpointAuthzInitialState();
 
     if (!canReadActionsLogManagement) {
       linksToExclude.push(SecurityPageName.responseActionsHistory);
@@ -270,18 +277,19 @@ export const getManagementFilteredLinks = async (
     }
 
     if (!canIsolateHost && canUnIsolateHost) {
-      let shouldSeeHIEToBeAbleToDeleteEntries: boolean;
+      let shouldBeAbleToDeleteEntries: boolean;
       try {
         const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
-        shouldSeeHIEToBeAbleToDeleteEntries = hostExceptionCount !== 0;
+        // has an HIE entry and is a super user then set to TRUE
+        shouldBeAbleToDeleteEntries = hostExceptionCount !== 0 && canAccessEndpointManagement;
       } catch {
-        shouldSeeHIEToBeAbleToDeleteEntries = false;
+        shouldBeAbleToDeleteEntries = false;
       }
 
-      if (!shouldSeeHIEToBeAbleToDeleteEntries) {
+      if (!shouldBeAbleToDeleteEntries) {
         linksToExclude.push(SecurityPageName.hostIsolationExceptions);
       }
-    } else if (!canIsolateHost) {
+    } else if (!canIsolateHost || !canAccessEndpointManagement) {
       linksToExclude.push(SecurityPageName.hostIsolationExceptions);
     }
   } catch {
