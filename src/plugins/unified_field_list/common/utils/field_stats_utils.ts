@@ -212,7 +212,9 @@ export async function getNumberHistogram(
   if (histogramInterval === 0) {
     return {
       totalDocuments: getHitsTotal(minMaxResult),
-      sampledValues: sumSampledValues(topValues, terms.sum_other_doc_count),
+      sampledValues:
+        sumSampledValues(topValues, terms.sum_other_doc_count) ||
+        minMaxResult.aggregations!.sample.sample_count.value!,
       sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
       topValues,
       histogram: useTopHits
@@ -245,7 +247,9 @@ export async function getNumberHistogram(
   return {
     totalDocuments: getHitsTotal(minMaxResult),
     sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
-    sampledValues: sumSampledValues(topValues, terms.sum_other_doc_count),
+    sampledValues:
+      sumSampledValues(topValues, terms.sum_other_doc_count) ||
+      minMaxResult.aggregations!.sample.sample_count.value!,
     histogram: {
       buckets: histogramResult.aggregations!.sample.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,
@@ -295,10 +299,11 @@ export async function getStringSamples(
   return {
     totalDocuments: getHitsTotal(topValuesResult),
     sampledDocuments: topValuesResult.aggregations!.sample.doc_count,
-    sampledValues: sumSampledValues(
-      topValues,
-      topValuesResult.aggregations!.sample.top_values.sum_other_doc_count
-    ),
+    sampledValues:
+      sumSampledValues(
+        topValues,
+        topValuesResult.aggregations!.sample.top_values.sum_other_doc_count
+      ) || topValuesResult.aggregations!.sample.sample_count.value!,
     topValues,
   };
 }
@@ -403,9 +408,9 @@ const getHitsTotal = (body: estypes.SearchResponse): number => {
 // See Github issue #144625
 export function sumSampledValues(
   topValues: FieldStatsResponse<string | number>['topValues'],
-  sumOtherDocCount: number = 0
+  sumOtherDocCount: number
 ): number {
   const valuesInTopBuckets =
     topValues?.buckets?.reduce((prev, bucket) => bucket.count + prev, 0) || 0;
-  return valuesInTopBuckets + sumOtherDocCount;
+  return valuesInTopBuckets + (sumOtherDocCount || 0);
 }
