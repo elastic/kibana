@@ -51,7 +51,7 @@ export class CustomIntegrationsPlugin
     const languageClientsUiComponents = {
       sample: SampleClientReadme,
       javascript: ElasticsearchJsClientReadme,
-      python: ElasticsearchPyClientReadme
+      python: ElasticsearchPyClientReadme,
     };
 
     const ContextProvider: React.FC = ({ children }) => (
