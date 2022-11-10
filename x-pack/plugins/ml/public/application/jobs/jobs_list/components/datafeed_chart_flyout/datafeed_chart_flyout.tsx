@@ -171,6 +171,14 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     try {
       const chartData = await getDatafeedResultChartData(jobId, startTimestamp, endTimestamp);
 
+      if (chartData.datafeedResults.length !== chartData.bucketResults.length) {
+        // const mappedData = new Map(dataWithPossibleMissingValues);
+        // const filledData = dataWithAllValues.reduce<[number, number | null][]>((acc, source) => {
+        //     acc.push(mappedData.has(source[0]) ? [source[0],  mappedData.get(source[0]) ?? null] : [source[0], null]);
+        //     return acc;
+        // }, []);
+      }
+
       setSourceData(chartData.datafeedResults);
       setBucketData(chartData.bucketResults);
       setAnnotationData({
