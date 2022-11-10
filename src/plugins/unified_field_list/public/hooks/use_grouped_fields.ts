@@ -157,6 +157,10 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         title: i18n.translate('unifiedFieldList.useGroupedFields.popularFieldsLabel', {
           defaultMessage: 'Popular fields',
         }),
+        helpText: i18n.translate('unifiedFieldList.useGroupedFields.unmappedFieldsLabelHelp', {
+          defaultMessage:
+            'Fields that your organization frequently uses, from most to least popular.',
+        }),
         isAffectedByGlobalFilter,
         isAffectedByTimeFilter,
         hideDetails: false,
@@ -199,12 +203,9 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         title: i18n.translate('unifiedFieldList.useGroupedFields.unmappedFieldsLabel', {
           defaultMessage: 'Unmapped fields',
         }),
-        defaultNoFieldsMessage: i18n.translate(
-          'unifiedFieldList.useGroupedFields.noUnmappedFieldsLabel',
-          {
-            defaultMessage: `There are no unmapped fields.`,
-          }
-        ),
+        helpText: i18n.translate('unifiedFieldList.useGroupedFields.unmappedFieldsLabelHelp', {
+          defaultMessage: "Fields that aren't explicitly mapped to a field data type.",
+        }),
       },
       EmptyFields: {
         fields: groupedFields.emptyFields,
@@ -218,15 +219,15 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         title: i18n.translate('unifiedFieldList.useGroupedFields.emptyFieldsLabel', {
           defaultMessage: 'Empty fields',
         }),
+        helpText: i18n.translate('unifiedFieldList.useGroupedFields.emptyFieldsLabelHelp', {
+          defaultMessage: "Fields that don't have any values based on your filters.",
+        }),
         defaultNoFieldsMessage: i18n.translate(
           'unifiedFieldList.useGroupedFields.noEmptyDataLabel',
           {
             defaultMessage: `There are no empty fields.`,
           }
         ),
-        helpText: i18n.translate('unifiedFieldList.useGroupedFields.emptyFieldsLabelHelp', {
-          defaultMessage: 'Empty fields did not contain any values based on your filters.',
-        }),
       },
       MetaFields: {
         fields: groupedFields.metaFields,

@@ -241,23 +241,7 @@ export function DiscoverSidebarComponent({
       if (groupName === FieldsGroupNames.AvailableFields) {
         return {
           helpText: i18n.translate('discover.fieldChooser.availableFieldsTooltip', {
-            defaultMessage:
-              'Your query returned values for these fields. Click + to add an available field to the data table.',
-          }),
-        };
-      }
-      if (groupName === FieldsGroupNames.PopularFields) {
-        return {
-          helpText: i18n.translate('discover.fieldChooser.popularFieldsTooltip', {
-            defaultMessage: 'Add fields to the table that your organization frequently uses.',
-          }),
-        };
-      }
-      if (groupName === FieldsGroupNames.UnmappedFields) {
-        return {
-          helpText: i18n.translate('discover.fieldChooser.unmappedFieldsTooltip', {
-            defaultMessage:
-              "Add fields to the table that aren't explicitly mapped to a field data type.",
+            defaultMessage: 'Fields available for display in the table.',
           }),
         };
       }
@@ -375,7 +359,7 @@ export function DiscoverSidebarComponent({
                 : ExistenceFetchStatus.unknown
             }
             renderFieldItem={renderFieldItem}
-            fieldsExistInIndex={Boolean(allFields?.length)}
+            fieldsExistInIndex={isPlainRecord ? true : Boolean(allFields?.length)}
             scrollToTopResetCounter={scrollToTopResetCounter}
             screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
           />

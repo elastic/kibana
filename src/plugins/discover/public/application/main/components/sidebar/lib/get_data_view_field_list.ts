@@ -15,7 +15,11 @@ export function getDataViewFieldList(
   dataView: DataView | undefined,
   fieldCounts: Record<string, number> | undefined | null,
   isPlainRecord: boolean
-) {
+): DataViewField[] | null {
+  if (isPlainRecord && !fieldCounts) {
+    // still loading data
+    return null;
+  }
   const currentFieldCounts = fieldCounts || {};
   const sourceFiltersValues = dataView?.getSourceFiltering?.()?.excludes;
   let dataViewFields: DataViewField[] = dataView?.fields.getAll() || [];
@@ -23,7 +27,7 @@ export function getDataViewFieldList(
   if (sourceFiltersValues) {
     const filter = fieldWildcardFilter(sourceFiltersValues, dataView.metaFields);
     dataViewFields = dataViewFields.filter((field) => {
-      return filter(field.name) || currentFieldCounts[field.name]; // don't filter out a field which was present in hits (ex. for text-based queries)
+      return filter(field.name) || currentFieldCounts[field.name]; // don't filter out a field which was present in hits (ex. for text-based queries, selected fields)
     });
   }
 
