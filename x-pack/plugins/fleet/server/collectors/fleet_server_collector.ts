@@ -40,7 +40,7 @@ export const getFleetServerUsage = async (
   }
 
   const fleetServerHosts = await listFleetServerHosts(soClient);
-  const numHostsUrls = fleetServerHosts.total;
+  const numHostsUrls = fleetServerHosts.items.flatMap((host) => host.host_urls).length;
 
   // Find all policies with Fleet server than query agent status
   let hasMore = true;
