@@ -51,20 +51,20 @@ export const EntityAnalyticsHoverActions: React.FC<Props> = ({
   return (
     <HoverActions
       applyWidthAndPadding
-      scopeId={SecurityPageName.entityAnalytics}
       closeTopN={noop}
-      dataType={'string'}
-      onFilterAdded={onFilterAdded}
       dataProvider={dataProvider}
+      dataType={'string'}
+      field={fieldName}
       fieldType={'keyword'}
+      hideTopN={true}
       isAggregatable
       isObjectArray={false}
+      onFilterAdded={onFilterAdded}
       ownFocus={false}
+      scopeId={SecurityPageName.entityAnalytics}
       showTopN={false}
-      hideTopN={true}
       toggleTopN={noop}
       values={[fieldValue]}
-      field={fieldName}
     />
   );
 };

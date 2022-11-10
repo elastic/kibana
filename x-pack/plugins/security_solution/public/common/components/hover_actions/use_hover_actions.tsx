@@ -78,13 +78,13 @@ export const useHoverActions = ({
     }, 0); // invoked on the next tick, because we want to restore focus first
   }, [keyboardHandlerRef]);
 
-  const { closeTopN, toggleTopN, showTopN } = useTopNPopOver(handleClosePopOverTrigger);
+  const { closeTopN, toggleTopN, isShowingTopN } = useTopNPopOver(handleClosePopOverTrigger);
 
   const hoverContent = useMemo(() => {
     // display links as additional content in the hover menu to enable keyboard
     // navigation of links (when the draggable contains them):
     const additionalContent =
-      hoverActionsOwnFocus && !showTopN && draggableContainsLinks(containerRef.current) ? (
+      hoverActionsOwnFocus && !isShowingTopN && draggableContainsLinks(containerRef.current) ? (
         <ProviderContentWrapper
           data-test-subj={`draggable-link-content-${dataProvider.queryMatch.field}`}
         >
@@ -107,7 +107,7 @@ export const useHoverActions = ({
         onFilterAdded={onFilterAdded}
         ownFocus={hoverActionsOwnFocus}
         showOwnFocus={false}
-        showTopN={showTopN}
+        showTopN={isShowingTopN}
         scopeId={id}
         toggleTopN={toggleTopN}
         values={
@@ -119,7 +119,7 @@ export const useHoverActions = ({
     );
   }, [
     hoverActionsOwnFocus,
-    showTopN,
+    isShowingTopN,
     dataProvider,
     render,
     closeTopN,
@@ -170,7 +170,7 @@ export const useHoverActions = ({
       onFocus,
       openPopover,
       setContainerRef,
-      showTopN,
+      isShowingTopN,
     }),
     [
       closePopOverTrigger,
@@ -181,7 +181,7 @@ export const useHoverActions = ({
       onFocus,
       openPopover,
       setContainerRef,
-      showTopN,
+      isShowingTopN,
     ]
   );
 };

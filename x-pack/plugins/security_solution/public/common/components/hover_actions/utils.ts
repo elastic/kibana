@@ -22,7 +22,7 @@ export const getAdditionalScreenReaderOnlyContext = ({
 };
 
 export const useTopNPopOver = (setIsPopoverVisible?: (isVisible: boolean) => void) => {
-  const [showTopN, setShowTopN] = useState<boolean>(false);
+  const [isShowingTopN, setShowTopN] = useState<boolean>(false);
   const toggleTopN = useCallback(() => {
     setShowTopN((prevShowTopN) => {
       const newShowTopN = !prevShowTopN;
@@ -35,5 +35,5 @@ export const useTopNPopOver = (setIsPopoverVisible?: (isVisible: boolean) => voi
     setShowTopN(false);
   }, []);
 
-  return { closeTopN, toggleTopN, setShowTopN, showTopN };
+  return { closeTopN, toggleTopN, isShowingTopN };
 };

@@ -52,7 +52,7 @@ export const ActionCell: React.FC<Props> = React.memo(
       values,
     });
 
-    const { closeTopN, toggleTopN, showTopN } = useTopNPopOver(setIsPopoverVisible);
+    const { closeTopN, toggleTopN, isShowingTopN } = useTopNPopOver(setIsPopoverVisible);
     const { aggregatable, type } = fieldFromBrowserField || { aggregatable: false, type: '' };
     const { timelineId: timelineIdFind } = useContext(TimelineContext);
 
@@ -70,7 +70,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         isObjectArray={data.isObjectArray}
         onFilterAdded={onFilterAdded}
         ownFocus={false}
-        showTopN={showTopN}
+        showTopN={isShowingTopN}
         scopeId={scopeId ?? timelineIdFind}
         toggleColumn={toggleColumn}
         toggleTopN={toggleTopN}
