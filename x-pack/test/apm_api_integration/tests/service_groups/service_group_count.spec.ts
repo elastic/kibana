@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApmRuleType } from '../../../../plugins/apm/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
+import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { waitForActiveAlert } from './wait_for_active_alert';
 
