@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -28,6 +28,10 @@ import {
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import {
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+} from '@kbn/alerting-plugin/common/parse_duration';
 import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
@@ -44,6 +48,7 @@ import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './act
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
+import { ActionNotifyWhen, DEFAULT_FREQUENCY } from './action_notify_when';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -74,6 +79,8 @@ const preconfiguredMessage = i18n.translate(
     defaultMessage: '(preconfigured)',
   }
 );
+
+type ActionFrequency = NonNullable<RuleAction['frequency']>;
 
 export const ActionTypeForm = ({
   actionItem,
@@ -106,7 +113,28 @@ export const ActionTypeForm = ({
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
   });
+  const [actionThrottle, setActionThrottle] = useState<number | null>(
+    actionItem.frequency?.throttle
+      ? getDurationNumberInItsUnit(actionItem.frequency.throttle)
+      : null
+  );
+  const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
+    actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
+  );
 
+  const setActionFrequencyProperty = useCallback(
+    <Key extends keyof ActionFrequency>(key: Key, value: ActionFrequency[Key]) => {
+      setActionParamsProperty(
+        'frequency',
+        {
+          ...(actionItem.frequency ?? DEFAULT_FREQUENCY),
+          [key]: value,
+        },
+        index
+      );
+    },
+    [setActionParamsProperty, actionItem.frequency, index]
+  );
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
     let defaultParams;
@@ -185,6 +213,28 @@ export const ActionTypeForm = ({
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
       : false;
 
+  const actionNotifyWhen = (
+    <ActionNotifyWhen
+      frequency={actionItem.frequency}
+      throttle={actionThrottle}
+      throttleUnit={actionThrottleUnit}
+      onNotifyWhenChange={useCallback(
+        (notifyWhen) => {
+          setActionFrequencyProperty('notifyWhen', notifyWhen);
+        },
+        [setActionFrequencyProperty]
+      )}
+      onThrottleChange={useCallback(
+        (throttle: number | null, throttleUnit: string) => {
+          setActionThrottle(throttle);
+          setActionThrottleUnit(throttleUnit);
+          setActionFrequencyProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
+        },
+        [setActionFrequencyProperty]
+      )}
+    />
+  );
+
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
 
@@ -200,8 +250,10 @@ export const ActionTypeForm = ({
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
+      {actionNotifyWhen}
       {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
         <>
+          <EuiSpacer size="xs" />
           <EuiSuperSelect
             prepend={
               <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}>
