@@ -259,72 +259,6 @@
       },
       {
         "parentPluginId": "savedObjectsTaggingOss",
-        "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectSaveModalTagSelectorComponentProps",
-        "description": [
-          "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector | SavedObjectSaveModalTagSelector component}\n"
-        ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "savedObjectsTaggingOss",
-            "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.initialSelection",
-            "type": "Array",
-            "tags": [],
-            "label": "initialSelection",
-            "description": [
-              "\nIds of the initially selected tags.\nChanging the value of this prop after initial mount will not rerender the component (see component description for more details)"
-            ],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedObjectsTaggingOss",
-            "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.onTagsSelected",
-            "type": "Function",
-            "tags": [],
-            "label": "onTagsSelected",
-            "description": [
-              "\ntags selection callback"
-            ],
-            "signature": [
-              "(ids: string[]) => void"
-            ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjectsTaggingOss",
-                "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps.onTagsSelected.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "ids",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.SavedObjectsTaggingApi",
         "type": "Interface",
         "tags": [],
@@ -1291,6 +1225,41 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "savedObjectsTaggingOss",
+        "id": "def-public.SavedObjectSaveModalTagSelectorComponentProps",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectSaveModalTagSelectorComponentProps",
+        "description": [
+          "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector | SavedObjectSaveModalTagSelector component}\n"
+        ],
+        "signature": [
+          "Omit<",
+          "_EuiComboBoxProps",
+          "<",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          " | { type: \"__create_option__\"; }>, \"options\" | \"selectedOptions\" | \"append\" | \"prepend\" | \"fullWidth\" | \"compressed\" | \"async\" | \"isClearable\" | \"singleSelection\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          " | { type: \"__create_option__\"; }>> & { initialSelection: string[]; onTagsSelected: (ids: string[]) => void; }"
+        ],
+        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.SavedObjectTagDecoratorTypeGuard",
