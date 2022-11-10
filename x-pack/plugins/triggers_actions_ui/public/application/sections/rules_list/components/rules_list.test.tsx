@@ -12,19 +12,21 @@ import { ReactWrapper } from 'enzyme';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList, percentileFields } from './rules_list';
-import { RuleTypeModel, ValidationResult, Percentiles } from '../../../../types';
-import {
-  RuleExecutionStatusErrorReasons,
-  RuleExecutionStatusWarningReasons,
-  ALERTS_FEATURE_ID,
-  parseDuration,
-} from '@kbn/alerting-plugin/common';
+import { RuleTypeModel, Percentiles } from '../../../../types';
+import { parseDuration } from '@kbn/alerting-plugin/common';
 import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
+
+import {
+  mockedRulesData,
+  ruleTypeFromApi,
+  getDisabledByLicenseRuleTypeFromApi,
+  ruleType,
+} from './test_helpers';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -80,14 +82,7 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const {
-  loadRuleTypes,
-  updateAPIKey,
-  loadRuleTags,
-  bulkSnoozeRules,
-  bulkUnsnoozeRules,
-  bulkUpdateAPIKey,
-} = jest.requireMock('../../../lib/rule_api');
+const { loadRuleTypes, updateAPIKey, loadRuleTags } = jest.requireMock('../../../lib/rule_api');
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
@@ -96,238 +91,11 @@ const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/actio
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const ruleType = {
-  id: 'test_rule_type',
-  description: 'test',
-  iconClass: 'test',
-  documentationUrl: null,
-  validate: (): ValidationResult => {
-    return { errors: {} };
-  },
-  ruleParamsExpression: () => null,
-  requiresAppContext: false,
-};
-const ruleTypeFromApi = {
-  id: 'test_rule_type',
-  name: 'some rule type',
-  actionGroups: [{ id: 'default', name: 'Default' }],
-  recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-  actionVariables: { context: [], state: [] },
-  defaultActionGroupId: 'default',
-  producer: ALERTS_FEATURE_ID,
-  minimumLicenseRequired: 'basic',
-  enabledInLicense: true,
-  authorizedConsumers: {
-    [ALERTS_FEATURE_ID]: { read: true, all: true },
-  },
-  ruleTaskTimeout: '1m',
-};
+
 ruleTypeRegistry.list.mockReturnValue([ruleType]);
 actionTypeRegistry.list.mockReturnValue([]);
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-
-const mockedRulesData = [
-  {
-    id: '1',
-    name: 'test rule',
-    tags: ['tag1'],
-    enabled: true,
-    ruleTypeId: 'test_rule_type',
-    schedule: { interval: '1s' },
-    actions: [],
-    params: { name: 'test rule type name' },
-    scheduledTaskId: null,
-    createdBy: null,
-    updatedBy: null,
-    apiKeyOwner: null,
-    throttle: '1m',
-    muteAll: false,
-    mutedInstanceIds: [],
-    executionStatus: {
-      status: 'active',
-      lastDuration: 500,
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-      error: null,
-    },
-    monitoring: {
-      execution: {
-        history: [
-          {
-            success: true,
-            duration: 1000000,
-          },
-          {
-            success: true,
-            duration: 200000,
-          },
-          {
-            success: false,
-            duration: 300000,
-          },
-        ],
-        calculated_metrics: {
-          success_ratio: 0.66,
-          p50: 200000,
-          p95: 300000,
-          p99: 300000,
-        },
-      },
-    },
-  },
-  {
-    id: '2',
-    name: 'test rule ok',
-    tags: ['tag1'],
-    enabled: true,
-    ruleTypeId: 'test_rule_type',
-    schedule: { interval: '5d' },
-    actions: [],
-    params: { name: 'test rule type name' },
-    scheduledTaskId: null,
-    createdBy: null,
-    updatedBy: null,
-    apiKeyOwner: null,
-    throttle: '1m',
-    muteAll: false,
-    mutedInstanceIds: [],
-    executionStatus: {
-      status: 'ok',
-      lastDuration: 61000,
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-      error: null,
-    },
-    monitoring: {
-      execution: {
-        history: [
-          {
-            success: true,
-            duration: 100000,
-          },
-          {
-            success: true,
-            duration: 500000,
-          },
-        ],
-        calculated_metrics: {
-          success_ratio: 1,
-          p50: 0,
-          p95: 100000,
-          p99: 500000,
-        },
-      },
-    },
-  },
-  {
-    id: '3',
-    name: 'test rule pending',
-    tags: ['tag1'],
-    enabled: true,
-    ruleTypeId: 'test_rule_type',
-    schedule: { interval: '5d' },
-    actions: [],
-    params: { name: 'test rule type name' },
-    scheduledTaskId: null,
-    createdBy: null,
-    updatedBy: null,
-    apiKeyOwner: null,
-    throttle: '1m',
-    muteAll: false,
-    mutedInstanceIds: [],
-    executionStatus: {
-      status: 'pending',
-      lastDuration: 30234,
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-      error: null,
-    },
-    monitoring: {
-      execution: {
-        history: [{ success: false, duration: 100 }],
-        calculated_metrics: {
-          success_ratio: 0,
-        },
-      },
-    },
-  },
-  {
-    id: '4',
-    name: 'test rule error',
-    tags: ['tag1'],
-    enabled: true,
-    ruleTypeId: 'test_rule_type',
-    schedule: { interval: '5d' },
-    actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
-    params: { name: 'test rule type name' },
-    scheduledTaskId: null,
-    createdBy: null,
-    updatedBy: null,
-    apiKeyOwner: null,
-    throttle: '1m',
-    muteAll: false,
-    mutedInstanceIds: [],
-    executionStatus: {
-      status: 'error',
-      lastDuration: 122000,
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-      error: {
-        reason: RuleExecutionStatusErrorReasons.Unknown,
-        message: 'test',
-      },
-    },
-  },
-  {
-    id: '5',
-    name: 'test rule license error',
-    tags: [],
-    enabled: true,
-    ruleTypeId: 'test_rule_type',
-    schedule: { interval: '5d' },
-    actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
-    params: { name: 'test rule type name' },
-    scheduledTaskId: null,
-    createdBy: null,
-    updatedBy: null,
-    apiKeyOwner: null,
-    throttle: '1m',
-    muteAll: false,
-    mutedInstanceIds: [],
-    executionStatus: {
-      status: 'error',
-      lastDuration: 500,
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-      error: {
-        reason: RuleExecutionStatusErrorReasons.License,
-        message: 'test',
-      },
-    },
-  },
-  {
-    id: '6',
-    name: 'test rule warning',
-    tags: [],
-    enabled: true,
-    ruleTypeId: 'test_rule_type',
-    schedule: { interval: '5d' },
-    actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
-    params: { name: 'test rule type name' },
-    scheduledTaskId: null,
-    createdBy: null,
-    updatedBy: null,
-    apiKeyOwner: null,
-    throttle: '1m',
-    muteAll: false,
-    mutedInstanceIds: [],
-    executionStatus: {
-      status: 'warning',
-      lastDuration: 500,
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-      warning: {
-        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
-        message: 'test',
-      },
-    },
-  },
-];
 
 beforeEach(() => {
   (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
@@ -488,7 +256,7 @@ describe.skip('rules_list component empty', () => {
   });
 });
 
-describe.skip('rules_list component with props', () => {
+describe('rules_list component with props', () => {
   describe('Status filter', () => {
     let wrapper: ReactWrapper<any>;
     async function setup(editable: boolean = true) {
@@ -577,6 +345,10 @@ describe.skip('rules_list component with props', () => {
         'disabled',
         'enabled',
       ]);
+
+      await act(async () => {
+        await nextTick();
+      });
     });
   });
 
@@ -1044,7 +816,7 @@ describe.skip('rules_list component with props', () => {
   });
 });
 
-describe.skip('rules_list component with items', () => {
+describe('rules_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(editable: boolean = true) {
@@ -1106,279 +878,312 @@ describe.skip('rules_list component with items', () => {
     expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalled();
   }
 
-  it('renders table of rules', async () => {
-    // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers('legacy');
-    await setup();
-    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRow')).toHaveLength(mockedRulesData.length);
-
-    // Name and rule type column
-    const ruleNameColumns = wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-name"]');
-    expect(ruleNameColumns.length).toEqual(mockedRulesData.length);
-    mockedRulesData.forEach((rule, index) => {
-      expect(ruleNameColumns.at(index).text()).toEqual(`Name${rule.name}${ruleTypeFromApi.name}`);
+  describe('render table of rules', () => {
+    beforeAll(async () => {
+      // Use fake timers so we don't have to wait for the EuiToolTip timeout
+      jest.useFakeTimers('legacy');
+      await setup();
     });
 
-    // Tags column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-tagsPopover"]').length
-    ).toEqual(mockedRulesData.length);
-    // only show tags popover if tags exist on rule
-    const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagBadge"]');
-    expect(tagsBadges.length).toEqual(
-      mockedRulesData.filter((data) => data.tags.length > 0).length
-    );
-
-    // Last run column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastExecutionDate"]').length
-    ).toEqual(mockedRulesData.length);
-
-    // Last run tooltip
-    wrapper
-      .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
-      .first()
-      .simulate('mouseOver');
-
-    // Run the timers so the EuiTooltip will be visible
-    jest.runOnlyPendingTimers();
-
-    wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
-      'Start time of the last run.'
-    );
-
-    wrapper
-      .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"] EuiToolTipAnchor')
-      .first()
-      .simulate('mouseOut');
-
-    // Schedule interval column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-interval"]').length
-    ).toEqual(mockedRulesData.length);
-
-    // Schedule interval tooltip
-    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOver');
-
-    // Run the timers so the EuiTooltip will be visible
-    jest.runOnlyPendingTimers();
-
-    wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
-      'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
-    );
-
-    wrapper
-      .find('[data-test-subj="ruleInterval-config-tooltip-0"] EuiToolTipAnchor')
-      .first()
-      .simulate('mouseOut');
-
-    // Duration column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-duration"]').length
-    ).toEqual(mockedRulesData.length);
-    // show warning if duration is long
-    const durationWarningIcon = wrapper.find('EuiIconTip[data-test-subj="ruleDurationWarning"]');
-    expect(durationWarningIcon.length).toEqual(
-      mockedRulesData.filter(
-        (data) => data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout)
-      ).length
-    );
-
-    // Duration tooltip
-    wrapper.find('[data-test-subj="rulesTableCell-durationTooltip"]').first().simulate('mouseOver');
-
-    // Run the timers so the EuiTooltip will be visible
-    jest.runOnlyPendingTimers();
-
-    wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
-      'The length of time it took for the rule to run (mm:ss).'
-    );
-
-    // Last response column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastResponse"]').length
-    ).toEqual(mockedRulesData.length);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-active"]').length).toEqual(1);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').length).toEqual(1);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-unknown"]').length).toEqual(0);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').length).toEqual(2);
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-warning"]').length).toEqual(1);
-    expect(wrapper.find('[data-test-subj="ruleStatus-error-tooltip"]').length).toEqual(2);
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="ruleStatus-error-license-fix"]').length
-    ).toEqual(1);
-
-    expect(wrapper.find('[data-test-subj="rulesListAutoRefresh"]').exists()).toBeTruthy();
-
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').first().text()).toEqual(
-      'Error'
-    );
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').last().text()).toEqual(
-      'License Error'
-    );
-
-    // Status control column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
-      mockedRulesData.length
-    );
-
-    // Monitoring column
-    expect(
-      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-successRatio"]').length
-    ).toEqual(mockedRulesData.length);
-    const ratios = wrapper.find(
-      'EuiTableRowCell[data-test-subj="rulesTableCell-successRatio"] span[data-test-subj="successRatio"]'
-    );
-
-    mockedRulesData.forEach((rule, index) => {
-      if (rule.monitoring) {
-        expect(ratios.at(index).text()).toEqual(
-          `${rule.monitoring.execution.calculated_metrics.success_ratio * 100}%`
-        );
-      } else {
-        expect(ratios.at(index).text()).toEqual(`N/A`);
-      }
+    afterAll(() => {
+      jest.clearAllMocks();
     });
 
-    // P50 column is rendered initially
-    expect(
-      wrapper.find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`).exists()
-    ).toBeTruthy();
-
-    let percentiles = wrapper.find(
-      `EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
-    );
-
-    mockedRulesData.forEach((rule, index) => {
-      if (typeof rule.monitoring?.execution.calculated_metrics.p50 === 'number') {
-        // Ensure the table cells are getting the correct values
-        expect(percentiles.at(index).text()).toEqual(
-          getFormattedDuration(rule.monitoring.execution.calculated_metrics.p50)
-        );
-        // Ensure the tooltip is showing the correct content
-        expect(
-          wrapper
-            .find(
-              'EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] [data-test-subj="rule-duration-format-tooltip"]'
-            )
-            .at(index)
-            .props().content
-        ).toEqual(getFormattedMilliseconds(rule.monitoring.execution.calculated_metrics.p50));
-      } else {
-        expect(percentiles.at(index).text()).toEqual('N/A');
-      }
+    it('should render basic table and its row', async () => {
+      expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
+      expect(wrapper.find('EuiTableRow')).toHaveLength(mockedRulesData.length);
     });
 
-    // Click column to sort by P50
-    wrapper
-      .find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`)
-      .first()
-      .simulate('click');
-
-    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sort: {
-          field: percentileFields[Percentiles.P50],
-          direction: 'asc',
-        },
-      })
-    );
-
-    // Click column again to reverse sort by P50
-    wrapper
-      .find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`)
-      .first()
-      .simulate('click');
-
-    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sort: {
-          field: percentileFields[Percentiles.P50],
-          direction: 'desc',
-        },
-      })
-    );
-
-    // Hover over percentile selection button
-    wrapper
-      .find('[data-test-subj="percentileSelectablePopover-iconButton"]')
-      .first()
-      .simulate('click');
-
-    jest.runOnlyPendingTimers();
-    wrapper.update();
-
-    // Percentile Selection
-    expect(
-      wrapper.find('[data-test-subj="percentileSelectablePopover-selectable"]').exists()
-    ).toBeTruthy();
-
-    const percentileOptions = wrapper.find(
-      '[data-test-subj="percentileSelectablePopover-selectable"] li'
-    );
-    expect(percentileOptions.length).toEqual(3);
-
-    // Select P95
-    percentileOptions.at(1).simulate('click');
-
-    jest.runOnlyPendingTimers();
-    wrapper.update();
-
-    expect(
-      wrapper.find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`).exists()
-    ).toBeTruthy();
-
-    percentiles = wrapper.find(
-      `EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
-    );
-
-    mockedRulesData.forEach((rule, index) => {
-      if (typeof rule.monitoring?.execution.calculated_metrics.p95 === 'number') {
-        expect(percentiles.at(index).text()).toEqual(
-          getFormattedDuration(rule.monitoring.execution.calculated_metrics.p95)
-        );
-      } else {
-        expect(percentiles.at(index).text()).toEqual('N/A');
-      }
+    it('Name and rule type column', () => {
+      const ruleNameColumns = wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-name"]');
+      expect(ruleNameColumns.length).toEqual(mockedRulesData.length);
+      mockedRulesData.forEach((rule, index) => {
+        expect(ruleNameColumns.at(index).text()).toEqual(`Name${rule.name}${ruleTypeFromApi.name}`);
+      });
     });
 
-    // Click column to sort by P95
-    wrapper
-      .find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`)
-      .first()
-      .simulate('click');
+    it('Tags column', () => {
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-tagsPopover"]').length
+      ).toEqual(mockedRulesData.length);
+      // only show tags popover if tags exist on rule
+      const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagBadge"]');
+      expect(tagsBadges.length).toEqual(
+        mockedRulesData.filter((data) => data.tags.length > 0).length
+      );
+    });
 
-    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sort: {
-          field: percentileFields[Percentiles.P95],
-          direction: 'asc',
-        },
-      })
-    );
+    it('Last run column', () => {
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastExecutionDate"]').length
+      ).toEqual(mockedRulesData.length);
+    });
 
-    // Click column again to reverse sort by P95
-    wrapper
-      .find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`)
-      .first()
-      .simulate('click');
+    it('Last run tooltip', () => {
+      wrapper
+        .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
+        .first()
+        .simulate('mouseOver');
 
-    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sort: {
-          field: percentileFields[Percentiles.P95],
-          direction: 'desc',
-        },
-      })
-    );
+      // Run the timers so the EuiTooltip will be visible
+      jest.runOnlyPendingTimers();
 
-    // Clearing all mocks will also reset fake timers.
-    jest.clearAllMocks();
+      wrapper.update();
+
+      expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
+        'Start time of the last run.'
+      );
+
+      wrapper
+        .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"] EuiToolTipAnchor')
+        .first()
+        .simulate('mouseOut');
+    });
+
+    it('Schedule interval column', () => {
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-interval"]').length
+      ).toEqual(mockedRulesData.length);
+    });
+
+    it('Schedule interval tooltip', () => {
+      wrapper
+        .find('[data-test-subj="ruleInterval-config-tooltip-0"]')
+        .first()
+        .simulate('mouseOver');
+
+      // Run the timers so the EuiTooltip will be visible
+      jest.runOnlyPendingTimers();
+      wrapper.update();
+      expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
+        'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
+      );
+      wrapper
+        .find('[data-test-subj="ruleInterval-config-tooltip-0"] EuiToolTipAnchor')
+        .first()
+        .simulate('mouseOut');
+      // Duration column
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-duration"]').length
+      ).toEqual(mockedRulesData.length);
+      // show warning if duration is long
+      const durationWarningIcon = wrapper.find('EuiIconTip[data-test-subj="ruleDurationWarning"]');
+      expect(durationWarningIcon.length).toEqual(
+        mockedRulesData.filter(
+          (data) =>
+            data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout)
+        ).length
+      );
+
+      // Duration tooltip
+      wrapper
+        .find('[data-test-subj="rulesTableCell-durationTooltip"]')
+        .first()
+        .simulate('mouseOver');
+
+      // Run the timers so the EuiTooltip will be visible
+      jest.runOnlyPendingTimers();
+      wrapper.update();
+      expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
+        'The length of time it took for the rule to run (mm:ss).'
+      );
+    });
+
+    it('Duration tooltip', () => {
+      wrapper
+        .find('[data-test-subj="rulesTableCell-durationTooltip"]')
+        .first()
+        .simulate('mouseOver');
+    });
+
+    it('Last response column', () => {
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastResponse"]').length
+      ).toEqual(mockedRulesData.length);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-active"]').length).toEqual(1);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').length).toEqual(1);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-unknown"]').length).toEqual(0);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').length).toEqual(2);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-warning"]').length).toEqual(1);
+      expect(wrapper.find('[data-test-subj="ruleStatus-error-tooltip"]').length).toEqual(2);
+      expect(
+        wrapper.find('EuiButtonEmpty[data-test-subj="ruleStatus-error-license-fix"]').length
+      ).toEqual(1);
+
+      expect(wrapper.find('[data-test-subj="rulesListAutoRefresh"]').exists()).toBeTruthy();
+
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').first().text()).toEqual(
+        'Error'
+      );
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').last().text()).toEqual(
+        'License Error'
+      );
+    });
+
+    it('Status control column', () => {
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length
+      ).toEqual(mockedRulesData.length);
+
+      // Monitoring column
+      expect(
+        wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-successRatio"]').length
+      ).toEqual(mockedRulesData.length);
+      const ratios = wrapper.find(
+        'EuiTableRowCell[data-test-subj="rulesTableCell-successRatio"] span[data-test-subj="successRatio"]'
+      );
+
+      mockedRulesData.forEach((rule, index) => {
+        if (rule.monitoring) {
+          expect(ratios.at(index).text()).toEqual(
+            `${rule.monitoring.execution.calculated_metrics.success_ratio * 100}%`
+          );
+        } else {
+          expect(ratios.at(index).text()).toEqual(`N/A`);
+        }
+      });
+    });
+
+    it('P50 column is rendered initially', () => {
+      expect(
+        wrapper.find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`).exists()
+      ).toBeTruthy();
+
+      const percentiles = wrapper.find(
+        `EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
+      );
+
+      mockedRulesData.forEach((rule, index) => {
+        if (typeof rule.monitoring?.execution.calculated_metrics.p50 === 'number') {
+          // Ensure the table cells are getting the correct values
+          expect(percentiles.at(index).text()).toEqual(
+            getFormattedDuration(rule.monitoring.execution.calculated_metrics.p50)
+          );
+          // Ensure the tooltip is showing the correct content
+          expect(
+            wrapper
+              .find(
+                'EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] [data-test-subj="rule-duration-format-tooltip"]'
+              )
+              .at(index)
+              .props().content
+          ).toEqual(getFormattedMilliseconds(rule.monitoring.execution.calculated_metrics.p50));
+        } else {
+          expect(percentiles.at(index).text()).toEqual('N/A');
+        }
+      });
+    });
+
+    it('Click column to sort by P50', () => {
+      wrapper
+        .find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`)
+        .first()
+        .simulate('click');
+
+      expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: percentileFields[Percentiles.P50],
+            direction: 'asc',
+          },
+        })
+      );
+
+      // Click column again to reverse sort by P50
+      wrapper
+        .find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`)
+        .first()
+        .simulate('click');
+
+      expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: percentileFields[Percentiles.P50],
+            direction: 'desc',
+          },
+        })
+      );
+
+      // Hover over percentile selection button
+      wrapper
+        .find('[data-test-subj="percentileSelectablePopover-iconButton"]')
+        .first()
+        .simulate('click');
+
+      jest.runOnlyPendingTimers();
+      wrapper.update();
+
+      // Percentile Selection
+      expect(
+        wrapper.find('[data-test-subj="percentileSelectablePopover-selectable"]').exists()
+      ).toBeTruthy();
+
+      const percentileOptions = wrapper.find(
+        '[data-test-subj="percentileSelectablePopover-selectable"] li'
+      );
+      expect(percentileOptions.length).toEqual(3);
+    });
+
+    it('Select P95', () => {
+      const percentileOptions = wrapper.find(
+        '[data-test-subj="percentileSelectablePopover-selectable"] li'
+      );
+
+      percentileOptions.at(1).simulate('click');
+
+      jest.runOnlyPendingTimers();
+      wrapper.update();
+
+      expect(
+        wrapper.find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`).exists()
+      ).toBeTruthy();
+
+      const percentiles = wrapper.find(
+        `EuiTableRowCell[data-test-subj="rulesTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
+      );
+
+      mockedRulesData.forEach((rule, index) => {
+        if (typeof rule.monitoring?.execution.calculated_metrics.p95 === 'number') {
+          expect(percentiles.at(index).text()).toEqual(
+            getFormattedDuration(rule.monitoring.execution.calculated_metrics.p95)
+          );
+        } else {
+          expect(percentiles.at(index).text()).toEqual('N/A');
+        }
+      });
+    });
+
+    it('Click column to sort by P95', () => {
+      wrapper
+        .find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`)
+        .first()
+        .simulate('click');
+
+      expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: percentileFields[Percentiles.P95],
+            direction: 'asc',
+          },
+        })
+      );
+
+      // Click column again to reverse sort by P95
+      wrapper
+        .find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`)
+        .first()
+        .simulate('click');
+
+      expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: percentileFields[Percentiles.P95],
+            direction: 'desc',
+          },
+        })
+      );
+    });
   });
 
   it('renders license errors and manage license modal on click', async () => {
@@ -1590,7 +1395,7 @@ describe.skip('rules_list component with items', () => {
   });
 });
 
-describe.skip('rules_list component empty with show only capability', () => {
+describe('rules_list component empty with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
@@ -1633,7 +1438,7 @@ describe.skip('rules_list component empty with show only capability', () => {
   });
 });
 
-describe.skip('rules_list with show only capability', () => {
+describe('rules_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(editable: boolean = true) {
@@ -1754,7 +1559,7 @@ describe.skip('rules_list with show only capability', () => {
   });
 });
 
-describe.skip('rules_list with disabled items', () => {
+describe('rules_list with disabled items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
@@ -1820,23 +1625,7 @@ describe.skip('rules_list with disabled items', () => {
       },
     ]);
 
-    loadRuleTypes.mockResolvedValue([
-      ruleTypeFromApi,
-      {
-        id: 'test_rule_type_disabled_by_license',
-        name: 'some rule type that is not allowed',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-        actionVariables: { context: [], state: [] },
-        defaultActionGroupId: 'default',
-        producer: ALERTS_FEATURE_ID,
-        minimumLicenseRequired: 'platinum',
-        enabledInLicense: false,
-        authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { read: true, all: true },
-        },
-      },
-    ]);
+    loadRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
     loadAllActions.mockResolvedValue([]);
 
     ruleTypeRegistry.has.mockReturnValue(false);
@@ -1886,233 +1675,5 @@ describe.skip('rules_list with disabled items', () => {
     wrapper.find('[data-test-subj="rulesListNotifyBadge-unsnoozed"]').first().simulate('click');
 
     expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
-  });
-});
-
-// Failing: https://github.com/elastic/kibana/issues/141052
-describe.skip('Rules list bulk actions', () => {
-  let wrapper: ReactWrapper<any>;
-
-  async function setup(authorized: boolean = true) {
-    loadRulesWithKueryFilter.mockResolvedValue({
-      page: 1,
-      perPage: 10000,
-      total: 6,
-      data: mockedRulesData,
-    });
-
-    loadActionTypes.mockResolvedValue([
-      {
-        id: 'test',
-        name: 'Test',
-      },
-      {
-        id: 'test2',
-        name: 'Test2',
-      },
-    ]);
-    loadRuleTypes.mockResolvedValue([
-      ruleTypeFromApi,
-      {
-        id: 'test_rule_type_disabled_by_license',
-        name: 'some rule type that is not allowed',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-        actionVariables: { context: [], state: [] },
-        defaultActionGroupId: 'default',
-        producer: ALERTS_FEATURE_ID,
-        minimumLicenseRequired: 'platinum',
-        enabledInLicense: false,
-        authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { read: true, all: authorized },
-        },
-      },
-    ]);
-    loadAllActions.mockResolvedValue([]);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    wrapper = mountWithIntl(<RulesList />);
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-  }
-
-  it('renders select all button for bulk editing', async () => {
-    await setup();
-    expect(wrapper.find('[data-test-subj="totalRulesCount"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="showBulkActionButton"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="selectAllRulesButton"]').exists()).toBeFalsy();
-
-    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
-
-    expect(wrapper.find('[data-test-subj="totalRulesCount"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="showBulkActionButton"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="selectAllRulesButton"]').exists()).toBeTruthy();
-  });
-
-  it('does not render select all button if the user is not authorized', async () => {
-    await setup(false);
-    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
-    expect(wrapper.find('[data-test-subj="showBulkActionButton"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="selectAllRulesButton"]').exists()).toBeFalsy();
-  });
-
-  it('selects all will select all items', async () => {
-    await setup();
-    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
-    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
-
-    mockedRulesData.forEach((rule) => {
-      expect(
-        wrapper.find(`[data-test-subj="checkboxSelectRow-${rule.id}"]`).first().prop('checked')
-      ).toBeTruthy();
-    });
-
-    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
-
-    expect(wrapper.find('[data-test-subj="ruleQuickEditButton"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="disableAll"]').first().prop('isDisabled')).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="deleteAll"]').first().prop('isDisabled')).toBeTruthy();
-  });
-
-  it('can bulk snooze', async () => {
-    await setup();
-    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
-    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
-    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
-
-    // Unselect something to test filtering
-    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
-
-    wrapper.find('[data-test-subj="bulkSnooze"]').first().simulate('click');
-
-    expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
-    wrapper.find('[data-test-subj="linkSnooze1h"]').first().simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(bulkSnoozeRules).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ids: [],
-        filter: 'NOT (alert.id: "alert:2")',
-      })
-    );
-  });
-
-  it('can bulk unsnooze', async () => {
-    await setup();
-    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
-    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
-    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
-
-    // Unselect something to test filtering
-    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
-
-    wrapper.find('[data-test-subj="bulkUnsnooze"]').first().simulate('click');
-
-    expect(wrapper.find('[data-test-subj="bulkUnsnoozeConfirmationModal"]').exists()).toBeTruthy();
-    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(bulkUnsnoozeRules).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ids: [],
-        filter: 'NOT (alert.id: "alert:2")',
-      })
-    );
-  });
-
-  it('can bulk add snooze schedule', async () => {
-    await setup();
-    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
-    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
-    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
-
-    // Unselect something to test filtering
-    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
-
-    wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').first().simulate('click');
-    expect(wrapper.find('[data-test-subj="ruleSnoozeScheduler"]').exists()).toBeTruthy();
-
-    wrapper.find('[data-test-subj="scheduler-saveSchedule"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(bulkSnoozeRules).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ids: [],
-        filter: 'NOT (alert.id: "alert:2")',
-      })
-    );
-  });
-
-  it('can bulk remove snooze schedule', async () => {
-    await setup();
-    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
-    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
-    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
-
-    // Unselect something to test filtering
-    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
-
-    wrapper.find('[data-test-subj="bulkRemoveSnoozeSchedule"]').first().simulate('click');
-
-    expect(
-      wrapper.find('[data-test-subj="bulkRemoveScheduleConfirmationModal"]').exists()
-    ).toBeTruthy();
-    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(bulkUnsnoozeRules).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ids: [],
-        filter: 'NOT (alert.id: "alert:2")',
-        scheduleIds: [],
-      })
-    );
-  });
-
-  it('can bulk update API key', async () => {
-    await setup();
-    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
-    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
-    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
-
-    // Unselect something to test filtering
-    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
-
-    wrapper.find('[data-test-subj="updateAPIKeys"]').first().simulate('click');
-    expect(wrapper.find('[data-test-subj="updateApiKeyIdsConfirmation"]').exists()).toBeTruthy();
-
-    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(bulkUpdateAPIKey).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ids: [],
-        filter: 'NOT (alert.id: "alert:2")',
-      })
-    );
   });
 });
