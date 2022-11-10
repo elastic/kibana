@@ -188,31 +188,7 @@ export const technicalRuleFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
-  },
-  [Fields.ALERT_CONTEXT_CONTAINER]: {
-    type: 'object',
-    required: false,
-  },
-  [Fields.ALERT_CONTEXT_CLOUD]: {
-    type: 'object',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_CONTEXT_HOST]: {
-    type: 'object',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_CONTEXT_ORCHESTRATOR]: {
-    type: 'object',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_CONTEXT_LABELS]: {
-    type: 'object',
-    array: false,
-    required: false,
-  },
+  }
 } as const;
 
 export type TechnicalRuleFieldMap = typeof technicalRuleFieldMap;

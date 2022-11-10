@@ -11,18 +11,8 @@ import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
-import { ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { PublicContract } from '@kbn/utility-types';
-import {
-  ALERT_CONTEXT_CLOUD,
-  ALERT_CONTEXT_CONTAINER,
-  ALERT_CONTEXT_HOST,
-  ALERT_CONTEXT_LABELS,
-  ALERT_CONTEXT_ORCHESTRATOR,
-  ALERT_CONTEXT_TAGS,
-} from '@kbn/rule-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
@@ -30,6 +20,14 @@ import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
+import { unflattenObject } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/lib';
+
+const ALERT_CONTEXT_CONTAINER = 'container' as const;
+const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator' as const;
+const ALERT_CONTEXT_CLOUD = 'cloud' as const;
+const ALERT_CONTEXT_HOST = 'host' as const;
+const ALERT_CONTEXT_LABELS = 'labels' as const;
+const ALERT_CONTEXT_TAGS = 'tags' as const;
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -221,41 +219,12 @@ export const shouldTermsAggOnContainer = (groupBy: string | string[] | undefined
     : groupBy === KUBERNETES_POD_UID;
 };
 
-export const fetchAlertbyAlertUUID = async (
-  ruleDataClient: PublicContract<IRuleDataClient>,
-  alertUuid: string
-) => {
-  const request = {
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                [ALERT_UUID]: alertUuid,
-              },
-            },
-          ],
-        },
-      },
-      size: 1,
-    },
-    allow_no_indices: true,
-  };
-  const { hits } = await ruleDataClient.getReader().search(request);
-  return hits?.hits;
-};
+export const getContextForRecoveredAlerts = (
+  alertHits: AdditionalContext | undefined
+): AdditionalContext => {
+  const alertHitsSource = alertHits && alertHits.length > 0 ? unflattenObject(alertHits[0]._source) : undefined;
 
-// fetch alert context from Alerts-As-Data
-export const getContextForRecoveredAlerts = async (
-  ruleDataClient: PublicContract<IRuleDataClient>,
-  alertUuid: string | null
-): Promise<{ [x: string]: any }> => {
-  const alertHits = alertUuid ? await fetchAlertbyAlertUUID(ruleDataClient, alertUuid) : undefined;
-
-  const alertHitsSource = alertHits && alertHits.length > 0 ? alertHits[0]._source : undefined;
-
-  const additionalContext = {
+  return {
     cloud: alertHitsSource?.[ALERT_CONTEXT_CLOUD],
     host: alertHitsSource?.[ALERT_CONTEXT_HOST],
     orchestrator: alertHitsSource?.[ALERT_CONTEXT_ORCHESTRATOR],
@@ -263,6 +232,4 @@ export const getContextForRecoveredAlerts = async (
     labels: alertHitsSource?.[ALERT_CONTEXT_LABELS],
     tags: alertHitsSource?.[ALERT_CONTEXT_TAGS],
   };
-
-  return additionalContext;
 };

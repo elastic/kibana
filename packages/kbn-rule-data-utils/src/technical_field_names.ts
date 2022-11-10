@@ -97,14 +97,6 @@ const ALERT_RULE_CONSUMER = `${ALERT_RULE_NAMESPACE}.consumer` as const;
 const ALERT_RULE_PRODUCER = `${ALERT_RULE_NAMESPACE}.producer` as const;
 const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
 
-// Fields related to Alert context
-const ALERT_CONTEXT_CONTAINER = 'container' as const;
-const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator' as const;
-const ALERT_CONTEXT_CLOUD = 'cloud' as const;
-const ALERT_CONTEXT_HOST = 'host' as const;
-const ALERT_CONTEXT_LABELS = 'labels' as const;
-const ALERT_CONTEXT_TAGS = 'tags' as const;
-
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
@@ -177,12 +169,6 @@ const fields = {
   ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_REFERENCE,
   SPACE_IDS,
   VERSION,
-  ALERT_CONTEXT_CONTAINER,
-  ALERT_CONTEXT_CLOUD,
-  ALERT_CONTEXT_HOST,
-  ALERT_CONTEXT_ORCHESTRATOR,
-  ALERT_CONTEXT_LABELS,
-  ALERT_CONTEXT_TAGS,
 };
 
 export {
@@ -254,12 +240,6 @@ export {
   TIMESTAMP,
   SPACE_IDS,
   VERSION,
-  ALERT_CONTEXT_CONTAINER,
-  ALERT_CONTEXT_CLOUD,
-  ALERT_CONTEXT_HOST,
-  ALERT_CONTEXT_ORCHESTRATOR,
-  ALERT_CONTEXT_LABELS,
-  ALERT_CONTEXT_TAGS,
 };
 
 export type TechnicalRuleDataFieldName = ValuesType<typeof fields & typeof namespaces>;

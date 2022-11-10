@@ -40,6 +40,7 @@ import {
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
+import { flattenObject } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/lib';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
@@ -97,16 +98,25 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       executionId,
     });
 
-    const { alertWithLifecycle, savedObjectsClient, getAlertUuid, ruleDataClient } = services;
+    const { alertWithLifecycle, savedObjectsClient, getAlertUuid, getAlertByAlertUuid } = services;
 
     const alertFactory: MetricThresholdAlertFactory = (id, reason, additionalContext) =>
-      alertWithLifecycle({
+    {
+      let flattenedContext: AdditionalContext = {};
+      additionalContext?.keys.forEach((context: string) => {
+        if (additionalContext[context]) {
+          flattenedContext = { ...flattenedContext, ...flattenObject(additionalContext[context], [context + "."]) };
+        }
+      });
+
+      return alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
-          ...additionalContext,
+          ...flattenedContext,
         },
       });
+    };
 
     const {
       sourceId,
@@ -299,7 +309,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     for (const alert of recoveredAlerts) {
       const recoveredAlertId = alert.getId();
       const alertUuid = getAlertUuid(recoveredAlertId);
-      const additionalContext = await getContextForRecoveredAlerts(ruleDataClient, alertUuid);
+
+      const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
+      const additionalContext = getContextForRecoveredAlerts(alertHits);
 
       alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),

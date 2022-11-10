@@ -31,6 +31,7 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import {
+  AdditionalContext,
   createScopedLogger,
   getAlertDetailsUrl,
   getContextForRecoveredAlerts,
@@ -38,6 +39,7 @@ import {
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
 import { evaluateCondition, ConditionResult } from './evaluate_condition';
+import { flattenObject } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/lib';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
@@ -55,7 +57,7 @@ type InventoryMetricThresholdAlert = Alert<
 type InventoryMetricThresholdAlertFactory = (
   id: string,
   reason: string,
-  additionalContext?: [x: string] | null,
+  additionalContext?: AdditionalContext | null,
   threshold?: number | undefined,
   value?: number | undefined
 ) => InventoryMetricThresholdAlert;
@@ -86,17 +88,25 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       savedObjectsClient,
       getAlertStartedDate,
       getAlertUuid,
-      ruleDataClient,
+      getAlertByAlertUuid,
     } = services;
-    const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason, additionalContext) =>
-      alertWithLifecycle({
+    const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason, additionalContext) => {
+      let flattenedContext: AdditionalContext = {};
+      additionalContext?.keys.forEach((context: string) => {
+        if (additionalContext[context]) {
+          flattenedContext = { ...flattenedContext, ...flattenObject(additionalContext[context], [context + "."]) };
+        }
+      });
+
+      return alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
           [ALERT_RULE_PARAMETERS]: params as any, // the type assumes the object is already flattened when writing the same way as when reading https://github.com/elastic/kibana/blob/main/x-pack/plugins/rule_registry/common/field_map/runtime_type_from_fieldmap.ts#L60
-          ...additionalContext,
+          ...flattenedContext
         },
       });
+    };
 
     if (!params.filterQuery && params.filterQueryText) {
       try {
@@ -252,7 +262,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       const recoveredAlertId = alert.getId();
       const indexedStartedDate = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
       const alertUuid = getAlertUuid(recoveredAlertId);
-      const additionalContext = await getContextForRecoveredAlerts(ruleDataClient, alertUuid);
+      const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
+      const additionalContext = getContextForRecoveredAlerts(alertHits);
 
       alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
