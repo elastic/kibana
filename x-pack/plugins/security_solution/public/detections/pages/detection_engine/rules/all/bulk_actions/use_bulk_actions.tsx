@@ -332,7 +332,9 @@ export const useBulkActions = ({
               disabled:
                 missingActionPrivileges || containsLoading || (!containsDisabled && !isAllSelected),
               onClick: handleEnableAction,
-              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
               toolTipPosition: 'right',
               icon: undefined,
             },
@@ -342,7 +344,9 @@ export const useBulkActions = ({
               'data-test-subj': 'duplicateRuleBulk',
               disabled: isEditDisabled,
               onClick: handleDuplicateAction,
-              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
               toolTipPosition: 'right',
               icon: undefined,
             },
@@ -366,7 +370,9 @@ export const useBulkActions = ({
               'data-test-subj': 'addRuleActionsBulk',
               disabled: !hasActionsPrivileges || isEditDisabled,
               onClick: handleBulkEdit(BulkActionEditType.add_rule_actions),
-              toolTipContent: !hasActionsPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipContent: !hasActionsPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
               toolTipPosition: 'right',
               icon: undefined,
             },
@@ -376,7 +382,9 @@ export const useBulkActions = ({
               'data-test-subj': 'setScheduleBulk',
               disabled: isEditDisabled,
               onClick: handleBulkEdit(BulkActionEditType.set_schedule),
-              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
               toolTipPosition: 'right',
               icon: undefined,
             },
@@ -386,7 +394,9 @@ export const useBulkActions = ({
               'data-test-subj': 'applyTimelineTemplateBulk',
               disabled: isEditDisabled,
               onClick: handleBulkEdit(BulkActionEditType.set_timeline),
-              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
               toolTipPosition: 'right',
               icon: undefined,
             },
@@ -405,7 +415,9 @@ export const useBulkActions = ({
               disabled:
                 missingActionPrivileges || containsLoading || (!containsEnabled && !isAllSelected),
               onClick: handleDisableActions,
-              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
               toolTipPosition: 'right',
               icon: undefined,
             },
@@ -439,7 +451,9 @@ export const useBulkActions = ({
               'data-test-subj': 'addTagsBulkEditRule',
               onClick: handleBulkEdit(BulkActionEditType.add_tags),
               disabled: isEditDisabled,
-              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
               toolTipPosition: 'right',
             },
             {
@@ -448,7 +462,9 @@ export const useBulkActions = ({
               'data-test-subj': 'deleteTagsBulkEditRule',
               onClick: handleBulkEdit(BulkActionEditType.delete_tags),
               disabled: isEditDisabled,
-              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
               toolTipPosition: 'right',
             },
           ],
@@ -463,7 +479,9 @@ export const useBulkActions = ({
               'data-test-subj': 'addIndexPatternsBulkEditRule',
               onClick: handleBulkEdit(BulkActionEditType.add_index_patterns),
               disabled: isEditDisabled,
-              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
               toolTipPosition: 'right',
             },
             {
@@ -472,7 +490,9 @@ export const useBulkActions = ({
               'data-test-subj': 'deleteIndexPatternsBulkEditRule',
               onClick: handleBulkEdit(BulkActionEditType.delete_index_patterns),
               disabled: isEditDisabled,
-              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
               toolTipPosition: 'right',
             },
           ],

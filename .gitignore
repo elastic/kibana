@@ -92,6 +92,7 @@ report.asciidoc
 .yarn-local-mirror
 
 # Bazel
+.ijwb
 /bazel
 /bazel-*
 .bazelrc.user
