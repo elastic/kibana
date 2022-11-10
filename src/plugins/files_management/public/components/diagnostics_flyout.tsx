@@ -76,7 +76,8 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                 title: i18nTexts.diagnosticsBreakdownsStatus,
                 description: (
                   <Chart size={{ height: 200, width: 300 - 32 }}>
-                    <Axis id="key" position={Position.Bottom} showOverlappingTicks />
+                    <Axis id="y" position={Position.Left} showOverlappingTicks />
+                    <Axis id="x" position={Position.Bottom} showOverlappingTicks />
                     <HistogramBarSeries
                       data={Object.entries(data.countByStatus).map(([key, count]) => ({
                         key,
@@ -96,7 +97,8 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                 title: i18nTexts.diagnosticsBreakdownsExtension,
                 description: (
                   <Chart size={{ height: 200, width: 300 - 32 }}>
-                    <Axis id="key" position={Position.Bottom} showOverlappingTicks />
+                    <Axis id="y" position={Position.Left} showOverlappingTicks />
+                    <Axis id="x" position={Position.Bottom} showOverlappingTicks />
                     <HistogramBarSeries
                       data={Object.entries(data.countByExtension).map(([key, count]) => ({
                         key,
