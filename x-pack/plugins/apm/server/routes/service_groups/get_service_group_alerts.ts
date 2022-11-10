@@ -6,6 +6,7 @@
  */
 
 import { kqlQuery } from '@kbn/observability-plugin/server';
+import { ALERT_RULE_PRODUCER, ALERT_STATUS } from '@kbn/rule-data-utils';
 import {
   AggregationsCardinalityAggregate,
   AggregationsFilterAggregate,
@@ -15,10 +16,6 @@ import { Logger } from '@kbn/core/server';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { SavedServiceGroup } from '../../../common/service_groups';
 import { ApmAlertsClient } from './get_apm_alerts_client';
-import {
-  KIBANA_ALERT_RULE_PRODUCER,
-  KIBANA_ALERT_STATUS,
-} from '../../../common/rules/apm_rule_types';
 
 export async function getServiceGroupAlerts({
   serviceGroups,
@@ -48,8 +45,8 @@ export async function getServiceGroupAlerts({
     query: {
       bool: {
         filter: [
-          { term: { [KIBANA_ALERT_RULE_PRODUCER]: 'apm' } },
-          { term: { [KIBANA_ALERT_STATUS]: 'active' } },
+          { term: { [ALERT_RULE_PRODUCER]: 'apm' } },
+          { term: { [ALERT_STATUS]: 'active' } },
         ],
       },
     },
