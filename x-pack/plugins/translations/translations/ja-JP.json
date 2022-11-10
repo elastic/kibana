@@ -23337,7 +23337,6 @@
     "xpack.observability.enableComparisonByDefaultDescription": "APMアプリで比較機能を有効にする",
     "xpack.observability.enableInspectEsQueriesExperimentDescription": "API応答でElasticsearchクエリを調査します。",
     "xpack.observability.enableInspectEsQueriesExperimentName": "ESクエリを調査",
-    "xpack.observability.enableNewSyntheticsViewExperimentDescription": "オブザーバビリティで新しい合成監視アプリケーションを有効にします。設定を適用するにはページを更新してください。",
     "xpack.observability.enableNewSyntheticsViewExperimentName": "新しい合成監視アプリケーションを有効にする",
     "xpack.observability.exp.breakDownFilter.noBreakdown": "内訳なし",
     "xpack.observability.exp.breakDownFilter.unavailable": "モニター期間メトリックでは、ステップ名内訳を使用できません。ステップ期間メトリックを使用して、ステップ名で分解します。",
