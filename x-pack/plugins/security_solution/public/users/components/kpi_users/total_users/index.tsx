@@ -16,6 +16,9 @@ import { kpiTotalUsersAreaLensAttributes } from '../../../../common/components/v
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { UsersKpiProps } from '../types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis1 = euiVisColorPalette[1];
@@ -51,16 +54,24 @@ const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
 }) => {
   const { toggleStatus } = useQueryToggle(QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
+
   const { loading, result, search, refetch, inspect } =
     useSearchStrategy<UsersQueries.kpiTotalUsers>({
       factoryQueryType: UsersQueries.kpiTotalUsers,
       initialResult: { users: 0, usersHistogram: [] },
       errorMessage: i18n.ERROR_USERS_KPI,
-      abort: querySkip,
+      abort: querySkip || isChartEmbeddablesEnabled,
     });
+
+  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+    inputId: InputsModelId.global,
+    queryId: QUERY_ID,
+  });
 
   useEffect(() => {
     if (!querySkip) {
@@ -86,9 +97,10 @@ const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
       from={from}
       to={to}
       updateDateRange={updateDateRange}
-      refetch={refetch}
+      refetch={isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
+      searchSessionId={isChartEmbeddablesEnabled ? searchSessionId : undefined}
     />
   );
 };
