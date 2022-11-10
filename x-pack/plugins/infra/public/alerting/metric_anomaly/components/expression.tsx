@@ -39,7 +39,7 @@ type AlertParams = RuleTypeParams &
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch' | 'onChangeMetaData'
 >;
 
 export const defaultExpression = {

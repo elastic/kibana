@@ -16,7 +16,6 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { MAJOR_VERSION } from '../../../common/constants';
 import { versionService } from '../version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
 import { getMockVersionInfo } from '../__fixtures__/version';
@@ -51,7 +50,7 @@ describe('ReindexActions', () => {
 
   describe('createReindexOp', () => {
     beforeEach(() => {
-      versionService.setup(MAJOR_VERSION);
+      versionService.setup('8.0.0');
       client.create.mockResolvedValue();
     });
 
