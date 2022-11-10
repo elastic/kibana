@@ -114,6 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint:user-artifact-packager',
         'fleet:check-deleted-files-task',
         'fleet:reassign_action:retry',
+        'fleet:request_diagnostics:retry',
         'fleet:unenroll_action:retry',
         'fleet:update_agent_tags:retry',
         'fleet:upgrade_action:retry',

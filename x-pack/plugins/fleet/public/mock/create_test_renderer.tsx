@@ -68,6 +68,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     createPackagePolicyMultiPageLayout: true,
     packageVerification: true,
     showDevtoolsRequest: false,
+    showRequestDiagnostics: false,
   });
 
   const HookWrapper = memo(({ children }) => {
