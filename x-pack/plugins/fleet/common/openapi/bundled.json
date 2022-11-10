@@ -4263,6 +4263,7 @@
             "type": "boolean"
           },
           "fleet_server_hosts": {
+            "deprecated": true,
             "type": "array",
             "items": {
               "type": "string"
