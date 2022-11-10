@@ -24,9 +24,9 @@ import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 import {
-  FetchIndexApiLogic,
-  FetchIndexApiResponse,
-} from '../../../../api/index/fetch_index_api_logic';
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicValues,
+} from '../../../../api/index/cached_fetch_index_api_logic';
 import {
   GetMappingsArgs,
   GetMappingsResponse,
@@ -204,7 +204,7 @@ export interface MLInferenceProcessorsValues {
   createErrors: string[];
   existingInferencePipelines: MLInferencePipelineOption[];
   formErrors: AddInferencePipelineFormErrors;
-  index: FetchIndexApiResponse | undefined;
+  index: CachedFetchIndexApiLogicValues['indexData'];
   isLoading: boolean;
   isPipelineDataValid: boolean;
   mappingData: typeof MappingsApiLogic.values.data;
@@ -280,8 +280,8 @@ export const MLInferenceLogic = kea<
       ],
     ],
     values: [
-      FetchIndexApiLogic,
-      ['data as index'],
+      CachedFetchIndexApiLogic,
+      ['indexData as index'],
       FetchMlInferencePipelinesApiLogic,
       ['data as mlInferencePipelinesData'],
       MappingsApiLogic,
@@ -500,7 +500,7 @@ export const MLInferenceLogic = kea<
       (
         status: Status,
         mapping: IndicesGetMappingIndexMappingRecord,
-        index: FetchIndexApiResponse
+        index: MLInferenceProcessorsValues['index']
       ) => {
         if (status !== Status.SUCCESS) return;
         if (mapping?.mappings?.properties === undefined) {
