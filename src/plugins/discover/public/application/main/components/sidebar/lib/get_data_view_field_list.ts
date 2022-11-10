@@ -12,7 +12,7 @@ import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
 import { isNestedFieldParent } from '../../../utils/nested_fields';
 
 export function getDataViewFieldList(
-  dataView: DataView | undefined,
+  dataView: DataView | undefined | null,
   fieldCounts: Record<string, number> | undefined | null,
   isPlainRecord: boolean
 ): DataViewField[] | null {
@@ -20,6 +20,7 @@ export function getDataViewFieldList(
     // still loading data
     return null;
   }
+
   const currentFieldCounts = fieldCounts || {};
   const sourceFiltersValues = dataView?.getSourceFiltering?.()?.excludes;
   let dataViewFields: DataViewField[] = dataView?.fields.getAll() || [];

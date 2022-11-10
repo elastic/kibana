@@ -19,7 +19,6 @@ import {
 import { type DataView } from '@kbn/data-plugin/common';
 import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
-import { useMemorizedDateRange } from './use_memorized_date_range';
 
 const getBuildEsQueryAsync = async () => (await import('@kbn/es-query')).buildEsQuery;
 const generateId = htmlIdGenerator();
@@ -33,8 +32,8 @@ export interface ExistingFieldsInfo {
 
 export interface ExistingFieldsFetcherParams {
   dataViews: DataView[];
-  fromDate: string;
-  toDate: string;
+  fromDate: string | null;
+  toDate: string | null;
   query: Query | AggregateQuery;
   filters: Filter[];
   services: {
@@ -74,7 +73,6 @@ export const useExistingFieldsFetcher = (
   const mountedRef = useRef<boolean>(true);
   const [activeRequests, setActiveRequests] = useState<number>(0);
   const isProcessing = activeRequests > 0;
-  const memorizedDateRange = useMemorizedDateRange({ from: params.fromDate, to: params.toDate });
 
   const fetchFieldsExistenceInfo = useCallback(
     async ({
@@ -90,7 +88,7 @@ export const useExistingFieldsFetcher = (
       dataViewId: string | undefined;
       fetchId: string;
     }): Promise<void> => {
-      if (!dataViewId || !query || !filters) {
+      if (!dataViewId || !query || !filters || !fromDate || !toDate) {
         return;
       }
 
@@ -179,8 +177,6 @@ export const useExistingFieldsFetcher = (
         fetchId,
         dataViewId,
         ...params,
-        fromDate: memorizedDateRange.from,
-        toDate: memorizedDateRange.to,
       };
       // refetch only for the specified data view
       if (dataViewId) {
@@ -206,8 +202,8 @@ export const useExistingFieldsFetcher = (
       dataViewsHash,
       params.query,
       params.filters,
-      memorizedDateRange.from,
-      memorizedDateRange.to,
+      params.fromDate,
+      params.toDate,
     ]
   );
 

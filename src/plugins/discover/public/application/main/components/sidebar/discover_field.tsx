@@ -28,6 +28,7 @@ import {
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
+  getResolvedDateRange,
 } from '@kbn/unified-field-list-plugin/public';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
@@ -409,7 +410,9 @@ function DiscoverFieldComponent({
   }
 
   const renderPopover = () => {
-    const dateRange = data?.query?.timefilter.timefilter.getAbsoluteTime();
+    const dateRange = data?.query?.timefilter.timefilter
+      ? getResolvedDateRange(data?.query?.timefilter.timefilter)
+      : null;
     // prioritize an aggregatable multi field if available or take the parent field
     const fieldForStats =
       (multiFields?.length &&
@@ -432,13 +435,13 @@ function DiscoverFieldComponent({
           </>
         ) : (
           <>
-            {Boolean(dateRange) && (
+            {!!dateRange && (
               <FieldStats
                 services={services}
                 query={query!}
                 filters={filters!}
-                fromDate={dateRange.from}
-                toDate={dateRange.to}
+                fromDate={dateRange.fromDate}
+                toDate={dateRange.toDate}
                 dataViewOrDataViewId={dataView}
                 field={fieldForStats}
                 data-test-subj="dscFieldStats"

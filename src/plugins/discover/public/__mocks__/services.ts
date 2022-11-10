@@ -21,7 +21,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   HIDE_ANNOUNCEMENTS,
 } from '../../common';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { UI_SETTINGS, calculateBounds } from '@kbn/data-plugin/public';
 import { TopNavMenu } from '@kbn/navigation-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -43,6 +43,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
   dataPlugin.query.timefilter.timefilter.getTime = jest.fn(() => {
     return { from: 'now-15m', to: 'now' };
   });
+  dataPlugin.query.timefilter.timefilter.calculateBounds = jest.fn(calculateBounds);
   dataPlugin.dataViews = createDiscoverDataViewsMock();
 
   return {

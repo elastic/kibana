@@ -106,6 +106,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   return (
     <div
       className="unifiedFieldList__fieldListGrouped"
+      data-test-subj={`${dataTestSubject}FieldGroups`}
       ref={(el) => {
         if (el && !el.dataset.dynamicScroll) {
           el.dataset.dynamicScroll = 'true';

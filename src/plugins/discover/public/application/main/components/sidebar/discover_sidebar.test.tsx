@@ -57,7 +57,7 @@ function getCompProps(): DiscoverSidebarProps {
     }
   }
 
-  const allFields = getDataViewFieldList(dataView, fieldCounts, false); // TODO: add tests for text-based queries too
+  const allFields = getDataViewFieldList(dataView, fieldCounts, false);
 
   (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockClear();
   (ExistingFieldsHookApi.useExistingFieldsReader as jest.Mock).mockImplementation(() => ({
@@ -102,6 +102,7 @@ function getCompProps(): DiscoverSidebarProps {
     documents$,
     availableFields$,
     useNewFieldsApi: true,
+    showFieldList: true,
   };
 }
 
@@ -145,33 +146,43 @@ async function mountComponent(
 
 describe('discover sidebar', function () {
   let props: DiscoverSidebarProps;
-  let comp: ReactWrapper<DiscoverSidebarProps>;
 
   beforeEach(async () => {
     props = getCompProps();
-    comp = await mountComponent(props);
   });
 
-  it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
+  it('should hide field list', async function () {
+    const comp = await mountComponent({
+      ...props,
+      showFieldList: false,
+    });
+    expect(findTestSubject(comp, 'fieldListGroupedFieldGroups').exists()).toBe(false);
+  });
+  it('should have Selected Fields and Available Fields with Popular Fields sections', async function () {
+    const comp = await mountComponent(props);
     const popularFieldsCount = findTestSubject(comp, 'fieldListGroupedPopularFields-count');
     const selectedFieldsCount = findTestSubject(comp, 'fieldListGroupedSelectedFields-count');
     const availableFieldsCount = findTestSubject(comp, 'fieldListGroupedAvailableFields-count');
     expect(popularFieldsCount.text()).toBe('4');
     expect(availableFieldsCount.text()).toBe('3');
     expect(selectedFieldsCount.text()).toBe('1');
+    expect(findTestSubject(comp, 'fieldListGroupedFieldGroups').exists()).toBe(true);
   });
-  it('should allow selecting fields', function () {
+  it('should allow selecting fields', async function () {
+    const comp = await mountComponent(props);
     const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     findTestSubject(availableFields, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
-  it('should allow deselecting fields', function () {
+  it('should allow deselecting fields', async function () {
+    const comp = await mountComponent(props);
     const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     findTestSubject(availableFields, 'fieldToggle-extension').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
 
-  it('should render "Add a field" button', () => {
+  it('should render "Add a field" button', async () => {
+    const comp = await mountComponent(props);
     const addFieldButton = findTestSubject(comp, 'dataView-add-field_btn');
     expect(addFieldButton.length).toBe(1);
     addFieldButton.simulate('click');
@@ -179,6 +190,7 @@ describe('discover sidebar', function () {
   });
 
   it('should render "Edit field" button', async () => {
+    const comp = await mountComponent(props);
     const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     await act(async () => {
       findTestSubject(availableFields, 'field-bytes').simulate('click');
@@ -197,7 +209,7 @@ describe('discover sidebar', function () {
     });
     const addFieldButton = findTestSubject(compInViewerMode, 'dataView-add-field_btn');
     expect(addFieldButton.length).toBe(0);
-    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
+    const availableFields = findTestSubject(compInViewerMode, 'fieldListGroupedAvailableFields');
     await act(async () => {
       findTestSubject(availableFields, 'field-bytes').simulate('click');
     });

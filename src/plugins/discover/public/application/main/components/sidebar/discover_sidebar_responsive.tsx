@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -24,7 +24,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/public';
-import { useExistingFieldsFetcher } from '@kbn/unified-field-list-plugin/public';
+import {
+  getResolvedDateRange,
+  useExistingFieldsFetcher,
+} from '@kbn/unified-field-list-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
@@ -34,7 +37,12 @@ import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { getDataViewFieldList } from './lib/get_data_view_field_list';
+import {
+  discoverSidebarReducer,
+  getInitialState,
+  DiscoverSidebarReducerActionType,
+  DiscoverSidebarReducerStatus,
+} from './lib/sidebar_reducer';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 
 export interface DiscoverSidebarResponsiveProps {
@@ -121,36 +129,66 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [allFields, setAllFields] = useState<DataViewField[] | null>(null);
-  const [fieldCounts, setFieldCounts] = useState<Record<string, number> | null>(null);
-  const dataViewFields = selectedDataView?.fields;
+  const [sidebarState, dispatchSidebarStateAction] = useReducer(
+    discoverSidebarReducer,
+    selectedDataView,
+    getInitialState
+  );
+  const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
+  const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
+      const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
+
       if (documentState?.fetchStatus === FetchStatus.COMPLETE) {
-        setFieldCounts(calcFieldCounts(documentState.result));
-      } else {
-        setFieldCounts(null);
+        dispatchSidebarStateAction({
+          type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+          payload: {
+            dataView: selectedDataViewRef.current,
+            fieldCounts: calcFieldCounts(documentState.result),
+            isPlainRecord: isPlainRecordType,
+          },
+        });
+      } else if (documentState?.fetchStatus === FetchStatus.LOADING) {
+        dispatchSidebarStateAction({
+          type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
+          payload: {
+            dateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+            isPlainRecord: isPlainRecordType,
+          },
+        });
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, setAllFields, setFieldCounts]);
+  }, [
+    props.documents$,
+    data.query.timefilter.timefilter,
+    dispatchSidebarStateAction,
+    selectedDataViewRef,
+  ]);
 
   useEffect(() => {
-    setAllFields(getDataViewFieldList(selectedDataView, fieldCounts, isPlainRecord));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewFields, fieldCounts, setAllFields, isPlainRecord]);
+    if (selectedDataView !== selectedDataViewRef.current) {
+      dispatchSidebarStateAction({
+        type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
+        payload: {
+          dataView: selectedDataView,
+        },
+      });
+      selectedDataViewRef.current = selectedDataView;
+    }
+  }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);
 
   const query = useAppStateSelector((state) => state.query);
   const filters = useAppStateSelector((state) => state.filters);
-  const dateRange = data.query.timefilter.timefilter.getAbsoluteTime();
 
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
     dataViews: !isPlainRecord && selectedDataView ? [selectedDataView] : [],
     query: query!,
     filters: filters!,
-    fromDate: dateRange.from,
-    toDate: dateRange.to,
+    fromDate: sidebarState.dateRange?.fromDate ?? null, // existence fetching will be skipped if `null`
+    toDate: sidebarState.dateRange?.toDate ?? null,
     services: {
       data,
       dataViews,
@@ -205,12 +243,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     // or what fields are selected by the user
 
     const availableFields =
-      props.columns.length > 0 ? props.columns : Object.keys(fieldCounts || {});
+      props.columns.length > 0 ? props.columns : Object.keys(sidebarState.fieldCounts || {});
     availableFields$.next({
       fetchStatus: FetchStatus.COMPLETE,
       fields: availableFields,
     });
-  }, [selectedDataView, fieldCounts, props.columns, availableFields$]);
+  }, [selectedDataView, sidebarState.fieldCounts, props.columns, availableFields$]);
 
   const editField = useMemo(
     () =>
@@ -270,11 +308,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           <DiscoverSidebar
             {...props}
             onFieldEdited={onFieldEditedExtended}
-            allFields={allFields}
+            allFields={sidebarState.allFields}
             fieldFilter={fieldFilter}
             setFieldFilter={setFieldFilter}
             editField={editField}
             createNewDataView={createNewDataView}
+            showFieldList={showFieldList}
           />
         </EuiHideFor>
       )}
@@ -333,7 +372,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                 <DiscoverSidebar
                   {...props}
                   onFieldEdited={onFieldEditedExtended}
-                  allFields={allFields}
+                  allFields={sidebarState.allFields}
                   fieldFilter={fieldFilter}
                   setFieldFilter={setFieldFilter}
                   alwaysShowActionButtons={true}
@@ -342,6 +381,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   editField={editField}
                   createNewDataView={createNewDataView}
                   showDataViewPicker={true}
+                  showFieldList={showFieldList}
                 />
               </div>
             </EuiFlyout>

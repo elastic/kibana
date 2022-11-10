@@ -160,7 +160,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         title: i18n.translate('unifiedFieldList.useGroupedFields.popularFieldsLabel', {
           defaultMessage: 'Popular fields',
         }),
-        helpText: i18n.translate('unifiedFieldList.useGroupedFields.unmappedFieldsLabelHelp', {
+        helpText: i18n.translate('unifiedFieldList.useGroupedFields.popularFieldsLabelHelp', {
           defaultMessage:
             'Fields that your organization frequently uses, from most to least popular.',
         }),
@@ -322,15 +322,14 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     return fieldsExistenceReader.getFieldsExistenceStatus(dataViewId);
   }, [dataViewId, hasDataLoaded, fieldsExistenceReader]);
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    return {
       fieldGroups,
       scrollToTopResetCounter,
       fieldsExistInIndex,
       fieldsExistenceStatus,
-    }),
-    [fieldGroups, scrollToTopResetCounter, fieldsExistInIndex, fieldsExistenceStatus]
-  );
+    };
+  }, [fieldGroups, scrollToTopResetCounter, fieldsExistInIndex, fieldsExistenceStatus]);
 }
 
 function sortFields<T extends FieldListItem>(fieldA: T, fieldB: T) {

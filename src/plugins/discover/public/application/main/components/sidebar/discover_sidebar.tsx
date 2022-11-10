@@ -87,7 +87,15 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
    */
   viewMode: VIEW_MODE;
 
+  /**
+   * Show data view picker (for mobile view)
+   */
   showDataViewPicker?: boolean;
+
+  /**
+   * Whether to render the field list or not (we don't show it unless documents are loaded)
+   */
+  showFieldList?: boolean;
 }
 
 export function DiscoverSidebarComponent({
@@ -111,6 +119,7 @@ export function DiscoverSidebarComponent({
   viewMode,
   createNewDataView,
   showDataViewPicker,
+  showFieldList,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor, dataViews } = useDiscoverServices();
   const isPlainRecord = useAppStateSelector(
@@ -161,22 +170,16 @@ export function DiscoverSidebarComponent({
   >(undefined);
 
   useEffect(() => {
-    const nextSelectedFields = getSelectedFields(selectedDataView, columns);
-    setSelectedFields(nextSelectedFields);
+    setSelectedFields(getSelectedFields(selectedDataView, columns));
+  }, [selectedDataView, columns, setSelectedFields]);
+
+  useEffect(() => {
     if (isPlainRecord || !useNewFieldsApi) {
       setMultiFieldsMap(undefined); // we don't have to calculate multifields in this case
     } else {
-      setMultiFieldsMap(calculateMultiFields(allFields, nextSelectedFields, useNewFieldsApi));
+      setMultiFieldsMap(calculateMultiFields(allFields, selectedFields, useNewFieldsApi));
     }
-  }, [
-    selectedDataView,
-    allFields,
-    columns,
-    useNewFieldsApi,
-    setSelectedFields,
-    setMultiFieldsMap,
-    isPlainRecord,
-  ]);
+  }, [selectedFields, allFields, useNewFieldsApi, setMultiFieldsMap, isPlainRecord]);
 
   const deleteField = useMemo(
     () =>
@@ -347,11 +350,13 @@ export function DiscoverSidebarComponent({
           </form>
         </EuiFlexItem>
         <EuiFlexItem>
-          <FieldListGrouped
-            {...fieldListGroupedProps}
-            renderFieldItem={renderFieldItem}
-            screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
-          />
+          {showFieldList && (
+            <FieldListGrouped
+              {...fieldListGroupedProps}
+              renderFieldItem={renderFieldItem}
+              screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+            />
+          )}
         </EuiFlexItem>
         {!!editField && (
           <EuiFlexItem grow={false}>
