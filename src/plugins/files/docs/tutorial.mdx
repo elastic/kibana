@@ -89,6 +89,10 @@ export const exampleFileKind: FileKind = {
 
 In this example we have chosen to disallow metadata updates and file sharing endpoints. **Make sure that you only expose the actions you need over HTTP**.
 
+<DocCallOut title="Ensure users can access their files">
+  HTTP access tags (`access:myApp`) define a new permission for an HTTP endpoint. **Ensure that users have the permissions they need to access their files!** See `KibanaFeatureConfig` for more information.
+</DocCallOut>
+
 Now we are able to register this file kind with the file service:
 
 ```ts
