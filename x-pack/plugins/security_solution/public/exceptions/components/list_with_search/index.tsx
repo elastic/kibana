@@ -20,7 +20,7 @@ import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/co
 import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
 import * as i18n from '../../translations';
 import { useListWithSearchComponent } from '../../hooks/use_list_with_search';
-import { ListExceptionItems } from '../../../detection_engine/rule_exceptions/components/list_exception_items';
+import { ListExceptionItems } from '../../components';
 import type { ExceptionListInfo } from '../../hooks';
 
 interface ListWithSearchComponentProps {

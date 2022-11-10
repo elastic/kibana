@@ -13,8 +13,7 @@ import {
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
-import { ListDetailsLinkAnchor } from '../../components/list_details_link_anchor';
-import { ListWithSearch, ManageRules } from '../../components';
+import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
 import type { ExceptionListInfo } from '../../hooks';
 import { useExceptionListDetails } from '../../hooks';
 

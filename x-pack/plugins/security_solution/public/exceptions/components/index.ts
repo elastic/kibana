@@ -14,3 +14,4 @@ export * from './list_with_search';
 export * from './manage_rules';
 export * from './shared_list_utilty_bar';
 export * from './title_badge';
+export * from './list_search_bar';
