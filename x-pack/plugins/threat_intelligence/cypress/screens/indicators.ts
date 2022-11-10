@@ -67,7 +67,7 @@ export const FLYOUT_TITLE = `[data-test-subj="tiIndicatorFlyoutTitle"]`;
 
 export const FLYOUT_TABS = `[data-test-subj="tiIndicatorFlyoutTabs"]`;
 
-export const FLYOUT_TABLE = `[data-test-subj="tiFlyoutTableTabRow"]`;
+export const FLYOUT_TABLE = `[data-test-subj="tiFlyoutTable"]`;
 
 export const FLYOUT_JSON = `[data-test-subj="tiFlyoutJsonCodeBlock"]`;
 
@@ -99,13 +99,13 @@ export const FLYOUT_BLOCK_MORE_ACTIONS_BUTTON =
   '[data-test-subj="tiFlyoutOverviewHighLevelBlocksPopoverButton"] button';
 
 export const FLYOUT_TABLE_TAB_ROW_TIMELINE_BUTTON =
-  '[data-test-subj="tiFlyoutTableTabRowTimelineButton"]';
+  '[data-test-subj="tiFlyoutTableTimelineButton"]';
 
 export const FLYOUT_TABLE_TAB_ROW_FILTER_IN_BUTTON =
-  '[data-test-subj="tiFlyoutTableTabRowFilterInButton"]';
+  '[data-test-subj="tiFlyoutTableFilterInButton"]';
 
 export const FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON =
-  '[data-test-subj="tiFlyoutTableTabRowFilterOutButton"]';
+  '[data-test-subj="tiFlyoutTableFilterOutButton"]';
 
 /* Field selector */
 
