@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
-  FILE_STORAGE_METADATA_AGENT_INDEX,
   FILE_STORAGE_DATA_AGENT_INDEX,
-} from '@kbn/fleet-plugin/common/constants';
+  FILE_STORAGE_METADATA_AGENT_INDEX,
+} from '@kbn/fleet-plugin/server/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
