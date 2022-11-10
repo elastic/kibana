@@ -7,7 +7,7 @@
 
 import { validateSLO } from '.';
 import { createSLO } from '../../services/slo/fixtures/slo';
-import { Duration, DurationUnit } from '../../types/models/duration';
+import { Duration, DurationUnit } from '../models/duration';
 
 describe('validateSLO', () => {
   describe('any slo', () => {
@@ -23,14 +23,14 @@ describe('validateSLO', () => {
 
     it("throws when time window duration unit is 'm'", () => {
       const slo = createSLO({
-        time_window: { duration: new Duration(1, DurationUnit.m), is_rolling: true },
+        time_window: { duration: new Duration(1, DurationUnit.Minute), is_rolling: true },
       });
       expect(() => validateSLO(slo)).toThrowError('Invalid time_window.duration');
     });
 
     it("throws when time window duration unit is 'h'", () => {
       const slo = createSLO({
-        time_window: { duration: new Duration(1, DurationUnit.h), is_rolling: true },
+        time_window: { duration: new Duration(1, DurationUnit.Hour), is_rolling: true },
       });
       expect(() => validateSLO(slo)).toThrowError('Invalid time_window.duration');
     });
@@ -42,7 +42,7 @@ describe('validateSLO', () => {
         budgeting_method: 'timeslices',
         objective: {
           target: 0.95,
-          timeslice_window: new Duration(1, DurationUnit.m),
+          timeslice_window: new Duration(1, DurationUnit.Minute),
         },
       });
       expect(() => validateSLO(slo)).toThrowError('Invalid objective.timeslice_target');
@@ -54,7 +54,7 @@ describe('validateSLO', () => {
         objective: {
           target: 0.95,
           timeslice_target: 0,
-          timeslice_window: new Duration(1, DurationUnit.m),
+          timeslice_window: new Duration(1, DurationUnit.Minute),
         },
       });
 
@@ -67,7 +67,7 @@ describe('validateSLO', () => {
         objective: {
           target: 0.95,
           timeslice_target: 1.001,
-          timeslice_window: new Duration(1, DurationUnit.m),
+          timeslice_window: new Duration(1, DurationUnit.Minute),
         },
       });
       expect(() => validateSLO(slo)).toThrowError('Invalid objective.timeslice_target');
@@ -97,47 +97,47 @@ describe('validateSLO', () => {
       expect(() =>
         validateSLO({
           ...slo,
-          objective: { ...slo.objective, timeslice_window: new Duration(1, DurationUnit.d) },
+          objective: { ...slo.objective, timeslice_window: new Duration(1, DurationUnit.Day) },
         })
       ).toThrowError('Invalid objective.timeslice_window');
 
       expect(() =>
         validateSLO({
           ...slo,
-          objective: { ...slo.objective, timeslice_window: new Duration(1, DurationUnit.w) },
+          objective: { ...slo.objective, timeslice_window: new Duration(1, DurationUnit.Week) },
         })
       ).toThrowError('Invalid objective.timeslice_window');
 
       expect(() =>
         validateSLO({
           ...slo,
-          objective: { ...slo.objective, timeslice_window: new Duration(1, DurationUnit.M) },
+          objective: { ...slo.objective, timeslice_window: new Duration(1, DurationUnit.Month) },
         })
       ).toThrowError('Invalid objective.timeslice_window');
 
       expect(() =>
         validateSLO({
           ...slo,
-          objective: { ...slo.objective, timeslice_window: new Duration(1, DurationUnit.Q) },
+          objective: { ...slo.objective, timeslice_window: new Duration(1, DurationUnit.Quarter) },
         })
       ).toThrowError('Invalid objective.timeslice_window');
 
       expect(() =>
         validateSLO({
           ...slo,
-          objective: { ...slo.objective, timeslice_window: new Duration(1, DurationUnit.Y) },
+          objective: { ...slo.objective, timeslice_window: new Duration(1, DurationUnit.Year) },
         })
       ).toThrowError('Invalid objective.timeslice_window');
     });
 
     it("throws when 'objective.timeslice_window' is longer than 'slo.time_window'", () => {
       const slo = createSLO({
-        time_window: { duration: new Duration(1, DurationUnit.w), is_rolling: true },
+        time_window: { duration: new Duration(1, DurationUnit.Week), is_rolling: true },
         budgeting_method: 'timeslices',
         objective: {
           target: 0.95,
           timeslice_target: 0.95,
-          timeslice_window: new Duration(169, DurationUnit.h), // 1 week + 1 hours = 169 hours
+          timeslice_window: new Duration(169, DurationUnit.Hour), // 1 week + 1 hours = 169 hours
         },
       });
 

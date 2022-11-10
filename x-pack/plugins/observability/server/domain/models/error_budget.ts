@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { errorBudgetSchema } from '../schema';
+import { errorBudgetSchema } from '../../types/schema';
 
 type ErrorBudget = t.TypeOf<typeof errorBudgetSchema>;
 

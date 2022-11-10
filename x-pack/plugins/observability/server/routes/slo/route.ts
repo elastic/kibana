@@ -7,22 +7,22 @@
 
 import {
   CreateSLO,
-  DeleteSLO,
   DefaultResourceInstaller,
-  DefaultTransformManager,
-  KibanaSavedObjectsSLORepository,
-  GetSLO,
-  UpdateSLO,
   DefaultSLIClient,
+  DefaultTransformManager,
+  DeleteSLO,
+  FindSLO,
+  GetSLO,
+  KibanaSavedObjectsSLORepository,
+  UpdateSLO,
 } from '../../services/slo';
-import { FindSLO } from '../../services/slo/find_slo';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
   KQLCustomTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
-import { IndicatorTypes } from '../../types/models';
+import { IndicatorTypes } from '../../domain/models';
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
@@ -33,9 +33,9 @@ import {
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
-  'slo.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
-  'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
-  'slo.kql.custom': new KQLCustomTransformGenerator(),
+  'sli.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
+  'sli.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+  'sli.kql.custom': new KQLCustomTransformGenerator(),
 };
 
 const createSLORoute = createObservabilityServerRoute({

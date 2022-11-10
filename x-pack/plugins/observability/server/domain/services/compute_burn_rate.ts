@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IndicatorData, SLO } from '../../types/models';
 import { toHighPrecision } from '../../utils/number';
+import { IndicatorData, SLO } from '../models';
 
 /**
  * A Burn Rate is computed with the Indicator Data retrieved from a specific lookback period

@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 
-import { SLO } from '../../types/models';
+import { SLO } from '../../domain/models';
 import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';

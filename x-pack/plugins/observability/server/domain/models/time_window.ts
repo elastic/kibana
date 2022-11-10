@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export * from './slo';
-export * from './indicators';
-export * from './error_budget';
-export * from './duration';
-export * from './common';
+import * as t from 'io-ts';
+import { timeWindowSchema } from '../../types/schema/time_window';
+
+type TimeWindow = t.TypeOf<typeof timeWindowSchema>;
+
+export type { TimeWindow };

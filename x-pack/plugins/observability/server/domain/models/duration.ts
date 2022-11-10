@@ -9,13 +9,13 @@ import { assertNever } from '@kbn/std';
 import * as moment from 'moment';
 
 enum DurationUnit {
-  'm' = 'm',
-  'h' = 'h',
-  'd' = 'd',
-  'w' = 'w',
-  'M' = 'M',
-  'Q' = 'Q',
-  'Y' = 'Y',
+  'Minute' = 'm',
+  'Hour' = 'h',
+  'Day' = 'd',
+  'Week' = 'w',
+  'Month' = 'M',
+  'Quarter' = 'Q',
+  'Year' = 'Y',
 }
 
 class Duration {
@@ -41,19 +41,19 @@ class Duration {
 
 const toMomentUnitOfTime = (unit: DurationUnit): moment.unitOfTime.Diff => {
   switch (unit) {
-    case DurationUnit.m:
+    case DurationUnit.Minute:
       return 'minutes';
-    case DurationUnit.h:
+    case DurationUnit.Hour:
       return 'hours';
-    case DurationUnit.d:
+    case DurationUnit.Day:
       return 'days';
-    case DurationUnit.w:
+    case DurationUnit.Week:
       return 'weeks';
-    case DurationUnit.M:
+    case DurationUnit.Month:
       return 'months';
-    case DurationUnit.Q:
+    case DurationUnit.Quarter:
       return 'quarters';
-    case DurationUnit.Y:
+    case DurationUnit.Year:
       return 'years';
     default:
       assertNever(unit);

@@ -6,8 +6,8 @@
  */
 
 import { IllegalArgumentError } from '../../errors';
-import { SLO } from '../../types/models';
-import { Duration, DurationUnit } from '../../types/models/duration';
+import { SLO } from '../models';
+import { Duration, DurationUnit } from '../models/duration';
 import { timeslicesBudgetingMethodSchema } from '../../types/schema';
 
 /**
@@ -48,14 +48,18 @@ function isValidTargetNumber(value: number): boolean {
 }
 
 function isValidTimeWindowDuration(duration: Duration): boolean {
-  return [DurationUnit.d, DurationUnit.w, DurationUnit.M, DurationUnit.Q, DurationUnit.Y].includes(
-    duration.unit
-  );
+  return [
+    DurationUnit.Day,
+    DurationUnit.Week,
+    DurationUnit.Month,
+    DurationUnit.Quarter,
+    DurationUnit.Year,
+  ].includes(duration.unit);
 }
 
 function isValidTimesliceWindowDuration(timesliceWindow: Duration, timeWindow: Duration): boolean {
   return (
-    [DurationUnit.m, DurationUnit.h].includes(timesliceWindow.unit) &&
+    [DurationUnit.Minute, DurationUnit.Hour].includes(timesliceWindow.unit) &&
     timesliceWindow.isShorterThan(timeWindow)
   );
 }
