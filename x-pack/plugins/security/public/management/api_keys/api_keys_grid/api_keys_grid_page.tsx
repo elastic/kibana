@@ -152,24 +152,30 @@ export class APIKeysGridPage extends Component<Props, State> {
     }
 
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
-      const createButton = this.props.readOnly ? undefined : (
-        <EuiButton
-          {...reactRouterNavigate(this.props.history, '/create')}
-          fill
-          iconType="plusInCircleFilled"
-          data-test-subj="apiKeysCreatePromptButton"
-        >
-          <FormattedMessage
-            id="xpack.security.management.apiKeys.table.createButton"
-            defaultMessage="Create API key"
-          />
-        </EuiButton>
-      );
-
-      return <ApiKeysEmptyPrompt>{createButton}</ApiKeysEmptyPrompt>;
+      if (this.props.readOnly) {
+        return <ApiKeysEmptyPrompt readOnly={this.props.readOnly} />;
+      } else {
+        return (
+          <ApiKeysEmptyPrompt>
+            <EuiButton
+              {...reactRouterNavigate(this.props.history, '/create')}
+              fill
+              iconType="plusInCircleFilled"
+              data-test-subj="apiKeysCreatePromptButton"
+            >
+              <FormattedMessage
+                id="xpack.security.management.apiKeys.table.createButton"
+                defaultMessage="Create API key"
+              />
+            </EuiButton>
+          </ApiKeysEmptyPrompt>
+        );
+      }
     }
 
     const concatenated = `${this.state.createdApiKey?.id}:${this.state.createdApiKey?.api_key}`;
+
+    const description = this.determineDescription(isAdmin, this.props.readOnly ?? false);
 
     return (
       <>
@@ -182,21 +188,7 @@ export class APIKeysGridPage extends Component<Props, State> {
               defaultMessage="API Keys"
             />
           }
-          description={
-            <>
-              {isAdmin ? (
-                <FormattedMessage
-                  id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                  defaultMessage="View and delete API keys. An API key sends requests on behalf of a user."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
-                  defaultMessage="View and delete your API keys. An API key sends requests on your behalf."
-                />
-              )}
-            </>
-          }
+          description={description}
           rightSideItems={
             this.props.readOnly
               ? undefined
@@ -430,20 +422,13 @@ export class APIKeysGridPage extends Component<Props, State> {
         : undefined,
     };
 
+    const callOutTitle = this.determineCallOutTitle(this.props.readOnly ?? false);
+
     return (
       <>
         {!isAdmin ? (
           <>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
-                  defaultMessage="You only have permission to manage your own API keys."
-                />
-              }
-              color="primary"
-              iconType="user"
-            />
+            <EuiCallOut title={callOutTitle} color="primary" iconType="user" />
             <EuiSpacer />
           </>
         ) : undefined}
@@ -666,4 +651,47 @@ export class APIKeysGridPage extends Component<Props, State> {
 
     this.setState({ isLoadingApp: false, isLoadingTable: false });
   };
+
+  private determineDescription(isAdmin: boolean, readOnly: boolean) {
+    if (isAdmin) {
+      return (
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
+          defaultMessage="View and delete API keys. An API key sends requests on behalf of a user."
+        />
+      );
+    } else if (readOnly) {
+      return (
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.apiKeysReadOnlyDescription"
+          defaultMessage="View your API keys. An API key sends requests on your behalf."
+        />
+      );
+    } else {
+      return (
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
+          defaultMessage="View and delete your API keys. An API key sends requests on your behalf."
+        />
+      );
+    }
+  }
+
+  private determineCallOutTitle(readOnly: boolean) {
+    if (readOnly) {
+      return (
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.readOnlyOwnKeysWarning"
+          defaultMessage="You only have permission to view your own API keys."
+        />
+      );
+    } else {
+      return (
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
+          defaultMessage="You only have permission to manage your own API keys."
+        />
+      );
+    }
+  }
 }

@@ -211,6 +211,14 @@ describe('APIKeysGridPage', () => {
   });
 
   describe('Read Only View', () => {
+    beforeEach(() => {
+      apiClientMock.checkPrivileges.mockResolvedValueOnce({
+        areApiKeysEnabled: true,
+        canManage: false,
+        isAdmin: false,
+      });
+    });
+
     it('should not display prompt `Create Button` when no API keys are shown', async () => {
       const history = createMemoryHistory({ initialEntries: ['/'] });
 
@@ -236,7 +244,7 @@ describe('APIKeysGridPage', () => {
         </Providers>
       );
       expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
-      expect(await findByText('Create your first API key')).toBeInTheDocument();
+      expect(await findByText('You do not have permission to create API keys')).toBeInTheDocument();
       expect(queryByText('Create API key')).toBeNull();
     });
 
@@ -262,6 +270,12 @@ describe('APIKeysGridPage', () => {
       );
 
       expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
+      expect(
+        await findByText('You only have permission to view your own API keys.')
+      ).toBeInTheDocument();
+      expect(
+        await findByText('View your API keys. An API key sends requests on your behalf.')
+      ).toBeInTheDocument();
       expect(queryByText('Create API key')).toBeNull();
       expect(queryAllByText('Delete').length).toBe(0);
     });
