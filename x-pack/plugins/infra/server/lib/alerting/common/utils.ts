@@ -219,6 +219,23 @@ export const shouldTermsAggOnContainer = (groupBy: string | string[] | undefined
     : groupBy === KUBERNETES_POD_UID;
 };
 
+export const flattenAdditionalContext = (
+  additionalContext: AdditionalContext | undefined | null
+): AdditionalContext => {
+  let flattenedContext: AdditionalContext = {};
+  if (additionalContext) {
+    Object.keys(additionalContext).forEach((context: string) => {
+      if (additionalContext[context]) {
+        flattenedContext = {
+          ...flattenedContext,
+          ...flattenObject(additionalContext[context], [context + '.']),
+        };
+      }
+    });
+  }
+  return flattenedContext;
+}
+
 export const getContextForRecoveredAlerts = (
   alertHits: AdditionalContext | undefined | null
 ): AdditionalContext => {

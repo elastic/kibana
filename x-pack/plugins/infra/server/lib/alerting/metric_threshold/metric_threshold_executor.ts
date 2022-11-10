@@ -35,7 +35,7 @@ import {
   UNGROUPED_FACTORY_KEY,
   hasAdditionalContext,
   validGroupByForContext,
-  flattenObject,
+  flattenAdditionalContext,
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
@@ -100,25 +100,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     const { alertWithLifecycle, savedObjectsClient, getAlertUuid, getAlertByAlertUuid } = services;
 
-    const alertFactory: MetricThresholdAlertFactory = (id, reason, additionalContext) => {
-      let flattenedContext: AdditionalContext = {};
-      additionalContext?.keys.forEach((context: string) => {
-        if (additionalContext[context]) {
-          flattenedContext = {
-            ...flattenedContext,
-            ...flattenObject(additionalContext[context], [context + '.']),
-          };
-        }
-      });
-
-      return alertWithLifecycle({
+    const alertFactory: MetricThresholdAlertFactory = (id, reason, additionalContext) =>
+      alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
-          ...flattenedContext,
+          ...flattenAdditionalContext(additionalContext),
         },
       });
-    };
 
     const {
       sourceId,
