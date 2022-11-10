@@ -32,7 +32,10 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
-import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY } from '../../../../common/constants';
+import {
+  LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY,
+  MAX_ITEMS,
+} from '../../../../common/constants';
 
 const getDefaultQuery = ({
   query,
@@ -90,7 +93,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const findingsGroupByResource = useFindingsByResource({
     ...getPaginationQuery({
       pageIndex: 0,
-      pageSize: 500,
+      pageSize: MAX_ITEMS,
     }),
     sortDirection: urlQuery.sortDirection,
     query: baseEsQuery.query,

@@ -32,9 +32,10 @@ import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { ErrorCallout } from '../layout/error_callout';
 import { getLimitProperties } from '../utils/get_limit_properties';
-import { LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY } from '../../../../common/constants';
-
-const MAX_ITEMS = 500;
+import {
+  LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY,
+  MAX_ITEMS,
+} from '../../../../common/constants';
 
 export const getDefaultQuery = ({
   query,

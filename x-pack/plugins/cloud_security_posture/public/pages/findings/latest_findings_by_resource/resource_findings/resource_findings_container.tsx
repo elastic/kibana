@@ -38,7 +38,10 @@ import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 import { ErrorCallout } from '../../layout/error_callout';
 import { FindingsDistributionBar } from '../../layout/findings_distribution_bar';
-import { LOCAL_STORAGE_PAGE_SIZE_RESOURCE_FINDINGS_KEY } from '../../../../../common/constants';
+import {
+  LOCAL_STORAGE_PAGE_SIZE_RESOURCE_FINDINGS_KEY,
+  MAX_ITEMS,
+} from '../../../../../common/constants';
 
 const getDefaultQuery = ({
   query,
@@ -112,7 +115,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const resourceFindings = useResourceFindings({
     ...getPaginationQuery({
       pageIndex: 0,
-      pageSize: 500,
+      pageSize: MAX_ITEMS,
     }),
     sort: urlQuery.sort,
     query: baseEsQuery.query,

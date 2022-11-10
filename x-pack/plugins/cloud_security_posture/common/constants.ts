@@ -56,3 +56,5 @@ export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY =
   'cloudPosture:findingsByResource:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
+
+export const MAX_ITEMS = 500;
