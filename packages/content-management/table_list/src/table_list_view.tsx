@@ -271,8 +271,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
               item={record}
               getDetailViewLink={getDetailViewLink}
               onClickTitle={onClickTitle}
-              onClickTag={(tag, isCtrlKey) => {
-                if (isCtrlKey) {
+              onClickTag={(tag, withModifierKey) => {
+                if (withModifierKey) {
                   addOrRemoveExcludeTagFilter(tag);
                 } else {
                   addOrRemoveIncludeTagFilter(tag);

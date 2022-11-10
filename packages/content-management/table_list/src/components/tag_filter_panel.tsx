@@ -32,7 +32,9 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { useServices } from '../services';
 import type { Tag } from '../types';
-import { CtrlClickDetect } from './ctrl_click_detect';
+
+const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+const modifierKeyPrefix = isMac ? '⌘' : '^';
 
 const toArray = (item: unknown) => (Array.isArray(item) ? item : [item]);
 
@@ -84,7 +86,10 @@ export const TagFilterPanel: FC<Props> = ({
     background-color: ${euiTheme.colors.lightestShade};
     border-top: ${euiTheme.border.thin};
     padding: ${euiTheme.size.s};
-    text-align: center;
+    & a {
+      text-align: center;
+      width: 100%;
+    }
   `;
 
   let searchProps: ExclusiveUnion<
@@ -125,20 +130,17 @@ export const TagFilterPanel: FC<Props> = ({
   );
 
   const onOptionClick = useCallback(
-    (tag: Tag) =>
-      (e: MouseEvent, { isCtrlKey }: { isCtrlKey: boolean }) => {
-        e.preventDefault();
+    (tag: Tag) => (e: MouseEvent) => {
+      const withModifierKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey);
 
-        if (isCtrlKey) {
-          addOrRemoveExcludeTagFilter(tag);
-        } else {
-          addOrRemoveIncludeTagFilter(tag);
-        }
+      if (withModifierKey) {
+        addOrRemoveExcludeTagFilter(tag);
+      } else {
+        addOrRemoveIncludeTagFilter(tag);
+      }
 
-        setIsPopoverOpen(false);
-
-        e.stopPropagation();
-      },
+      setIsPopoverOpen(false);
+    },
     [addOrRemoveIncludeTagFilter, addOrRemoveExcludeTagFilter]
   );
 
@@ -160,26 +162,22 @@ export const TagFilterPanel: FC<Props> = ({
         tag,
         checked,
         view: (
-          <CtrlClickDetect onClick={onOptionClick(tag)}>
-            {(ref, onClickWrapped) => (
-              <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" ref={ref}>
-                <EuiFlexItem>
-                  <EuiHealth
-                    color={color}
-                    data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}
-                    onClick={onClickWrapped}
-                  >
-                    <EuiText>{name}</EuiText>
-                  </EuiHealth>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color={checked !== undefined ? 'accent' : undefined}>
-                    {tagsToTableItemMap[id ?? '']?.length ?? 0}
-                  </EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </CtrlClickDetect>
+          <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiHealth
+                color={color}
+                data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}
+                onClick={onOptionClick(tag)}
+              >
+                <EuiText>{name}</EuiText>
+              </EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={checked !== undefined ? 'accent' : undefined}>
+                {tagsToTableItemMap[id ?? '']?.length ?? 0}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       };
     });
@@ -274,37 +272,48 @@ export const TagFilterPanel: FC<Props> = ({
                 color="danger"
                 onClick={clearTagSelection}
               >
-                Clear selection
+                {i18n.translate(
+                  'contentManagement.tableList.tagFilterPanel.clearSelectionButtonLabelLabel',
+                  {
+                    defaultMessage: 'Clear selection',
+                  }
+                )}
               </EuiButtonEmpty>
             )}
             <EuiSpacer size="s" />
             <EuiText size="xs">
-              <EuiTextColor color="dimgrey">Ctrl + click to filter out tags</EuiTextColor>
+              <EuiTextColor color="dimgrey">
+                {i18n.translate('contentManagement.tableList.tagFilterPanel.modifierKeyHelpText', {
+                  defaultMessage: '{modifierKeyPrefix} + click to filter out tags',
+                  values: {
+                    modifierKeyPrefix,
+                  },
+                })}
+              </EuiTextColor>
             </EuiText>
             <EuiSpacer size="s" />
           </EuiFlexItem>
 
           {/* Link to manage all tags */}
           <EuiFlexItem css={bottomBarCSS}>
-            <span>
-              <RedirectAppLinks
-                coreStart={{
-                  application: {
-                    navigateToUrl,
-                    currentAppId$,
-                  },
-                }}
-              >
-                <EuiLink href={getTagManagementUrl()} data-test-subj="manageAllTagsLink" external>
-                  {i18n.translate(
-                    'contentManagement.tableList.tagFilterPanel.manageAllTagsLinkLabel',
-                    {
-                      defaultMessage: 'Manage all tags',
-                    }
-                  )}
-                </EuiLink>
-              </RedirectAppLinks>
-            </span>
+            <RedirectAppLinks
+              coreStart={{
+                application: {
+                  navigateToUrl,
+                  currentAppId$,
+                },
+              }}
+            >
+              <EuiLink href={getTagManagementUrl()} data-test-subj="manageAllTagsLink" external>
+                {i18n.translate(
+                  'contentManagement.tableList.tagFilterPanel.manageAllTagsLinkLabel',
+                  {
+                    defaultMessage: 'Manage all tags',
+                  }
+                )}
+              </EuiLink>
+            </RedirectAppLinks>
+            <span />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopover>
