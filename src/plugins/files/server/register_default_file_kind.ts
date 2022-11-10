@@ -7,8 +7,8 @@
  */
 
 import { getFileKindsRegistry } from '../common/file_kinds_registry';
-import { baseFileKind } from '../common';
+import { defaultFileKind } from '../common';
 
-export function registerBaseFileKind() {
-  getFileKindsRegistry().register(baseFileKind);
+export function registerDefaultFileKind() {
+  getFileKindsRegistry().register(defaultFileKind);
 }

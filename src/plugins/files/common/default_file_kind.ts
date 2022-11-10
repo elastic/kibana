@@ -8,7 +8,7 @@
 
 import { FileKind } from './types';
 
-const id = 'baseFileKind' as const;
+const id = 'default' as const;
 const tags: string[] = [];
 const tenMebiBytes = 1024 * 1024 * 10;
 
@@ -18,7 +18,7 @@ const tenMebiBytes = 1024 * 1024 * 10;
  * @note this file kind has no access controls and so creating a file of this
  * kind is visible to all Kibana users.
  */
-export const baseFileKind: FileKind = {
+export const defaultFileKind: FileKind = {
   id,
   maxSizeBytes: tenMebiBytes,
   blobStoreSettings: {},
