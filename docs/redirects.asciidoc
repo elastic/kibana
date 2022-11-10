@@ -424,12 +424,4 @@ This page has been deleted. Refer to <<machine-learning-api-sync>>.
 [role="exclude",id="managing-alerts-and-actions"]
 == Alerts and Actions
 
-
 This page has been deleted. Refer to <<alerting-getting-started>>.
-
-This page has been deleted. Refer to <<Machine_learning_APIs>>.
-
-[role="exclude",id="create-panels-with-lens"]
-== Create and add panels
-
-This page has been deleted. Refer to <<lens>>.

@@ -18,7 +18,7 @@ image:images/dashboard_ecommerceRevenueDashboard_7.15.0.png[Example dashboard]
 To help you choose the visualizations to display on the dashboard, identify your users and the goals they need to accomplish while using the dashboard. 
 
 [discrete]
-[[dashboard-choose-the-best-visualization-to-display-your-data]]
+[[create-panels-with-lens]]
 == Choose the best visualizations for your data
 
 [discrete]
@@ -34,8 +34,6 @@ You can also display visualizations with summary data at the top of the dashboar
 Group visualizations that contain related data together and in rows. For example, you have metric visualizations that display inbound and outbound traffic. To display a more detailed visualization of the data, add a bar chart that displays the inbound and outbound traffic over time. 
 
 [image]
-
-
 
 [discrete]
 [[dashboard-respect-the-aspect-ratio]]
