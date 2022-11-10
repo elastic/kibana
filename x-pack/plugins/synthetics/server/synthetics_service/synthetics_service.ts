@@ -176,7 +176,7 @@ export class SyntheticsService {
                   status: e.status,
                   stackVersion: service.server.stackVersion,
                 });
-                throw e;
+                service.logger.error(e);
               }
 
               return { state };
@@ -297,25 +297,32 @@ export class SyntheticsService {
     const subject = new Subject<SyntheticsMonitorWithId[]>();
 
     subject.subscribe(async (monitorConfigs) => {
-      const monitors = this.formatConfigs(monitorConfigs);
-
-      if (monitors.length === 0) {
-        this.logger.debug('No monitor found which can be pushed to service.');
-        return null;
-      }
-
-      const output = await this.getOutput();
-
-      this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
-
       try {
+        const monitors = this.formatConfigs(monitorConfigs);
+
+        if (monitors.length === 0) {
+          this.logger.debug('No monitor found which can be pushed to service.');
+          return null;
+        }
+
+        const output = await this.getOutput();
+
+        this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
+
         service.syncErrors = await this.apiClient.put({
           monitors,
           output,
         });
       } catch (e) {
+        sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+          reason: 'Failed to push configs to service',
+          message: e?.message,
+          type: 'pushConfigsError',
+          code: e?.code,
+          status: e.status,
+          stackVersion: service.server.stackVersion,
+        });
         this.logger.error(e);
-        throw e;
       }
     });
 
