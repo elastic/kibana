@@ -38,6 +38,7 @@ interface LookbackWindow {
 }
 
 type AggKey = 'good' | 'total';
+type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
 
 export class DefaultSLIClient implements SLIClient {
   constructor(private esClient: ElasticsearchClient) {}
@@ -117,7 +118,6 @@ export class DefaultSLIClient implements SLIClient {
       is_rolling: true,
     });
 
-    type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
     if (occurencesBudgetingMethodSchema.is(slo.budgeting_method)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, longestDateRange),
