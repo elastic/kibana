@@ -59,6 +59,7 @@ const filtersBuilderMaxHeight = css`
   max-height: ${DEFAULT_MAX_HEIGHT};
 `;
 
+/** @todo: should be removed, no hardcoded sizes **/
 const filterBadgeStyle = css`
   .euiFormRow__fieldWrapper {
     font-size: 12px;
@@ -199,7 +200,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
                 <EuiButton
                   fill
                   onClick={this.onSubmit}
-                  isDisabled={!this.isFilterValid()}
+                  isDisabled={!this.isFiltersValid()}
                   data-test-subj="saveFilter"
                 >
                   {this.props.mode === 'add' ? addButtonLabel : updateButtonLabel}
@@ -271,7 +272,16 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
   private renderFiltersBuilderEditor() {
     const { selectedIndexPattern, filters } = this.state;
-    const shouldShowPreview = filters && flattenFilters(filters).length > 1;
+    const shouldShowPreview =
+      selectedIndexPattern &&
+      (filters.length > 1 ||
+        (filters.length === 1 &&
+          isFilterValid(
+            selectedIndexPattern,
+            getFieldFromFilter(filters[0] as FieldFilter, selectedIndexPattern),
+            getOperatorFromFilter(filters[0]),
+            getFilterParams(filters[0])
+          )));
 
     return (
       <>
@@ -351,7 +361,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
-  private isFilterValid() {
+  private isFiltersValid() {
     const {
       isCustomEditorOpen,
       queryDsl,
