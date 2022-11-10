@@ -77,7 +77,7 @@ export const i18nTexts = {
       defaultMessage: 'Deleted',
     }),
     READY: i18n.translate('filesManagement.filesFlyout.status.ready', {
-      defaultMessage: 'Available',
+      defaultMessage: 'Ready to download',
     }),
     UPLOADING: i18n.translate('filesManagement.filesFlyout.status.uploading', {
       defaultMessage: 'Uploading',
