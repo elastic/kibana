@@ -15,6 +15,7 @@ import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, Sort } from '../../types';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../../common/constants';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
@@ -47,6 +48,7 @@ const getResourceFindingsQuery = ({
   size,
   sort,
 }: UseResourceFindingsOptions): estypes.SearchRequest => ({
+  index: CSP_LATEST_FINDINGS_DATA_VIEW,
   body: {
     from,
     size,

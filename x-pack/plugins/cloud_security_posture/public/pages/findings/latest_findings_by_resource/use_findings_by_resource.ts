@@ -13,6 +13,7 @@ import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, Sort } from '../types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
 
 interface UseFindingsByResourceOptions extends FindingsBaseEsQuery {
   from: NonNullable<NonNullable<estypes.SearchRequest['body']>['from']>;
@@ -74,6 +75,7 @@ export const getFindingsByResourceAggQuery = ({
   size,
   sortDirection,
 }: UseResourceFindingsQueryOptions): estypes.SearchRequest => ({
+  index: CSP_LATEST_FINDINGS_DATA_VIEW,
   body: {
     query,
     size: 0,
