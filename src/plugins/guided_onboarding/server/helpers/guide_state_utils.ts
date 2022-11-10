@@ -89,7 +89,10 @@ export const updateGuideState = async (
 
     const createdGuideResponse = await savedObjectsClient.create(
       guideStateSavedObjectsType,
-      updatedGuideState
+      updatedGuideState,
+      {
+        id: updatedGuideState.guideId,
+      }
     );
 
     return createdGuideResponse;

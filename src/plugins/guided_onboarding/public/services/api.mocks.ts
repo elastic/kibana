@@ -139,6 +139,7 @@ export const mockPluginStateNotStarted: PluginState = {
   status: 'not_started',
   isActivePeriod: true,
 };
+
 export const mockPluginStateInProgress: PluginState = {
   status: 'in_progress',
   isActivePeriod: true,
