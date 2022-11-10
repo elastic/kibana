@@ -106,6 +106,7 @@ export interface BooleanFieldStats {
   trueCount: number;
   falseCount: number;
   topValues: Bucket[];
+  topValuesSampleSize: number;
 }
 
 export interface DocumentCountStats {

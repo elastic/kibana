@@ -16,11 +16,11 @@ import type {
   ISearchStart,
 } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { processTopValues } from './utils';
 import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import { SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {
   Aggs,
-  Bucket,
   Field,
   FieldStatsCommonRequestParams,
   StringFieldStats,
@@ -99,18 +99,11 @@ export const fetchStringFieldsStats = (
           }
 
           const fieldAgg = get(aggregations, [...topAggsPath], {});
-          const topValuesBuckets: Bucket[] = fieldAgg.buckets ?? [];
-          const sumOtherDocCount = fieldAgg.sum_other_doc_count || 0;
-          const valuesInTopBuckets =
-            topValuesBuckets?.reduce((prev, bucket) => bucket.doc_count + prev, 0) || 0;
-          const topValuesSampleSize = valuesInTopBuckets + sumOtherDocCount;
+          const { topValuesSampleSize, topValues } = processTopValues(fieldAgg);
           const stats = {
             fieldName: field.fieldName,
             isTopValuesSampled: true,
-            topValues: topValuesBuckets.map((bucket) => ({
-              ...bucket,
-              percent: bucket.doc_count / topValuesSampleSize,
-            })),
+            topValues,
             topValuesSampleSize,
             topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };
