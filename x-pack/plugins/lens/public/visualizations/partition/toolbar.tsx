@@ -346,7 +346,7 @@ export function DimensionDataExtraEditor(
 
   return (
     <>
-      {![...currentLayer.primaryGroups, ...(currentLayer.secondaryGroups ?? [])].includes(
+      {[...currentLayer.primaryGroups, ...(currentLayer.secondaryGroups ?? [])].includes(
         props.accessor
       ) && (
         <CollapseSetting
