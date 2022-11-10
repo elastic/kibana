@@ -68,7 +68,7 @@ export const GuideButton = ({
           data-test-subj="guideButtonRedirect"
         >
           {i18n.translate('guidedOnboarding.guidedSetupRedirectButtonLabel', {
-            defaultMessage: 'Launch setup guide',
+            defaultMessage: 'Setup guide',
           })}
         </EuiButton>
       );
