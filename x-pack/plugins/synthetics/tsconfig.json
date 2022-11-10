@@ -33,5 +33,9 @@
     {
       "path": "../../../src/plugins/unified_search/tsconfig.json"
     }
+  ,
+    {
+      "path": "../index_lifecycle_management/tsconfig.json"
+    }
   ]
 }
