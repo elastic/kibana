@@ -12,13 +12,7 @@
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects([
-    'common',
-    'settings',
-    'savedObjects',
-    'dashboard',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
   const renderService = getService('renderable');
 
   describe('Verify upgraded dashboards', function () {
