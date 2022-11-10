@@ -25628,6 +25628,8 @@
     "xpack.securitySolution.networkTopNFlowTable.rows": "{numRows} {numRows, plural, other {行}}",
     "xpack.securitySolution.networkTopNFlowTable.unit": "{totalCount, plural, other {个 IP}}",
     "xpack.securitySolution.noPermissionsMessage": "要查看 {subPluginKey}，必须更新权限。有关详细信息，请联系您的 Kibana 管理员。",
+    "xpack.securitySolution.noPrivilegesPerPageMessage": "要查看 {pageName}，必须更新权限。有关详细信息，请联系您的 Kibana 管理员。",
+    "xpack.securitySolution.noPrivilegesDefaultMessage": "要查看此页面，必须更新权限。有关详细信息，请联系您的 Kibana 管理员。",
     "xpack.securitySolution.notes.youAreViewingNotesScreenReaderOnly": "您正在查看事件在第 {row} 行的备注。完成后，按向上箭头键可返回到事件。",
     "xpack.securitySolution.open.timeline.deleteTimelineModalTitle": "删除“{title}”？",
     "xpack.securitySolution.open.timeline.selectedTemplatesTitle": "已选择 {selectedTemplates} 个{selectedTemplates, plural, other {模板}}",

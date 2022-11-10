@@ -25594,6 +25594,8 @@
     "xpack.securitySolution.networkTopNFlowTable.rows": "{numRows} {numRows, plural, other  {行}}",
     "xpack.securitySolution.networkTopNFlowTable.unit": "{totalCount, plural, other  {IP}}",
     "xpack.securitySolution.noPermissionsMessage": "{subPluginKey}を表示するには、権限を更新する必要があります。詳細については、Kibana管理者に連絡してください。",
+    "xpack.securitySolution.noPrivilegesPerPageMessage": "{pageName}を表示するには、権限を更新する必要があります。詳細については、Kibana管理者に連絡してください。",
+    "xpack.securitySolution.noPrivilegesDefaultMessage": "このページを表示するには、権限を更新する必要があります。詳細については、Kibana管理者に連絡してください。",
     "xpack.securitySolution.notes.youAreViewingNotesScreenReaderOnly": "行 {row} のイベントのメモを表示しています。完了したら上矢印キーを押して、イベントに戻ります。",
     "xpack.securitySolution.open.timeline.deleteTimelineModalTitle": "「{title}」を削除しますか？",
     "xpack.securitySolution.open.timeline.selectedTemplatesTitle": "{selectedTemplates} {selectedTemplates, plural, other  {個のテンプレート}}を選択しました",
