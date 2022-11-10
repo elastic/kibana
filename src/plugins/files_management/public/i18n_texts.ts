@@ -34,7 +34,7 @@ export const i18nTexts = {
     defaultMessage: 'Statistics',
   }),
   failedToFetchDiagnostics: i18n.translate('filesManagement.diagnostics.errorMessage', {
-    defaultMessage: 'Could not fetch diagnostics',
+    defaultMessage: 'Could not fetch statistics',
   }),
   diagnosticsSpaceUsed: i18n.translate('filesManagement.diagnostics.spaceUsedLabel', {
     defaultMessage: 'Disk space used',
