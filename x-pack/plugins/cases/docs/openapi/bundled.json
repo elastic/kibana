@@ -550,7 +550,12 @@
                           },
                           "username": {
                             "type": "string",
-                            "example": "elastic"
+                            "example": "elastic",
+                            "nullable": true
+                          },
+                          "profile_uid": {
+                            "type": "string",
+                            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                           }
                         }
                       },
@@ -607,7 +612,12 @@
                           },
                           "username": {
                             "type": "string",
-                            "example": "elastic"
+                            "example": "elastic",
+                            "nullable": true
+                          },
+                          "profile_uid": {
+                            "type": "string",
+                            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                           }
                         },
                         "nullable": true
@@ -769,7 +779,12 @@
                         },
                         "username": {
                           "type": "string",
-                          "example": "elastic"
+                          "example": "elastic",
+                          "nullable": true
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -826,7 +841,12 @@
                         },
                         "username": {
                           "type": "string",
-                          "example": "elastic"
+                          "example": "elastic",
+                          "nullable": true
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true
@@ -985,7 +1005,12 @@
                           },
                           "username": {
                             "type": "string",
-                            "example": "elastic"
+                            "example": "elastic",
+                            "nullable": true
+                          },
+                          "profile_uid": {
+                            "type": "string",
+                            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                           }
                         }
                       },
@@ -1042,7 +1067,12 @@
                           },
                           "username": {
                             "type": "string",
-                            "example": "elastic"
+                            "example": "elastic",
+                            "nullable": true
+                          },
+                          "profile_uid": {
+                            "type": "string",
+                            "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                           }
                         },
                         "nullable": true
@@ -3784,7 +3814,12 @@
                 "type": "string",
                 "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
               }
-            }
+            },
+            "required": [
+              "email",
+              "full_name",
+              "username"
+            ]
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
@@ -4471,6 +4506,7 @@
             },
             "owner": "cases",
             "payload": {
+              "assignees": null,
               "connector": {
                 "name": "none",
                 "type": ".none",
@@ -4510,6 +4546,26 @@
               "type": "user"
             },
             "type": "comment"
+          },
+          {
+            "action_id": "573c6980-6123-11ed-aa41-81a0a61fe447",
+            "action": "add",
+            "case_id": "22df07d0-03b1-11ed-920c-974bfa104448",
+            "comment_id": null,
+            "created_at": "2022-07-20T01:10:28.238Z",
+            "created_by": {
+              "username": "elastic",
+              "email": null,
+              "full_name": null,
+              "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+            },
+            "owner": "cases",
+            "payload": {
+              "assignees": {
+                "uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+              }
+            },
+            "type": "assignees"
           },
           {
             "action_id": "fff460e0-07c9-11ed-a5fd-47154cb8767e",

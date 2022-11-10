@@ -30,6 +30,10 @@ properties:
     type: object
     properties:
       $ref: 'user_properties.yaml'
+    required:
+      - email
+      - full_name
+      - username
   owner:
     $ref: 'owners.yaml'
   payload:

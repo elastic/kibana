@@ -822,6 +822,7 @@ Any modifications made to this file will be overwritten.
   "updated_at" : "2022-06-01T19:58:48.169Z",
   "updated_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -830,6 +831,7 @@ Any modifications made to this file will be overwritten.
   "error" : "error",
   "created_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -932,7 +934,7 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#getCaseReporters_200_response_inner">getCaseReporters_200_response_inner</a>]
+      array[<a href="#getCaseConfiguration_200_response_inner_created_by">getCaseConfiguration_200_response_inner_created_by</a>]
       
     </div>
 
@@ -1503,6 +1505,7 @@ Any modifications made to this file will be overwritten.
   "updated_at" : "2022-06-01T19:58:48.169Z",
   "updated_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -1511,6 +1514,7 @@ Any modifications made to this file will be overwritten.
   "error" : "error",
   "created_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -1837,6 +1841,7 @@ Any modifications made to this file will be overwritten.
   "updated_at" : "2022-06-01T19:58:48.169Z",
   "updated_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -1845,6 +1850,7 @@ Any modifications made to this file will be overwritten.
   "error" : "error",
   "created_by" : {
     "full_name" : "full_name",
+    "profile_uid" : "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
     "email" : "email",
     "username" : "elastic"
   },
@@ -1878,7 +1884,6 @@ Any modifications made to this file will be overwritten.
     <li><a href="#add_case_comment_request"><code>add_case_comment_request</code> - Add case comment request</a></li>
     <li><a href="#add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - Add case comment request properties for user comments</a></li>
     <li><a href="#alert_comment_response_properties"><code>alert_comment_response_properties</code> - Add case comment response properties for alerts</a></li>
-    <li><a href="#alert_comment_response_properties_pushed_by"><code>alert_comment_response_properties_pushed_by</code> - </a></li>
     <li><a href="#alert_comment_response_properties_rule"><code>alert_comment_response_properties_rule</code> - </a></li>
     <li><a href="#alert_identifiers"><code>alert_identifiers</code> - Alert identifiers</a></li>
     <li><a href="#alert_indices"><code>alert_indices</code> - Alert indices</a></li>
@@ -1914,7 +1919,6 @@ Any modifications made to this file will be overwritten.
     <li><a href="#getCaseConfiguration_200_response_inner_updated_by"><code>getCaseConfiguration_200_response_inner_updated_by</code> - </a></li>
     <li><a href="#getCaseConnectors_200_response_inner"><code>getCaseConnectors_200_response_inner</code> - </a></li>
     <li><a href="#getCaseConnectors_200_response_inner_config"><code>getCaseConnectors_200_response_inner_config</code> - </a></li>
-    <li><a href="#getCaseReporters_200_response_inner"><code>getCaseReporters_200_response_inner</code> - </a></li>
     <li><a href="#getCaseStatus_200_response"><code>getCaseStatus_200_response</code> - </a></li>
     <li><a href="#getCasesByAlert_200_response_inner"><code>getCasesByAlert_200_response_inner</code> - </a></li>
     <li><a href="#getCases_200_response"><code>getCases_200_response</code> - </a></li>
@@ -1953,6 +1957,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_case_request_cases_inner"><code>update_case_request_cases_inner</code> - </a></li>
     <li><a href="#update_user_comment_request_properties"><code>update_user_comment_request_properties</code> - Update case comment request properties for user comments</a></li>
     <li><a href="#user_actions_response_properties"><code>user_actions_response_properties</code> - </a></li>
+    <li><a href="#user_actions_response_properties_created_by"><code>user_actions_response_properties_created_by</code> - </a></li>
     <li><a href="#user_actions_response_properties_payload"><code>user_actions_response_properties_payload</code> - </a></li>
     <li><a href="#user_comment_response_properties"><code>user_comment_response_properties</code> - Case response properties for user comments</a></li>
   </ol>
@@ -2047,29 +2052,19 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">alertId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">created_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">created_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseReporters_200_response_inner">getCaseReporters_200_response_inner</a></span>  </div>
+<div class="param">created_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_created_by">getCaseConfiguration_200_response_inner_created_by</a></span>  </div>
 <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
 <div class="param">pushed_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_pushed_by">alert_comment_response_properties_pushed_by</a></span>  </div>
+<div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_updated_by">getCaseConfiguration_200_response_inner_updated_by</a></span>  </div>
 <div class="param">rule (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_rule">alert_comment_response_properties_rule</a></span>  </div>
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">alert</div>
 <div class="param">updated_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseReporters_200_response_inner">getCaseReporters_200_response_inner</a></span>  </div>
+<div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_created_by">getCaseConfiguration_200_response_inner_created_by</a></span>  </div>
 <div class="param">version (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="alert_comment_response_properties_pushed_by"><code>alert_comment_response_properties_pushed_by</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2356,7 +2351,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">external_title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">external_url (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">pushed_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_comment_response_properties_pushed_by">alert_comment_response_properties_pushed_by</a></span>  </div>
+<div class="param">pushed_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#getCaseConfiguration_200_response_inner_updated_by">getCaseConfiguration_200_response_inner_updated_by</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2415,6 +2410,7 @@ Any modifications made to this file will be overwritten.
       <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2433,6 +2429,7 @@ Any modifications made to this file will be overwritten.
       <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2455,16 +2452,6 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">apiUrl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">projectKey (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="getCaseReporters_200_response_inner"><code>getCaseReporters_200_response_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">full_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2813,10 +2800,20 @@ Any modifications made to this file will be overwritten.
 <div class="param">case_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">comment_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">created_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">created_by </div><div class="param-desc"><span class="param-type"><a href="#getCaseReporters_200_response_inner">getCaseReporters_200_response_inner</a></span>  </div>
+<div class="param">created_by </div><div class="param-desc"><span class="param-type"><a href="#user_actions_response_properties_created_by">user_actions_response_properties_created_by</a></span>  </div>
 <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
 <div class="param">payload </div><div class="param-desc"><span class="param-type"><a href="#user_actions_response_properties_payload">user_actions_response_properties_payload</a></span>  </div>
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#action_types">action_types</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="user_actions_response_properties_created_by"><code>user_actions_response_properties_created_by</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">full_name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">username </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">profile_uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
