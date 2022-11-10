@@ -146,10 +146,10 @@ export interface PackagePolicyClient {
     request: KibanaRequest
   ): Promise<
     A extends 'postPackagePolicyDelete'
-    ? void
-    : A extends 'packagePolicyPostCreate'
-    ? PackagePolicy
-    : NewPackagePolicy
+      ? void
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
+      : NewPackagePolicy
   >;
 
   runDeleteExternalCallbacks(deletedPackagePolicies: DeletePackagePoliciesResponse): Promise<void>;
