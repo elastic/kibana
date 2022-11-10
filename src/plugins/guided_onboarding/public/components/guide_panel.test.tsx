@@ -69,7 +69,6 @@ describe('Guided setup', () => {
 
   describe('Button component', () => {
     describe('when a guide is active', () => {
-
       it('button is enabled', async () => {
         const { exists, find } = await setupComponentWithPluginStateMock(httpClient, {
           status: 'in_progress',
