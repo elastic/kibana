@@ -170,16 +170,6 @@ export const StatefulEditDataProvider = React.memo<Props>(
       window.onscroll = () => noop;
     };
 
-    console.log({
-      test: selectionsAreValid({
-        type,
-        browserFields,
-        selectedField: updatedField,
-        selectedOperator: updatedOperator,
-      }),
-      disableButton,
-    });
-
     const handleSave = useCallback(() => {
       onDataProviderEdited({
         andProviderId,
