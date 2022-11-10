@@ -24,13 +24,9 @@ export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
 
   const monitorId = useMonitorQueryId();
 
-  if (!monitorId) {
-    return null;
-  }
-
   const selectedLocation = useSelectedLocation();
 
-  if (!selectedLocation) {
+  if (!selectedLocation || !monitorId) {
     return null;
   }
 
