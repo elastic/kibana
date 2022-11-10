@@ -111,3 +111,10 @@ export const JSON_EDITOR_ERROR = i18n.translate(
     defaultMessage: 'JSON editor error exists',
   }
 );
+
+export const OPSGENIE_DOCUMENTATION = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.documentation',
+  {
+    defaultMessage: 'Opsgenie documentation',
+  }
+);
