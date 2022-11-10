@@ -38,7 +38,6 @@ import React, { Component } from 'react';
 import { XJsonLang } from '@kbn/monaco';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { css, cx } from '@emotion/css';
@@ -396,13 +395,9 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
   }
 
   private onIndexPatternChange = ([selectedIndexPattern]: DataView[]) => {
-    const { uiSettings } = this.props;
-    const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
-    const emptyFilter = buildEmptyFilter(isPinned, selectedIndexPattern.id);
-    const filters = [emptyFilter];
     this.setState({
       selectedIndexPattern,
-      filters,
+      filters: [buildEmptyFilter(false, selectedIndexPattern.id)],
     });
   };
 

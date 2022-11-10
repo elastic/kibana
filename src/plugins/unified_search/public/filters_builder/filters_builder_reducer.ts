@@ -19,6 +19,11 @@ export interface FiltersBuilderState {
 }
 
 /** @internal **/
+export interface UpdateFiltersPayload {
+  filters: Filter[];
+}
+
+/** @internal **/
 export interface AddFilterPayload {
   path: Path;
   filter: Filter;
@@ -49,6 +54,7 @@ export interface MoveFilterPayload {
 
 /** @internal **/
 export type FiltersBuilderActions =
+  | { type: 'updateFilters'; payload: UpdateFiltersPayload }
   | { type: 'addFilter'; payload: AddFilterPayload }
   | { type: 'removeFilter'; payload: RemoveFilterPayload }
   | { type: 'moveFilter'; payload: MoveFilterPayload }
@@ -59,8 +65,14 @@ export const FiltersBuilderReducer: Reducer<FiltersBuilderState, FiltersBuilderA
   action
 ) => {
   switch (action.type) {
+    case 'updateFilters':
+      return {
+        ...state,
+        filters: action.payload.filters,
+      };
     case 'addFilter':
       return {
+        ...state,
         filters: addFilter(
           state.filters,
           action.payload.filter,
