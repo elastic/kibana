@@ -36,6 +36,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       );
 
       expect(filterCountStatus).toBeTruthy();
+      expect(filterCountStatus).toHaveTextContent('Showing 2 of 3 alerts');
     });
 
     it('should show only total alert counts when filtered  and total count are equal', async () => {
@@ -47,10 +48,8 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         'sessionView:sessionViewAlertDetailsFilterStatus'
       );
 
-      expect(filterCountStatus).toHaveTextContent('3');
-      expect(filterCountStatus).not.toHaveTextContent(
-        `${props.filteredAlertsCount} of ${props.totalAlertsCount}`
-      );
+      expect(filterCountStatus).toHaveTextContent('Showing 3 alerts');
+      expect(filterCountStatus).not.toHaveTextContent('Showing 2 of 3 alerts');
       expect(filterCountStatus).toBeTruthy();
     });
 

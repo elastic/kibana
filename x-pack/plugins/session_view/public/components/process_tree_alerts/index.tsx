@@ -83,7 +83,11 @@ export function ProcessTreeAlerts({
   );
 
   const handleProcessEventAlertCategorySelected = useCallback((eventCategory) => {
-    setSelectedProcessEventAlertCategory(eventCategory);
+    if (ProcessEventAlertCategory.hasOwnProperty(eventCategory)) {
+      setSelectedProcessEventAlertCategory(eventCategory);
+    } else {
+      setSelectedProcessEventAlertCategory(ProcessEventAlertCategory.all);
+    }
   }, []);
 
   const filteredProcessEventAlerts = useMemo(() => {

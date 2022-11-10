@@ -13,6 +13,7 @@ export interface AlertStatusEventEntityIdMap {
 }
 
 export const enum ProcessEventAlertCategory {
+  all = 'all',
   file = 'file',
   network = 'network',
   process = 'process',

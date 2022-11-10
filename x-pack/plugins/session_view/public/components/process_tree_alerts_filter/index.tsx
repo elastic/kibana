@@ -24,6 +24,7 @@ import {
   AlertTypeCount,
 } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
+import { FILTER_MENU_OPTIONS, SELECTED_PROCESS } from './translations';
 
 export interface ProcessTreeAlertsFilterDeps {
   totalAlertsCount: number;
@@ -40,9 +41,8 @@ export const ProcessTreeAlertsFilter = ({
 }: ProcessTreeAlertsFilterDeps) => {
   const { filterStatus, popover } = useStyles();
 
-  const [selectedProcessEventAlertCategory, setSelectedProcessEventAlertCategory] = useState<
-    ProcessEventAlertCategory | DefaultAlertFilterType
-  >(DEFAULT_ALERT_FILTER_VALUE);
+  const [selectedProcessEventAlertCategory, setSelectedProcessEventAlertCategory] =
+    useState<ProcessEventAlertCategory>(ProcessEventAlertCategory.all);
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -64,12 +64,6 @@ export const ProcessTreeAlertsFilter = ({
     [onAlertEventCategorySelected]
   );
 
-  const alertCountsStatusText = useMemo(() => {
-    return totalAlertsCount === filteredAlertsCount
-      ? totalAlertsCount
-      : `${filteredAlertsCount} of ${totalAlertsCount}`;
-  }, [totalAlertsCount, filteredAlertsCount]);
-
   const doesMultipleAlertTypesExist = useMemo(() => {
     // Check if alerts consist of at least two alert event types
     const multipleAlertTypeCount = alertTypeCounts.reduce((sumOfAlertTypes, { count }) => {
@@ -89,13 +83,7 @@ export const ProcessTreeAlertsFilter = ({
       iconSide="right"
       onClick={onButtonClick}
     >
-      <FormattedMessage
-        id="xpack.sessionView.alertDetailsEmptyButtonLabel"
-        defaultMessage="View: {selectedProcessEventAlertCategory} alerts"
-        values={{
-          selectedProcessEventAlertCategory,
-        }}
-      />
+      {SELECTED_PROCESS[selectedProcessEventAlertCategory]}
     </EuiButtonEmpty>
   );
 
@@ -114,13 +102,7 @@ export const ProcessTreeAlertsFilter = ({
             icon={getIconType(processEventAlertCategory)}
             onClick={onSelectedProcessEventAlertCategory}
           >
-            <FormattedMessage
-              id="xpack.sessionView.alertDetailsFilterMenuItemLabel"
-              defaultMessage="View {processEventAlertCategory} alerts"
-              values={{
-                processEventAlertCategory,
-              }}
-            />
+            {FILTER_MENU_OPTIONS[processEventAlertCategory]}
           </EuiContextMenuItem>
         );
       });
@@ -132,10 +114,7 @@ export const ProcessTreeAlertsFilter = ({
         icon={getIconType(DEFAULT_ALERT_FILTER_VALUE)}
         onClick={onSelectedProcessEventAlertCategory}
       >
-        <FormattedMessage
-          id="xpack.sessionView.alertDetailsDefaultFilterMenuItemLabel"
-          defaultMessage="View all alerts"
-        />
+        {FILTER_MENU_OPTIONS[ProcessEventAlertCategory.all]}
       </EuiContextMenuItem>,
       ...alertEventFilterMenuItems,
     ];
@@ -145,21 +124,30 @@ export const ProcessTreeAlertsFilter = ({
     <div data-test-subj="sessionView:sessionViewAlertDetailsFilter">
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem css={filterStatus} style={{ paddingLeft: '16px' }}>
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.sessionView.alertDetailsCountStatusLabel"
-              defaultMessage="Showing {alertCountsStatusElem} alerts"
-              values={{
-                alertCountsStatusElem: (
-                  <span
-                    className={'text'}
-                    data-test-subj="sessionView:sessionViewAlertDetailsFilterStatus"
-                  >
-                    {alertCountsStatusText}
-                  </span>
-                ),
-              }}
-            />
+          <EuiText size="s" data-test-subj="sessionView:sessionViewAlertDetailsFilterStatus">
+            {totalAlertsCount === filteredAlertsCount && (
+              <FormattedMessage
+                id="xpack.sessionView.alertTotalCountStatusLabel"
+                defaultMessage="Showing {count} alerts"
+                values={{
+                  count: <strong>{totalAlertsCount}</strong>,
+                }}
+              />
+            )}
+
+            {totalAlertsCount !== filteredAlertsCount && (
+              <FormattedMessage
+                id="xpack.sessionView.alertTotalCountStatusLabel"
+                defaultMessage=" Showing {count} alerts"
+                values={{
+                  count: (
+                    <strong>
+                      {filteredAlertsCount} of {totalAlertsCount}
+                    </strong>
+                  ),
+                }}
+              />
+            )}
           </EuiText>
         </EuiFlexItem>
         {doesMultipleAlertTypesExist && (
