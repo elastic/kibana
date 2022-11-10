@@ -199,8 +199,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
                   pageSize: urlQuery.pageSize,
-                  currentPageSize:
-                    pageSize !== undefined ? pageSize : resourceFindings.data.page.length,
+                  currentPageSize: slicedPage.length,
                 }),
               }}
             />
