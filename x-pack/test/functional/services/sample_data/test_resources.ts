@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function RulesTestResourcesServiceProvider({ getService }: FtrProviderContext) {
+export function SampleDataTestResourcesServiceProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   return {
@@ -20,6 +20,18 @@ export function RulesTestResourcesServiceProvider({ getService }: FtrProviderCon
         .delete(`/api/sample_data/${sampleDataId}`)
         .set('kbn-xsrf', 'true')
         .expect(204);
+    },
+
+    async installAllKibanaSampleData() {
+      await this.installKibanaSampleData('ecommerce');
+      await this.installKibanaSampleData('flights');
+      await this.installKibanaSampleData('logs');
+    },
+
+    async removeAllKibanaSampleData() {
+      await this.removeKibanaSampleData('ecommerce');
+      await this.removeKibanaSampleData('flights');
+      await this.removeKibanaSampleData('logs');
     },
   };
 }

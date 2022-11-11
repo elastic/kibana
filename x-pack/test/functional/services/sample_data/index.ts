@@ -6,10 +6,10 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { RulesCommonServiceProvider } from './common';
+import { SampleDataTestResourcesServiceProvider } from './test_resources';
 
-export function RulesServiceProvider(context: FtrProviderContext) {
+export function SampleDataServiceProvider(context: FtrProviderContext) {
   return {
-    common: RulesCommonServiceProvider(context),
+    testResources: SampleDataTestResourcesServiceProvider(context),
   };
 }
