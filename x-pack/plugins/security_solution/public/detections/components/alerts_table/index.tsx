@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { combineQueries } from '../../../common/lib/kuery';
@@ -17,6 +17,7 @@ import type { TableIdLiteral } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -39,6 +40,8 @@ import {
 import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
 import { useLicense } from '../../../common/hooks/use_license';
+import { useBulkAddToCaseActions } from './timeline_actions/use_bulk_add_to_case_actions';
+import { useAddBulkToTimelineAction } from './timeline_actions/use_add_bulk_to_timeline';
 
 interface OwnProps {
   defaultFilters?: Filter[];
@@ -78,6 +81,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   filterGroup = 'open',
 }) => {
   const dispatch = useDispatch();
+
+  const { globalQueries } = useSelector((state: State) => eventsViewerSelector(state, tableId));
+
   const {
     browserFields,
     indexPattern: indexPatterns,
@@ -160,7 +166,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       return [...defaultFilters, ...alertStatusFilter];
     }
   }, [defaultFilters, filterGroup]);
-  const { filterManager } = useKibana().services.data.query;
+  const { filterManager } = kibana.services.data.query;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
@@ -189,6 +195,29 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [ACTION_BUTTON_COUNT]
   );
 
+  const refetchQuery = useCallback((newQueries: inputsModel.GlobalQuery[]) => {
+    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  }, []);
+
+  const addToCaseBulkActions = useBulkAddToCaseActions();
+  const addBulkToTimelineAction = useAddBulkToTimelineAction({
+    localFilters: defaultFiltersMemo ?? [],
+    tableId,
+    from,
+    to,
+    scopeId: SourcererScopeName.detections,
+  });
+
+  const bulkActions = useMemo(
+    () => ({
+      onAlertStatusActionSuccess: () => {
+        refetchQuery(globalQueries);
+      },
+      customBulkActions: [...addToCaseBulkActions, addBulkToTimelineAction],
+    }),
+    [globalQueries, refetchQuery, addToCaseBulkActions, addBulkToTimelineAction]
+  );
+
   if (loading || isEmpty(selectedPatterns)) {
     return null;
   }
@@ -200,6 +229,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       defaultCellActions={defaultCellActions}
       defaultModel={getAlertsDefaultModel(license)}
       end={to}
+      bulkActions={bulkActions}
       entityType="events"
       hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
       tableId={tableId}

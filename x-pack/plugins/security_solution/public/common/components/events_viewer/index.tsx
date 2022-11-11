@@ -27,8 +27,7 @@ import type {
 } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
-import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
-import type { inputsModel, State } from '../../store';
+import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { InspectButton, InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
@@ -105,6 +104,7 @@ export interface Props {
   hasAlertsCrud?: boolean;
   unit?: (n: number) => string;
   indexNames?: string[];
+  bulkActions: boolean | BulkActionsProp;
 }
 
 /**
@@ -130,6 +130,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   hasAlertsCrud = false,
   unit,
   indexNames,
+  bulkActions,
 }) => {
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
@@ -137,6 +138,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const {
     filters,
+    input,
     query,
     globalQueries,
     dataTable: {
@@ -208,21 +210,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, []);
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
-
-  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-  };
-
-  const addToCaseBulkActions = useBulkAddToCaseActions();
-  const bulkActions = useMemo(
-    () => ({
-      onAlertStatusActionSuccess: () => {
-        refetchQuery(globalQueries);
-      },
-      customBulkActions: addToCaseBulkActions,
-    }),
-    [addToCaseBulkActions, globalQueries]
-  );
 
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope,

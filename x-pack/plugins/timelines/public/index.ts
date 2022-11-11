@@ -17,6 +17,7 @@
 import { TimelinesPlugin } from './plugin';
 
 export type { TimelinesUIStart } from './types';
+  updateTotalCount,
 export type { OnColumnFocused } from '../common/utils/accessibility';
 
 export {

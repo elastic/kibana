@@ -18,6 +18,10 @@ import {
 import { getScopedActions, isTimelineScope } from '../../../helpers';
 import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../../../common/components/guided_onboarding_tour/tour_config';
 import type { ActionProps, OnPinEvent } from '../../../../common/types';
 import { TableId, TimelineId, TimelineTabs } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
@@ -209,8 +213,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   const onExpandEvent = useCallback(() => {
-    const isStep2Active = activeStep === 2 && isTourShown(SecurityStepId.alertsCases);
-    if (isTourAnchor && isStep2Active) {
+    if (
+      isTourAnchor &&
+      activeStep === AlertsCasesTourSteps.expandEvent &&
+      isTourShown(SecurityStepId.alertsCases)
+    ) {
       incrementStep(SecurityStepId.alertsCases);
     }
     onEventDetailsPanelOpened();
@@ -237,8 +244,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
       )}
       <GuidedOnboardingTourStep
         isTourAnchor={isTourAnchor}
-        step={2}
-        stepId={SecurityStepId.alertsCases}
+        onClick={onExpandEvent}
+        step={AlertsCasesTourSteps.expandEvent}
+        tourId={SecurityStepId.alertsCases}
       >
         <div key="expand-event">
           <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>

@@ -81,11 +81,13 @@ export const tableDefaults: SubsetDataTableModel = {
       sortDirection: 'desc',
     },
   ],
+  selectAll: false,
   graphEventId: '',
   sessionViewConfig: null,
   columns: defaultHeaders,
   queryFields: [],
   title: '',
+  totalCount: 0,
 };
 
 export const getDataTableManageDefaults = (id: string) => ({

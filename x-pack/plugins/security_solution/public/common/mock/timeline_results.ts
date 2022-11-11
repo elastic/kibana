@@ -2073,6 +2073,7 @@ export const mockDataTableModel: DataTableModel = {
   title: 'Test rule',
   showCheckboxes: false,
   selectAll: false,
+  totalCount: 0,
 };
 
 export const mockGetOneTimelineResult: TimelineResult = {

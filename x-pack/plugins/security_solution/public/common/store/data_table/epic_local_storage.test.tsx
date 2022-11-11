@@ -87,6 +87,7 @@ describe('epicLocalStorage', () => {
       rowRenderers: defaultRowRenderers,
       sourcererScope: SourcererScopeName.default,
       start: from,
+      bulkActions: false,
     };
   });
 

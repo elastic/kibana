@@ -638,6 +638,7 @@ describe('SiemLocalStorage', () => {
         title: '',
         initialized: true,
         updated: 1665943295913,
+        totalCount: 0,
       };
       const dataTables = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
       expect(dataTables).toStrictEqual({

@@ -129,6 +129,7 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
 import type { NavTab } from '../../../../common/components/navigation/types';
 import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
+import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -235,6 +236,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
+
+  const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
+  const startMlJobsIfNeeded = useCallback(async () => {
+    await startMlJobs(rule?.machine_learning_job_id);
+  }, [rule, startMlJobs]);
 
   const ruleDetailTabs = useMemo(
     (): Record<RuleDetailTabs, NavTab> => ({
@@ -693,6 +699,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             (isMlRule(rule?.type) && !hasMlPermissions)
                           }
                           enabled={isExistingRule && (rule?.enabled ?? false)}
+                          startMlJobsIfNeeded={startMlJobsIfNeeded}
                           onChange={handleOnChangeEnabledRule}
                         />
                         <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
@@ -751,7 +758,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         loading={isLoading || isSavedQueryLoading}
                         title={ruleI18n.DEFINITION}
                       >
-                        {defineRuleData != null && !isSavedQueryLoading && (
+                        {defineRuleData != null && !isSavedQueryLoading && !isStartingJobs && (
                           <StepDefineRule
                             descriptionColumns="singleSplit"
                             isReadOnlyView={true}
