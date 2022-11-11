@@ -210,38 +210,40 @@ export async function executor(
 }
 
 function addSeverityAndEventTypeInBody(bodyString: string,severity: string,eventType: string){
-  let result = bodyString
+  let result = bodyString;
+  var rawdata = JSON.parse(bodyString);
   try{
     var bodyObj = JSON.parse(bodyString);
-    if (bodyObj.hasOwnProperty('_source')) {
-      bodyObj["_source"]["event.type"] = eventType;
-      if (bodyObj["_source"]["kibana"] != undefined) {
-        if (bodyObj["_source"]["kibana"]["alert"] != undefined) {
-          if (bodyObj["_source"]["kibana"]["alert"]["severity"] != undefined) {
-            result = JSON.stringify(bodyObj)
-          } else {
-            bodyObj["_source"]["kibana"]["alert"]["severity"] = severity;
-            result = JSON.stringify(bodyObj)
-          }
+    bodyObj = {};
+    bodyObj['hits'] = {};
+    bodyObj['hits']['hits'] = {};
+    bodyObj['hits']['hits']["_source"] = {}
+    console.log("raw", rawdata);
+    bodyObj['hits']['hits']["_source"]["rawData"] = rawdata;
+
+    if (bodyObj['hits']['hits']["_source"]["event"] != undefined) {
+      bodyObj['hits']['hits']["_source"]["event"]["type"] = eventType;
+    } else {
+      bodyObj['hits']['hits']["_source"]["event"] = {};
+      bodyObj['hits']['hits']["_source"]["event"]["type"] = eventType;
+    }
+    if (bodyObj['hits']['hits']["_source"]["kibana"] != undefined) {
+      if (bodyObj['hits']['hits']["_source"]["kibana"]["alert"] != undefined) {
+        if (bodyObj['hits']['hits']["_source"]["kibana"]["alert"]["severity"] != undefined) {
         } else {
-          bodyObj["_source"]["kibana"]["alert"] = {};
-          bodyObj["_source"]["kibana"]["alert"]["severity"] = severity;
-          result = JSON.stringify(bodyObj)
+          bodyObj['hits']['hits']["_source"]["kibana"]["alert"]["severity"] = severity;
         }
       } else {
-        bodyObj["_source"]["kibana"] = {};
-        bodyObj["_source"]["kibana"]["alert"] = {};
-        bodyObj["_source"]["kibana"]["alert"]["severity"] = severity;
-        result = JSON.stringify(bodyObj)
+        bodyObj['hits']['hits']["_source"]["kibana"]["alert"] = {};
+        bodyObj['hits']['hits']["_source"]["kibana"]["alert"]["severity"] = severity;
       }
-    }else{
-      bodyObj["_source"] = {};
-      bodyObj["_source"]["kibana"] = {};
-      bodyObj["_source"]["event.type"] = eventType;
-      bodyObj["_source"]["kibana"]["alert"] = {};
-      bodyObj["_source"]["kibana"]["alert"]["severity"] = severity;
-      result = JSON.stringify(bodyObj)
+    } else {
+      bodyObj['hits']['hits']["_source"]["kibana"] = {};
+      bodyObj['hits']['hits']["_source"]["kibana"]["alert"] = {};
+      bodyObj['hits']['hits']["_source"]["kibana"]["alert"]["severity"] = severity;
     }
+
+    result = JSON.stringify(bodyObj)
   }catch{
   }
   return result
