@@ -128,7 +128,10 @@ export const ModalInspectQuery = ({
   const inspectResponses: Response[] = parseInspectStrings(responses);
 
   const isSourcererPattern = useMemo(
-    () => (inspectRequests[0]?.index ?? []).every((pattern) => selectedPatterns.includes(pattern)),
+    () =>
+      (inspectRequests[0]?.index ?? []).every((pattern) =>
+        selectedPatterns.includes(pattern.trim())
+      ),
     [inspectRequests, selectedPatterns]
   );
 
