@@ -14,7 +14,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
 
-  async function uploadSourceMap({
+  async function uploadSourcemap({
     bundleFilePath,
     serviceName,
     serviceVersion,
@@ -40,14 +40,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response.body;
   }
 
-  async function deleteSourceMap(id: string) {
+  async function deleteSourcemap(id: string) {
     await apmApiClient.writeUser({
       endpoint: 'DELETE /api/apm/sourcemaps/{id}',
       params: { path: { id } },
     });
   }
 
-  async function getSourceMaps() {
+  async function listSourcemaps() {
     const response = await apmApiClient.readUser({
       endpoint: 'GET /api/apm/sourcemaps',
     });
@@ -65,7 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('can upload a source map', async () => {
-        resp = await uploadSourceMap({
+        resp = await uploadSourcemap({
           serviceName: 'foo',
           serviceVersion: '1.0.0',
           bundleFilePath: 'bar',
@@ -79,12 +79,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('list source maps', () => {
-      const sourceMaps: Array<APIReturnType<'POST /api/apm/sourcemaps'>> = [];
+    describe('list source maps', () => {
+      const uploadedSourcemapIds: string[] = [];
       before(async () => {
         await Promise.all(
           times(2).map(async (i) => {
-            const sourceMap = await uploadSourceMap({
+            const sourcemap = await uploadSourcemap({
               serviceName: 'foo',
               serviceVersion: `1.0.${i}`,
               bundleFilePath: 'bar',
@@ -94,34 +94,34 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 mappings: '',
               },
             });
-            sourceMaps.push(sourceMap);
+            uploadedSourcemapIds.push(sourcemap.id);
           })
         );
       });
 
       after(async () => {
-        await Promise.all(sourceMaps.map(async (sourceMap) => deleteSourceMap(sourceMap.id)));
+        await Promise.all(uploadedSourcemapIds.map((id) => deleteSourcemap(id)));
       });
 
       it('can list source maps', async () => {
-        const sourceMaps = await getSourceMaps();
-        expect(sourceMaps).to.not.empty();
+        const sourcemaps = await listSourcemaps();
+        expect(sourcemaps).to.not.empty();
       });
 
-      it('returns source maps ordered by created desc', async () => {
+      it('returns source maps ordered by created date in descending order', async () => {
         const response = await apmApiClient.readUser({
           endpoint: 'GET /api/apm/sourcemaps',
         });
 
         const unsorted = response.body.artifacts.map((a) => a.created);
-        expect(unsorted).to.eql(sortBy(unsorted, 'created'));
+        const sorted = sortBy(unsorted);
+        expect(unsorted).to.eql(sorted);
       });
     });
 
     describe('delete source maps', () => {
-      let resp: APIReturnType<'POST /api/apm/sourcemaps'>;
-      before(async () => {
-        resp = await uploadSourceMap({
+      it('can delete a source map', async () => {
+        const sourcemap = await uploadSourcemap({
           serviceName: 'foo',
           serviceVersion: '1.0.0',
           bundleFilePath: 'bar',
@@ -131,12 +131,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             mappings: '',
           },
         });
-      });
 
-      it('can delete a source map', async () => {
-        await deleteSourceMap(resp.id);
-        const sourceMaps = await getSourceMaps();
-        expect(sourceMaps).to.be.empty();
+        await deleteSourcemap(sourcemap.id);
+        const sourcemaps = await listSourcemaps();
+        expect(sourcemaps).to.be.empty();
       });
     });
   });
