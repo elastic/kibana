@@ -52,6 +52,9 @@ import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
 import { DiscoverSingleDocLocator } from './application/doc/locator';
 
+/**
+ * Location state of internal Discover history instance
+ */
 export interface HistoryLocationState {
   referrer: string;
 }

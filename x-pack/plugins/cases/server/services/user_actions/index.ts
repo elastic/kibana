@@ -68,6 +68,7 @@ import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_fr
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
 import type { IndexRefresh } from '../types';
 import { isAssigneesArray, isStringArray } from './type_guards';
+import type { CaseSavedObject } from '../../common/types';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
@@ -106,7 +107,7 @@ interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
 }
 
 interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs, IndexRefresh {
-  originalCases: Array<SavedObject<CaseAttributes>>;
+  originalCases: CaseSavedObject[];
   updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
   user: User;
 }
