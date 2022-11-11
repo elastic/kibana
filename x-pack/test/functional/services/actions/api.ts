@@ -39,8 +39,11 @@ export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
       return createdAction;
     },
 
-    async deleteConnector(id: string){
-      return kbnSupertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo').expect(204, '');
-    }
+    async deleteConnector(id: string) {
+      return kbnSupertest
+        .delete(`/api/actions/connector/${id}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204, '');
+    },
   };
 }
