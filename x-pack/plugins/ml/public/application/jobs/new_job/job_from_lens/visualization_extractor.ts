@@ -55,8 +55,6 @@ export class VisualizationExtractor {
       );
     }
 
-    validateDimensions(layer.dimensions);
-
     const timeField = layer.dimensions.find(({ operation }) => operation.dataType === 'date');
     if (timeField === undefined) {
       throw Error(
@@ -67,6 +65,8 @@ export class VisualizationExtractor {
     }
 
     const metricFields = layer.dimensions.filter((dimension) => dimension.role === 'metric');
+
+    validateDimensions(metricFields);
 
     const splitField = layer.dimensions.find(
       (dimension) => dimension.role === 'split' && dimension.name === 'breakdown'
