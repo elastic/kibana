@@ -24,6 +24,7 @@ export const createSlackConnectorAndObjectRemover = async ({
   const createdAction = await createSlackConnector({
     name: testData.name,
     supertest,
+    getService,
   });
   objectRemover.add(createdAction.id, 'action', 'actions');
 
@@ -33,11 +34,14 @@ export const createSlackConnectorAndObjectRemover = async ({
 export const createSlackConnector = async ({
   name,
   supertest,
+  getService,
 }: {
   name: string;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
+  getService: FtrProviderContext['getService'];
 }) => {
-  const connector = await createConnector({
+  const actions = getService('actions');
+  const connector = await actions.api.createConnector({
     name,
     config: {},
     secrets: { webhookUrl: 'https://test.com' },
@@ -60,29 +64,3 @@ export const getConnectorByName = async (
   return body[i];
 };
 
-export const createConnector = async ({
-  name,
-  config,
-  secrets,
-  connectorTypeId,
-  supertest,
-}: {
-  name: string;
-  config: Record<string, unknown>;
-  secrets: Record<string, unknown>;
-  connectorTypeId: string;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-}) => {
-  const { body: createdAction } = await supertest
-    .post(`/api/actions/connector`)
-    .set('kbn-xsrf', 'foo')
-    .send({
-      name,
-      config,
-      secrets,
-      connector_type_id: connectorTypeId,
-    })
-    .expect(200);
-
-  return createdAction;
-};
