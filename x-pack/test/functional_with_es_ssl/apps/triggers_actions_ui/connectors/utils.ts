@@ -63,4 +63,3 @@ export const getConnectorByName = async (
   const i = findIndex(body, (c: any) => c.name === name);
   return body[i];
 };
-
