@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export class UnreachableError extends Error {
-  constructor(val: never) {
-    super(`Unreachable: ${val}`);
-  }
-}
+export * from './assert_deeply_false';
+export * from './unreachable_error';
