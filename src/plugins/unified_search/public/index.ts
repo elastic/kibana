@@ -22,6 +22,7 @@ export type { FilterItemsProps } from './filter_bar';
 export { FilterItem, FilterItems } from './filter_bar';
 export { FilterContent } from './filter_badge/filter_content';
 export { DataViewsList } from './dataview_picker/dataview_list';
+export { DataViewSelector } from './dataview_picker/data_view_selector';
 export { DataViewPicker } from './dataview_picker';
 
 export type { DataViewPickerProps } from './dataview_picker';
