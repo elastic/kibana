@@ -27,7 +27,6 @@ import {
   buildCombinedFilter,
   buildCustomFilter,
   buildEmptyFilter,
-  buildFilter,
   cleanFilter,
   FieldFilter,
   Filter,
@@ -78,11 +77,11 @@ export interface FilterEditorProps {
 }
 
 interface State {
-  selectedIndexPattern?: DataView;
+  selectedDataView?: DataView;
   customLabel: string | null;
   queryDsl: string;
   isCustomEditorOpen: boolean;
-  filters: Filter[];
+  localFilter: Filter;
 }
 
 const panelTitleAdd = i18n.translate('unifiedSearch.filter.filterEditor.addFilterPopupTitle', {
@@ -110,18 +109,17 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     super(props);
     const dataView = this.getIndexPatternFromFilter();
     this.state = {
-      selectedIndexPattern: dataView,
+      selectedDataView: dataView,
       customLabel: props.filter.meta.alias || '',
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
-      filters: [dataView ? props.filter : buildEmptyFilter(false)],
+      localFilter: dataView ? props.filter : buildEmptyFilter(false),
     };
   }
 
   public render() {
-    const { filters } = this.state;
-    const shouldDisableToggle =
-      Array.isArray(filters) && (filters.length > 1 || isCombinedFilter(filters[0]));
+    const { localFilter } = this.state;
+    const shouldDisableToggle = isCombinedFilter(localFilter);
 
     return (
       <div>
@@ -240,13 +238,12 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
       return '';
     }
-    const { selectedIndexPattern } = this.state;
+    const { selectedDataView } = this.state;
     return (
       <>
         <EuiFormRow
           fullWidth
-          label={this.props.intl.formatMessage({
-            id: 'unifiedSearch.filter.filterEditor.dateViewSelectLabel',
+          label={i18n.translate('unifiedSearch.filter.filterEditor.dateViewSelectLabel', {
             defaultMessage: 'Data view',
           })}
         >
@@ -257,7 +254,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
               defaultMessage: 'Select a data view',
             })}
             options={this.props.indexPatterns}
-            selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
+            selectedOptions={selectedDataView ? [selectedDataView] : []}
             getLabel={(indexPattern) => indexPattern.getName()}
             onChange={this.onIndexPatternChange}
             singleSelection={{ asPlainText: true }}
@@ -271,16 +268,16 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
   }
 
   private renderFiltersBuilderEditor() {
-    const { selectedIndexPattern, filters } = this.state;
-    const flattenedFilters = flattenFilters(filters);
+    const { selectedDataView, localFilter } = this.state;
+    const flattenedFilters = flattenFilters([localFilter]);
 
     const shouldShowPreview =
-      selectedIndexPattern &&
+      selectedDataView &&
       (flattenedFilters.length > 1 ||
         (flattenedFilters.length === 1 &&
           isFilterValid(
-            selectedIndexPattern,
-            getFieldFromFilter(flattenedFilters[0] as FieldFilter, selectedIndexPattern),
+            selectedDataView,
+            getFieldFromFilter(flattenedFilters[0] as FieldFilter, selectedDataView),
             getOperatorFromFilter(flattenedFilters[0]),
             getFilterParams(flattenedFilters[0])
           )));
@@ -289,12 +286,10 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       <>
         <div role="region" aria-label="" className={cx(filtersBuilderMaxHeight, 'eui-yScroll')}>
           <FiltersBuilder
-            filters={filters}
+            filters={[localFilter]}
             timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
-            dataView={selectedIndexPattern!}
-            onChange={(filtersBuilder: Filter[]) => {
-              this.setState({ filters: filtersBuilder });
-            }}
+            dataView={selectedDataView!}
+            onChange={this.onLocalFilterChange}
           />
         </div>
 
@@ -316,7 +311,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
             }
           >
             <FilterBadgeGroup
-              filters={filters}
+              filters={[localFilter]}
               dataViews={this.props.indexPatterns}
               booleanRelation={BooleanRelation.AND}
               shouldShowBrackets={false}
@@ -365,12 +360,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
   }
 
   private isFiltersValid() {
-    const {
-      isCustomEditorOpen,
-      queryDsl,
-      selectedIndexPattern: indexPattern,
-      filters,
-    } = this.state;
+    const { isCustomEditorOpen, queryDsl, selectedDataView, localFilter } = this.state;
 
     if (isCustomEditorOpen) {
       try {
@@ -381,24 +371,24 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       }
     }
 
-    if (!indexPattern) {
+    if (!selectedDataView) {
       return false;
     }
 
-    return flattenFilters(filters).every((f) =>
+    return flattenFilters([localFilter]).every((f) =>
       isFilterValid(
-        indexPattern,
-        getFieldFromFilter(f as FieldFilter, indexPattern!),
+        selectedDataView,
+        getFieldFromFilter(f as FieldFilter, selectedDataView),
         getOperatorFromFilter(f),
         getFilterParams(f)
       )
     );
   }
 
-  private onIndexPatternChange = ([selectedIndexPattern]: DataView[]) => {
+  private onIndexPatternChange = ([selectedDataView]: DataView[]) => {
     this.setState({
-      selectedIndexPattern,
-      filters: [buildEmptyFilter(false, selectedIndexPattern.id)],
+      selectedDataView,
+      localFilter: buildEmptyFilter(false, selectedDataView.id),
     });
   };
 
@@ -411,13 +401,8 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     this.setState({ queryDsl });
   };
 
-  private onSubmit = () => {
-    const {
-      selectedIndexPattern: indexPattern,
-      customLabel,
-      isCustomEditorOpen,
-      queryDsl,
-    } = this.state;
+  private onLocalFilterChange = (updatedFilters: Filter[]) => {
+    const { selectedDataView, customLabel, isCustomEditorOpen, queryDsl } = this.state;
 
     const { $state } = this.props.filter;
     if (!$state || !$state.store) {
@@ -431,51 +416,26 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       const body = JSON.parse(queryDsl);
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
       this.props.onSubmit(filter);
-    } else if (indexPattern) {
-      const mappedFilter = (filter: Filter) => {
-        return filter.meta.params.map((item: Filter) => builderFilter(item));
-      };
-
-      const builderFilter = (filter: Filter) => {
-        if (isCombinedFilter(filter)) {
-          return buildCombinedFilter(
-            filter.meta.relation,
-            mappedFilter(filter),
-            indexPattern,
-            disabled,
-            negate,
-            alias,
-            $state.store
-          );
-        } else {
-          return buildFilter(
-            indexPattern,
-            getFieldFromFilter(filter as FieldFilter, indexPattern)!,
-            getOperatorFromFilter(filter)?.type!,
-            getOperatorFromFilter(filter)?.negate!,
-            filter.meta.disabled ?? false,
-            getFilterParams(filter) ?? '',
-            alias,
-            filter?.$state?.store
-          );
-        }
-      };
-      const filters = this.state.filters.map((filter: Filter) => builderFilter(filter));
-      const builedFilter =
-        filters.length === 1
-          ? filters[0]
-          : buildCombinedFilter(
-              BooleanRelation.AND,
-              filters,
-              indexPattern,
-              disabled,
-              negate,
-              alias,
-              $state.store
-            );
-
-      this.props.onSubmit(builedFilter);
+    } else if (selectedDataView) {
+      this.setState({
+        localFilter:
+          updatedFilters.length === 1
+            ? updatedFilters[0]
+            : buildCombinedFilter(
+                BooleanRelation.AND,
+                updatedFilters,
+                selectedDataView,
+                disabled,
+                negate,
+                alias,
+                $state.store
+              ),
+      });
     }
+  };
+
+  private onSubmit = () => {
+    this.props.onSubmit(this.state.localFilter);
   };
 }
 

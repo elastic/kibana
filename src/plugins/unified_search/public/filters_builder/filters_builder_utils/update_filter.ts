@@ -64,7 +64,7 @@ function updateOperator(filter: Filter, operator?: Operator) {
       params: { ...filter.meta.params, query: undefined },
       value: undefined,
     },
-    query: { match_phrase: { field: filter.meta.key } },
+    query: { match_phrase: {} },
   };
 }
 
