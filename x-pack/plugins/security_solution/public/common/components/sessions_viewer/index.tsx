@@ -8,10 +8,10 @@
 import React, { useMemo, useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { ENTRY_SESSION_ENTITY_ID_PROPERTY, EventAction } from '@kbn/session-view-plugin/public';
-import { TableId } from '../../../../common/types';
 import type { BulkActionsProp } from '@kbn/timelines-plugin/common/types';
 import { useDispatch } from 'react-redux';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
+import { TableId } from '../../../../common/types';
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import type { SessionsComponentsProps } from './types';
 import type { ESBoolQuery } from '../../../../common/typed_json';

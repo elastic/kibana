@@ -12,8 +12,8 @@ import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 
-import type { TableId } from '../../../../common/types';
 import type { BulkActionsProp } from '@kbn/timelines-plugin/common/types';
+import type { TableId } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
