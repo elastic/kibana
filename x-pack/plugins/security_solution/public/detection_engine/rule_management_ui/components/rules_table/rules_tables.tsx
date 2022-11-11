@@ -244,7 +244,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       {shouldShowLoadingOverlay && (
         <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
       )}
-      {shouldShowRulesTable && <RulesTableFilters />}
       {isTableEmpty && <PrePackagedRulesPrompt />}
       {isLoading && (
         <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
@@ -288,6 +287,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       )}
       {shouldShowRulesTable && (
         <>
+          <RulesTableFilters />
           <RulesTableUtilityBar
             canBulkEdit={hasPermissions}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
