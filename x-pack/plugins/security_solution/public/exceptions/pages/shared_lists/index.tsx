@@ -69,6 +69,12 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listNamespaceType: 'single',
 };
 
+const SORT_FIELDS: Array<{ field: string; label: string; defaultOrder: 'asc' | 'desc' }> = [
+  { field: 'exception-list.name', label: i18n.SORT_BY_NAME, defaultOrder: 'asc' },
+  { field: 'exception-list.created_at', label: i18n.SORT_BY_CREATE_AT, defaultOrder: 'desc' },
+  { field: 'exception-list.created_by', label: i18n.SORT_BY_CREATE_BY, defaultOrder: 'desc' },
+];
+
 export const SharedLists = React.memo(() => {
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
@@ -87,15 +93,23 @@ export const SharedLists = React.memo(() => {
   const [filters, setFilters] = useState<ExceptionListFilter | undefined>({
     types: [ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT],
   });
-  const [loadingExceptions, exceptions, pagination, setPagination, refreshExceptions] =
-    useExceptionLists({
-      errorMessage: i18n.ERROR_EXCEPTION_LISTS,
-      filterOptions: filters,
-      http,
-      namespaceTypes: ['single', 'agnostic'],
-      notifications,
-      hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
-    });
+  
+  const [
+    loadingExceptions,
+    exceptions,
+    pagination,
+    setPagination,
+    refreshExceptions,
+    sort,
+    setSort,
+  ] = useExceptionLists({
+    errorMessage: i18n.ERROR_EXCEPTION_LISTS,
+    filterOptions: filters,
+    http,
+    namespaceTypes: ['single', 'agnostic'],
+    notifications,
+    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+  });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
   });
@@ -482,6 +496,9 @@ export const SharedLists = React.memo(() => {
             <ExceptionsTableUtilityBar
               totalExceptionLists={exceptionListsWithRuleRefs.length}
               onRefresh={handleRefresh}
+              setSort={setSort}
+              sort={sort}
+              sortFields={SORT_FIELDS}
             />
             {exceptionListsWithRuleRefs.length > 0 && canUserCRUD !== null && canUserREAD !== null && (
               <div data-test-subj="exceptionsTable">
