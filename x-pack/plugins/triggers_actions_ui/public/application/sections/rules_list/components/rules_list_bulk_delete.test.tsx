@@ -157,9 +157,11 @@ describe('Rules list bulk delete', () => {
     });
 
     const filter = bulkDeleteRules.mock.calls[0][0].filter;
-    expect(filter.function).toEqual('not');
-    expect(filter.arguments[0].arguments[0].value).toEqual('alert.id');
-    expect(filter.arguments[0].arguments[1].value).toEqual('alert:2');
+    expect(filter.function).toEqual('and');
+    expect(filter.arguments[0].function).toEqual('or');
+    expect(filter.arguments[1].function).toEqual('not');
+    expect(filter.arguments[1].arguments[0].arguments[0].value).toEqual('alert.id');
+    expect(filter.arguments[1].arguments[0].arguments[1].value).toEqual('alert:2');
 
     expect(bulkDeleteRules).toHaveBeenCalledWith(
       expect.objectContaining({
