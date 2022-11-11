@@ -117,6 +117,7 @@ export function estimateBucketSpanFactory(client) {
               });
               this.checkers.push({
                 check: new SingleSeriesChecker(
+                  asCurrentUser,
                   this.index,
                   this.timeField,
                   this.aggTypes[i],
