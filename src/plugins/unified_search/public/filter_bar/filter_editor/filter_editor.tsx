@@ -108,12 +108,13 @@ const disableToggleModeTooltip = i18n.translate(
 class FilterEditorUI extends Component<FilterEditorProps, State> {
   constructor(props: FilterEditorProps) {
     super(props);
+    const dataView = this.getIndexPatternFromFilter();
     this.state = {
-      selectedIndexPattern: this.getIndexPatternFromFilter(),
+      selectedIndexPattern: dataView,
       customLabel: props.filter.meta.alias || '',
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
-      filters: [props.filter],
+      filters: [dataView ? props.filter : buildEmptyFilter(false)],
     };
   }
 
