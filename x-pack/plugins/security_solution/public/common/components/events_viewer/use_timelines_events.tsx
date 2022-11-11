@@ -13,13 +13,6 @@ import { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import {
-  clearEventsLoading,
-  clearEventsDeleted,
-  setTableUpdatedAt,
-  updateGraphEventId,
-  updateTotalCount,
-} from '../store/t_grid/actions';
 import type {
   Inspect,
   PaginationInputPaginated,
@@ -35,7 +28,6 @@ import type {
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { KueryFilterQueryKind, AlertStatus } from '../../common/types/timeline';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
 import { Direction, TableId } from '../../../../common/types';
@@ -44,6 +36,7 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { dataTableActions } from '../../store/data_table';
 import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
 import { ERROR_TIMELINE_EVENTS } from './translations';
+import type { AlertWorkflowStatus } from '../../types';
 export type InspectResponse = Inspect & { response: string[] };
 
 export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
@@ -90,7 +83,7 @@ export interface UseTimelineEventsProps {
   sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
-  filterStatus?: AlertStatus;
+  filterStatus?: AlertWorkflowStatus;
 }
 
 const createFilter = (filterQuery: ESQuery | string | undefined) =>
@@ -182,7 +175,7 @@ export const useTimelineEventsHandler = ({
   );
 
   const setTotalCount = useCallback(
-    (totalCount: number) => dispatch(updateTotalCount({ id, totalCount })),
+    (totalCount: number) => dispatch(dataTableActions.updateTotalCount({ id, totalCount })),
     [dispatch, id]
   );
 
@@ -250,7 +243,7 @@ export const useTimelineEventsHandler = ({
                     return newTimelineResponse;
                   });
                   if (prevFilterStatus !== request.filterStatus) {
-                    dispatch(updateGraphEventId({ id, graphEventId: '' }));
+                    dispatch(dataTableActions.updateGraphEventId({ id, graphEventId: '' }));
                   }
                   setFilterStatus(request.filterStatus);
                   setLoading(false);

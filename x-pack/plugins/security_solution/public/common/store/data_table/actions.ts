@@ -122,3 +122,7 @@ export const updateSessionViewConfig = actionCreator<{
 export const setTableUpdatedAt = actionCreator<{ id: string; updated: number }>(
   'SET_TABLE_UPDATED_AT'
 );
+
+export const updateTotalCount = actionCreator<{ id: string; totalCount: number }>(
+  'UPDATE_TOTAL_COUNT'
+);
