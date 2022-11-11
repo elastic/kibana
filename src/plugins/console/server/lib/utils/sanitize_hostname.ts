@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { RouteDependencies } from '../../..';
-import { registerGetRoute } from './register_get_route';
-
-export function registerMappingsRoute(deps: RouteDependencies) {
-  registerGetRoute(deps);
-}
+/**
+ * Node http request library does not expect there to be trailing "[" or "]"
+ * characters in ipv6 host names.
+ */
+export const sanitizeHostname = (hostName: string): string =>
+  hostName.trim().replace(/^\[/, '').replace(/\]$/, '');
