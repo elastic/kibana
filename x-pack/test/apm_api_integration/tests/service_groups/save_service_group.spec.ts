@@ -65,12 +65,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     afterEach(deleteServiceGroups);
 
     it('creates a new service group', async () => {
-      const response = await callApi({
+      const serviceGroup = {
         groupName: 'synthbeans',
         kuery: 'service.name: synth*',
-      });
+      };
+      const response = await callApi(serviceGroup);
       expect(response.status).to.be(200);
-      expect(Object.keys(response.body).length).to.be(0);
+      expect(response.body).to.have.property('id');
+      expect(response.body).to.have.property('groupName', serviceGroup.groupName);
+      expect(response.body).to.have.property('kuery', serviceGroup.kuery);
+      expect(response.body).to.have.property('updatedAt');
     });
 
     it('handles invalid fields with error response', async () => {

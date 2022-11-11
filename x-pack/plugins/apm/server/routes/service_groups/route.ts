@@ -84,7 +84,7 @@ const serviceGroupSaveRoute = createApmServerRoute({
     }),
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
-  handler: async (resources): Promise<void> => {
+  handler: async (resources): ReturnType<typeof saveServiceGroup> => {
     const { context, params } = resources;
     const { serviceGroupId } = params.query;
     const {
@@ -97,7 +97,7 @@ const serviceGroupSaveRoute = createApmServerRoute({
       throw Boom.badRequest(message);
     }
 
-    await saveServiceGroup({
+    return saveServiceGroup({
       savedObjectsClient,
       serviceGroupId,
       serviceGroup: params.body,

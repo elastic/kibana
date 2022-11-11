@@ -74,78 +74,78 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Service group counts', { config: 'basic', archives: [] }, () => {
+    let synthbeansServiceGroupId: string;
+    let opbeansServiceGroupId: string;
     before(async () => {
-      await saveServiceGroup({
-        groupName: 'synthbeans',
-        kuery: 'service.name: synthbeans*',
-      });
-      const serviceGo = apm
-        .service({ name: 'synthbeans-go', environment: 'testing', agentName: 'go' })
-        .instance('instance-1');
-      const serviceJava = apm
-        .service({ name: 'synthbeans-java', environment: 'testing', agentName: 'java' })
-        .instance('instance-2');
+      const synthServices = [
+        apm
+          .service({ name: 'synth-go', environment: 'testing', agentName: 'go' })
+          .instance('instance-1'),
+        apm
+          .service({ name: 'synth-java', environment: 'testing', agentName: 'java' })
+          .instance('instance-2'),
+        apm
+          .service({ name: 'opbeans-node', environment: 'testing', agentName: 'nodejs' })
+          .instance('instance-3'),
+      ];
 
-      await synthtraceEsClient.index([
-        timerange(start, end)
-          .interval('5m')
-          .rate(1)
-          .generator((timestamp) =>
-            serviceJava
-              .transaction({ transactionName: 'GET /api/product/list', transactionType: 'request' })
-              .duration(2000)
-              .timestamp(timestamp)
-              .children(
-                serviceGo
-                  .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
-                  .destination('elasticsearch')
-                  .duration(100)
-                  .success()
-                  .timestamp(timestamp),
-                serviceGo
-                  .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
-                  .destination('elasticsearch')
-                  .duration(300)
-                  .success()
-                  .timestamp(timestamp)
-              )
-              .errors(
-                serviceGo.error({ message: 'error 1', type: 'foo' }).timestamp(timestamp),
-                serviceGo.error({ message: 'error 2', type: 'foo' }).timestamp(timestamp),
-                serviceGo.error({ message: 'error 3', type: 'bar' }).timestamp(timestamp)
-              )
+      const [, { body: synthbeansServiceGroup }, { body: opbeansServiceGroup }] = await Promise.all(
+        [
+          synthtraceEsClient.index(
+            synthServices.map((service) =>
+              timerange(start, end)
+                .interval('5m')
+                .rate(1)
+                .generator((timestamp) =>
+                  service
+                    .transaction({
+                      transactionName: 'GET /api/product/list',
+                      transactionType: 'request',
+                    })
+                    .duration(2000)
+                    .timestamp(timestamp)
+                    .children(
+                      service
+                        .span({
+                          spanName: '/_search',
+                          spanType: 'db',
+                          spanSubtype: 'elasticsearch',
+                        })
+                        .destination('elasticsearch')
+                        .duration(100)
+                        .success()
+                        .timestamp(timestamp),
+                      service
+                        .span({
+                          spanName: '/_search',
+                          spanType: 'db',
+                          spanSubtype: 'elasticsearch',
+                        })
+                        .destination('elasticsearch')
+                        .duration(300)
+                        .success()
+                        .timestamp(timestamp)
+                    )
+                    .errors(
+                      service.error({ message: 'error 1', type: 'foo' }).timestamp(timestamp),
+                      service.error({ message: 'error 2', type: 'foo' }).timestamp(timestamp),
+                      service.error({ message: 'error 3', type: 'bar' }).timestamp(timestamp)
+                    )
+                )
+            )
           ),
-      ]);
-      await synthtraceEsClient.index([
-        timerange(start, end)
-          .interval('5m')
-          .rate(1)
-          .generator((timestamp) =>
-            serviceGo
-              .transaction({ transactionName: 'GET /api/product/list', transactionType: 'request' })
-              .duration(2000)
-              .timestamp(timestamp)
-              .children(
-                serviceGo
-                  .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
-                  .destination('elasticsearch')
-                  .duration(100)
-                  .success()
-                  .timestamp(timestamp),
-                serviceGo
-                  .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
-                  .destination('elasticsearch')
-                  .duration(300)
-                  .success()
-                  .timestamp(timestamp)
-              )
-              .errors(
-                serviceGo.error({ message: 'error 1', type: 'foo' }).timestamp(timestamp),
-                serviceGo.error({ message: 'error 2', type: 'foo' }).timestamp(timestamp),
-                serviceGo.error({ message: 'error 3', type: 'bar' }).timestamp(timestamp)
-              )
-          ),
-      ]);
+          saveServiceGroup({
+            groupName: 'synthbeans',
+            kuery: 'service.name: synth*',
+          }),
+          saveServiceGroup({
+            groupName: 'opbeans',
+            kuery: 'service.name: opbeans*',
+          }),
+        ]
+      );
+      synthbeansServiceGroupId = synthbeansServiceGroup.id;
+      opbeansServiceGroupId = opbeansServiceGroup.id;
     });
 
     after(async () => {
@@ -156,9 +156,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('returns the correct number of services', async () => {
       const response = await callApi();
       expect(response.status).to.be(200);
-      expect(Object.keys(response.body).length).to.be(1);
-      const [serviceGroupId] = Object.keys(response.body);
-      expect(response.body[serviceGroupId]).to.have.property('services', 2);
+      expect(Object.keys(response.body).length).to.be(2);
+      expect(response.body[synthbeansServiceGroupId]).to.have.property('services', 2);
+      expect(response.body[opbeansServiceGroupId]).to.have.property('services', 1);
     });
 
     describe('with alerts', () => {
@@ -169,27 +169,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send({
             params: {
-              serviceName: 'synthbeans-go',
+              serviceName: 'synth-go',
               transactionType: '',
               windowSize: 99,
               windowUnit: 'y',
               threshold: 100,
               aggregationType: 'avg',
-              environment: 'ENVIRONMENT_ALL',
+              environment: 'testing',
             },
             consumer: 'apm',
             schedule: { interval: '1m' },
             tags: ['apm'],
-            name: 'Latency threshold | synthbeans-go',
+            name: 'Latency threshold | synth-go',
             rule_type_id: ApmRuleType.TransactionDuration,
             notify_when: 'onActiveAlert',
             actions: [],
           });
-
         ruleId = createdRule.id;
-
         await waitForActiveAlert({ ruleId, esClient, log });
       });
+
       after(async () => {
         await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
         await esDeleteAllIndices('.alerts*');
@@ -197,11 +196,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the correct number of alerts', async () => {
         const response = await callApi();
-        console.log(JSON.stringify(response.body));
         expect(response.status).to.be(200);
-        expect(Object.keys(response.body).length).to.be(1);
-        const [serviceGroupId] = Object.keys(response.body);
-        expect(response.body[serviceGroupId]).to.have.property('alerts', 1);
+        expect(Object.keys(response.body).length).to.be(2);
+        expect(response.body[synthbeansServiceGroupId]).to.have.property('alerts', 1);
+        expect(response.body[opbeansServiceGroupId]).to.have.property('alerts', 0);
       });
     });
   });

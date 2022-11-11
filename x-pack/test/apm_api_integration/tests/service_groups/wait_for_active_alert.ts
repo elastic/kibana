@@ -8,7 +8,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
 
-const WAIT_FOR_STATUS_INCREMENT = 500;
+const WAIT_FOR_STATUS_INCREMENT = 1000;
 
 export async function waitForActiveAlert({
   ruleId,
@@ -25,8 +25,9 @@ export async function waitForActiveAlert({
     expect().fail(`waiting for active alert for rule ${ruleId} timed out`);
   }
 
-  const response = await esClient.search({
+  const searchParams = {
     index: '.alerts-observability.apm.alerts-*',
+    size: 1,
     query: {
       bool: {
         filter: [
@@ -48,7 +49,8 @@ export async function waitForActiveAlert({
         ],
       },
     },
-  });
+  };
+  const response = await esClient.search(searchParams);
 
   const hits = (response?.hits?.total as { value: number } | undefined)?.value ?? 0;
   if (hits > 0) {
