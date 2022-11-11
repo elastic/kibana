@@ -19,6 +19,7 @@ import {
   getDisabledByLicenseRuleTypeFromApi,
   ruleType,
 } from './test_helpers';
+import { IToasts } from '@kbn/core/public';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -135,6 +136,12 @@ describe('Rules list bulk delete', () => {
 
   beforeAll(async () => {
     await setup();
+    useKibanaMock().services.notifications.toasts = {
+      addSuccess: jest.fn(),
+      addError: jest.fn(),
+      addDanger: jest.fn(),
+      addWarning: jest.fn(),
+    } as unknown as IToasts;
   });
 
   beforeEach(() => {
@@ -147,7 +154,6 @@ describe('Rules list bulk delete', () => {
 
   it('can bulk delete', async () => {
     wrapper.find('button[data-test-subj="bulkDelete"]').first().simulate('click');
-
     expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
@@ -157,6 +163,7 @@ describe('Rules list bulk delete', () => {
     });
 
     const filter = bulkDeleteRules.mock.calls[0][0].filter;
+
     expect(filter.function).toEqual('and');
     expect(filter.arguments[0].function).toEqual('or');
     expect(filter.arguments[1].function).toEqual('not');
@@ -172,7 +179,6 @@ describe('Rules list bulk delete', () => {
 
   it('can cancel bulk delete', async () => {
     wrapper.find('[data-test-subj="bulkDelete"]').first().simulate('click');
-
     expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
     wrapper.find('[data-test-subj="confirmModalCancelButton"]').first().simulate('click');
 
@@ -182,5 +188,85 @@ describe('Rules list bulk delete', () => {
     });
 
     expect(bulkDeleteRules).not.toBeCalled();
+  });
+
+  describe('Toast', () => {
+    it('should have success toast message', async () => {
+      wrapper.find('button[data-test-subj="bulkDelete"]').first().simulate('click');
+      expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
+      wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
+      expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+        'Deleted 10 rules'
+      );
+    });
+
+    it('should have warning toast message', async () => {
+      bulkDeleteRules.mockResolvedValue({
+        errors: [
+          {
+            message: 'string',
+            rule: {
+              id: 'string',
+              name: 'string',
+            },
+          },
+        ],
+        total: 10,
+      });
+
+      wrapper.find('button[data-test-subj="bulkDelete"]').first().simulate('click');
+      expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
+      wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+      expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Deleted 9 rules, 1 rule encountered errors',
+        })
+      );
+    });
+
+    it('should have danger toast message', async () => {
+      bulkDeleteRules.mockResolvedValue({
+        errors: [
+          {
+            message: 'string',
+            rule: {
+              id: 'string',
+              name: 'string',
+            },
+          },
+        ],
+        total: 1,
+      });
+
+      wrapper.find('button[data-test-subj="bulkDelete"]').first().simulate('click');
+      expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
+      wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+      expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Failed to delete 1 rule',
+        })
+      );
+    });
   });
 });
