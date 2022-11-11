@@ -16,8 +16,8 @@ import {
   getInProgressStepId,
   getStepConfig,
   getUpdatedSteps,
+  getGuideStatusOnStepCompletion,
   isIntegrationInGuideStep,
-  isLastStep,
   isStepInProgress,
   isStepReadyToComplete,
 } from './helpers';
@@ -319,7 +319,7 @@ export class ApiService implements GuidedOnboardingApi {
       const currentGuide: GuideState = {
         guideId,
         isActive: true,
-        status: isLastStep(guideId, stepId) ? 'ready_to_complete' : 'in_progress',
+        status: getGuideStatusOnStepCompletion(guideState, guideId, stepId),
         steps: updatedSteps,
       };
 
