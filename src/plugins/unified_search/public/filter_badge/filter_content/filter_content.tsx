@@ -19,7 +19,7 @@ const FilterValue = ({ value }: { value: string | number }) => {
       color={typeof value === 'string' ? 'success' : 'accent'}
       className="globalFilterLabel__value"
     >
-      {value}
+      {` ${value}`}
     </EuiTextColor>
   );
 };
