@@ -35,7 +35,7 @@ export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
       const formDataRequest = st[method](url)
         .set('kbn-xsrf', 'foo')
         .set('Content-type', 'multipart/form-data');
-      for (let field of fields) {
+      for (const field of fields) {
         formDataRequest.field(field[0], field[1]);
       }
       res = await formDataRequest;

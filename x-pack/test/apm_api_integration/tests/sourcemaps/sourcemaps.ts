@@ -80,7 +80,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe.only('list source maps', () => {
-      let sourceMaps: Array<APIReturnType<'POST /api/apm/sourcemaps'>> = [];
+      const sourceMaps: Array<APIReturnType<'POST /api/apm/sourcemaps'>> = [];
       before(async () => {
         await Promise.all(
           times(2).map(async (i) => {
