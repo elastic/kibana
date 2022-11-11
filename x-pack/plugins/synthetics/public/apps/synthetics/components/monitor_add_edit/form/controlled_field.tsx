@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiFormRow, EuiFormRowProps } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import {
@@ -44,7 +44,7 @@ export const ControlledField = ({
   dependenciesValues,
   dependenciesFieldMeta,
 }: Props) => {
-  const { setValue, reset, formState } = useFormContext();
+  const { setValue, reset, formState, setError, clearErrors } = useFormContext();
   const noop = () => {};
   let hook: Function = noop;
   let hookProps;
@@ -71,7 +71,21 @@ export const ControlledField = ({
       })
     : {};
   const isInvalid = hookResult || Boolean(fieldState.error);
+  const hookErrorContent = hookProps?.error;
   const hookError = hookResult ? hookProps?.error : undefined;
+
+  useEffect(() => {
+    if (!customHook) {
+      return;
+    }
+
+    if (hookResult && !fieldState.error) {
+      setError(fieldKey, { type: 'custom', message: hookErrorContent as string });
+    } else if (!hookResult && fieldState.error?.message === hookErrorContent) {
+      clearErrors(fieldKey);
+    }
+  }, [setError, fieldKey, clearErrors, fieldState, customHook, hookResult, hookErrorContent]);
+
   return (
     <EuiFormRow
       {...formRowProps}
