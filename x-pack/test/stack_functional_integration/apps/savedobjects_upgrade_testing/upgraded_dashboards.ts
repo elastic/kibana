@@ -9,7 +9,7 @@
  * will import from 6.8.x to 7.x.x
  */
 
-export default function ({ getService, getPageObjects }) {
+export default ({ getService, getPageObjects }) => {
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
   const renderService = getService('renderable');
 
@@ -66,4 +66,4 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.verifyNoRenderErrors();
     });
   });
-}
+};
