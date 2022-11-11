@@ -835,6 +835,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           setCellProps,
           scopeId: id,
           truncate: isDetails ? false : true,
+          closeCellPopover: closeCellPopoverAction,
         }) as React.ReactElement;
       };
       return Cell;
@@ -848,6 +849,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       renderCellValue,
       rowRenderers,
       theme,
+      closeCellPopoverAction,
     ]);
 
     const onChangeItemsPerPage = useCallback(
