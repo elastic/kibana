@@ -464,7 +464,7 @@ describe('Response actions history', () => {
       const downloadLink = getByTestId(`${testPrefix}-getFileDownloadLink`);
       expect(downloadLink).toBeTruthy();
       expect(downloadLink.textContent).toEqual(
-        'Click here to download(ZIP file passcode: elastic)'
+        'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
       );
     });
 
