@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
   return {
-
     async createConnector({
       name,
       config,
@@ -36,6 +35,6 @@ export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
         .expect(200);
 
       return createdAction;
-    }
+    },
   };
 }
