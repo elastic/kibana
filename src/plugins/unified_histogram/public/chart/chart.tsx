@@ -41,7 +41,7 @@ export interface ChartProps {
   className?: string;
   services: UnifiedHistogramServices;
   dataView: DataView;
-  lastReloadRequestTime: number | undefined;
+  lastReloadRequestTime?: number;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
