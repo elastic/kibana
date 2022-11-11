@@ -44,6 +44,8 @@ import {
   timeFormatter,
   RectAnnotationEvent,
   LineAnnotationEvent,
+  Tooltip,
+  TooltipType,
 } from '@elastic/charts';
 
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
@@ -63,6 +65,7 @@ import { EditQueryDelay } from './edit_query_delay';
 import { CHART_DIRECTION, ChartDirectionType, CHART_SIZE } from './constants';
 import { loadFullJob } from '../utils';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { fillMissingChartData, ChartDataWithNullValues } from './fill_missing_chart_data';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
 const MAX_CHART_POINTS = 480;
@@ -114,7 +117,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   });
   const [endDate, setEndDate] = useState<any>(moment(end));
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
-  const [bucketData, setBucketData] = useState<number[][]>([]);
+  const [bucketData, setBucketData] = useState<ChartDataWithNullValues>([]);
   const [annotationData, setAnnotationData] = useState<{
     rect: RectAnnotationDatum[];
     line: LineAnnotationDatum[];
@@ -123,7 +126,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     LineAnnotationDatumWithModelSnapshot[]
   >([]);
   const [messageData, setMessageData] = useState<LineAnnotationDatum[]>([]);
-  const [sourceData, setSourceData] = useState<number[][]>([]);
+  const [sourceData, setSourceData] = useState<ChartDataWithNullValues>([]);
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
   const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(true);
   const [range, setRange] = useState<{ start: string; end: string } | undefined>();
@@ -170,17 +173,21 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
 
     try {
       const chartData = await getDatafeedResultChartData(jobId, startTimestamp, endTimestamp);
+      let chartSourceData: ChartDataWithNullValues =
+        chartData.datafeedResults as ChartDataWithNullValues;
+      let chartBucketData: ChartDataWithNullValues =
+        chartData.bucketResults as ChartDataWithNullValues;
 
-      if (chartData.datafeedResults.length !== chartData.bucketResults.length) {
-        // const mappedData = new Map(dataWithPossibleMissingValues);
-        // const filledData = dataWithAllValues.reduce<[number, number | null][]>((acc, source) => {
-        //     acc.push(mappedData.has(source[0]) ? [source[0],  mappedData.get(source[0]) ?? null] : [source[0], null]);
-        //     return acc;
-        // }, []);
+      if (chartSourceData.length !== chartBucketData.length) {
+        if (chartSourceData.length > chartBucketData.length) {
+          chartBucketData = fillMissingChartData(chartBucketData, chartSourceData);
+        } else {
+          chartSourceData = fillMissingChartData(chartSourceData, chartBucketData);
+        }
       }
 
-      setSourceData(chartData.datafeedResults);
-      setBucketData(chartData.bucketResults);
+      setSourceData(chartSourceData);
+      setBucketData(chartBucketData);
       setAnnotationData({
         rect: chartData.annotationResultsRect,
         line: chartData.annotationResultsLine.map(setLineAnnotationHeader),
@@ -386,6 +393,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                   <EuiFlexItem>
                     <div data-test-subj="mlAnnotationsViewDatafeedFlyoutChart">
                       <Chart size={CHART_SIZE}>
+                        <Tooltip type={TooltipType.VerticalCursor} showNullValues />
                         <Settings
                           showLegend
                           legendPosition={Position.Bottom}
