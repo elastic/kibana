@@ -35,7 +35,6 @@ import type { EuiButtonIconProps } from '@elastic/eui';
 import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
