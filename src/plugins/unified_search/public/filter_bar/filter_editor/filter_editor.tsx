@@ -21,7 +21,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   BooleanRelation,
   buildCombinedFilter,
@@ -38,9 +38,8 @@ import { XJsonLang } from '@kbn/monaco';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import { css, cx } from '@emotion/css';
-import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
+import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
   getOperatorFromFilter,
@@ -70,10 +69,8 @@ export interface FilterEditorProps {
   indexPatterns: DataView[];
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
-  intl: InjectedIntl;
   timeRangeForSuggestionsOverride?: boolean;
   mode?: 'edit' | 'add';
-  uiSettings?: IUiSettingsClient;
 }
 
 interface State {
@@ -104,7 +101,7 @@ const disableToggleModeTooltip = i18n.translate(
   }
 );
 
-class FilterEditorUI extends Component<FilterEditorProps, State> {
+export class FilterEditor extends Component<FilterEditorProps, State> {
   constructor(props: FilterEditorProps) {
     super(props);
     const dataView = this.getIndexPatternFromFilter();
@@ -166,10 +163,12 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
             <EuiSpacer size="l" />
             <EuiFormRow
-              label={this.props.intl.formatMessage({
-                id: 'unifiedSearch.filter.filterEditor.createCustomLabelInputLabel',
-                defaultMessage: 'Custom label (optional)',
-              })}
+              label={i18n.translate(
+                'unifiedSearch.filter.filterEditor.createCustomLabelInputLabel',
+                {
+                  defaultMessage: 'Custom label (optional)',
+                }
+              )}
               fullWidth
             >
               <EuiFieldText
@@ -247,12 +246,14 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
             defaultMessage: 'Data view',
           })}
         >
-          <IndexPatternComboBox
+          <GenericComboBox
             fullWidth
-            placeholder={this.props.intl.formatMessage({
-              id: 'unifiedSearch.filter.filterBar.indexPatternSelectPlaceholder',
-              defaultMessage: 'Select a data view',
-            })}
+            placeholder={i18n.translate(
+              'unifiedSearch.filter.filterBar.indexPatternSelectPlaceholder',
+              {
+                defaultMessage: 'Select a data view',
+              }
+            )}
             options={this.props.indexPatterns}
             selectedOptions={selectedDataView ? [selectedDataView] : []}
             getLabel={(indexPattern) => indexPattern.getName()}
@@ -438,9 +439,3 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     this.props.onSubmit(this.state.localFilter);
   };
 }
-
-function IndexPatternComboBox(props: GenericComboBoxProps<DataView>) {
-  return GenericComboBox(props);
-}
-
-export const FilterEditor = injectI18n(FilterEditorUI);

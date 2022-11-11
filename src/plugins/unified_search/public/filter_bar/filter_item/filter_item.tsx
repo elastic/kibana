@@ -70,7 +70,7 @@ export const FILTER_EDITOR_WIDTH = 850;
 export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [renderedComponent, setRenderedComponent] = useState('menu');
-  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, uiSettings } = props;
+  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
 
   const euiTheme = useEuiTheme();
 
@@ -374,7 +374,6 @@ export function FilterItem(props: FilterItemProps) {
                   setIsPopoverOpen(false);
                 }}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-                uiSettings={uiSettings}
               />
             </div>,
           ]}
