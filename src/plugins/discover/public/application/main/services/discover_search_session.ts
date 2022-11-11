@@ -31,8 +31,9 @@ export class DiscoverSearchSessionManager {
    * skips if `searchSessionId` matches current search session id
    */
   readonly newSearchSessionIdFromURL$: Rx.Observable<string | null>;
+  readonly searchSessionId$: Rx.Observable<string | undefined>;
+
   private readonly deps: DiscoverSearchSessionManagerDeps;
-  private lastSearchSessionId?: string;
 
   constructor(deps: DiscoverSearchSessionManagerDeps) {
     this.deps = deps;
@@ -45,6 +46,7 @@ export class DiscoverSearchSessionManager {
         return !this.deps.session.isCurrentSession(searchSessionId);
       })
     );
+    this.searchSessionId$ = this.deps.session.getSession$();
   }
 
   /**
@@ -66,16 +68,7 @@ export class DiscoverSearchSessionManager {
       }
     }
 
-    this.lastSearchSessionId = searchSessionIdFromURL ?? this.deps.session.start();
-
-    return this.lastSearchSessionId;
-  }
-
-  /**
-   * Get the last returned session id by {@link getNextSearchSessionId}
-   */
-  getLastSearchSessionId() {
-    return this.lastSearchSessionId;
+    return searchSessionIdFromURL ?? this.deps.session.start();
   }
 
   /**

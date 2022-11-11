@@ -8,6 +8,7 @@
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 
 /**
  * Helper function to get the agg configs required for the unified histogram chart request
@@ -15,10 +16,12 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 export function getChartAggConfigs({
   dataView,
   timeInterval,
+  timeRange,
   data,
 }: {
   dataView: DataView;
   timeInterval: string;
+  timeRange: TimeRange;
   data: DataPublicPluginStart;
 }) {
   const visStateAggs = [
@@ -32,7 +35,7 @@ export function getChartAggConfigs({
       params: {
         field: dataView.timeFieldName!,
         interval: timeInterval,
-        timeRange: data.query.timefilter.timefilter.getTime(),
+        timeRange,
       },
     },
   ];

@@ -11,7 +11,7 @@ import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/obser
 import AlertsFlyoutBody from './alerts_flyout_body';
 import { inventoryThresholdAlert } from '../../../../rules/fixtures/example_alerts';
 import { parseAlert } from '../parse_alert';
-import { RULE_DETAILS_PAGE_ID } from '../../../rule_details/types';
+import { RULE_DETAILS_PAGE_ID } from '../../../rule_details/constants';
 
 describe('AlertsFlyoutBody', () => {
   jest

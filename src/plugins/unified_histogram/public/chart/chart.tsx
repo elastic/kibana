@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 import React, { memo } from 'react';
 import {
   EuiButtonIcon,
@@ -35,6 +35,7 @@ import { useTotalHits } from './use_total_hits';
 import { useRequestParams } from './use_request_params';
 import { useChartStyles } from './use_chart_styles';
 import { useChartActions } from './use_chart_actions';
+import { useRefetchId } from './use_refetch_id';
 
 export interface ChartProps {
   className?: string;
@@ -104,22 +105,45 @@ export function Chart({
     dataView.isTimeBased()
   );
 
-  const { filters, query, timeRange } = useRequestParams({
+  const { filters, query, relativeTimeRange } = useRequestParams({
     services,
     lastReloadRequestTime,
     request,
   });
 
-  useTotalHits({
-    services,
+  const refetchId = useRefetchId({
+    dataView,
     lastReloadRequestTime,
     request,
-    chartVisible,
     hits,
+    chart,
+    chartVisible,
+    breakdown,
+    filters,
+    query,
+    relativeTimeRange,
+  });
+
+  // We need to update the absolute time range whenever the refetchId changes
+  const timeRange = useMemo(
+    () => services.data.query.timefilter.timefilter.getAbsoluteTime(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [services.data.query.timefilter.timefilter, refetchId]
+  );
+
+  useTotalHits({
+    services,
     dataView,
+    lastReloadRequestTime,
+    request,
+    hits,
+    chart,
+    chartVisible,
+    breakdown,
     filters,
     query,
     timeRange,
+    refetchId,
     onTotalHitsChange,
   });
 
@@ -159,7 +183,7 @@ export function Chart({
                 justifyContent="flexEnd"
                 css={breakdownFieldSelectorGroupCss}
               >
-                {chartVisible && (
+                {chartVisible && breakdown && (
                   <EuiFlexItem css={breakdownFieldSelectorItemCss}>
                     <BreakdownFieldSelector
                       dataView={dataView}

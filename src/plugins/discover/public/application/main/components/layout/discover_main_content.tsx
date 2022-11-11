@@ -96,8 +96,8 @@ export const DiscoverMainContent = ({
   );
 
   const {
+    shouldRender,
     topPanelHeight,
-    lastReloadRequestTime,
     request,
     hits,
     chart,
@@ -121,12 +121,11 @@ export const DiscoverMainContent = ({
     searchSessionManager,
   });
 
-  return (
+  return shouldRender ? (
     <UnifiedHistogramLayout
       className="dscPageContent__inner"
       services={services}
       dataView={dataView}
-      lastReloadRequestTime={lastReloadRequestTime}
       request={request}
       hits={hits}
       chart={chart}
@@ -206,5 +205,7 @@ export const DiscoverMainContent = ({
         )}
       </EuiFlexGroup>
     </UnifiedHistogramLayout>
+  ) : (
+    <></>
   );
 };

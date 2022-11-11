@@ -127,4 +127,11 @@ export const discoverServiceMock = {
   dataViews: dataViewsMock,
   timefilter: { createFilter: jest.fn() },
   lens: { EmbeddableComponent: jest.fn(() => null) },
+  locator: {
+    useUrl: jest.fn(() => ''),
+    navigate: jest.fn(),
+    getUrl: jest.fn(() => Promise.resolve('')),
+  },
+  contextLocator: { getRedirectUrl: jest.fn(() => '') },
+  singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
 } as unknown as DiscoverServices;

@@ -10,132 +10,77 @@ import { isCompleteResponse } from '@kbn/data-plugin/public';
 import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, isEqual } from 'lodash';
-import { MutableRefObject, useEffect, useRef } from 'react';
+import { MutableRefObject, useRef } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import {
+  UnifiedHistogramBreakdownContext,
+  UnifiedHistogramChartContext,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
 } from '../types';
+import { REQUEST_DEBOUNCE_MS } from './consts';
 
 export const useTotalHits = ({
   services,
+  dataView,
   lastReloadRequestTime,
   request,
-  chartVisible,
   hits,
-  dataView,
+  chart,
+  chartVisible,
+  breakdown,
   filters,
   query,
   timeRange,
+  refetchId,
   onTotalHitsChange,
 }: {
   services: UnifiedHistogramServices;
+  dataView: DataView;
   lastReloadRequestTime: number | undefined;
   request: UnifiedHistogramRequestContext | undefined;
-  chartVisible: boolean;
   hits: UnifiedHistogramHitsContext | undefined;
-  dataView: DataView;
+  chart: UnifiedHistogramChartContext | undefined;
+  chartVisible: boolean;
+  breakdown: UnifiedHistogramBreakdownContext | undefined;
   filters: Filter[];
   query: Query | AggregateQuery;
   timeRange: TimeRange;
+  refetchId: number;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
 }) => {
   const abortController = useRef<AbortController>();
-  const totalHitsDeps = useRef<ReturnType<typeof getTotalHitsDeps>>();
 
-  // When the unified histogram props change, we must compare the current subset
-  // that should trigger a total hits refetch against the previous subset. If they
-  // are different, we must refetch the total hits to ensure it's up to date with
-  // the chart. These are the props we care about:
-  //   - chartVisible:
-  //       We only need to fetch the total hits when the chart is hidden,
-  //       otherwise Lens will be responsible for updating the display.
-  //   - lastReloadRequestTime: A refetch has been manually triggered by the consumer.
-  //   - hits:
-  //       If the hits context is undefined, we don't need to fetch the
-  //       total hits because the display will be hidden.
-  //   - dataView: The current data view has changed.
-  //   - filters: The current filters have changed.
-  //   - query: The current query has been updated.
-  //   - timeRange: The selected time range has changed.
-  useEffect(() => {
-    const newTotalHitsDeps = getTotalHitsDeps({
-      chartVisible,
-      lastReloadRequestTime,
-      hits,
-      dataView,
-      filters,
-      query,
-      timeRange,
-    });
-
-    if (!isEqual(totalHitsDeps.current, newTotalHitsDeps)) {
-      totalHitsDeps.current = newTotalHitsDeps;
-
+  useDebounce(
+    () => {
       fetchTotalHits({
         services,
         abortController,
-        request,
-        chartVisible,
-        hits,
         dataView,
+        request,
+        hits,
+        chartVisible,
         filters,
         query,
         timeRange,
         onTotalHitsChange,
       });
-    }
-  }, [
-    chartVisible,
-    dataView,
-    filters,
-    hits,
-    lastReloadRequestTime,
-    onTotalHitsChange,
-    query,
-    request,
-    services,
-    timeRange,
-  ]);
+    },
+    REQUEST_DEBOUNCE_MS,
+    [onTotalHitsChange, refetchId, services]
+  );
 };
-
-const getTotalHitsDeps = ({
-  chartVisible,
-  lastReloadRequestTime,
-  hits,
-  dataView,
-  filters,
-  query,
-  timeRange,
-}: {
-  chartVisible: boolean;
-  lastReloadRequestTime: number | undefined;
-  hits: UnifiedHistogramHitsContext | undefined;
-  dataView: DataView;
-  filters: Filter[];
-  query: Query | AggregateQuery;
-  timeRange: TimeRange;
-}) =>
-  cloneDeep([
-    chartVisible,
-    Boolean(hits),
-    dataView.id,
-    filters,
-    query,
-    timeRange,
-    lastReloadRequestTime,
-  ]);
 
 const fetchTotalHits = async ({
   services: { data },
   abortController,
-  request,
-  chartVisible,
-  hits,
   dataView,
+  request,
+  hits,
+  chartVisible,
   filters: originalFilters,
   query,
   timeRange,
@@ -143,10 +88,10 @@ const fetchTotalHits = async ({
 }: {
   services: UnifiedHistogramServices;
   abortController: MutableRefObject<AbortController | undefined>;
-  request: UnifiedHistogramRequestContext | undefined;
-  chartVisible: boolean;
-  hits: UnifiedHistogramHitsContext | undefined;
   dataView: DataView;
+  request: UnifiedHistogramRequestContext | undefined;
+  hits: UnifiedHistogramHitsContext | undefined;
+  chartVisible: boolean;
   filters: Filter[];
   query: Query | AggregateQuery;
   timeRange: TimeRange;
@@ -227,5 +172,6 @@ const fetchTotalHits = async ({
     result instanceof Error
       ? UnifiedHistogramFetchStatus.error
       : UnifiedHistogramFetchStatus.complete;
+
   onTotalHitsChange?.(resultStatus, result);
 };

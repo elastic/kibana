@@ -16,7 +16,7 @@ import { fieldSupportsBreakdown } from './field_supports_breakdown';
 
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
-  breakdown?: UnifiedHistogramBreakdownContext;
+  breakdown: UnifiedHistogramBreakdownContext;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
 }
 
@@ -26,11 +26,11 @@ export const BreakdownFieldSelector = ({
   onBreakdownFieldChange,
 }: BreakdownFieldSelectorProps) => {
   const fieldOptions = dataView.fields
-    .filter((field) => fieldSupportsBreakdown(field))
+    .filter(fieldSupportsBreakdown)
     .map((field) => ({ label: field.displayName, value: field.name }))
     .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 
-  const selectedFields = breakdown?.field
+  const selectedFields = breakdown.field
     ? [{ label: breakdown.field.displayName, value: breakdown.field.name }]
     : [];
 
