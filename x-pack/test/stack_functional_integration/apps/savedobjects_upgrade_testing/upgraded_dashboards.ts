@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-/* This test is importing saved objects from 7.13.0 to 8.0 and the backported version
- * will import from 6.8.x to 7.x.x
- */
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default ({ getService, getPageObjects }) => {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
-  const renderService = getService('renderable');
-
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Verify upgraded dashboards', function () {
+    const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
+    const renderService = getService('renderable');
     before(async () => {
       await PageObjects.common.navigateToApp('management', { insertTimestamp: false });
     });
@@ -66,4 +63,4 @@ export default ({ getService, getPageObjects }) => {
       await PageObjects.dashboard.verifyNoRenderErrors();
     });
   });
-};
+}
