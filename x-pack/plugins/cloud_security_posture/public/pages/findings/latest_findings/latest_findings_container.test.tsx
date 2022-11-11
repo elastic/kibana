@@ -20,7 +20,6 @@ import { useLocation } from 'react-router-dom';
 import { RisonObject } from 'rison-node';
 import { buildEsQuery } from '@kbn/es-query';
 import { getPaginationQuery } from '../utils/utils';
-import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
@@ -56,13 +55,6 @@ describe('<LatestFindingsContainer />', () => {
       search: encodeQuery(query as unknown as RisonObject),
     });
 
-    const setPitId = jest.fn();
-    const pitIdRef = { current: '' };
-    const pitQuery = createReactQueryResponse({
-      status: 'success',
-      data: '',
-    }) as UseQueryResult<string>;
-
     render(
       <TestProvider
         deps={{
@@ -74,15 +66,12 @@ describe('<LatestFindingsContainer />', () => {
           licensing: licensingMock.createStart(),
         }}
       >
-        <FindingsEsPitContext.Provider value={{ setPitId, pitIdRef, pitQuery }}>
-          <LatestFindingsContainer dataView={dataView} />
-        </FindingsEsPitContext.Provider>
+        <LatestFindingsContainer dataView={dataView} />
       </TestProvider>
     );
 
     const baseQuery = {
       query: buildEsQuery(dataView, query.query, query.filters),
-      pitId: pitIdRef.current,
     };
 
     expect(dataMock.search.search).toHaveBeenNthCalledWith(1, {
