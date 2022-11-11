@@ -10,7 +10,7 @@ The client-side code registers a button in the Kibana header that controls the g
 
 ## Development
 
-1. Update your `kibana.dev.yml` file with `xpack.cloud.id: 'testID'` to imitate the Cloud environment.
+1. Guided onboarding is only enabled on cloud. Update your `kibana.dev.yml` file with `xpack.cloud.id: 'testID'` to imitate the Cloud environment.
 
 2. Start Kibana with the example plugins enabled: `yarn start --run-examples`. 
 
