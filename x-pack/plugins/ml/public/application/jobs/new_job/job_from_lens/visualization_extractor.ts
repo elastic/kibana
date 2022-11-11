@@ -66,7 +66,7 @@ export class VisualizationExtractor {
       );
     }
 
-    const fields = layer.dimensions;
+    const metricFields = layer.dimensions.filter((dimension) => dimension.role === 'metric');
 
     const splitField = layer.dimensions.find(
       (dimension) => dimension.role === 'split' && dimension.name === 'breakdown'
@@ -110,7 +110,7 @@ export class VisualizationExtractor {
       );
     }
 
-    return { fields, timeField, splitField, dataView: layer.dataView };
+    return { fields: metricFields, timeField, splitField, dataView: layer.dataView };
   }
 
   private async getLayers(chartInfo: ChartInfo, lens: LensPublicStart): Promise<LayerResult[]> {

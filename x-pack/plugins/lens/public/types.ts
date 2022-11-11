@@ -28,6 +28,7 @@ import type {
 import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { EuiButtonIconProps } from '@elastic/eui';
@@ -54,7 +55,6 @@ import type { FormatSelectorOptions } from './datasources/form_based/dimension_p
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 export interface IndexPatternRef {
   id: string;
@@ -504,7 +504,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceInfo: (
     state: T,
     references?: SavedObjectReference[],
-    dataViewsService?: DataViewsServicePublic
+    dataViewsService?: DataViewsPublicPluginStart
   ) => Promise<DataSourceInfo[]>;
 }
 
