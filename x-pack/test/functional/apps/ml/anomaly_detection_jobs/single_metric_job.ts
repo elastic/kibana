@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
     ? remoteName + indexPatternName
     : indexPatternName;
 
-  describe('single metric', function () {
+  describe.only('single metric', function () {
     this.tags(['ml']);
     before(async () => {
       await esNode.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle(indexPatternString);
     });
 
     it('job creation loads the single metric wizard for the source data', async () => {
