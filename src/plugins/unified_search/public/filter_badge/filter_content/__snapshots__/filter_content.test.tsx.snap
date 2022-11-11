@@ -5,9 +5,8 @@ exports[`alias 1`] = `
   machine.os
   :
   <span
-    class="emotion-euiTextColor-success"
+    class="globalFilterLabel__value emotion-euiTextColor-success"
   >
-     
     ios
   </span>
 </div>
@@ -23,9 +22,8 @@ exports[`alias with error status 1`] = `
   machine.os
   :
   <span
-    class="emotion-euiTextColor-success"
+    class="globalFilterLabel__value emotion-euiTextColor-success"
   >
-     
     Error
   </span>
 </div>
@@ -41,9 +39,8 @@ exports[`alias with warning status 1`] = `
   machine.os
   :
   <span
-    class="emotion-euiTextColor-success"
+    class="globalFilterLabel__value emotion-euiTextColor-success"
   >
-     
     Warning
   </span>
 </div>
@@ -54,9 +51,8 @@ exports[`error 1`] = `
   machine.os
   :
   <span
-    class="emotion-euiTextColor-success"
+    class="globalFilterLabel__value emotion-euiTextColor-success"
   >
-     
     Error
   </span>
 </div>
@@ -67,9 +63,8 @@ exports[`field custom label 1`] = `
   test label
   :
   <span
-    class="emotion-euiTextColor-success"
+    class="globalFilterLabel__value emotion-euiTextColor-success"
   >
-     
     ios
   </span>
 </div>
@@ -80,9 +75,8 @@ exports[`warning 1`] = `
   machine.os
   :
   <span
-    class="emotion-euiTextColor-success"
+    class="globalFilterLabel__value emotion-euiTextColor-success"
   >
-     
     Warning
   </span>
 </div>
