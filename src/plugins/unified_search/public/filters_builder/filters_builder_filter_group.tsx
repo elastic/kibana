@@ -106,7 +106,11 @@ export const FilterGroup = ({
   const color = reverseBackground ? 'plain' : 'subdued';
 
   const renderedFilters = filters.map((filter, index, acc) => (
-    <EuiFlexGroup direction="column" gutterSize={shouldNormalizeFirstLevel ? 'none' : 'xs'}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize={shouldNormalizeFirstLevel ? 'none' : 'xs'}
+      responsive={false}
+    >
       <EuiFlexItem>
         <FilterItem
           filter={filter}

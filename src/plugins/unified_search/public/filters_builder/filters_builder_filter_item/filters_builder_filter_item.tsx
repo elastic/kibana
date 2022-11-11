@@ -9,7 +9,6 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiDraggable,
   EuiDroppable,
   EuiFlexGroup,
@@ -216,7 +215,7 @@ export function FilterItem({
                   <EuiPanel color={color} paddingSize={'none'} hasShadow={false}>
                     <EuiFlexGroup
                       responsive={false}
-                      alignItems="baseline"
+                      alignItems="center"
                       gutterSize="s"
                       justifyContent="center"
                       className={cx({
@@ -280,9 +279,14 @@ export function FilterItem({
                         </EuiFlexGroup>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd" gutterSize="s">
+                        <EuiFlexGroup
+                          justifyContent="flexEnd"
+                          alignItems="flexEnd"
+                          gutterSize="xs"
+                          responsive={false}
+                        >
                           <EuiFlexItem grow={false}>
-                            <EuiButtonIcon
+                            <EuiButtonEmpty
                               onClick={onRemoveFilter}
                               iconType="trash"
                               isDisabled={disableRemove}
