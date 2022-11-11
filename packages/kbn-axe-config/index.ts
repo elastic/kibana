@@ -26,11 +26,20 @@ export const AXE_CONFIG = {
       id: 'aria-roles',
       selector: '[data-test-subj="comboBoxSearchInput"] *',
     },
-
+    {
+      // EUI bug: https://github.com/elastic/eui/issues/4474
+      id: 'aria-required-parent',
+      selector: '[class=*"euiDataGridRowCell"][role="gridcell"]',
+    },
     {
       // 3rd-party library; button has aria-describedby
       id: 'button-name',
       selector: '[data-rbd-drag-handle-draggable-id]',
+    },
+    {
+      // EUI bug: https://github.com/elastic/eui/issues/4536
+      id: 'duplicate-id',
+      selector: '.euiSuperDatePicker *',
     },
   ],
 };
@@ -40,14 +49,8 @@ export const AXE_OPTIONS = {
   runOnly: ['wcag2a', 'wcag2aa'],
   rules: {
     'color-contrast': {
-      enabled: false,
-      // disabled because we have too many failures
+      enabled: false, // disabled because we have too many failures
     },
-    'aria-valid-attr-value': {
-      enabled: false,
-      // disabled because we have too many failures
-    },
-
     bypass: {
       enabled: false, // disabled because it's too flaky
     },
