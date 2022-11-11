@@ -9,6 +9,8 @@ import type SuperTest from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
+  const kbnSupertest = getService('supertest');
+
   return {
     async createConnector({
       name,
@@ -36,5 +38,9 @@ export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
 
       return createdAction;
     },
+
+    async deleteConnector(id: string){
+      return kbnSupertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo').expect(204, '');
+    }
   };
 }

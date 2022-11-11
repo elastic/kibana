@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await deleteConnector(serverLogConnectorId);
+      await actions.api.deleteConnector(serverLogConnectorId);
     });
 
     it('connectors list screenshot', async () => {
@@ -47,7 +47,4 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       supertest,
     });
   };
-
-  const deleteConnector = (id: string) =>
-    supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo').expect(204, '');
 }
