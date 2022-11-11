@@ -11,7 +11,6 @@ import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ChartInfo, Embeddable, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DashboardAppLocatorParams } from '@kbn/dashboard-plugin/public';
