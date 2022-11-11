@@ -8,7 +8,12 @@
 import { cloneDeep } from 'lodash/fp';
 import { Filter, EsQueryConfig, FilterStateStore } from '@kbn/es-query';
 
-import { DataProviderType, EXISTS_OPERATOR, IS_OPERATOR } from '../../../common/types/timeline';
+import {
+  DataProviderType,
+  EXISTS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
+  IS_OPERATOR,
+} from '../../../common/types/timeline';
 import {
   buildEXISTSQueryMatch,
   buildGlobalQuery,
@@ -731,6 +736,165 @@ describe('Combined Queries', () => {
             });
           });
         });
+      });
+    });
+  });
+  describe('DataProvider yields same result as kqlQuery equivolent with each operator', () => {
+    describe('IS ONE OF operator', () => {
+      test('dataprovider matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = IS_ONE_OF_OPERATOR;
+        dataProviders[0].queryMatch.value = ['a', 'b', 'c'];
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'name: (a OR b OR c)', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
+      });
+      test('dataprovider with negated IS ONE OF operator matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = IS_ONE_OF_OPERATOR;
+        dataProviders[0].queryMatch.value = ['a', 'b', 'c'];
+        dataProviders[0].excluded = true;
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'NOT name: (a OR b OR c)', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
+      });
+    });
+    describe('IS operator', () => {
+      test('dataprovider matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = IS_OPERATOR;
+        dataProviders[0].queryMatch.value = 'a';
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'name: "a"', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
+      });
+      test('dataprovider with negated IS operator matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = IS_OPERATOR;
+        dataProviders[0].queryMatch.value = 'a';
+        dataProviders[0].excluded = true;
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'NOT name: "a"', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
+      });
+    });
+    describe('Exists operator', () => {
+      test('dataprovider matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = EXISTS_OPERATOR;
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'name : *', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
+      });
+      test('dataprovider with negated EXISTS operator matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = EXISTS_OPERATOR;
+        dataProviders[0].excluded = true;
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'NOT name : *', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
       });
     });
   });
