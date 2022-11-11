@@ -13,13 +13,6 @@ import { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import {
-  clearEventsLoading,
-  clearEventsDeleted,
-  setTableUpdatedAt,
-  updateGraphEventId,
-  updateTotalCount,
-} from '../store/t_grid/actions';
 import type {
   Inspect,
   PaginationInputPaginated,
@@ -35,6 +28,7 @@ import type {
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { updateGraphEventId, updateTotalCount } from '../store/t_grid/actions';
 import type { KueryFilterQueryKind, AlertStatus } from '../../common/types/timeline';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
