@@ -403,8 +403,50 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
   };
 
   private onLocalFilterChange = (updatedFilters: Filter[]) => {
-    const { selectedDataView, customLabel, isCustomEditorOpen, queryDsl } = this.state;
+    const { selectedDataView, customLabel } = this.state;
     const alias = customLabel || null;
+    const {
+      $state,
+      meta: { disabled = false, negate = false },
+    } = this.props.filter;
+
+    if (!$state || !$state.store || !selectedDataView) {
+      return;
+    }
+
+    let newFilter: Filter;
+
+    if (updatedFilters.length === 1) {
+      const f = updatedFilters[0];
+      newFilter = {
+        ...f,
+        $state: {
+          store: $state.store,
+        },
+        meta: {
+          ...f.meta,
+          disabled,
+          negate,
+          alias,
+        },
+      };
+    } else {
+      newFilter = buildCombinedFilter(
+        BooleanRelation.AND,
+        updatedFilters,
+        selectedDataView,
+        disabled,
+        negate,
+        alias,
+        $state.store
+      );
+    }
+
+    this.setState({ localFilter: newFilter });
+  };
+
+  private onSubmit = () => {
+    const { isCustomEditorOpen, queryDsl, customLabel } = this.state;
     const {
       $state,
       meta: { index, disabled = false, negate = false },
@@ -417,42 +459,18 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
     if (isCustomEditorOpen) {
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
-      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
+      const filter = buildCustomFilter(
+        newIndex,
+        body,
+        disabled,
+        negate,
+        customLabel || null,
+        $state.store
+      );
+
       this.props.onSubmit(filter);
-    } else if (selectedDataView) {
-      let newFilter: Filter;
-
-      if (updatedFilters.length === 1) {
-        const f = updatedFilters[0];
-        newFilter = {
-          ...f,
-          $state: {
-            store: $state.store,
-          },
-          meta: {
-            ...f.meta,
-            disabled,
-            negate,
-            alias,
-          },
-        };
-      } else {
-        newFilter = buildCombinedFilter(
-          BooleanRelation.AND,
-          updatedFilters,
-          selectedDataView,
-          disabled,
-          negate,
-          alias,
-          $state.store
-        );
-      }
-
-      this.setState({ localFilter: newFilter });
+    } else {
+      this.props.onSubmit(this.state.localFilter);
     }
-  };
-
-  private onSubmit = () => {
-    this.props.onSubmit(this.state.localFilter);
   };
 }
