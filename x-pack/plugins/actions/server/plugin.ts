@@ -137,6 +137,8 @@ export interface PluginStartContract {
     options?: { notifyUsage: boolean }
   ): boolean;
 
+  getAllTypes: ActionTypeRegistry['getAllTypes'];
+
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
@@ -551,6 +553,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ) => {
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
+      getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },

@@ -65,12 +65,12 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
 
-export const FILTER_EDITOR_WIDTH = 850;
+export const FILTER_EDITOR_WIDTH = 800;
 
 export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [renderedComponent, setRenderedComponent] = useState('menu');
-  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, uiSettings } = props;
+  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
 
   const euiTheme = useEuiTheme();
 
@@ -365,7 +365,7 @@ export function FilterItem(props: FilterItemProps) {
       ) : (
         <EuiContextMenuPanel
           items={[
-            <div style={{ width: FILTER_EDITOR_WIDTH }}>
+            <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
               <FilterEditor
                 filter={filter}
                 indexPatterns={indexPatterns}
@@ -374,7 +374,6 @@ export function FilterItem(props: FilterItemProps) {
                   setIsPopoverOpen(false);
                 }}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-                uiSettings={uiSettings}
               />
             </div>,
           ]}

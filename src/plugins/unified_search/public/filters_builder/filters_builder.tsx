@@ -58,7 +58,10 @@ function FiltersBuilder({
   );
 
   useEffect(() => {
-    dispatch({ type: 'updateFilters', payload: { filters } });
+    if (filters !== filtersRef.current) {
+      filtersRef.current = filters;
+      dispatch({ type: 'updateFilters', payload: { filters } });
+    }
   }, [filters]);
 
   useEffect(() => {

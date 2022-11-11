@@ -15,7 +15,12 @@ import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor'
 
 const FilterValue = ({ value }: { value: string | number }) => {
   return (
-    <EuiTextColor color={typeof value === 'string' ? 'success' : 'accent'}> {value}</EuiTextColor>
+    <EuiTextColor
+      color={typeof value === 'string' ? 'success' : 'accent'}
+      className="globalFilterLabel__value"
+    >
+      {` ${value}`}
+    </EuiTextColor>
   );
 };
 

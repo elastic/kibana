@@ -7,7 +7,7 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { identity, pickBy } from 'lodash';
 import type { Operator } from '../../filter_bar/filter_editor';
 
@@ -64,7 +64,7 @@ function updateOperator(filter: Filter, operator?: Operator) {
       params: { ...filter.meta.params, query: undefined },
       value: undefined,
     },
-    query: { match_phrase: { field: filter.meta.key } },
+    query: { match_phrase: {} },
   };
 }
 
@@ -122,7 +122,9 @@ function updateWithRangeOperator(
       params,
     },
     query: {
-      [field.name]: params,
+      range: {
+        [field.name]: params,
+      },
     },
   };
 
