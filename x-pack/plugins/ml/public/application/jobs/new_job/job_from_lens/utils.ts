@@ -168,7 +168,6 @@ export async function getVisTypeFactory(lens: LensPublicStart) {
         };
       default:
         return {
-          // @ts-expect-error just in case a new layer type appears in the future
           label: layer.layerType,
           icon: '',
         };

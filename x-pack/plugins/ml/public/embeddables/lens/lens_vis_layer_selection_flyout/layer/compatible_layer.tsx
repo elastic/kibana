@@ -77,14 +77,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
   const [state, setState] = useState<STATE>(STATE.DEFAULT);
   const [createError, setCreateError] = useState<{ text: string; errorText: string } | null>(null);
   const quickJobCreator = useMemo(
-    () =>
-      new QuickJobCreator(
-        data.dataViews,
-        uiSettings,
-        data.query.timefilter.timefilter,
-        share,
-        mlApiServices
-      ),
+    () => new QuickJobCreator(uiSettings, data.query.timefilter.timefilter, share, mlApiServices),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, uiSettings]
   );

@@ -14,7 +14,6 @@ import { ml } from '../../../services/ml_api_service';
 
 import {
   getUiSettings,
-  getDataViews,
   getSavedObjectsClient,
   getTimefilter,
   getShare,
@@ -71,13 +70,7 @@ export async function resolver(
     layerIndex = undefined;
   }
 
-  const jobCreator = new QuickJobCreator(
-    getDataViews(),
-    getUiSettings(),
-    getTimefilter(),
-    getShare(),
-    ml
-  );
+  const jobCreator = new QuickJobCreator(getUiSettings(), getTimefilter(), getShare(), ml);
   await jobCreator.createAndStashADJob(vis, from, to, query, filters, layerIndex);
 }
 

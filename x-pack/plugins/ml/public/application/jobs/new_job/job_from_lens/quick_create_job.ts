@@ -51,7 +51,6 @@ interface CreateState {
 
 export class QuickJobCreator {
   constructor(
-    private readonly dataViewClient: DataViewsContract,
     private readonly kibanaConfig: IUiSettingsClient,
     private readonly timeFilter: TimefilterContract,
     private readonly share: SharePluginStart,
