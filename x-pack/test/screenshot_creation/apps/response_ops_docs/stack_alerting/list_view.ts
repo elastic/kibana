@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const commonScreenshots = getService('commonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
   const pageObjects = getPageObjects(['common', 'header']);
-  const rules = getService('rules');
+  const actions = getService('actions');
   const supertest = getService('supertest');
 
   describe('list view', function () {
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   });
 
   const createServerLogConnector = async (name: string) => {
-    return rules.common.createConnector({
+    return actions.api.createConnector({
       name,
       config: {},
       secrets: {},
