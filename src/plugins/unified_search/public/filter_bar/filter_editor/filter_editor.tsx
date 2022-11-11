@@ -404,13 +404,15 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
 
   private onLocalFilterChange = (updatedFilters: Filter[]) => {
     const { selectedDataView, customLabel, isCustomEditorOpen, queryDsl } = this.state;
-
-    const { $state } = this.props.filter;
-    if (!$state || !$state.store) {
-      return; // typescript validation
-    }
     const alias = customLabel || null;
-    const { index, disabled = false, negate = false } = this.props.filter.meta;
+    const {
+      $state,
+      meta: { index, disabled = false, negate = false },
+    } = this.props.filter;
+
+    if (!$state || !$state.store) {
+      return;
+    }
 
     if (isCustomEditorOpen) {
       const newIndex = index || this.props.indexPatterns[0].id!;
@@ -418,20 +420,35 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
       this.props.onSubmit(filter);
     } else if (selectedDataView) {
-      this.setState({
-        localFilter:
-          updatedFilters.length === 1
-            ? updatedFilters[0]
-            : buildCombinedFilter(
-                BooleanRelation.AND,
-                updatedFilters,
-                selectedDataView,
-                disabled,
-                negate,
-                alias,
-                $state.store
-              ),
-      });
+      let newFilter: Filter;
+
+      if (updatedFilters.length === 1) {
+        const f = updatedFilters[0];
+        newFilter = {
+          ...f,
+          $state: {
+            store: $state.store,
+          },
+          meta: {
+            ...f.meta,
+            disabled,
+            negate,
+            alias,
+          },
+        };
+      } else {
+        newFilter = buildCombinedFilter(
+          BooleanRelation.AND,
+          updatedFilters,
+          selectedDataView,
+          disabled,
+          negate,
+          alias,
+          $state.store
+        );
+      }
+
+      this.setState({ localFilter: newFilter });
     }
   };
 
