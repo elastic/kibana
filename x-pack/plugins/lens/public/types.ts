@@ -152,7 +152,7 @@ export interface VisualizationInfo {
     chartType?: string;
     icon?: IconType;
     label?: string;
-    dimensions: Array<{ name: string; id: string }>;
+    dimensions: Array<{ name: string; id: string; dimensionType: string }>;
   }>;
 }
 

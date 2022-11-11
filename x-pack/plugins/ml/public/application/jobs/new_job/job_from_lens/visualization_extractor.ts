@@ -69,7 +69,7 @@ export class VisualizationExtractor {
     validateDimensions(metricFields);
 
     const splitField = layer.dimensions.find(
-      (dimension) => dimension.role === 'split' && dimension.name === 'breakdown'
+      (dimension) => dimension.role === 'split' && dimension.dimensionType === 'breakdown'
     );
 
     if (

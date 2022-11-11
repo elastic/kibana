@@ -35,6 +35,7 @@ export interface ChartLayerDescriptor {
     name: string;
     id: string;
     role: 'split' | 'metric';
+    dimensionType: string;
     operation: OperationDescriptor & { type: string; fields?: string[]; filter?: Query };
   }>;
 }

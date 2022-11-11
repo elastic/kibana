@@ -891,11 +891,19 @@ export const getXyVisualization = ({
         icon = layerVisType?.icon;
         label = layerVisType?.fullLabel || layerVisType?.label;
         if (layer.xAccessor) {
-          dimensions.push({ name: getAxisName('x', { isHorizontal }), id: layer.xAccessor });
+          dimensions.push({
+            name: getAxisName('x', { isHorizontal }),
+            id: layer.xAccessor,
+            dimensionType: 'x',
+          });
         }
         if (layer.accessors && layer.accessors.length) {
           layer.accessors.forEach((accessor) => {
-            dimensions.push({ name: getAxisName('y', { isHorizontal }), id: accessor });
+            dimensions.push({
+              name: getAxisName('y', { isHorizontal }),
+              id: accessor,
+              dimensionType: 'y',
+            });
           });
         }
         if (layer.splitAccessor) {
@@ -903,6 +911,7 @@ export const getXyVisualization = ({
             name: i18n.translate('xpack.lens.xyChart.splitSeries', {
               defaultMessage: 'Breakdown',
             }),
+            dimensionType: 'breakdown',
             id: layer.splitAccessor,
           });
         }
@@ -913,6 +922,7 @@ export const getXyVisualization = ({
             name: i18n.translate('xpack.lens.xyChart.layerReferenceLine', {
               defaultMessage: 'Reference line',
             }),
+            dimensionType: 'reference_line',
             id: accessor,
           });
         });
@@ -927,6 +937,7 @@ export const getXyVisualization = ({
             name: i18n.translate('xpack.lens.xyChart.layerAnnotation', {
               defaultMessage: 'Annotation',
             }),
+            dimensionType: 'annotation',
             id: annotation.id,
           });
         });
