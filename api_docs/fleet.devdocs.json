@@ -3520,6 +3520,52 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.agent_details_diagnostics",
+            "type": "Function",
+            "tags": [],
+            "label": "agent_details_diagnostics",
+            "description": [],
+            "signature": [
+              "({ agentId }: ",
+              {
+                "pluginId": "fleet",
+                "scope": "public",
+                "docId": "kibFleetPluginApi",
+                "section": "def-public.DynamicPagePathValues",
+                "text": "DynamicPagePathValues"
+              },
+              ") => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.pagePathGetters.agent_details_diagnostics.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ agentId }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "public",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-public.DynamicPagePathValues",
+                    "text": "DynamicPagePathValues"
+                  }
+                ],
+                "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.pagePathGetters.enrollment_tokens",
             "type": "Function",
             "tags": [],
@@ -7024,7 +7070,7 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; } | undefined, packagePolicy?: ",
+              " | undefined; force?: boolean | undefined; } | undefined, packagePolicy?: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -7130,6 +7176,20 @@
                         "text": "AuthenticatedUser"
                       },
                       " | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.upgrade.$4.force",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "force",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
@@ -16180,6 +16240,28 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.REQUEST_DIAGNOSTICS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "REQUEST_DIAGNOSTICS_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.BULK_REQUEST_DIAGNOSTICS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_REQUEST_DIAGNOSTICS_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN",
             "type": "string",
             "tags": [],
@@ -16274,6 +16356,28 @@
             "type": "string",
             "tags": [],
             "label": "LIST_TAGS_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.LIST_UPLOADS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "LIST_UPLOADS_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.GET_UPLOAD_FILE_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "GET_UPLOAD_FILE_PATTERN",
             "description": [],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false,
@@ -17137,6 +17241,133 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getRequestDiagnosticsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getRequestDiagnosticsPath",
+            "description": [],
+            "signature": [
+              "(agentId: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.agentRouteService.getRequestDiagnosticsPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getBulkRequestDiagnosticsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getBulkRequestDiagnosticsPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getListAgentUploads",
+            "type": "Function",
+            "tags": [],
+            "label": "getListAgentUploads",
+            "description": [],
+            "signature": [
+              "(agentId: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.agentRouteService.getListAgentUploads.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getAgentFileDownloadLink",
+            "type": "Function",
+            "tags": [],
+            "label": "getAgentFileDownloadLink",
+            "description": [],
+            "signature": [
+              "(fileId: string, fileName: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.agentRouteService.getAgentFileDownloadLink.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fileId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.agentRouteService.getAgentFileDownloadLink.$2",
+                "type": "string",
+                "tags": [],
+                "label": "fileName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],

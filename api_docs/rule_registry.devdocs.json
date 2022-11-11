@@ -3068,6 +3068,38 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.LifecycleAlertServices.getAlertByAlertUuid",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlertByAlertUuid",
+            "description": [],
+            "signature": [
+              "(alertUuid: string) => { [x: string]: any; } | null"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.LifecycleAlertServices.getAlertByAlertUuid.$1",
+                "type": "string",
+                "tags": [],
+                "label": "alertUuid",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

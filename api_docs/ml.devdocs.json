@@ -3001,7 +3001,11 @@
             "section": "def-common.MlSummaryJob",
             "text": "MlSummaryJob"
           },
-          "[]>; }"
+          "[]>; forceStartDatafeeds: (datafeedIds: string[], start?: number | undefined, end?: number | undefined) => Promise<",
+          "Results",
+          ">; stopDatafeeds: (datafeedIds: string[]) => Promise<",
+          "Results",
+          ">; }"
         ],
         "path": "x-pack/plugins/ml/server/shared.ts",
         "deprecated": false,
