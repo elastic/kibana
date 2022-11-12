@@ -7,21 +7,19 @@
  */
 
 import React from 'react';
+import { EuiFlexItem } from '@elastic/eui';
 
 import { MarkdownStorybookMock, MarkdownStorybookParams } from '@kbn/shared-ux-markdown-mocks';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
-import { EuiFlexItem } from '@elastic/eui';
-import mdx from './README.mdx';
 import { Markdown } from './markdown';
+
+import content, { attributes } from './README.mdx';
 
 export default {
   title: 'Markdown/Markdown Editor',
   description: 'A wrapper around `EuiMarkdownEditor`, to be used for markdown within Kibana',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 const mock = new MarkdownStorybookMock();

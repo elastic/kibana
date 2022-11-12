@@ -11,21 +11,19 @@ import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
+
 import { Params, getStoryArgTypes, getStoryServices, mockDataSet } from './mocks';
 import { SampleDataCardProvider } from './services';
 import { SampleDataCard } from './sample_data_card';
 
-import mdx from '../README.mdx';
+import content, { attributes } from '../README.mdx';
 
 export default {
   title: 'Sample Data/Card',
   description:
     'A card describing a Sample Data Set, with options to install it, remove it, or see its saved objects.',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
   decorators: [(Story) => <div style={{ width: '433px', padding: '25px' }}>{Story()}</div>],
 } as ComponentMeta<typeof SampleDataCard>;
 

@@ -7,11 +7,18 @@
  */
 
 import { defaultConfig } from '@kbn/storybook';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
+
+export const REPO_ROOT = KIBANA_ROOT;
 
 module.exports = {
   ...defaultConfig,
   stories: ['../../**/*.stories.+(tsx|mdx)'],
   reactOptions: {
     strictMode: true,
+  },
+  features: {
+    postcss: false,
+    previewMdx2: true,
   },
 };

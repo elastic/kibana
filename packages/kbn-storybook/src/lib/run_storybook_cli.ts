@@ -49,7 +49,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         mode: flags.site ? 'static' : 'dev',
         port: 9001,
         staticDir,
-        debugWebpack: true,
+        debugWebpack: false,
       };
       if (flags.site) {
         config.outputDir = join(constants.ASSET_DIR, name);

@@ -9,21 +9,18 @@
 import React from 'react';
 import { AnalyticsNoDataPageStorybookMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 import type { AnalyticsNoDataPageStorybookParams } from '@kbn/shared-ux-page-analytics-no-data-mocks';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page';
 import { AnalyticsNoDataPageProvider } from './services';
-import mdx from '../README.mdx';
+import content, { attributes } from '../README.mdx';
 
 const mock = new AnalyticsNoDataPageStorybookMock();
 
 export default {
   title: 'No Data/Page/Kibana',
   description: 'An Analytics-specific version of KibanaNoDataPage.',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 export const Analytics = (params: AnalyticsNoDataPageStorybookParams) => {

@@ -9,20 +9,19 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
+
 import { RedirectAppLinksStorybookMock } from '@kbn/shared-ux-link-redirect-app-mocks';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
 import { RedirectAppLinks as Component } from './redirect_app_links';
-import mdx from '../README.mdx';
+
+import content, { attributes } from '../README.mdx';
 
 export default {
   title: 'Link/Redirect App Links',
   description:
     'An "area of effect" component which intercepts clicks on anchor elements and redirects them to Kibana solutions without a page refresh.',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 const mock = new RedirectAppLinksStorybookMock();

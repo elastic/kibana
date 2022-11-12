@@ -1,0 +1,44 @@
+---
+id: presentationUtilPlugin
+slug: /kibana-dev-docs/presentationPlugin
+title: Outline
+description: An outline of the documentation I plan to write.
+date: 2020-01-12
+tags: ['kibana', 'presentation', 'services']
+related: []
+---
+
+This is a working outline for my documentation. It is a work in progress and will likely be updated as I go.
+
+- TL;DR
+  - Core Tenets
+    - Components should remain stateless until imported
+    - Component consumption should not involve the plugin lifecycle
+    - Components should define their own contextual API for external services
+    - We should be able to develop, test, fix, and showcase components without running Kibana
+  - Create containers and pure components
+  - Keep components small and useful
+  - Use Emotion first
+  - Create storybooks/mocks/test for each component
+  - Create impl/mock/types packages
+- Component Architecture
+  - Pure Components and Containers
+    - Kibana Dependency Management
+    - State Management and Hooks
+  - Composition
+  - Styling
+  - Testing
+  - Storybook
+  - Packaging
+    - Naming Convention
+    - impl, mock, and types
+  - Documentation
+- System Architecture
+  - Plugins and the Kibana Lifecycle
+  - Packages and Bazel
+  - Stateless vs Stateful
+    - Packages are Stateless
+    - Plugins are Stateful
+  - Dependency Management
+    - Plugins can depend on other plugins and Packages
+    - Packages can only depend on other Packages

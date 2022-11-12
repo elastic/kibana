@@ -7,17 +7,13 @@
  */
 
 import { addons } from '@storybook/addons';
-import { create } from '@storybook/theming';
 import { PANEL_ID as selectedPanel } from '@storybook/addon-actions';
 
-import { TITLE as brandTitle, URL as brandUrl } from './constants';
+import { theme } from '@kbn/shared-ux-storybook-theme';
 
 addons.setConfig({
-  theme: create({
-    base: 'light',
-    brandTitle,
-    brandUrl,
-  }),
-  selectedPanel,
   showPanel: true.valueOf,
+  showToolbar: true,
+  selectedPanel,
+  theme,
 });

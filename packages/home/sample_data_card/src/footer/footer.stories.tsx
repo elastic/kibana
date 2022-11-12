@@ -11,20 +11,18 @@ import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
+
 import { Params, getStoryArgTypes, getStoryServices, mockDataSet } from '../mocks';
 import { SampleDataCardProvider } from '../services';
 import { Footer as Component } from '.';
 
-import mdx from '../../README.mdx';
+import content, { attributes } from '../../README.mdx';
 
 export default {
   title: 'Sample Data/Card Footer',
   description: '',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
   decorators: [(Story) => <div style={{ width: '433px', padding: '25px' }}>{Story()}</div>],
 } as ComponentMeta<typeof Component>;
 

@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
 import React from 'react';
+import { action } from '@storybook/addon-actions';
+
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
+
 import { IconButtonGroup as Component } from './icon_button_group';
-import mdx from '../../../README.mdx';
+
+import content, { attributes } from '../../../README.mdx';
 
 export default {
   title: 'Button Toolbar/Buttons',
   description: 'A collection of icon buttons that is a part of a toolbar.',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 const iconButtons = [

@@ -7,17 +7,17 @@
  */
 
 import React from 'react';
+
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
+
 import { AddFromLibraryButton as Component } from './add_from_library';
-import mdx from '../../../README.mdx';
+
+import content, { attributes } from '../../../README.mdx';
 
 export default {
   title: 'Button Toolbar/Buttons',
   description: 'An implementation of the toolbar primary button',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 export const AddFromLibraryButton = () => {

@@ -10,20 +10,17 @@ import React from 'react';
 
 import { NoDataCardStorybookMock } from '@kbn/shared-ux-card-no-data-mocks';
 import type { NoDataCardStorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
 import { NoDataCard } from './no_data_card';
 import { NoDataCardProvider } from './services';
 
-import mdx from '../README.mdx';
+import content, { attributes } from '../README.mdx';
 
 export default {
   title: 'No Data/Card',
   description: 'A solution-specific wrapper around `EuiCard`, to be used on `NoData` page',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 const mock = new NoDataCardStorybookMock();

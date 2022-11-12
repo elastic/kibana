@@ -9,18 +9,16 @@
 import React from 'react';
 import { ComponentMeta } from '@storybook/react';
 
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
+
 import { DemoEnvironmentPanel } from './demo_env_panel';
 
-import mdx from '../README.mdx';
+import content, { attributes } from '../README.mdx';
 
 export default {
   title: 'Sample Data/Demo Panel',
   description: '',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
   decorators: [(Story) => <div style={{ width: 1200 }}>{Story()}</div>],
 } as ComponentMeta<typeof DemoEnvironmentPanel>;
 

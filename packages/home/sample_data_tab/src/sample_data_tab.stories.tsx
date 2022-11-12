@@ -9,20 +9,18 @@
 import React from 'react';
 import { ComponentMeta } from '@storybook/react';
 
-import { SampleDataTab } from './sample_data_tab';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
-import mdx from '../README.mdx';
+import { SampleDataTab } from './sample_data_tab';
 import { SampleDataTabProvider } from './services';
 import { getStoryServices, getStoryArgTypes, Params } from './mocks';
+
+import content, { attributes } from '../README.mdx';
 
 export default {
   title: 'Sample Data/Tab Content',
   description: '',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
   decorators: [(Story) => <div style={{ width: 1200 }}>{Story()}</div>],
 } as ComponentMeta<typeof SampleDataTab>;
 

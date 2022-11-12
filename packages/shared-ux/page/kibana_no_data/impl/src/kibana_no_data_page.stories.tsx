@@ -10,20 +10,17 @@ import React from 'react';
 
 import { KibanaNoDataPageStorybookMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 import type { KibanaNoDataPageStorybookParams } from '@kbn/shared-ux-page-kibana-no-data-mocks';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
 import { KibanaNoDataPage as Component } from './kibana_no_data_page';
-
 import { KibanaNoDataPageProvider } from './services';
-import mdx from '../README.mdx';
+
+import content, { attributes } from '../README.mdx';
 
 export default {
   title: 'No Data/Page/Kibana',
   description: 'A component to display when there is no data available',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 const mock = new KibanaNoDataPageStorybookMock();

@@ -10,24 +10,21 @@ import React from 'react';
 import Chance from 'chance';
 import moment from 'moment';
 import { action } from '@storybook/addon-actions';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
 import { Params, getStoryArgTypes, getStoryServices } from './mocks';
 
 import { TableListView as Component, UserContentCommonSchema } from './table_list_view';
 import { TableListViewProvider } from './services';
 
-import mdx from '../README.mdx';
+import content, { attributes } from '../README.mdx';
 
 const chance = new Chance();
 
 export default {
   title: 'Table list view',
   description: 'A table list to display user content saved objects',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 const createMockItems = (total: number): UserContentCommonSchema[] => {

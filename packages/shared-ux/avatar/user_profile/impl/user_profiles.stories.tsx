@@ -7,18 +7,18 @@
  */
 
 import React from 'react';
+
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
+
 import { UserAvatar, UserAvatarProps } from './user_avatar';
-import mdx from './README.mdx';
 import { UserProfileUserInfo } from './user_profile';
+
+import content, { attributes } from './README.mdx';
 
 export default {
   title: 'Avatar/User Profile',
   description: '',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 type UserAvatarParams = Pick<UserAvatarProps, 'user'>;
