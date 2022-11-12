@@ -440,6 +440,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             defaultMessage: 'Count',
                           })}
                           position={Position.Left}
+                          tickFormat={(d) => d === null ? 'N/A' : d}
                         />
                         {showAnnotations ? (
                           <>
