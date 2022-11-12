@@ -9,7 +9,10 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
-import { SecurityStepId } from '../../../common/components/guided_onboarding_tour/tour_config';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../common/components/guided_onboarding_tour/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { TimelineId } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
@@ -31,15 +34,16 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     () =>
       columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
       isDetectionsAlertsTable(scopeId) &&
-      rowIndex === 0,
-    [columnId, rowIndex, scopeId]
+      rowIndex === 0 &&
+      !props.isDetails,
+    [columnId, props.isDetails, rowIndex, scopeId]
   );
 
   return (
     <GuidedOnboardingTourStep
       isTourAnchor={isTourAnchor}
-      step={1}
-      stepId={SecurityStepId.alertsCases}
+      step={AlertsCasesTourSteps.pointToAlertName}
+      tourId={SecurityStepId.alertsCases}
     >
       <DefaultCellRenderer {...props} />
     </GuidedOnboardingTourStep>
