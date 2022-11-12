@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
     ? remoteName + indexPatternName
     : indexPatternName;
 
-  describe.only('single metric', function () {
+  describe('single metric', function () {
     this.tags(['ml']);
     before(async () => {
       await esNode.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
