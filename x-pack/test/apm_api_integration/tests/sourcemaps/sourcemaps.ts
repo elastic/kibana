@@ -82,21 +82,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('list source maps', () => {
       const uploadedSourcemapIds: string[] = [];
       before(async () => {
-        await Promise.all(
-          times(2).map(async (i) => {
-            const sourcemap = await uploadSourcemap({
-              serviceName: 'foo',
-              serviceVersion: `1.0.${i}`,
-              bundleFilePath: 'bar',
-              sourcemap: {
-                version: 123,
-                sources: [''],
-                mappings: '',
-              },
-            });
-            uploadedSourcemapIds.push(sourcemap.id);
-          })
-        );
+        const sourcemapCount = times(2);
+        for (const i of sourcemapCount) {
+          const sourcemap = await uploadSourcemap({
+            serviceName: 'foo',
+            serviceVersion: `1.0.${i}`,
+            bundleFilePath: 'bar',
+            sourcemap: {
+              version: 123,
+              sources: [''],
+              mappings: '',
+            },
+          });
+          uploadedSourcemapIds.push(sourcemap.id);
+          await sleep(100);
+        }
       });
 
       after(async () => {
@@ -108,14 +108,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(sourcemaps).to.not.empty();
       });
 
-      it('returns source maps ordered by created date in descending order', async () => {
+      it('returns newest source maps first', async () => {
         const response = await apmApiClient.readUser({
           endpoint: 'GET /api/apm/sourcemaps',
         });
 
-        const unsorted = response.body.artifacts.map((a) => a.created);
-        const sorted = sortBy(unsorted);
-        expect(unsorted).to.eql(sorted);
+        const timestamps = response.body.artifacts.map((a) => new Date(a.created).getTime());
+        expect(timestamps[0]).to.be.greaterThan(timestamps[1]);
       });
     });
 
@@ -138,4 +137,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
   });
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
