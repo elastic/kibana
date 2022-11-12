@@ -468,7 +468,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                     fullWidth
                     helpText={i18n.translate('xpack.ml.splom.backgroundLayerHelpText', {
                       defaultMessage:
-                        'The portion of the data not reflecting the current filter is presented in a blurred gray.',
+                        'If the data points match your filter, they\'re shown in color; otherwise, they\'re blurred gray',
                     })}
                   >
                     <></>
