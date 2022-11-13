@@ -99,7 +99,13 @@ export const CloudBenchmarksSection = ({
             <ClusterDetailsBox cluster={cluster} />
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.second}>
-            <div style={{ padding: '0 16px', height: '100%' }}>
+            <div
+              style={{
+                paddingLeft: euiTheme.size.base,
+                paddingRight: euiTheme.size.base,
+                height: '100%',
+              }}
+            >
               <CloudPostureScoreChart
                 compact
                 id={`${cluster.meta.clusterId}_score_chart`}
@@ -112,7 +118,7 @@ export const CloudBenchmarksSection = ({
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.third}>
-            <div style={{ padding: '0 16px' }}>
+            <div style={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
               <RisksTable
                 compact
                 data={cluster.groupedFindingsEvaluation}
