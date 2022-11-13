@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { PartitionElementEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
 import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
@@ -37,11 +36,7 @@ export const CloudSummarySection = ({
   const navToFindings = useNavigateFindings();
   const navToFindingsByResource = useNavigateFindingsByResource();
 
-  const handleElementClick = (elements: PartitionElementEvent[]) => {
-    const [element] = elements;
-    const [layerValue] = element;
-    const evaluation = layerValue[0].groupByRollup as Evaluation;
-
+  const handleEvalCounterClick = (evaluation: Evaluation) => {
     navToFindings({ 'result.evaluation': evaluation });
   };
 
@@ -60,33 +55,31 @@ export const CloudSummarySection = ({
     () => [
       {
         id: DASHBOARD_COUNTER_CARDS.CLUSTERS_EVALUATED,
-        title: i18n.translate(
+        description: i18n.translate(
           'xpack.csp.dashboard.summarySection.counterCard.clustersEvaluatedDescription',
           { defaultMessage: 'Clusters Evaluated' }
         ),
-        description: <CompactFormattedNumber number={complianceData.clusters.length} />,
+        title: <CompactFormattedNumber number={complianceData.clusters.length} />,
       },
       {
         id: DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED,
-        title: i18n.translate(
+        description: i18n.translate(
           'xpack.csp.dashboard.summarySection.counterCard.resourcesEvaluatedDescription',
           { defaultMessage: 'Resources Evaluated' }
         ),
-        description: (
-          <CompactFormattedNumber number={complianceData.stats.resourcesEvaluated || 0} />
-        ),
+        title: <CompactFormattedNumber number={complianceData.stats.resourcesEvaluated || 0} />,
         onClick: () => {
           navToFindingsByResource();
         },
       },
       {
         id: DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS,
-        title: i18n.translate(
+        description: i18n.translate(
           'xpack.csp.dashboard.summarySection.counterCard.failingFindingsDescription',
           { defaultMessage: 'Failing Findings' }
         ),
-        description: <CompactFormattedNumber number={complianceData.stats.totalFailed} />,
-        descriptionColor: complianceData.stats.totalFailed > 0 ? 'danger' : 'text',
+        title: <CompactFormattedNumber number={complianceData.stats.totalFailed} />,
+        titleColor: complianceData.stats.totalFailed > 0 ? 'danger' : 'text',
         onClick: () => {
           navToFindings({ 'result.evaluation': RULE_FAILED });
         },
@@ -122,7 +115,7 @@ export const CloudSummarySection = ({
             id="cloud_posture_score_chart"
             data={complianceData.stats}
             trend={complianceData.trend}
-            partitionOnElementClick={handleElementClick}
+            onEvalCounterClick={handleEvalCounterClick}
           />
         </ChartPanel>
       </EuiFlexItem>

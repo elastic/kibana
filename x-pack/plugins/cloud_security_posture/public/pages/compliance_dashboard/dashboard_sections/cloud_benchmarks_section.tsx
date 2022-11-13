@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, useEuiTheme, EuiTitle } from '@elastic/eui';
-import { PartitionElementEvent } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
@@ -25,11 +24,7 @@ export const CloudBenchmarksSection = ({
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
-  const handleElementClick = (clusterId: string, elements: PartitionElementEvent[]) => {
-    const [element] = elements;
-    const [layerValue] = element;
-    const evaluation = layerValue[0].groupByRollup as Evaluation;
-
+  const handleEvalCounterClick = (clusterId: string, evaluation: Evaluation) => {
     navToFindings({ cluster_id: clusterId, 'result.evaluation': evaluation });
   };
 
@@ -110,8 +105,8 @@ export const CloudBenchmarksSection = ({
                 id={`${cluster.meta.clusterId}_score_chart`}
                 data={cluster.stats}
                 trend={cluster.trend}
-                partitionOnElementClick={(elements) =>
-                  handleElementClick(cluster.meta.clusterId, elements)
+                onEvalCounterClick={(evaluation) =>
+                  handleEvalCounterClick(cluster.meta.clusterId, evaluation)
                 }
               />
             </div>

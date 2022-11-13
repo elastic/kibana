@@ -11,23 +11,24 @@ import {
   Axis,
   Chart,
   niceTimeFormatByDay,
-  PartitionElementEvent,
   Settings,
   timeFormatter,
 } from '@elastic/charts';
 import {
+  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiText,
-  EuiTextProps,
   EuiTitle,
-  useEuiTheme,
+  type EuiLinkButtonProps,
+  type EuiTextProps,
 } from '@elastic/eui';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
+import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
-import type { PostureTrend, Stats } from '../../../../common/types';
+import type { Evaluation, PostureTrend, Stats } from '../../../../common/types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
 interface CloudPostureScoreChartProps {
@@ -35,7 +36,7 @@ interface CloudPostureScoreChartProps {
   trend: PostureTrend[];
   data: Stats;
   id: string;
-  partitionOnElementClick: (elements: PartitionElementEvent[]) => void;
+  onEvalCounterClick: (evaluation: Evaluation) => void;
 }
 
 const getPostureScorePercentage = (postureScore: number): string => `${Math.round(postureScore)}%`;
@@ -105,25 +106,30 @@ const CounterLink = ({
   text,
   count,
   color,
+  onClick,
 }: {
   count: number;
   text: string;
   color: EuiTextProps['color'];
-}) => (
-  <EuiLink color="text" css={{ display: 'flex' }}>
-    <EuiText color={color} style={{ fontWeight: 500 }} size="s">
-      <CompactFormattedNumber number={count} abbreviateAbove={999} />
-      &nbsp;
-    </EuiText>
-    <EuiText size="s">{text}</EuiText>
-  </EuiLink>
-);
+  onClick: EuiLinkButtonProps['onClick'];
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiLink color="text" onClick={onClick} css={{ display: 'flex' }}>
+      <EuiText color={color} style={{ fontWeight: euiTheme.font.weight.medium }} size="s">
+        <CompactFormattedNumber number={count} abbreviateAbove={999} />
+        &nbsp;
+      </EuiText>
+      <EuiText size="s">{text}</EuiText>
+    </EuiLink>
+  );
+};
 
 export const CloudPostureScoreChart = ({
   data,
   trend,
-  id,
-  partitionOnElementClick,
+  onEvalCounterClick,
   compact,
 }: CloudPostureScoreChartProps) => {
   const { euiTheme } = useEuiTheme();
@@ -147,9 +153,19 @@ export const CloudPostureScoreChart = ({
               alignItems={compact ? 'center' : 'flexStart'}
               style={{ paddingRight: euiTheme.size.xxl }}
             >
-              <CounterLink text="passed" count={data.totalPassed} color="success" />
+              <CounterLink
+                text="passed"
+                count={data.totalPassed}
+                color="success"
+                onClick={() => onEvalCounterClick(RULE_PASSED)}
+              />
               &nbsp;{`-`}&nbsp;
-              <CounterLink text="failed" count={data.totalFailed} color="danger" />
+              <CounterLink
+                text="failed"
+                count={data.totalFailed}
+                color="danger"
+                onClick={() => onEvalCounterClick(RULE_FAILED)}
+              />
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
