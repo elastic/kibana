@@ -121,9 +121,10 @@ export const CloudSummarySection = ({
       </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.third}>
         <ChartPanel
-          title={i18n.translate('xpack.csp.dashboard.summarySection.failedFindingsPanelTitle', {
-            defaultMessage: 'Failed Findings',
-          })}
+          title={i18n.translate(
+            'xpack.csp.dashboard.summarySection.complianceByCisSectionPanelTitle',
+            { defaultMessage: 'Compliance By CIS Section' }
+          )}
         >
           <RisksTable
             data={complianceData.groupedFindingsEvaluation}

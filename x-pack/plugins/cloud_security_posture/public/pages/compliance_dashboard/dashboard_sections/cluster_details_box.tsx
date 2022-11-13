@@ -29,8 +29,6 @@ const defaultClusterTitle = i18n.translate(
   { defaultMessage: 'Cluster ID' }
 );
 
-const MAX_TITLE_WIDTH = 200;
-
 export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
@@ -67,15 +65,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
           }
         >
           <EuiLink onClick={() => handleClusterTitleClick(cluster.meta.clusterId)} color="text">
-            <EuiTitle
-              css={{
-                fontSize: 20,
-                maxWidth: MAX_TITLE_WIDTH,
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-              }}
-            >
+            <EuiTitle css={{ fontSize: 20 }}>
               <h5>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.clusterTitle"
