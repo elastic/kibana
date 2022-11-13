@@ -15,10 +15,6 @@
 // https://on.cypress.io/plugins-guide
 // ***********************************************************
 
-// TODO(jbudz): should be removed when upgrading to TS@4.8
-// this is a skip for the errors created when typechecking with isolatedModules
-export {};
-
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
@@ -26,6 +22,9 @@ export {};
  * @type {Cypress.PluginConfig}
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// TODO: we should be able to remove this ts-ignore while using isolatedModules
+// this is a skip for the errors created when typechecking with isolatedModules
+// @ts-ignore
 module.exports = (on: any, config: any) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-extraneous-dependencies
   require('@cypress/code-coverage/task')(on, config);
