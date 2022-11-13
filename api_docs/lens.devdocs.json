@@ -742,6 +742,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getChartInfo",
+            "type": "Function",
+            "tags": [],
+            "label": "getChartInfo",
+            "description": [],
+            "signature": [
+              "() => Readonly<ChartInfo | undefined>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -7085,6 +7101,40 @@
                 "description": [],
                 "signature": [
                   "VisualizationStateFromContextChangeProps"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.getVisualizationInfo",
+            "type": "Function",
+            "tags": [],
+            "label": "getVisualizationInfo",
+            "description": [],
+            "signature": [
+              "((state: T) => ",
+              "VisualizationInfo",
+              ") | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getVisualizationInfo.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
