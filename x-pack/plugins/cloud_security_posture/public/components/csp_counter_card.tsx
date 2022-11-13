@@ -7,7 +7,7 @@
 
 import React, { MouseEventHandler } from 'react';
 import { css } from '@emotion/react';
-import { EuiIcon, EuiPanel, EuiStat, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiStat, useEuiTheme } from '@elastic/eui';
 import type { EuiStatProps } from '@elastic/eui';
 
 export interface CspCounterCardProps {
@@ -48,11 +48,8 @@ export const CspCounterCard = (counter: CspCounterCardProps) => {
         titleSize="s"
         title={counter.title}
         titleColor={counter.titleColor}
-        description={
-          <EuiTitle size="xxxs">
-            <h6>{counter.description}</h6>
-          </EuiTitle>
-        }
+        descriptionElement="h6"
+        description={counter.description}
       />
       {counter.onClick && (
         <EuiIcon

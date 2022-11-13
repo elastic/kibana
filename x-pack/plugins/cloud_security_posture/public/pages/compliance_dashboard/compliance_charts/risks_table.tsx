@@ -63,13 +63,11 @@ export const RisksTable = ({
       },
       {
         field: 'totalFailed',
-        name: compact ? (
-          <></>
-        ) : (
-          i18n.translate('xpack.csp.dashboard.risksTable.findingsColumnLabel', {
-            defaultMessage: 'Findings',
-          })
-        ),
+        name: compact
+          ? ''
+          : i18n.translate('xpack.csp.dashboard.risksTable.findingsColumnLabel', {
+              defaultMessage: 'Findings',
+            }),
         render: (
           totalFailed: GroupedFindingsEvaluation['totalFailed'],
           resource: GroupedFindingsEvaluation

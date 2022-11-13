@@ -44,7 +44,7 @@ const getPostureScorePercentage = (postureScore: number): string => `${Math.roun
 const PercentageInfo = ({
   compact,
   postureScore,
-}: CloudPostureScoreChartProps['data'] & { compact: CloudPostureScoreChartProps['compact'] }) => {
+}: CloudPostureScoreChartProps['data'] & { compact?: CloudPostureScoreChartProps['compact'] }) => {
   const { euiTheme } = useEuiTheme();
   const percentage = getPostureScorePercentage(postureScore);
 
