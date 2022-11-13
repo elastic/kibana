@@ -63,7 +63,6 @@ const TopFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const ElasticsearchPyClientReadme = () => {
-  const [apiKey, setApiKey] = useState<string | null>(null);
 
   return (
     <>
