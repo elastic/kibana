@@ -23,9 +23,12 @@ import {
   EuiTitle,
   type EuiLinkButtonProps,
   type EuiTextProps,
+  EuiToolTip,
+  EuiToolTipProps,
 } from '@elastic/eui';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import type { Evaluation, PostureTrend, Stats } from '../../../../common/types';
@@ -107,22 +110,26 @@ const CounterLink = ({
   count,
   color,
   onClick,
+  tooltipContent,
 }: {
   count: number;
   text: string;
   color: EuiTextProps['color'];
   onClick: EuiLinkButtonProps['onClick'];
+  tooltipContent: EuiToolTipProps['content'];
 }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiLink color="text" onClick={onClick} css={{ display: 'flex' }}>
-      <EuiText color={color} style={{ fontWeight: euiTheme.font.weight.medium }} size="s">
-        <CompactFormattedNumber number={count} abbreviateAbove={999} />
-        &nbsp;
-      </EuiText>
-      <EuiText size="s">{text}</EuiText>
-    </EuiLink>
+    <EuiToolTip content={tooltipContent}>
+      <EuiLink color="text" onClick={onClick} css={{ display: 'flex' }}>
+        <EuiText color={color} style={{ fontWeight: euiTheme.font.weight.medium }} size="s">
+          <CompactFormattedNumber number={count} abbreviateAbove={999} />
+          &nbsp;
+        </EuiText>
+        <EuiText size="s">{text}</EuiText>
+      </EuiLink>
+    </EuiToolTip>
   );
 };
 
@@ -151,13 +158,17 @@ export const CloudPostureScoreChart = ({
               justifyContent="flexEnd"
               gutterSize="none"
               alignItems={compact ? 'center' : 'flexStart'}
-              style={{ paddingRight: euiTheme.size.xxl }}
+              style={{ paddingRight: euiTheme.size.xl }}
             >
               <CounterLink
                 text="passed"
                 count={data.totalPassed}
                 color="success"
                 onClick={() => onEvalCounterClick(RULE_PASSED)}
+                tooltipContent={i18n.translate(
+                  'xpack.csp.cloudPostureScoreChart.counterLink.passedFindingsTooltip',
+                  { defaultMessage: 'Passed findings' }
+                )}
               />
               &nbsp;{`-`}&nbsp;
               <CounterLink
@@ -165,6 +176,10 @@ export const CloudPostureScoreChart = ({
                 count={data.totalFailed}
                 color="danger"
                 onClick={() => onEvalCounterClick(RULE_FAILED)}
+                tooltipContent={i18n.translate(
+                  'xpack.csp.cloudPostureScoreChart.counterLink.failedFindingsTooltip',
+                  { defaultMessage: 'Failed findings' }
+                )}
               />
             </EuiFlexGroup>
           </EuiFlexItem>
