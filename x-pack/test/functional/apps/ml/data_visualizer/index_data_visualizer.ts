@@ -14,7 +14,7 @@ import {
   farequoteKQLSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,
-} from './index_test_data';
+} from './index_test_data_random_sampler';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
