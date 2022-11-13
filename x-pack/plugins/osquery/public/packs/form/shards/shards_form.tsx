@@ -29,7 +29,13 @@ interface ShardsFormProps {
   options: Array<EuiComboBoxOptionOption<string>>;
 }
 
-export const ShardsForm = ({ onDelete, index, isLastItem, control, options }: ShardsFormProps) => {
+const ShardsFormComponent = ({
+  onDelete,
+  index,
+  isLastItem,
+  control,
+  options,
+}: ShardsFormProps) => {
   const handleDeleteClick = useCallback(() => {
     if (onDelete) {
       onDelete(index);
@@ -80,3 +86,5 @@ export const ShardsForm = ({ onDelete, index, isLastItem, control, options }: Sh
     </>
   );
 };
+
+export const ShardsForm = React.memo(ShardsFormComponent);

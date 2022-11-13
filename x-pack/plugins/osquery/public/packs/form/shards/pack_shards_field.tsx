@@ -30,7 +30,7 @@ interface PackShardsFieldProps {
   options: Array<EuiComboBoxOptionOption<string>>;
 }
 
-export const PackShardsField = React.memo(({ options }: PackShardsFieldProps) => {
+const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
   const {
     watch: watchRoot,
     register: registerRoot,
@@ -131,4 +131,6 @@ export const PackShardsField = React.memo(({ options }: PackShardsFieldProps) =>
       ))}
     </>
   );
-});
+};
+
+export const PackShardsField = React.memo(PackShardsFieldComponent);

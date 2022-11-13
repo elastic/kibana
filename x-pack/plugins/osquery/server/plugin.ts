@@ -11,7 +11,6 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-  SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -142,10 +141,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             if (packagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
               await this.initialize(core, dataViewsService);
 
-              const allPacks: SavedObjectsFindResponse<PackSavedObjectAttributes> =
-                await client.find({
-                  type: packSavedObjectType,
-                });
+              const allPacks = await client.find<PackSavedObjectAttributes>({
+                type: packSavedObjectType,
+              });
 
               if (allPacks.saved_objects) {
                 await updateGlobalPacksCreateCallback(
