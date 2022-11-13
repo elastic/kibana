@@ -5,22 +5,7 @@
  * 2.0.
  */
 
-import {
-  getDefaultIndexPatterns,
-  getDescription,
-  getFalsePositives,
-  getFrom,
-  getInterval,
-  getQuery,
-  getReferenceUrls,
-  getRiskScore,
-  getRuleName,
-  getSeverity,
-  getTags,
-  getThreat,
-  getThreatSubtechnique,
-  getThreatTechnique,
-} from '../../data/detection_engine';
+import { ruleFields } from '../../data/detection_engine';
 import {
   getNewRule,
   getExistingRule,
@@ -171,13 +156,13 @@ describe('Custom query rules', () => {
 
       // expect define step to repopulate
       cy.get(DEFINE_EDIT_BUTTON).click();
-      cy.get(CUSTOM_QUERY_INPUT).should('have.value', getQuery());
+      cy.get(CUSTOM_QUERY_INPUT).should('have.value', ruleFields.ruleQuery);
       cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
       cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
 
       // expect about step to populate
       cy.get(ABOUT_EDIT_BUTTON).click();
-      cy.get(RULE_NAME_INPUT).invoke('val').should('eql', getRuleName());
+      cy.get(RULE_NAME_INPUT).invoke('val').should('eql', ruleFields.ruleName);
       cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
       cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
       cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -189,56 +174,59 @@ describe('Custom query rules', () => {
 
       cy.log('Asserting rule view in rules list');
       cy.get(RULES_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
-      cy.get(RULE_NAME).should('have.text', getRuleName());
-      cy.get(RISK_SCORE).should('have.text', getRiskScore());
+      cy.get(RULE_NAME).should('have.text', ruleFields.ruleName);
+      cy.get(RISK_SCORE).should('have.text', ruleFields.riskScore);
       cy.get(SEVERITY)
         .invoke('text')
         .then((text) => {
-          cy.wrap(text.toLowerCase()).should('equal', getSeverity());
+          cy.wrap(text.toLowerCase()).should('equal', ruleFields.ruleSeverity);
         });
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
       goToRuleDetails();
 
       cy.log('Asserting rule details');
-      cy.get(RULE_NAME_HEADER).should('contain', getRuleName());
-      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', getDescription());
+      cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
+      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', ruleFields.ruleDescription);
       cy.get(ABOUT_DETAILS).within(() => {
         getDetails(SEVERITY_DETAILS)
           .invoke('text')
           .then((text) => {
-            cy.wrap(text.toLowerCase()).should('equal', getSeverity());
+            cy.wrap(text.toLowerCase()).should('equal', ruleFields.ruleSeverity);
           });
-        getDetails(RISK_SCORE_DETAILS).should('have.text', getRiskScore());
+        getDetails(RISK_SCORE_DETAILS).should('have.text', ruleFields.riskScore);
         getDetails(REFERENCE_URLS_DETAILS).should((details) => {
-          expect(removeExternalLinkText(details.text())).equal(getReferenceUrls().join(''));
+          expect(removeExternalLinkText(details.text())).equal(ruleFields.referenceUrls.join(''));
         });
-        getDetails(FALSE_POSITIVES_DETAILS).should('have.text', getFalsePositives().join(''));
-        getDetails(TAGS_DETAILS).should('have.text', getTags().join(''));
+        getDetails(FALSE_POSITIVES_DETAILS).should('have.text', ruleFields.falsePositives.join(''));
+        getDetails(TAGS_DETAILS).should('have.text', ruleFields.ruleTags.join(''));
       });
       cy.get(THREAT_TACTIC).should(
         'contain',
-        `${getThreat().tactic.name} (${getThreat().tactic.id})`
+        `${ruleFields.threat.tactic.name} (${ruleFields.threat.tactic.id})`
       );
       cy.get(THREAT_TECHNIQUE).should(
         'contain',
-        `${getThreatTechnique().name} (${getThreatTechnique().id})`
+        `${ruleFields.threatTechnique.name} (${ruleFields.threatTechnique.id})`
       );
       cy.get(THREAT_SUBTECHNIQUE).should(
         'contain',
-        `${getThreatSubtechnique().name} (${getThreatSubtechnique().id})`
+        `${ruleFields.threatSubtechnique.name} (${ruleFields.threatSubtechnique.id})`
       );
       cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getDefaultIndexPatterns().join(''));
-        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', getQuery());
+        getDetails(INDEX_PATTERNS_DETAILS).should(
+          'have.text',
+          ruleFields.defaultIndexPatterns.join('')
+        );
+        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', ruleFields.ruleQuery);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       });
       cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should('have.text', getInterval());
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', getFrom());
+        getDetails(RUNS_EVERY_DETAILS).should('have.text', ruleFields.ruleInterval);
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', ruleFields.ruleIntervalFrom);
       });
 
       waitForTheRuleToBeExecuted();
@@ -248,7 +236,7 @@ describe('Custom query rules', () => {
       cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
         .should('match', /^[1-9].+$/); // Any number of alerts
-      cy.get(ALERT_GRID_CELL).contains(getRuleName());
+      cy.get(ALERT_GRID_CELL).contains(ruleFields.ruleName);
     });
   });
 

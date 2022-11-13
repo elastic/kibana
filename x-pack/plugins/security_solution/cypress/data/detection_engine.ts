@@ -26,79 +26,26 @@ import type {
   RuleTagArray,
 } from '../../common/detection_engine/rule_schema';
 
-export const getQuery = (): RuleQuery => {
-  return 'host.name: *';
-};
+interface RuleFields {
+  defaultIndexPatterns: IndexPatternArray;
+  falsePositives: RuleFalsePositiveArray;
+  investigationGuide: InvestigationGuide;
+  referenceUrls: RuleReferenceArray;
+  riskScore: RiskScore;
+  ruleDescription: RuleDescription;
+  ruleInterval: RuleInterval;
+  ruleIntervalFrom: RuleIntervalFrom;
+  ruleQuery: RuleQuery;
+  ruleName: RuleName;
+  ruleTags: RuleTagArray;
+  severity: Severity;
+  threat: Threat;
+  threatSubtechnique: ThreatSubtechnique;
+  threatTechnique: ThreatTechnique;
+}
 
-export const getRuleName = (): RuleName => {
-  return 'Test Rule';
-};
-
-export const getDescription = (): RuleDescription => {
-  return 'The rule description';
-};
-
-export const getSeverity = (): Severity => {
-  return 'high';
-};
-
-export const getRiskScore = (): RiskScore => {
-  return 17;
-};
-
-export const getTags = (): RuleTagArray => {
-  return ['test', 'newRule'];
-};
-
-export const getReferenceUrls = (): RuleReferenceArray => {
-  return ['http://example.com/', 'https://example.com/'];
-};
-
-export const getFalsePositives = (): RuleFalsePositiveArray => {
-  return ['False1', 'False2'];
-};
-
-export const getInvestigationGuide = (): InvestigationGuide => {
-  return '# test markdown';
-};
-
-export const getThreat = (): Threat => {
-  return {
-    framework: 'MITRE ATT&CK',
-    tactic: {
-      name: 'Credential Access',
-      id: 'TA0006',
-      reference: 'https://attack.mitre.org/tactics/TA0006',
-    },
-  };
-};
-
-export const getThreatTechnique = (): ThreatTechnique => {
-  return {
-    id: 'T1003',
-    name: 'OS Credential Dumping',
-    reference: 'https://attack.mitre.org/techniques/T1003',
-  };
-};
-
-export const getThreatSubtechnique = (): ThreatSubtechnique => {
-  return {
-    name: '/etc/passwd and /etc/shadow',
-    id: 'T1003.008',
-    reference: 'https://attack.mitre.org/techniques/T1003/008',
-  };
-};
-
-export const getInterval = (): RuleInterval => {
-  return '5m';
-};
-
-export const getFrom = (): RuleIntervalFrom => {
-  return '50000h';
-};
-
-export const getDefaultIndexPatterns = (): IndexPatternArray => {
-  return [
+export const ruleFields: RuleFields = {
+  defaultIndexPatterns: [
     'apm-*-transaction*',
     'auditbeat-*',
     'endgame-*',
@@ -108,5 +55,34 @@ export const getDefaultIndexPatterns = (): IndexPatternArray => {
     'traces-apm*',
     'winlogbeat-*',
     '-*elastic-cloud-logs-*',
-  ];
+  ],
+  falsePositives: ['False1', 'False2'],
+  investigationGuide: '# test markdown',
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  riskScore: 17,
+  ruleDescription: 'The rule description',
+  ruleInterval: '5m',
+  ruleIntervalFrom: '50000h',
+  ruleQuery: 'host.name: *',
+  ruleName: 'Test Rule',
+  ruleTags: ['test', 'newRule'],
+  ruleSeverity: 'high',
+  threat: {
+    framework: 'MITRE ATT&CK',
+    tactic: {
+      name: 'Credential Access',
+      id: 'TA0006',
+      reference: 'https://attack.mitre.org/tactics/TA0006',
+    },
+  },
+  threatSubtechnique: {
+    name: '/etc/passwd and /etc/shadow',
+    id: 'T1003.008',
+    reference: 'https://attack.mitre.org/techniques/T1003/008',
+  },
+  threatTechnique: {
+    id: 'T1003',
+    name: 'OS Credential Dumping',
+    reference: 'https://attack.mitre.org/techniques/T1003',
+  },
 };

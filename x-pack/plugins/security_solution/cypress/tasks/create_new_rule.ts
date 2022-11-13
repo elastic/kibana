@@ -116,20 +116,7 @@ import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
-import {
-  getDescription,
-  getFalsePositives,
-  getFrom,
-  getInvestigationGuide,
-  getReferenceUrls,
-  getRiskScore,
-  getRuleName,
-  getSeverity,
-  getTags,
-  getThreat,
-  getThreatSubtechnique,
-  getThreatTechnique,
-} from '../data/detection_engine';
+import { ruleFields } from '../data/detection_engine';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
@@ -174,8 +161,9 @@ export const expandAdvancedSettings = () => {
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 };
 
-export const fillNote = (note: string = getInvestigationGuide()) => {
+export const fillNote = (note: string = ruleFields.investigationGuide) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(note, { force: true });
+  return note;
 };
 
 export const fillMitre = (mitreAttacks: Mitre[]) => {
@@ -203,28 +191,32 @@ export const fillMitre = (mitreAttacks: Mitre[]) => {
 
     cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click({ force: true });
   });
+  return mitreAttacks;
 };
 
-export const fillThreat = (threat: Threat = getThreat()) => {
+export const fillThreat = (threat: Threat = ruleFields.threat) => {
   cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).first().click({ force: true });
   cy.contains(MITRE_TACTIC, threat.tactic.name).click();
+  return threat;
 };
 
-export const fillThreatTechnique = (technique: ThreatTechnique = getThreatTechnique()) => {
+export const fillThreatTechnique = (technique: ThreatTechnique = ruleFields.threatTechnique) => {
   cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).first().click({ force: true });
   cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).first().click({ force: true });
   cy.contains(MITRE_TACTIC, technique.name).click();
+  return technique;
 };
 
 export const fillThreatSubtechnique = (
-  subtechnique: ThreatSubtechnique = getThreatSubtechnique()
+  subtechnique: ThreatSubtechnique = ruleFields.threatSubtechnique
 ) => {
   cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).first().click({ force: true });
   cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN).first().click({ force: true });
   cy.contains(MITRE_TACTIC, subtechnique.name).click();
+  return subtechnique;
 };
 
-export const fillFalsePositiveExamples = (falsePositives: string[] = getFalsePositives()) => {
+export const fillFalsePositiveExamples = (falsePositives: string[] = ruleFields.falsePositives) => {
   falsePositives.forEach((falsePositive, index) => {
     cy.get(FALSE_POSITIVES_INPUT)
       .eq(index)
@@ -232,36 +224,49 @@ export const fillFalsePositiveExamples = (falsePositives: string[] = getFalsePos
       .type(falsePositive, { force: true });
     cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
   });
+  return falsePositives;
 };
 
-export const fillRuleName = (ruleName: string = getRuleName()) => {
+export const importSavedQuery = (timelineId: string) => {
+  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+  cy.get(TIMELINE(timelineId)).click();
+  cy.get(CUSTOM_QUERY_INPUT).should('not.be.empty');
+};
+
+export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
   cy.get(RULE_NAME_INPUT).clear({ force: true }).type(ruleName, { force: true });
+  return ruleName;
 };
 
-export const fillDescription = (description: string = getDescription()) => {
+export const fillDescription = (description: string = ruleFields.ruleDescription) => {
   cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true }).type(description, { force: true });
+  return description;
 };
 
-export const fillSeverity = (severity: string = getSeverity()) => {
+export const fillSeverity = (severity: string = ruleFields.ruleSeverity) => {
   cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${severity.toLowerCase()}`).click();
+  return severity;
 };
 
-export const fillRiskScore = (riskScore: string = getRiskScore().toString()) => {
+export const fillRiskScore = (riskScore: string = ruleFields.riskScore.toString()) => {
   cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${riskScore}`, { force: true });
+  return riskScore;
 };
 
-export const fillRuleTags = (tags: string[] = getTags()) => {
+export const fillRuleTags = (tags: string[] = ruleFields.ruleTags) => {
   tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
   });
+  return tags;
 };
 
-export const fillReferenceUrls = (referenceUrls: string[] = getReferenceUrls()) => {
+export const fillReferenceUrls = (referenceUrls: string[] = ruleFields.referenceUrls) => {
   referenceUrls.forEach((url, index) => {
     cy.get(REFERENCE_URLS_INPUT).eq(index).clear({ force: true }).type(url, { force: true });
     cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
   });
+  return referenceUrls;
 };
 
 export const fillAboutRuleAndContinue = (
@@ -342,12 +347,6 @@ export const continueWithNextSection = () => {
   cy.get(CONTINUE_BUTTON).should('exist').click();
 };
 
-export const importSavedQuery = (timelineId: string) => {
-  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(timelineId)).click();
-  cy.get(CUSTOM_QUERY_INPUT).should('not.be.empty');
-};
-
 export const fillDefineCustomRuleAndContinue = (rule: CustomRule | OverrideRule) => {
   if (rule.dataSource.type === 'dataView') {
     cy.get(DATA_VIEW_OPTION).click();
@@ -370,7 +369,7 @@ export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRu
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 };
 
-export const fillFrom = (from: RuleIntervalFrom = getFrom()) => {
+export const fillFrom = (from: RuleIntervalFrom = ruleFields.ruleIntervalFrom) => {
   const value = from.slice(0, from.length - 1);
   const type = from.slice(from.length - 1);
   cy.get(LOOK_BACK_INTERVAL).type('{selectAll}').type(value);
@@ -683,3 +682,20 @@ export const checkLoadQueryDynamically = () => {
 export const uncheckLoadQueryDynamically = () => {
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true }).should('not.be.checked');
 };
+
+export const defineSection = { importSavedQuery };
+export const aboutSection = {
+  fillRuleName,
+  fillDescription,
+  fillSeverity,
+  fillRiskScore,
+  fillRuleTags,
+  expandAdvancedSettings,
+  fillReferenceUrls,
+  fillFalsePositiveExamples,
+  fillThreat,
+  fillThreatTechnique,
+  fillThreatSubtechnique,
+  fillNote,
+};
+export const scheduleSection = { fillFrom };
