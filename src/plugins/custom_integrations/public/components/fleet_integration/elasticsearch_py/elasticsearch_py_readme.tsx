@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import cuid from 'cuid';
 
 import {
   EuiButton,
@@ -128,42 +127,6 @@ export const ElasticsearchPyClientReadme = () => {
                 <EuiTitle>
                   <h2>
                     <FormattedMessage
-                      id="customIntegrations.languageClients.PythonElasticsearch.readme.createApiKey"
-                      defaultMessage="Create an API key"
-                    />
-                  </h2>
-                </EuiTitle>
-
-                <EuiText>
-                  <FormattedMessage
-                    id="customIntegrations.languageClients.PythonElasticsearch.readme.apiKey"
-                    defaultMessage="Use the button bellow to generate an API key. You'll need this set up your client in the next step."
-                  />
-                </EuiText>
-
-                <EuiSpacer size="m" />
-
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => setApiKey(cuid())} disabled={!!apiKey}>
-                      Generate API key
-                    </EuiButton>
-                  </EuiFlexItem>
-
-                  {apiKey && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCodeBlock paddingSize="s" isCopyable className="eui-displayInline">
-                        {apiKey}
-                      </EuiCodeBlock>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiPageSection>
-
-              <EuiPageSection>
-                <EuiTitle>
-                  <h2>
-                    <FormattedMessage
                       id="customIntegrations.languageClients.PythonElasticsearch.readme.connecting"
                       defaultMessage="Connecting to Elastic cloud"
                     />
@@ -173,9 +136,10 @@ export const ElasticsearchPyClientReadme = () => {
                 <EuiText>
                   <FormattedMessage
                     id="customIntegrations.languageClients.PythonElasticsearch.readme.connectingText"
-                    defaultMessage="When connecting to Elastic Cloud with the Python Elasticsearch client you should always use the {cloud_id} parameter to connect. You can find this value within the 'Manage Deployment' page after you’ve created a cluster."
+                    defaultMessage="You can connect to Elastic Cloud using an {api_key} and a {cloud_id}:"
                     values={{
-                      cloud_id: <EuiCode>cloud_id</EuiCode>,
+                      api_key: <EuiCode>API key</EuiCode>,
+                      cloud_id: <EuiCode>Cloud ID</EuiCode>,
                     }}
                   />
                 </EuiText>
@@ -186,13 +150,16 @@ export const ElasticsearchPyClientReadme = () => {
                   {`
 from elasticsearch import Elasticsearch
 
-# Found in the 'Manage Deployment' page
+# Found in the 'Manage this deployment' page
 CLOUD_ID = "deployment-name:dXMtZWFzdDQuZ2Nw..."
+
+# Found in the 'Management' page under the section 'Security'
+API_KEY = "YOUR_API_KEY"
 
 # Create the client instance
 client = Elasticsearch(
     cloud_id=CLOUD_ID,
-    api_key='${apiKey || 'YOUR_API_KEY'}',
+    api_key=API_KEY,
 )
           `}
                 </EuiCodeBlock>
