@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { GuideId, GuideStepIds, GuideState, GuideStep } from '@kbn/guided-onboarding';
+import type {
+  GuideId,
+  GuideStepIds,
+  GuideState,
+  GuideStep,
+  GuideStatus,
+} from '@kbn/guided-onboarding';
 import { guidesConfig } from '../constants/guides_config';
 import { GuideConfig, StepConfig } from '../types';
 
@@ -127,4 +133,28 @@ export const getUpdatedSteps = (
     // All other steps return as-is
     return step;
   });
+};
+
+export const getGuideStatusOnStepCompletion = (
+  guideState: GuideState,
+  guideId: GuideId,
+  stepId: GuideStepIds
+): GuideStatus => {
+  const stepConfig = getStepConfig(guideId, stepId);
+  const isManualCompletion = stepConfig?.manualCompletion || false;
+  const isLastStepInGuide = isLastStep(guideId, stepId);
+  const isCurrentStepReadyToComplete = isStepReadyToComplete(guideState, guideId, stepId);
+
+  // We want to set the guide status to 'ready_to_complete' if the current step is the last step in the guide
+  // and the step is not configured for manual completion
+  // or if the current step is configured for manual completion and the last step is ready to complete
+  if (
+    (isLastStepInGuide && !isManualCompletion) ||
+    (isLastStepInGuide && isManualCompletion && isCurrentStepReadyToComplete)
+  ) {
+    return 'ready_to_complete';
+  }
+
+  // Otherwise the guide is still in progress
+  return 'in_progress';
 };

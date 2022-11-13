@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { ErrorBudget, IndicatorData, SLO, toMomentUnitOfTime } from '../../types/models';
+import { ErrorBudget, IndicatorData, SLO, toMomentUnitOfTime } from '../models';
 import {
   calendarAlignedTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
