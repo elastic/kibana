@@ -263,7 +263,7 @@ export class TaskStore {
             attributes: attributesByDocId.get(doc.id)!,
           })),
           {
-            refresh: true,
+            refresh: false,
           }
         ));
     } catch (e) {
