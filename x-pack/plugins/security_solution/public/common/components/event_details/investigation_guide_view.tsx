@@ -27,7 +27,8 @@ export const BasicAlertDataContext = createContext<Partial<GetBasicDataFromDetai
 
 const InvestigationGuideViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
-}> = ({ data }) => {
+  scopeId: string;
+}> = ({ data, scopeId }) => {
   const ruleId = useMemo(() => {
     const item = data.find((d) => d.field === 'signal.rule.id' || d.field === ALERT_RULE_UUID);
     return Array.isArray(item?.originalValue)
@@ -51,7 +52,7 @@ const InvestigationGuideViewComponent: React.FC<{
       <Indent>
         <EuiText size="xs">
           <LineClamp lineClampHeight={4.5}>
-            <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
+            <MarkdownRenderer scopeId={scopeId}>{maybeRule.note}</MarkdownRenderer>
           </LineClamp>
         </EuiText>
       </Indent>

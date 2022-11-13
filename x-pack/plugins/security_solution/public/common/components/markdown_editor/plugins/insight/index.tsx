@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
 import React, { useContext, useMemo, useState, useCallback } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiCodeBlock,
+  EuiCallOut,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
@@ -32,16 +32,15 @@ import type {
   DataProvidersAnd,
 } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../../lib/kibana';
-const x: InsightComponentProps = {
-  description: 'Please look for similar process by the same user.',
-  label: 'Similar Processes by User',
-  dataProviders: [{ field: 'process.name', value: 'process.Ext.user' }],
-};
+import { useInsightQuery } from './use_insight_query';
+import { useInsightDataProviders } from './use_insight_data_providers';
+import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
+import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
 
 interface InsightComponentProps {
-  label?: string;
+  label: string;
   description?: string;
-  dataProviders: Array<{ field: string; value: string }>;
+  providers?: string;
 }
 
 export const parser: Plugin = function () {
@@ -87,20 +86,13 @@ export const parser: Plugin = function () {
       }
 
       match += configurationString;
-      console.log(configurationString);
       try {
         configuration = JSON.parse(configurationString);
-        const dataProviders = {};
-        // configuration.dataProviders;
-
+        console.log({configuration});
         return eat(value)({
           type: 'insight',
           ...configuration,
-          ...configuration.dataProviders.map((provider) => {
-            return {
-              [provider.field]: provider.value,
-            };
-          }),
+          providers: JSON.stringify(configuration.providers),
         });
       } catch (e) {
         console.log(e);
@@ -114,24 +106,54 @@ export const parser: Plugin = function () {
 };
 
 // receives the configuration from the parser and renders
-const OpenInsightInTimeline = ({
-  label,
-  description,
-  dataProviders,
-  ...fields
-}: InsightComponentProps) => {
-  const handleOpen = useCallback(() => console.log('click run'), []);
-  console.log({ label, description, dataProviders, fields });
-  return (
-    <>
-      <EuiButton iconType={'timeline'} onClick={handleOpen}>
-        {label ??
-          i18n.translate('xpack.securitySolution.markdown.insights.openInsightButtonLabel', {
-            defaultMessage: 'Open Insight in Timeline',
-          })}
-      </EuiButton>
-    </>
-  );
+const OpenInsightInTimeline = (scopeId) => {
+  const InsightComponent = ({
+    label,
+    description,
+    children,
+    position,
+    type,
+    providers,
+  }: InsightComponentProps) => {
+    let parsedProviders = {};
+    try {
+      if (providers !== undefined) {
+        parsedProviders = JSON.parse(providers);
+      }
+    } catch (err) {
+    }
+    const { data: alertData, alertId } = useContext(BasicAlertDataContext);
+    console.log({parsedProviders});
+    const { dataProviders } = useInsightDataProviders({
+      providers,
+      scopeId,
+      alertData,
+      alertId,
+    });
+    const { totalCount, isQueryLoading, oldestTimestamp } = useInsightQuery({
+      dataProviders,
+      scopeId,
+      alertData,
+    });
+    return (
+      <EuiCallOut title={label} iconType="timeline">
+        {isQueryLoading === false ? <p>{`${totalCount} matching events`}</p> : null}
+        <p>{description}</p>
+        <InvestigateInTimelineButton
+          asEmptyButton={false}
+          dataProviders={dataProviders}
+          timeRange={oldestTimestamp}
+          keepDataView={false}
+        >
+          {label ??
+            i18n.translate('xpack.securitySolution.markdown.insights.openInsightButtonLabel', {
+              defaultMessage: 'Open Insight in Timeline',
+            })}
+        </InvestigateInTimelineButton>
+      </EuiCallOut>
+    );
+  };
+  return InsightComponent;
 };
 
 export { OpenInsightInTimeline as renderer };
