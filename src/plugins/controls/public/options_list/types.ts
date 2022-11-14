@@ -8,11 +8,7 @@
 
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { ControlOutput } from '../types';
-import {
-  OptionsListEmbeddableInput,
-  OptionsListField,
-  SuggestionsSorting,
-} from '../../common/options_list/types';
+import { OptionsListEmbeddableInput, OptionsListField } from '../../common/options_list/types';
 
 interface SearchString {
   value: string;
@@ -21,7 +17,6 @@ interface SearchString {
 // Component state is only used by public components.
 export interface OptionsListComponentState {
   field?: OptionsListField;
-  sort: SuggestionsSorting;
   totalCardinality?: number;
   validSelections?: string[];
   searchString: SearchString;

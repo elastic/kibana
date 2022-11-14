@@ -145,7 +145,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     // debounce pipes to slow down search string + sorting related queries
     const typeaheadPipe = this.typeaheadSubject.pipe(debounceTime(100));
-    const sortSubjectPipe = this.sortSubject.pipe(debounceTime(200));
+    const sortSubjectPipe = this.sortSubject.pipe(debounceTime(100));
 
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
@@ -286,8 +286,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     const {
-      componentState: { searchString, sort },
-      explicitInput: { selectedOptions, runPastTimeout, existsSelected },
+      componentState: { searchString },
+      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
     } = getState();
     dispatch(setLoading(true));
     if (searchString.valid) {

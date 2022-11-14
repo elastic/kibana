@@ -53,8 +53,9 @@ export const OptionsListPopoverActionBar = ({
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality);
   const searchString = select((state) => state.componentState.searchString);
+  const sort = select((state) => state.explicitInput.sort ?? { by: '_count', direction: 'desc' });
+
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
-  const sort = select((state) => state.componentState.sort);
   const [options, setOptions] = useState<EuiSelectableOption[]>([
     {
       label: 'Document count (descending)',

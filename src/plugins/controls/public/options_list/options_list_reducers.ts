@@ -16,7 +16,6 @@ import { getIpRangeQuery } from '../../common/options_list/ip_search';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
   searchString: { value: '', valid: true },
-  sort: { by: '_count', direction: 'desc' },
 });
 
 export const optionsListReducers = {
@@ -56,7 +55,7 @@ export const optionsListReducers = {
     state: WritableDraft<OptionsListReduxState>,
     action: PayloadAction<SuggestionsSorting>
   ) => {
-    state.componentState.sort = action.payload;
+    state.explicitInput.sort = action.payload;
   },
   selectExists: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     if (action.payload) {

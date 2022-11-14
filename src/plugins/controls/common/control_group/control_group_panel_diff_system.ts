@@ -7,7 +7,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { omit, isEqual } from 'lodash';
+import { omit, isEqual, isEqualWith } from 'lodash';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../options_list/types';
 
 import { ControlPanelState } from './types';
@@ -32,6 +32,7 @@ export const ControlPanelDiffSystems: {
       }
 
       const {
+        sort: sortA,
         exclude: excludeA,
         hideExists: hideExistsA,
         hideExclude: hideExcludeA,
@@ -42,6 +43,7 @@ export const ControlPanelDiffSystems: {
         ...inputA
       }: Partial<OptionsListEmbeddableInput> = initialInput.explicitInput;
       const {
+        sort: sortB,
         exclude: excludeB,
         hideExists: hideExistsB,
         hideExclude: hideExcludeB,
@@ -51,7 +53,6 @@ export const ControlPanelDiffSystems: {
         runPastTimeout: runPastTimeoutB,
         ...inputB
       }: Partial<OptionsListEmbeddableInput> = newInput.explicitInput;
-
       return (
         Boolean(excludeA) === Boolean(excludeB) &&
         Boolean(hideExistsA) === Boolean(hideExistsB) &&
@@ -60,6 +61,11 @@ export const ControlPanelDiffSystems: {
         Boolean(existsSelectedA) === Boolean(existsSelectedB) &&
         Boolean(runPastTimeoutA) === Boolean(runPastTimeoutB) &&
         isEqual(selectedA ?? [], selectedB ?? []) &&
+        isEqualWith(sortA, sortB, (a, b) => {
+          const defaultA = a ?? { by: '_count', direction: 'desc' };
+          const defaultB = b ?? { by: '_count', direction: 'desc' };
+          return isEqual(defaultA, defaultB);
+        }) &&
         deepEqual(inputA, inputB)
       );
     },

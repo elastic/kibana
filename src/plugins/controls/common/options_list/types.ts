@@ -20,6 +20,7 @@ export interface SuggestionsSorting {
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
   selectedOptions?: string[];
+  sort?: SuggestionsSorting;
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
