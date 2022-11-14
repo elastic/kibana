@@ -39,9 +39,9 @@ export interface RegistrationServices {
 }
 
 export function registerConnectorTypes({
-                                         connectorTypeRegistry,
-                                         services,
-                                       }: {
+  connectorTypeRegistry,
+  services,
+}: {
   connectorTypeRegistry: TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'];
   services: RegistrationServices;
 }) {
