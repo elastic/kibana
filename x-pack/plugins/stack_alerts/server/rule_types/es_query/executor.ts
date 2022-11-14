@@ -107,51 +107,28 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       .replaceState({ latestTimestamp, dateStart, dateEnd })
       .scheduleActions(ActionGroupId, actionContext);
 
-    // update the timestamp based on the current search results
-    const firstValidTimefieldSort = getValidTimefieldSort(
-      searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
-    );
-    if (firstValidTimefieldSort) {
-      latestTimestamp = firstValidTimefieldSort;
+    if (!isGroupAgg) {
+      // update the timestamp based on the current search results
+      const firstValidTimefieldSort = getValidTimefieldSort(
+        result.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
+      );
+      if (firstValidTimefieldSort) {
+        latestTimestamp = firstValidTimefieldSort;
+      }
     }
-
-    // we only create one alert if the condition is met, so we would only ever
-    // reach the alert limit if the limit is less than 1
-    alertFactory.alertLimit.setLimitReached(alertLimit < 1);
   }
 
-  if (conditionMet) {
-    const baseActiveContext: EsQueryRuleActionContext = {
-      ...baseContext,
-      conditions: getContextConditionsDescription(params.thresholdComparator, params.threshold),
-    } as EsQueryRuleActionContext;
-
-    const actionContext = addMessages(name, baseActiveContext, params);
-    const alertInstance = alertFactory.create(ConditionMetAlertInstanceId);
-    alertInstance
-      // store the params we would need to recreate the query that led to this alert instance
-      .replaceState({ latestTimestamp, dateStart, dateEnd })
-      .scheduleActions(ActionGroupId, actionContext);
-
-    // update the timestamp based on the current search results
-    const firstValidTimefieldSort = getValidTimefieldSort(
-      searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
-    );
-    if (firstValidTimefieldSort) {
-      latestTimestamp = firstValidTimefieldSort;
-    }
-
-    // we only create one alert if the condition is met, so we would only ever
-    // reach the alert limit if the limit is less than 1
-    alertFactory.alertLimit.setLimitReached(alertLimit < 1);
-  } else {
-    alertFactory.alertLimit.setLimitReached(false);
-  }
+  // alertFactory.alertLimit.setLimitReached(result.truncated);
 
   const { getRecoveredAlerts } = alertFactory.done();
-  for (const alert of getRecoveredAlerts()) {
+  for (const recoveredAlert of getRecoveredAlerts()) {
+    const alertId = recoveredAlert.getId();
     const baseRecoveryContext: EsQueryRuleActionContext = {
-      ...baseContext,
+      title: name,
+      date: currentTimestamp,
+      value: unmetGroupValues[alertId] ?? 0,
+      hits: [],
+      link,
       conditions: getContextConditionsDescription(
         params.thresholdComparator,
         params.threshold,
@@ -159,7 +136,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       ),
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages(name, baseRecoveryContext, params, true);
-    alert.setContext(recoveryContext);
+    recoveredAlert.setContext(recoveryContext);
   }
 
   return { latestTimestamp };
