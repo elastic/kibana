@@ -15,10 +15,9 @@ export interface FormInput {
 
 export function validateInputs(inputs: { [k: string]: FormInput }) {
   return Object.values(inputs).reduce((acc, input) => {
-    if (acc === false) {
-      return acc;
-    }
-    return input.validate();
+    const res = input.validate();
+
+    return acc === false ? acc : res;
   }, true);
 }
 
