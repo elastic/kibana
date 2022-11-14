@@ -7,6 +7,7 @@
 
 /* eslint-disable prettier/prettier,no-console,@typescript-eslint/ban-ts-comment,@typescript-eslint/no-var-requires,import/no-extraneous-dependencies,padding-line-between-statements */
 
+// force cypress tests to run
 // / <reference types="cypress" />
 // @ts-check
 
