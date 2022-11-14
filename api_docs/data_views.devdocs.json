@@ -677,7 +677,7 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/expression/search_source_expression_form.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -969,15 +969,15 @@
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -8970,7 +8970,7 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/expression/search_source_expression_form.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -9262,15 +9262,15 @@
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -16344,7 +16344,7 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/expression/search_source_expression_form.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -16636,15 +16636,15 @@
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",

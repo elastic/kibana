@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { convertToLines } from './convert_to_lines';
 
 const esResponse = {
