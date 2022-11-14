@@ -10,9 +10,9 @@ import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core-theme-browser';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-browser';
-import { App, AppDeps } from './app';
+import { App } from './app';
 
-interface BootDeps extends AppDeps {
+interface BootDeps {
   element: HTMLElement;
   savedObjects: SavedObjectsClientContract;
   I18nContext: any;
@@ -20,11 +20,11 @@ interface BootDeps extends AppDeps {
 }
 
 export const renderApp = (bootDeps: BootDeps) => {
-  const { I18nContext, element, savedObjects, theme$, ...appDeps } = bootDeps;
+  const { I18nContext, element, theme$ } = bootDeps;
   render(
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>
-        <App {...appDeps} />
+        <App />
       </KibanaThemeProvider>
     </I18nContext>,
     element

@@ -5,28 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { ToastsSetup } from '@kbn/core-notifications-browser';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { Observable } from 'rxjs';
-import { ManagementAppMountParams, RegisterManagementAppArgs } from '@kbn/management-plugin/public';
-import { ApplicationStart } from '@kbn/core-application-browser';
-import { ExecutionContextStart } from '@kbn/core-execution-context-browser';
-import { LicenseStatus } from '../types';
-
-export interface AppDeps {
-  toasts: ToastsSetup;
-  http: HttpSetup;
-  uiSettings: IUiSettingsClient;
-  theme: ChartsPluginSetup['theme'];
-  createTimeBuckets: () => any;
-  licenseStatus$: Observable<LicenseStatus>;
-  setBreadcrumbs: Parameters<RegisterManagementAppArgs['mount']>[0]['setBreadcrumbs'];
-  history: ManagementAppMountParams['history'];
-  getUrlForApp: ApplicationStart['getUrlForApp'];
-  executionContext: ExecutionContextStart;
-}
 
 export const App = () => {
   return <div />;
