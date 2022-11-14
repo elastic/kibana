@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseQueryResult } from '@tanstack/react-query';
-import { createReactQueryResponse } from '../../../test/fixtures/react_query';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { LatestFindingsContainer, getDefaultQuery } from './latest_findings_container';
