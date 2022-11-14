@@ -15,9 +15,9 @@ import {
   EuiLink,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { statusColors } from '../../../common/constants';
 import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
 
@@ -49,6 +49,8 @@ export const RisksTable = ({
   viewAllButtonTitle,
   compact,
 }: RisksTableProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
       {
@@ -78,7 +80,7 @@ export const RisksTable = ({
             gutterSize="none"
             alignItems="center"
             justifyContent="flexEnd"
-            style={{ gap: euiThemeVars.gutterTypes.gutterSmall }}
+            style={{ gap: euiTheme.size.s }}
           >
             <EuiFlexItem>
               <EuiToolTip
@@ -93,8 +95,8 @@ export const RisksTable = ({
                 <EuiFlexGroup
                   gutterSize="none"
                   style={{
-                    height: euiThemeVars.euiSizeXS,
-                    borderRadius: euiThemeVars.euiBorderRadius,
+                    height: euiTheme.size.xs,
+                    borderRadius: euiTheme.border.radius.medium,
                     overflow: 'hidden',
                     gap: 1,
                   }}
@@ -115,7 +117,7 @@ export const RisksTable = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" style={{ fontWeight: euiThemeVars.euiFontWeightBold }}>{`${
+              <EuiText size="xs" style={{ fontWeight: euiTheme.font.weight.bold }}>{`${
                 postureScore?.toFixed(0) || 0
               }%`}</EuiText>
             </EuiFlexItem>
@@ -123,7 +125,14 @@ export const RisksTable = ({
         ),
       },
     ],
-    [compact, onCellClick]
+    [
+      compact,
+      euiTheme.border.radius.medium,
+      euiTheme.font.weight.bold,
+      euiTheme.size.s,
+      euiTheme.size.xs,
+      onCellClick,
+    ]
   );
 
   const sortedByComplianceScore = getTopRisks(cisSectionsEvaluations, maxItems);
