@@ -5,17 +5,17 @@
  * 2.0.
  */
 // copy this one
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   sendPostFleetProxy,
-  sendPostFleetServerHost,
-  sendPutFleetServerHost,
+  sendPutFleetProxy,
   useInput,
   useStartServices,
+  validateInputs,
 } from '../../../../hooks';
 import { isDiffPathProtocol } from '../../../../../../../common/services';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -129,11 +129,47 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
 
   const nameInput = useInput(fleetProxy?.name ?? '', validateName, isPreconfigured);
   const urlInput = useInput(fleetProxy?.url ?? '', validateUrl, isPreconfigured);
-
-  const validate = useCallback(
-    () => nameInput.validate() && urlInput.validate(),
-    [nameInput, urlInput]
+  const proxyHeadersInput = useInput(
+    fleetProxy?.proxy_headers ?? '',
+    () => undefined,
+    isPreconfigured
   );
+  const certificateAuthoritiesInput = useInput(
+    fleetProxy?.certificate_authorities ?? '',
+    () => undefined,
+    isPreconfigured
+  );
+  const certificateInput = useInput(
+    fleetProxy?.certificate ?? '',
+    () => undefined,
+    isPreconfigured
+  );
+  const certificateKeyInput = useInput(
+    fleetProxy?.certificate_key ?? '',
+    () => undefined,
+    isPreconfigured
+  );
+
+  const inputs = useMemo(
+    () => ({
+      nameInput,
+      urlInput,
+      proxyHeadersInput,
+      certificateAuthoritiesInput,
+      certificateInput,
+      certificateKeyInput,
+    }),
+    [
+      nameInput,
+      urlInput,
+      proxyHeadersInput,
+      certificateAuthoritiesInput,
+      certificateInput,
+      certificateKeyInput,
+    ]
+  );
+
+  const validate = useCallback(() => validateInputs(inputs), [inputs]);
 
   const submit = useCallback(async () => {
     try {
@@ -145,7 +181,7 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
       }
       setIsLoading(true);
       if (fleetProxy) {
-        const res = await sendPutFleetServerHost(fleetProxy.id, {
+        const res = await sendPutFleetProxy(fleetProxy.id, {
           name: nameInput.value,
           url: urlInput.value,
         });
@@ -188,9 +224,6 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
     isLoading,
     isDisabled,
     submit,
-    inputs: {
-      nameInput,
-      urlInput,
-    },
+    inputs,
   };
 }

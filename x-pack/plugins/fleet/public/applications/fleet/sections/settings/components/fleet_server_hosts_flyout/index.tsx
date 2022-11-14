@@ -33,6 +33,7 @@ import { FLYOUT_MAX_WIDTH } from '../../constants';
 import type { FleetServerHost } from '../../../../types';
 
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
+import { TextInput } from '../form';
 
 export interface FleetServerHostsFlyoutProps {
   onClose: () => void;
@@ -69,28 +70,20 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm onSubmit={form.submit}>
-          <EuiFormRow
-            fullWidth
+          <TextInput
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.nameInputLabel"
                 defaultMessage="Name"
               />
             }
-            {...inputs.nameInput.formRowProps}
-          >
-            <EuiFieldText
-              data-test-subj="fleetServerHostsFlyout.nameInput"
-              fullWidth
-              {...inputs.nameInput.props}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.fleetServerHostsFlyout.nameInputPlaceholder',
-                {
-                  defaultMessage: 'Specify name',
-                }
-              )}
-            />
-          </EuiFormRow>
+            inputProps={inputs.nameInput}
+            dataTestSubj="fleetServerHostsFlyout.nameInput"
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.fleetServerHostsFlyout.nameInputPlaceholder',
+              { defaultMessage: 'Specify name' }
+            )}
+          />
           <EuiFormRow
             fullWidth
             label={

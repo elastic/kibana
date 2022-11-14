@@ -9,6 +9,19 @@ import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 
+export interface FormInput {
+  validate: () => boolean;
+}
+
+export function validateInputs(inputs: { [k: string]: FormInput }) {
+  return Object.values(inputs).reduce((acc, input) => {
+    if (acc === false) {
+      return acc;
+    }
+    return input.validate();
+  }, true);
+}
+
 export function useInput(
   defaultValue = '',
   validate?: (value: string) => string[] | undefined,

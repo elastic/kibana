@@ -17,3 +17,10 @@ export interface PostFleetProxiesRequest {
     url: string;
   };
 }
+
+export interface PutFleetProxiesRequest {
+  body: {
+    name?: string;
+    url?: string;
+  };
+}

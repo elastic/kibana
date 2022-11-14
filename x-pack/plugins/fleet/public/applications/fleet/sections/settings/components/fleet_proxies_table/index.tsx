@@ -55,7 +55,13 @@ export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> 
           defaultMessage: 'Name',
         }),
       },
-
+      {
+        truncateText: true,
+        field: 'url',
+        name: i18n.translate('xpack.fleet.settings.fleetProxiesTable.urlColumnTitle', {
+          defaultMessage: 'Url',
+        }),
+      },
       {
         width: '68px',
         render: (fleetProxy: FleetProxy) => {

@@ -9,6 +9,7 @@ import { fleetProxiesRoutesService } from '../../../common/services';
 import type {
   GetFleetProxiesResponse,
   PostFleetProxiesRequest,
+  PutFleetProxiesRequest,
 } from '../../../common/types/rest_spec/fleet_proxies';
 
 import { sendRequest, useRequest } from './use_request';
@@ -28,6 +29,10 @@ export function sendPostFleetProxy(body: PostFleetProxiesRequest['body']) {
   return sendRequest({ method: 'post', path: fleetProxiesRoutesService.getCreatePath(), body });
 }
 
-export function sendPutFleetProxy(proxyId: string) {
-  return sendRequest({ method: 'delete', path: fleetProxiesRoutesService.getDeletePath(proxyId) });
+export function sendPutFleetProxy(proxyId: string, body: PutFleetProxiesRequest['body']) {
+  return sendRequest({
+    method: 'put',
+    path: fleetProxiesRoutesService.getUpdatePath(proxyId),
+    body,
+  });
 }
