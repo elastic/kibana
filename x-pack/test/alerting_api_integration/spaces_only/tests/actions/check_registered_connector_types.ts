@@ -23,27 +23,30 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
         .then((response) => response.body);
 
       expect(
-        registeredConnectorTypes.filter(
-          (connectorType: string) => !connectorType.startsWith('test.')
-        )
-      ).to.eql([
-        '.email',
-        '.index',
-        '.pagerduty',
-        '.swimlane',
-        '.server-log',
-        '.slack',
-        '.webhook',
-        '.cases-webhook',
-        '.xmatters',
-        '.servicenow',
-        '.servicenow-sir',
-        '.servicenow-itom',
-        '.jira',
-        '.resilient',
-        '.teams',
-        '.opsgenie',
-      ]);
+        registeredConnectorTypes
+          .filter((connectorType: string) => !connectorType.startsWith('test.'))
+          .sort()
+      ).to.eql(
+        [
+          '.email',
+          '.index',
+          '.pagerduty',
+          '.swimlane',
+          '.server-log',
+          '.slack',
+          '.webhook',
+          '.cases-webhook',
+          '.xmatters',
+          '.servicenow',
+          '.servicenow-sir',
+          '.servicenow-itom',
+          '.jira',
+          '.resilient',
+          '.teams',
+          '.tines',
+          '.opsgenie',
+        ].sort()
+      );
     });
   });
 }
