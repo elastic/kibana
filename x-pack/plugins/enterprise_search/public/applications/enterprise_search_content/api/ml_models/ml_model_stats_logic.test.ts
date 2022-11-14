@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
+import { mlModelStats } from '../../__mocks__/ml_models.mock';
 
-import { getMLModelsStats, GetMlModelsStatsResponse } from './ml_model_stats_logic';
+import { getMLModelsStats } from './ml_model_stats_logic';
 
 describe('MLModelsApiLogic', () => {
   const { http } = mockHttpValues;
@@ -15,26 +16,10 @@ describe('MLModelsApiLogic', () => {
   });
   describe('getMLModelsStats', () => {
     it('calls the ml api', async () => {
-      const response: GetMlModelsStatsResponse = {
-        count: 1,
-        trained_model_stats: [
-          {
-            inference_stats: {
-              cache_miss_count: 0,
-              failure_count: 0,
-              inference_count: 100,
-              missing_all_fields_count: 0,
-              timestamp: 0,
-            },
-            model_id: 'unit-test',
-            pipeline_count: 1,
-          },
-        ],
-      };
-      http.get.mockResolvedValue(response);
+      http.get.mockResolvedValue(mlModelStats);
       const result = await getMLModelsStats();
       expect(http.get).toHaveBeenCalledWith('/api/ml/trained_models/_stats');
-      expect(result).toEqual(response);
+      expect(result).toEqual(mlModelStats);
     });
   });
 });

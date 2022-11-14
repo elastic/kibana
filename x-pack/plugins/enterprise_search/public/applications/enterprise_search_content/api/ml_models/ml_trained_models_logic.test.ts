@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { LogicMounter } from '../../../__mocks__/kea_logic';
+import { mlModels, mlModelStats } from '../../__mocks__/ml_models.mock';
 
 import { HttpError, Status } from '../../../../../common/types/api';
 
@@ -32,35 +33,6 @@ const DEFAULT_VALUES: TrainedModelsApiLogicValues = {
   modelStatsStatus: Status.IDLE,
 };
 
-const mockModels: TrainedModelsApiLogicValues['modelsData'] = [
-  {
-    inference_config: { ner: {} },
-    input: {
-      field_names: ['text_field'],
-    },
-    model_id: 'unit-test',
-    model_type: 'pytorch',
-    tags: [],
-    version: '1',
-  },
-];
-const mockStats: TrainedModelsApiLogicValues['modelStatsData'] = {
-  count: 1,
-  trained_model_stats: [
-    {
-      inference_stats: {
-        cache_miss_count: 0,
-        failure_count: 0,
-        inference_count: 0,
-        missing_all_fields_count: 0,
-        timestamp: 0,
-      },
-      model_id: 'unit-test',
-      pipeline_count: 1,
-    },
-  ],
-};
-
 describe('TrainedModelsApiLogic', () => {
   const { mount } = new LogicMounter(TrainedModelsApiLogic);
   const { mount: mountMLModelsApiLogic } = new LogicMounter(MLModelsApiLogic);
@@ -80,23 +52,27 @@ describe('TrainedModelsApiLogic', () => {
   describe('selectors', () => {
     describe('data', () => {
       it('returns combined trained models', () => {
-        MLModelsApiLogic.actions.apiSuccess(mockModels);
-        MLModelsStatsApiLogic.actions.apiSuccess(mockStats);
+        MLModelsApiLogic.actions.apiSuccess(mlModels);
+        MLModelsStatsApiLogic.actions.apiSuccess(mlModelStats);
 
         expect(TrainedModelsApiLogic.values.data).toEqual([
           {
-            ...mockModels[0],
-            ...mockStats.trained_model_stats[0],
+            ...mlModels[0],
+            ...mlModelStats.trained_model_stats[0],
+          },
+          {
+            ...mlModels[1],
+            ...mlModelStats.trained_model_stats[1],
           },
         ]);
       });
       it('returns just models if stats not available', () => {
-        MLModelsApiLogic.actions.apiSuccess(mockModels);
+        MLModelsApiLogic.actions.apiSuccess(mlModels);
 
-        expect(TrainedModelsApiLogic.values.data).toEqual(mockModels);
+        expect(TrainedModelsApiLogic.values.data).toEqual(mlModels);
       });
       it('returns null trained models even with stats if models missing', () => {
-        MLModelsStatsApiLogic.actions.apiSuccess(mockStats);
+        MLModelsStatsApiLogic.actions.apiSuccess(mlModelStats);
 
         expect(TrainedModelsApiLogic.values.data).toEqual(null);
       });
@@ -120,8 +96,8 @@ describe('TrainedModelsApiLogic', () => {
       } as HttpError;
 
       it('returns null with no errors', () => {
-        MLModelsApiLogic.actions.apiSuccess(mockModels);
-        MLModelsStatsApiLogic.actions.apiSuccess(mockStats);
+        MLModelsApiLogic.actions.apiSuccess(mlModels);
+        MLModelsStatsApiLogic.actions.apiSuccess(mlModelStats);
 
         expect(TrainedModelsApiLogic.values.error).toBeNull();
       });
@@ -144,23 +120,23 @@ describe('TrainedModelsApiLogic', () => {
     });
     describe('status', () => {
       it('returns matching status for both calls', () => {
-        MLModelsApiLogic.actions.apiSuccess(mockModels);
-        MLModelsStatsApiLogic.actions.apiSuccess(mockStats);
+        MLModelsApiLogic.actions.apiSuccess(mlModels);
+        MLModelsStatsApiLogic.actions.apiSuccess(mlModelStats);
 
         expect(TrainedModelsApiLogic.values.status).toEqual(Status.SUCCESS);
       });
       it('returns models status when its lower', () => {
-        MLModelsStatsApiLogic.actions.apiSuccess(mockStats);
+        MLModelsStatsApiLogic.actions.apiSuccess(mlModelStats);
 
         expect(TrainedModelsApiLogic.values.status).toEqual(Status.IDLE);
       });
       it('returns stats status when its lower', () => {
-        MLModelsApiLogic.actions.apiSuccess(mockModels);
+        MLModelsApiLogic.actions.apiSuccess(mlModels);
 
         expect(TrainedModelsApiLogic.values.status).toEqual(Status.IDLE);
       });
       it('returns error status if one api call fails', () => {
-        MLModelsApiLogic.actions.apiSuccess(mockModels);
+        MLModelsApiLogic.actions.apiSuccess(mlModels);
         MLModelsStatsApiLogic.actions.apiError({
           body: {
             error: 'Stats Error',

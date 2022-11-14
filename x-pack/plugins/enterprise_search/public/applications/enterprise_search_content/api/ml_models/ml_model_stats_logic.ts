@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
+import { MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
 
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -13,7 +13,7 @@ export type GetMlModelsStatsArgs = undefined;
 
 export interface GetMlModelsStatsResponse {
   count: number;
-  trained_model_stats: TrainedModelStat[];
+  trained_model_stats: MlTrainedModelStats[];
 }
 
 export const getMLModelsStats = async () => {
