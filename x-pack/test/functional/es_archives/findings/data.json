@@ -1,0 +1,455 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "b7cZOIQBWa5nqQeB5Mk_",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-00",
+        "name": "Resource 00"
+      },
+      "result": {
+        "evaluation": "passed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 00",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cLcZOIQBWa5nqQeB5MlU",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-01",
+        "name": "Resource 01"
+      },
+      "result": {
+        "evaluation": "passed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 01",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cbcZOIQBWa5nqQeB5Mlh",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-02",
+        "name": "Resource 02"
+      },
+      "result": {
+        "evaluation": "failed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 02",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "crcZOIQBWa5nqQeB5Mlw",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-03",
+        "name": "Resource 03"
+      },
+      "result": {
+        "evaluation": "failed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 03",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "c7cZOIQBWa5nqQeB5Ml7",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-04",
+        "name": "Resource 04"
+      },
+      "result": {
+        "evaluation": "passed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 04",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "dLcZOIQBWa5nqQeB5MmJ",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-05",
+        "name": "Resource 05"
+      },
+      "result": {
+        "evaluation": "failed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 05",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "dbcZOIQBWa5nqQeB5MmW",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-06",
+        "name": "Resource 06"
+      },
+      "result": {
+        "evaluation": "passed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 06",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "drcZOIQBWa5nqQeB5Mmk",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-07",
+        "name": "Resource 07"
+      },
+      "result": {
+        "evaluation": "passed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 07",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "d7cZOIQBWa5nqQeB5Mmz",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-08",
+        "name": "Resource 08"
+      },
+      "result": {
+        "evaluation": "passed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 08",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "eLcZOIQBWa5nqQeB5MnA",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-09",
+        "name": "Resource 09"
+      },
+      "result": {
+        "evaluation": "failed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 09",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ebcZOIQBWa5nqQeB5MnM",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-10",
+        "name": "Resource 10"
+      },
+      "result": {
+        "evaluation": "passed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 10",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ercZOIQBWa5nqQeB5Mna",
+    "index": "logs-cloud_security_posture.findings_latest-default",
+    "source": {
+      "event": {
+        "agent_id_status": "missing",
+        "ingested": "2022-11-02T11:28:51Z"
+      },
+      "resource": {
+        "id": "id-11",
+        "name": "Resource 11"
+      },
+      "result": {
+        "evaluation": "failed"
+      },
+      "rule": {
+        "benchmark": {
+          "id": "cis_k8s",
+          "name": "CIS Kubernetes V1.23",
+          "version": "v1.0.0"
+        },
+        "default_value": "",
+        "impact": "",
+        "name": "Rule 11",
+        "rationale": "",
+        "remediation": "",
+        "section": "Kubelet",
+        "tags": [
+          "Kubernetes"
+        ],
+        "type": "process"
+      }
+    }
+  }
+}
