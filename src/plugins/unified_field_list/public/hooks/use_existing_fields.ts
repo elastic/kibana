@@ -31,6 +31,7 @@ export interface ExistingFieldsInfo {
 }
 
 export interface ExistingFieldsFetcherParams {
+  disableAutoFetching?: boolean;
   dataViews: DataView[];
   fromDate: string | null;
   toDate: string | null;
@@ -89,8 +90,11 @@ export const useExistingFieldsFetcher = (
       fetchId: string;
     }): Promise<void> => {
       if (!dataViewId || !query || !filters || !fromDate || !toDate) {
+        // console.log('skipped fetching existence info', dataViewId, fromDate, toDate);
         return;
       }
+
+      // console.log('fetching existence info', dataViewId, fromDate, toDate);
 
       const currentInfo = globalMap$.getValue()?.[dataViewId];
 
@@ -208,8 +212,12 @@ export const useExistingFieldsFetcher = (
   );
 
   useEffect(() => {
-    refetchFieldsExistenceInfo();
-  }, [refetchFieldsExistenceInfo]);
+    if (!params.disableAutoFetching) {
+      refetchFieldsExistenceInfo();
+    } else {
+      // console.log('skipped auto fetching existence info');
+    }
+  }, [refetchFieldsExistenceInfo, params.disableAutoFetching]);
 
   useEffect(() => {
     return () => {

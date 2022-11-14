@@ -186,7 +186,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const filters = useAppStateSelector((state) => state.filters);
 
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
-    dataViews: !isPlainRecord && selectedDataView ? [selectedDataView] : [],
+    disableAutoFetching: true,
+    dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
     query: query!,
     filters: filters!,
     fromDate: sidebarState.dateRange?.fromDate ?? null, // existence fetching will be skipped if `null`
@@ -198,9 +199,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     },
   });
 
+  useEffect(() => {
+    if (sidebarState.status === DiscoverSidebarReducerStatus.COMPLETED) {
+      refetchFieldsExistenceInfo();
+    }
+  }, [refetchFieldsExistenceInfo, sidebarState.status]);
+
   const onFieldEditedExtended = useCallback(async () => {
     await onFieldEdited();
-    refetchFieldsExistenceInfo();
+    refetchFieldsExistenceInfo(); // TODO: check if still necessary
   }, [onFieldEdited, refetchFieldsExistenceInfo]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
