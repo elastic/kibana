@@ -80,8 +80,36 @@ export const transformBucketsToValues = (
     );
 };
 
+export const createFieldValuesMap = (
+  newTermsFields: string[],
+  buckets: estypes.AggregationsCompositeBucket[]
+) => {
+  if (newTermsFields.length === 1) {
+    return undefined;
+  }
+
+  const valuesMap = newTermsFields.reduce<Record<string, Record<string, boolean>>>(
+    (acc, field) => ({ ...acc, [field]: {} }),
+    {}
+  );
+
+  buckets
+    .map((bucket) => bucket.key)
+    .forEach((bucket) => {
+      Object.entries(bucket).forEach(([key, value]) => {
+        const strValue = typeof value !== 'string' ? value.toString() : value;
+        if (strValue != null) {
+          valuesMap[key][strValue] = true;
+        }
+      });
+    });
+
+  return valuesMap;
+};
+
 export const getNewTermsRuntimeMappings = (
-  newTermsFields: string[]
+  newTermsFields: string[],
+  values?: Record<string, Record<string, boolean>>
 ): undefined | { [AGG_FIELD_NAME]: estypes.MappingRuntimeField } => {
   // if new terms include only one field we don't use runtime mappings and don't stich fields buckets together
   if (newTermsFields.length <= 1) {
@@ -92,7 +120,7 @@ export const getNewTermsRuntimeMappings = (
     [AGG_FIELD_NAME]: {
       type: 'keyword',
       script: {
-        params: { fields: newTermsFields },
+        params: { fields: newTermsFields, values },
         source: `
           def stack = new Stack();
           // ES has limit in 100 values for runtime field, after this query will fail
@@ -110,9 +138,14 @@ export const getNewTermsRuntimeMappings = (
                 emit(line);
                 emitLimit = emitLimit - 1;
               } else {
-                for (field in doc[params['fields'][index]]) {
+                def fieldName = params['fields'][index];
+                for (field in doc[fieldName]) {
+                    def fieldStr = String.valueOf(field);
+                    if (!params['values'][fieldName].containsKey(fieldStr)) {
+                      continue;
+                    }
                     def delimiter = index === 0 ? '' : '${DELIMITER}';
-                    def nextLine = line + delimiter + String.valueOf(field).encodeBase64();
+                    def nextLine = line + delimiter + fieldStr.encodeBase64();
           
                     stack.add([index + 1, nextLine])
                 }

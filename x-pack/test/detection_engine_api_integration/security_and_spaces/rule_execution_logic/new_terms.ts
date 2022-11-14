@@ -600,6 +600,23 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('runtime field', () => {
+      it('[POC] should return runtime field created from 2 single values', async () => {
+        // encoded base64 values of "host-0" and  "127.0.0.1" joined with underscore
+        const expectedEncodedValues = ['aG9zdC0w_MTI3LjAuMC4x'];
+        const { hits } = await performSearchQuery({
+          es,
+          query: { match: { id: 'first_doc' } },
+          index: 'new_terms',
+          fields: [AGG_FIELD_NAME],
+          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'host.ip'], {
+            'host.name': { 'host-0': true },
+            'host.ip': { '127.0.0.1': true },
+          }),
+        });
+
+        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
+      });
+
       it('should return runtime field created from 2 single values', async () => {
         // encoded base64 values of "host-0" and  "127.0.0.1" joined with underscore
         const expectedEncodedValues = ['aG9zdC0w_MTI3LjAuMC4x'];

@@ -34,6 +34,7 @@ import {
   getNewTermsRuntimeMappings,
   getAggregationField,
   decodeMatchedValues,
+  createFieldValuesMap,
 } from './utils';
 import {
   addToSearchAfterReturn,
@@ -194,6 +195,7 @@ export const createNewTermsAlertType = (
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
         const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
+        const fieldsValuesMap = createFieldValuesMap(params.newTermsFields, bucketsForField);
         // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
         // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
         // response correspond to each new term.
@@ -210,7 +212,7 @@ export const createNewTermsAlertType = (
           }),
           runtimeMappings: {
             ...runtimeMappings,
-            ...getNewTermsRuntimeMappings(params.newTermsFields),
+            ...getNewTermsRuntimeMappings(params.newTermsFields, fieldsValuesMap),
           },
           searchAfterSortIds: undefined,
           index: inputIndex,
@@ -256,7 +258,7 @@ export const createNewTermsAlertType = (
             }),
             runtimeMappings: {
               ...runtimeMappings,
-              ...getNewTermsRuntimeMappings(params.newTermsFields),
+              ...getNewTermsRuntimeMappings(params.newTermsFields, fieldsValuesMap),
             },
             searchAfterSortIds: undefined,
             index: inputIndex,
