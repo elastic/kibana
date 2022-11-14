@@ -112,7 +112,7 @@ describe('Build KQL Query', () => {
     dataProviders[0].queryMatch.operator = 'includes';
     dataProviders[0].queryMatch.value = ['a', 'b', 'c'];
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : (a OR b OR c)');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual(`name : (\"a\" OR \"b\" OR \"c\")`);
   });
 
   test('Handles bad inputs to buildKQLQuery', () => {
@@ -379,7 +379,7 @@ describe('isStringOrNumberArray', () => {
           field: 'kibana.alert.worflow_status',
           value: ['a', 'b', 'c'],
         })
-      ).toBe('kibana.alert.worflow_status : (a OR b OR c)');
+      ).toBe(`kibana.alert.worflow_status : (\"a\" OR \"b\" OR \"c\")`);
     });
     it('correcty computes IS ONE OF query if value is an empty array', () => {
       expect(
