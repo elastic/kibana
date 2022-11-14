@@ -35,7 +35,6 @@ import {
 import { configServiceMock } from '@kbn/config-mocks';
 import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
 import {
-  ISavedObjectsClientProvider,
   SavedObjectsClientProvider,
   SavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server-internal';
@@ -51,7 +50,6 @@ import {
 
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-import exp from 'constants';
 
 jest.mock('./object_types');
 jest.mock('./deprecations');
