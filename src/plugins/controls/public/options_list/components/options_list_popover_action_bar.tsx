@@ -144,6 +144,7 @@ export const OptionsListPopoverActionBar = ({
                   iconType="sortable"
                   onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
                   aria-label={'sort by'}
+                  disabled={showOnlySelected}
                 />
               }
               isOpen={isSortingPopoverOpen}
