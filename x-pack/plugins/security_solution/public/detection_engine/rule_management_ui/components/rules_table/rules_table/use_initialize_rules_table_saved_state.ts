@@ -5,31 +5,20 @@
  * 2.0.
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { RULE_TABLE_STATE_STORAGE_KEY } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
-import {
-  useInitializeUrlParam,
-  useUpdateUrlParam,
-} from '../../../../../common/utils/global_query_string';
-import type { FilterOptions, SortingOptions } from '../../../../rule_management/logic/types';
+import { useInitializeUrlParam } from '../../../../../common/utils/global_query_string';
+
 import { useRulesTableContext } from './rules_table_context';
+import type { RulesTableSavedState } from './rules_table_saved_state';
 
-interface RulesTableSavedState {
-  isInMemorySorting: boolean;
-  filterOptions: FilterOptions;
-  sorting: SortingOptions;
-  page: number;
-  perPage: number;
-}
-
-export function useSyncRulesTableUrlParam(): void {
-  const { state, actions } = useRulesTableContext();
+export function useInitializeRulesTableSavedState(): void {
+  const { actions } = useRulesTableContext();
   const {
     services: { storage },
   } = useKibana();
-
   const onInitializeRulesTableContextFromUrlParam = useCallback(
     (params: RulesTableSavedState | null) => {
       const savedState: Partial<RulesTableSavedState> = storage.get(RULE_TABLE_STATE_STORAGE_KEY);
@@ -68,19 +57,4 @@ export function useSyncRulesTableUrlParam(): void {
   );
 
   useInitializeUrlParam(URL_PARAM_KEY.rulesTable, onInitializeRulesTableContextFromUrlParam);
-  const updateUrlParam = useUpdateUrlParam<RulesTableSavedState>(URL_PARAM_KEY.rulesTable);
-
-  useEffect(() => {
-    const savedState: RulesTableSavedState = {
-      filterOptions: state.filterOptions,
-      isInMemorySorting: state.isInMemorySorting,
-      sorting: state.sortingOptions,
-      page: state.pagination.page,
-      perPage: state.pagination.perPage,
-    };
-
-    updateUrlParam(savedState);
-
-    storage.set(RULE_TABLE_STATE_STORAGE_KEY, savedState);
-  }, [updateUrlParam, storage, state]);
 }

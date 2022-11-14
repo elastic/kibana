@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
 import { SEARCH_FIRST_RULE_ANCHOR } from '../../guided_onboarding/rules_management_tour';
