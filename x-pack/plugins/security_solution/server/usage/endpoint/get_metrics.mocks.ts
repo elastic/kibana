@@ -9,7 +9,7 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const getUniqueEndpointCountMock = (): SearchResponse<
-  never,
+  unknown,
   Record<string, AggregationsAggregate>
 > => ({
   took: 495,

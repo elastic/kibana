@@ -54,9 +54,10 @@ export const getUniqueEndpointCount = async (
       },
     };
 
-    const response = await esClient.search(query, { meta: true });
-    const { body: endpointCountResponse } = response as unknown as UniqueEndpointCountResponse;
-    return endpointCountResponse.aggregations?.endpoint_count?.value ?? 0;
+    const response = await esClient.search(query);
+    const { aggregations: endpointCountResponse } =
+      response as unknown as UniqueEndpointCountResponse;
+    return endpointCountResponse?.endpoint_count?.value ?? 0;
   } catch (e) {
     tlog(logger, `Failed to get active endpoint count due to: ${e.message}`);
     return 0;
