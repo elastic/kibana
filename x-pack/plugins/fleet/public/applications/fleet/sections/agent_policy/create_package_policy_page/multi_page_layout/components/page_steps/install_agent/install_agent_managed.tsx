@@ -64,6 +64,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     InstallManagedAgentStep({
       installCommand: installManagedCommands,
       apiKeyData: { item: enrollmentAPIKey },
+      enrollToken: enrollmentAPIKey.api_key,
       selectedApiKeyId: enrollmentAPIKey.id,
       isComplete: commandCopied || !!enrolledAgentIds.length,
       fullCopyButton: true,
