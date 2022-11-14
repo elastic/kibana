@@ -15,6 +15,8 @@ export {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
   validateTimeWindowUnits,
+  validateAggType,
+  validateGroupBy,
 } from './lib';
 
 // future enhancement: make these configurable?

@@ -14,6 +14,8 @@ export {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
   validateTimeWindowUnits,
+  validateAggType,
+  validateGroupBy,
   MAX_GROUPS,
   DEFAULT_GROUPS,
   TIME_SERIES_BUCKET_SELECTOR_FIELD,

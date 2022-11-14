@@ -7,12 +7,15 @@
 
 import {
   SearchResponse,
+  SearchHit,
+  SearchHitsMetadata,
   AggregationsSingleMetricAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface ParsedAggregationGroup {
   group: string;
   count: number;
+  hits: Array<SearchHit<unknown>>;
   value?: number;
 }
 
@@ -34,7 +37,12 @@ export const parseAggregationResults = ({
       buckets: [
         {
           key: 'all documents',
-          doc_count: esResult.hits.total ?? 0,
+          doc_count: totalHitsToNumber(esResult.hits.total),
+          topHitsAgg: {
+            hits: {
+              hits: esResult.hits.hits ?? [],
+            },
+          },
           ...(!isCountAgg
             ? {
                 metricAgg: {
@@ -59,6 +67,7 @@ export const parseAggregationResults = ({
     const groupResult: any = {
       group: groupName,
       count: groupBucket?.doc_count,
+      hits: groupBucket?.topHitsAgg?.hits?.hits ?? [],
       ...(!isCountAgg ? { value: groupBucket?.metricAgg?.value } : {}),
     };
     results.push(groupResult);
@@ -66,3 +75,7 @@ export const parseAggregationResults = ({
 
   return results;
 };
+
+function totalHitsToNumber(total: SearchHitsMetadata['total']): number {
+  return typeof total === 'number' ? total : total?.value ?? 0;
+}
