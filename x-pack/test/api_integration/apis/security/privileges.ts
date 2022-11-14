@@ -194,7 +194,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // In this non-Basic case, results should be exactly the same as not supplying the respectLicenseLevel flag
-    describe('GET /api/security/privileges?respectLicenseLevel=false', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/145136
+    describe.skip('GET /api/security/privileges?respectLicenseLevel=false', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
         // If you're removing a privilege, this breaks backwards compatibility
