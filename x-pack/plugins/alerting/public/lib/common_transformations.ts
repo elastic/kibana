@@ -70,6 +70,7 @@ export type ApiRule = Omit<
   | 'alert_type_id'
   | 'muted_instance_ids'
   | 'last_run'
+  | 'next_run'
 > & {
   execution_status: ApiRuleExecutionStatus;
   actions: Array<AsApiContract<RuleAction>>;
@@ -78,6 +79,7 @@ export type ApiRule = Omit<
   rule_type_id: string;
   muted_alert_ids: string[];
   last_run?: AsApiContract<RuleLastRun>;
+  next_run?: string;
 };
 
 export function transformRule(input: ApiRule): Rule {

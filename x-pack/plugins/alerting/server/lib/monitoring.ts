@@ -59,7 +59,7 @@ export const updateMonitoring = ({
 }: {
   monitoring: RuleMonitoring;
   timestamp: string;
-  duration: number;
+  duration?: number;
 }) => {
   const { run } = monitoring;
   const { last_run: lastRun, ...rest } = run;
@@ -99,6 +99,6 @@ export const convertMonitoringFromRawAndVerify = (
   return updateMonitoring({
     monitoring,
     timestamp: new Date(parsedDateMillis).toISOString(),
-    duration: monitoring.run.last_run.metrics.duration || 0,
+    duration: monitoring.run.last_run.metrics.duration,
   });
 };

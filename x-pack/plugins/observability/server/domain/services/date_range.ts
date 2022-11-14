@@ -7,9 +7,9 @@
 
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
-import { DateRange, toMomentUnitOfTime } from '../../types/models';
+import { DateRange, toMomentUnitOfTime } from '../models';
 
-import type { TimeWindow } from '../../types/models/time_window';
+import type { TimeWindow } from '../models/time_window';
 import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '../../types/schema';
 
 export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date()): DateRange => {

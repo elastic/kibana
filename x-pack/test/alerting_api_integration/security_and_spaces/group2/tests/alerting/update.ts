@@ -140,6 +140,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
                 Date.parse(response.body.created_at)
               );
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -226,6 +229,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
                 Date.parse(response.body.created_at)
               );
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -323,6 +329,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
                 Date.parse(response.body.created_at)
               );
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -420,6 +429,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
                 Date.parse(response.body.created_at)
               );
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -515,6 +527,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
                 Date.parse(response.body.created_at)
               );
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,

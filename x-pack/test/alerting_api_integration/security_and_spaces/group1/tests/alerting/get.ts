@@ -93,6 +93,9 @@ const getTestUtils = (
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

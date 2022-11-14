@@ -1568,10 +1568,15 @@ describe('Task Runner', () => {
 
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
-      const executeRuleDebugLogger = logger.debug.mock.calls[3][0];
-      expect(executeRuleDebugLogger as string).toMatchInlineSnapshot(
+      const updateRuleDebugLogger = logger.debug.mock.calls[3][0];
+      expect(updateRuleDebugLogger as string).toMatchInlineSnapshot(
         `"Updating rule task for test rule with id 1 - {\\"lastExecutionDate\\":\\"1970-01-01T00:00:00.000Z\\",\\"status\\":\\"error\\",\\"error\\":{\\"reason\\":\\"read\\",\\"message\\":\\"Saved object [alert/1] not found\\"}} - {\\"outcome\\":\\"failed\\",\\"warning\\":\\"read\\",\\"outcomeMsg\\":\\"Saved object [alert/1] not found\\",\\"alertsCount\\":{}}"`
       );
+      const executeRuleDebugLogger = logger.debug.mock.calls[4][0];
+      expect(executeRuleDebugLogger as string).toMatchInlineSnapshot(
+        `"Executing Rule foo:test:1 has resulted in Error: Saved object [alert/1] not found"`
+      );
+
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
@@ -1650,10 +1655,15 @@ describe('Task Runner', () => {
 
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
-      const ruleExecuteDebugLog = logger.debug.mock.calls[3][0];
-      expect(ruleExecuteDebugLog as string).toMatchInlineSnapshot(
+      const updateRuleDebugLogger = logger.debug.mock.calls[3][0];
+      expect(updateRuleDebugLogger as string).toMatchInlineSnapshot(
         `"Updating rule task for test rule with id 1 - {\\"lastExecutionDate\\":\\"1970-01-01T00:00:00.000Z\\",\\"status\\":\\"error\\",\\"error\\":{\\"reason\\":\\"read\\",\\"message\\":\\"Saved object [alert/1] not found\\"}} - {\\"outcome\\":\\"failed\\",\\"warning\\":\\"read\\",\\"outcomeMsg\\":\\"Saved object [alert/1] not found\\",\\"alertsCount\\":{}}"`
       );
+      const ruleExecuteDebugLog = logger.debug.mock.calls[4][0];
+      expect(ruleExecuteDebugLog as string).toMatchInlineSnapshot(
+        `"Executing Rule test space:test:1 has resulted in Error: Saved object [alert/1] not found"`
+      );
+
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
@@ -2272,7 +2282,6 @@ describe('Task Runner', () => {
             timestamp: 0,
           },
         ],
-        nextRun: null,
       })
     );
   });

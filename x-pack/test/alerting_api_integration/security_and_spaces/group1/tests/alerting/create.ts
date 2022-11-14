@@ -130,6 +130,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(typeof response.body.scheduled_task_id).to.be('string');
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
 
               const taskRecord = await getScheduledTask(response.body.scheduled_task_id);
               expect(taskRecord.type).to.eql('task');

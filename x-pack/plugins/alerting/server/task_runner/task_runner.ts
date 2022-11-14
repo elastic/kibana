@@ -661,6 +661,8 @@ export class TaskRunner<
     let nextRun: string | null = null;
     if (isOk(schedule)) {
       nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
+    } else if (taskSchedule) {
+      nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
     }
 
     const { executionStatus, executionMetrics } = await this.timer.runWithTimer(
