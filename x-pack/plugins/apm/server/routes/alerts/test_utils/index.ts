@@ -12,6 +12,7 @@ import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 
 export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<any>;
@@ -57,7 +58,9 @@ export const createRuleTypeMocks = () => {
         serverBasePath: '/eyr',
       } as IBasePath,
       config$: mockedConfig$,
-      getAlertDetailsConfig: jest.fn().mockReturnValue({ apm: true }),
+      observability: {
+        getAlertDetailsConfig: jest.fn().mockReturnValue({ apm: true }),
+      } as unknown as ObservabilityPluginSetup,
       logger: loggerMock,
       ruleDataClient: ruleRegistryMocks.createRuleDataClient(
         '.alerts-observability.apm.alerts'
