@@ -199,7 +199,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { columns } = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,
       userProfiles: userProfiles ?? new Map(),
-      currentUserProfile,
       isSelectorView,
       connectors,
       onRowClick,

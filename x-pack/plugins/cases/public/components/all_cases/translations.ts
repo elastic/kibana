@@ -137,3 +137,13 @@ export const NO_ASSIGNEES = i18n.translate(
     defaultMessage: 'No assignees',
   }
 );
+
+export const SHOW_LESS = i18n.translate('xpack.cases.allCasesView.showLessAvatars', {
+  defaultMessage: 'show less',
+});
+
+export const SHOW_MORE = (count: number) =>
+  i18n.translate('xpack.cases.allCasesView.showMoreAvatars', {
+    defaultMessage: '+{count} more',
+    values: { count },
+  });
