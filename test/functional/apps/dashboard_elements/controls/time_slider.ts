@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should display document count for global time range when no timeslice is set', async () => {
-          expect(await discover.getEmbeddableDocumentCount()).to.be('14005 documents');
+          expect(await discover.getSavedSearchDocumentCount()).to.be('14005 documents');
         });
 
         it('should display document count for timeslice when timeslice is selected', async () => {
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardControls.gotoNextTimeSlice();
           await dashboardControls.closeTimeSliderPopover(); // close popover so its not blocking panel
           await dashboard.waitForRenderComplete();
-          expect(await discover.getEmbeddableDocumentCount()).to.be('605 documents');
+          expect(await discover.getSavedSearchDocumentCount()).to.be('605 documents');
         });
       });
     });

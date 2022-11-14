@@ -247,7 +247,7 @@ export class DiscoverPageObject extends FtrService {
     return parseInt(await this.getHitCount(), 10);
   }
 
-  public async getEmbeddableDocumentCount() {
+  public async getSavedSearchDocumentCount() {
     return await this.testSubjects.getVisibleText('savedSearchTotalDocuments');
   }
 
