@@ -56,7 +56,7 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
               }}
               wrapperProps={{ style: { display: 'block', height: '100%', width: '100%' } }}
               src={this.deps.getImageDownloadHref(input.imageConfig.src.fileId)}
-              alt={input.imageConfig.alt ?? ''}
+              alt={input.imageConfig.altText ?? ''}
             />
           )}
         </div>
