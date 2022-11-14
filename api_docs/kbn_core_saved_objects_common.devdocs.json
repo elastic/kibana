@@ -801,6 +801,14 @@
             "path": "src/core/types/index.ts"
           },
           {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/common/types.ts"
           },
@@ -839,14 +847,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
           },
           {
             "plugin": "core",

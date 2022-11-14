@@ -14,7 +14,7 @@ import type { GetCategoriesResponse } from '../types';
 export function useCategories(prerelease?: boolean) {
   const [data, setData] = useState<GetCategoriesResponse | undefined>();
   const [error, setError] = useState<RequestError | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isPrereleaseEnabled, setIsPrereleaseEnabled] = useState(prerelease);
 
   const fetchData = useCallback(async () => {

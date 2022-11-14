@@ -55,7 +55,7 @@ TYPES_DEPS = [
   "@npm//tslib",
   "@npm//@types/jest",
   "@npm//@types/lodash",
-  "@npm//@types/moment-timezone",
+  "@npm//moment-timezone",
   "@npm//@types/node",
 ]
 

@@ -23,7 +23,10 @@ export const ActionBar = () => {
   const history = useHistory();
   const editRouteMatch = useRouteMatch({ path: MONITOR_EDIT_ROUTE });
   const isEdit = editRouteMatch?.isExact;
-  const { handleSubmit } = useFormContext();
+  const {
+    handleSubmit,
+    formState: { errors },
+  } = useFormContext();
 
   const [monitorData, setMonitorData] = useState<SyntheticsMonitor | undefined>(undefined);
 
@@ -60,7 +63,9 @@ export const ActionBar = () => {
   }, [data, status, monitorId, loading]);
 
   const formSubmitter = (formData: Record<string, any>) => {
-    setMonitorData(format(formData) as SyntheticsMonitor);
+    if (!Object.keys(errors).length) {
+      setMonitorData(format(formData) as SyntheticsMonitor);
+    }
   };
 
   return status === FETCH_STATUS.SUCCESS ? (

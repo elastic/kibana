@@ -32,6 +32,26 @@ export function defineRoutes(
   { logger }: { logger: Logger }
 ) {
   const router = core.http.createRouter();
+  router.get(
+    {
+      path: '/api/alerts_fixture/registered_rule_types',
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [_, { alerting }] = await core.getStartServices();
+        return res.ok({
+          body: alerting.getAllTypes(),
+        });
+      } catch (err) {
+        return res.badRequest({ body: err });
+      }
+    }
+  );
   router.put(
     {
       path: '/api/alerts_fixture/{id}/replace_api_key',
@@ -404,6 +424,27 @@ export function defineRoutes(
         return res.ok({ body: { apiKey, apiKeyOwner } });
       } catch (err) {
         return res.badRequest({ body: err });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/alerts_fixture/registered_connector_types',
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [_, { actions }] = await core.getStartServices();
+        return res.ok({
+          body: actions.getAllTypes(),
+        });
+      } catch (e) {
+        return res.badRequest({ body: e });
       }
     }
   );

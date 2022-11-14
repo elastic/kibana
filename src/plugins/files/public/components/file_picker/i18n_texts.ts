@@ -12,17 +12,17 @@ export const i18nTexts = {
   title: i18n.translate('files.filePicker.title', {
     defaultMessage: 'Select a file',
   }),
+  titleMultiple: i18n.translate('files.filePicker.titleMultiple', {
+    defaultMessage: 'Select files',
+  }),
   loadingFilesErrorTitle: i18n.translate('files.filePicker.error.loadingTitle', {
     defaultMessage: 'Could not load files',
   }),
   retryButtonLabel: i18n.translate('files.filePicker.error.retryButtonLabel', {
     defaultMessage: 'Retry',
   }),
-  emptyStatePrompt: i18n.translate('files.filePicker.emptyStatePrompt', {
-    defaultMessage: 'No files found',
-  }),
-  emptyStatePromptSubtitle: i18n.translate('files.filePicker.emptyStatePromptSubtitle', {
-    defaultMessage: 'Upload your first file.',
+  emptyStatePrompt: i18n.translate('files.filePicker.emptyStatePromptTitle', {
+    defaultMessage: 'Upload your first file',
   }),
   selectFileLabel: i18n.translate('files.filePicker.selectFileButtonLable', {
     defaultMessage: 'Select file',
@@ -36,7 +36,7 @@ export const i18nTexts = {
     defaultMessage: 'my-file-*',
   }),
   emptyFileGridPrompt: i18n.translate('files.filePicker.emptyGridPrompt', {
-    defaultMessage: 'No files matched filter',
+    defaultMessage: 'No files match your filter',
   }),
   loadMoreButtonLabel: i18n.translate('files.filePicker.loadMoreButtonLabel', {
     defaultMessage: 'Load more',
