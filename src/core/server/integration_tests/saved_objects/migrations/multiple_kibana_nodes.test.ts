@@ -121,9 +121,7 @@ describe('migration v2', () => {
     },
   };
 
-  afterAll(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-  });
+  const delay = (timeInMs: number) => new Promise((resolve) => setTimeout(resolve, timeInMs));
 
   beforeEach(async () => {
     await removeLogFiles();
@@ -161,10 +159,10 @@ describe('migration v2', () => {
 
     if (esServer) {
       await esServer.stop();
+      await delay(10000);
     }
   });
 
-  const delay = (timeInMs: number) => new Promise((resolve) => setTimeout(resolve, timeInMs));
   const startWithDelay = async (instances: Root[], delayInSec: number) => {
     const promises: Array<Promise<unknown>> = [];
     for (let i = 0; i < instances.length; i++) {
