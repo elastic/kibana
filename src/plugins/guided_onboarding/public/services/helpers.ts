@@ -143,7 +143,7 @@ export const getUpdatedSteps = (
 };
 
 export const getGuideStatusOnStepCompletion = (
-  guideState: GuideState,
+  guideState: GuideState | undefined,
   guideId: GuideId,
   stepId: GuideStepIds
 ): GuideStatus => {

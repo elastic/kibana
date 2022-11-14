@@ -260,28 +260,30 @@ describe('Guided setup', () => {
       expect(exists('onboarding--completeGuideButton--testGuide')).toBe(true);
     });
 
-    test('should not show the completed state when the last step is not marked as complete', async () => {
-      const { component, exists, find } = testBed;
-
-      const mockCompleteTestGuideState: GuideState = {
-        ...mockActiveTestGuideState,
-        steps: [
-          {
-            id: mockActiveTestGuideState.steps[0].id,
-            status: 'complete',
-          },
-          {
-            id: mockActiveTestGuideState.steps[1].id,
-            status: 'complete',
-          },
-          {
-            id: mockActiveTestGuideState.steps[2].id,
-            status: 'complete',
-          },
-        ],
-      };
-
-      await updateComponentWithState(component, mockCompleteTestGuideState, true);
+    test(`doesn't show the completed state when the last step is not marked as complete`, async () => {
+      const { exists, find, component } = await setupComponentWithPluginStateMock(httpClient, {
+        status: 'in_progress',
+        isActivePeriod: true,
+        activeGuide: {
+          ...testGuideStep1ActiveState,
+          steps: [
+            {
+              ...testGuideStep1ActiveState.steps[0],
+              status: 'complete',
+            },
+            {
+              ...testGuideStep1ActiveState.steps[1],
+              status: 'complete',
+            },
+            {
+              ...testGuideStep1ActiveState.steps[2],
+              status: 'ready_to_complete',
+            },
+          ],
+        },
+      });
+      find('guideButton').simulate('click');
+      component.update();
 
       expect(find('guideTitle').text()).not.toContain('Well done');
       expect(find('guideDescription').text()).not.toContain(

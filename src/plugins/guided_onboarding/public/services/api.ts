@@ -348,7 +348,7 @@ export class ApiService implements GuidedOnboardingApi {
       const currentGuide: GuideState = {
         guideId,
         isActive: true,
-        status: getGuideStatusOnStepCompletion(guideState, guideId, stepId),
+        status: getGuideStatusOnStepCompletion(activeGuide, guideId, stepId),
         steps: updatedSteps,
       };
 
