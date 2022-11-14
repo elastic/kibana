@@ -42,7 +42,7 @@ import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { hasActiveFilter } from './utils';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { DiscoverMainContent } from './discover_main_content';
+import { DiscoverHistogramLayout } from './discover_histogram_layout';
 
 /**
  * Local storage key for sidebar persistence state
@@ -216,7 +216,7 @@ export function DiscoverLayout({
     }
 
     return (
-      <DiscoverMainContent
+      <DiscoverHistogramLayout
         isPlainRecord={isPlainRecord}
         dataView={dataView}
         navigateTo={navigateTo}
