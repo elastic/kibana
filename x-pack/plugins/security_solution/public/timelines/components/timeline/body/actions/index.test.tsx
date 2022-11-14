@@ -277,7 +277,7 @@ describe('Actions', () => {
         endpointPrivileges: { loading: false, canWriteEventFilters: true },
       });
     });
-    test('it hides for eventType=raw', () => {
+    test('it disables for eventType=raw', () => {
       const wrapper = mount(
         <TestProviders>
           <Actions {...defaultProps} />
