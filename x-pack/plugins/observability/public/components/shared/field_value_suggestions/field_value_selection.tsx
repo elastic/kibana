@@ -18,6 +18,7 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiLoadingSpinner,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -78,6 +79,8 @@ export function FieldValueSelection({
   showLogicalConditionSwitch = false,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
+  const { euiTheme } = useEuiTheme();
+
   const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
     formatOptions(values, selectedValue, excludedValue, showCount)
   );
@@ -204,6 +207,33 @@ export function FieldValueSelection({
                 </EuiText>
               )}
               <EuiPopoverFooter paddingSize="s">
+                {showLogicalConditionSwitch && (
+                  <>
+                    <div css={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <EuiSwitch
+                        css={{
+                          flexDirection: 'row-reverse',
+                          gap: euiTheme.size.s,
+                          color: euiTheme.colors.subduedText,
+                        }}
+                        label={i18n.translate(
+                          'xpack.observability.fieldValueSelection.logicalAnd',
+                          {
+                            defaultMessage: 'Use logical AND',
+                          }
+                        )}
+                        data-test-subj="tagsLogicalOperatorSwitch"
+                        checked={Boolean(isLogicalAND)}
+                        compressed={true}
+                        onChange={(e) => {
+                          setIsLogicalAND(e.target.checked);
+                        }}
+                      />
+                    </div>
+                    <EuiSpacer size="s" />
+                  </>
+                )}
+
                 <EuiButton
                   aria-label={i18n.translate(
                     'xpack.observability.fieldValueSelection.apply.label',
@@ -241,20 +271,6 @@ export function FieldValueSelection({
                     defaultMessage: 'Apply',
                   })}
                 </EuiButton>
-                {showLogicalConditionSwitch && (
-                  <>
-                    <EuiSpacer size="xs" />
-                    <EuiSwitch
-                      label={i18n.translate('xpack.observability.fieldValueSelection.logicalAnd', {
-                        defaultMessage: 'Use logical AND',
-                      })}
-                      checked={Boolean(isLogicalAND)}
-                      onChange={(e) => {
-                        setIsLogicalAND(e.target.checked);
-                      }}
-                    />
-                  </>
-                )}
               </EuiPopoverFooter>
             </div>
           )}
