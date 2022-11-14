@@ -9,7 +9,7 @@
 import https from 'https';
 import { URL } from 'url';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
-import nodeFetch, { RequestInit, Response } from 'node-fetch';
+import nodeFetch, { Headers, RequestInit, Response } from 'node-fetch';
 import type { IConfigService } from '@kbn/config';
 import type { Logger } from '@kbn/logging';
 import type { KibanaConfigType } from '../kibana_config';
@@ -17,32 +17,32 @@ import { KibanaConfig } from '../kibana_config';
 
 const HTTPS = 'https:';
 
-const GATEWAY_STATUS_ROUTE = '/api/status';
-const KIBANA_STATUS_ROUTE = '/api/status';
+const GATEWAY_ROOT_ROUTE = '/';
+const KIBANA_ROOT_ROUTE = '/';
 
-interface StatusRouteDependencies {
+interface RootRouteDependencies {
   log: Logger;
   config: IConfigService;
 }
 
 type Fetch = (path: string) => Promise<Response>;
 
-export function createStatusRoute({ config, log }: StatusRouteDependencies) {
+export function createRootRoute({ config, log }: RootRouteDependencies) {
   const kibanaConfig = new KibanaConfig(config.atPathSync<KibanaConfigType>('kibana'));
   const fetch = configureFetch(kibanaConfig);
 
   return {
     method: 'GET',
-    path: GATEWAY_STATUS_ROUTE,
+    path: GATEWAY_ROOT_ROUTE,
     handler: async (req: Request, h: ResponseToolkit) => {
-      const responses = await fetchKibanaStatuses({ fetch, kibanaConfig, log });
-      const { body, statusCode } = mergeStatusResponses(responses);
+      const responses = await fetchKibanaRoots({ fetch, kibanaConfig, log });
+      const { body, statusCode } = mergeResponses(responses);
       return h.response(body).type('application/json').code(statusCode);
     },
   };
 }
 
-async function fetchKibanaStatuses({
+async function fetchKibanaRoots({
   fetch,
   kibanaConfig,
   log,
@@ -53,19 +53,18 @@ async function fetchKibanaStatuses({
 }) {
   const requests = await Promise.allSettled(
     kibanaConfig.hosts.map(async (host) => {
-      log.debug(`Fetching response from ${host}${KIBANA_STATUS_ROUTE}`);
-      const response = fetch(`${host}${KIBANA_STATUS_ROUTE}`).then((res) => res.json());
-      return response;
+      log.debug(`Fetching response from ${host}${KIBANA_ROOT_ROUTE}`);
+      return fetch(`${host}${KIBANA_ROOT_ROUTE}`);
     })
   );
 
   return requests.map((r, i) => {
     if (r.status === 'rejected') {
-      log.error(`Unable to retrieve status from ${kibanaConfig.hosts[i]}${KIBANA_STATUS_ROUTE}`);
+      log.error(`No response from ${kibanaConfig.hosts[i]}${KIBANA_ROOT_ROUTE}`);
     } else {
       log.info(
-        `Got response from ${kibanaConfig.hosts[i]}${KIBANA_STATUS_ROUTE}: ${JSON.stringify(
-          r.value.status?.overall ? r.value.status.overall : r.value
+        `Got response from ${kibanaConfig.hosts[i]}${KIBANA_ROOT_ROUTE}: ${JSON.stringify(
+          r.value.status
         )}`
       );
     }
@@ -73,20 +72,35 @@ async function fetchKibanaStatuses({
   });
 }
 
-function mergeStatusResponses(
+function mergeResponses(
   responses: Array<PromiseFulfilledResult<Response> | PromiseRejectedResult>
 ) {
   let statusCode = 200;
   for (const response of responses) {
-    if (response.status === 'rejected') {
+    if (
+      response.status === 'rejected' ||
+      !isHealthyResponse(response.value.status, response.value.headers)
+    ) {
       statusCode = 503;
     }
   }
 
   return {
-    body: {}, // Need to determine what response body, if any, we want to include
+    body: {}, // The control plane health check ignores the body, so we do the same
     statusCode,
   };
+}
+
+function isHealthyResponse(statusCode: number, headers: Headers) {
+  return isSuccess(statusCode) || isUnauthorized(statusCode, headers);
+}
+
+function isUnauthorized(statusCode: number, headers: Headers): boolean {
+  return statusCode === 401 && headers.has('www-authenticate');
+}
+
+function isSuccess(statusCode: number): boolean {
+  return (statusCode >= 200 && statusCode <= 299) || statusCode === 302;
 }
 
 function generateAgentConfig(sslConfig: KibanaConfig['ssl']) {
@@ -133,6 +147,7 @@ function configureFetch(kibanaConfig: KibanaConfig) {
     const fetchOptions: RequestInit = {
       ...(protocol === HTTPS && { agent }),
       signal: controller.signal,
+      redirect: 'manual',
     };
     try {
       const response = await nodeFetch(url, fetchOptions);
