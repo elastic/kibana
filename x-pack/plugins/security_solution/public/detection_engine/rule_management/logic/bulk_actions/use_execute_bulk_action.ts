@@ -59,10 +59,6 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
             summary: response.attributes.summary,
             editPayload:
               bulkAction.type === BulkActionType.edit ? bulkAction.editPayload : undefined,
-            duplicatePayload:
-              bulkAction.type === BulkActionType.duplicate
-                ? bulkAction.duplicatePayload
-                : undefined,
           });
         }
 
