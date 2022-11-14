@@ -104,9 +104,7 @@ export class ApiService implements GuidedOnboardingApi {
     try {
       return await this.client.get<{ state: GuideState[] }>(`${API_BASE_PATH}/guides`);
     } catch (error) {
-      // TODO handle error
-      // eslint-disable-next-line no-console
-      console.error(error);
+      throw error;
     }
   }
 
@@ -140,9 +138,7 @@ export class ApiService implements GuidedOnboardingApi {
       this.isGuidePanelOpen$.next(panelState);
       return response;
     } catch (error) {
-      // TODO handle error
-      // eslint-disable-next-line no-console
-      console.error(error);
+      throw error;
     }
   }
 
