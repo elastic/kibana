@@ -90,7 +90,7 @@ describe('common_transformations', () => {
           ignored: 4,
         },
       },
-      next_run: dateUpdated,
+      next_run: dateUpdated.toISOString(),
     };
     expect(transformRule(apiRule)).toMatchInlineSnapshot(`
       Object {
