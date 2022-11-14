@@ -68,8 +68,10 @@ For the Elastic Security 8.5.1 release information, refer to {security-guide}/re
 [[fixes-v8.5.1]]
 === Bug fixes
 APM::
-* Metadata API does not filter by environment {kibana-pull}144472[#144472]
-* Aws lambda checks for undefined value {kibana-pull}143987[#143987]
+* Fixes a bug where Metadata API does not filter by environment {kibana-pull}144472[#144472]
+* Fixes a bug where AWS lambda checks for an undefined value {kibana-pull}143987[#143987]
+* Limits the number of source map artifacts {kibana-pull}144963[#144963]
+* Fixes an incorrect documentation link {kibana-pull}145077[#145077]
 
 Dashboard::
 * Removes support for scripted fields in options list {kibana-pull}144643[#144643]
