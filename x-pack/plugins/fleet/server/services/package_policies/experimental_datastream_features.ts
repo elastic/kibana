@@ -42,41 +42,39 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       (optIn) => optIn.data_stream === featureMapEntry.data_stream
     );
 
-    const isOptInChanged =
-      existingOptIn?.features.synthetic_source !== featureMapEntry.features.synthetic_source ||
-      existingOptIn?.features.tsdb !== featureMapEntry.features.tsdb;
+    const isSyntheticSourceOptInChanged =
+      existingOptIn?.features.synthetic_source !== featureMapEntry.features.synthetic_source;
 
-    // If the feature opt-in status in unchanged, we don't need to update any component templates
-    if (!isOptInChanged) {
-      continue;
-    }
+    if (isSyntheticSourceOptInChanged) {
+      const componentTemplateName = `${featureMapEntry.data_stream}@package`;
+      const componentTemplateRes = await esClient.cluster.getComponentTemplate({
+        name: componentTemplateName,
+      });
 
-    const componentTemplateName = `${featureMapEntry.data_stream}@package`;
-    const componentTemplateRes = await esClient.cluster.getComponentTemplate({
-      name: componentTemplateName,
-    });
+      const componentTemplate = componentTemplateRes.component_templates[0].component_template;
 
-    const componentTemplate = componentTemplateRes.component_templates[0].component_template;
-
-    const body = {
-      template: {
-        ...componentTemplate.template,
-        mappings: {
-          ...componentTemplate.template.mappings,
-          _source: {
-            mode: featureMapEntry.features.synthetic_source ? 'synthetic' : 'stored',
+      const body = {
+        template: {
+          ...componentTemplate.template,
+          mappings: {
+            ...componentTemplate.template.mappings,
+            _source: {
+              mode: featureMapEntry.features.synthetic_source ? 'synthetic' : 'stored',
+            },
           },
         },
-      },
-    };
+      };
 
-    await esClient.cluster.putComponentTemplate({
-      name: componentTemplateName,
-      // @ts-expect-error - TODO: Remove when ES client typings include support for synthetic source
-      body,
-    });
+      await esClient.cluster.putComponentTemplate({
+        name: componentTemplateName,
+        // @ts-expect-error - TODO: Remove when ES client typings include support for synthetic source
+        body,
+      });
+    }
 
-    if (featureMapEntry.features.tsdb) {
+    const isTSDBOptInChanged = existingOptIn?.features.tsdb !== featureMapEntry.features.tsdb;
+
+    if (isTSDBOptInChanged && featureMapEntry.features.tsdb) {
       const indexTemplateRes = await esClient.indices.getIndexTemplate({
         name: featureMapEntry.data_stream,
       });
