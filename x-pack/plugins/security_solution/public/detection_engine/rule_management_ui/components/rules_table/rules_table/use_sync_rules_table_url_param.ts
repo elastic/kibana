@@ -6,6 +6,8 @@
  */
 
 import { useCallback, useEffect } from 'react';
+import { RULE_TABLE_STATE_STORAGE_KEY } from '../../../../../../common/constants';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import {
   useInitializeUrlParam,
@@ -14,7 +16,7 @@ import {
 import type { FilterOptions, SortingOptions } from '../../../../rule_management/logic/types';
 import { useRulesTableContext } from './rules_table_context';
 
-interface RulesTableUrlParam {
+interface RulesTableSavedState {
   isInMemorySorting: boolean;
   filterOptions: FilterOptions;
   sorting: SortingOptions;
@@ -24,36 +26,61 @@ interface RulesTableUrlParam {
 
 export function useSyncRulesTableUrlParam(): void {
   const { state, actions } = useRulesTableContext();
+  const {
+    services: { storage },
+  } = useKibana();
 
   const onInitializeRulesTableContextFromUrlParam = useCallback(
-    (params: RulesTableUrlParam | null) => {
-      if (!params) {
+    (params: RulesTableSavedState | null) => {
+      const savedState: Partial<RulesTableSavedState> = storage.get(RULE_TABLE_STATE_STORAGE_KEY);
+
+      if (!params && !savedState) {
         return;
       }
 
-      actions.setIsInMemorySorting(params.isInMemorySorting);
-      actions.setFilterOptions(params.filterOptions);
+      const isInMemorySorting = params?.isInMemorySorting ?? savedState.isInMemorySorting;
+      const filterOptions = params?.filterOptions ?? savedState.filterOptions;
+      const sorting = params?.sorting ?? savedState.sorting;
+      const page = params?.page ?? savedState.page;
+      const perPage = params?.perPage ?? savedState.perPage;
 
-      if (params.sorting && params.sorting.field && params.sorting.order) {
-        actions.setSortingOptions(params.sorting);
+      if (isInMemorySorting !== undefined) {
+        actions.setIsInMemorySorting(isInMemorySorting);
       }
 
-      actions.setPage(params.page);
-      actions.setPerPage(params.perPage);
+      if (filterOptions !== undefined) {
+        actions.setFilterOptions(filterOptions);
+      }
+
+      if (sorting && sorting.field && sorting.order) {
+        actions.setSortingOptions(sorting);
+      }
+
+      if (page) {
+        actions.setPage(page);
+      }
+
+      if (perPage) {
+        actions.setPerPage(perPage);
+      }
     },
-    [actions]
+    [actions, storage]
   );
 
   useInitializeUrlParam(URL_PARAM_KEY.rulesTable, onInitializeRulesTableContextFromUrlParam);
-  const updateUrlParam = useUpdateUrlParam<RulesTableUrlParam>(URL_PARAM_KEY.rulesTable);
+  const updateUrlParam = useUpdateUrlParam<RulesTableSavedState>(URL_PARAM_KEY.rulesTable);
 
   useEffect(() => {
-    updateUrlParam({
+    const savedState: RulesTableSavedState = {
       filterOptions: state.filterOptions,
       isInMemorySorting: state.isInMemorySorting,
       sorting: state.sortingOptions,
       page: state.pagination.page,
       perPage: state.pagination.perPage,
-    });
-  }, [updateUrlParam, state]);
+    };
+
+    updateUrlParam(savedState);
+
+    storage.set(RULE_TABLE_STATE_STORAGE_KEY, savedState);
+  }, [updateUrlParam, storage, state]);
 }
