@@ -47,6 +47,8 @@
 /x-pack/test/functional/apps/lens @elastic/kibana-visualizations
 /x-pack/test/api_integration/apis/lens/ @elastic/kibana-visualizations
 /test/functional/apps/visualize/ @elastic/kibana-visualizations
+/src/plugins/expressions/ @elastic/kibana-visualizations
+/src/plugins/unified_search/ @elastic/kibana-visualizations
 
 # Application Services
 /examples/dashboard_embeddable_examples/ @elastic/kibana-app-services
@@ -57,10 +59,9 @@
 /examples/field_formats_example/ @elastic/kibana-app-services
 /examples/partial_results_example/ @elastic/kibana-app-services
 /examples/search_examples/ @elastic/kibana-app-services
-/src/plugins/data/ @elastic/kibana-app-services
+/src/plugins/data/ @elastic/kibana-visualizations  @elastic/kibana-data-discovery
 /src/plugins/data_views/ @elastic/kibana-app-services
 /src/plugins/embeddable/ @elastic/kibana-app-services
-/src/plugins/expressions/ @elastic/kibana-app-services
 /src/plugins/field_formats/ @elastic/kibana-app-services
 /src/plugins/data_view_editor/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
@@ -69,7 +70,6 @@
 /src/plugins/data_view_field_editor @elastic/kibana-app-services
 /src/plugins/data_view_management/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
-/src/plugins/unified_search/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
 /src/plugins/dashboard/public/application/embeddable/viewport/print_media @elastic/kibana-app-services
@@ -937,7 +937,7 @@ packages/kbn-health-gateway-server @elastic/kibana-core
 packages/kbn-i18n @elastic/kibana-core
 packages/kbn-i18n-react @elastic/kibana-core
 packages/kbn-import-resolver @elastic/kibana-operations
-packages/kbn-interpreter @elastic/kibana-app-services
+packages/kbn-interpreter @elastic/kibana-visualizations
 packages/kbn-io-ts-utils @elastic/apm-ui
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations
