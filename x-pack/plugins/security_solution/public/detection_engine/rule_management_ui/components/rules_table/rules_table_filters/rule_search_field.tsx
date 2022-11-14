@@ -1,4 +1,11 @@
-import React, { ChangeEvent, useCallback, useState } from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
 import { SEARCH_FIRST_RULE_ANCHOR } from '../../guided_onboarding/rules_management_tour';
@@ -14,16 +21,26 @@ const SearchBarWrapper = styled(EuiFlexItem)`
 `;
 
 interface RuleSearchFieldProps {
-  initialValue: string;
+  initialValue?: string;
   onSearch: (value: string) => void;
 }
 
 export function RuleSearchField({ initialValue, onSearch }: RuleSearchFieldProps): JSX.Element {
   const [searchText, setSearchText] = useState(initialValue);
+  const [valueIsDirty, setValueIsDirty] = useState(false);
   const handleChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value),
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setSearchText(e.target.value);
+      setValueIsDirty(true);
+    },
     [setSearchText]
   );
+
+  useEffect(() => {
+    if (!valueIsDirty) {
+      setSearchText(initialValue);
+    }
+  }, [initialValue, valueIsDirty]);
 
   return (
     <SearchBarWrapper grow>
