@@ -127,13 +127,12 @@ export const setupOptionsListSuggestionsRoute = (
         ...runtimeFieldMap,
       },
     };
-    // console.log('body', JSON.stringify(body));
 
     /**
      * Run ES query
      */
     const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
-    // console.log('rawEsResult', rawEsResult);
+
     /**
      * Parse ES response into Options List Response
      */
