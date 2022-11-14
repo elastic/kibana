@@ -12,8 +12,8 @@ import { D3ActionParams } from '../../types';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import {
-  TextFieldWithMessageVariables,
-} from '@kbn/triggers-actions-ui-plugin/public';
+  EuiFieldText
+} from '@elastic/eui';
 
 const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3ActionParams>> = ({
   actionParams,
@@ -36,14 +36,14 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3ActionParams>>
             }
           )}
         >
-          <TextFieldWithMessageVariables
-            index={index}
-            editAction={editAction}
-            messageVariables={messageVariables}
-            paramsProperty={'eventType'}
-            inputTargetValue={eventType}
-            errors={(errors.eventType ?? []) as string[]}
-          />
+          <EuiFieldText
+              data-test-subj="eventTypeInput"
+              name="eventType"
+              value={eventType}
+              onChange={(e) => editAction("eventType", e.target.value, index)}
+              isInvalid={false}
+              fullWidth={true}
+            />
         </EuiFormRow>
         <EuiFormRow
           fullWidth
@@ -56,14 +56,14 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3ActionParams>>
             }
           )}
         >
-          <TextFieldWithMessageVariables
-            index={index}
-            editAction={editAction}
-            messageVariables={messageVariables}
-            paramsProperty={'severity'}
-            inputTargetValue={severity}
-            errors={(errors.severity ?? []) as string[]}
-          />
+           <EuiFieldText
+              data-test-subj="severityInput"
+              name="severity"
+              value={severity}
+              onChange={(e) => editAction("severity", e.target.value, index)}
+              isInvalid={false}
+              fullWidth={true}
+            />
         </EuiFormRow>
         
   

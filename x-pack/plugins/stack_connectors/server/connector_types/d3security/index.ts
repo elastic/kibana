@@ -99,11 +99,11 @@ export function getConnectorType(): D3SecurityConnectorType {
 }
 
 function renderParameterTemplates(params: ActionParamsType, variables: Record<string, unknown>): ActionParamsType {
-  if (!params.body) return params;
-  const bodyString = addSeverityAndEventTypeInBody(params.body,String(params.severity),String(params.eventType));
-  return {
-    body: renderMustacheString(bodyString, variables, 'json'),
-  };
+  let result = {...params};
+  if (params.body) {
+    result = {...params,body:renderMustacheString(params.body, variables, 'json') }
+  }
+  return result;
 }
 
 function validateConnectorTypeConfig(
@@ -145,7 +145,6 @@ export async function executor(
   const { body:data, severity, eventType } = params;
 
   const axiosInstance = axios.create();
-  console.log(data);
   const bodyData = addSeverityAndEventTypeInBody(String(data),String(severity),String(eventType));
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
@@ -210,42 +209,23 @@ export async function executor(
 }
 
 function addSeverityAndEventTypeInBody(bodyString: string,severity: string,eventType: string){
-  let result = bodyString;
-  var rawdata = JSON.parse(bodyString);
+  let result;
+  let bodyObj = bodyString;
   try{
-    var bodyObj = JSON.parse(bodyString);
-    bodyObj = {};
-    bodyObj['hits'] = {};
-    bodyObj['hits']['hits'] = {};
-    bodyObj['hits']['hits']["_source"] = {}
-    console.log("raw", rawdata);
-    bodyObj['hits']['hits']["_source"]["rawData"] = rawdata;
-
-    if (bodyObj['hits']['hits']["_source"]["event"] != undefined) {
-      bodyObj['hits']['hits']["_source"]["event"]["type"] = eventType;
-    } else {
-      bodyObj['hits']['hits']["_source"]["event"] = {};
-      bodyObj['hits']['hits']["_source"]["event"]["type"] = eventType;
-    }
-    if (bodyObj['hits']['hits']["_source"]["kibana"] != undefined) {
-      if (bodyObj['hits']['hits']["_source"]["kibana"]["alert"] != undefined) {
-        if (bodyObj['hits']['hits']["_source"]["kibana"]["alert"]["severity"] != undefined) {
-        } else {
-          bodyObj['hits']['hits']["_source"]["kibana"]["alert"]["severity"] = severity;
-        }
-      } else {
-        bodyObj['hits']['hits']["_source"]["kibana"]["alert"] = {};
-        bodyObj['hits']['hits']["_source"]["kibana"]["alert"]["severity"] = severity;
-      }
-    } else {
-      bodyObj['hits']['hits']["_source"]["kibana"] = {};
-      bodyObj['hits']['hits']["_source"]["kibana"]["alert"] = {};
-      bodyObj['hits']['hits']["_source"]["kibana"]["alert"]["severity"] = severity;
-    }
-
-    result = JSON.stringify(bodyObj)
+    bodyObj = JSON.parse(bodyString);
   }catch{
   }
+  var resultObj = JSON.parse("{}");
+  resultObj['hits'] = {};
+  resultObj['hits']['hits'] = {};
+  resultObj['hits']['hits']["_source"] = {};
+  resultObj['hits']['hits']["_source"]["rawData"] = bodyObj;
+  resultObj['hits']['hits']["_source"]["event"]={};
+  resultObj['hits']['hits']["_source"]["event"]["type"] = eventType;
+  resultObj['hits']['hits']["_source"]["kibana"] ={};
+  resultObj['hits']['hits']["_source"]["kibana"]["alert"]={};
+  resultObj['hits']['hits']["_source"]["kibana"]["alert"]["severity"] = severity;
+  result = JSON.stringify(resultObj)
   return result
 }
 // Action Executor Result w/ internationalisation
