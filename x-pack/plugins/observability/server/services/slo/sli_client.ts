@@ -15,8 +15,7 @@ import { assertNever } from '@kbn/std';
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
-import { DateRange, Duration, IndicatorData, SLO } from '../../types/models';
-
+import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
 import {
   occurencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
