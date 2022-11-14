@@ -34,7 +34,7 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
     try {
       return await this.runInfer<RawTextClassificationResponse>(
         (inputText: string) => {
-          const labelsText = this.labelsText$.value;
+          const labelsText = this.labelsText$.getValue();
           const inputLabels = labelsText?.split(',').map((l) => l.trim());
           return {
             docs: [{ [this.inputField]: inputText }],
@@ -67,7 +67,7 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
   }
 
   private getInputLabels() {
-    const labelsText = this.labelsText$.value;
+    const labelsText = this.labelsText$.getValue();
     return labelsText?.split(',').map((l) => l.trim());
   }
 

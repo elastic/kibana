@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC, useState, useMemo, useCallback } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,14 +40,14 @@ export const IndexInput: FC<Props> = ({ inferrer }) => {
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
   const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);
 
-  async function run() {
+  const run = useCallback(async () => {
     setErrorText(null);
     try {
       await inferrer.infer();
     } catch (e) {
       setErrorText(extractErrorMessage(e));
     }
-  }
+  }, [inferrer]);
 
   return (
     <>

@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { i18n } from '@kbn/i18n';
 
 import { MLHttpFetchError } from '../../../../../../common/util/errors';
 import { SupportedPytorchTasksType } from '../../../../../../common/constants/trained_models';
@@ -242,7 +243,12 @@ export abstract class InferenceBase<TInferResponse> {
         this.setFinishedWithErrors(error);
         throw Error(error.reason);
       }
-      throw Error('Error simulating ingest pipeline');
+
+      throw Error(
+        i18n.translate('xpack.ml.trainedModels.testModelsFlyout.pipelineSimulate.unknownError', {
+          defaultMessage: 'Error simulating ingest pipeline',
+        })
+      );
     }
     return doc;
   }

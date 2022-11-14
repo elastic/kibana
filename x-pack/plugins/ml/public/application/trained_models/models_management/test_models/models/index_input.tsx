@@ -13,6 +13,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { EuiSpacer, EuiSelect, EuiFormRow, EuiAccordion, EuiCodeBlock } from '@elastic/eui';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { RUNNING_STATE } from './inference_base';
 import type { InferrerType } from '.';
@@ -47,7 +48,11 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Field">
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.indexInput.fieldInput', {
+          defaultMessage: 'Field',
+        })}
+      >
         <EuiSelect
           options={fieldNames}
           value={selectedField}
@@ -61,7 +66,15 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
 
       <EuiSpacer size="m" />
 
-      <EuiAccordion id={'simpleAccordionId'} buttonContent="View pipeline">
+      <EuiAccordion
+        id={'simpleAccordionId'}
+        buttonContent={i18n.translate(
+          'xpack.ml.trainedModels.testModelsFlyout.indexInput.viewPipeline',
+          {
+            defaultMessage: 'View pipeline',
+          }
+        )}
+      >
         <EuiCodeBlock language="json" fontSize="s" paddingSize="s" lineNumbers isCopyable={true}>
           {JSON.stringify(inferrer.getPipeline(), null, 2)}
         </EuiCodeBlock>

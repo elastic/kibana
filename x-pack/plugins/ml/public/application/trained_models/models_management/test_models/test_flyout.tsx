@@ -35,13 +35,16 @@ export const TestTrainedModelFlyout: FC<Props> = ({ modelId, onClose }) => {
   const [inputType, setInputType] = useState<INPUT_TYPE>(INPUT_TYPE.TEXT);
   const [model, setModel] = useState<estypes.MlTrainedModelConfig | null>(null);
 
-  useEffect(() => {
-    trainedModelsApiService.getTrainedModels(modelId).then((resp) => {
-      if (resp.length) {
-        setModel(resp[0]);
-      }
-    });
-  }, [modelId, trainedModelsApiService]);
+  useEffect(
+    function fetchModel() {
+      trainedModelsApiService.getTrainedModels(modelId).then((resp) => {
+        if (resp.length) {
+          setModel(resp[0]);
+        }
+      });
+    },
+    [modelId, trainedModelsApiService]
+  );
 
   if (model === null) {
     return null;
