@@ -227,7 +227,6 @@ export const useDataVisualizerGridData = (
         aggregatableFields,
         nonAggregatableFields,
         fieldsToFetch,
-        // @TODO: remove this
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
       };

@@ -267,7 +267,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     } catch (error) {
       // An `AbortError` gets triggered when a user cancels a request by navigating away, we need to ignore these errors.
       if (error.name !== 'AbortError') {
-        // @todo displayError(toasts, searchParams!.index, extractErrorProperties(error));
+        displayError(toasts, searchStrategyParams!.index, extractErrorProperties(error));
       }
     }
   }, [data.search, searchStrategyParams, toasts, lastRefresh, probability]);
