@@ -154,21 +154,6 @@ export const OptionsListPopoverActionBar = ({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
-              content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-            >
-              <EuiButtonIcon
-                size="s"
-                color="danger"
-                iconType="eraser"
-                data-test-subj="optionsList-control-clear-all-selections"
-                aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                onClick={() => dispatch(clearSelections({}))}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
               content={
                 showOnlySelected
                   ? OptionsListStrings.popover.getAllOptionsButtonTitle()
@@ -184,6 +169,21 @@ export const OptionsListPopoverActionBar = ({
                 aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
                 data-test-subj="optionsList-control-show-only-selected"
                 onClick={() => setShowOnlySelected(!showOnlySelected)}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+            >
+              <EuiButtonIcon
+                size="s"
+                color="danger"
+                iconType="eraser"
+                data-test-subj="optionsList-control-clear-all-selections"
+                aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                onClick={() => dispatch(clearSelections({}))}
               />
             </EuiToolTip>
           </EuiFlexItem>
