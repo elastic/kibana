@@ -342,7 +342,7 @@ export const SUCCESS_TITLE = i18n.translate(
   }
 );
 
-export const SORT_BY = i18n.translate('xpack.securitySolution.exceptions.sortByName', {
+export const SORT_BY = i18n.translate('xpack.securitySolution.exceptions.sortBy', {
   defaultMessage: 'Sort by:',
 });
 
