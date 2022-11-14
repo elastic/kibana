@@ -13,6 +13,7 @@ import {
 import {
   generateMockIndicator,
   generateMockUrlIndicator,
+  Indicator,
 } from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../common/mocks/test_providers';
 
@@ -26,6 +27,28 @@ describe('useInvestigateInTimeline()', () => {
     hookResult = renderHook(() => useInvestigateInTimeline({ indicator }), {
       wrapper: TestProvidersComponent,
     });
+    expect(hookResult.result.current).toEqual({});
+  });
+
+  it('should return empty object if name_origin value is missing on the mapping investigate in timeline mapping', () => {
+    const indicator: Indicator = generateMockUrlIndicator();
+    indicator.fields['threat.indicator.name_origin'] = ['threat.indicator.url.missing'];
+
+    hookResult = renderHook(() => useInvestigateInTimeline({ indicator }), {
+      wrapper: TestProvidersComponent,
+    });
+
+    expect(hookResult.result.current).toEqual({});
+  });
+
+  it('should return empty object if @timestamp is missing', () => {
+    const indicator: Indicator = generateMockUrlIndicator();
+    indicator.fields['@timestamp'] = undefined;
+
+    hookResult = renderHook(() => useInvestigateInTimeline({ indicator }), {
+      wrapper: TestProvidersComponent,
+    });
+
     expect(hookResult.result.current).toEqual({});
   });
 
