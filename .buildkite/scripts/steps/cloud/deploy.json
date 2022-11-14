@@ -201,8 +201,7 @@
           ],
           "kibana": {
             "version": null,
-            "docker_image": null,
-            "config": "config/theming.yml"
+            "docker_image": null
           }
         },
         "ref_id": "main-kibana"

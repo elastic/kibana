@@ -86,7 +86,6 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
     navigateToApp: jest.fn().mockImplementation((appId) => currentAppId$.next(appId)),
     navigateToUrl: jest.fn(),
     history: createHistoryMock(),
-    setCustomLogo$: jest.fn(),
   };
 };
 

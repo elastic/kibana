@@ -352,9 +352,6 @@ export class ApplicationService {
           />
         );
       },
-      setCustomLogo$: (customLogo$: BehaviorSubject<string | undefined>) => {
-        this.customLogo$ = customLogo$;
-      },
     };
   }
 
