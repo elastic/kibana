@@ -223,11 +223,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
 
       await testSubjects.click('collapsedItemActions');
-
       await testSubjects.click('deleteRule');
-      await testSubjects.existOrFail('deleteIdsConfirmation');
-      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('deleteIdsConfirmation');
+      await testSubjects.exists('rulesDeleteIdsConfirmation');
+      await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
@@ -348,10 +346,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('bulkAction');
 
-      await testSubjects.click('deleteAll');
-      await testSubjects.existOrFail('deleteIdsConfirmation');
-      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('deleteIdsConfirmation');
+      await testSubjects.click('bulkDelete');
+      await testSubjects.exists('rulesDeleteIdsConfirmation');
+      await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();

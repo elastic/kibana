@@ -44,6 +44,7 @@ jest.mock('../../../lib/rule_api', () => ({
   updateAPIKey: jest.fn(),
   loadRuleTags: jest.fn(),
   bulkSnoozeRules: jest.fn(),
+  bulkDeleteRules: jest.fn().mockResolvedValue({ errors: [], total: 10 }),
   bulkUnsnoozeRules: jest.fn(),
   bulkUpdateAPIKey: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
@@ -102,6 +103,10 @@ beforeEach(() => {
 });
 
 // This entire test suite is flaky/timing out and has been skipped.
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
 // FLAKY: https://github.com/elastic/kibana/issues/134922
 // FLAKY: https://github.com/elastic/kibana/issues/134923
 // FLAKY: https://github.com/elastic/kibana/issues/134924
