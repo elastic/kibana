@@ -44,7 +44,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
     const isOptInChanged =
       existingOptIn?.features.synthetic_source !== featureMapEntry.features.synthetic_source ||
-      existingOptIn?.features.TSDB !== featureMapEntry.features.TSDB;
+      existingOptIn?.features.tsdb !== featureMapEntry.features.tsdb;
 
     // If the feature opt-in status in unchanged, we don't need to update any component templates
     if (!isOptInChanged) {
@@ -76,7 +76,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       body,
     });
 
-    if (featureMapEntry.features.TSDB) {
+    if (featureMapEntry.features.tsdb) {
       const indexTemplateRes = await esClient.indices.getIndexTemplate({
         name: featureMapEntry.data_stream,
       });

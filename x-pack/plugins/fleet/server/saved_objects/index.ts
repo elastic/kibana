@@ -284,7 +284,7 @@ const getSavedObjectTypes = (
               type: 'nested',
               properties: {
                 synthetic_source: { type: 'boolean' },
-                TSDB: { type: 'boolean' },
+                tsdb: { type: 'boolean' },
               },
             },
           },

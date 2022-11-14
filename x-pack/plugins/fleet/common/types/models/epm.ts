@@ -445,7 +445,7 @@ export type PackageInfo =
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
 // TODO - Expand this with other experimental indexing types
-export type ExperimentalIndexingFeature = 'synthetic_source' | 'TSDB';
+export type ExperimentalIndexingFeature = 'synthetic_source' | 'tsdb';
 
 export interface ExperimentalDataStreamFeature {
   data_stream: string;

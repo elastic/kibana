@@ -143,14 +143,14 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
           (feat) => feat.data_stream === dsName
         );
         if (match) {
-          if (!match.features.TSDB) {
-            match.features.TSDB = true;
+          if (!match.features.tsdb) {
+            match.features.tsdb = true;
             isUpdated = true;
           }
         } else {
           packagePolicy.package!.experimental_data_stream_features.push({
             data_stream: dsName,
-            features: { TSDB: true, synthetic_source: false },
+            features: { tsdb: true, synthetic_source: false },
           });
           isUpdated = true;
         }

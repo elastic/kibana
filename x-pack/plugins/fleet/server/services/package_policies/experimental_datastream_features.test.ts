@@ -35,7 +35,7 @@ function getNewTestPackagePolicy({
           data_stream: 'metrics-test.test',
           features: {
             synthetic_source: isSyntheticSourceEnabled,
-            TSDB: isTSDBEnabled,
+            tsdb: isTSDBEnabled,
           },
         },
       ],
@@ -69,7 +69,7 @@ function getExistingTestPackagePolicy({
           data_stream: 'metrics-test.test',
           features: {
             synthetic_source: isSyntheticSourceEnabled,
-            TSDB: isTSDBEnabled,
+            tsdb: isTSDBEnabled,
           },
         },
       ],
@@ -106,7 +106,7 @@ describe('experimental_datastream_features', () => {
           experimental_data_stream_features: [
             {
               data_stream: 'metrics-test.test',
-              features: { synthetic_source: false, TSDB: false },
+              features: { synthetic_source: false, tsdb: false },
             },
           ],
         },
@@ -162,7 +162,7 @@ describe('experimental_datastream_features', () => {
             experimental_data_stream_features: [
               {
                 data_stream: 'metrics-test.test',
-                features: { synthetic_source: true, TSDB: false },
+                features: { synthetic_source: true, tsdb: false },
               },
             ],
           },
@@ -190,7 +190,7 @@ describe('experimental_datastream_features', () => {
             experimental_data_stream_features: [
               {
                 data_stream: 'metrics-test.test',
-                features: { synthetic_source: false, TSDB: false },
+                features: { synthetic_source: false, tsdb: false },
               },
             ],
           },

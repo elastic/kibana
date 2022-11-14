@@ -84,7 +84,7 @@ const ExperimentalDataStreamFeatures = schema.arrayOf(
     data_stream: schema.string(),
     features: schema.object({
       synthetic_source: schema.boolean(),
-      TSDB: schema.boolean(),
+      tsdb: schema.boolean(),
     }),
   })
 );
@@ -129,7 +129,7 @@ const CreatePackagePolicyProps = {
         schema.arrayOf(
           schema.object({
             data_stream: schema.string(),
-            features: schema.object({ synthetic_source: schema.boolean(), TSDB: schema.boolean() }),
+            features: schema.object({ synthetic_source: schema.boolean(), tsdb: schema.boolean() }),
           })
         )
       ),

@@ -137,7 +137,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     const newExperimentalIndexingFeature = {
       synthetic_source: isFeatureEnabled('synthetic_source'),
-      TSDB: isFeatureEnabled('TSDB'),
+      tsdb: isFeatureEnabled('tsdb'),
     };
 
     const onIndexingSettingChange = (
@@ -392,8 +392,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             }
                           >
                             <EuiSwitch
-                              disabled={isFeatureEnabled('TSDB')}
-                              checked={isFeatureEnabled('TSDB')}
+                              disabled={isFeatureEnabled('tsdb')}
+                              checked={isFeatureEnabled('tsdb')}
                               label={
                                 <FormattedMessage
                                   id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBLabel"
@@ -402,7 +402,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               }
                               onChange={(e) => {
                                 onIndexingSettingChange({
-                                  TSDB: e.target.checked,
+                                  tsdb: e.target.checked,
                                 });
                               }}
                             />
