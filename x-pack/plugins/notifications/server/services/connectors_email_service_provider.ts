@@ -48,10 +48,7 @@ export class EmailServiceProvider
 
     const emailConnector = this.config.connectors?.default?.email;
     if (!emailConnector) {
-      return this._registerInitializationError(
-        'Error: Email connector not specified.',
-        this.logger.info
-      );
+      return this._registerInitializationError('Error: Email connector not specified.', 'info');
     }
 
     if (!actions.isPreconfiguredConnector(emailConnector)) {
@@ -95,9 +92,13 @@ export class EmailServiceProvider
     };
   }
 
-  private _registerInitializationError(error: string, log = this.logger.warn) {
+  private _registerInitializationError(error: string, level: 'info' | 'warn' = 'warn') {
     const message = `Email Service ${error}`;
     this.setupError = message;
-    log(message);
+    if (level === 'info') {
+      this.logger.info(message);
+    } else {
+      this.logger.warn(message);
+    }
   }
 }
