@@ -9,7 +9,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
-import { SecurityStepId } from '../../../common/components/guided_onboarding_tour/tour_config';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../common/components/guided_onboarding_tour/tour_config';
 import { isActiveTimeline } from '../../../helpers';
 import { TableId } from '../../../../common/types';
 import { useResponderActionItem } from '../endpoint_responder';
@@ -224,7 +227,7 @@ export const TakeActionDropdown = React.memo(
       scopeId as TableId
     );
 
-    const { addToCaseActionItems } = useAddToCaseActions({
+    const { addToCaseActionItems, handleAddToNewCaseClick } = useAddToCaseActions({
       ecsData,
       nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
@@ -256,7 +259,11 @@ export const TakeActionDropdown = React.memo(
 
     const takeActionButton = useMemo(
       () => (
-        <GuidedOnboardingTourStep step={4} stepId={SecurityStepId.alertsCases}>
+        <GuidedOnboardingTourStep
+          onClick={handleAddToNewCaseClick}
+          step={AlertsCasesTourSteps.addAlertToCase}
+          tourId={SecurityStepId.alertsCases}
+        >
           <EuiButton
             data-test-subj="take-action-dropdown-btn"
             fill
@@ -269,7 +276,7 @@ export const TakeActionDropdown = React.memo(
         </GuidedOnboardingTourStep>
       ),
 
-      [togglePopoverHandler]
+      [handleAddToNewCaseClick, togglePopoverHandler]
     );
 
     return items.length && !loadingEventDetails && ecsData ? (

@@ -138,7 +138,7 @@ export const getSetProcessorForInferenceType = (
       copy_from: `${prefixedDestinationField}.predicted_value`,
       description: `Copy the predicted_value to '${destinationField}' if the prediction_probability is greater than 0.5`,
       field: destinationField,
-      if: `${prefixedDestinationField}.prediction_probability > 0.5`,
+      if: `ctx.${prefixedDestinationField}.prediction_probability > 0.5`,
       on_failure: onFailure,
       value: undefined,
     };

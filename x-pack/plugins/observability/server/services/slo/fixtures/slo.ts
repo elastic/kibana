@@ -14,15 +14,16 @@ import {
   Indicator,
   KQLCustomIndicator,
   SLO,
-} from '../../../types/models';
+} from '../../../domain/models';
 import { CreateSLOParams } from '../../../types/rest_specs';
+import { Paginated } from '../slo_repository';
 import { sevenDays } from './duration';
 import { sevenDaysRolling } from './time_window';
 
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
 ): Indicator => ({
-  type: 'slo.apm.transaction_error_rate',
+  type: 'sli.apm.transaction_error_rate',
   params: {
     environment: 'irrelevant',
     service: 'irrelevant',
@@ -36,7 +37,7 @@ export const createAPMTransactionErrorRateIndicator = (
 export const createAPMTransactionDurationIndicator = (
   params: Partial<APMTransactionDurationIndicator['params']> = {}
 ): Indicator => ({
-  type: 'slo.apm.transaction_duration',
+  type: 'sli.apm.transaction_duration',
   params: {
     environment: 'irrelevant',
     service: 'irrelevant',
@@ -50,7 +51,7 @@ export const createAPMTransactionDurationIndicator = (
 export const createKQLCustomIndicator = (
   params: Partial<KQLCustomIndicator['params']> = {}
 ): Indicator => ({
-  type: 'slo.kql.custom',
+  type: 'sli.kql.custom',
   params: {
     index: 'my-index*',
     query_filter: 'labels.groupId: group-3',
@@ -96,4 +97,17 @@ export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO 
     },
     ...params,
   });
+};
+
+export const createPaginatedSLO = (
+  slo: SLO,
+  params: Partial<Paginated<SLO>> = {}
+): Paginated<SLO> => {
+  return {
+    page: 1,
+    perPage: 25,
+    total: 1,
+    results: [slo],
+    ...params,
+  };
 };
