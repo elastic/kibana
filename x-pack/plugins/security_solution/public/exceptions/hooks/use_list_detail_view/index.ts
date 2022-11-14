@@ -16,7 +16,7 @@ import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types
 import { useUserData } from '../../../detections/components/user_info';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import { getListById, updateList, getListRules } from '../../api';
+import { getListById, updateList, getListRules, exportList } from '../../api';
 import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 import * as i18n from '../../translations';
 
@@ -116,19 +116,20 @@ export const useExceptionListDetails = () => {
     [exceptionListId, handleErrorStatus, http, list]
   );
   const onExportList = useCallback(async () => {
-    //  try {
-    //   const result = await exportList({
-    //     id: exceptionListId,
-    //     http,
-    //     listId: exceptionListId,
-    //     namespaceType: list.namespace_type,
-    //   });
-    //   setExportedList(result);
-    //   toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.name));
-    // } catch (error) {
-    //   handleErrorStatus(error);
-    // }
-  }, []);
+    try {
+      if (!list) return;
+      const result = await exportList({
+        id: exceptionListId,
+        http,
+        listId: exceptionListId,
+        namespaceType: list.namespace_type,
+      });
+      setExportedList(result);
+      toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.list_id));
+    } catch (error) {
+      handleErrorStatus(error);
+    }
+  }, [exceptionListId, http, list, toasts, handleErrorStatus]);
 
   const onDeleteList = useCallback(async () => {
     // try {

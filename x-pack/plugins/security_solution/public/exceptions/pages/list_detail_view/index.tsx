@@ -69,7 +69,7 @@ export const ListsDetailViewComponent: FC = () => {
         <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />
       ) : (
         <>
-          <AutoDownload blob={exportedList} name={listName} />
+          <AutoDownload blob={exportedList} name={listId} />
           <ListWithSearch list={list} isReadOnly={isReadOnly} />
           {showManageRulesFlyout ? (
             <ManageRules
