@@ -47,9 +47,10 @@ export function AlertDetails() {
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases();
   const { rule } = useFetchRule({
-    ruleId: alert?.fields[ALERT_RULE_UUID] || '',
+    ruleId: alert?.fields[ALERT_RULE_UUID],
     http,
   });
+
   useEffect(() => {
     if (alert) {
       setRuleTypeModel(ruleTypeRegistry.get(alert?.fields[ALERT_RULE_TYPE_ID]!));
