@@ -29,6 +29,8 @@ import {
   getSwimlaneConnectorType,
 } from './cases';
 
+import { getTinesConnectorType } from './security';
+
 export interface RegistrationServices {
   validateEmailAddresses: (
     addresses: string[],
@@ -37,9 +39,9 @@ export interface RegistrationServices {
 }
 
 export function registerConnectorTypes({
-  connectorTypeRegistry,
-  services,
-}: {
+                                         connectorTypeRegistry,
+                                         services,
+                                       }: {
   connectorTypeRegistry: TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'];
   services: RegistrationServices;
 }) {
@@ -59,4 +61,5 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
+  connectorTypeRegistry.register(getTinesConnectorType());
 }

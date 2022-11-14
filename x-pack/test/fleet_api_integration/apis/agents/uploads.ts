@@ -7,6 +7,10 @@
 
 import expect from '@kbn/expect';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import {
+  FILE_STORAGE_DATA_AGENT_INDEX,
+  FILE_STORAGE_METADATA_AGENT_INDEX,
+} from '@kbn/fleet-plugin/server/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -57,7 +61,7 @@ export default function (providerContext: FtrProviderContext) {
       );
 
       await esClient.update({
-        index: '.fleet-agent-files',
+        index: FILE_STORAGE_METADATA_AGENT_INDEX,
         id: 'file1',
         refresh: true,
         body: {
@@ -102,7 +106,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should get agent uploaded file', async () => {
       await esClient.update({
-        index: '.fleet-agent-file-data',
+        index: FILE_STORAGE_DATA_AGENT_INDEX,
         id: 'file1.0',
         refresh: true,
         body: {
