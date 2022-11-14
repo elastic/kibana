@@ -30,8 +30,6 @@ import { TitleBadge } from '../title_badge';
 import * as i18n from '../../translations';
 import { ListExceptionItems } from '../list_exception_items';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
-import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
-import { SecurityPageName } from '../../../../common/constants';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
