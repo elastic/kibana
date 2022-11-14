@@ -72,7 +72,10 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       state.flyoutConfig = action.payload;
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
-      state.status = action.payload;
+      state.status = {
+        ...action.payload,
+        allConfigs: { ...action.payload.upConfigs, ...action.payload.downConfigs },
+      };
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.statusError = action.payload;

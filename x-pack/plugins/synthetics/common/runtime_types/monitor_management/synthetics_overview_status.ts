@@ -14,13 +14,18 @@ export const OverviewStatusMetaDataCodec = t.interface({
   status: t.string,
 });
 
-export const OverviewStatusType = t.type({
-  up: t.number,
-  down: t.number,
-  disabledCount: t.number,
-  upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
-  downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
-});
+export const OverviewStatusType = t.intersection([
+  t.interface({
+    up: t.number,
+    down: t.number,
+    disabledCount: t.number,
+    upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+    downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  }),
+  t.partial({
+    allConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  }),
+]);
 
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusType>;
 export type OverviewStatusMetaData = t.TypeOf<typeof OverviewStatusMetaDataCodec>;
