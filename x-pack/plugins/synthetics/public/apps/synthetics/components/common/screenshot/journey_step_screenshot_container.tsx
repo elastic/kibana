@@ -32,6 +32,7 @@ interface Props {
   allStepsLoaded?: boolean;
   asThumbnail?: boolean;
   retryFetchOnRevisit?: boolean; // Set to `true` fro "Run Once" / "Test Now" modes
+  size?: 'm';
 }
 
 export const JourneyStepScreenshotContainer = ({
@@ -42,6 +43,7 @@ export const JourneyStepScreenshotContainer = ({
   initialStepNo = 1,
   retryFetchOnRevisit = false,
   asThumbnail = true,
+  size,
 }: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
@@ -139,11 +141,12 @@ export const JourneyStepScreenshotContainer = ({
           isStepFailed={stepStatus === 'failed'}
           isLoading={Boolean(loading)}
           asThumbnail={asThumbnail}
+          size={size}
         />
       ) : asThumbnail ? (
         <EmptyThumbnail isLoading={loading || !allStepsLoaded} />
       ) : (
-        <EmptyImage isLoading={loading || !allStepsLoaded} />
+        <EmptyImage isLoading={loading || !allStepsLoaded} size={size} />
       )}
     </div>
   );
