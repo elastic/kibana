@@ -31,12 +31,10 @@ import { SuggestionsSorting } from '../../../common/options_list/types';
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
   setShowOnlySelected: (value: boolean) => void;
-  updateSort: (sort: SuggestionsSorting) => void;
   updateSearchString: (newSearchString: string) => void;
 }
 
 export const OptionsListPopoverActionBar = ({
-  updateSort,
   showOnlySelected,
   updateSearchString,
   setShowOnlySelected,
@@ -45,7 +43,7 @@ export const OptionsListPopoverActionBar = ({
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { clearSelections },
+    actions: { clearSelections, setSort },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
 
@@ -145,7 +143,7 @@ export const OptionsListPopoverActionBar = ({
                 listProps={{ bordered: false }}
                 style={{ width: 300 }}
                 onActiveOptionChange={(option) => {
-                  if (option?.data) updateSort(option.data as SuggestionsSorting);
+                  if (option?.data) dispatch(setSort(option.data as SuggestionsSorting));
                 }}
               >
                 {(list) => list}

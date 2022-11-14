@@ -22,13 +22,7 @@ import { OptionsListReduxState } from '../types';
 
 import './options_list.scss';
 
-export const OptionsListControl = ({
-  typeaheadSubject,
-  sortSubject,
-}: {
-  typeaheadSubject: Subject<string>;
-  sortSubject: Subject<SuggestionsSorting>;
-}) => {
+export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Subject<string> }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const resizeRef = useRef(null);
@@ -76,14 +70,6 @@ export const OptionsListControl = ({
       dispatch(setSearchString(newSearchString));
     },
     [typeaheadSubject, dispatch, setSearchString]
-  );
-
-  const updateSort = useCallback(
-    (newSort: SuggestionsSorting) => {
-      sortSubject.next(newSort);
-      dispatch(setSort(newSort));
-    },
-    [sortSubject, dispatch, setSort]
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
@@ -162,11 +148,7 @@ export const OptionsListControl = ({
         anchorClassName="optionsList__anchorOverride"
         aria-labelledby={`control-popover-${id}`}
       >
-        <OptionsListPopover
-          width={dimensions.width}
-          updateSearchString={updateSearchString}
-          updateSort={updateSort}
-        />
+        <OptionsListPopover width={dimensions.width} updateSearchString={updateSearchString} />
       </EuiPopover>
     </EuiFilterGroup>
   );

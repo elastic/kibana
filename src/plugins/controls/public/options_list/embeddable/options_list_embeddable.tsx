@@ -76,7 +76,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
-  private sortSubject: Subject<SuggestionsSorting> = new Subject<SuggestionsSorting>();
   private abortController?: AbortController;
   private dataView?: DataView;
   private field?: OptionsListField;
@@ -99,7 +98,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       pluginServices.getServices());
 
     this.typeaheadSubject = new Subject<string>();
-    this.sortSubject = new Subject<SuggestionsSorting>();
 
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
@@ -139,17 +137,17 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         exclude: newInput.exclude,
         filters: newInput.filters,
         query: newInput.query,
+        sort: newInput.sort,
       })),
       distinctUntilChanged(diffDataFetchProps)
     );
 
     // debounce pipes to slow down search string + sorting related queries
     const typeaheadPipe = this.typeaheadSubject.pipe(debounceTime(100));
-    const sortSubjectPipe = this.sortSubject.pipe(debounceTime(100));
 
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
-      merge(dataFetchPipe, typeaheadPipe, sortSubjectPipe)
+      merge(dataFetchPipe, typeaheadPipe)
         .pipe(skip(1)) // Skip the first input update because options list query will be run by initialize.
         .subscribe(this.runOptionsListQuery)
     );
@@ -421,10 +419,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <OptionsListReduxWrapper>
-          <OptionsListControl
-            typeaheadSubject={this.typeaheadSubject}
-            sortSubject={this.sortSubject}
-          />
+          <OptionsListControl typeaheadSubject={this.typeaheadSubject} />
         </OptionsListReduxWrapper>
       </KibanaThemeProvider>,
       node
