@@ -14,6 +14,7 @@ import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import { useParams } from 'react-router-dom';
 import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { patchRule } from '../../../detection_engine/rule_management/logic';
 import { useUserData } from '../../../detections/components/user_info';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
@@ -96,7 +97,9 @@ export const useExceptionListDetails = () => {
 
   const initializeList = useCallback(async () => {
     try {
+      if (ALL_ENDPOINT_ARTIFACT_LIST_IDS.includes(exceptionListId)) return setInvalidListId(true);
       setIsLoading(true);
+
       const result = await getListById({
         id: exceptionListId,
         http,
