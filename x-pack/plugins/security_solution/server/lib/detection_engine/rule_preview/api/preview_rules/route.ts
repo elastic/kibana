@@ -106,13 +106,11 @@ export const previewRulesRoute = async (
           });
         }
 
-        const license = (await context.licensing).license;
-
-        const internalRule = convertCreateAPIToInternalSchema(request.body, license);
+        const internalRule = convertCreateAPIToInternalSchema(request.body);
         const previewRuleParams = internalRule.params;
 
         const mlAuthz = buildMlAuthz({
-          license,
+          license: (await context.licensing).license,
           ml,
           request,
           savedObjectsClient,

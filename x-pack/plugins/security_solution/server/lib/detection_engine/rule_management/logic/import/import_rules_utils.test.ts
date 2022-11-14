@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/rule_management/mocks';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 
@@ -30,9 +29,6 @@ describe('importRules', () => {
       .mockResolvedValue({ valid: true, message: 'mocked validation message' }),
   };
   const { clients, context } = requestContextMock.createTools();
-  const basicLicense = licensingMock.createLicense({
-    license: { status: 'active', type: 'basic' },
-  });
 
   beforeEach(() => {
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
@@ -53,7 +49,6 @@ describe('importRules', () => {
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
       existingLists: {},
-      license: basicLicense,
     });
 
     expect(result).toEqual([]);
@@ -70,7 +65,6 @@ describe('importRules', () => {
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
       existingLists: {},
-      license: basicLicense,
     });
 
     expect(result).toEqual([
@@ -102,7 +96,6 @@ describe('importRules', () => {
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
       existingLists: {},
-      license: basicLicense,
     });
 
     expect(result).toEqual([{ rule_id: 'rule-1', status_code: 200 }]);
@@ -130,7 +123,6 @@ describe('importRules', () => {
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
       existingLists: {},
-      license: basicLicense,
     });
 
     expect(result).toEqual([
@@ -163,7 +155,6 @@ describe('importRules', () => {
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
       existingLists: {},
-      license: basicLicense,
     });
 
     expect(result).toEqual([{ rule_id: 'rule-1', status_code: 200 }]);
@@ -191,7 +182,6 @@ describe('importRules', () => {
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
       existingLists: {},
-      license: basicLicense,
     });
 
     expect(result).toEqual([
@@ -227,7 +217,6 @@ describe('importRules', () => {
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
       existingLists: {},
-      license: basicLicense,
     });
 
     expect(result).toEqual([
@@ -262,7 +251,6 @@ describe('importRules', () => {
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
       existingLists: {},
-      license: basicLicense,
     });
 
     expect(result).toEqual([

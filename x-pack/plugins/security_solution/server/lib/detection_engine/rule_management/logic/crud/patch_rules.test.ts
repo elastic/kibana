@@ -6,7 +6,6 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 import { patchRules } from './patch_rules';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
@@ -17,9 +16,6 @@ import {
 } from '../../../../../../common/detection_engine/rule_schema/mocks';
 
 describe('patchRules', () => {
-  const basicLicense = licensingMock.createLicense({
-    license: { status: 'active', type: 'basic' },
-  });
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
     const rulesClient = rulesClientMock.create();
     const nextParams = {
@@ -31,7 +27,7 @@ describe('patchRules', () => {
       enabled: true,
     };
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    await patchRules({ rulesClient, nextParams, existingRule, license: basicLicense });
+    await patchRules({ rulesClient, nextParams, existingRule });
     expect(rulesClient.disable).toHaveBeenCalledWith(
       expect.objectContaining({
         id: existingRule.id,
@@ -50,7 +46,7 @@ describe('patchRules', () => {
       enabled: false,
     };
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    await patchRules({ rulesClient, nextParams, existingRule, license: basicLicense });
+    await patchRules({ rulesClient, nextParams, existingRule });
     expect(rulesClient.enable).toHaveBeenCalledWith(
       expect.objectContaining({
         id: existingRule.id,
@@ -63,7 +59,7 @@ describe('patchRules', () => {
     const nextParams = getCreateMachineLearningRulesSchemaMock();
     const existingRule = getRuleMock(getMlRuleParams());
     rulesClient.update.mockResolvedValue(getRuleMock(getMlRuleParams()));
-    await patchRules({ rulesClient, nextParams, existingRule, license: basicLicense });
+    await patchRules({ rulesClient, nextParams, existingRule });
     expect(rulesClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -84,7 +80,7 @@ describe('patchRules', () => {
     };
     const existingRule = getRuleMock(getMlRuleParams());
     rulesClient.update.mockResolvedValue(getRuleMock(getMlRuleParams()));
-    await patchRules({ rulesClient, nextParams, existingRule, license: basicLicense });
+    await patchRules({ rulesClient, nextParams, existingRule });
     expect(rulesClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -115,7 +111,7 @@ describe('patchRules', () => {
       };
       const existingRule = getRuleMock(getQueryRuleParams());
       rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-      await patchRules({ rulesClient, nextParams, existingRule, license: basicLicense });
+      await patchRules({ rulesClient, nextParams, existingRule });
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -150,7 +146,7 @@ describe('patchRules', () => {
         },
       ];
       rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-      await patchRules({ rulesClient, nextParams, existingRule, license: basicLicense });
+      await patchRules({ rulesClient, nextParams, existingRule });
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({

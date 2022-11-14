@@ -11,7 +11,6 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 
-import type { ILicense } from '@kbn/licensing-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   CreateExceptionListSchema,
@@ -78,7 +77,6 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
         ]);
         const rulesClient = ctx.alerting.getRulesClient();
         const listsClient = ctx.securitySolution.getExceptionListClient();
-        const license = ctx.licensing.license;
 
         const { items } = request.body;
         const { id: ruleId } = request.params;
@@ -133,7 +131,6 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
               rulesClient,
               listsClient,
               removeOldAssociation: true,
-              license,
             });
 
             createdItems = await createExceptionListItems({ items, defaultList, listsClient });
@@ -144,7 +141,6 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             rulesClient,
             listsClient,
             removeOldAssociation: false,
-            license,
           });
 
           createdItems = await createExceptionListItems({ items, defaultList, listsClient });
@@ -200,13 +196,11 @@ export const createAndAssociateDefaultExceptionList = async ({
   listsClient,
   rulesClient,
   removeOldAssociation,
-  license,
 }: {
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
   rulesClient: RulesClient;
   removeOldAssociation: boolean;
-  license: ILicense;
 }): Promise<ExceptionListSchema> => {
   const exceptionList: CreateExceptionListSchema = {
     description: `Exception list containing exceptions for rule with id: ${rule.id}`,
@@ -278,7 +272,6 @@ export const createAndAssociateDefaultExceptionList = async ({
         },
       ],
     },
-    license,
   });
 
   return exceptionListAssociatedToRule;

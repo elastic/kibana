@@ -14,7 +14,6 @@ import type {
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { ILicense } from '@kbn/licensing-plugin/server';
 
 import type { RuleToImport } from '../../../../../../common/detection_engine/rule_management';
 // eslint-disable-next-line no-restricted-imports
@@ -61,7 +60,6 @@ export const importRules = async ({
   exceptionsClient,
   spaceId,
   existingLists,
-  license,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
@@ -72,7 +70,6 @@ export const importRules = async ({
   exceptionsClient: ExceptionListClient | undefined;
   spaceId: string;
   existingLists: Record<string, ExceptionListSchema>;
-  license: ILicense;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
 
@@ -121,7 +118,6 @@ export const importRules = async ({
                       ...parsedRule,
                       exceptions_list: [...exceptions],
                     },
-                    license,
                   });
                   resolve({
                     rule_id: parsedRule.rule_id,
@@ -140,7 +136,6 @@ export const importRules = async ({
                       ...parsedRule,
                       exceptions_list: [...exceptions],
                     },
-                    license,
                   });
                   resolve({
                     rule_id: parsedRule.rule_id,

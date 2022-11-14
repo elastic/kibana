@@ -6,7 +6,6 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getRuleMock, getFindResultWithSingleHit } from '../../routes/__mocks__/request_responses';
 import { updatePrebuiltRules } from './update_prebuilt_rules';
@@ -35,9 +34,6 @@ describe('updatePrebuiltRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let ruleExecutionLog: ReturnType<typeof ruleExecutionLogMock.forRoutes.create>;
-  const basicLicense = licensingMock.createLicense({
-    license: { status: 'active', type: 'basic' },
-  });
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
@@ -63,8 +59,7 @@ describe('updatePrebuiltRules', () => {
       rulesClient,
       savedObjectsClient,
       [{ ...prepackagedRule, actions }],
-      ruleExecutionLog,
-      basicLicense
+      ruleExecutionLog
     );
 
     expect(patchRules).toHaveBeenCalledWith(
@@ -101,8 +96,7 @@ describe('updatePrebuiltRules', () => {
       rulesClient,
       savedObjectsClient,
       [{ ...prepackagedRule, ...updatedThreatParams }],
-      ruleExecutionLog,
-      basicLicense
+      ruleExecutionLog
     );
 
     expect(patchRules).toHaveBeenCalledWith(

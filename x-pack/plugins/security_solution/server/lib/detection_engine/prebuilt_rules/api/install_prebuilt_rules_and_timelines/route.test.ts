@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
   getEmptyFindResult,
   addPrepackagedRulesRequest,
@@ -85,9 +84,6 @@ describe('add_prepackaged_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let mockExceptionsClient: ExceptionListClient;
-  const basicLicense = licensingMock.createLicense({
-    license: { status: 'active', type: 'basic' },
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -249,7 +245,6 @@ describe('add_prepackaged_rules_route', () => {
       await createPrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
-        basicLicense,
         mockExceptionsClient
       );
 
@@ -263,7 +258,6 @@ describe('add_prepackaged_rules_route', () => {
       await createPrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
-        basicLicense,
         mockExceptionsClient
       );
 

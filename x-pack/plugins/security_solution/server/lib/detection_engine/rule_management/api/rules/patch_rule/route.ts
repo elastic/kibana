@@ -53,10 +53,9 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
         const rulesClient = (await context.alerting).getRulesClient();
         const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
         const savedObjectsClient = (await context.core).savedObjects.client;
-        const license = (await context.licensing).license;
 
         const mlAuthz = buildMlAuthz({
-          license,
+          license: (await context.licensing).license,
           ml,
           request,
           savedObjectsClient,
@@ -88,7 +87,6 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
           rulesClient,
           existingRule: migratedRule,
           nextParams: params,
-          license,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);

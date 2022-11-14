@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import type { ILicense } from '@kbn/licensing-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
@@ -54,14 +53,11 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
-        const rulesClient = ctx.alerting.getRulesClient();
-        const license = ctx.licensing.license;
+        const rulesClient = (await context.alerting).getRulesClient();
 
         const validated = await createPrepackagedRules(
-          ctx.securitySolution,
+          await context.securitySolution,
           rulesClient,
-          license,
           undefined
         );
         return response.ok({ body: validated ?? {} });
@@ -87,7 +83,6 @@ export class PrepackagedRulesError extends Error {
 export const createPrepackagedRules = async (
   context: SecuritySolutionApiRequestHandlerContext,
   rulesClient: RulesClient,
-  license: ILicense,
   exceptionsClient?: ExceptionListClient
 ): Promise<InstallPrebuiltRulesAndTimelinesResponse | null> => {
   const config = context.getConfig();
@@ -121,7 +116,7 @@ export const createPrepackagedRules = async (
   const rulesToInstall = getRulesToInstall(latestPrepackagedRulesMap, installedPrePackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRulesMap, installedPrePackagedRules);
 
-  await createPrebuiltRules(rulesClient, rulesToInstall, license);
+  await createPrebuiltRules(rulesClient, rulesToInstall);
 
   const timeline = await installPrepackagedTimelines(
     maxTimelineImportExportSize,
@@ -137,8 +132,7 @@ export const createPrepackagedRules = async (
     rulesClient,
     savedObjectsClient,
     rulesToUpdate,
-    context.getRuleExecutionLog(),
-    license
+    context.getRuleExecutionLog()
   );
 
   const prepackagedRulesOutput: InstallPrebuiltRulesAndTimelinesResponse = {
