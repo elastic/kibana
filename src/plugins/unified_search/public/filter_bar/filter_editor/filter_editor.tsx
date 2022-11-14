@@ -444,7 +444,6 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
         meta: {
           ...f.meta,
           disabled,
-          negate,
           alias,
         },
       };
