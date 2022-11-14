@@ -145,7 +145,11 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    inferTrainedModel(modelId: string, payload: any, timeout?: string) {
+    inferTrainedModel(
+      modelId: string,
+      payload: estypes.MlInferTrainedModelRequest['body'],
+      timeout?: string
+    ) {
       const body = JSON.stringify(payload);
       return httpService.http<estypes.MlInferTrainedModelResponse>({
         path: `${apiBasePath}/trained_models/infer/${modelId}`,

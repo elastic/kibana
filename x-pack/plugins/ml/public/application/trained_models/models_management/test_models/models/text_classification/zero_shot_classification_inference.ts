@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { estypes } from '@elastic/elasticsearch';
 import { InferenceBase } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
@@ -38,7 +39,10 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
           const inputLabels = labelsText?.split(',').map((l) => l.trim());
           return {
             docs: [{ [this.inputField]: inputText }],
-            ...this.getInferenceConfig([{ labels: inputLabels }, { multi_label: false }]),
+            inference_config: this.getInferenceConfig({
+              labels: inputLabels,
+              multi_label: false,
+            } as estypes.MlZeroShotClassificationInferenceUpdateOptions),
           };
         },
         (resp, inputText) => {
@@ -73,7 +77,10 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
 
   protected getProcessors() {
     const inputLabels = this.getInputLabels();
-    return this.getBasicProcessors([{ labels: inputLabels }, { multi_label: false }]);
+    return this.getBasicProcessors({
+      labels: inputLabels,
+      multi_label: false,
+    } as estypes.MlZeroShotClassificationInferenceUpdateOptions);
   }
 
   public getInputComponent(): JSX.Element {

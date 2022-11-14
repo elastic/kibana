@@ -31,7 +31,7 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
         (inputText: string) => {
           return {
             docs: [{ [this.inputField]: inputText }],
-            ...this.getInferenceConfig([this.getNumTopClassesConfig()]),
+            inference_config: this.getInferenceConfig(this.getNumTopClassesConfig()),
           };
         },
         (resp, inputText) => {
@@ -60,7 +60,7 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
   }
 
   protected getProcessors() {
-    return this.getBasicProcessors([this.getNumTopClassesConfig()]);
+    return this.getBasicProcessors(this.getNumTopClassesConfig());
   }
 
   public getInputComponent(): JSX.Element | null {

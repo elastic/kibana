@@ -64,7 +64,10 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
           const question = this.questionText$.value;
           return {
             docs: [{ [this.inputField]: inputText }],
-            ...this.getInferenceConfig([this.getNumTopClassesConfig(), { question }]),
+            inference_config: this.getInferenceConfig({
+              ...this.getNumTopClassesConfig(),
+              question,
+            }),
           };
         },
         (resp, inputText) => {
@@ -93,7 +96,7 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
 
   protected getProcessors() {
     const question = this.questionText$.value;
-    return this.getBasicProcessors([this.getNumTopClassesConfig(), { question }]);
+    return this.getBasicProcessors({ ...this.getNumTopClassesConfig(), question });
   }
 
   public getInputComponent(): JSX.Element {

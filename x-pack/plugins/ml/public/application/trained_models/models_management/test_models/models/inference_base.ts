@@ -18,6 +18,17 @@ export type InferenceType =
   | SupportedPytorchTasksType
   | keyof estypes.AggregationsInferenceConfigContainer;
 
+export type InferenceOptions =
+  | estypes.MlRegressionInferenceOptions
+  | estypes.MlClassificationInferenceOptions
+  | estypes.MlTextClassificationInferenceOptions
+  | estypes.MlZeroShotClassificationInferenceOptions
+  | estypes.MlFillMaskInferenceOptions
+  | estypes.MlNerInferenceOptions
+  | estypes.MlPassThroughInferenceOptions
+  | estypes.MlTextEmbeddingInferenceOptions
+  | estypes.MlQuestionAnsweringInferenceUpdateOptions;
+
 const DEFAULT_INPUT_FIELD = 'text_field';
 export const DEFAULT_INFERENCE_TIME_OUT = '30s';
 
@@ -139,7 +150,7 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   protected getBasicProcessors(
-    inferenceConfigOverrides?: Array<Record<string, any>>
+    inferenceConfigOverrides?: InferenceOptions
   ): estypes.IngestProcessorContainer[] {
     const processor: estypes.IngestProcessorContainer = {
       inference: {
@@ -148,8 +159,8 @@ export abstract class InferenceBase<TInferResponse> {
         field_map: {
           [this.inputField]: this.modelInputField,
         },
-        ...(inferenceConfigOverrides?.length
-          ? { ...this.getInferenceConfig(inferenceConfigOverrides) }
+        ...(inferenceConfigOverrides && Object.keys(inferenceConfigOverrides).length
+          ? { inference_config: this.getInferenceConfig(inferenceConfigOverrides) }
           : {}),
       },
     };
@@ -157,31 +168,27 @@ export abstract class InferenceBase<TInferResponse> {
     return [processor];
   }
 
-  protected getInferenceConfig(inferenceConfigOverrides: Array<Record<string, any>>): {
-    inference_config: estypes.MlInferenceConfigCreateContainer;
-  } {
+  protected getInferenceConfig(
+    inferenceConfigOverrides: InferenceOptions
+  ): estypes.MlInferenceConfigUpdateContainer {
     return {
-      inference_config: {
-        [this.inferenceType as keyof estypes.MlInferenceConfigCreateContainer]: Object.assign(
-          {},
-          {},
-          ...inferenceConfigOverrides
-        ),
+      [this.inferenceType as keyof estypes.MlInferenceConfigUpdateContainer]: {
+        ...inferenceConfigOverrides,
       },
     };
   }
 
   protected async runInfer<TRawInferResponse>(
-    getPayload: (inputText: string) => any,
+    getInferBody: (inputText: string) => estypes.MlInferTrainedModelRequest['body'],
     processResponse: (resp: TRawInferResponse, inputText: string) => TInferResponse
   ): Promise<TInferResponse[]> {
     this.setRunning();
     const inputText = this.inputText$.getValue()[0];
+    const body = getInferBody(inputText);
 
-    const payload = getPayload(inputText);
     const resp = (await this.trainedModelsApi.inferTrainedModel(
       this.model.model_id,
-      payload,
+      body,
       DEFAULT_INFERENCE_TIME_OUT
     )) as unknown as TRawInferResponse;
 
@@ -217,14 +224,14 @@ export abstract class InferenceBase<TInferResponse> {
     }));
   }
 
-  private getDefaultInferenceConfig(): estypes.MlInferenceConfigCreateContainer[keyof estypes.MlInferenceConfigCreateContainer] {
+  private getDefaultInferenceConfig(): estypes.MlInferenceConfigUpdateContainer[keyof estypes.MlInferenceConfigUpdateContainer] {
     return this.model.inference_config[
-      this.inferenceType as keyof estypes.MlInferenceConfigCreateContainer
+      this.inferenceType as keyof estypes.MlInferenceConfigUpdateContainer
     ];
   }
 
   protected getNumTopClassesConfig(defaultOverride = 5) {
-    const options: estypes.MlInferenceConfigCreateContainer[keyof estypes.MlInferenceConfigCreateContainer] =
+    const options: estypes.MlInferenceConfigUpdateContainer[keyof estypes.MlInferenceConfigUpdateContainer] =
       this.getDefaultInferenceConfig();
 
     if (options && 'num_top_classes' in options && (options?.num_top_classes ?? 0 > 0)) {
