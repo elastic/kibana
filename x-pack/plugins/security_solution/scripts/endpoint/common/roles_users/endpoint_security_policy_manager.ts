@@ -7,7 +7,7 @@
 
 import type { Role } from '@kbn/security-plugin/common';
 
-export const endpointSecurityPolicyManager: Omit<Role, 'name'> = {
+export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => ({
   elasticsearch: {
     cluster: ['manage'],
     indices: [
@@ -43,4 +43,4 @@ export const endpointSecurityPolicyManager: Omit<Role, 'name'> = {
       spaces: ['*'],
     },
   ],
-};
+});

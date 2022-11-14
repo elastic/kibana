@@ -7,14 +7,14 @@
 
 import type { Role } from '@kbn/security-plugin/common';
 
-import { t1Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t1_analyst';
-import { t2Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t2_analyst';
-import { hunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/hunter';
-import { threadIntelligenceAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/thread_intelligence_analyst';
-import { socManager } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/soc_manager';
-import { platformEngineer } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/platform_engineer';
-import { endpointOperationsAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/endpoint_operations_analyst';
-import { endpointSecurityPolicyManager } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
+import { getT1Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t1_analyst';
+import { getT2Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t2_analyst';
+import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/hunter';
+import { getThreadIntelligenceAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/thread_intelligence_analyst';
+import { getSocManager } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/soc_manager';
+import { getPlatformEngineer } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/platform_engineer';
+import { getEndpointOperationsAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/endpoint_operations_analyst';
+import { getEndpointSecurityPolicyManager } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -31,14 +31,14 @@ export enum ROLE {
 }
 
 const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
-  t1Analyst,
-  t2Analyst,
-  hunter,
-  threadIntelligenceAnalyst,
-  socManager,
-  platformEngineer,
-  endpointOperationsAnalyst,
-  endpointSecurityPolicyManager,
+  t1Analyst: getT1Analyst(),
+  t2Analyst: getT2Analyst(),
+  hunter: getHunter(),
+  threadIntelligenceAnalyst: getThreadIntelligenceAnalyst(),
+  socManager: getSocManager(),
+  platformEngineer: getPlatformEngineer(),
+  endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
+  endpointSecurityPolicyManager: getEndpointSecurityPolicyManager(),
 };
 
 export function RolesUsersProvider({ getService }: FtrProviderContext) {

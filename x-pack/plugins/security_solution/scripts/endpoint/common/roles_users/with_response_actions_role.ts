@@ -6,22 +6,25 @@
  */
 
 import type { Role } from '@kbn/security-plugin/common';
-import { noResponseActionsRole } from './without_response_actions_role';
+import { getNoResponseActionsRole } from './without_response_actions_role';
 
-export const withResponseActionsRole: Omit<Role, 'name'> = {
-  ...noResponseActionsRole,
-  kibana: [
-    {
-      ...noResponseActionsRole.kibana[0],
-      feature: {
-        ...noResponseActionsRole.kibana[0].feature,
-        siem: [
-          ...noResponseActionsRole.kibana[0].feature.siem,
-          'host_isolation_all',
-          'process_operations_all',
-          'file_operations_all',
-        ],
+export const getWithResponseActionsRole: () => Omit<Role, 'name'> = () => {
+  const noResponseActionsRole = getNoResponseActionsRole();
+  return {
+    ...noResponseActionsRole,
+    kibana: [
+      {
+        ...noResponseActionsRole.kibana[0],
+        feature: {
+          ...noResponseActionsRole.kibana[0].feature,
+          siem: [
+            ...noResponseActionsRole.kibana[0].feature.siem,
+            'host_isolation_all',
+            'process_operations_all',
+            'file_operations_all',
+          ],
+        },
       },
-    },
-  ],
+    ],
+  };
 };

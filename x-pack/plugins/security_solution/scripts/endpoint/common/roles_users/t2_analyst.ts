@@ -7,7 +7,7 @@
 
 import type { Role } from '@kbn/security-plugin/common';
 
-export const t2Analyst: Omit<Role, 'name'> = {
+export const getT2Analyst: () => Omit<Role, 'name'> = () => ({
   elasticsearch: {
     cluster: ['manage'],
     indices: [
@@ -43,4 +43,4 @@ export const t2Analyst: Omit<Role, 'name'> = {
       spaces: ['*'],
     },
   ],
-};
+});
