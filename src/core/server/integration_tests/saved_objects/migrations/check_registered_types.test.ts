@@ -53,7 +53,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "7858e6d5a9f231bf23f6f2e57328eb0095b26735",
         "action_task_params": "bbd38cbfd74bf6713586fe078e3fa92db2234299",
-        "alert": "48461f3375d9ba22882ea23a318b62a5b0921a9b",
+        "alert": "eefada4a02ce05962387c0679d7b292771a931c4",
         "api_key_pending_invalidation": "9b4bc1235337da9a87ef05a1d1f4858b2a3b77c6",
         "apm-indices": "ceb0870f3a74e2ffc3a1cd3a3c73af76baca0999",
         "apm-server-schema": "2bfd2998d3873872e1366458ce553def85418f91",
@@ -130,7 +130,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "siem-ui-timeline-pinned-event": "e2697b38751506c7fce6e8b7207a830483dc4283",
         "space": "c4a0acce1bd4b9cce85154f2a350624a53111c59",
         "spaces-usage-stats": "922d3235bbf519e3fb3b260e27248b1df8249b79",
-        "synthetics-monitor": "30f1cd04016a37095de60554cbf7fff89aaad177",
+        "synthetics-monitor": "111811218f7e34f40980665a4eb99976f457bb23",
         "synthetics-privates-locations": "dd00385f4a27ef062c3e57312eeb3799872fa4af",
         "tag": "39413f4578cc2128c9a0fda97d0acd1c8862c47a",
         "task": "ef53d0f070bd54957b8fe22fae3b1ff208913f76",
