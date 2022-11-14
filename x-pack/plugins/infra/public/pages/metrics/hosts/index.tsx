@@ -10,7 +10,6 @@ import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBetaBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EuiLink } from '@elastic/eui';
 import { SourceErrorPage } from '../../../components/source_error_page';
@@ -23,6 +22,7 @@ import { MetricsDataViewProvider } from './hooks/use_data_view';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { UnifiedSearchProvider } from './hooks/use_unified_search';
 import { HostContainer } from './components/hosts_container';
+import { ExperimentalBadge } from './components/experimental_badge';
 
 export const HostsPage = () => {
   const HOSTS_FEEDBACK_LINK = 'https://ela.st/feedback-host-observability';
@@ -63,13 +63,11 @@ export const HostsPage = () => {
                     `}
                   >
                     <h1>{hostsTitle}</h1>
-                    <EuiBetaBadge
+                    <ExperimentalBadge
                       css={css`
                         display: flex;
                         justify-content: center;
                       `}
-                      label="Technical preview"
-                      tooltipContent="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
                     />
                   </div>
                 ),
