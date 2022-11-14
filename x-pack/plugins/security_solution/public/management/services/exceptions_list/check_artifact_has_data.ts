@@ -29,6 +29,7 @@ export const checkArtifactHasData = (
       try {
         return await artifactApiClient.hasData();
       } catch {
+        // Ignores possible failures and returns `false` if any exception was encountered
         return false;
       }
     },
