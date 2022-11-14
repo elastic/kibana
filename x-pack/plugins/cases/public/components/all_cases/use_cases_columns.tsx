@@ -26,6 +26,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 import { Status } from '@kbn/cases-components';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import type { Case } from '../../../common/ui/types';
 import type { ActionConnector } from '../../../common/api';
@@ -57,6 +58,20 @@ type CasesColumns =
 const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
+
+const LINE_CLAMP = 3;
+const LineClampedEuiBadgeGroup = euiStyled(EuiBadgeGroup)`
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: ${LINE_CLAMP};
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: normal;
+`;
+
+const StyledEuiBadge = euiStyled(EuiBadge)`
+  max-width: 100px
+`; // to allow for ellipsis
 
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
@@ -183,7 +198,21 @@ export const useCasesColumns = ({
     name: i18n.TAGS,
     render: (tags: Case['tags']) => {
       if (tags != null && tags.length > 0) {
-        const badges = (
+        const clampedBadges = (
+          <LineClampedEuiBadgeGroup data-test-subj="case-table-column-tags">
+            {tags.map((tag: string, i: number) => (
+              <StyledEuiBadge
+                color="hollow"
+                key={`${tag}-${i}`}
+                data-test-subj={`case-table-column-tags-${tag}`}
+              >
+                {tag}
+              </StyledEuiBadge>
+            ))}
+          </LineClampedEuiBadgeGroup>
+        );
+
+        const unclampedBadges = (
           <EuiBadgeGroup data-test-subj="case-table-column-tags">
             {tags.map((tag: string, i: number) => (
               <EuiBadge
@@ -201,15 +230,15 @@ export const useCasesColumns = ({
           <EuiToolTip
             data-test-subj="case-table-column-tags-tooltip"
             position="left"
-            content={badges}
+            content={unclampedBadges}
           >
-            {badges}
+            {clampedBadges}
           </EuiToolTip>
         );
       }
       return getEmptyTagValue();
     },
-    truncateText: true,
+    width: '15%',
   });
 
   if (isAlertsEnabled) {
@@ -221,6 +250,7 @@ export const useCasesColumns = ({
         totalAlerts != null
           ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
           : getEmptyTagValue(),
+      width: '80px',
     });
   }
 
