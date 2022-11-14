@@ -2537,7 +2537,6 @@ export class RulesClient {
     const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const taskIdsToEnable: string[] = [];
     const errors: BulkOperationError[] = [];
-    const taskIdToRuleIdMapping: Record<string, string> = {};
     const ruleNameToRuleIdMapping: Record<string, string> = {};
 
     for await (const response of rulesFinder.find()) {
@@ -2553,9 +2552,6 @@ export class RulesClient {
           if (rule.attributes.enabled === true) return;
           if (rule.attributes.name) {
             ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-          }
-          if (rule.attributes.scheduledTaskId) {
-            taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
           }
 
           const username = await this.getUserName();
@@ -2631,8 +2627,8 @@ export class RulesClient {
 
     result.saved_objects.forEach((rule) => {
       if (rule.error === undefined) {
-        if (taskIdToRuleIdMapping[rule.id]) {
-          taskIdsToEnable.push(taskIdToRuleIdMapping[rule.id]);
+        if (rule.attributes.scheduledTaskId) {
+          taskIdsToEnable.push(rule.attributes.scheduledTaskId);
         }
       } else {
         errors.push({
