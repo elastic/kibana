@@ -62,6 +62,26 @@ export class CspPlugin
   private readonly logger: Logger;
   private isCloudEnabled?: boolean;
 
+  /**
+   * CSP is initialized when the Fleet package is installed.
+   * either directly after installation, or
+   * when the plugin is started and a package is present.
+   */
+  readonly #initializerTracker = (() => {
+    let initialized = false;
+    return {
+      get: () => initialized,
+      on: () => {
+        initialized = true;
+        this.logger.debug('initialized');
+      },
+      off: () => {
+        initialized = false;
+        this.logger.debug('not initialized');
+      },
+    };
+  })();
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
@@ -75,6 +95,7 @@ export class CspPlugin
     setupRoutes({
       core,
       logger: this.logger,
+      isPluginInitialized: this.#initializerTracker.get,
     });
 
     const coreStartServices = core.getStartServices();
@@ -162,12 +183,16 @@ export class CspPlugin
 
   public stop() {}
 
+  /**
+   * Initialization is idempotent and required for (re)creating indices and transforms.
+   */
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
-    this.logger.debug('initialize');
+    this.#initializerTracker.off();
     const esClient = core.elasticsearch.client.asInternalUser;
     await initializeCspIndices(esClient, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
+    this.#initializerTracker.on();
   }
 
   async uninstallResources(taskManager: TaskManagerStartContract, logger: Logger): Promise<void> {
