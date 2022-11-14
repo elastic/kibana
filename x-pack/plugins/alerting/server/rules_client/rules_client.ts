@@ -2837,6 +2837,7 @@ export class RulesClient {
           scheduledTaskId: attributes.scheduledTaskId === id ? attributes.scheduledTaskId : null,
           updatedBy: await this.getUserName(),
           updatedAt: new Date().toISOString(),
+          nextRun: null,
         }),
         { version }
       );
