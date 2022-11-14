@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import useIntersection from 'react-use/lib/useIntersection';
 import { i18n } from '@kbn/i18n';
 
+import { EuiImageProps } from '@elastic/eui';
 import { EmptyImage } from './empty_image';
 import {
   isScreenshotImageBlob,
@@ -32,6 +33,7 @@ interface Props {
   allStepsLoaded?: boolean;
   asThumbnail?: boolean;
   retryFetchOnRevisit?: boolean; // Set to `true` fro "Run Once" / "Test Now" modes
+  size?: EuiImageProps['size'];
 }
 
 export const JourneyStepScreenshotContainer = ({
@@ -42,6 +44,7 @@ export const JourneyStepScreenshotContainer = ({
   initialStepNo = 1,
   retryFetchOnRevisit = false,
   asThumbnail = true,
+  size,
 }: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
@@ -139,11 +142,12 @@ export const JourneyStepScreenshotContainer = ({
           isStepFailed={stepStatus === 'failed'}
           isLoading={Boolean(loading)}
           asThumbnail={asThumbnail}
+          size={size}
         />
       ) : asThumbnail ? (
         <EmptyThumbnail isLoading={loading || !allStepsLoaded} />
       ) : (
-        <EmptyImage isLoading={loading || !allStepsLoaded} />
+        <EmptyImage isLoading={loading || !allStepsLoaded} size={size} />
       )}
     </div>
   );
