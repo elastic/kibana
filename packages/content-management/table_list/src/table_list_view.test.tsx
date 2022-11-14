@@ -15,7 +15,11 @@ import type { ReactWrapper } from 'enzyme';
 
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
-import { TableListView, Props as TableListViewProps } from './table_list_view';
+import {
+  TableListView,
+  Props as TableListViewProps,
+  UserContentCommonSchema,
+} from './table_list_view';
 
 const mockUseEffect = useEffect;
 
@@ -115,10 +119,11 @@ describe('TableListView', () => {
     const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
     const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
     const yesterdayToString = new Date(yesterday.getTime()).toDateString();
-    const hits = [
+    const hits: UserContentCommonSchema[] = [
       {
         id: '123',
-        updatedAt: twoDaysAgo,
+        updatedAt: twoDaysAgo.toISOString(),
+        type: 'dashboard',
         attributes: {
           title: 'Item 1',
           description: 'Item 1 description',
@@ -128,7 +133,8 @@ describe('TableListView', () => {
       {
         id: '456',
         // This is the latest updated and should come first in the table
-        updatedAt: yesterday,
+        updatedAt: yesterday.toISOString(),
+        type: 'dashboard',
         attributes: {
           title: 'Item 2',
           description: 'Item 2 description',
@@ -255,7 +261,10 @@ describe('TableListView', () => {
     const initialPageSize = 20;
     const totalItems = 30;
 
-    const hits = [...Array(totalItems)].map((_, i) => ({
+    const hits: UserContentCommonSchema[] = [...Array(totalItems)].map((_, i) => ({
+      id: `item${i}`,
+      type: 'dashboard',
+      updatedAt: new Date().toISOString(),
       attributes: {
         title: `Item ${i < 10 ? `0${i}` : i}`, // prefix with "0" for correct A-Z sorting
       },
@@ -336,10 +345,11 @@ describe('TableListView', () => {
     const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
     const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
     const yesterdayToString = new Date(yesterday.getTime()).toDateString();
-    const hits = [
+    const hits: UserContentCommonSchema[] = [
       {
         id: '123',
-        updatedAt: twoDaysAgo, // first asc, last desc
+        updatedAt: twoDaysAgo.toISOString(), // first asc, last desc
+        type: 'dashboard',
         attributes: {
           title: 'z-foo', // first desc, last asc
         },
@@ -347,7 +357,8 @@ describe('TableListView', () => {
       },
       {
         id: '456',
-        updatedAt: yesterday, // first desc, last asc
+        updatedAt: yesterday.toISOString(), // first desc, last asc
+        type: 'dashboard',
         attributes: {
           title: 'a-foo', // first asc, last desc
         },
@@ -535,22 +546,26 @@ describe('TableListView', () => {
       }
     );
 
-    const hits = [
+    const hits: UserContentCommonSchema[] = [
       {
         id: '123',
-        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)),
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
         attributes: {
           title: 'Item 1',
           description: 'Item 1 description',
         },
+        references: [],
+        type: 'dashboard',
       },
       {
         id: '456',
-        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)),
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
         attributes: {
           title: 'Item 2',
           description: 'Item 2 description',
         },
+        references: [],
+        type: 'dashboard',
       },
     ];
 
@@ -589,10 +604,11 @@ describe('TableListView', () => {
       }
     );
 
-    const hits = [
+    const hits: UserContentCommonSchema[] = [
       {
         id: '123',
-        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)),
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
+        type: 'dashboard',
         attributes: {
           title: 'Item 1',
           description: 'Item 1 description',
@@ -604,7 +620,8 @@ describe('TableListView', () => {
       },
       {
         id: '456',
-        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)),
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
+        type: 'dashboard',
         attributes: {
           title: 'Item 2',
           description: 'Item 2 description',
@@ -615,6 +632,7 @@ describe('TableListView', () => {
 
     test('should filter by tag from the table', async () => {
       let testBed: TestBed;
+
       const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
 
       await act(async () => {
@@ -627,6 +645,7 @@ describe('TableListView', () => {
       component.update();
 
       const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
       const getLastCallArgsFromFindItems = () =>
         findItems.mock.calls[findItems.mock.calls.length - 1];
 
@@ -681,17 +700,20 @@ describe('TableListView', () => {
       component.update();
 
       const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
       const getLastCallArgsFromFindItems = () =>
         findItems.mock.calls[findItems.mock.calls.length - 1];
 
-      // Open the tag filter dropdown
-      await act(async () => {
-        find('tagFilterPopoverButton').simulate('click');
-      });
-      component.update();
+      const openTagFilterDropdown = async () => {
+        await act(async () => {
+          find('tagFilterPopoverButton').simulate('click');
+        });
+        component.update();
+      };
+
+      await openTagFilterDropdown();
 
       expect(exists('tagSelectableList')).toBe(true);
-
       await act(async () => {
         find('tag-searchbar-option-tag-1').simulate('click');
       });
@@ -702,11 +724,6 @@ describe('TableListView', () => {
       let [searchTerm] = getLastCallArgsFromFindItems();
       expect(getSearchBoxValue()).toBe(expected);
       expect(searchTerm).toBe(expected);
-
-      await act(async () => {
-        find('tagFilterPopoverButton').simulate('click');
-      });
-      component.update();
 
       // Ctrl + click one item
       await act(async () => {

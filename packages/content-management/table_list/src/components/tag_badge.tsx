@@ -27,6 +27,7 @@ export const TagBadge: FC<Props> = ({ tag, onClick }) => {
     <EuiBadge
       color={tag.color}
       title={tag.description}
+      data-test-subj={`tag-${tag.id}`}
       onClick={(e) => {
         const withModifierKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey);
         onClick(tag, withModifierKey);
