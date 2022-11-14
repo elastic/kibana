@@ -362,9 +362,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
   /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /api/ml/trained_models/infer/:modelId Evaluates a trained model
-   * @apiName InferTrainedModelDeployment
-   * @apiDescription Evaluates a trained model.
+   * @api {post} /api/ml/trained_models/pipeline_simulate Simulates an ingest pipeline
+   * @apiName SimulateIngestPipeline
+   * @apiDescription Simulates an ingest pipeline.
    */
   router.post(
     {
