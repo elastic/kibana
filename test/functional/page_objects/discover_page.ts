@@ -9,6 +9,8 @@
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
+type SidebarSectionName = 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected';
+
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -433,13 +435,33 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
-  public async toggleFieldListSection(
-    sectionName: 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected'
-  ) {
+  public async doesSidebarShowFields() {
+    return await this.testSubjects.exists('fieldListGroupedFieldGroups');
+  }
+
+  public getSidebarSectionSelector(sectionName: SidebarSectionName) {
+    return `[data-test-subj="fieldListGrouped${sectionName[0].toUpperCase()}${sectionName.substring(
+      1
+    )}Fields"]`;
+  }
+
+  public async getSidebarSectionFieldNames(sectionName: SidebarSectionName): Promise<string[]> {
+    const elements = await this.find.allByCssSelector(
+      `${this.getSidebarSectionSelector(sectionName)} li`
+    );
+
+    if (!elements?.length) {
+      return [];
+    }
+
+    return Promise.all(
+      elements.map(async (element) => await element.getAttribute('data-attr-field'))
+    );
+  }
+
+  public async toggleSidebarSection(sectionName: SidebarSectionName) {
     return await this.find.clickByCssSelector(
-      `[data-test-subj="fieldListGrouped${sectionName[0].toUpperCase()}${sectionName.substring(
-        1
-      )}Fields"] .euiAccordion__iconButton`
+      `${this.getSidebarSectionSelector(sectionName)} .euiAccordion__iconButton`
     );
   }
 
@@ -471,7 +493,7 @@ export class DiscoverPageObject extends FtrService {
       return;
     }
     if (['_score', '_id', '_index'].includes(field)) {
-      await this.toggleFieldListSection('meta'); // expand Meta section
+      await this.toggleSidebarSection('meta'); // expand Meta section
     }
     await this.clickFieldListItemToggle(field);
     const isLegacyDefault = await this.useLegacyTable();
