@@ -140,8 +140,8 @@ describe('useExceptionLists', () => {
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
-        sort: { field: 'exception-list.created_at', order: 'desc' },
         signal: new AbortController().signal,
+        sort: { field: 'exception-list.created_at', order: 'desc' },
       });
     });
   });
