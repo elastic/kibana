@@ -79,12 +79,16 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     withRedirect: true,
   });
 
-  const deserializer = (payload: PackItem) => ({
-    ...payload,
-    policy_ids: payload.policy_ids ?? [],
-    queries: convertPackQueriesToSO(payload.queries),
-    shards: omit(payload.shards, '*') ?? {},
-  });
+  const deserializer = (payload: PackItem) => {
+    const defaultPolicyIds = filter(payload.policy_ids, (policyId) => !payload.shards?.[policyId]);
+
+    return {
+      ...payload,
+      policy_ids: defaultPolicyIds ?? [],
+      queries: convertPackQueriesToSO(payload.queries),
+      shards: omit(payload.shards, '*') ?? {},
+    };
+  };
 
   const hooksForm = useHookForm({
     defaultValues: defaultValue

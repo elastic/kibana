@@ -9,8 +9,7 @@ import React, { useEffect } from 'react';
 import type { InternalFieldErrors } from 'react-hook-form';
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, last, reject } from 'lodash';
 import { useAgentPolicies } from '../../../agent_policies';
@@ -98,24 +97,6 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
 
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.osquery.pack.form.shardsSection.title"
-                defaultMessage="Shards"
-              />
-            </h5>
-          </EuiTitle>
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.osquery.pack.form.shardsSection.description"
-              defaultMessage="Use the fields to set shards per policy."
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiSpacer size="s" />
 
       {fields.map((item, index, array) => (
