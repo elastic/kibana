@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiRadioGroup, EuiText, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiRadioGroup, EuiText, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui';
 import { DUPLICATE_OPTIONS } from '../../../../../../common/constants';
 
 import { bulkDuplicateRuleActions as i18n } from './translations';
@@ -39,24 +39,28 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
 
   return (
     <EuiConfirmModal
-      title={i18n.MODAL_TITLE}
+      title={i18n.MODAL_TITLE(rulesCount)}
       onConfirm={handleConfirm}
       cancelButtonText={i18n.CANCEL_BUTTON}
       confirmButtonText={i18n.CONTINUE_BUTTON}
       defaultFocusedButton="confirm"
       onCancel={onCancel}
     >
-      <EuiText>{i18n.MODAL_TEXT(rulesCount)}</EuiText>
+      <EuiText>
+        {i18n.MODAL_TEXT(rulesCount)}{' '}
+        <EuiIconTip content={i18n.DUPLICATE_TOOLTIP} position="bottom" />
+      </EuiText>
+
       <EuiSpacer />
       <EuiRadioGroup
         options={[
           {
             id: DUPLICATE_OPTIONS.WITH_EXCEPTIONS,
-            label: i18n.DUPLICATE_EXCEPTIONS_TEXT,
+            label: i18n.DUPLICATE_EXCEPTIONS_TEXT(rulesCount),
           },
           {
             id: DUPLICATE_OPTIONS.WITHOUT_EXCEPTIONS,
-            label: i18n.DUPLICATE_WITHOUT_EXCEPTIONS_TEXT,
+            label: i18n.DUPLICATE_WITHOUT_EXCEPTIONS_TEXT(rulesCount),
           },
         ]}
         idSelected={selectedDuplicateOption}
