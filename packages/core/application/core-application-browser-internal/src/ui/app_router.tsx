@@ -27,7 +27,6 @@ interface Props {
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   setIsMounting: (isMounting: boolean) => void;
-  customLogo$?: Observable<string | undefined>;
 }
 
 interface Params {
@@ -42,7 +41,6 @@ export const AppRouter: FunctionComponent<Props> = ({
   setAppActionMenu,
   appStatuses$,
   setIsMounting,
-  customLogo$,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
   const createScopedHistory = useMemo(
@@ -70,7 +68,6 @@ export const AppRouter: FunctionComponent<Props> = ({
                   setAppActionMenu,
                   setIsMounting,
                   theme$,
-                  customLogo$,
                 }}
               />
             )}
@@ -99,7 +96,6 @@ export const AppRouter: FunctionComponent<Props> = ({
                   setAppActionMenu,
                   setIsMounting,
                   theme$,
-                  customLogo$,
                 }}
               />
             );

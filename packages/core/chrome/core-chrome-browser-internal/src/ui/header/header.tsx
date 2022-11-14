@@ -72,8 +72,6 @@ export interface HeaderProps {
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
-  customLogo$: Observable<string | undefined>;
-  customMark$: Observable<string | undefined>;
 }
 
 export function Header({
@@ -130,8 +128,6 @@ export function Header({
                     navLinks$={observables.navLinks$}
                     navigateToApp={application.navigateToApp}
                     loadingCount$={observables.loadingCount$}
-                    customLogo={customLogo}
-                    customMark={customMark}
                   />,
                 ],
                 borders: 'none',

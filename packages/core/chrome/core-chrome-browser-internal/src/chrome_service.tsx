@@ -116,8 +116,6 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
-    const customLogo$ = new BehaviorSubject<string | undefined>(undefined);
-    const customMark$ = new BehaviorSubject<string | undefined>(undefined);
     let customBrandingRegistered: string | null = null;
 
     const getKbnVersionClass = () => {
@@ -234,8 +232,6 @@ export class ChromeService {
           navControlsExtension$={navControls.getExtension$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
-          customLogo$={customLogo$.pipe(takeUntil(this.stop$))}
-          customMark$={customMark$.pipe(takeUntil(this.stop$))}
         />
       ),
 
