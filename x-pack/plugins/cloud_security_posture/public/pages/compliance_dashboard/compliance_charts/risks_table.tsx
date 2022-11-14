@@ -115,10 +115,9 @@ export const RisksTable = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText
-                size="xs"
-                style={{ fontWeight: euiThemeVars.euiFontWeightBold }}
-              >{`${postureScore.toFixed(0)}%`}</EuiText>
+              <EuiText size="xs" style={{ fontWeight: euiThemeVars.euiFontWeightBold }}>{`${
+                postureScore?.toFixed(0) || 0
+              }%`}</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
