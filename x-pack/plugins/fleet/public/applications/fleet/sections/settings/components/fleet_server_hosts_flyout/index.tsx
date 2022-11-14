@@ -31,8 +31,9 @@ import { useStartServices } from '../../../../hooks';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 import type { FleetServerHost } from '../../../../types';
 
-import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 import { TextInput } from '../form';
+
+import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 
 export interface FleetServerHostsFlyoutProps {
   onClose: () => void;
