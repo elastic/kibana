@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { getTinesConnectorType } from './tines';
+export { useSubAction } from './use_sub_action';
+export { useLoadRuleTypes } from './use_load_rule_types';

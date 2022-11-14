@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { getTinesConnectorType } from './tines';
+export const TINES_TITLE = 'Tines';
+export const TINES_CONNECTOR_ID = '.tines';
+export const API_MAX_RESULTS = 500;
+export const enum SUB_ACTION {
+  STORIES = 'stories',
+  WEBHOOKS = 'webhooks',
+  RUN = 'run',
+  TEST = 'test',
+}
