@@ -47,7 +47,7 @@ describe('Alert Event Details', () => {
     );
     findAndClickButton('Update pack');
     closeModalIfVisible();
-    cy.contains(PACK_NAME);
+    cy.contains(`Successfully updated "${PACK_NAME}" pack`);
     cy.visit('/app/security/rules');
     cy.contains(RULE_NAME);
     cy.wait(2000);
