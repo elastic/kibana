@@ -107,6 +107,7 @@ import {
   retryIfBulkEditConflicts,
   retryIfBulkDeleteConflicts,
   retryIfBulkEnableConflicts,
+  retryIfBulkDisableConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
 } from './lib';
@@ -2663,10 +2664,12 @@ export class RulesClient {
       action: 'DISABLE',
     });
 
-    // TODO retry if
-
-    const taskIdsToDisable: string[] = [];
-    const taskIdsToDelete: string[] = [];
+    const { errors, taskIdsToDisable, taskIdsToDelete } = await retryIfBulkDisableConflicts(
+      this.logger,
+      (filterKueryNode: KueryNode | null) =>
+        this.bulkDisableRulesWithOCC({ filter: filterKueryNode }),
+      kueryNodeFilterWithAuth
+    );
 
     if (taskIdsToDisable.length > 0) {
       try {
