@@ -4,9 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import datemath from '@kbn/datemath';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
+import { KibanaRequest } from '@kbn/core/server';
+import datemath from '@kbn/datemath';
+import type { ESSearchResponse } from '@kbn/es-types';
+import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -14,20 +19,9 @@ import {
   ALERT_SEVERITY,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import { compact } from 'lodash';
-import type { ESSearchResponse } from '@kbn/es-types';
-import { KibanaRequest } from '@kbn/core/server';
-import { termQuery } from '@kbn/observability-plugin/server';
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  ApmRuleType,
-  RULE_TYPES_CONFIG,
-  ANOMALY_ALERT_SEVERITY_TYPES,
-  formatAnomalyReason,
-} from '../../../../../common/rules/apm_rule_types';
+import { compact } from 'lodash';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
   ApmMlDetectorType,
@@ -44,6 +38,12 @@ import {
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
+import {
+  ANOMALY_ALERT_SEVERITY_TYPES,
+  ApmRuleType,
+  formatAnomalyReason,
+  RULE_TYPES_CONFIG,
+} from '../../../../../common/rules/apm_rule_types';
 import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
 import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getMLJobs } from '../../../service_map/get_service_anomalies';
@@ -112,7 +112,7 @@ export function registerAnomalyRuleType({
           return {};
         }
 
-        const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
+        const { savedObjectsClient, scopedClusterClient, getAlertUuid } =
           services;
 
         const ruleParams = params;

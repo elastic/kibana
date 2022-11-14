@@ -79,7 +79,6 @@ export interface RuleExecutorServices<
   scopedClusterClient: IScopedClusterClient;
   searchSourceClient: ISearchStartSearchSource;
   uiSettingsClient: IUiSettingsClient;
-  getAlertUuid?: (alertId: string) => string | null;
   shouldStopExecution: () => boolean;
   shouldWriteAlerts: () => boolean;
 }
