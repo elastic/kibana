@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import useIntersection from 'react-use/lib/useIntersection';
 import { i18n } from '@kbn/i18n';
 
-import { EuiImageProps } from '@elastic/eui';
 import { EmptyImage } from './empty_image';
 import {
   isScreenshotImageBlob,
@@ -33,7 +32,7 @@ interface Props {
   allStepsLoaded?: boolean;
   asThumbnail?: boolean;
   retryFetchOnRevisit?: boolean; // Set to `true` fro "Run Once" / "Test Now" modes
-  size?: EuiImageProps['size'];
+  size?: 'm';
 }
 
 export const JourneyStepScreenshotContainer = ({

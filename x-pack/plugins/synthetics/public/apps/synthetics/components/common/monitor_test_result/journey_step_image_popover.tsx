@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiImage, EuiPopover, useEuiTheme, EuiImageProps } from '@elastic/eui';
+import { EuiImage, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EmptyImage } from '../screenshot/empty_image';
 import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
@@ -24,7 +24,7 @@ interface ScreenshotImageProps {
   isStepFailed: boolean;
   isLoading: boolean;
   asThumbnail?: boolean;
-  size?: EuiImageProps['size'];
+  size?: 'm';
 }
 
 const ScreenshotThumbnail: React.FC<ScreenshotImageProps & { imageData?: string }> = ({
@@ -34,7 +34,7 @@ const ScreenshotThumbnail: React.FC<ScreenshotImageProps & { imageData?: string 
   isStepFailed,
   isLoading,
   asThumbnail = true,
-  size = 'l',
+  size,
 }) => {
   return imageData ? (
     <EuiImage
@@ -102,7 +102,7 @@ export interface StepImagePopoverProps {
   asThumbnail?: boolean;
   height?: number;
   width?: number;
-  size?: EuiImageProps['size'];
+  size?: 'm';
 }
 
 const JourneyStepImage: React.FC<
