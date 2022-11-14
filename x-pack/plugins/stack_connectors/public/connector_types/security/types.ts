@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export * from './slo';
-export * from './indicators';
-export * from './error_budget';
-export * from './duration';
-export * from './common';
+import type { EuiIconProps } from '@elastic/eui';
+
+export type LogoProps = Omit<EuiIconProps, 'type'>;
