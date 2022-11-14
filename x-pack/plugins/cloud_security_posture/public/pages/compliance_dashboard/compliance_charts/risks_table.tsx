@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiProgress,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -48,6 +47,7 @@ export const RisksTable = ({
   viewAllButtonTitle,
   compact,
 }: RisksTableProps) => {
+  console.log(euiThemeVars);
   const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
       {
@@ -79,20 +79,29 @@ export const RisksTable = ({
             justifyContent="flexEnd"
             style={{ gap: euiThemeVars.gutterTypes.gutterSmall }}
           >
-            <EuiFlexItem
-              css={`
-                // controls the coloring for the unfilled part of the progress element
-                progress[value]::-webkit-progress-bar {
-                  background-color: ${statusColors.success};
-                }
-              `}
-            >
-              <EuiProgress
-                value={data.totalFailed}
-                max={data.totalFailed + data.totalPassed}
-                color={statusColors.danger}
-                size="s"
-              />
+            <EuiFlexItem>
+              <EuiFlexGroup
+                gutterSize="none"
+                style={{
+                  height: euiThemeVars.euiSizeXS,
+                  borderRadius: euiThemeVars.euiBorderRadius,
+                  overflow: 'hidden',
+                  gap: 1,
+                }}
+              >
+                <EuiFlexItem
+                  style={{
+                    flex: data.totalFailed,
+                    background: statusColors.danger,
+                  }}
+                />
+                <EuiFlexItem
+                  style={{
+                    flex: data.totalPassed,
+                    background: statusColors.success,
+                  }}
+                />
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText
