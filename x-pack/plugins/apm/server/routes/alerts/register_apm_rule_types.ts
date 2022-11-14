@@ -28,8 +28,8 @@ export interface RegisterRuleDependencies {
 }
 
 export function registerApmRuleTypes(dependencies: RegisterRuleDependencies) {
+  registerTransactionDurationRuleType(dependencies);
   registerAnomalyRuleType(dependencies);
   registerErrorCountRuleType(dependencies);
-  registerTransactionDurationRuleType(dependencies);
   registerTransactionErrorRateRuleType(dependencies);
 }
