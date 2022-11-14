@@ -61,14 +61,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appPath={path}
                 appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{
-                  appId,
-                  mounter,
-                  setAppLeaveHandler,
-                  setAppActionMenu,
-                  setIsMounting,
-                  theme$,
-                }}
+                {...{ appId, mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting, theme$ }}
               />
             )}
           />
@@ -90,13 +83,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appId={id ?? appId}
                 appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{
-                  mounter,
-                  setAppLeaveHandler,
-                  setAppActionMenu,
-                  setIsMounting,
-                  theme$,
-                }}
+                {...{ mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting, theme$ }}
               />
             );
           }}

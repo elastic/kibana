@@ -28,22 +28,19 @@ export const Template: FunctionComponent<Props> = ({
     i18n,
     bootstrapScriptUrl,
     strictCsp,
-    theming,
   },
 }) => {
-  const favIcon =
-    theming && theming.favIcon ? theming.favIcon : `${uiPublicUrl}/favicons/favicon.svg`;
   return (
     <html lang={locale}>
       <head>
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
-        <title>{theming && theming.pageTitle ? theming.pageTitle : 'Elastic'}</title>
+        <title>Elastic</title>
         <Fonts url={uiPublicUrl} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         <link rel="alternate icon" type="image/png" href={`${uiPublicUrl}/favicons/favicon.png`} />
-        <link rel="icon" type="image/svg+xml" href={favIcon} />
+        <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content="light dark" />
         {/* Inject EUI reset and global styles before all other component styles */}
@@ -66,11 +63,7 @@ export const Template: FunctionComponent<Props> = ({
           data-test-subj="kbnLoadingMessage"
         >
           <div className="kbnLoaderWrap">
-            {theming && theming.logo ? (
-              <img src={theming.logo} width="48px" height="48px" alt="logo" />
-            ) : (
-              <Logo />
-            )}
+            <Logo />
             <div
               className="kbnWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
@@ -78,20 +71,14 @@ export const Template: FunctionComponent<Props> = ({
                   'Elastic did not load properly. Check the server output for more information.',
               })}
             >
-              {theming && theming.welcomeMessage
-                ? theming.welcomeMessage
-                : i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic' })}
+              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic' })}
             </div>
             <div className="kbnProgress" />
           </div>
         </div>
 
         <div className="kbnWelcomeView" id="kbn_legacy_browser_error" style={{ display: 'none' }}>
-          {theming && theming.logo ? (
-            <img src={theming.logo} width="48px" height="48px" alt="logo" />
-          ) : (
-            <Logo />
-          )}
+          <Logo />
 
           <h2 className="kbnWelcomeTitle">
             {i18n('core.ui.legacyBrowserTitle', {

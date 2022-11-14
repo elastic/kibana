@@ -91,10 +91,6 @@ export class RenderingService {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
     };
-    const config = this.coreContext.configService.getConfig$();
-    // @ts-expect-error
-    const { whitelabelling } = (await config.pipe(take(1)).toPromise())?.rawConfig;
-    const theming = whitelabelling?.theme;
     const buildNum = env.packageInfo.buildNum;
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
@@ -139,7 +135,6 @@ export class RenderingService {
       darkMode,
       themeVersion,
       stylesheetPaths,
-      theming,
       injectedMetadata: {
         version: env.packageInfo.version,
         buildNumber: env.packageInfo.buildNum,

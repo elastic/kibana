@@ -10,6 +10,9 @@ import './app_container.scss';
 
 import { Observable } from 'rxjs';
 import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
+import { EuiLoadingElastic } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
@@ -111,7 +114,20 @@ export const AppContainer: FC<Props> = ({
   return (
     <Fragment>
       {appNotFound && <AppNotFound />}
+      {showSpinner && !appNotFound && <AppLoadingPlaceholder />}
       <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
     </Fragment>
+  );
+};
+
+const AppLoadingPlaceholder: FC = () => {
+  return (
+    <EuiLoadingElastic
+      className="appContainer__loading"
+      aria-label={i18n.translate('core.application.appContainer.loadingAriaLabel', {
+        defaultMessage: 'Loading application',
+      })}
+      size="xxl"
+    />
   );
 };

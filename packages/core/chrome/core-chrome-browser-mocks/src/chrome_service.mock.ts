@@ -61,7 +61,6 @@ const createStartContractMock = () => {
     setHeaderBanner: jest.fn(),
     hasHeaderBanner$: jest.fn(),
     getBodyClasses$: jest.fn(),
-    registerCustomBrandingPlugin: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
