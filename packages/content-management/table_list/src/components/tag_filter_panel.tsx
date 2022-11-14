@@ -47,7 +47,7 @@ interface Props {
   clearTagSelection: () => void;
   closePopover: () => void;
   isPopoverOpen: boolean;
-  isTransitionOn: boolean;
+  isInUse: boolean;
   options: TagOptionItem[];
   totalActiveFilters: number;
   onFilterButtonClick: () => void;
@@ -56,7 +56,7 @@ interface Props {
 
 export const TagFilterPanel: FC<Props> = ({
   isPopoverOpen,
-  isTransitionOn,
+  isInUse,
   options,
   totalActiveFilters,
   onFilterButtonClick,
@@ -117,7 +117,7 @@ export const TagFilterPanel: FC<Props> = ({
         panelPaddingSize="none"
         anchorPosition="downCenter"
         panelClassName="euiFilterGroup__popoverPanel"
-        panelStyle={isTransitionOn ? undefined : { transition: 'none' }}
+        panelStyle={isInUse ? { transition: 'none' } : undefined}
       >
         <EuiPopoverTitle paddingSize="m" css={popoverTitleCSS}>
           <EuiFlexGroup>
@@ -147,12 +147,14 @@ export const TagFilterPanel: FC<Props> = ({
           data-test-subj="tagSelectableList"
           {...searchProps}
         >
-          {(list, search) => (
-            <>
-              {isSearchVisible ? <div css={searchBoxCSS}>{search}</div> : <EuiSpacer size="s" />}
-              {list}
-            </>
-          )}
+          {(list, search) => {
+            return (
+              <>
+                {isSearchVisible ? <div css={searchBoxCSS}>{search}</div> : <EuiSpacer size="s" />}
+                {list}
+              </>
+            );
+          }}
         </EuiSelectable>
         <EuiPopoverFooter paddingSize="m">
           <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">

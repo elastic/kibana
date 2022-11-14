@@ -46,12 +46,11 @@ export const useTagFilterPanel = ({
   addOrRemoveIncludeTagFilter,
 }: Params) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  // Every time one of the prop of the <TagFilterPanel /> changes it creates a new mount
-  // of that component as it is embedded as a "custom_component" SearchFilterConfig.
-  // This means that, as we keep the popover panel open for the tag selection we get an anoying
-  // "transition IN" effect from EUI. To avoid it we disable the transition after the popover is
-  // open and we reenable it when it is closed.
-  const [isTransitionOn, setIsTransitionOn] = useState(true);
+  // When the panel is "in use" it means that it is opened and the user is interacting with it.
+  // When the user clicks on a tag to select it, the component is unmounted and mounted immediately, which
+  // creates a new EUI transition "IN" which makes the UI "flicker". To avoid that we pass this
+  // "isInUse" state which disable the transition.
+  const [isInUse, setIsInUse] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
   const [tagSelection, setTagSelection] = useState<TagSelection>({});
   const totalActiveFilters = Object.keys(tagSelection).length;
@@ -169,18 +168,18 @@ export const useTagFilterPanel = ({
       updateTagList();
 
       // To avoid "cutting" the inflight css transition when opening the popover
-      // we add a slight delay to switch the "isTransitionOn" flag.
+      // we add a slight delay to switch the "isInUse" flag.
       setTimeout(() => {
-        setIsTransitionOn(false);
+        setIsInUse(true);
       }, 250);
     } else {
-      setIsTransitionOn(true);
+      setIsInUse(false);
     }
   }, [isPopoverOpen, updateTagList]);
 
   return {
     isPopoverOpen,
-    isTransitionOn,
+    isInUse,
     options,
     totalActiveFilters,
     onFilterButtonClick,

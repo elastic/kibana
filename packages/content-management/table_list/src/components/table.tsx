@@ -114,7 +114,7 @@ export function Table<T extends UserContentCommonSchema>({
 
   const {
     isPopoverOpen,
-    isTransitionOn,
+    isInUse,
     closePopover,
     onFilterButtonClick,
     onSelectChange,
@@ -163,7 +163,7 @@ export function Table<T extends UserContentCommonSchema>({
         return (
           <TagFilterPanel
             isPopoverOpen={isPopoverOpen}
-            isTransitionOn={isTransitionOn}
+            isInUse={isInUse}
             closePopover={closePopover}
             options={options}
             totalActiveFilters={totalActiveFilters}
@@ -176,7 +176,7 @@ export function Table<T extends UserContentCommonSchema>({
     };
   }, [
     isPopoverOpen,
-    isTransitionOn,
+    isInUse,
     closePopover,
     options,
     totalActiveFilters,
