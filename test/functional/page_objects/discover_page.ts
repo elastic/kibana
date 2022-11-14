@@ -435,6 +435,18 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
+  public async getSidebarAriaDescription(): Promise<string> {
+    return await (
+      await this.testSubjects.find('fieldListGrouped__ariaDescription')
+    ).getAttribute('innerText');
+  }
+
+  public async waitUntilSidebarHasLoaded() {
+    await this.retry.waitFor('sidebar is loaded', async () => {
+      return (await this.getSidebarAriaDescription()).length > 0;
+    });
+  }
+
   public async doesSidebarShowFields() {
     return await this.testSubjects.exists('fieldListGroupedFieldGroups');
   }
@@ -487,6 +499,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldListItemAdd(field: string) {
+    await this.waitUntilSidebarHasLoaded();
+
     // a filter check may make sense here, but it should be properly handled to make
     // it work with the _score and _source fields as well
     if (await this.isFieldSelected(field)) {
@@ -517,6 +531,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldListItemRemove(field: string) {
+    await this.waitUntilSidebarHasLoaded();
+
     if (
       !(await this.testSubjects.exists('fieldListGroupedSelectedFields')) ||
       !(await this.isFieldSelected(field))

@@ -20,16 +20,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+    });
+
+    beforeEach(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 
-    after(async () => {
+    afterEach(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.uiSettings.replace({});
     });
 
     describe('field filtering', function () {
@@ -57,6 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('renders field groups', function () {
       it('should show field list groups excluding multifields', async function () {
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
 
         // Initial Available fields
@@ -88,20 +95,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect((await PageObjects.discover.getSidebarSectionFieldNames('meta')).join(', ')).to.be(
           '_id, _index, _score'
         );
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
       });
 
       it('should show field list groups including multifields when searched from source', async function () {
         await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': true });
         await browser.refresh();
 
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
 
         // Initial Available fields
-        const expectedInitialAvailableFields =
-          '@message, @message.raw, @tags, @tags.raw, @timestamp, agent, agent.raw, bytes, clientip, extension, extension.raw, geo.coordinates, geo.dest, geo.src, geo.srcdest, headings, headings.raw, host, host.raw, id, index, index.raw, ip, links, links.raw, machine.os, machine.os.raw, machine.ram, machine.ram_range, memory, meta.char, meta.related, meta.user.firstname, meta.user.lastname, nestedField.child, phpmemory, referer, relatedContent.article:modified_time, relatedContent.article:published_time, relatedContent.article:section, relatedContent.article:section.raw, relatedContent.article:tag, relatedContent.article:tag.raw, relatedContent.og:description, relatedContent.og:description.raw, relatedContent.og:image, relatedContent.og:image:height, relatedContent.og:image:height.raw, relatedContent.og:image:width, relatedContent.og:image:width.raw';
         let availableFields = await PageObjects.discover.getSidebarSectionFieldNames('available');
         expect(availableFields.length).to.be(50);
-        expect(availableFields.join(', ')).to.be(expectedInitialAvailableFields);
+        expect(
+          availableFields
+            .join(', ')
+            .startsWith(
+              '@message, @message.raw, @tags, @tags.raw, @timestamp, agent, agent.raw, bytes, clientip, extension, extension.raw'
+            )
+        ).to.be(true);
 
         // Available fields after scrolling down
         const emptySectionButton = await find.byCssSelector(
@@ -128,8 +144,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(
           (await PageObjects.discover.getSidebarSectionFieldNames('unmapped')).join(', ')
         ).to.be('relatedContent');
-        await kibanaServer.uiSettings.unset('discover:searchFieldsFromSource');
-        await browser.refresh();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '83 available fields. 1 unmapped field. 0 empty fields. 3 meta fields.'
+        );
       });
 
       it('should show selected and popular fields', async function () {
@@ -146,6 +164,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(availableFields.includes('extension')).to.be(true);
         expect(availableFields.includes('@message')).to.be(true);
 
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '2 selected fields. 2 popular fields. 53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
         await PageObjects.discover.clickFieldListItemRemove('@message');
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
@@ -161,6 +183,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(
           (await PageObjects.discover.getSidebarSectionFieldNames('popular')).join(', ')
         ).to.be('@message, _id, extension');
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '3 selected fields. 3 popular fields. 53 available fields. 0 empty fields. 3 meta fields.'
+        );
+      });
+
+      it('should show selected and available fields in text-based mode', async function () {
+        await kibanaServer.uiSettings.update({ 'discover:enableSql': true });
+        await browser.refresh();
+
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await PageObjects.discover.selectTextBaseLang('SQL');
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '50 selected fields. 51 available fields.'
+        );
+
+        await PageObjects.discover.clickFieldListItemRemove('extension');
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '49 selected fields. 51 available fields.'
+        );
       });
     });
   });
