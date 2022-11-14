@@ -62,6 +62,7 @@ export const createExceptionList = async ({
     created_by: user,
     description,
     entries: undefined,
+    expire_time: undefined,
     immutable,
     item_id: undefined,
     list_id: listId,

@@ -70,6 +70,7 @@ describe('build_exceptions_filter', () => {
         excludeExceptions: false,
         listClient,
         lists: [],
+        startedAt: new Date(),
       });
       expect(filter).toBeUndefined();
     });
@@ -81,6 +82,7 @@ describe('build_exceptions_filter', () => {
         excludeExceptions: false,
         listClient,
         lists: [getExceptionListItemSchemaMock()],
+        startedAt: new Date(),
       });
 
       expect(filter).toMatchInlineSnapshot(`
@@ -154,6 +156,7 @@ describe('build_exceptions_filter', () => {
         excludeExceptions: true,
         listClient,
         lists: [exceptionItem1, exceptionItem2],
+        startedAt: new Date(),
       });
       expect(filter).toMatchInlineSnapshot(`
         Object {
@@ -236,6 +239,7 @@ describe('build_exceptions_filter', () => {
         excludeExceptions: true,
         listClient,
         lists: [exceptionItem1, exceptionItem2, exceptionItem3],
+        startedAt: new Date(),
       });
 
       expect(filter).toMatchInlineSnapshot(`
@@ -325,6 +329,7 @@ describe('build_exceptions_filter', () => {
         excludeExceptions: true,
         listClient,
         lists: exceptions,
+        startedAt: new Date(),
       });
 
       expect(filter).toMatchInlineSnapshot(`

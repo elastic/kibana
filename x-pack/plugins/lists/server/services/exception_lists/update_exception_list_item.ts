@@ -11,6 +11,7 @@ import type {
   EntriesArray,
   ExceptionListItemSchema,
   ExceptionListItemTypeOrUndefined,
+  ExpireTimeOrUndefined,
   IdOrUndefined,
   ItemIdOrUndefined,
   MetaOrUndefined,
@@ -38,6 +39,7 @@ interface UpdateExceptionListItemOptions {
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
   entries: EntriesArray;
+  expireTime: ExpireTimeOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
   osTypes: OsTypeArray;
@@ -53,6 +55,7 @@ export const updateExceptionListItem = async ({
   _version,
   comments,
   entries,
+  expireTime,
   id,
   savedObjectsClient,
   namespaceType,
@@ -87,6 +90,7 @@ export const updateExceptionListItem = async ({
         comments: transformedComments,
         description,
         entries,
+        expire_time: expireTime,
         meta,
         name,
         os_types: osTypes,

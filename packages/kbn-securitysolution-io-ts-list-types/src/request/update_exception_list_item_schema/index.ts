@@ -22,6 +22,7 @@ import { _version } from '../../common/underscore_version';
 import { id } from '../../common/id';
 import { meta } from '../../common/meta';
 import { namespace_type } from '../../common/namespace_type';
+import { ExpireTimeOrUndefined, expireTimeOrUndefined } from '../../common';
 
 export const updateExceptionListItemSchema = t.intersection([
   t.exact(
@@ -36,6 +37,7 @@ export const updateExceptionListItemSchema = t.intersection([
     t.partial({
       _version, // defaults to undefined if not set during decode
       comments: DefaultUpdateCommentsArray, // defaults to empty array if not set during decode
+      expire_time: expireTimeOrUndefined,
       id, // defaults to undefined if not set during decode
       item_id: t.union([t.string, t.undefined]),
       meta, // defaults to undefined if not set during decode
@@ -51,11 +53,12 @@ export type UpdateExceptionListItemSchema = t.OutputOf<typeof updateExceptionLis
 // This type is used after a decode since some things are defaults after a decode.
 export type UpdateExceptionListItemSchemaDecoded = Omit<
   RequiredKeepUndefined<t.TypeOf<typeof updateExceptionListItemSchema>>,
-  'tags' | 'entries' | 'namespace_type' | 'comments' | 'os_types'
+  'tags' | 'entries' | 'namespace_type' | 'comments' | 'os_types' | 'expire_time'
 > & {
   comments: UpdateCommentsArray;
   tags: Tags;
   entries: EntriesArray;
   namespace_type: NamespaceType;
   os_types: OsTypeArray;
+  expire_time: ExpireTimeOrUndefined;
 };

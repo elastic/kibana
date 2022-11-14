@@ -28,6 +28,7 @@ export * from './entry_nested';
 export * from './exception_export_details';
 export * from './exception_list';
 export * from './exception_list_item_type';
+export * from './expire_time';
 export * from './filter';
 export * from './id';
 export * from './immutable';

@@ -33,6 +33,8 @@ import {
 
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
+import type { Moment } from 'moment';
+import moment from 'moment';
 import {
   isEqlRule,
   isNewTermsRule,
@@ -56,6 +58,7 @@ import { createExceptionItemsReducer } from './reducer';
 import { useEditExceptionItems } from './use_edit_exception';
 
 import * as i18n from './translations';
+import { ExceptionsExpireTime } from '../flyout_components/expire_time';
 
 interface EditExceptionFlyoutProps {
   list: ExceptionListSchema;
@@ -119,6 +122,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       disableBulkClose,
       bulkCloseIndex,
       entryErrorExists,
+      expireTime,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -129,6 +133,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     disableBulkClose: true,
     bulkCloseIndex: undefined,
     entryErrorExists: false,
+    expireTime: moment(itemToEdit.expire_time),
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -226,6 +231,16 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       dispatch({
         type: 'setConditionValidationErrorExists',
         errorExists,
+      });
+    },
+    [dispatch]
+  );
+
+  const setExpireTime = useCallback(
+    (exceptionExpireTime: Moment | undefined): void => {
+      dispatch({
+        type: 'setExpireTime',
+        expireTime: exceptionExpireTime,
       });
     },
     [dispatch]
@@ -370,6 +385,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           newCommentValue={newComment}
           newCommentOnChange={setComment}
         />
+        <EuiHorizontalRule />
+        <ExceptionsExpireTime expireTime={expireTime} setExpireTime={setExpireTime} />
         {showAlertCloseOptions && (
           <>
             <EuiHorizontalRule />

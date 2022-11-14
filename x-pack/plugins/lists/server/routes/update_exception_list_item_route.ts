@@ -56,6 +56,7 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
           namespace_type: namespaceType,
           os_types: osTypes,
           tags,
+          expire_time: expireTime,
         } = request.body;
         if (id == null && itemId == null) {
           return siemResponse.error({
@@ -69,6 +70,7 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
             comments,
             description,
             entries,
+            expireTime,
             id,
             itemId,
             meta,

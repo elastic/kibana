@@ -11,6 +11,7 @@ import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
+import type { Moment } from 'moment';
 
 import type { Rule } from '../../../rule_management/logic/types';
 
@@ -30,6 +31,7 @@ export interface State {
   exceptionListsToAddTo: ExceptionListSchema[];
   selectedRulesToAddTo: Rule[];
   errorSubmitting: Error | null;
+  expireTime: Moment | undefined;
 }
 
 export const initialState: State = {
@@ -48,6 +50,7 @@ export const initialState: State = {
   selectedRulesToAddTo: [],
   listType: ExceptionListTypeEnum.RULE_DEFAULT,
   errorSubmitting: null,
+  expireTime: undefined,
 };
 
 export type Action =
@@ -110,6 +113,10 @@ export type Action =
   | {
       type: 'setErrorSubmitting';
       err: Error | null;
+    }
+  | {
+      type: 'setExpireTime';
+      expireTime: Moment | undefined;
     };
 
 export const createExceptionItemsReducer =
@@ -242,6 +249,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           errorSubmitting: err,
+        };
+      }
+      case 'setExpireTime': {
+        const { expireTime } = action;
+
+        return {
+          ...state,
+          expireTime,
         };
       }
       default:
