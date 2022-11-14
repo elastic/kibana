@@ -209,7 +209,6 @@ export function registerErrorCountRuleType({
                   [ALERT_EVALUATION_VALUE]: errorCount,
                   [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
                   [ALERT_REASON]: alertReason,
-                  [ALERT_UUID]: alertUuid,
                   ...sourceFields,
                 },
               })

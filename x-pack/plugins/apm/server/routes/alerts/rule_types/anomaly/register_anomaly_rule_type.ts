@@ -323,7 +323,6 @@ export function registerAnomalyRuleType({
                 [ALERT_EVALUATION_VALUE]: score,
                 [ALERT_EVALUATION_THRESHOLD]: threshold,
                 [ALERT_REASON]: reasonMessage,
-                [ALERT_UUID]: alertUuid,
                 ...eventSourceFields,
               },
             })

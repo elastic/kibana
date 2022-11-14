@@ -284,7 +284,6 @@ export function registerTransactionDurationRuleType({
               [ALERT_EVALUATION_VALUE]: transactionDuration,
               [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
               [ALERT_REASON]: reason,
-              [ALERT_UUID]: alertUuid,
               ...sourceFields,
             },
           })
