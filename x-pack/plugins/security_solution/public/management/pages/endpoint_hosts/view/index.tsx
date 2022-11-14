@@ -71,6 +71,7 @@ import { BackToExternalAppButton } from '../../../components/back_to_external_ap
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
+import { NoPrivileges } from '../../../../common/components/no_privileges';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -133,7 +134,8 @@ export const EndpointList = () => {
     endpointsTotalError,
     metadataTransformStats,
   } = useEndpointSelector(selector);
-  const { canReadEndpointList } = useUserPrivileges().endpointPrivileges;
+  const { canReadEndpointList, canAccessFleet } = useUserPrivileges().endpointPrivileges;
+  console.log(canReadEndpointList, canAccessFleet);
   const { search } = useFormatUrl(SecurityPageName.administration);
   const { search: searchParams } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -144,11 +146,6 @@ export const EndpointList = () => {
   const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
-
-  const fleetAuthz = services.fleet?.authz;
-  const fleetAuthzForCurrentUser =
-    fleetAuthz.packagePrivileges?.endpoint?.actions.readEndpointList.executePackageAction ?? false;
-  console.log(canReadEndpointList, fleetAuthzForCurrentUser);
 
   const backLinkOptions = useMemo<BackToExternalAppButtonProps>(() => {
     if (routeState?.backLink) {
@@ -588,7 +585,6 @@ export const EndpointList = () => {
     handleSelectableOnChange,
     selectionOptions,
     handleCreatePolicyClick,
-    canReadEndpointList,
   ]);
 
   const hasListData = listData && listData.length > 0;
@@ -687,6 +683,10 @@ export const EndpointList = () => {
     );
   }, [showTransformFailedCallout, closeTransformFailedCallout, transformFailedCalloutDescription]);
 
+  if (canReadEndpointList && !canAccessFleet) {
+    return <NoPrivileges pageName={SecurityPageName.endpoints} />;
+  }
+
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
@@ -707,7 +707,6 @@ export const EndpointList = () => {
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
-        {canReadEndpointList && !fleetAuthzForCurrentUser && <EuiText>{'hi'}</EuiText>}
         {areEndpointsEnrolling && !hasErrorFindingTotals && (
           <>
             <EuiCallOut size="s" data-test-subj="endpointsEnrollingNotification">
