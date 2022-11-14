@@ -57,7 +57,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Execution"
+    "Execution",
+    "has_guide"
   ],
   "threat": [
     {
@@ -93,5 +94,5 @@
     }
   ],
   "type": "eql",
-  "version": 100
+  "version": 101
 }

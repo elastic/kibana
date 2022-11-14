@@ -14,7 +14,7 @@ import { useToasts } from '../../../common/lib/kibana';
 import type { FindRulesReferencedByExceptionsListProp } from '../../../detections/containers/detection_engine/rules/types';
 import * as i18n from '../utils/translations';
 
-export type ReturnUseFindExceptionListReferences = [boolean, RuleReferences | null];
+export type ReturnUseFindExceptionListReferences = [boolean, boolean, RuleReferences | null];
 
 export interface RuleReferences {
   [key: string]: RuleReferenceSchema[];
@@ -28,6 +28,7 @@ export const useFindExceptionListReferences = (
 ): ReturnUseFindExceptionListReferences => {
   const toasts = useToasts();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorExists, setErrorExists] = useState(false);
   const [references, setReferences] = useState<RuleReferences | null>(null);
   const listRefs = useMemo((): FindRulesReferencedByExceptionsListProp[] => {
     return ruleExceptionLists.map((list) => {
@@ -61,11 +62,13 @@ export const useFindExceptionListReferences = (
         }, {});
 
         if (isSubscribed) {
+          setErrorExists(false);
           setIsLoading(false);
           setReferences(results);
         }
       } catch (error) {
         if (isSubscribed) {
+          setErrorExists(true);
           setIsLoading(false);
           toasts.addError(error, { title: i18n.ERROR_FETCHING_REFERENCES_TITLE });
         }
@@ -73,6 +76,7 @@ export const useFindExceptionListReferences = (
     };
 
     if (listRefs.length === 0 && isSubscribed) {
+      setErrorExists(false);
       setIsLoading(false);
       setReferences(null);
     } else {
@@ -85,5 +89,5 @@ export const useFindExceptionListReferences = (
     };
   }, [ruleExceptionLists, listRefs, toasts]);
 
-  return [isLoading, references];
+  return [isLoading, errorExists, references];
 };

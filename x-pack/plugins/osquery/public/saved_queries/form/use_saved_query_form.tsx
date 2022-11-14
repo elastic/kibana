@@ -10,7 +10,7 @@ import { isArray, isEmpty, map } from 'lodash';
 import type { Draft } from 'immer';
 import produce from 'immer';
 import { useMemo } from 'react';
-import type { ECSMapping } from '../../../common/schemas/common';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { useSavedQueries } from '../use_saved_queries';
 
 export interface SavedQuerySOFormData {
@@ -72,11 +72,6 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
       draft.interval = draft.interval + '';
     }
 
-    if (draft.snapshot) {
-      delete draft.snapshot;
-      delete draft.removed;
-    }
-
     return draft;
   });
 
@@ -101,6 +96,7 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
             query: '',
             interval: 3600,
             ecs_mapping: {},
+            snapshot: true,
           },
     }),
   };

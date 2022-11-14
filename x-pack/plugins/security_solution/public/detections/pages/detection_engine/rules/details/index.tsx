@@ -27,10 +27,10 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { SecuritySolutionTabNavigation } from '../../../../../common/components/navigation';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import {
@@ -43,7 +43,6 @@ import type { UpdateDateRange } from '../../../../../common/components/charts/co
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import {
-  getEditRuleUrl,
   getRulesUrl,
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
@@ -67,7 +66,7 @@ import {
 } from '../../../../components/alerts_table/default_config';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
-import { getStepsData, redirectToDetections, userHasPermissions } from '../helpers';
+import { getStepsData, redirectToDetections } from '../helpers';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
@@ -76,8 +75,6 @@ import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
-import { LinkButton } from '../../../../../common/components/links';
-import { useFormatUrl } from '../../../../../common/components/link_to';
 import {
   APP_UI_ID,
   DEFAULT_INDEX_KEY,
@@ -97,9 +94,10 @@ import { timelineDefaults } from '../../../../../timelines/store/timeline/defaul
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import {
-  getToolTipContent,
+  explainLackOfPermission,
   canEditRuleWithActions,
   isBoolean,
+  hasUserCRUDPermission,
 } from '../../../../../common/utils/privileges';
 
 import {
@@ -116,7 +114,7 @@ import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
 import { RuleDetailsContextProvider } from './rule_details_context';
-import { useGetSavedQuery } from '../../../../../common/hooks/use_get_saved_query';
+import { useGetSavedQuery } from '../use_get_saved_query';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
@@ -132,6 +130,7 @@ import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use
 import { HeaderPage } from '../../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../../../detection_engine/rule_exceptions/components/all_exception_items_table';
 import type { NavTab } from '../../../../../common/components/navigation/types';
+import { EditRuleSettingButtonLink } from './components/edit_rule_settings_button_link';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -301,14 +300,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
-  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
 
-  // load saved query only if rule type === 'saved_query', as other rule types still can have saved_id property that is not used
-  const savedQueryId = rule?.type === 'saved_query' ? rule?.saved_id : undefined;
-  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(savedQueryId);
+  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(rule?.saved_id, {
+    ruleType: rule?.type,
+  });
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -586,44 +584,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
   }, []);
 
-  const goToEditRule = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.rules,
-        path: getEditRuleUrl(ruleId ?? ''),
-      });
-    },
-    [navigateToApp, ruleId]
-  );
-
-  const editRule = useMemo(() => {
-    if (!hasActionsPrivileges) {
-      return (
-        <EuiToolTip position="top" content={ruleI18n.EDIT_RULE_SETTINGS_TOOLTIP}>
-          <LinkButton
-            onClick={goToEditRule}
-            iconType="controlsHorizontal"
-            isDisabled={true}
-            href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
-          >
-            {ruleI18n.EDIT_RULE_SETTINGS}
-          </LinkButton>
-        </EuiToolTip>
-      );
-    }
-    return (
-      <LinkButton
-        onClick={goToEditRule}
-        iconType="controlsHorizontal"
-        isDisabled={!isExistingRule || !userHasPermissions(canUserCRUD)}
-        href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
-      >
-        {ruleI18n.EDIT_RULE_SETTINGS}
-      </LinkButton>
-    );
-  }, [isExistingRule, canUserCRUD, formatUrl, goToEditRule, hasActionsPrivileges, ruleId]);
-
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
     (newShowBuildingBlockAlerts: boolean) => {
       setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
@@ -720,7 +680,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       position="top"
-                      content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
+                      content={explainLackOfPermission(
+                        rule,
+                        hasMlPermissions,
+                        hasActionsPrivileges,
+                        canUserCRUD
+                      )}
                     >
                       <EuiFlexGroup>
                         <RuleSwitch
@@ -728,8 +693,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           isDisabled={
                             !isExistingRule ||
                             !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                            !userHasPermissions(canUserCRUD) ||
-                            (!hasMlPermissions && !rule?.enabled)
+                            !hasUserCRUDPermission(canUserCRUD) ||
+                            (isMlRule(rule?.type) && !hasMlPermissions)
                           }
                           enabled={isExistingRule && (rule?.enabled ?? false)}
                           onChange={handleOnChangeEnabledRule}
@@ -741,11 +706,26 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>{editRule}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EditRuleSettingButtonLink
+                          ruleId={ruleId}
+                          disabled={
+                            !isExistingRule ||
+                            !hasUserCRUDPermission(canUserCRUD) ||
+                            (isMlRule(rule?.type) && !hasMlPermissions)
+                          }
+                          disabledReason={explainLackOfPermission(
+                            rule,
+                            hasMlPermissions,
+                            hasActionsPrivileges,
+                            canUserCRUD
+                          )}
+                        />
+                      </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <RuleActionsOverflow
                           rule={rule}
-                          userHasPermissions={isExistingRule && userHasPermissions(canUserCRUD)}
+                          userHasPermissions={isExistingRule && hasUserCRUDPermission(canUserCRUD)}
                           canDuplicateRuleWithActions={canEditRuleWithActions(
                             rule,
                             hasActionsPrivileges
@@ -869,6 +849,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     rule={rule}
                     listType={ExceptionListTypeEnum.DETECTION}
                     onRuleChange={refreshRule}
+                    isViewReadOnly={!isExistingRule}
                     data-test-subj="exceptionTab"
                   />
                 </Route>
@@ -879,6 +860,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     rule={rule}
                     listType={ExceptionListTypeEnum.ENDPOINT}
                     onRuleChange={refreshRule}
+                    isViewReadOnly={!isExistingRule}
                     data-test-subj="endpointExceptionsTab"
                   />
                 </Route>

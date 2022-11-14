@@ -17,7 +17,6 @@ export const createFileServiceMock = (): DeeplyMockedKeys<FileServiceStart> => (
   getByToken: jest.fn(),
   getShareObject: jest.fn(),
   getUsageMetrics: jest.fn(),
-  list: jest.fn(),
   listShareObjects: jest.fn(),
   update: jest.fn(),
   updateShareObject: jest.fn(),

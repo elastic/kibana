@@ -256,7 +256,10 @@ describe('Discover main content component', () => {
     });
 
     it('should pass undefined for onResetChartHeight to DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED', async () => {
-      const component = await mountComponent();
+      const storage = new LocalStorageMock({}) as unknown as Storage;
+      const topPanelHeight = 123;
+      storage.get = jest.fn().mockImplementation(() => topPanelHeight);
+      const component = await mountComponent({ storage });
       expect(component.find(DiscoverChart).prop('onResetChartHeight')).toBeDefined();
       setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
       expect(component.find(DiscoverChart).prop('onResetChartHeight')).toBeUndefined();
@@ -339,6 +342,22 @@ describe('Discover main content component', () => {
       component.update();
       expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, defaultTopPanelHeight);
       expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBe(defaultTopPanelHeight);
+    });
+
+    it('should pass undefined for onResetChartHeight to DiscoverChart when the chart is the default height', async () => {
+      const component = await mountComponent();
+      const defaultTopPanelHeight = component.find(DiscoverPanels).prop('topPanelHeight');
+      const newTopPanelHeight = 123;
+      act(() => {
+        component.find(DiscoverPanels).prop('onTopPanelHeightChange')(newTopPanelHeight);
+      });
+      component.update();
+      expect(component.find(DiscoverChart).prop('onResetChartHeight')).toBeDefined();
+      act(() => {
+        component.find(DiscoverPanels).prop('onTopPanelHeightChange')(defaultTopPanelHeight);
+      });
+      component.update();
+      expect(component.find(DiscoverChart).prop('onResetChartHeight')).toBeUndefined();
     });
   });
 });

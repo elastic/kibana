@@ -12,42 +12,40 @@ import { useActions, useValues } from 'kea';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
-  EuiTextColor,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 import { CANCEL_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { HttpLogic } from '../../../../shared/http';
+import { ML_MANAGE_TRAINED_MODELS_PATH } from '../../../routes';
 import { IndexNameLogic } from '../index_name_logic';
 
+import { TrainedModelHealth } from './ml_model_health';
 import { PipelinesLogic } from './pipelines_logic';
 
-export const InferencePipelineCard: React.FC<InferencePipeline> = ({
-  pipelineName,
-  trainedModelName,
-  isDeployed,
-  types,
-}) => {
+export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => {
   const { http } = useValues(HttpLogic);
   const { indexName } = useValues(IndexNameLogic);
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const { deleteMlPipeline } = useActions(PipelinesLogic);
-
-  const deployedText = i18n.translate('xpack.enterpriseSearch.inferencePipelineCard.isDeployed', {
-    defaultMessage: 'Deployed',
-  });
+  const showConfirmDeleteModal = () => {
+    setShowConfirmDelete(true);
+    setIsPopOverOpen(false);
+  };
+  const { pipelineName, types } = pipeline;
 
   const actionButton = (
     <EuiButtonEmpty
@@ -109,7 +107,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
                         flush="both"
                         iconType="trash"
                         color="text"
-                        onClick={() => setShowConfirmDelete(true)}
+                        onClick={showConfirmDeleteModal}
                       >
                         {i18n.translate(
                           'xpack.enterpriseSearch.inferencePipelineCard.action.delete',
@@ -126,13 +124,26 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
         <EuiFlexItem>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiTextColor color="subdued">{trainedModelName}</EuiTextColor>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-                {isDeployed && (
-                  <EuiFlexItem grow={false}>
-                    <EuiHealth color="success">{deployedText}</EuiHealth>
+              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <TrainedModelHealth {...pipeline} />
+                </EuiFlexItem>
+                {pipeline.modelState === TrainedModelState.NotDeployed && (
+                  <EuiFlexItem grow={false} style={{ paddingRight: '1rem' }}>
+                    <EuiToolTip
+                      position="top"
+                      content={i18n.translate(
+                        'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
+                        { defaultMessage: 'Fix issue in Trained Models' }
+                      )}
+                    >
+                      <EuiButtonIcon
+                        href={http.basePath.prepend(ML_MANAGE_TRAINED_MODELS_PATH)}
+                        display="base"
+                        size="xs"
+                        iconType="wrench"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
                 {types.map((type) => (

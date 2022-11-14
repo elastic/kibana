@@ -39,6 +39,8 @@ describe('SessionView component', () => {
         dispatchEvent: jest.fn(),
       })),
     });
+
+    global.ResizeObserver = require('resize-observer-polyfill');
   });
 
   beforeEach(() => {

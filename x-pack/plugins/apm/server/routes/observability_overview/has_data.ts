@@ -21,6 +21,7 @@ export async function getHasData({ setup }: { setup: Setup }) {
       },
       terminate_after: 1,
       body: {
+        track_total_hits: 1,
         size: 0,
       },
     };

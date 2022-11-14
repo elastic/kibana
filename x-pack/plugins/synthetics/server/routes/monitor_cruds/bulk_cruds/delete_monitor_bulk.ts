@@ -28,7 +28,7 @@ export const deleteMonitorBulk = async ({
   syntheticsMonitorClient: SyntheticsMonitorClient;
   request: KibanaRequest;
 }) => {
-  const { logger, telemetry, kibanaVersion } = server;
+  const { logger, telemetry, stackVersion } = server;
   const spaceId = server.spaces.spacesService.getSpaceId(request);
 
   try {
@@ -43,11 +43,12 @@ export const deleteMonitorBulk = async ({
       savedObjectsClient,
       spaceId
     );
-    const deletePromises = monitors.map((monitor) =>
-      savedObjectsClient.delete(syntheticsMonitorType, monitor.id)
+
+    const deletePromises = savedObjectsClient.bulkDelete(
+      monitors.map((monitor) => ({ type: syntheticsMonitorType, id: monitor.id }))
     );
 
-    const [errors] = await Promise.all([deleteSyncPromise, ...deletePromises]);
+    const [errors] = await Promise.all([deleteSyncPromise, deletePromises]);
 
     monitors.forEach((monitor) => {
       sendTelemetryEvents(
@@ -55,7 +56,7 @@ export const deleteMonitorBulk = async ({
         telemetry,
         formatTelemetryDeleteEvent(
           monitor,
-          kibanaVersion,
+          stackVersion,
           new Date().toISOString(),
           Boolean((monitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
           errors

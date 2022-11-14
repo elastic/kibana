@@ -22,7 +22,7 @@
   "related_integrations": [
     {
       "package": "azure",
-      "version": "0.12.0"
+      "version": "^1.0.0"
     }
   ],
   "required_fields": [
@@ -52,7 +52,8 @@
     "Azure",
     "Continuous Monitoring",
     "SecOps",
-    "Identity and Access"
+    "Identity and Access",
+    "has_guide"
   ],
   "threat": [
     {
@@ -73,5 +74,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 100
+  "version": 102
 }

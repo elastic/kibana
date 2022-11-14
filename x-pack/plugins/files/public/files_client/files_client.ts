@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/function';
-import * as qs from 'query-string';
 import type { HttpStart } from '@kbn/core/public';
 import type { ScopedFilesClient, FilesClient } from '../types';
 import {
@@ -15,13 +13,6 @@ import {
   FILES_PUBLIC_API_BASE_PATH,
   FILES_SHARE_API_BASE_PATH,
 } from '../../common/api_routes';
-
-const addQueryParams =
-  (queryParams: object) =>
-  (path: string): string => {
-    const stringified = qs.stringify(queryParams);
-    return `${path}${stringified ? `?${stringified}` : ''}`;
-  };
 
 /**
  * @internal
@@ -36,32 +27,25 @@ export const apiRoutes = {
     `${FILES_API_BASE_PATH}/${fileKind}/${id}/blob${fileName ? '/' + fileName : ''}`,
   getUpdateRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
   getDeleteRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
-  getListRoute: (fileKind: string, page?: number, perPage?: number) => {
-    return pipe(`${FILES_API_BASE_PATH}/${fileKind}/list`, addQueryParams({ page, perPage }));
-  },
+  getListRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/list`,
   getByIdRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
 
   /**
    * Scope to file shares and file kind
    */
   getShareRoute: (fileKind: string, id: string) => `${FILES_SHARE_API_BASE_PATH}/${fileKind}/${id}`,
-  getListSharesRoute: (fileKind: string, page?: number, perPage?: number, forFileId?: string) =>
-    pipe(`${FILES_SHARE_API_BASE_PATH}/${fileKind}`, addQueryParams({ page, perPage, forFileId })),
+  getListSharesRoute: (fileKind: string) => `${FILES_SHARE_API_BASE_PATH}/${fileKind}`,
 
   /**
    * Public routes
    */
-  getPublicDownloadRoute: (token: string, fileName?: string) =>
-    pipe(
-      `${FILES_PUBLIC_API_BASE_PATH}/blob${fileName ? '/' + fileName : ''}`,
-      addQueryParams({ token })
-    ),
+  getPublicDownloadRoute: (fileName?: string) =>
+    `${FILES_PUBLIC_API_BASE_PATH}/blob${fileName ? '/' + fileName : ''}`,
 
   /**
    * Top-level routes
    */
-  getFindRoute: (page?: number, perPage?: number) =>
-    pipe(`${API_BASE_PATH}/find`, addQueryParams({ page, perPage })),
+  getFindRoute: () => `${API_BASE_PATH}/find`,
   getMetricsRoute: () => `${API_BASE_PATH}/metrics`,
 };
 
@@ -118,8 +102,12 @@ export function createFilesClient({
     getById: ({ kind, ...args }) => {
       return http.get(apiRoutes.getByIdRoute(scopedFileKind ?? kind, args.id));
     },
-    list({ kind, ...args } = { kind: '' }) {
-      return http.get(apiRoutes.getListRoute(scopedFileKind ?? kind, args.page, args.perPage));
+    list: ({ kind, page, perPage, ...body } = { kind: '' }) => {
+      return http.post(apiRoutes.getListRoute(scopedFileKind ?? kind), {
+        headers: commonBodyHeaders,
+        query: { page, perPage },
+        body: JSON.stringify(body),
+      });
     },
     update: ({ kind, id, ...body }) => {
       return http.patch(apiRoutes.getUpdateRoute(scopedFileKind ?? kind, id), {
@@ -127,10 +115,11 @@ export function createFilesClient({
         body: JSON.stringify(body),
       });
     },
-    upload: ({ kind, abortSignal, ...args }) => {
+    upload: ({ kind, abortSignal, contentType, selfDestructOnAbort, ...args }) => {
       return http.put(apiRoutes.getUploadRoute(scopedFileKind ?? kind, args.id), {
+        query: { selfDestructOnAbort },
         headers: {
-          'Content-Type': 'application/octet-stream',
+          'Content-Type': contentType ?? 'application/octet-stream',
         },
         signal: abortSignal,
         body: args.body as BodyInit,
@@ -152,12 +141,16 @@ export function createFilesClient({
       return http.get(apiRoutes.getShareRoute(scopedFileKind ?? kind, id));
     },
     listShares: ({ kind, forFileId, page, perPage }) => {
-      return http.get(
-        apiRoutes.getListSharesRoute(scopedFileKind ?? kind, page, perPage, forFileId)
-      );
+      return http.get(apiRoutes.getListSharesRoute(scopedFileKind ?? kind), {
+        query: { page, perPage, forFileId },
+      });
     },
     find: ({ page, perPage, ...filterArgs }) => {
-      return http.post(apiRoutes.getFindRoute(page, perPage), {
+      return http.post(apiRoutes.getFindRoute(), {
+        query: {
+          page,
+          perPage,
+        },
         headers: commonBodyHeaders,
         body: JSON.stringify(filterArgs),
       });
@@ -166,7 +159,7 @@ export function createFilesClient({
       return http.get(apiRoutes.getMetricsRoute());
     },
     publicDownload: ({ token, fileName }) => {
-      return http.get(apiRoutes.getPublicDownloadRoute(token, fileName));
+      return http.get(apiRoutes.getPublicDownloadRoute(fileName), { query: { token } });
     },
   };
   return api;

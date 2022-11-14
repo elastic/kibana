@@ -78,7 +78,7 @@ export function MachineLearningCasesProvider(
       await testSubjects.existOrFail('comment-persistableState-ml_anomaly_charts');
 
       await mlAnomalyCharts.assertAnomalyExplorerChartsCount(
-        `mlExplorerEmbeddable_${attachment.id}`,
+        attachment.id !== undefined ? `mlExplorerEmbeddable_${attachment.id}` : undefined,
         expectedChartsCount
       );
     },

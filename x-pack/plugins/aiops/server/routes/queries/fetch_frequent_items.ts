@@ -10,6 +10,7 @@ import { uniq, uniqWith, pick, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
 
 interface FrequentItemsAggregation extends estypes.AggregationsSamplerAggregation {
@@ -53,9 +54,11 @@ export async function fetchFrequentItems(
   changePoints: ChangePoint[],
   timeFieldName: string,
   deviationMin: number,
-  deviationMax: number
+  deviationMax: number,
+  logger: Logger,
+  emitError: (m: string) => void
 ) {
-  // get unique fields that are left
+  // get unique fields from change points
   const fields = [...new Set(changePoints.map((t) => t.fieldName))];
 
   // TODO add query params
@@ -91,6 +94,8 @@ export async function fetchFrequentItems(
     sampleProbability = Math.min(0.5, minDocCount / totalDocCount);
   }
 
+  logger.debug(`frequent_items sample probability: ${sampleProbability}`);
+
   // frequent items can be slow, so sample and use 10% min_support
   const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
     sample: {
@@ -103,7 +108,7 @@ export async function fetchFrequentItems(
           frequent_items: {
             minimum_set_size: 2,
             size: 200,
-            minimum_support: 0.01,
+            minimum_support: 0.1,
             fields: aggFields,
           },
         },
@@ -125,11 +130,17 @@ export async function fetchFrequentItems(
     { maxRetries: 0 }
   );
 
-  const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
-
   if (body.aggregations === undefined) {
-    throw new Error('fetchFrequentItems failed, did not return aggregations.');
+    logger.error(`Failed to fetch frequent_items, got: \n${JSON.stringify(body, null, 2)}`);
+    emitError(`Failed to fetch frequent_items.`);
+    return {
+      fields: [],
+      df: [],
+      totalDocCount: 0,
+    };
   }
+
+  const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
 
   const shape = body.aggregations.sample.fi.buckets.length;
   let maximum = shape;

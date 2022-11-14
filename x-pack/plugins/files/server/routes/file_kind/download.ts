@@ -5,35 +5,31 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Ensure } from '@kbn/utility-types';
+import { schema } from '@kbn/config-schema';
 import { Readable } from 'stream';
 
-import type { DownloadFileKindHttpEndpoint } from '../../../common/api_routes';
 import type { FileKind } from '../../../common/types';
 import { fileNameWithExt } from '../common_schemas';
 import { fileErrors } from '../../file';
 import { getDownloadHeadersForFile } from '../common';
 import { getById } from './helpers';
-import type { FileKindRouter, FileKindsRequestHandler } from './types';
-import { FILES_API_ROUTES } from '../api_routes';
+import type { CreateHandler, FileKindRouter } from './types';
+import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 
 export const method = 'get' as const;
 
-export const paramsSchema = schema.object({
-  id: schema.string(),
-  fileName: schema.maybe(fileNameWithExt),
-});
+const rt = {
+  params: schema.object({
+    id: schema.string(),
+    fileName: schema.maybe(fileNameWithExt),
+  }),
+};
 
-type Params = Ensure<DownloadFileKindHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
+export type Endpoint = CreateRouteDefinition<typeof rt, any>;
 
 type Response = Readable;
 
-export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
-  { files, fileKind },
-  req,
-  res
-) => {
+export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
   const { fileService } = await files;
   const {
     params: { id, fileName },
@@ -44,7 +40,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     const body: Response = await file.downloadContent();
     return res.ok({
       body,
-      headers: getDownloadHeadersForFile(file, fileName),
+      headers: getDownloadHeadersForFile({ file, fileName }),
     });
   } catch (e) {
     if (e instanceof fileErrors.NoDownloadAvailableError) {
@@ -59,9 +55,7 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
     fileKindRouter[method](
       {
         path: FILES_API_ROUTES.fileKind.getDownloadRoute(fileKind.id),
-        validate: {
-          params: paramsSchema,
-        },
+        validate: { ...rt },
         options: {
           tags: fileKind.http.download.tags,
         },

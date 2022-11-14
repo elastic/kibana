@@ -134,7 +134,9 @@ describe('format', () => {
       timeout: '16',
       type: 'http',
       urls: 'sample url',
+      'url.port': null,
       username: '',
+      id: '',
     });
   });
 
@@ -283,6 +285,7 @@ describe('format', () => {
         type: 'browser',
         'url.port': null,
         urls: '',
+        id: '',
       });
     }
   );
@@ -347,7 +350,9 @@ describe('format', () => {
       timeout: '16',
       type: 'http',
       urls: 'sample url',
+      'url.port': null,
       username: '',
+      id: '',
     });
   });
 });

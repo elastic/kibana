@@ -95,13 +95,14 @@ export function ServiceNodeMetrics() {
                 kuery,
                 start,
                 end,
+                environment,
               },
             },
           }
         );
       }
     },
-    [kuery, serviceName, serviceNodeName, start, end]
+    [kuery, serviceName, serviceNodeName, start, end, environment]
   );
 
   const { docLinks } = useApmPluginContext().core;

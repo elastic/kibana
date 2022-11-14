@@ -11,29 +11,28 @@ import { getAllListTypes } from '@kbn/lists-plugin/server/services/exception_lis
 import type { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 
 /**
- * Helper that takes rules, goes through their referenced exception lists and
- * searches for them, returning an object with all those found, using list_id as keys
- * @param rules {array}
- * @param savedObjectsClient {object}
- * @returns {Promise} an object with all referenced lists found, using list_id as keys
+ * splitting out the parsing of the lists from the fetching
+ * for easier and more compartmentalized testing
+ * @param rules Array<RuleToImport | Error>
+ * @returns [ExceptionListQueryInfo[], ExceptionListQueryInfo[]]
  */
-export const getReferencedExceptionLists = async ({
-  rules,
-  savedObjectsClient,
-}: {
-  rules: Array<ImportRulesSchema | Error>;
-  savedObjectsClient: SavedObjectsClientContract;
-}): Promise<Record<string, ExceptionListSchema>> => {
-  const [lists] = rules.reduce<ListArray[]>((acc, rule) => {
-    if (!(rule instanceof Error) && rule.exceptions_list != null) {
-      return [...acc, rule.exceptions_list];
+export const parseReferencedExceptionsLists = (
+  rules: Array<ImportRulesSchema | Error>
+): [ExceptionListQueryInfo[], ExceptionListQueryInfo[]] => {
+  const lists = rules.reduce<ListArray>((acc, rule) => {
+    if (
+      !(rule instanceof Error) &&
+      rule.exceptions_list != null &&
+      rule.exceptions_list.length > 0
+    ) {
+      return [...acc, ...rule.exceptions_list];
     } else {
       return acc;
     }
   }, []);
 
-  if (lists == null) {
-    return {};
+  if (lists == null || lists.length === 0) {
+    return [[], []];
   }
 
   const [agnosticLists, nonAgnosticLists] = lists.reduce<
@@ -49,6 +48,23 @@ export const getReferencedExceptionLists = async ({
     },
     [[], []]
   );
+  return [agnosticLists, nonAgnosticLists];
+};
 
+/**
+ * Helper that takes rules, goes through their referenced exception lists and
+ * searches for them, returning an object with all those found, using list_id as keys
+ * @param rules {array}
+ * @param savedObjectsClient {object}
+ * @returns {Promise} an object with all referenced lists found, using list_id as keys
+ */
+export const getReferencedExceptionLists = async ({
+  rules,
+  savedObjectsClient,
+}: {
+  rules: Array<ImportRulesSchema | Error>;
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<Record<string, ExceptionListSchema>> => {
+  const [agnosticLists, nonAgnosticLists] = parseReferencedExceptionsLists(rules);
   return getAllListTypes(agnosticLists, nonAgnosticLists, savedObjectsClient);
 };

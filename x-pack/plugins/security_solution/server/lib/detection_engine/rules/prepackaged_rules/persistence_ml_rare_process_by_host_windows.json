@@ -27,7 +27,8 @@
     "Windows",
     "Threat Detection",
     "ML",
-    "Persistence"
+    "Persistence",
+    "has_guide"
   ],
   "threat": [
     {
@@ -54,5 +55,5 @@
     }
   ],
   "type": "machine_learning",
-  "version": 100
+  "version": 101
 }

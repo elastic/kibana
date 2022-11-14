@@ -13,7 +13,6 @@ export type {
   FindMetadataArg,
   GetMetadataArg,
   GetUsageMetricsArgs,
-  ListMetadataArg,
   UpdateMetadataArg,
 } from './file_metadata_client';
 export { FileClientImpl } from './file_client';

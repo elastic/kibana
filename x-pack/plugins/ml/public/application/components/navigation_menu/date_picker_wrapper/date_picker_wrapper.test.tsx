@@ -123,7 +123,7 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     refreshSubscription.unsubscribe();
   });
 
-  test('should not allow disabled pause with 0 refresh interval', () => {
+  test('should set interval to default of 5s when pause is disabled and refresh interval is 0', () => {
     // arrange
     (useUrlState as jest.Mock).mockReturnValue([{ refreshInterval: { pause: false, value: 0 } }]);
 
@@ -137,9 +137,10 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     render(<DatePickerWrapper />);
 
     // assert
-    expect(displayWarningSpy).not.toHaveBeenCalled();
+    // Show warning that the interval set is too short
+    expect(displayWarningSpy).toHaveBeenCalled();
     const calledWith = MockedEuiSuperDatePicker.mock.calls[0][0];
-    expect(calledWith.isPaused).toBe(true);
+    expect(calledWith.isPaused).toBe(false);
     expect(calledWith.refreshInterval).toBe(5000);
   });
 

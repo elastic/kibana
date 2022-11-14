@@ -27,8 +27,7 @@ import { generateNavLink } from './nav_link_helpers';
 export const useEnterpriseSearchNav = () => {
   const { productAccess, uiSettings } = useValues(KibanaLogic);
 
-  const analyticsSectionEnabled =
-    uiSettings?.get<boolean>(enableBehavioralAnalyticsSection) ?? false;
+  const analyticsSectionEnabled = uiSettings?.get<boolean>(enableBehavioralAnalyticsSection, false);
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {

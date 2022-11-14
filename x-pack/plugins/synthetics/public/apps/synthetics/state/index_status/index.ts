@@ -6,7 +6,7 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 import { StatesIndexStatus } from '../../../../../common/runtime_types';
 
 import { getIndexStatus, getIndexStatusSuccess, getIndexStatusFail } from './actions';
@@ -33,7 +33,7 @@ export const indexStatusReducer = createReducer(initialState, (builder) => {
       state.loading = false;
     })
     .addCase(getIndexStatusFail, (state, action) => {
-      state.error = serializeHttpFetchError(action.payload);
+      state.error = action.payload;
       state.loading = false;
     });
 });

@@ -20,6 +20,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -50,21 +51,6 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 
 type EventViewTab = EuiTabbedContentTab;
-
-export interface AlertRawEventData {
-  _id: string;
-  fields: {
-    ['agent.id']?: string[];
-    ['kibana.alert.rule.parameters']: Array<{
-      response_actions: Array<{
-        action_type_id: string;
-        params: Record<string, unknown>;
-      }>;
-    }>;
-    ['kibana.alert.rule.name']: string[];
-  };
-  [key: string]: unknown;
-}
 
 export type EventViewId =
   | EventsViewType.tableView
@@ -130,6 +116,7 @@ const TabContentWrapper = styled.div`
 const RendererContainer = styled.div`
   overflow-x: auto;
   padding-right: ${(props) => props.theme.eui.euiSizeXS};
+
   & .${DETAILS_CLASS_NAME} .euiFlexGroup {
     justify-content: flex-start;
   }
@@ -192,6 +179,12 @@ const EventDetailsComponent: React.FC<Props> = ({
     [detailsEcsData]
   );
 
+  const showThreatSummary = useMemo(() => {
+    const hasEnrichments = enrichmentCount > 0;
+    const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
+    return hasEnrichments || hasRiskInfoWithLicense;
+  }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
+
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
@@ -250,20 +243,19 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
 
-                {enrichmentCount > 0 ||
-                  (isLicenseValid && (hostRisk || userRisk) && (
-                    <ThreatSummaryView
-                      isDraggable={isDraggable}
-                      hostRisk={hostRisk}
-                      userRisk={userRisk}
-                      browserFields={browserFields}
-                      data={data}
-                      eventId={id}
-                      timelineId={timelineId}
-                      enrichments={allEnrichments}
-                      isReadOnly={isReadOnly}
-                    />
-                  ))}
+                {showThreatSummary && (
+                  <ThreatSummaryView
+                    isDraggable={isDraggable}
+                    hostRisk={hostRisk}
+                    userRisk={userRisk}
+                    browserFields={browserFields}
+                    data={data}
+                    eventId={id}
+                    timelineId={timelineId}
+                    enrichments={allEnrichments}
+                    isReadOnly={isReadOnly}
+                  />
+                )}
 
                 {isEnrichmentsLoading && (
                   <>
@@ -281,7 +273,6 @@ const EventDetailsComponent: React.FC<Props> = ({
       browserFields,
       data,
       detailsEcsData,
-      enrichmentCount,
       goToTableTab,
       handleOnEventClosed,
       hostRisk,
@@ -290,7 +281,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       isAlert,
       isDraggable,
       isEnrichmentsLoading,
-      isLicenseValid,
+      showThreatSummary,
       isReadOnly,
       renderer,
       timelineId,
@@ -397,7 +388,6 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const osqueryTab = useOsqueryTab({
     rawEventData: rawEventData as AlertRawEventData,
-    id,
   });
 
   const tabs = useMemo(() => {

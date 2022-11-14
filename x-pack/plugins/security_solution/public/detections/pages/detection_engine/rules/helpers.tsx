@@ -76,7 +76,7 @@ export const getActionsStepsData = (
     response_actions?: ResponseAction[];
   }
 ): ActionsStepRule => {
-  const { enabled, throttle, meta, actions = [], response_actions: responseActions = [] } = rule;
+  const { enabled, throttle, meta, actions = [], response_actions: responseActions } = rule;
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
@@ -460,10 +460,6 @@ export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): A
  */
 export const getAllActionMessageParams = () =>
   transformRuleKeysToActionVariables(getAllRuleParamsKeys());
-
-// typed as null not undefined as the initial state for this value is null.
-export const userHasPermissions = (canUserCRUD: boolean | null): boolean =>
-  canUserCRUD != null ? canUserCRUD : true;
 
 export const MaxWidthEuiFlexItem = styled(EuiFlexItem)`
   max-width: 1000px;

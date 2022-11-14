@@ -10,7 +10,7 @@ import type { LensAttributes } from '../../types';
 export const kpiUserAuthenticationsMetricFailureLensAttributes: LensAttributes = {
   title: '[Host] User authentications - metric failure ',
   description: '',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   state: {
     visualization: {
       accessor: '0eb97c09-a351-4280-97da-944e4bd30dd7',

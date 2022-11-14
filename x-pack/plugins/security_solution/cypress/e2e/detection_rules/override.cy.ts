@@ -6,8 +6,9 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import type { OverrideRule } from '../../objects/rule';
+import type { Mitre, OverrideRule } from '../../objects/rule';
 import { getIndexPatterns, getNewOverrideRule, getSeveritiesOverride } from '../../objects/rule';
+import type { CompleteTimeline } from '../../objects/timeline';
 
 import { NUMBER_OF_ALERTS, ALERT_GRID_CELL } from '../../screens/alerts';
 
@@ -55,7 +56,7 @@ import { cleanKibana } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
-  fillDefineCustomRuleWithImportedQueryAndContinue,
+  fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
@@ -66,21 +67,23 @@ import { getDetails } from '../../tasks/rule_details';
 import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, override', () => {
-  const expectedUrls = getNewOverrideRule().referenceUrls.join('');
-  const expectedFalsePositives = getNewOverrideRule().falsePositivesExamples.join('');
-  const expectedTags = getNewOverrideRule().tags.join('');
-  const expectedMitre = formatMitreAttackDescription(getNewOverrideRule().mitre);
+  const expectedUrls = getNewOverrideRule().referenceUrls?.join('');
+  const expectedFalsePositives = getNewOverrideRule().falsePositivesExamples?.join('');
+  const expectedTags = getNewOverrideRule().tags?.join('');
+  const mitreAttack = getNewOverrideRule().mitre as Mitre[];
+  const expectedMitre = formatMitreAttackDescription(mitreAttack);
 
   before(() => {
     cleanKibana();
     login();
   });
   beforeEach(() => {
-    createTimeline(getNewOverrideRule().timeline).then((response) => {
+    const timeline = getNewOverrideRule().timeline as CompleteTimeline;
+    createTimeline(timeline).then((response) => {
       cy.wrap({
         ...getNewOverrideRule(),
         timeline: {
-          ...getNewOverrideRule().timeline,
+          ...timeline,
           id: response.body.data.persistTimeline.timeline.savedObjectId,
         },
       }).as('rule');
@@ -89,7 +92,7 @@ describe('Detection rules, override', () => {
 
   it('Creates and enables a new custom rule with override option', function () {
     visitWithoutDateRange(RULE_CREATION);
-    fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
+    fillDefineCustomRuleAndContinue(this.rule);
     fillAboutRuleWithOverrideAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
     createAndEnableRule();

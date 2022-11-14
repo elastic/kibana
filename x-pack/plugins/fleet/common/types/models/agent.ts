@@ -30,7 +30,14 @@ export type AgentStatus =
 
 export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
 
-export type AgentActionType = 'UNENROLL' | 'UPGRADE' | 'SETTINGS' | 'POLICY_REASSIGN' | 'CANCEL';
+export type AgentActionType =
+  | 'UNENROLL'
+  | 'UPGRADE'
+  | 'SETTINGS'
+  | 'POLICY_REASSIGN'
+  | 'CANCEL'
+  | 'FORCE_UNENROLL'
+  | 'UPDATE_TAGS';
 
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
@@ -68,9 +75,8 @@ interface AgentBase {
   enrolled_at: string;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
-  upgraded_at?: string;
+  upgraded_at?: string | null;
   upgrade_started_at?: string | null;
-  upgrade_status?: 'started' | 'completed';
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;
@@ -87,7 +93,15 @@ interface AgentBase {
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
+  // @deprecated
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
+  outputs?: Record<
+    string,
+    {
+      api_key_id: string;
+      to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
+    }
+  >;
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
@@ -181,15 +195,11 @@ export interface FleetServerAgent {
   /**
    * Date/time the Elastic Agent was last upgraded
    */
-  upgraded_at?: string;
+  upgraded_at?: string | null;
   /**
    * Date/time the Elastic Agent started the current upgrade
    */
   upgrade_started_at?: string | null;
-  /**
-   * Upgrade status
-   */
-  upgrade_status?: 'started' | 'completed';
   /**
    * ID of the API key the Elastic Agent must used to contact Fleet Server
    */

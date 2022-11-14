@@ -28,6 +28,8 @@ describe('TTYPlayer component', () => {
         dispatchEvent: jest.fn(),
       })),
     });
+
+    global.ResizeObserver = require('resize-observer-polyfill');
   });
 
   let render: () => ReturnType<AppContextTestRender['render']>;

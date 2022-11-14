@@ -150,6 +150,7 @@ export const EventSchema = schema.maybe(
                         claim_to_start_duration_ms: ecsStringOrNumber(),
                         prepare_rule_duration_ms: ecsStringOrNumber(),
                         total_run_duration_ms: ecsStringOrNumber(),
+                        total_enrichment_duration_ms: ecsStringOrNumber(),
                       })
                     ),
                   })

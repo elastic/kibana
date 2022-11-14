@@ -20,8 +20,9 @@
   ],
   "related_integrations": [
     {
+      "integration": "audit",
       "package": "gcp",
-      "version": "1.10.0"
+      "version": "^2.2.1"
     }
   ],
   "required_fields": [
@@ -80,5 +81,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 100
+  "version": 101
 }

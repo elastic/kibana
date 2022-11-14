@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTextAlign } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTextAlign,
+} from '@elastic/eui';
 import React from 'react';
 import * as i18n from './translations';
 
@@ -25,11 +33,18 @@ const NoMatchesComponent: React.FC = () => {
       <EuiFlexItem grow={false}>
         <EuiTextAlign textAlign="center">
           <EuiText size="s" color="default">
-            <strong>{i18n.NO_MATCHING_USERS}</strong>
+            <strong>{i18n.USER_DOES_NOT_EXIST}</strong>
             <br />
           </EuiText>
           <EuiText size="s" color="subdued">
-            {i18n.TRY_MODIFYING_SEARCH}
+            {i18n.MODIFY_SEARCH}
+            <br />
+            <EuiLink
+              href="https://www.elastic.co/guide/en/security/current/case-permissions.html"
+              target="_blank"
+            >
+              {i18n.LEARN_PRIVILEGES_GRANT_ACCESS}
+            </EuiLink>
           </EuiText>
         </EuiTextAlign>
       </EuiFlexItem>

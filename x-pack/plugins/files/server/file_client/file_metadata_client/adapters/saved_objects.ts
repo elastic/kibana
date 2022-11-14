@@ -13,11 +13,10 @@ import type {
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
-import { escapeKuery } from '@kbn/es-query';
 
 import { FindFileArgs } from '../../../file_service/file_action_types';
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../../common/constants';
-import type { FileMetadata, FilesMetrics, FileStatus, Pagination } from '../../../../common/types';
+import type { FileMetadata, FilesMetrics, FileStatus } from '../../../../common/types';
 import type {
   FileMetadataClient,
   UpdateArgs,
@@ -61,26 +60,11 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
       metadata: result.attributes as FileDescriptor['metadata'],
     };
   }
-  async list({ fileKind, page, perPage }: { fileKind?: string } & Pagination = {}): Promise<
-    FileDescriptor[]
-  > {
-    let filter = `NOT ${this.soType}.attributes.Status: DELETED`;
-    if (fileKind) {
-      filter = `${this.soType}.attributes.FileKind: ${escapeKuery(fileKind)} AND ${filter}`;
-    }
-    const result = await this.soClient.find({
-      type: this.soType,
-      filter,
-      page,
-      perPage,
-    });
-    return result.saved_objects.map((file) => ({
-      id: file.id,
-      metadata: file.attributes as FileDescriptor['metadata'],
-    }));
-  }
 
-  async find({ page, perPage, ...filterArgs }: FindFileArgs): Promise<FileDescriptor[]> {
+  async find({ page, perPage, ...filterArgs }: FindFileArgs = {}): Promise<{
+    total: number;
+    files: Array<FileDescriptor<unknown>>;
+  }> {
     const result = await this.soClient.find({
       type: this.soType,
       filter: filterArgsToKuery({ ...filterArgs, attrPrefix: `${this.soType}.attributes` }),
@@ -89,10 +73,13 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
       sortOrder: 'desc',
       sortField: 'created',
     });
-    return result.saved_objects.map((so) => ({
-      id: so.id,
-      metadata: so.attributes as FileMetadata,
-    }));
+    return {
+      files: result.saved_objects.map((so) => ({
+        id: so.id,
+        metadata: so.attributes as FileMetadata,
+      })),
+      total: result.total,
+    };
   }
 
   async delete({ id }: { id: string }): Promise<void> {

@@ -8,7 +8,10 @@
 import { ConnectorConfiguration } from '../../../../../../common/types/connectors';
 
 export interface NativeConnector {
+  configuration: ConnectorConfiguration;
+  docsUrl: string;
+  externalAuthDocsUrl?: string;
+  externalDocsUrl: string;
   name: string;
   serviceType: string;
-  configuration: ConnectorConfiguration;
 }

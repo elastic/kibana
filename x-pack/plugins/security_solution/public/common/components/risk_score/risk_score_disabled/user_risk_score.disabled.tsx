@@ -38,7 +38,7 @@ const EntityAnalyticsUserRiskScoreDisableComponent = ({
         body={
           <>
             {i18n.ENABLE_USER_RISK_SCORE_DESCRIPTION}{' '}
-            <RiskScoreDocLink external={false} riskScoreEntity={RiskScoreEntity.user} />
+            <RiskScoreDocLink riskScoreEntity={RiskScoreEntity.user} />
           </>
         }
         actions={

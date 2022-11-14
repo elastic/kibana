@@ -9,6 +9,7 @@ import React from 'react';
 import type { ComponentType } from 'react';
 import { from } from 'rxjs';
 
+import { TagList } from '../mocks';
 import { TableListViewProvider, Services } from '../services';
 
 export const getMockServices = (overrides?: Partial<Services>) => {
@@ -18,6 +19,8 @@ export const getMockServices = (overrides?: Partial<Services>) => {
     notifyError: () => undefined,
     currentAppId$: from('mockedApp'),
     navigateToUrl: () => undefined,
+    TagList,
+    itemHasTags: () => true,
     ...overrides,
   };
 

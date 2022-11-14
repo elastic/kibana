@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
+import { KueryNode } from '@kbn/es-query';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { BulkEditResponse } from '../../../types';
 
@@ -16,7 +17,7 @@ export async function updateAPIKey({ id, http }: { id: string; http: HttpSetup }
 
 export interface BulkUpdateAPIKeyProps {
   ids?: string[];
-  filter?: string;
+  filter?: KueryNode | null | undefined;
 }
 
 export function bulkUpdateAPIKey({
@@ -28,7 +29,7 @@ export function bulkUpdateAPIKey({
   try {
     body = JSON.stringify({
       ids: ids?.length ? ids : undefined,
-      filter,
+      ...(filter ? { filter: JSON.stringify(filter) } : {}),
       operations: [
         {
           operation: 'set',

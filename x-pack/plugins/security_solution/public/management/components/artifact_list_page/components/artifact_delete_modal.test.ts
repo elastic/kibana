@@ -13,7 +13,8 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getDeferred } from '../../mocks';
 
-describe('When displaying the Delete artifact modal in the Artifact List Page', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/141459
+describe.skip('When displaying the Delete artifact modal in the Artifact List Page', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];

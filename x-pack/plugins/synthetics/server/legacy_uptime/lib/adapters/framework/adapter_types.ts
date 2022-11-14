@@ -57,7 +57,7 @@ export interface UptimeServerSetup {
   savedObjectsClient?: SavedObjectsClientContract;
   authSavedObjectsClient?: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  kibanaVersion: string;
+  stackVersion: string;
   logger: Logger;
   telemetry: TelemetryEventsSender;
   uptimeEsClient: UptimeESClient;

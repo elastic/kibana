@@ -334,6 +334,7 @@ export default function (providerContext: FtrProviderContext) {
 
           return 0;
         }
+
         const {
           body: {
             item: { id: originalPolicyId },
@@ -394,6 +395,91 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         expect(await getSystemPackagePolicyCopyVersion(copy3Id)).to.be(3);
+      });
+
+      it('should work with package policy with space in name', async () => {
+        const policyId = 'package-policy-test-1';
+        const getPkRes = await supertest
+          .get(`/api/fleet/epm/packages/system`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        const systemPkgVersion = getPkRes.body.item.version;
+        // we must first force install the system package to override package verification error on policy create
+        const installPromise = supertest
+          .post(`/api/fleet/epm/packages/system-${systemPkgVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        await Promise.all([
+          installPromise,
+          kibanaServer.savedObjects.create({
+            id: policyId,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            overwrite: true,
+            attributes: {
+              name: `system-1`,
+              package: {
+                name: 'system',
+              },
+            },
+          }),
+        ]);
+
+        const {
+          body: {
+            item: { id: originalPolicyId },
+          },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .query({
+            sys_monitoring: false,
+          })
+          .send({
+            name: 'original policy with package policy with space in name',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Filetest with space in name',
+            description: '',
+            namespace: 'default',
+            policy_id: originalPolicyId,
+            enabled: true,
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+
+        const {
+          body: {
+            item: { id: copy1Id },
+          },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${originalPolicyId}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'copy 123',
+            description: 'Test',
+          })
+          .expect(200);
+
+        const {
+          body: {
+            item: { package_policies: packagePolicies },
+          },
+        } = await supertest.get(`/api/fleet/agent_policies/${copy1Id}`).expect(200);
+
+        expect(packagePolicies[0].name).to.eql('Filetest with space in name (copy)');
       });
 
       it('should return a 404 with invalid source policy', async () => {

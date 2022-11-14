@@ -133,6 +133,7 @@ export async function _installPackage({
         paths,
         installedPkg,
         logger,
+        spaceId,
       })
     );
     // Necessary to avoid async promise rejection warning

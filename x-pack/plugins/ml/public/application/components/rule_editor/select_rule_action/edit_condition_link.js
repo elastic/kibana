@@ -70,7 +70,7 @@ export class EditConditionLink extends Component {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiText>
+          <EuiText size={'s'}>
             <FormattedMessage
               id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
               defaultMessage="Update rule condition from {conditionValue} to"

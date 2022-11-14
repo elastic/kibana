@@ -38,7 +38,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Persistence"
+    "Persistence",
+    "has_guide"
   ],
   "threat": [
     {
@@ -59,5 +60,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 100
+  "version": 101
 }

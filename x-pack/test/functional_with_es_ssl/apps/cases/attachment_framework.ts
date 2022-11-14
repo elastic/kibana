@@ -53,6 +53,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const es = getService('es');
   const common = getPageObject('common');
+  const retry = getService('retry');
 
   const createAttachmentAndNavigate = async (attachment: CommentRequest) => {
     const caseData = await cases.api.createCase({
@@ -107,8 +108,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139300
-    describe.skip('Persistable state attachments', () => {
+    describe('Persistable state attachments', () => {
       const getLensState = (dataViewId: string) => ({
         title: '',
         visualizationType: 'lnsXY',
@@ -205,7 +205,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('renders a persistable attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
         await validateAttachment(CommentType.persistableState, attachmentId);
-        expect(await find.existsByCssSelector('.lnsExpressionRenderer')).toBe(true);
+        await retry.waitFor(
+          'actions accordion to exist',
+          async () => await find.existsByCssSelector('.lnsExpressionRenderer')
+        );
       });
     });
 

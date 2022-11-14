@@ -94,7 +94,7 @@ const UserRiskTabBodyComponent: React.FC<
     return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
   }
 
-  if (isDeprecated) {
+  if (isDeprecated && !loading) {
     return (
       <RiskScoresDeprecated
         entityType={RiskScoreEntity.user}
@@ -105,7 +105,7 @@ const UserRiskTabBodyComponent: React.FC<
   }
 
   if (isModuleEnabled && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} refetch={refetch} />;
   }
 
   const lastUsertRiskItem: UserRiskScore | null =

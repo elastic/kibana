@@ -100,7 +100,7 @@ export const TimeSeries = ({
   const onRenderChange = useCallback(
     (isRendered) => {
       if (isRendered) {
-        initialRender();
+        initialRender?.();
       }
     },
     [initialRender]

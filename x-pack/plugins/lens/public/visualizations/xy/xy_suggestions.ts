@@ -529,13 +529,17 @@ function buildSuggestion({
     layerType: layerTypes.DATA,
   };
 
+  const hasDateHistogramDomain =
+    xValue?.operation.dataType === 'date' && xValue.operation.scale === 'interval';
+
   // Maintain consistent order for any layers that were saved
   const keptLayers: XYLayerConfig[] = currentState
     ? currentState.layers
         // Remove layers that aren't being suggested
         .filter(
           (layer) =>
-            keptLayerIds.includes(layer.layerId) || layer.layerType === layerTypes.ANNOTATIONS
+            keptLayerIds.includes(layer.layerId) ||
+            (hasDateHistogramDomain && layer.layerType === layerTypes.ANNOTATIONS)
         )
         // Update in place
         .map((layer) => (layer.layerId === layerId ? newLayer : layer))

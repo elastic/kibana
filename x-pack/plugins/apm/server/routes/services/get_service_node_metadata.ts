@@ -21,7 +21,6 @@ import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../common/utils/environment_query';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 export async function getServiceNodeMetadata({
   kuery,
@@ -30,6 +29,7 @@ export async function getServiceNodeMetadata({
   setup,
   start,
   end,
+  environment,
 }: {
   kuery: string;
   serviceName: string;
@@ -37,6 +37,7 @@ export async function getServiceNodeMetadata({
   setup: Setup;
   start: number;
   end: number;
+  environment: string;
 }) {
   const { apmEventClient } = setup;
 
@@ -45,13 +46,14 @@ export async function getServiceNodeMetadata({
       events: [ProcessorEvent.metric],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
-            ...environmentQuery(ENVIRONMENT_ALL.value),
+            ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...serviceNodeNameQuery(serviceNodeName),
           ],

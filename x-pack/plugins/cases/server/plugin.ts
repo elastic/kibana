@@ -30,7 +30,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { APP_ID } from '../common/constants';
 
 import {
@@ -53,12 +53,14 @@ import { getInternalRoutes } from './routes/api/get_internal_routes';
 import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
   features: FeaturesPluginSetup;
   security: SecurityPluginSetup;
+  licensing: LicensingPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
 }
@@ -148,6 +150,8 @@ export class CasePlugin {
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,
     });
+
+    plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
 
     return {
       attachmentFramework: {

@@ -649,6 +649,7 @@ export const createSearchAfterReturnType = ({
   success,
   warning,
   searchAfterTimes,
+  enrichmentTimes,
   bulkCreateTimes,
   lastLookBackDate,
   createdSignalsCount,
@@ -659,6 +660,7 @@ export const createSearchAfterReturnType = ({
   success?: boolean | undefined;
   warning?: boolean;
   searchAfterTimes?: string[] | undefined;
+  enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
@@ -670,6 +672,7 @@ export const createSearchAfterReturnType = ({
     success: success ?? true,
     warning: warning ?? false,
     searchAfterTimes: searchAfterTimes ?? [],
+    enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
     createdSignalsCount: createdSignalsCount ?? 0,
@@ -715,6 +718,7 @@ export const addToSearchAfterReturn = ({
   current.createdSignalsCount += next.createdItemsCount;
   current.createdSignals.push(...next.createdItems);
   current.bulkCreateTimes.push(next.bulkCreateDuration);
+  current.enrichmentTimes.push(next.enrichmentDuration);
   current.errors = [...new Set([...current.errors, ...next.errors])];
 };
 
@@ -727,6 +731,7 @@ export const mergeReturns = (
       warning: existingWarning,
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
+      enrichmentTimes: existingEnrichmentTimes,
       lastLookBackDate: existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
@@ -738,6 +743,7 @@ export const mergeReturns = (
       success: newSuccess,
       warning: newWarning,
       searchAfterTimes: newSearchAfterTimes,
+      enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
       createdSignalsCount: newCreatedSignalsCount,
@@ -750,6 +756,7 @@ export const mergeReturns = (
       success: existingSuccess && newSuccess,
       warning: existingWarning || newWarning,
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
+      enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
@@ -972,14 +979,13 @@ export const getField = (event: SimpleHit, field: string): SearchTypes | undefin
   }
 };
 
-export const logUnprocessedExceptionsWarnings = (
-  unprocessedExceptions: ExceptionListItemSchema[],
-  ruleExecutionLogger: IRuleExecutionLogForExecutors
-) => {
+export const getUnprocessedExceptionsWarnings = (
+  unprocessedExceptions: ExceptionListItemSchema[]
+): string | undefined => {
   if (unprocessedExceptions.length > 0) {
     const exceptionNames = unprocessedExceptions.map((exception) => exception.name);
-    ruleExecutionLogger.warn(
-      `The following exceptions won't be applied to rule execution: ${exceptionNames.join(', ')}`
-    );
+    return `The following exceptions won't be applied to rule execution: ${exceptionNames.join(
+      ', '
+    )}`;
   }
 };

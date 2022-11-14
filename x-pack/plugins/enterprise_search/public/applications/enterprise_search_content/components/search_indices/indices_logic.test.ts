@@ -31,8 +31,10 @@ const DEFAULT_VALUES = {
   deleteModalIndex: null,
   deleteModalIndexName: '',
   deleteModalIngestionMethod: IngestionMethod.API,
+  deleteStatus: Status.IDLE,
   hasNoIndices: false,
   indices: [],
+  isDeleteLoading: false,
   isDeleteModalVisible: false,
   isFirstRequest: true,
   isLoading: true,
@@ -252,6 +254,36 @@ describe('IndicesLogic', () => {
             meta,
           },
           status: Status.SUCCESS,
+        });
+      });
+    });
+    describe('deleteRequest', () => {
+      it('should update isDeleteLoading to true on deleteIndex', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.LOADING,
+          isDeleteLoading: true,
+        });
+      });
+      it('should update isDeleteLoading to to false on apiError', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        IndicesLogic.actions.deleteError({} as HttpError);
+
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.ERROR,
+          isDeleteLoading: false,
+        });
+      });
+      it('should update isDeleteLoading to to false on apiSuccess', () => {
+        IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
+        IndicesLogic.actions.deleteSuccess();
+
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          deleteStatus: Status.SUCCESS,
+          isDeleteLoading: false,
         });
       });
     });

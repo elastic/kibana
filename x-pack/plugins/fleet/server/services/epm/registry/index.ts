@@ -24,6 +24,7 @@ import type {
   RegistrySearchResults,
   GetCategoriesRequest,
   PackageVerificationResult,
+  ArchivePackage,
 } from '../../../types';
 import {
   getArchiveFilelist,
@@ -159,7 +160,10 @@ export async function fetchFindLatestPackageOrUndefined(
   }
 }
 
-export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<RegistryPackage> {
+export async function fetchInfo(
+  pkgName: string,
+  pkgVersion: string
+): Promise<RegistryPackage | ArchivePackage> {
   const registryUrl = getRegistryUrl();
   try {
     // Trailing slash avoids 301 redirect / extra hop
@@ -168,6 +172,18 @@ export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<Re
     return res;
   } catch (err) {
     if (err instanceof RegistryResponseError && err.status === 404) {
+      // Check bundled packages in case the exact package being requested is available on disk
+      const bundledPackage = await getBundledPackageByName(pkgName);
+
+      if (bundledPackage && bundledPackage.version === pkgVersion) {
+        const archivePackage = await generatePackageInfoFromArchiveBuffer(
+          bundledPackage.buffer,
+          'application/zip'
+        );
+
+        return archivePackage.packageInfo;
+      }
+
       throw new PackageNotFoundError(`${pkgName}@${pkgVersion} not found`);
     }
     throw err;
@@ -221,14 +237,16 @@ export async function fetchCategories(
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function getInfo(name: string, version: string, options: { cache?: boolean } = {}) {
-  const cache = options.cache ?? true;
+export async function getInfo(name: string, version: string) {
   return withPackageSpan('Fetch package info', async () => {
     let packageInfo = getPackageInfo({ name, version });
     if (!packageInfo) {
       packageInfo = await fetchInfo(name, version);
-      if (cache) setPackageInfo({ name, version, packageInfo });
+      // only cache registry pkg info for integration pkgs because
+      // input type packages must get their pkg info from the archive
+      if (packageInfo.type === 'integration') setPackageInfo({ name, version, packageInfo });
     }
+
     return packageInfo as RegistryPackage;
   });
 }
@@ -308,9 +326,17 @@ export async function fetchArchiveBuffer({
   verificationResult?: PackageVerificationResult;
 }> {
   const logger = appContextService.getLogger();
-  const { download: archivePath } = await getInfo(pkgName, pkgVersion, { cache: false });
+  let { download: archivePath } = await getInfo(pkgName, pkgVersion);
+
+  // Bundled packages don't have a download path when they're installed, as they're
+  // ArchivePackage objects - so we fake the download path here instead
+  if (!archivePath) {
+    archivePath = `/epr/${pkgName}/${pkgName}-${pkgVersion}.zip`;
+  }
+
   const archiveUrl = `${getRegistryUrl()}${archivePath}`;
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+
   if (shouldVerify) {
     const verificationResult = await verifyPackageArchiveSignature({
       pkgName,
@@ -336,9 +362,7 @@ export async function getPackageArchiveSignatureOrUndefined({
   pkgVersion: string;
   logger: Logger;
 }): Promise<string | undefined> {
-  const { signature_path: signaturePath } = await getInfo(pkgName, pkgVersion, {
-    cache: false,
-  });
+  const { signature_path: signaturePath } = await getInfo(pkgName, pkgVersion);
 
   if (!signaturePath) {
     logger.debug(

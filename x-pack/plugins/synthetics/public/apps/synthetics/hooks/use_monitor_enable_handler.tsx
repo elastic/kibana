@@ -9,11 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitor,
-  MonitorOverviewItem,
-} from '../components/monitors_page/overview/types';
+import { ConfigKey } from '../components/monitors_page/overview/types';
 import {
   clearMonitorUpsertStatus,
   fetchUpsertMonitorAction,
@@ -41,11 +37,11 @@ export function useMonitorEnableHandler({
   const savedObjEnabledState = upsertStatuses[id]?.enabled;
   const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
   const updateMonitorEnabledState = useCallback(
-    (monitor: EncryptedSyntheticsMonitor | MonitorOverviewItem, enabled: boolean) => {
+    (enabled: boolean) => {
       dispatch(
         fetchUpsertMonitorAction({
           id,
-          monitor: { ...monitor, [ConfigKey.ENABLED]: enabled },
+          monitor: { [ConfigKey.ENABLED]: enabled },
         })
       );
     },

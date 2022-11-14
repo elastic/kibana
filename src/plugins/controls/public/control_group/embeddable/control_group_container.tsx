@@ -10,7 +10,7 @@ import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Filter, uniqFilters } from '@kbn/es-query';
-import { merge, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
@@ -56,6 +56,8 @@ export class ControlGroupContainer extends Container<
 > {
   public readonly type = CONTROL_GROUP_TYPE;
   public readonly anyControlOutputConsumerLoading$: Subject<boolean> = new Subject();
+
+  private initialized$ = new BehaviorSubject(false);
 
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
@@ -194,10 +196,11 @@ export class ControlGroupContainer extends Container<
     });
 
     // when all children are ready setup subscriptions
-    this.untilReady().then(() => {
+    this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
       this.recalculateFilters();
       this.setupSubscriptions();
+      this.initialized$.next(true);
     });
   }
 
@@ -327,7 +330,7 @@ export class ControlGroupContainer extends Container<
     };
   }
 
-  public untilReady = () => {
+  public untilAllChildrenReady = () => {
     const panelsLoading = () =>
       Object.keys(this.getInput().panels).some(
         (panelId) => !this.getOutput().embeddableLoaded[panelId]
@@ -340,6 +343,24 @@ export class ControlGroupContainer extends Container<
             reject();
           }
           if (!panelsLoading()) {
+            subscription.unsubscribe();
+            resolve();
+          }
+        });
+      });
+    }
+    return Promise.resolve();
+  };
+
+  public untilInitialized = () => {
+    if (this.initialized$.value === false) {
+      return new Promise<void>((resolve, reject) => {
+        const subscription = this.initialized$.subscribe((isInitialized) => {
+          if (this.destroyed) {
+            subscription.unsubscribe();
+            reject();
+          }
+          if (isInitialized) {
             subscription.unsubscribe();
             resolve();
           }

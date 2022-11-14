@@ -155,7 +155,10 @@ export class CasesClientFactory {
       attachmentService,
     });
 
-    const licensingService = new LicensingService(this.options.licensingPluginStart.license$);
+    const licensingService = new LicensingService(
+      this.options.licensingPluginStart.license$,
+      this.options.licensingPluginStart.featureUsage.notifyUsage
+    );
 
     return {
       alertsService: new AlertService(esClient, this.logger),

@@ -109,6 +109,7 @@ describe('ExceptionsViewer', () => {
             ],
           }}
           listType={ExceptionListTypeEnum.DETECTION}
+          isViewReadOnly={false}
         />
       </TestProviders>
     );
@@ -146,6 +147,7 @@ describe('ExceptionsViewer', () => {
             ],
           }}
           listType={ExceptionListTypeEnum.DETECTION}
+          isViewReadOnly={false}
         />
       </TestProviders>
     );
@@ -183,6 +185,7 @@ describe('ExceptionsViewer', () => {
             ],
           }}
           listType={ExceptionListTypeEnum.ENDPOINT}
+          isViewReadOnly={false}
         />
       </TestProviders>
     );
@@ -226,6 +229,7 @@ describe('ExceptionsViewer', () => {
             ],
           }}
           listType={ExceptionListTypeEnum.DETECTION}
+          isViewReadOnly={false}
         />
       </TestProviders>
     );
@@ -268,6 +272,7 @@ describe('ExceptionsViewer', () => {
           ],
         }}
         listType={ExceptionListTypeEnum.DETECTION}
+        isViewReadOnly={false}
       />
     );
 
@@ -301,6 +306,7 @@ describe('ExceptionsViewer', () => {
           ],
         }}
         listType={ExceptionListTypeEnum.DETECTION}
+        isViewReadOnly={false}
       />
     );
 

@@ -22,6 +22,14 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
     throw new FleetError('xpack.fleet.developer.bundledPackageLocation is not configured');
   }
 
+  // If the bundled package directory is missing, we log a warning during setup,
+  // so we can safely ignore this case here and just retun and empty array
+  try {
+    await fs.stat(bundledPackageLocation);
+  } catch (error) {
+    return [];
+  }
+
   try {
     const dirContents = await fs.readdir(bundledPackageLocation);
     const zipFiles = dirContents.filter((file) => file.endsWith('.zip'));

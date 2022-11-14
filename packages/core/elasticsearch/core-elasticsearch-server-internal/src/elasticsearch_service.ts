@@ -183,6 +183,7 @@ export class ElasticsearchService
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentManager: this.agentManager,
+      kibanaVersion: this.kibanaVersion,
     });
   }
 }

@@ -9,6 +9,7 @@ import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eu
 import { EuiBadge, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import moment from 'moment';
 import { IntegrationsPopover } from '../../../../components/rules/related_integrations/integrations_popover';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
@@ -21,7 +22,10 @@ import { FormattedRelativePreferenceDate } from '../../../../../common/component
 import { getRuleDetailsTabUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
-import { canEditRuleWithActions, getToolTipContent } from '../../../../../common/utils/privileges';
+import {
+  canEditRuleWithActions,
+  explainLackOfPermission,
+} from '../../../../../common/utils/privileges';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
 import type { Rule } from '../../../../containers/detection_engine/rules';
@@ -47,10 +51,10 @@ import { RuleDetailTabs } from '../details';
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
 interface ColumnsProps {
-  hasPermissions: boolean;
+  hasCRUDPermissions: boolean;
 }
 
-const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
+const useEnabledColumn = ({ hasCRUDPermissions }: ColumnsProps): TableColumn => {
   const hasMlPermissions = useHasMlPermissions();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
@@ -67,15 +71,20 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
       render: (_, rule: Rule) => (
         <EuiToolTip
           position="top"
-          content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
+          content={explainLackOfPermission(
+            rule,
+            hasMlPermissions,
+            hasActionsPrivileges,
+            hasCRUDPermissions
+          )}
         >
           <RuleSwitch
             id={rule.id}
             enabled={rule.enabled}
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-              !hasPermissions ||
-              (isMlRule(rule.type) && !hasMlPermissions && !rule.enabled)
+              !hasCRUDPermissions ||
+              (isMlRule(rule.type) && !hasMlPermissions)
             }
             isLoading={loadingIds.includes(rule.id)}
           />
@@ -84,7 +93,7 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
       width: '95px',
       sortable: true,
     }),
-    [hasActionsPrivileges, hasMlPermissions, hasPermissions, loadingIds]
+    [hasActionsPrivileges, hasMlPermissions, hasCRUDPermissions, loadingIds]
   );
 };
 
@@ -194,9 +203,9 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
   );
 };
 
-export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[] => {
+export const useRulesColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
   const actionsColumn = useActionsColumn();
-  const enabledColumn = useEnabledColumn({ hasPermissions });
+  const enabledColumn = useEnabledColumn({ hasCRUDPermissions });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
@@ -291,12 +300,12 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
         width: '65px',
       },
       enabledColumn,
-      ...(hasPermissions ? [actionsColumn] : []),
+      ...(hasCRUDPermissions ? [actionsColumn] : []),
     ],
     [
       actionsColumn,
       enabledColumn,
-      hasPermissions,
+      hasCRUDPermissions,
       isInMemorySorting,
       ruleNameColumn,
       showRelatedIntegrations,
@@ -304,10 +313,10 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
   );
 };
 
-export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableColumn[] => {
+export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
   const docLinks = useKibana().services.docLinks;
   const actionsColumn = useActionsColumn();
-  const enabledColumn = useEnabledColumn({ hasPermissions });
+  const enabledColumn = useEnabledColumn({ hasCRUDPermissions });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
@@ -387,7 +396,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
         ),
         render: (value: DurationMetric | undefined) => (
           <EuiText data-test-subj="gap" size="s">
-            {value != null ? value.toFixed() : getEmptyTagValue()}
+            {value != null ? moment.duration(value, 'seconds').humanize() : getEmptyTagValue()}
           </EuiText>
         ),
         sortable: !!isInMemorySorting,
@@ -424,13 +433,13 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
         width: '16%',
       },
       enabledColumn,
-      ...(hasPermissions ? [actionsColumn] : []),
+      ...(hasCRUDPermissions ? [actionsColumn] : []),
     ],
     [
       actionsColumn,
       docLinks.links.siem.troubleshootGaps,
       enabledColumn,
-      hasPermissions,
+      hasCRUDPermissions,
       isInMemorySorting,
       ruleNameColumn,
       showRelatedIntegrations,

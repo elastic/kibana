@@ -105,6 +105,7 @@ export async function getServiceMetadataDetails({
       ],
     },
     body: {
+      track_total_hits: 1,
       size: 1,
       _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],
       query: { bool: { filter, should } },

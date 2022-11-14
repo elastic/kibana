@@ -40,7 +40,7 @@ export interface Props<Kind extends string = string> {
   /**
    * A files client that will be used process uploads.
    */
-  client: FilesClient;
+  client: FilesClient<any>;
   /**
    * Allow users to clear a file after uploading.
    *
@@ -92,14 +92,15 @@ export const UploadFile = <Kind extends string = string>({
 }: Props<Kind>): ReturnType<FunctionComponent> => {
   const { registry } = useFilesContext();
   const ref = useRef<null | EuiFilePicker>(null);
+  const fileKind = registry.get(kindId);
   const uploadState = useMemo(
     () =>
       createUploadState({
         client,
-        fileKind: registry.get(kindId),
+        fileKind,
         allowRepeatedUploads,
       }),
-    [client, kindId, allowRepeatedUploads, registry]
+    [client, allowRepeatedUploads, fileKind]
   );
 
   /**
@@ -116,9 +117,17 @@ export const UploadFile = <Kind extends string = string>({
     return () => subs.forEach((sub) => sub.unsubscribe());
   }, [uploadState, onDone, onError]);
 
+  useEffect(() => uploadState.dispose, [uploadState]);
+
   return (
     <context.Provider value={uploadState}>
-      <Component ref={ref} meta={meta} immediate={immediate} allowClear={allowClear} />
+      <Component
+        ref={ref}
+        accept={fileKind.allowedMimeTypes?.join(',')}
+        meta={meta}
+        immediate={immediate}
+        allowClear={allowClear}
+      />
     </context.Provider>
   );
 };

@@ -381,7 +381,6 @@ paths:
         name: ignoreUnverified
         description: Ignore if the package is fails signature verification
         in: query
-    required: true
     post:
       summary: Packages - Install
       tags: []
@@ -772,15 +771,9 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties:
-                  type: object
-                  properties:
-                    success:
-                      type: boolean
-                    error:
-                      type: string
-                  required:
-                    - success
+                properties:
+                  actionId:
+                    type: string
         '400':
           description: BAD REQUEST
           content:
@@ -1139,15 +1132,9 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties:
-                  type: object
-                  properties:
-                    success:
-                      type: boolean
-                    error:
-                      type: string
-                  required:
-                    - success
+                properties:
+                  actionId:
+                    type: string
       operationId: bulk-reassign-agents
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1185,15 +1172,9 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties:
-                  type: object
-                  properties:
-                    success:
-                      type: boolean
-                    error:
-                      type: string
-                  required:
-                    - success
+                properties:
+                  actionId:
+                    type: string
       operationId: bulk-unenroll-agents
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1236,15 +1217,9 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties:
-                  type: object
-                  properties:
-                    success:
-                      type: boolean
-                    error:
-                      type: string
-                  required:
-                    - success
+                properties:
+                  actionId:
+                    type: string
       operationId: bulk-update-agent-tags
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1332,7 +1307,7 @@ paths:
           name: full
           description: >-
             When set to true, retrieve the related package policies for each
-            agent policy/
+            agent policy.
       description: ''
     post:
       summary: Agent policy - Create

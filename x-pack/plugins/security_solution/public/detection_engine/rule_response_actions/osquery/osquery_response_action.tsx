@@ -19,7 +19,7 @@ interface IProps {
 }
 
 export const OsqueryResponseAction = React.memo((props: IProps) => {
-  const { osquery } = useKibana().services;
+  const { osquery, application } = useKibana().services;
   const OsqueryForm = useMemo(
     () => osquery?.OsqueryResponseActionTypeForm,
     [osquery?.OsqueryResponseActionTypeForm]
@@ -27,13 +27,20 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
 
   if (osquery) {
     const { disabled, permissionDenied } = osquery?.fetchInstallationStatus();
+    const disabledOsqueryPermission = !(
+      application?.capabilities?.osquery?.writeLiveQueries ||
+      (application?.capabilities?.osquery?.runSavedQueries &&
+        (application?.capabilities?.osquery?.readSavedQueries ||
+          application?.capabilities?.osquery?.readPacks))
+    );
 
-    if (permissionDenied) {
+    if (permissionDenied || disabledOsqueryPermission) {
       return (
         <>
           <EuiEmptyPrompt
             title={<h2>{PERMISSION_DENIED}</h2>}
             titleSize="xs"
+            iconType="logoOsquery"
             body={
               <p>
                 <FormattedMessage
@@ -55,6 +62,7 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
     if (disabled) {
       return (
         <EuiEmptyPrompt
+          iconType="logoOsquery"
           title={<h2>{SHORT_EMPTY_TITLE}</h2>}
           titleSize="xs"
           body={<p>{NOT_AVAILABLE}</p>}

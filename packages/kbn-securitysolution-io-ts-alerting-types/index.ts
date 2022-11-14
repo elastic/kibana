@@ -18,7 +18,6 @@ export * from './src/default_per_page';
 export * from './src/default_risk_score_mapping_array';
 export * from './src/default_severity_mapping_array';
 export * from './src/default_threat_array';
-export * from './src/default_throttle_null';
 export * from './src/default_to_string';
 export * from './src/default_uuid';
 export * from './src/from';

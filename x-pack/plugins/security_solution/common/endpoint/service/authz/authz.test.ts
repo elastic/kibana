@@ -121,6 +121,7 @@ describe('Endpoint Authz service', () => {
         canSuspendProcess: false,
         canGetRunningProcesses: false,
         canAccessResponseConsole: false,
+        canAccessResponseActionsHistory: false,
       });
     });
   });

@@ -40,8 +40,8 @@ export const useData = (
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void,
   selectedChangePoint?: ChangePoint,
-  barTarget: number = DEFAULT_BAR_TARGET,
-  selectedGroup?: GroupTableItem | null
+  selectedGroup?: GroupTableItem | null,
+  barTarget: number = DEFAULT_BAR_TARGET
 ) => {
   const {
     uiSettings,
@@ -49,6 +49,7 @@ export const useData = (
       query: { filterManager },
     },
   } = useAiopsAppContext();
+
   const [lastRefresh, setLastRefresh] = useState(0);
   const [fieldStatsRequest, setFieldStatsRequest] = useState<
     DocumentStatsSearchStrategyParams | undefined

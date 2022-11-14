@@ -9,6 +9,7 @@ import { HttpSetup } from '@kbn/core/public';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IExecutionErrorsResult, ActionErrorLogSortFields } from '@kbn/alerting-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { getFilter } from './get_filter';
 
 export type SortField = Record<
   ActionErrorLogSortFields,
@@ -47,22 +48,6 @@ const getRenamedSort = (sort?: SortField[]) => {
       },
     };
   });
-};
-
-// TODO (Jiawei): Use node builder instead of strings
-const getFilter = ({ runId, message }: { runId?: string; message?: string }) => {
-  const filter: string[] = [];
-
-  if (runId) {
-    filter.push(`kibana.alert.rule.execution.uuid: ${runId}`);
-  }
-
-  if (message) {
-    const escapedMessage = message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&');
-    filter.push(`message: "${escapedMessage}" OR error.message: "${escapedMessage}"`);
-  }
-
-  return filter;
 };
 
 export const loadActionErrorLog = ({

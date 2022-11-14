@@ -114,7 +114,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           connectorId: schema.string(),
         }),
         body: schema.object({
-          nextSyncConfig: schema.string(),
+          nextSyncConfig: schema.maybe(schema.string()),
         }),
       },
     },
@@ -254,8 +254,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           connectorId: schema.string(),
         }),
         body: schema.object({
-          name: schema.maybe(schema.string()),
-          description: schema.maybe(schema.string()),
+          name: schema.string(),
+          description: schema.nullable(schema.string()),
         }),
       },
     },

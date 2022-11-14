@@ -156,6 +156,12 @@ export function ServiceGroupsList() {
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiText color="subdued" size="s">
+                {i18n.translate('xpack.apm.serviceGroups.listDescription', {
+                  defaultMessage:
+                    'Displayed service counts reflect the last 24 hours.',
+                })}
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               {items.length ? (

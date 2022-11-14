@@ -47,6 +47,7 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 describe('ObservabilityActions component', () => {
   const setup = async (pageId: string) => {
     const props: ObservabilityActionsProps = {
+      config,
       eventId: '6d4c6d74-d51a-495c-897d-88ced3b95e30',
       ecsData: {
         _id: '6d4c6d74-d51a-495c-897d-88ced3b95e30',

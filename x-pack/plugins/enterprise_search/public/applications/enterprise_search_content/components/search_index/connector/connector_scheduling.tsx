@@ -177,6 +177,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                 setScheduling({ ...scheduling, interval: expression });
                 setHasChanges(true);
               }}
+              frequencyBlockList={['MINUTE']}
             />
           </EuiFlexItem>
           <EuiFlexItem>

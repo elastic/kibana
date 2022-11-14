@@ -8,3 +8,4 @@
 export * from './monitor_duration';
 export * from './synthetics_monitor';
 export * from './monitor_validation';
+export * from './zip_url_deprecation';

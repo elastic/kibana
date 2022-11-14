@@ -198,6 +198,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
+      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
+        return await testSubjects.isDisplayed('disableButton');
+      });
       await testSubjects.click('disableButton');
 
       await refreshAlertsList();

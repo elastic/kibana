@@ -94,7 +94,6 @@ const RiskScoreUpgradeButtonComponent = ({
           onConfirm={upgradeRiskScore}
           cancelButtonText={
             <RiskScoreDocLink
-              external={false}
               riskScoreEntity={riskScoreEntity}
               title={
                 <FormattedMessage

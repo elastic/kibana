@@ -419,8 +419,8 @@ describe('tabbed content', () => {
       tabbedContent.update();
     });
 
-    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
-    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
+    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
+    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
 
     tabbedContent.find('[data-test-subj="eventLogListTab"]').simulate('click');
 

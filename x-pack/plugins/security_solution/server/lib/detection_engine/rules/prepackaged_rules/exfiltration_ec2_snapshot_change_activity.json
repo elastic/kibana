@@ -25,7 +25,7 @@
     {
       "integration": "cloudtrail",
       "package": "aws",
-      "version": "1.10.2"
+      "version": "^1.5.0"
     }
   ],
   "required_fields": [
@@ -56,7 +56,8 @@
     "Continuous Monitoring",
     "SecOps",
     "Asset Visibility",
-    "Exfiltration"
+    "Exfiltration",
+    "has_guide"
   ],
   "threat": [
     {
@@ -77,5 +78,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 100
+  "version": 102
 }

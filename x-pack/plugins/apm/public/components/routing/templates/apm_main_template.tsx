@@ -48,7 +48,7 @@ export function ApmMainTemplate({
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { http, docLinks, observability } = services;
+  const { http, docLinks, observability, application } = services;
   const basePath = http?.basePath.get();
 
   const ObservabilityPageTemplate = observability.navigation.PageTemplate;
@@ -56,6 +56,19 @@ export function ApmMainTemplate({
   const { data, status } = useFetcher((callApmApi) => {
     return callApmApi('GET /internal/apm/has_data');
   }, []);
+
+  // create static data view on inital load
+  useFetcher(
+    (callApmApi) => {
+      const canCreateDataView =
+        application?.capabilities.savedObjectsManagement.edit;
+
+      if (canCreateDataView) {
+        return callApmApi('POST /internal/apm/data_view/static');
+      }
+    },
+    [application?.capabilities.savedObjectsManagement.edit]
+  );
 
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
     location.pathname.includes(path)

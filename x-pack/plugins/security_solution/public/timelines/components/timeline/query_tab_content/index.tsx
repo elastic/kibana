@@ -35,7 +35,8 @@ import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
-import { calculateTotalPages, combineQueries } from '../helpers';
+import { calculateTotalPages } from '../helpers';
+import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
 import type {
   ControlColumnProps,
@@ -178,6 +179,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
+  kqlQueryLanguage,
   onEventClosed,
   renderCellValue,
   rowRenderers,
@@ -222,8 +224,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     query: string;
     language: KueryFilterQueryKind;
   } = useMemo(
-    () => ({ query: kqlQueryExpression.trim(), language: 'kuery' }),
-    [kqlQueryExpression]
+    () => ({ query: kqlQueryExpression.trim(), language: kqlQueryLanguage }),
+    [kqlQueryExpression, kqlQueryLanguage]
   );
 
   const combinedQueries = combineQueries({
@@ -492,6 +494,11 @@ const makeMapStateToProps = () => {
         ? ' '
         : kqlQueryTimeline?.expression ?? '';
 
+    const kqlQueryLanguage =
+      isEmpty(dataProviders) && timelineType === 'template'
+        ? 'kuery'
+        : kqlQueryTimeline?.kind ?? 'kuery';
+
     return {
       activeTab,
       columns,
@@ -505,6 +512,7 @@ const makeMapStateToProps = () => {
       itemsPerPageOptions,
       kqlMode,
       kqlQueryExpression,
+      kqlQueryLanguage,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       show,
       showExpandedDetails:

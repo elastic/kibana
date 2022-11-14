@@ -34,6 +34,7 @@ export async function getTransaction({
       events: [ProcessorEvent.transaction],
     },
     body: {
+      track_total_hits: false,
       size: 1,
       query: {
         bool: {

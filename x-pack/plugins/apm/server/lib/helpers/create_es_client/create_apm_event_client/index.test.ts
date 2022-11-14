@@ -61,7 +61,7 @@ describe('APMEventClient', () => {
           apm: {
             events: [],
           },
-          body: { size: 0 },
+          body: { size: 0, track_total_hits: false },
         });
 
         return res.ok({ body: 'ok' });

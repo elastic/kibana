@@ -38,7 +38,7 @@ const EntityAnalyticsHostRiskScoreDisableComponent = ({
         body={
           <>
             {i18n.ENABLE_HOST_RISK_SCORE_DESCRIPTION}{' '}
-            <RiskScoreDocLink external={false} riskScoreEntity={RiskScoreEntity.host} />
+            <RiskScoreDocLink riskScoreEntity={RiskScoreEntity.host} />
           </>
         }
         actions={

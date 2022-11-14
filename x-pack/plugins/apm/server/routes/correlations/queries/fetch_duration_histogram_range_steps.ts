@@ -75,6 +75,7 @@ export const fetchDurationHistogramRangeSteps = async ({
         events: [getEventType(chartType, searchMetrics)],
       },
       body: {
+        track_total_hits: 1,
         size: 0,
         query: getCommonCorrelationsQuery({
           start,

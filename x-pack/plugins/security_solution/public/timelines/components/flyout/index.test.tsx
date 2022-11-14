@@ -30,6 +30,8 @@ jest.mock('../timeline', () => ({
   StatefulTimeline: () => <div />,
 }));
 
+jest.mock('../../../common/hooks/timeline/use_timeline_save_prompt');
+
 describe('Flyout', () => {
   const props = {
     onAppLeave: jest.fn(),

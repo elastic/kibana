@@ -42,6 +42,7 @@ import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '..
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
+  enrichmentTimes: string[];
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];

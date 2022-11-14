@@ -27,3 +27,5 @@ export const FILE_SHARE_SO_TYPE = 'fileShare';
  * The name of the fixed size ES-backed blob store
  */
 export const ES_FIXED_SIZE_INDEX_BLOB_STORE = 'esFixedSizeIndex' as const;
+
+export const FILES_MANAGE_PRIVILEGE = 'files:manageFiles' as const;

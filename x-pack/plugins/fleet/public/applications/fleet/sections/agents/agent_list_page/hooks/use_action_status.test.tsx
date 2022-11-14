@@ -82,7 +82,23 @@ describe('useActionStatus', () => {
     });
     expect(mockSendPostCancelAction).toHaveBeenCalledWith('action1');
     expect(mockOnAbortSuccess).toHaveBeenCalled();
-    expect(mockOpenConfirm).toHaveBeenCalledWith('This action will abort upgrade of 1 agents', {
+    expect(mockOpenConfirm).toHaveBeenCalledWith('This action will abort upgrade of 1 agent', {
+      title: 'Abort upgrade?',
+    });
+  });
+
+  it('should post abort and invoke callback on abort upgrade - plural', async () => {
+    mockSendPostCancelAction.mockResolvedValue({});
+    let result: any | undefined;
+    await act(async () => {
+      ({ result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false)));
+    });
+    await act(async () => {
+      await result.current.abortUpgrade({ ...mockActionStatuses[0], nbAgentsAck: 0 });
+    });
+    expect(mockSendPostCancelAction).toHaveBeenCalledWith('action1');
+    expect(mockOnAbortSuccess).toHaveBeenCalled();
+    expect(mockOpenConfirm).toHaveBeenCalledWith('This action will abort upgrade of 2 agents', {
       title: 'Abort upgrade?',
     });
   });

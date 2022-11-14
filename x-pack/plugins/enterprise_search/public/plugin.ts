@@ -72,7 +72,8 @@ export class EnterpriseSearchPlugin implements Plugin {
     const { cloud } = plugins;
 
     const bahavioralAnalyticsEnabled = core.uiSettings?.get<boolean>(
-      enableBehavioralAnalyticsSection
+      enableBehavioralAnalyticsSection,
+      false
     );
 
     core.application.register({

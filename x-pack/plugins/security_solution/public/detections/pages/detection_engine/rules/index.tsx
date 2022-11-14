@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { MlJobUpgradeModal } from '../../../components/modals/ml_job_upgrade_modal';
 import { affectedJobIds } from '../../../components/callouts/ml_job_compatibility_callout/affected_job_ids';
 import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -26,7 +27,6 @@ import {
   getPrePackagedRuleStatus,
   getPrePackagedTimelineStatus,
   redirectToDetections,
-  userHasPermissions,
 } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
@@ -42,7 +42,6 @@ import { useInvalidateRules } from '../../../containers/detection_engine/rules/u
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { RulesPageTourComponent } from './tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -127,7 +126,7 @@ const RulesPageComponent: React.FC = () => {
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
-        isDisabled: !userHasPermissions(canUserCRUD) || loading || loadingJobs,
+        isDisabled: !hasUserCRUDPermission(canUserCRUD) || loading || loadingJobs,
         onClick: showMlJobUpgradeModal,
       }),
     [
@@ -142,7 +141,7 @@ const RulesPageComponent: React.FC = () => {
   const reloadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getReloadPrebuiltRulesAndTemplatesButton({
-        isDisabled: !userHasPermissions(canUserCRUD) || loading || loadingJobs,
+        isDisabled: !hasUserCRUDPermission(canUserCRUD) || loading || loadingJobs,
         onClick: showMlJobUpgradeModal,
       }),
     [
@@ -225,25 +224,23 @@ const RulesPageComponent: React.FC = () => {
                 <EuiButton
                   data-test-subj="rules-import-modal-button"
                   iconType="importAction"
-                  isDisabled={!userHasPermissions(canUserCRUD) || loading}
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
                   onClick={showImportModal}
                 >
                   {i18n.IMPORT_RULE}
                 </EuiButton>
               </EuiFlexItem>
-              <RulesPageTourComponent>
-                <EuiFlexItem grow={false}>
-                  <SecuritySolutionLinkButton
-                    data-test-subj="create-new-rule"
-                    fill
-                    iconType="plusInCircle"
-                    isDisabled={!userHasPermissions(canUserCRUD) || loading}
-                    deepLinkId={SecurityPageName.rulesCreate}
-                  >
-                    {i18n.ADD_NEW_RULE}
-                  </SecuritySolutionLinkButton>
-                </EuiFlexItem>
-              </RulesPageTourComponent>
+              <EuiFlexItem grow={false}>
+                <SecuritySolutionLinkButton
+                  data-test-subj="create-new-rule"
+                  fill
+                  iconType="plusInCircle"
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.rulesCreate}
+                >
+                  {i18n.ADD_NEW_RULE}
+                </SecuritySolutionLinkButton>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
           {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
@@ -260,7 +257,7 @@ const RulesPageComponent: React.FC = () => {
             createPrePackagedRules={createPrePackagedRules}
             data-test-subj="all-rules"
             loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-            hasPermissions={userHasPermissions(canUserCRUD)}
+            hasPermissions={hasUserCRUDPermission(canUserCRUD)}
             rulesCustomInstalled={rulesCustomInstalled}
             rulesInstalled={rulesInstalled}
             rulesNotInstalled={rulesNotInstalled}

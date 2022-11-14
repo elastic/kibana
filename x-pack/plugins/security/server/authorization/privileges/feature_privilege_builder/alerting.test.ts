@@ -90,6 +90,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
           ]
         `);
       });
@@ -174,6 +175,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
@@ -218,6 +220,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
@@ -316,6 +319,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
@@ -374,6 +378,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
@@ -392,6 +397,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getAlertSummary",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
           ]
         `);
       });
@@ -480,6 +486,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
@@ -498,6 +505,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getAlertSummary",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/getAuthorizedAlertsIndices",

@@ -1116,7 +1116,7 @@ describe('when on the endpoint list page', () => {
       expect(responderButton).not.toHaveAttribute('disabled');
     });
 
-    it('navigates to the Actions log flyout', async () => {
+    it('navigates to the Response actions history flyout', async () => {
       const actionsLink = await renderResult.findByTestId('actionsLink');
 
       expect(actionsLink.getAttribute('href')).toEqual(

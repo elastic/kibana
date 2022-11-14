@@ -10,6 +10,7 @@ import { FieldState } from '@kbn/advanced-settings-plugin/public';
 import { toEditableConfig } from '@kbn/advanced-settings-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 
 function getEditableConfig({
   settingsKeys,
@@ -42,6 +43,7 @@ function getEditableConfig({
 
 export function useApmEditableSettings(settingsKeys: string[]) {
   const { services } = useKibana();
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const { uiSettings } = services;
   const [isSaving, setIsSaving] = useState(false);
   const [forceReloadSettings, setForceReloadSettings] = useState(0);
@@ -76,7 +78,7 @@ export function useApmEditableSettings(settingsKeys: string[]) {
     setUnsavedChanges({});
   }
 
-  async function saveAll() {
+  async function saveAll({ trackMetricName }: { trackMetricName: string }) {
     if (uiSettings && !isEmpty(unsavedChanges)) {
       try {
         setIsSaving(true);
@@ -85,6 +87,7 @@ export function useApmEditableSettings(settingsKeys: string[]) {
         );
 
         await Promise.all(arr);
+        trackApmEvent({ metric: trackMetricName });
         setForceReloadSettings((state) => ++state);
         cleanUnsavedChanges();
       } finally {

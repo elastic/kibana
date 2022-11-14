@@ -140,6 +140,41 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.status).eql(400);
     });
 
+    it('omits unknown keys', async () => {
+      // Delete a required property to make payload invalid
+      const newMonitor = {
+        name: 'Sample name',
+        url: 'https://elastic.co',
+        unknownKey: 'unknownValue',
+        type: 'http',
+        locations: [
+          {
+            id: 'eu-west-01',
+            label: 'Europe West',
+            geo: {
+              lat: 33.2343132435,
+              lon: 73.2342343434,
+            },
+            url: 'https://example-url.com',
+            isServiceManaged: true,
+          },
+        ],
+      };
+
+      const apiResponse = await supertestAPI
+        .post(API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(newMonitor)
+        .expect(200);
+
+      const response = await supertestAPI
+        .get(`${API_URLS.SYNTHETICS_MONITORS}/${apiResponse.body.id}`)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(response.body.attributes).not.to.have.keys('unknownkey', 'url');
+    });
+
     it('can create monitor with API key with proper permissions', async () => {
       await supertestAPI
         .post('/internal/security/api_key')

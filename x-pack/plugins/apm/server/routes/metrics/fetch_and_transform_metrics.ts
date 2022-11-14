@@ -92,6 +92,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
       events: [ProcessorEvent.metric],
     },
     body: {
+      track_total_hits: 1,
       size: 0,
       query: {
         bool: {

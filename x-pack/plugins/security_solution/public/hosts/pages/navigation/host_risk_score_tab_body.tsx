@@ -21,7 +21,7 @@ import {
   useHostRiskScoreKpi,
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../common/search_strategy';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
@@ -60,6 +60,7 @@ export const HostRiskScoreQueryTabBody = ({
     setQuerySkip(!toggleStatus);
   }, [toggleStatus]);
   const { from, to } = useGlobalTime();
+  const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   const [
     loading,
@@ -69,7 +70,7 @@ export const HostRiskScoreQueryTabBody = ({
     skip: querySkip,
     pagination,
     sort,
-    timerange: { from, to },
+    timerange,
   });
 
   const { severityCount, loading: isKpiLoading } = useHostRiskScoreKpi({
@@ -77,13 +78,11 @@ export const HostRiskScoreQueryTabBody = ({
     skip: querySkip,
   });
 
-  const timerange = useMemo(() => ({ from, to }), [from, to]);
-
   if (!isModuleEnabled && !loading) {
     return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
   }
 
-  if (isDeprecated) {
+  if (isDeprecated && !loading) {
     return (
       <RiskScoresDeprecated
         refetch={refetch}
@@ -93,8 +92,14 @@ export const HostRiskScoreQueryTabBody = ({
     );
   }
 
-  if (isModuleEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
+  if (
+    !loading &&
+    isModuleEnabled &&
+    severitySelectionRedux.length === 0 &&
+    data &&
+    data.length === 0
+  ) {
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} refetch={refetch} />;
   }
 
   return (
@@ -109,7 +114,7 @@ export const HostRiskScoreQueryTabBody = ({
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
-      severityCount={severityCount}
+      severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
       totalCount={totalCount}
       type={type}
     />

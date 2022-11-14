@@ -75,7 +75,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Options List Control creation and editing experience', async () => {
+    // Skip on cloud until issue is fixed
+    // Issue: https://github.com/elastic/kibana/issues/141280
+    describe('Options List Control creation and editing experience', function () {
+      this.tags(['skipCloudFailedTest']);
       it('can add a new options list control from a blank state', async () => {
         await dashboardControls.createControl({
           controlType: OPTIONS_LIST_CONTROL,
@@ -167,6 +170,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.removeExistingControl(firstId);
         expect(await dashboardControls.getControlsCount()).to.be(1);
         await dashboard.clearUnsavedChanges();
+      });
+
+      it('cannot create options list for scripted field', async () => {
+        expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
+          'animals-*'
+        );
+        await dashboardControls.openCreateControlFlyout();
+        await testSubjects.missingOrFail('field-picker-select-isDog');
+        await dashboardControls.controlEditorCancel(true);
       });
 
       after(async () => {

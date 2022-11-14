@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
 import type { FilesRouter } from './types';
 
-import { FilesMetricsHttpEndpoint, FILES_API_ROUTES } from './api_routes';
+import { FilesMetrics } from '../../common';
+import { CreateRouteDefinition, FILES_API_ROUTES } from './api_routes';
 import type { FilesRequestHandler } from './types';
 
 const method = 'get' as const;
 
-type Response = FilesMetricsHttpEndpoint['output'];
+export type Endpoint = CreateRouteDefinition<{}, FilesMetrics>;
 
 const handler: FilesRequestHandler = async ({ files }, req, res) => {
   const { fileService } = await files;
-  const body: Response = await fileService.asCurrentUser().getUsageMetrics();
+  const body: Endpoint['output'] = await fileService.asCurrentUser().getUsageMetrics();
   return res.ok({
     body,
   });
@@ -26,6 +28,9 @@ export function register(router: FilesRouter) {
     {
       path: FILES_API_ROUTES.metrics,
       validate: {},
+      options: {
+        tags: [`access:${FILES_MANAGE_PRIVILEGE}`],
+      },
     },
     handler
   );

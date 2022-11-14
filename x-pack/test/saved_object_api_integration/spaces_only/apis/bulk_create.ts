@@ -103,11 +103,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   ];
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = bulkCreateTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = bulkCreateTestSuiteFactory(context);
   const createTests = (overwrite: boolean, spaceId: string) => {
     const testCases = createTestCases(overwrite, spaceId);
     return createTestDefinitions(testCases, false, overwrite, {
@@ -116,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
+  // Failing: See https://github.com/elastic/kibana/issues/141782
   describe('_bulk_create', () => {
     getTestScenarios([false, true]).spaces.forEach(({ spaceId, modifier: overwrite }) => {
       const suffix = overwrite ? ' with overwrite enabled' : '';

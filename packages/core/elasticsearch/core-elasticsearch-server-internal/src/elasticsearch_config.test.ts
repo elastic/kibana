@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { getDeprecationsFor } from '@kbn/core-test-helpers-deprecations-getters';
+
 import {
   mockReadFileSync,
   mockReadPkcs12Keystore,
@@ -13,7 +15,6 @@ import {
 } from './elasticsearch_config.test.mocks';
 
 import { ElasticsearchConfig, config } from './elasticsearch_config';
-import { getDeprecationsFor } from '@kbn/core-test-helpers-deprecations-getters';
 
 const CONFIG_PATH = 'elasticsearch';
 

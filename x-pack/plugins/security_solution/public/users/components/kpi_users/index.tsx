@@ -12,19 +12,25 @@ import type { UsersKpiProps } from './types';
 
 import { UsersKpiAuthentications } from './authentications';
 import { TotalUsersKpi } from './total_users';
-import { useUserRiskScore } from '../../../risk_score/containers';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import * as i18n from './translations';
 import { RiskScoreDocLink } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { getUserRiskIndex, RiskQueries, RiskScoreEntity } from '../../../../common/search_strategy';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useRiskScoreFeatureStatus } from '../../../risk_score/containers/feature_status';
 
 export const UsersKpiComponent = React.memo<UsersKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
-    const [loading, { isLicenseValid, isModuleEnabled }] = useUserRiskScore();
+    const spaceId = useSpaceId();
+    const defaultIndex = spaceId ? getUserRiskIndex(spaceId) : undefined;
+    const { isEnabled, isLicenseValid, isLoading } = useRiskScoreFeatureStatus(
+      RiskQueries.usersRiskScore,
+      defaultIndex
+    );
 
     return (
       <>
-        {isLicenseValid && !isModuleEnabled && !loading && (
+        {isLicenseValid && !isEnabled && !isLoading && (
           <>
             <CallOutSwitcher
               namespace="users"
@@ -38,7 +44,6 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
                   <>
                     {i18n.LEARN_MORE}{' '}
                     <RiskScoreDocLink
-                      external={false}
                       riskScoreEntity={RiskScoreEntity.user}
                       title={i18n.USER_RISK_DATA}
                     />

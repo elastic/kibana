@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { FileJSON, FilesMetrics, File } from '../../common';
+import type { FilesMetrics, File, FileJSON } from '../../common';
 import type { FileShareServiceStart } from '../file_share_service/types';
 import type {
   CreateFileArgs,
   UpdateFileArgs,
   DeleteFileArgs,
   GetByIdArgs,
-  ListFilesArgs,
   FindFileArgs,
 } from './file_action_types';
 
@@ -55,14 +54,7 @@ export interface FileServiceStart {
    *
    * @param args - find files args
    */
-  find<M>(args: FindFileArgs): Promise<Array<FileJSON<M>>>;
-
-  /**
-   * List all files of specific file kind.
-   *
-   * @param args - list files args
-   */
-  list<M>(args: ListFilesArgs): Promise<Array<File<M>>>;
+  find<M>(args: FindFileArgs): Promise<{ files: Array<FileJSON<M>>; total: number }>;
 
   /**
    * Get an instance of a share object
