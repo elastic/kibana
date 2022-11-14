@@ -61,7 +61,7 @@ describe('common_transformations', () => {
               timestamp: dateExecuted.getTime(),
               duration: 42,
               success: false,
-              outcome: 'failed',
+              outcome: RuleLastRunOutcomeValues[2],
             },
           ],
           calculated_metrics: {
@@ -80,7 +80,7 @@ describe('common_transformations', () => {
         },
       },
       last_run: {
-        outcome: 'failed',
+        outcome: RuleLastRunOutcomeValues[2],
         outcome_msg: 'this is just a test',
         warning: RuleExecutionStatusErrorReasons.Unknown,
         alerts_count: {
