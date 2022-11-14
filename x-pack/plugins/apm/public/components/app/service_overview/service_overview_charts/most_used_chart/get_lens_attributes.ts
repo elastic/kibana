@@ -93,7 +93,7 @@ export function getLensAttributes({
           {
             layerId: metricId,
             primaryGroups: [columnA],
-            metric: columnB,
+            metrics: [columnB],
             categoryDisplay: 'default',
             legendDisplay: 'hide',
             nestedLegend: false,

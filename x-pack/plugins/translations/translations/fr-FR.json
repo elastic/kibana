@@ -17845,7 +17845,6 @@
     "xpack.lens.pie.addLayer": "Visualisation",
     "xpack.lens.pie.donutLabel": "Graphique en anneau",
     "xpack.lens.pie.groupLabel": "Proportion",
-    "xpack.lens.pie.groupsizeLabel": "Taille par",
     "xpack.lens.pie.mosaiclabel": "Mosaïque",
     "xpack.lens.pie.mosaicSuggestionLabel": "En mosaïque",
     "xpack.lens.pie.pielabel": "Camembert",

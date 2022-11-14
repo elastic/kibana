@@ -17853,7 +17853,6 @@
     "xpack.lens.pie.addLayer": "可视化",
     "xpack.lens.pie.donutLabel": "圆环图",
     "xpack.lens.pie.groupLabel": "比例",
-    "xpack.lens.pie.groupsizeLabel": "大小调整依据",
     "xpack.lens.pie.mosaiclabel": "马赛克",
     "xpack.lens.pie.mosaicSuggestionLabel": "为马赛克",
     "xpack.lens.pie.pielabel": "饼图",
