@@ -55,6 +55,7 @@ export {
   ALERT_HISTORY_PREFIX,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
+  ActionConnectorMode,
 } from './types';
 
 export { useConnectorContext } from './application/context/use_connector_context';
@@ -79,6 +80,7 @@ export {
   SimpleConnectorForm,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
+  SectionLoading,
 } from './application/components';
 
 export {
@@ -118,11 +120,14 @@ export {
   deprecatedMessage,
 } from './common';
 
+export { useLoadRuleTypes, useSubAction } from './application/hooks';
+
 export type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from './plugin';
 export { Plugin } from './plugin';
+
 // TODO remove this import when we expose the Rules tables as a component
 export { loadRules } from './application/lib/rule_api/rules';
 export { loadExecutionLogAggregations } from './application/lib/rule_api/load_execution_log_aggregations';
@@ -137,7 +142,6 @@ export { unmuteRule } from './application/lib/rule_api/unmute';
 export { snoozeRule } from './application/lib/rule_api/snooze';
 export { unsnoozeRule } from './application/lib/rule_api/unsnooze';
 export { loadRuleAggregations, loadRuleTags } from './application/lib/rule_api/aggregate';
-export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
 export { loadRule } from './application/lib/rule_api/get_rule';
 export { loadAllActions } from './application/lib/action_connector_api';
 export { suspendedComponentWithProps } from './application/lib/suspended_component_with_props';

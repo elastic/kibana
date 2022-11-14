@@ -1887,6 +1887,24 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.getExpressionVariables$",
+            "type": "Function",
+            "tags": [],
+            "label": "getExpressionVariables$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<Record<string, unknown> | undefined>"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.VisualizeEmbeddable.inputIsRefType",
             "type": "Function",
             "tags": [],
@@ -3569,13 +3587,7 @@
                 "text": "DataViewSpec"
               },
               " | undefined; searchAfter?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.EsQuerySearchAfter",
-                "text": "EsQuerySearchAfter"
-              },
+              "SortResults",
               " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
               {
                 "pluginId": "data",
@@ -6358,7 +6370,9 @@
             "section": "def-public.ExpressionRenderError",
             "text": "ExpressionRenderError"
           },
-          ") => void; reload: () => Promise<void>; supportedTriggers: () => string[]; inputIsRefType: (input: ",
+          ") => void; reload: () => Promise<void>; supportedTriggers: () => string[]; getExpressionVariables$: () => ",
+          "Observable",
+          "<Record<string, unknown> | undefined>; inputIsRefType: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -11484,13 +11498,7 @@
                 "text": "DataViewSpec"
               },
               " | undefined; searchAfter?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.EsQuerySearchAfter",
-                "text": "EsQuerySearchAfter"
-              },
+              "SortResults",
               " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
               {
                 "pluginId": "data",

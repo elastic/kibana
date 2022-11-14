@@ -188,6 +188,8 @@ async function mountComponent(
     persistDataView: jest.fn(),
     updateAdHocDataViewId: jest.fn(),
     adHocDataViewList: [],
+    savedDataViewList: [],
+    updateDataViewList: jest.fn(),
   };
 
   const component = mountWithIntl(

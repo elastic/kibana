@@ -481,7 +481,7 @@
         "signature": [
           "{ onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; iconSide?: ",
           "ButtonContentIconSide",
-          " | undefined; }"
+          "; }"
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
         "deprecated": false,
