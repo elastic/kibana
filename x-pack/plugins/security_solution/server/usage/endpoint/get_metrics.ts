@@ -21,7 +21,7 @@ export const getEndpointMetrics = async ({
   logger,
 }: GetEndpointMetricsOptions): Promise<EndpointMetrics> => {
   return {
-    active_endpoint_count: await getActiveEndpointCount(esClient, logger),
+    unique_endpoint_count: await getActiveEndpointCount(esClient, logger),
   };
 };
 

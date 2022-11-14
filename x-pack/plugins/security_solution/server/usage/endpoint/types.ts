@@ -6,5 +6,5 @@
  */
 
 export interface EndpointMetrics {
-  active_endpoint_count: number;
+  unique_endpoint_count: number;
 }

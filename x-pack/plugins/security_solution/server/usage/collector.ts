@@ -2400,9 +2400,9 @@ export const registerCollector: RegisterCollector = ({
         },
       },
       endpointMetrics: {
-        active_endpoint_count: {
+        unique_endpoint_count: {
           type: 'long',
-          _meta: { description: 'Number of active endpoints in last 24 hours' },
+          _meta: { description: 'Number of active unique endpoints in last 24 hours' },
         },
       },
     },
