@@ -6,8 +6,8 @@
  */
 
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { Rule, RuleTypeParams, RecoveredActionGroup } from '../../common';
-import { getDefaultRuleMonitoring } from './task_runner';
+import { Rule, RuleTypeParams, RecoveredActionGroup, RuleMonitoring } from '../../common';
+import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
@@ -54,29 +54,51 @@ export const RULE_ACTIONS = [
   },
 ];
 
+const defaultHistory = [
+  {
+    success: true,
+    timestamp: 0,
+  },
+];
+
 export const generateSavedObjectParams = ({
   error = null,
   warning = null,
   status = 'ok',
+  outcome = 'succeeded',
+  nextRun = '1970-01-01T00:00:10.000Z',
+  successRatio = 1,
+  history = defaultHistory,
+  alertsCount,
 }: {
   error?: null | { reason: string; message: string };
   warning?: null | { reason: string; message: string };
   status?: string;
+  outcome?: string;
+  nextRun?: string | null;
+  successRatio?: number;
+  history?: RuleMonitoring['run']['history'];
+  alertsCount?: Record<string, number>;
 }) => [
   'alert',
   '1',
   {
     monitoring: {
-      execution: {
+      run: {
         calculated_metrics: {
-          success_ratio: 1,
+          success_ratio: successRatio,
         },
-        history: [
-          {
-            success: true,
-            timestamp: 0,
+        history,
+        last_run: {
+          timestamp: '1970-01-01T00:00:00.000Z',
+          metrics: {
+            gap_duration_s: null,
+            total_alerts_created: null,
+            total_alerts_detected: null,
+            total_indexing_duration_ms: null,
+            total_search_duration_ms: null,
           },
-        ],
+        },
       },
     },
     executionStatus: {
@@ -86,6 +108,19 @@ export const generateSavedObjectParams = ({
       status,
       warning,
     },
+    lastRun: {
+      outcome,
+      outcomeMsg: error?.message || warning?.message || null,
+      warning: error?.reason || warning?.reason || null,
+      alertsCount: {
+        active: 0,
+        ignored: 0,
+        new: 0,
+        recovered: 0,
+        ...(alertsCount || {}),
+      },
+    },
+    nextRun,
   },
   { refresh: false, namespace: undefined },
 ];
@@ -155,7 +190,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
-  monitoring: getDefaultRuleMonitoring(),
+  monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
 };
 
 export const mockTaskInstance = () => ({
@@ -218,12 +253,22 @@ export const generateRunnerResult = ({
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
-      execution: {
+      run: {
         calculated_metrics: {
           success_ratio: successRatio,
         },
         // @ts-ignore
         history: history.map((success) => ({ success, timestamp: 0 })),
+        last_run: {
+          metrics: {
+            gap_duration_s: null,
+            total_alerts_created: null,
+            total_alerts_detected: null,
+            total_indexing_duration_ms: null,
+            total_search_duration_ms: null,
+          },
+          timestamp: '1970-01-01T00:00:00.000Z',
+        },
       },
     },
     schedule: {
