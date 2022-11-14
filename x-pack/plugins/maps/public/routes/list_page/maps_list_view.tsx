@@ -65,7 +65,16 @@ const toTableListViewSavedObject = (
   };
 };
 
-async function findMaps(searchTerm: string, tagReferences?: SavedObjectsFindOptionsReference[]) {
+async function findMaps(
+  searchTerm: string,
+  {
+    references,
+    referencesToExclude,
+  }: {
+    references?: SavedObjectsFindOptionsReference[];
+    referencesToExclude?: SavedObjectsFindOptionsReference[];
+  } = {}
+) {
   const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
     type: MAP_SAVED_OBJECT_TYPE,
     search: searchTerm ? `${searchTerm}*` : undefined,
@@ -74,7 +83,8 @@ async function findMaps(searchTerm: string, tagReferences?: SavedObjectsFindOpti
     searchFields: ['title^3', 'description'],
     defaultSearchOperator: 'AND',
     fields: ['description', 'title'],
-    hasReference: tagReferences,
+    hasReference: references,
+    hasNoReference: referencesToExclude,
   });
 
   return {
