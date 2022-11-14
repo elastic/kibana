@@ -23,7 +23,6 @@ import {
   EuiSpacer,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
   EuiSwitch,
 } from '@elastic/eui';
 
