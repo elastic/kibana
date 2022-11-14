@@ -92,6 +92,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fleet-preconfiguration-deletion-record": "7b28f200513c28ae774f1b7d7d7906954e3c6e16",
         "graph-workspace": "3342f2cd561afdde8f42f5fb284bf550dee8ebb5",
         "guided-onboarding-guide-state": "561db8d481b131a2bbf46b1e534d6ce960255135",
+        "guided-onboarding-plugin-state": "a802ed58e9d0076b9632c59d7943861ba476f99c",
         "index-pattern": "48e77ca393c254e93256f11a7cdc0232dd754c08",
         "infrastructure-monitoring-log-view": "e2c78c1076bd35e57d7c5fa1b410e5c126d12327",
         "infrastructure-ui-source": "7c8dbbc0a608911f1b683a944f4a65383f6153ed",
