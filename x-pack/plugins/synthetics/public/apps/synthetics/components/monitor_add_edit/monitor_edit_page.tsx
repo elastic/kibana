@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
 import { getServiceLocations } from '../../state';
+import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
 import { MonitorDetailsLinkPortal } from './monitor_details_portal';
@@ -18,7 +19,7 @@ import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { getMonitorAPI } from '../../state/monitor_management/api';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
 
-export const MonitorEditPage: React.FC = () => {
+const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
   const { monitorId } = useParams<{ monitorId: string }>();
@@ -42,3 +43,9 @@ export const MonitorEditPage: React.FC = () => {
     <EuiLoadingSpinner />
   );
 };
+
+export const MonitorEditPageWithServiceAllowed = React.memo(() => (
+  <ServiceAllowedWrapper>
+    <MonitorEditPage />
+  </ServiceAllowedWrapper>
+));
