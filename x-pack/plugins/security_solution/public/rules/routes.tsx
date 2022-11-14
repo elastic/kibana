@@ -10,7 +10,7 @@ import { Redirect, Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
-import { RULES_PATH, SecurityPageName } from '../../common/constants';
+import { RULES_PATH, RULE_DETAILS_PATH, SecurityPageName } from '../../common/constants';
 import { NotFoundPage } from '../app/404';
 import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
 import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
@@ -25,12 +25,12 @@ import { SpyRoute } from '../common/utils/route/spy_routes';
 
 const RulesSubRoutes = [
   {
-    path: '/rules/id/:detailName/edit',
+    path: `${RULE_DETAILS_PATH}/:detailName/edit`,
     main: EditRulePage,
     exact: true,
   },
   {
-    path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
+    path: `${RULE_DETAILS_PATH}/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
     main: RuleDetailsPage,
     exact: true,
   },
@@ -54,7 +54,7 @@ const RulesContainerComponent: React.FC = () => {
       <TrackApplicationView viewId={SecurityPageName.rules}>
         <Switch>
           <Route // Redirect to first tab if none specified
-            path="/rules/id/:detailName"
+            path={`${RULE_DETAILS_PATH}/:detailName`}
             exact
             render={({
               match: {
@@ -65,7 +65,7 @@ const RulesContainerComponent: React.FC = () => {
               <Redirect
                 to={{
                   ...location,
-                  pathname: `/rules/id/${detailName}/${RuleDetailTabs.alerts}`,
+                  pathname: `${RULE_DETAILS_PATH}/${detailName}/${RuleDetailTabs.alerts}`,
                   search: location.search,
                 }}
               />

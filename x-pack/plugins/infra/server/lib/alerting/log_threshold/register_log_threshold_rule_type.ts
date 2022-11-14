@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { getObservabilityRuleDetailsFullPath } from '@kbn/observability-plugin/common/utils/paths';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
@@ -142,5 +143,6 @@ export async function registerLogThresholdRuleType(
     },
     producer: 'logs',
     getSummarizedAlerts: libs.logsRules.createGetSummarizedAlerts(),
+    getRulePagePath: getObservabilityRuleDetailsFullPath,
   });
 }

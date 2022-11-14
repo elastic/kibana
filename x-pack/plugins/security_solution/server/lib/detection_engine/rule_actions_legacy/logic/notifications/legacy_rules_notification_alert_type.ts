@@ -26,6 +26,7 @@ import { getSignals } from './get_signals';
 import { legacyExtractReferences } from './legacy_saved_object_references/legacy_extract_references';
 // eslint-disable-next-line no-restricted-imports
 import { legacyInjectReferences } from './legacy_saved_object_references/legacy_inject_references';
+import { getSecuritySolutionRuleDetailsFullPath } from '../../../../../../common/utils/paths';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -135,4 +136,5 @@ export const legacyRulesNotificationAlertType = ({
       });
     }
   },
+  getRulePagePath: getSecuritySolutionRuleDetailsFullPath,
 });

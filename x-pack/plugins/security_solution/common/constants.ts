@@ -147,6 +147,7 @@ export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const RULES_PATH = '/rules' as const;
+export const RULE_DETAILS_PATH = `${RULES_PATH}/id` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -171,6 +172,7 @@ export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
 
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}` as const;
+export const APP_RULE_DETAILS_PATH = `${APP_PATH}${RULE_DETAILS_PATH}` as const;
 export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}` as const;
 
 export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}` as const;

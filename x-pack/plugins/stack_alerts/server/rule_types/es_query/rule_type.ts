@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
+import { getManagementRuleDetailsFullPath } from '@kbn/rule-data-utils';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
@@ -187,5 +188,6 @@ export function getRuleType(
     },
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
 }

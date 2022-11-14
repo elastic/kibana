@@ -13,6 +13,7 @@ import {
   AlertInstanceState,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
+import { getManagementRuleDetailsFullPath } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -159,5 +160,6 @@ export function registerAnomalyDetectionAlertType({
         }
       }
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   });
 }

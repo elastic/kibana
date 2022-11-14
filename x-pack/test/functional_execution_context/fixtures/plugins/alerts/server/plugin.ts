@@ -12,6 +12,7 @@ import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-p
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { getManagementRuleDetailsFullPath } from '@kbn/rule-data-utils';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -81,6 +82,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         const [coreStart] = await core.getStartServices();
         await coreStart.elasticsearch.client.asInternalUser.ping();
       },
+      getRulePagePath: getManagementRuleDetailsFullPath,
     });
 
     const router = core.http.createRouter();

@@ -7,6 +7,7 @@
 
 import { CoreSetup } from '@kbn/core/server';
 import { RuleType } from '@kbn/alerting-plugin/server';
+import { getManagementRuleDetailsFullPath } from '@kbn/rule-data-utils';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export function defineAlertTypes(
@@ -23,6 +24,7 @@ export function defineAlertTypes(
     isExportable: true,
     recoveryActionGroup: { id: 'restrictedRecovered', name: 'Restricted Recovery' },
     async executor() {},
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   const noopUnrestrictedAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.unrestricted-noop',
@@ -33,6 +35,7 @@ export function defineAlertTypes(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     async executor() {},
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   alerting.registerType(noopRestrictedAlertType);
   alerting.registerType(noopUnrestrictedAlertType);

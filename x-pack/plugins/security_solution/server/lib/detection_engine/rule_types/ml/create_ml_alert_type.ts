@@ -10,6 +10,7 @@ import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { MachineLearningRuleParams } from '../../rule_schema';
+import { getSecuritySolutionRuleDetailsFullPath } from '../../../../../common/utils/paths';
 import { machineLearningRuleParams } from '../../rule_schema';
 import { mlExecutor } from '../../signals/executors/ml';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
@@ -78,5 +79,6 @@ export const createMlAlertType = (
       });
       return { ...result, state };
     },
+    getRulePagePath: getSecuritySolutionRuleDetailsFullPath,
   };
 };

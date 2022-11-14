@@ -85,6 +85,7 @@ import {
   APP_UI_ID,
   DEFAULT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_KEY,
+  RULE_DETAILS_PATH,
 } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../hosts/pages/display';
@@ -251,31 +252,31 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         id: RuleDetailTabs.alerts,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.alerts],
         disabled: false,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.alerts}`,
+        href: `${RULE_DETAILS_PATH}/${ruleId}/${RuleDetailTabs.alerts}`,
       },
       [RuleDetailTabs.exceptions]: {
         id: RuleDetailTabs.exceptions,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.exceptions],
         disabled: rule == null,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.exceptions}`,
+        href: `${RULE_DETAILS_PATH}/${ruleId}/${RuleDetailTabs.exceptions}`,
       },
       [RuleDetailTabs.endpointExceptions]: {
         id: RuleDetailTabs.endpointExceptions,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.endpointExceptions],
         disabled: rule == null,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.endpointExceptions}`,
+        href: `${RULE_DETAILS_PATH}/${ruleId}/${RuleDetailTabs.endpointExceptions}`,
       },
       [RuleDetailTabs.executionResults]: {
         id: RuleDetailTabs.executionResults,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionResults],
         disabled: !isExistingRule,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionResults}`,
+        href: `${RULE_DETAILS_PATH}/${ruleId}/${RuleDetailTabs.executionResults}`,
       },
       [RuleDetailTabs.executionEvents]: {
         id: RuleDetailTabs.executionEvents,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionEvents],
         disabled: !isExistingRule,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`,
+        href: `${RULE_DETAILS_PATH}/${ruleId}/${RuleDetailTabs.executionEvents}`,
       },
     }),
     [isExistingRule, rule, ruleId]
@@ -800,7 +801,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
             </Display>
             <StyledMinHeightTabContainer>
               <Switch>
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
+                <Route path={`${RULE_DETAILS_PATH}/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                   <>
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                       <EuiFlexItem grow={false}>
@@ -850,7 +851,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     )}
                   </>
                 </Route>
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
+                <Route
+                  path={`${RULE_DETAILS_PATH}/:detailName/:tabName(${RuleDetailTabs.exceptions})`}
+                >
                   <ExceptionsViewer
                     rule={rule}
                     listTypes={[
@@ -863,7 +866,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   />
                 </Route>
                 <Route
-                  path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.endpointExceptions})`}
+                  path={`${RULE_DETAILS_PATH}/:detailName/:tabName(${RuleDetailTabs.endpointExceptions})`}
                 >
                   <ExceptionsViewer
                     rule={rule}
@@ -873,10 +876,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     data-test-subj="endpointExceptionsTab"
                   />
                 </Route>
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
+                <Route
+                  path={`${RULE_DETAILS_PATH}/:detailName/:tabName(${RuleDetailTabs.executionResults})`}
+                >
                   <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
                 </Route>
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
+                <Route
+                  path={`${RULE_DETAILS_PATH}/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}
+                >
                   <ExecutionEventsTable ruleId={ruleId} />
                 </Route>
               </Switch>

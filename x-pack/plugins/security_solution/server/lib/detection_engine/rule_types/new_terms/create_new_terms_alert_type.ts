@@ -35,6 +35,7 @@ import {
   getUnprocessedExceptionsWarnings,
 } from '../../signals/utils';
 import { createEnrichEventsFunction } from '../../signals/enrichments';
+import { getSecuritySolutionRuleDetailsFullPath } from '../../../../../common/utils/paths';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions,
@@ -306,5 +307,6 @@ export const createNewTermsAlertType = (
       }
       return { ...result, state };
     },
+    getRulePagePath: getSecuritySolutionRuleDetailsFullPath,
   };
 };

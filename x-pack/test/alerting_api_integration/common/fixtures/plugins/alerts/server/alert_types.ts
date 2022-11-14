@@ -16,6 +16,7 @@ import {
   RuleTypeState,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
+import { getManagementRuleDetailsFullPath } from '@kbn/rule-data-utils';
 import { ES_TEST_INDEX_NAME } from '../../../../lib';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
@@ -90,6 +91,7 @@ function getAlwaysFiringAlertType() {
       context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
     },
     executor: curry(alwaysFiringExecutor)(),
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   return result;
 }
@@ -166,6 +168,7 @@ function getCumulativeFiringAlertType() {
         runCount,
       };
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   return result;
 }
@@ -210,6 +213,7 @@ function getNeverFiringAlertType() {
         globalStateValue: true,
       };
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   return result;
 }
@@ -249,6 +253,7 @@ function getFailingAlertType() {
       });
       throw new Error('Failed to execute alert type');
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   return result;
 }
@@ -303,6 +308,7 @@ function getExceedsAlertLimitRuleType() {
         },
       });
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   return result;
 }
@@ -395,6 +401,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
         },
       });
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   return result;
 }
@@ -421,6 +428,7 @@ function getValidationAlertType() {
       params: paramsSchema,
     },
     async executor() {},
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   return result;
 }
@@ -492,6 +500,7 @@ function getPatternFiringAlertType() {
         patternIndex: patternIndex + 1,
       };
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   return result;
 }
@@ -531,6 +540,7 @@ function getPatternSuccessOrFailureAlertType() {
         patternIndex: patternIndex + 1,
       };
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   return result;
 }
@@ -577,6 +587,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
       }
       return {};
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   return result;
 }
@@ -635,6 +646,7 @@ function getCancellableRuleType() {
         throw new Error('execution short circuited!');
       }
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   return result;
 }
@@ -652,6 +664,7 @@ export function defineAlertTypes(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     async executor() {},
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   const goldNoopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.gold.noop',
@@ -662,6 +675,7 @@ export function defineAlertTypes(
     minimumLicenseRequired: 'gold',
     isExportable: true,
     async executor() {},
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   const onlyContextVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.onlyContextVariables',
@@ -675,6 +689,7 @@ export function defineAlertTypes(
       context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
     },
     async executor() {},
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   const onlyStateVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.onlyStateVariables',
@@ -688,6 +703,7 @@ export function defineAlertTypes(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     async executor() {},
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   const throwAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.throw',
@@ -705,6 +721,7 @@ export function defineAlertTypes(
     async executor() {
       throw new Error('this alert is intended to fail');
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   function getLongRunningRuleType() {
     const paramsSchema = schema.object({
@@ -729,6 +746,7 @@ export function defineAlertTypes(
         const { params } = ruleExecutorOptions;
         await new Promise((resolve) => setTimeout(resolve, params.delay ?? 5000));
       },
+      getRulePagePath: getManagementRuleDetailsFullPath,
     };
     return result;
   }
@@ -745,6 +763,7 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {},
     producer: 'alertsFixture',
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
   const multipleSearchesRuleType: RuleType<
     { numSearches: number; delay: string },
@@ -796,6 +815,7 @@ export function defineAlertTypes(
         await services.scopedClusterClient.asCurrentUser.search(query as any);
       }
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
 
   alerting.registerType(getAlwaysFiringAlertType());

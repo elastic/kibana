@@ -8,6 +8,7 @@
 import uuid from 'uuid';
 import { range } from 'lodash';
 import { RuleType } from '@kbn/alerting-plugin/server';
+import { getManagementRuleDetailsFullPath } from '@kbn/rule-data-utils';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
   ALERTING_EXAMPLE_APP_ID,
@@ -76,4 +77,5 @@ export const alertType: RuleType<
     };
   },
   producer: ALERTING_EXAMPLE_APP_ID,
+  getRulePagePath: getManagementRuleDetailsFullPath,
 };

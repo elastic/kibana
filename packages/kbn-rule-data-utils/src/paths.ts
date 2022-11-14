@@ -10,3 +10,6 @@ export const ruleDetailsRoute = '/rule/:ruleId';
 export const triggersActionsRoute = '/app/management/insightsAndAlerting/triggersActions';
 
 export const getRuleDetailsRoute = (ruleId: string) => ruleDetailsRoute.replace(':ruleId', ruleId);
+export const getManagementRuleDetailsFullPath = (id: string): string => {
+  return `${triggersActionsRoute}${getRuleDetailsRoute(id)}`;
+};

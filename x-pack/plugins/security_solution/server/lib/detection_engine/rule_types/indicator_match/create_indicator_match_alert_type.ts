@@ -10,6 +10,7 @@ import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { ThreatRuleParams } from '../../rule_schema';
+import { getSecuritySolutionRuleDetailsFullPath } from '../../../../../common/utils/paths';
 import { threatRuleParams } from '../../rule_schema';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
@@ -102,5 +103,6 @@ export const createIndicatorMatchAlertType = (
       });
       return { ...result, state };
     },
+    getRulePagePath: getSecuritySolutionRuleDetailsFullPath,
   };
 };

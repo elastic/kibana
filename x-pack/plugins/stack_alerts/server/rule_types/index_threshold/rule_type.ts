@@ -11,6 +11,7 @@ import {
   TimeSeriesQuery,
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
+import { getManagementRuleDetailsFullPath } from '@kbn/rule-data-utils';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './rule_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
@@ -129,6 +130,7 @@ export function getRuleType(
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
 
   async function executor(

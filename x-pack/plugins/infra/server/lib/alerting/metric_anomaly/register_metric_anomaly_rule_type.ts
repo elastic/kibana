@@ -14,6 +14,7 @@ import {
   AlertInstanceContext as AlertContext,
 } from '@kbn/alerting-plugin/server';
 import { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
+import { getObservabilityRuleDetailsFullPath } from '@kbn/observability-plugin/common/utils/paths';
 import {
   createMetricAnomalyExecutor,
   FIRED_ACTIONS,
@@ -114,4 +115,5 @@ export const registerMetricAnomalyRuleType = (
       },
     ],
   },
+  getRulePagePath: getObservabilityRuleDetailsFullPath,
 });

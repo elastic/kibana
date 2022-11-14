@@ -7,6 +7,7 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { getSecuritySolutionRuleDetailsFullPath } from '../../../../../common/utils/paths';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { ThresholdRuleParams } from '../../rule_schema';
@@ -103,5 +104,6 @@ export const createThresholdAlertType = (
       });
       return result;
     },
+    getRulePagePath: getSecuritySolutionRuleDetailsFullPath,
   };
 };

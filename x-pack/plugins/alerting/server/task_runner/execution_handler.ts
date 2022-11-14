@@ -7,7 +7,6 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
-import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
@@ -291,7 +290,7 @@ export class ExecutionHandler<
 
     try {
       const ruleUrl = new URL(
-        `${triggersActionsRoute}${getRuleDetailsRoute(this.taskInstance.params.alertId)}`,
+        this.ruleType.getRulePagePath(this.taskInstance.params.alertId),
         this.taskRunnerContext.kibanaBaseUrl
       );
 

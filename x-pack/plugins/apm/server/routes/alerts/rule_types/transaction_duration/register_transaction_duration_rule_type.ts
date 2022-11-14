@@ -17,6 +17,7 @@ import { asDuration } from '@kbn/observability-plugin/common/utils/formatters';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getObservabilityRuleDetailsFullPath } from '@kbn/observability-plugin/common/utils/paths';
 import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import {
@@ -279,6 +280,7 @@ export function registerTransactionDurationRuleType({
 
       return {};
     },
+    getRulePagePath: getObservabilityRuleDetailsFullPath,
   });
 
   alerting.registerType(ruleType);

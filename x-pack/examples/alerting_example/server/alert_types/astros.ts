@@ -7,6 +7,7 @@
 
 import axios from 'axios';
 import { RuleType } from '@kbn/alerting-plugin/server';
+import { getManagementRuleDetailsFullPath } from '@kbn/rule-data-utils';
 import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {
@@ -79,4 +80,5 @@ export const alertType: RuleType<
     };
   },
   producer: ALERTING_EXAMPLE_APP_ID,
+  getRulePagePath: getManagementRuleDetailsFullPath,
 };

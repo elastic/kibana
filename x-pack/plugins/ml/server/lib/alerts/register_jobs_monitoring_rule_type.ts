@@ -19,6 +19,7 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { getManagementRuleDetailsFullPath } from '@kbn/rule-data-utils';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -180,5 +181,6 @@ export function registerJobsMonitoringRuleType({
         }
       }
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   });
 }

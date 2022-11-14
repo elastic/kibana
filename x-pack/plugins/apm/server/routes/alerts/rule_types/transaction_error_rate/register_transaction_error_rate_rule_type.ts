@@ -16,6 +16,7 @@ import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server
 import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getObservabilityRuleDetailsFullPath } from '@kbn/observability-plugin/common/utils/paths';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -274,6 +275,7 @@ export function registerTransactionErrorRateRuleType({
 
         return {};
       },
+      getRulePagePath: getObservabilityRuleDetailsFullPath,
     })
   );
 }

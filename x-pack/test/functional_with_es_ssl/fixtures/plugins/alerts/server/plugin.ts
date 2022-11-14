@@ -8,6 +8,7 @@
 import { Plugin, CoreSetup } from '@kbn/core/server';
 import { PluginSetupContract as AlertingSetup, RuleType } from '@kbn/alerting-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { getManagementRuleDetailsFullPath } from '@kbn/rule-data-utils';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
@@ -24,6 +25,7 @@ export const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
   isExportable: true,
   async executor() {},
   producer: 'alerts',
+  getRulePagePath: getManagementRuleDetailsFullPath,
 };
 
 export const alwaysFiringAlertType: RuleType<
@@ -62,6 +64,7 @@ export const alwaysFiringAlertType: RuleType<
       groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
     };
   },
+  getRulePagePath: getManagementRuleDetailsFullPath,
 };
 
 export const failingAlertType: RuleType<never, never, never, never, never, 'default' | 'other'> = {
@@ -80,6 +83,7 @@ export const failingAlertType: RuleType<never, never, never, never, never, 'defa
   async executor() {
     throw new Error('Failed to execute alert type');
   },
+  getRulePagePath: getManagementRuleDetailsFullPath,
 };
 
 export class AlertingFixturePlugin implements Plugin<void, void, AlertingExampleDeps> {

@@ -9,6 +9,7 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
+import { getSecuritySolutionRuleDetailsFullPath } from '../../../../../common/utils/paths';
 import type { EqlRuleParams } from '../../rule_schema';
 import { eqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from '../../signals/executors/eql';
@@ -97,5 +98,6 @@ export const createEqlAlertType = (
       });
       return { ...result, state };
     },
+    getRulePagePath: getSecuritySolutionRuleDetailsFullPath,
   };
 };

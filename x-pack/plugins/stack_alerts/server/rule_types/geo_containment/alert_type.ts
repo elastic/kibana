@@ -17,6 +17,7 @@ import {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
 import { Query } from '@kbn/data-plugin/common/query';
+import { getManagementRuleDetailsFullPath } from '@kbn/rule-data-utils';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoContainmentExecutor } from './geo_containment';
 
@@ -259,5 +260,6 @@ export function getAlertType(): GeoContainmentAlertType {
         return injectEntityAndBoundaryIds(params, references);
       },
     },
+    getRulePagePath: getManagementRuleDetailsFullPath,
   };
 }

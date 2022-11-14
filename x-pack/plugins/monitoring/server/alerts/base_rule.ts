@@ -17,6 +17,7 @@ import {
 import { Rule, RuleTypeParams, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import { getObservabilityRuleDetailsFullPath } from '@kbn/observability-plugin/common/utils/paths';
 import {
   AlertState,
   AlertNodeState,
@@ -102,6 +103,7 @@ export class BaseRule {
       actionVariables: {
         context: actionVariables,
       },
+      getRulePagePath: getObservabilityRuleDetailsFullPath,
     };
   }
 

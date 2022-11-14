@@ -193,6 +193,7 @@ export interface RuleType<
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   getSummarizedAlerts?: GetSummarizedAlertsFn;
+  getRulePagePath: (id: string) => string;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

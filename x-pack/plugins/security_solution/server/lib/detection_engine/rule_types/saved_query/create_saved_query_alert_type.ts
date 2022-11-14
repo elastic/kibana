@@ -7,6 +7,7 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { getSecuritySolutionRuleDetailsFullPath } from '../../../../../common/utils/paths';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { CompleteRule, UnifiedQueryRuleParams } from '../../rule_schema';
@@ -104,5 +105,6 @@ export const createSavedQueryAlertType = (
       });
       return { ...result, state };
     },
+    getRulePagePath: getSecuritySolutionRuleDetailsFullPath,
   };
 };
