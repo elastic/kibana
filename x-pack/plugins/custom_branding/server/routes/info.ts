@@ -8,12 +8,11 @@
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { CustomBrandingInfoResponse } from '../../common';
 import { CustomBrandingRouter } from '../types';
-import { PLUGIN } from '../../public/constants';
 
 export const registerInfoRoute = (router: CustomBrandingRouter) => {
   router.get(
     {
-      path: '/api/customBranding/info',
+      path: '/api/custom-branding/info',
       validate: false,
       options: {
         authRequired: 'optional',
@@ -36,5 +35,5 @@ export const registerInfoRoute = (router: CustomBrandingRouter) => {
 };
 
 const isValidLicense = (license: ILicense): boolean => {
-  return license.hasAtLeast(PLUGIN.MINIMUM_LICENSE_REQUIRED);
+  return license.hasAtLeast('enterprise');
 };
