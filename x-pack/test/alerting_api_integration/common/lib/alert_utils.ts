@@ -175,7 +175,7 @@ export class AlertUtils {
   }
 
   public async disable(alertId: string) {
-    await this.getDisableRequest(alertId).expect(204, '');
+    await this.getDisableRequest(alertId).expect(200, '');
   }
 
   public async muteAll(alertId: string) {
