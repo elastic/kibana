@@ -14,7 +14,6 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { SuggestionsSorting } from '../../../common/options_list/types';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListPopover } from './options_list_popover';
 import { optionsListReducers } from '../options_list_reducers';
@@ -31,7 +30,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   // Redux embeddable Context
   const {
     useEmbeddableDispatch,
-    actions: { replaceSelection, setSearchString, setSort },
+    actions: { replaceSelection, setSearchString },
     useEmbeddableSelector: select,
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();

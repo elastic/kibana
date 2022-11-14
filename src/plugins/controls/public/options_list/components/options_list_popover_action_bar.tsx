@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react';
+import { isEqual } from 'lodash';
 
 import {
   EuiFieldSearch,
@@ -34,6 +35,10 @@ interface OptionsListPopoverProps {
   updateSearchString: (newSearchString: string) => void;
 }
 
+type SortItem = EuiSelectableOption & {
+  data: SuggestionsSorting;
+};
+
 export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   updateSearchString,
@@ -51,35 +56,46 @@ export const OptionsListPopoverActionBar = ({
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality);
   const searchString = select((state) => state.componentState.searchString);
+
   const sort = select((state) => state.explicitInput.sort ?? { by: '_count', direction: 'desc' });
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
-  const [options, setOptions] = useState<EuiSelectableOption[]>([
-    {
-      label: 'Document count (descending)',
-      'data-test-subj': 'optionsList__sortByDocCount_desc',
-      checked: sort.by === '_count' && sort.direction === 'desc' ? 'on' : undefined,
-      data: { by: '_count', direction: 'desc' },
-    },
-    {
-      label: 'Document count (ascending)',
-      'data-test-subj': 'optionsList__sortByDocCount_asc',
-      checked: sort.by === '_count' && sort.direction === 'asc' ? 'on' : undefined,
-      data: { by: '_count', direction: 'asc' },
-    },
-    {
-      label: 'Alphabetical (descending)',
-      'data-test-subj': 'optionsList__sortByAlphabetical_desc',
-      checked: sort.by === '_key' && sort.direction === 'desc' ? 'on' : undefined,
-      data: { by: '_key', direction: 'desc' },
-    },
-    {
-      label: 'Alphabetical (ascending)',
-      'data-test-subj': 'optionsList__sortByAlphabetical_asc',
-      checked: sort.by === '_key' && sort.direction === 'asc' ? 'on' : undefined,
-      data: { by: '_key', direction: 'asc' },
-    },
-  ]);
+  const [options, setOptions] = useState<SortItem[]>(() => {
+    const opts = [
+      {
+        label: 'Document count (descending)',
+        'data-test-subj': 'optionsList__sortByDocCount_desc',
+        data: { by: '_count', direction: 'desc' },
+      },
+      {
+        label: 'Document count (ascending)',
+        'data-test-subj': 'optionsList__sortByDocCount_asc',
+        data: { by: '_count', direction: 'asc' },
+      },
+      {
+        label: 'Alphabetical (descending)',
+        'data-test-subj': 'optionsList__sortByAlphabetical_desc',
+        data: { by: '_key', direction: 'desc' },
+      },
+      {
+        label: 'Alphabetical (ascending)',
+        'data-test-subj': 'optionsList__sortByAlphabetical_asc',
+        data: { by: '_key', direction: 'asc' },
+      },
+    ];
+    const selectedOption = opts.find(({ data }) => isEqual(sort, data));
+    (selectedOption as SortItem).checked = 'on';
+    return opts as SortItem[];
+  });
+
+  const onSelectChange = (updatedOptions: SortItem[]) => {
+    setOptions(updatedOptions);
+    const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
+    if (selectedOption) {
+      dispatch(setSort(selectedOption.data as SuggestionsSorting));
+      setIsSortingPopoverOpen(false);
+    }
+  };
 
   return (
     <div className="optionsList__actions">
@@ -136,15 +152,12 @@ export const OptionsListPopoverActionBar = ({
             >
               <EuiPopoverTitle paddingSize="s">Sort</EuiPopoverTitle>
               <EuiSelectable
+                singleSelection="always"
                 aria-label="Single selection example"
                 options={options}
-                onChange={(newOptions) => setOptions(newOptions)}
-                singleSelection={'always'}
                 listProps={{ bordered: false }}
                 style={{ width: 300 }}
-                onActiveOptionChange={(option) => {
-                  if (option?.data) dispatch(setSort(option.data as SuggestionsSorting));
-                }}
+                onChange={onSelectChange}
               >
                 {(list) => list}
               </EuiSelectable>
