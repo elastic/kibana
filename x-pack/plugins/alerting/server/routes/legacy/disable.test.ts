@@ -38,7 +38,7 @@ describe('disableAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_disable"`);
 
-    rulesClient.disable.mockResolvedValueOnce();
+    rulesClient.disable.mockResolvedValueOnce({ errors: [], tasks: [] });
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
