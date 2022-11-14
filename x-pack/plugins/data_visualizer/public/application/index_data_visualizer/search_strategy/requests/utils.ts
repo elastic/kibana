@@ -13,7 +13,7 @@ import { Bucket } from '../../../../../common/types/field_stats';
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-doc-count-field.html
  * @param aggResult
  */
-export const processTopValues = (aggResult: object) => {
+export const processTopValues = (aggResult: object, sampledCount?: number) => {
   const topValuesBuckets: Bucket[] = isPopulatedObject<'buckets', Bucket[]>(aggResult, ['buckets'])
     ? aggResult.buckets
     : [];
@@ -26,11 +26,17 @@ export const processTopValues = (aggResult: object) => {
     topValuesBuckets?.reduce((prev, bucket) => bucket.doc_count + prev, 0) || 0;
   // We could use `aggregations.sample.sample_count.value` instead, but it does not always give a correct sum
   // See Github issue #144625
-  const topValuesSampleSize = valuesInTopBuckets + sumOtherDocCount;
+  const realNumberOfDocuments = valuesInTopBuckets + sumOtherDocCount;
   const topValues = topValuesBuckets.map((bucket) => ({
     ...bucket,
-    percent: bucket.doc_count / topValuesSampleSize,
+    doc_count: sampledCount
+      ? Math.floor(bucket.doc_count * (sampledCount / realNumberOfDocuments))
+      : bucket.doc_count,
+    percent: bucket.doc_count / realNumberOfDocuments,
   }));
 
-  return { topValuesSampleSize, topValues };
+  return {
+    topValuesSampleSize: realNumberOfDocuments,
+    topValues,
+  };
 };

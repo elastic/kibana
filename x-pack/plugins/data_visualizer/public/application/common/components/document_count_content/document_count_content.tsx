@@ -20,7 +20,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { sortedIndex } from 'lodash';
+import { debounce, sortedIndex } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '../../util/is_defined';
 import type { DocumentCountChartPoint } from './document_count_chart';
@@ -63,6 +63,16 @@ export const DocumentCountContent: FC<Props> = ({
   const closeSamplingOptions = useCallback(() => {
     setShowSamplingOptionsPopover(false);
   }, [setShowSamplingOptionsPopover]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updateSamplingProbability = useCallback(
+    debounce((p) => {
+      if (setSamplingProbability) {
+        setSamplingProbability(p);
+      }
+    }, 200),
+    [setSamplingProbability]
+  );
 
   const calloutInfoMessage = useMemo(() => {
     switch (randomSamplerPreference) {
@@ -210,9 +220,7 @@ export const DocumentCountContent: FC<Props> = ({
                             ? closestPrev
                             : closestNext;
 
-                        if (setSamplingProbability) {
-                          setSamplingProbability(closestProbability / 100);
-                        }
+                        updateSamplingProbability(closestProbability / 100);
                       }}
                       step={RANDOM_SAMPLER_STEP}
                       data-test-subj="dvRandomSamplerProbabilityRange"

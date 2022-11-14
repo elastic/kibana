@@ -36,7 +36,7 @@ interface Props {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
-function _getPercentLabel(percent: number): string {
+function getPercentLabel(percent: number): string {
   if (percent >= 0.1) {
     return `${roundToDecimalPlace(percent, 1)}%`;
   } else {
@@ -46,10 +46,10 @@ function _getPercentLabel(percent: number): string {
 
 export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed, onAddFilter }) => {
   const {
-    services: { data },
+    services: {
+      data: { fieldFormats },
+    },
   } = useDataVisualizerKibana();
-
-  const { fieldFormats } = data;
 
   if (stats === undefined || !stats.topValues) return null;
   const { topValues, fieldName, sampleCount } = stats;
@@ -57,7 +57,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   const totalDocuments = stats.totalDocuments ?? 0;
   const topValuesOtherCountPercent =
     1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);
-  const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount || 0));
+  const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount ?? 0));
 
   const countsElement = (
     <EuiText color="subdued" size="xs">
@@ -124,7 +124,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                     className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                     valueText={`${value.doc_count}${
                       totalDocuments !== undefined
-                        ? ` (${_getPercentLabel(value.percent * 100)})`
+                        ? ` (${getPercentLabel(value.percent * 100)})`
                         : ''
                     }`}
                   />
@@ -211,7 +211,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                 className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                 valueText={`${topValuesOtherCount}${
                   totalDocuments !== undefined
-                    ? ` (${_getPercentLabel(topValuesOtherCountPercent * 100)})`
+                    ? ` (${getPercentLabel(topValuesOtherCountPercent * 100)})`
                     : ''
                 }`}
               />

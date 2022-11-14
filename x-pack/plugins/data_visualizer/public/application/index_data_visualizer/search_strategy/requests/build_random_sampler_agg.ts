@@ -6,32 +6,15 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
+import {
+  Aggs,
   SamplingOption,
-  RandomSamplingOption,
-  NormalSamplingOption,
-  NoSamplingOption,
+  isNormalSamplingOption,
+  isRandomSamplingOption,
 } from '../../../../../common/types/field_stats';
 
-export const EMBEDDABLE_SAMPLER_OPTION = {
-  RANDOM: 'random_sampling',
-  NORMAL: 'normal_sampling',
-};
-export type FieldStatsEmbeddableSamplerOption =
-  typeof EMBEDDABLE_SAMPLER_OPTION[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
-
-export function isRandomSamplingOption(arg: SamplingOption): arg is RandomSamplingOption {
-  return arg.mode === 'random_sampling';
-}
-export function isNormalSamplingOption(arg: SamplingOption): arg is NormalSamplingOption {
-  return arg.mode === 'normal_sampling';
-}
-export function isNoSamplingOption(arg: SamplingOption): arg is NoSamplingOption {
-  return arg.mode === 'no_sampling' || (arg.mode === 'random_sampling' && arg.probability === 1);
-}
-
 export function buildAggregationWithSamplingOption(
-  aggs: any,
+  aggs: Aggs,
   samplingOption: SamplingOption
 ): Record<string, estypes.AggregationsAggregationContainer> {
   if (!samplingOption) {
@@ -81,7 +64,7 @@ export function buildAggregationWithSamplingOption(
  * Wraps the supplied aggregations in a random sampler aggregation.
  */
 export function buildRandomSamplerAggregation(
-  aggs: any,
+  aggs: Aggs,
   probability: number | null,
   seed: number
 ): Record<string, estypes.AggregationsAggregationContainer> {
@@ -102,7 +85,7 @@ export function buildRandomSamplerAggregation(
 }
 
 export function buildSamplerAggregation(
-  aggs: any,
+  aggs: Aggs,
   shardSize: number
 ): Record<string, estypes.AggregationsAggregationContainer> {
   if (shardSize <= 0) {

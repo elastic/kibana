@@ -52,7 +52,7 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
   const docsPercent =
     valueCount !== undefined && sampleCount !== undefined
       ? roundToDecimalPlace((valueCount / sampleCount) * 100)
-      : 0;
+      : undefined;
   const metaTableItems = [
     {
       function: 'count',
@@ -64,16 +64,20 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
       ),
       value: count,
     },
-    {
-      function: 'percentage',
-      display: (
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.percentageLabel"
-          defaultMessage="percentage"
-        />
-      ),
-      value: `${docsPercent}%`,
-    },
+    ...(docsPercent !== undefined
+      ? [
+          {
+            function: 'percentage',
+            display: (
+              <FormattedMessage
+                id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.percentageLabel"
+                defaultMessage="percentage"
+              />
+            ),
+            value: `${docsPercent}%`,
+          },
+        ]
+      : []),
     {
       function: 'distinctValues',
       display: (

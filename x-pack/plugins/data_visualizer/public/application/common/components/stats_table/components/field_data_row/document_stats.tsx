@@ -21,10 +21,10 @@ interface Props extends FieldDataRowProps {
 export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
   const { stats } = config;
   const {
-    services: { data },
+    services: {
+      data: { fieldFormats },
+    },
   } = useDataVisualizerKibana();
-
-  const { fieldFormats } = data;
 
   if (stats === undefined) return null;
 
@@ -37,8 +37,8 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
     count ?? (isIndexBasedFieldVisConfig(config) && config.existsInDocs === true ? undefined : 0);
   const docsPercent =
     valueCount !== undefined && total !== undefined
-      ? roundToDecimalPlace((valueCount / total) * 100)
-      : 0;
+      ? `(${roundToDecimalPlace((valueCount / total) * 100)}%)`
+      : null;
 
   return valueCount !== undefined ? (
     <>
@@ -47,7 +47,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
         {fieldFormats
           .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
           .convert(valueCount)}{' '}
-        ({docsPercent}%)
+        {docsPercent}
       </EuiText>
     </>
   ) : null;

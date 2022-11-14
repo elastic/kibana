@@ -263,3 +263,20 @@ export interface Field {
 export interface Aggs {
   [key: string]: estypes.AggregationsAggregationContainer;
 }
+
+export const EMBEDDABLE_SAMPLER_OPTION = {
+  RANDOM: 'random_sampling',
+  NORMAL: 'normal_sampling',
+};
+export type FieldStatsEmbeddableSamplerOption =
+  typeof EMBEDDABLE_SAMPLER_OPTION[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
+
+export function isRandomSamplingOption(arg: SamplingOption): arg is RandomSamplingOption {
+  return arg.mode === 'random_sampling';
+}
+export function isNormalSamplingOption(arg: SamplingOption): arg is NormalSamplingOption {
+  return arg.mode === 'normal_sampling';
+}
+export function isNoSamplingOption(arg: SamplingOption): arg is NoSamplingOption {
+  return arg.mode === 'no_sampling' || (arg.mode === 'random_sampling' && arg.probability === 1);
+}

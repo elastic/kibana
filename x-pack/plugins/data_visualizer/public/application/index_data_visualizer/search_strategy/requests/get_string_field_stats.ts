@@ -99,7 +99,11 @@ export const fetchStringFieldsStats = (
           }
 
           const fieldAgg = get(aggregations, [...topAggsPath], {});
-          const { topValuesSampleSize, topValues } = processTopValues(fieldAgg);
+
+          const { topValuesSampleSize, topValues } = processTopValues(
+            fieldAgg,
+            get(aggregations, ['sample', 'doc_count'])
+          );
           const stats = {
             fieldName: field.fieldName,
             isTopValuesSampled: true,

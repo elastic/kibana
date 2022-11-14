@@ -19,10 +19,7 @@ import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { processTopValues } from './utils';
 import { isDefined } from '../../../common/util/is_defined';
-import {
-  buildAggregationWithSamplingOption,
-  isNormalSamplingOption,
-} from './build_random_sampler_agg';
+import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import { MAX_PERCENT, PERCENTILE_SPACING, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {
   Aggs,
@@ -36,7 +33,10 @@ import type {
 } from '../../../../../common/types/field_stats';
 import { processDistributionData } from '../../utils/process_distribution_data';
 import { extractErrorProperties } from '../../utils/error_utils';
-import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import {
+  isIKibanaSearchResponse,
+  isNormalSamplingOption,
+} from '../../../../../common/types/field_stats';
 
 export const getNumericFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,

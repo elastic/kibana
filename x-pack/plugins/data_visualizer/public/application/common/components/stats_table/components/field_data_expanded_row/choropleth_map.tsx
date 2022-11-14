@@ -100,10 +100,10 @@ interface Props {
 
 export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   const {
-    services: { data },
+    services: {
+      data: { fieldFormats },
+    },
   } = useDataVisualizerKibana();
-
-  const { fieldFormats } = data;
 
   const { fieldName, isTopValuesSampled, topValues, sampleCount, totalDocuments } = stats!;
 

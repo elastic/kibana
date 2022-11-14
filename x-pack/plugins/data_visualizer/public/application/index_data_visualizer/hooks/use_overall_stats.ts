@@ -16,7 +16,6 @@ import type {
   IKibanaSearchResponse,
   ISearchOptions,
 } from '@kbn/data-plugin/common';
-import { isRandomSamplingOption } from '../search_strategy/requests/build_random_sampler_agg';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   AggregatableFieldOverallStats,
@@ -31,8 +30,9 @@ import {
 import type { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { extractErrorProperties } from '../utils/error_utils';
-import type {
+import {
   DataStatsFetchProgress,
+  isRandomSamplingOption,
   OverallStatsSearchStrategyParams,
 } from '../../../../common/types/field_stats';
 import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
