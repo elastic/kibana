@@ -16,86 +16,40 @@ import {
   useStartServices,
   validateInputs,
 } from '../../../../hooks';
-import { isDiffPathProtocol } from '../../../../../../../common/services';
+
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import type { FleetProxy } from '../../../../types';
 
-const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
+const URL_REGEX = /^(http)(s)?:\/\/[^\s$.?#].[^\s]*$/gm;
 
 const ConfirmTitle = () => (
   <FormattedMessage
-    id="xpack.fleet.settings.fleetServerHostsFlyout.confirmModalTitle"
+    id="xpack.fleet.settings.fleetProxyFlyout.confirmModalTitle"
     defaultMessage="Save and deploy changes?"
   />
 );
 
 const ConfirmDescription: React.FunctionComponent = ({}) => (
   <FormattedMessage
-    id="xpack.fleet.settings.fleetServerHostsFlyout.confirmModalText"
-    defaultMessage="This action will update agent policies enrolled in this Fleet Server. This action can not be undone. Are you sure you wish to continue?"
+    id="xpack.fleet.settings.fleetProxyFlyout.confirmModalText"
+    defaultMessage="This action will update agent policies using that proxies. This action can not be undone. Are you sure you wish to continue?"
   />
 );
 
-export function validateFleetServerHosts(value: string[]) {
-  if (value.length === 0) {
+function validateUrl(value: string) {
+  if (!value || value === '') {
     return [
-      {
-        message: i18n.translate('xpack.fleet.settings.fleetServerHostsEmptyError', {
-          defaultMessage: 'At least one URL is required',
-        }),
-      },
+      i18n.translate('xpack.fleet.settings.fleetProxyFlyoutUrlRequired', {
+        defaultMessage: 'URL is required',
+      }),
     ];
   }
 
-  const res: Array<{ message: string; index: number }> = [];
-  const hostIndexes: { [key: string]: number[] } = {};
-  value.forEach((val, idx) => {
-    if (!val) {
-      res.push({
-        message: i18n.translate('xpack.fleet.settings.fleetServerHostsRequiredError', {
-          defaultMessage: 'Host URL is required',
-        }),
-        index: idx,
-      });
-    } else if (!val.match(URL_REGEX)) {
-      res.push({
-        message: i18n.translate('xpack.fleet.settings.fleetServerHostsError', {
-          defaultMessage: 'Invalid URL (must be an https URL)',
-        }),
-        index: idx,
-      });
-    }
-    const curIndexes = hostIndexes[val] || [];
-    hostIndexes[val] = [...curIndexes, idx];
-  });
-
-  Object.values(hostIndexes)
-    .filter(({ length }) => length > 1)
-    .forEach((indexes) => {
-      indexes.forEach((index) =>
-        res.push({
-          message: i18n.translate('xpack.fleet.settings.fleetServerHostsDuplicateError', {
-            defaultMessage: 'Duplicate URL',
-          }),
-          index,
-        })
-      );
-    });
-
-  if (res.length) {
-    return res;
-  }
-
-  if (value.length && isDiffPathProtocol(value)) {
+  if (!value.match(URL_REGEX)) {
     return [
-      {
-        message: i18n.translate(
-          'xpack.fleet.settings.fleetServerHostsDifferentPathOrProtocolError',
-          {
-            defaultMessage: 'Protocol and path must be the same for each URL',
-          }
-        ),
-      },
+      i18n.translate('xpack.fleet.settings.fleetProxyFlyoutUrlError', {
+        defaultMessage: 'Invalid URL',
+      }),
     ];
   }
 }
@@ -105,16 +59,6 @@ export function validateName(value: string) {
     return [
       i18n.translate('xpack.fleet.settings.fleetProxy.nameIsRequiredErrorMessage', {
         defaultMessage: 'Name is required',
-      }),
-    ];
-  }
-}
-
-export function validateUrl(value: string) {
-  if (!value || value === '') {
-    return [
-      i18n.translate('xpack.fleet.settings.fleetProxy.urlIsRequiredErrorMessage', {
-        defaultMessage: 'Url is required',
       }),
     ];
   }
