@@ -323,7 +323,7 @@ export class QuickJobCreator {
     if (splitField && splitField.operation.fields) {
       jobConfig.analysis_config.influencers = [splitField.operation.fields[0]];
     }
-    const isSingleMetric = splitField === null && jobConfig.analysis_config.detectors.length === 1;
+    const isSingleMetric = !splitField && jobConfig.analysis_config.detectors.length === 1;
     const jobType = isSingleMetric ? JOB_TYPE.SINGLE_METRIC : JOB_TYPE.MULTI_METRIC;
 
     if (isSingleMetric) {

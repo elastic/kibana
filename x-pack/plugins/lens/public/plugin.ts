@@ -244,6 +244,7 @@ export class LensPlugin {
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
+  private initDependenciesForApi: () => void = () => {};
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
@@ -398,6 +399,19 @@ export class LensPlugin {
 
     urlForwarding.forwardApp('lens', 'lens');
 
+    this.initDependenciesForApi = async () => {
+      const { plugins } = startServices();
+      await this.initParts(
+        core,
+        data,
+        charts,
+        expressions,
+        fieldFormats,
+        plugins.fieldFormats.deserialize,
+        eventAnnotation
+      );
+    };
+
     return {
       registerVisualization: (vis: Visualization | (() => Promise<Visualization>)) => {
         if (this.editorFrameSetup) {
@@ -543,7 +557,9 @@ export class LensPlugin {
 
       stateHelperApi: async () => {
         const { createFormulaPublicApi, createChartInfoApi } = await import('./async_services');
-
+        if (!this.editorFrameService) {
+          await this.initDependenciesForApi();
+        }
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
