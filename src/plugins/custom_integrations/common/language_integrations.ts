@@ -115,9 +115,9 @@ export const languageIntegrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.PythonDescription', {
       defaultMessage: 'Index data to Elasticsearch with the Python client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/python-api/{branch}/index.html`,
+    docUrlTemplate: '',
     integrationsAppUrl: `/app/integrations/language_clients/python/overview`,
-    exportLanguageUiComponent: false,
+    exportLanguageUiComponent: true,
   },
   {
     id: 'rust',
