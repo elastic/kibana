@@ -8,7 +8,7 @@
 import { Observable } from 'rxjs';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
-import { ObservabilityConfig } from '@kbn/observability-plugin/server';
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { registerTransactionDurationRuleType } from './rule_types/transaction_duration/register_transaction_duration_rule_type';
@@ -21,9 +21,9 @@ export interface RegisterRuleDependencies {
   alerting: AlertingPluginSetupContract;
   basePath: IBasePath;
   config$: Observable<APMConfig>;
-  getAlertDetailsConfig: () => ObservabilityConfig['unsafe']['alertDetails'];
   logger: Logger;
   ml?: MlPluginSetup;
+  observability: ObservabilityPluginSetup;
   ruleDataClient: IRuleDataClient;
 }
 

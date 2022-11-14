@@ -79,8 +79,8 @@ export function registerTransactionDurationRuleType({
   alerting,
   ruleDataClient,
   config$,
-  getAlertDetailsConfig,
   logger,
+  observability,
   basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -98,7 +98,7 @@ export function registerTransactionDurationRuleType({
     },
     actionVariables: {
       context: [
-        ...(getAlertDetailsConfig()?.apm.enabled
+        ...(observability.getAlertDetailsConfig()?.apm.enabled
           ? [apmActionVariables.alertDetailsUrl]
           : []),
         apmActionVariables.environment,

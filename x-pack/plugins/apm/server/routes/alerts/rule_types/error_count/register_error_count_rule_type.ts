@@ -60,8 +60,8 @@ export function registerErrorCountRuleType({
   alerting,
   basePath,
   config$,
-  getAlertDetailsConfig,
   logger,
+  observability,
   ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -80,7 +80,7 @@ export function registerErrorCountRuleType({
       },
       actionVariables: {
         context: [
-          ...(getAlertDetailsConfig()?.apm.enabled
+          ...(observability.getAlertDetailsConfig()?.apm.enabled
             ? [apmActionVariables.alertDetailsUrl]
             : []),
           apmActionVariables.environment,

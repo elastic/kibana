@@ -71,9 +71,9 @@ export function registerAnomalyRuleType({
   alerting,
   basePath,
   config$,
-  getAlertDetailsConfig,
   logger,
   ml,
+  observability,
   ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -92,7 +92,7 @@ export function registerAnomalyRuleType({
       },
       actionVariables: {
         context: [
-          ...(getAlertDetailsConfig()?.apm.enabled
+          ...(observability.getAlertDetailsConfig()?.apm.enabled
             ? [apmActionVariables.alertDetailsUrl]
             : []),
           apmActionVariables.environment,

@@ -193,9 +193,9 @@ export class APMPlugin
         alerting: plugins.alerting,
         basePath: core.http.basePath,
         config$,
-        getAlertDetailsConfig: plugins.observability.getAlertDetailsConfig,
         logger: this.logger!.get('rule'),
         ml: plugins.ml,
+        observability: plugins.observability,
         ruleDataClient,
       });
     }
