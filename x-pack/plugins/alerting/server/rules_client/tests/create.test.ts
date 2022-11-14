@@ -19,7 +19,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
-import { getDefaultRuleMonitoring } from '../../task_runner/task_runner';
+import { getDefaultMonitoring } from '../../lib/monitoring';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
@@ -421,11 +421,21 @@ describe('create()', () => {
           "versionApiKeyLastmodified": "v8.0.0",
         },
         "monitoring": Object {
-          "execution": Object {
+          "run": Object {
             "calculated_metrics": Object {
               "success_ratio": 0,
             },
             "history": Array [],
+            "last_run": Object {
+              "metrics": Object {
+                "gap_duration_s": null,
+                "total_alerts_created": null,
+                "total_alerts_detected": null,
+                "total_indexing_duration_ms": null,
+                "total_search_duration_ms": null,
+              },
+              "timestamp": "2019-02-12T21:01:22.479Z",
+            },
           },
         },
         "muteAll": false,
@@ -628,11 +638,21 @@ describe('create()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "monitoring": Object {
-          "execution": Object {
+          "run": Object {
             "calculated_metrics": Object {
               "success_ratio": 0,
             },
             "history": Array [],
+            "last_run": Object {
+              "metrics": Object {
+                "gap_duration_s": null,
+                "total_alerts_created": null,
+                "total_alerts_detected": null,
+                "total_indexing_duration_ms": null,
+                "total_search_duration_ms": null,
+              },
+              "timestamp": "2019-02-12T21:01:22.479Z",
+            },
           },
         },
         "muteAll": false,
@@ -1056,7 +1076,7 @@ describe('create()', () => {
           status: 'pending',
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         snoozeSchedule: [],
@@ -1255,7 +1275,7 @@ describe('create()', () => {
           status: 'pending',
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         snoozeSchedule: [],
@@ -1423,7 +1443,7 @@ describe('create()', () => {
           status: 'pending',
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         snoozeSchedule: [],
@@ -1601,7 +1621,7 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
       },
       {
         id: 'mock-saved-object-id',
@@ -1733,7 +1753,7 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
       },
       {
         id: 'mock-saved-object-id',
@@ -1865,7 +1885,7 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
       },
       {
         id: 'mock-saved-object-id',
@@ -2013,10 +2033,20 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: {
-          execution: {
+          run: {
             history: [],
             calculated_metrics: {
               success_ratio: 0,
+            },
+            last_run: {
+              timestamp: '2019-02-12T21:01:22.479Z',
+              metrics: {
+                gap_duration_s: null,
+                total_alerts_created: null,
+                total_alerts_detected: null,
+                total_indexing_duration_ms: null,
+                total_search_duration_ms: null,
+              },
             },
           },
         },
@@ -2375,7 +2405,7 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
       },
       {
         id: 'mock-saved-object-id',
@@ -2477,7 +2507,7 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
       },
       {
         id: 'mock-saved-object-id',

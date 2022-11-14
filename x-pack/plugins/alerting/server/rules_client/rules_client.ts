@@ -65,6 +65,7 @@ import {
   RuleTaskState,
   AlertSummary,
   RuleExecutionStatusValues,
+  RuleLastRunOutcomeValues,
   RuleNotifyWhenType,
   RuleTypeParams,
   ResolvedSanitizedRule,
@@ -83,6 +84,10 @@ import {
   convertRuleIdsToKueryNode,
   getRuleSnoozeEndTime,
   convertEsSortToEventLogSort,
+  getDefaultMonitoring,
+  updateMonitoring,
+  convertMonitoringFromRawAndVerify,
+  getNextRun,
 } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -113,7 +118,6 @@ import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
-import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
 import {
   getMappedParams,
   getModifiedField,
@@ -148,6 +152,12 @@ export type InvalidateAPIKeyResult =
 
 export interface RuleAggregation {
   status: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+  outcome: {
     buckets: Array<{
       key: string;
       doc_count: number;
@@ -335,6 +345,7 @@ interface IndexType {
 
 export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
+  ruleLastRunOutcome: { [status: string]: number };
   ruleEnabledStatus?: { enabled: number; disabled: number };
   ruleMutedStatus?: { muted: number; unmuted: number };
   ruleSnoozedStatus?: { snoozed: number };
@@ -364,6 +375,8 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'executionStatus'
     | 'snoozeSchedule'
     | 'isSnoozedUntil'
+    | 'lastRun'
+    | 'nextRun'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -584,6 +597,7 @@ export class RulesClient {
     } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
 
     const createTime = Date.now();
+    const lastRunTimestamp = new Date();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
@@ -601,8 +615,8 @@ export class RulesClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
-      executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
-      monitoring: getDefaultRuleMonitoring(),
+      executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
+      monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
     };
 
     const mappedParams = getMappedParams(updatedParams);
@@ -1433,6 +1447,9 @@ export class RulesClient {
         status: {
           terms: { field: 'alert.attributes.executionStatus.status' },
         },
+        outcome: {
+          terms: { field: 'alert.attributes.lastRun.outcome' },
+        },
         enabled: {
           terms: { field: 'alert.attributes.enabled' },
         },
@@ -1463,6 +1480,7 @@ export class RulesClient {
       // Return a placeholder with all zeroes
       const placeholder: AggregateResult = {
         alertExecutionStatus: {},
+        ruleLastRunOutcome: {},
         ruleEnabledStatus: {
           enabled: 0,
           disabled: 0,
@@ -1487,8 +1505,18 @@ export class RulesClient {
       })
     );
 
+    const ruleLastRunOutcome = resp.aggregations.outcome.buckets.map(
+      ({ key, doc_count: docCount }) => ({
+        [key]: docCount,
+      })
+    );
+
     const ret: AggregateResult = {
       alertExecutionStatus: alertExecutionStatus.reduce(
+        (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
+        {}
+      ),
+      ruleLastRunOutcome: ruleLastRunOutcome.reduce(
         (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
         {}
       ),
@@ -1498,6 +1526,11 @@ export class RulesClient {
     for (const key of RuleExecutionStatusValues) {
       if (!ret.alertExecutionStatus.hasOwnProperty(key)) {
         ret.alertExecutionStatus[key] = 0;
+      }
+    }
+    for (const key of RuleLastRunOutcomeValues) {
+      if (!ret.ruleLastRunOutcome.hasOwnProperty(key)) {
+        ret.ruleLastRunOutcome[key] = 0;
       }
     }
 
@@ -2606,17 +2639,28 @@ export class RulesClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
+      const now = new Date();
+
+      const schedule = attributes.schedule as IntervalSchedule;
 
       const updateAttributes = this.updateMeta({
         ...attributes,
         ...(!existingApiKey && (await this.createNewAPIKeySet({ attributes, username }))),
+        ...(attributes.monitoring && {
+          monitoring: updateMonitoring({
+            monitoring: attributes.monitoring,
+            timestamp: now.toISOString(),
+            duration: 0,
+          }),
+        }),
+        nextRun: getNextRun({ interval: schedule.interval }),
         enabled: true,
         updatedBy: username,
-        updatedAt: new Date().toISOString(),
+        updatedAt: now.toISOString(),
         executionStatus: {
           status: 'pending',
           lastDuration: 0,
-          lastExecutionDate: new Date().toISOString(),
+          lastExecutionDate: now.toISOString(),
           error: null,
           warning: null,
         },
@@ -2793,6 +2837,7 @@ export class RulesClient {
           scheduledTaskId: attributes.scheduledTaskId === id ? attributes.scheduledTaskId : null,
           updatedBy: await this.getUserName(),
           updatedAt: new Date().toISOString(),
+          nextRun: null,
         }),
         { version }
       );
@@ -3442,6 +3487,8 @@ export class RulesClient {
       scheduledTaskId,
       params,
       executionStatus,
+      monitoring,
+      nextRun,
       schedule,
       actions,
       snoozeSchedule,
@@ -3468,6 +3515,7 @@ export class RulesClient {
           snoozeSchedule,
         })
       : null;
+    const includeMonitoring = monitoring && !excludeFromPublicApi;
     const rule = {
       id,
       notifyWhen,
@@ -3493,6 +3541,10 @@ export class RulesClient {
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
+      ...(includeMonitoring
+        ? { monitoring: convertMonitoringFromRawAndVerify(this.logger, id, monitoring) }
+        : {}),
+      ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
     };
 
     return includeLegacyId
