@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useParams } from 'react-router-dom';
 import {
   ConfigKey,
   DataStream,
@@ -102,6 +103,8 @@ const PanelHeader = ({
 
   const { basePath } = useSyntheticsSettingsContext();
 
+  const { monitorId } = useParams<{ monitorId: string }>();
+
   const format = useKibanaDateFormat();
 
   const lastRunTimestamp = useMemo(
@@ -160,9 +163,7 @@ const PanelHeader = ({
               size="xs"
               iconType="inspect"
               iconSide="left"
-              href={`${basePath}/app/uptime/journey/${
-                latestPing?.monitor?.check_group ?? ''
-              }/steps`}
+              href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${latestPing?.monitor.check_group}`}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewTestRun', {
                 defaultMessage: 'View test run',

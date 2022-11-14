@@ -147,9 +147,12 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
         const targetElem = evt.target as HTMLElement;
-
         // we dont want to capture image click event
-        if (targetElem.tagName !== 'IMG' && targetElem.tagName !== 'path') {
+        if (
+          targetElem.tagName !== 'IMG' &&
+          targetElem.tagName !== 'path' &&
+          !targetElem.parentElement?.classList.contains('euiLink')
+        ) {
           history.push(`/monitor/${monitorId}/test-run/${item.monitor.check_group}`);
         }
       },
