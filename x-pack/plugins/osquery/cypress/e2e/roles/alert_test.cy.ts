@@ -76,6 +76,7 @@ describe('Alert_Test', () => {
       cy.visit('/app/security/alerts');
       cy.getBySel('expand-event').first().click();
 
+      cy.wait(500);
       cy.contains('Get processes').click();
       submitQuery();
       checkResults();
@@ -89,6 +90,7 @@ describe('Alert_Test', () => {
       cy.visit('/app/security/alerts');
       cy.getBySel('expand-event').first().click();
 
+      cy.wait(500);
       cy.contains('Get processes').click();
 
       cy.intercept('POST', '/api/osquery/live_queries', (req) => {
