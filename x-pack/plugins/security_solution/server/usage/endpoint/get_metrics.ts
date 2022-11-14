@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { EndpointMetrics } from './types';
+import type { EndpointMetrics, UniqueEndpointCountResponse } from './types';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { tlog } from '../../lib/telemetry/helpers';
 
@@ -21,11 +21,11 @@ export const getEndpointMetrics = async ({
   logger,
 }: GetEndpointMetricsOptions): Promise<EndpointMetrics> => {
   return {
-    unique_endpoint_count: await getActiveEndpointCount(esClient, logger),
+    unique_endpoint_count: await getUniqueEndpointCount(esClient, logger),
   };
 };
 
-const getActiveEndpointCount = async (
+export const getUniqueEndpointCount = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<number> => {
@@ -55,13 +55,7 @@ const getActiveEndpointCount = async (
     };
 
     const response = await esClient.search(query, { meta: true });
-    const { body: endpointCountResponse } = response as unknown as {
-      body: {
-        aggregations: {
-          endpoint_count: { value: number };
-        };
-      };
-    };
+    const { body: endpointCountResponse } = response as unknown as UniqueEndpointCountResponse;
     return endpointCountResponse.aggregations?.endpoint_count?.value ?? 0;
   } catch (e) {
     tlog(logger, `Failed to get active endpoint count due to: ${e.message}`);

@@ -8,3 +8,11 @@
 export interface EndpointMetrics {
   unique_endpoint_count: number;
 }
+
+export interface UniqueEndpointCountResponse {
+  body: {
+    aggregations: {
+      endpoint_count: { value: number };
+    };
+  };
+}
