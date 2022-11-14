@@ -52,6 +52,9 @@ const initialActiveDimensionState = {
   isNew: false,
 };
 
+// hide the random sampling settings from the UI
+const DISPLAY_RANDOM_SAMPLING_SETTINGS = false;
+
 export function LayerPanel(
   props: Exclude<LayerPanelProps, 'state' | 'setState'> & {
     activeVisualization: Visualization;
@@ -323,12 +326,14 @@ export function LayerPanel(
           updateVisualization,
           () => setPanelSettingsOpen(true)
         ) || []),
-        ...(layerDatasource?.getSupportedActionsForLayer?.(
-          layerId,
-          layerDatasourceState,
-          (newState) => updateDatasource(datasourceId, newState),
-          () => setPanelSettingsOpen(true)
-        ) || []),
+        ...((DISPLAY_RANDOM_SAMPLING_SETTINGS &&
+          layerDatasource?.getSupportedActionsForLayer?.(
+            layerId,
+            layerDatasourceState,
+            (newState) => updateDatasource(datasourceId, newState),
+            () => setPanelSettingsOpen(true)
+          )) ||
+          []),
         ...getSharedActions({
           activeVisualization,
           core,
@@ -639,7 +644,8 @@ export function LayerPanel(
           })}
         </EuiPanel>
       </section>
-      {(layerDatasource?.renderLayerSettings || activeVisualization?.renderLayerSettings) && (
+      {((DISPLAY_RANDOM_SAMPLING_SETTINGS && layerDatasource?.renderLayerSettings) ||
+        activeVisualization?.renderLayerSettings) && (
         <FlyoutContainer
           panelRef={(el) => (settingsPanelRef.current = el)}
           isOpen={isPanelSettingsOpen}
@@ -655,7 +661,7 @@ export function LayerPanel(
         >
           <div id={layerId}>
             <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
-              {layerDatasource?.renderLayerSettings && (
+              {DISPLAY_RANDOM_SAMPLING_SETTINGS && layerDatasource?.renderLayerSettings && (
                 <NativeRenderer
                   render={layerDatasource.renderLayerSettings}
                   nativeProps={layerDatasourceConfigProps}
