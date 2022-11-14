@@ -132,15 +132,12 @@ function validateParams(anyParams: unknown): string | undefined {
       });
     }
     if (termSize > MAX_GROUPS) {
-      return i18n.translate(
-        'xpack.triggersActionsUI.data.coreQueryParams.invalidTermSizeMaximumErrorMessage',
-        {
-          defaultMessage: '[termSize]: must be less than or equal to {maxGroups}',
-          values: {
-            maxGroups: MAX_GROUPS,
-          },
-        }
-      );
+      return i18n.translate('xpack.stackAlerts.esQuery.invalidTermSizeMaximumErrorMessage', {
+        defaultMessage: '[termSize]: must be less than or equal to {maxGroups}',
+        values: {
+          maxGroups: MAX_GROUPS,
+        },
+      });
     }
   }
 

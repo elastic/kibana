@@ -172,6 +172,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       "alert_id": "{{alertId}}",
       "context_message": "{{context.message}}"
     }`);
+
+    // await testSubjects.click('whenExpression');
+    // await testSubjects.click('whenExpressionSelect');
+    // await retry.try(async () => {
+    //   const aggTypeOptions = await find.allByCssSelector('#aggTypeField option');
+    //   expect(aggTypeOptions[1]).not.to.be(undefined);
+    //   await aggTypeOptions[1].click();
+    // });
     await testSubjects.click('saveRuleButton');
   };
 

@@ -22,15 +22,24 @@ import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 
-export async function fetchSearchSourceQuery(
-  ruleId: string,
-  params: OnlySearchSourceRuleParams,
-  latestTimestamp: string | undefined,
+interface FetchSearchSourceQueryOpts {
+  ruleId: string;
+  params: OnlySearchSourceRuleParams;
+  latestTimestamp: string | undefined;
   services: {
-    logger: Logger;
     searchSourceClient: ISearchStartSearchSource;
-  }
-) {
+    logger: Logger;
+  };
+  alertLimit?: number;
+}
+
+export async function fetchSearchSourceQuery({
+  ruleId,
+  params,
+  latestTimestamp,
+  services,
+  alertLimit,
+}: FetchSearchSourceQueryOpts) {
   const { logger, searchSourceClient } = services;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
@@ -40,7 +49,8 @@ export async function fetchSearchSourceQuery(
   const { searchSource, dateStart, dateEnd } = updateSearchSource(
     initialSearchSource,
     params,
-    latestTimestamp
+    latestTimestamp,
+    alertLimit
   );
 
   logger.debug(
@@ -61,7 +71,8 @@ export async function fetchSearchSourceQuery(
 export function updateSearchSource(
   searchSource: ISearchSource,
   params: OnlySearchSourceRuleParams,
-  latestTimestamp: string | undefined
+  latestTimestamp: string | undefined,
+  alertLimit?: number
 ) {
   const isGroupAgg = isGroupAggregation(params.termField);
   const index = searchSource.getField('index');
@@ -102,6 +113,7 @@ export function updateSearchSource(
       termField: params.termField,
       termSize: params.termSize,
       condition: {
+        resultLimit: alertLimit,
         conditionScript: getComparatorScript(
           params.thresholdComparator,
           params.threshold,

@@ -18,19 +18,29 @@ import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_q
 import { ES_QUERY_ID } from '../constants';
 import { getSearchParams } from './get_search_params';
 
-/**
- * Fetching matching documents for a given rule from elasticsearch by a given index and query
- */
-export async function fetchEsQuery(
-  ruleId: string,
-  name: string,
-  params: OnlyEsQueryRuleParams,
-  timestamp: string | undefined,
+interface FetchEsQueryOpts {
+  ruleId: string;
+  name: string;
+  params: OnlyEsQueryRuleParams;
+  timestamp: string | undefined;
   services: {
     scopedClusterClient: IScopedClusterClient;
     logger: Logger;
-  }
-) {
+  };
+  alertLimit?: number;
+}
+
+/**
+ * Fetching matching documents for a given rule from elasticsearch by a given index and query
+ */
+export async function fetchEsQuery({
+  ruleId,
+  name,
+  params,
+  timestamp,
+  services,
+  alertLimit,
+}: FetchEsQueryOpts) {
   const { scopedClusterClient, logger } = services;
   const esClient = scopedClusterClient.asCurrentUser;
   const isGroupAgg = isGroupAggregation(params.termField);
@@ -92,6 +102,7 @@ export async function fetchEsQuery(
       termField: params.termField,
       termSize: params.termSize,
       condition: {
+        resultLimit: alertLimit,
         conditionScript: getComparatorScript(
           params.thresholdComparator,
           params.threshold,

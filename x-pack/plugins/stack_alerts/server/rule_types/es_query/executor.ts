@@ -52,13 +52,26 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   // avoid counting a document multiple times.
 
   const { parsedResults, dateStart, dateEnd } = esQueryRule
-    ? await fetchEsQuery(ruleId, name, params as OnlyEsQueryRuleParams, latestTimestamp, {
-        scopedClusterClient,
-        logger,
+    ? await fetchEsQuery({
+        ruleId,
+        name,
+        alertLimit,
+        params: params as OnlyEsQueryRuleParams,
+        timestamp: latestTimestamp,
+        services: {
+          scopedClusterClient,
+          logger,
+        },
       })
-    : await fetchSearchSourceQuery(ruleId, params as OnlySearchSourceRuleParams, latestTimestamp, {
-        searchSourceClient,
-        logger,
+    : await fetchSearchSourceQuery({
+        ruleId,
+        alertLimit,
+        params: params as OnlySearchSourceRuleParams,
+        latestTimestamp,
+        services: {
+          searchSourceClient,
+          logger,
+        },
       });
 
   const base = publicBaseUrl;
@@ -118,6 +131,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     }
   }
 
+  alertFactory.alertLimit.setLimitReached(false);
   // alertFactory.alertLimit.setLimitReached(result.truncated);
 
   const { getRecoveredAlerts } = alertFactory.done();

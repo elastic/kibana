@@ -14,7 +14,7 @@ describe('useTestQuery', () => {
     const { result } = renderHook(useTestQuery, {
       initialProps: () =>
         Promise.resolve({
-          testResults: [{ group: 'all documents', count: 1 }],
+          testResults: [{ group: 'all documents', hits: [], count: 1 }],
           isGrouped: false,
           timeWindow: '1s',
         }),
@@ -33,8 +33,8 @@ describe('useTestQuery', () => {
       initialProps: () =>
         Promise.resolve({
           testResults: [
-            { group: 'a', count: 1, value: 10 },
-            { group: 'b', count: 2, value: 20 },
+            { group: 'a', count: 1, value: 10, hits: [] },
+            { group: 'b', count: 2, value: 20, hits: [] },
           ],
           isGrouped: true,
           timeWindow: '1s',

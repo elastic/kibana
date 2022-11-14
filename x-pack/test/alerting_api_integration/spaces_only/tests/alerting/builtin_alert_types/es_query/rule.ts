@@ -697,6 +697,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       notifyWhen?: string;
       indexName?: string;
       excludeHitsFromPreviousRun?: boolean;
+      aggType?: string;
+      groupBy?: string;
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -772,6 +774,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
             searchType: params.searchType,
+            aggType: params.aggType ?? 'count',
+            groupBy: params.groupBy ?? 'all',
             ...(params.excludeHitsFromPreviousRun !== undefined && {
               excludeHitsFromPreviousRun: params.excludeHitsFromPreviousRun,
             }),
