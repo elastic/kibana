@@ -7,6 +7,7 @@
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { ConfigKey, SyntheticsMonitorWithSecrets } from '../../../../../../common/runtime_types';
+import { SYNTHETICS_MONITOR_ENCRYPTED_TYPE } from '../../synthetics_monitor';
 
 export const migration860 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => {
   return encryptedSavedObjects.createMigration<
@@ -31,5 +32,6 @@ export const migration860 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
         },
       };
     },
+    migratedType: SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
   });
 };
