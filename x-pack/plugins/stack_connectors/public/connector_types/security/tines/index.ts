@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getTinesConnectorType } from './tines';
+export { getConnectorType as getTinesConnectorType } from './tines';
