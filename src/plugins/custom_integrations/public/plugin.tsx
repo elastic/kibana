@@ -25,6 +25,7 @@ import { servicesFactory } from './services/kibana';
 import { SampleClientReadme } from './components/fleet_integration/sample/sample_client_readme';
 import { ElasticsearchJsClientReadme } from './components/fleet_integration/elasticsearch_js/elasticsearch_js_readme';
 import { ElasticsearchPhpClientReadme } from './components/fleet_integration/elasticsearch_php/elasticsearch_php_readme';
+import { ElasticsearchPyClientReadme } from './components/fleet_integration/elasticsearch_py/elasticsearch_py_readme';
 
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart>
@@ -52,6 +53,8 @@ export class CustomIntegrationsPlugin
       sample: SampleClientReadme,
       javascript: ElasticsearchJsClientReadme,
       php: ElasticsearchPhpClientReadme,
+      python: ElasticsearchPyClientReadme,
+
     };
 
     const ContextProvider: React.FC = ({ children }) => (

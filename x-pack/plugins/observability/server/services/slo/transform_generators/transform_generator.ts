@@ -15,7 +15,7 @@ import {
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
 } from '../../../types/schema';
-import { SLO } from '../../../types/models';
+import { SLO } from '../../../domain/models';
 
 export abstract class TransformGenerator {
   public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
