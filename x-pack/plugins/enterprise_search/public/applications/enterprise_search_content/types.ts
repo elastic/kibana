@@ -18,6 +18,7 @@ export const enum IngestionMethod {
 }
 
 export const enum IngestionStatus {
+  CONFIGURED,
   CONNECTED,
   ERROR,
   SYNC_ERROR,
