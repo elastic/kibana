@@ -44,6 +44,7 @@ const FormView: React.FC<FormViewProps> = ({
   messageVariables,
   subActionParams,
   showSaveError,
+  executionMode,
 }) => {
   const isMessageInvalid =
     (errors['subActionParams.message'] !== undefined &&
@@ -72,7 +73,11 @@ const FormView: React.FC<FormViewProps> = ({
       <EuiSpacer size={'m'} />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <Tags values={subActionParams?.tags ?? []} onChange={editOptionalSubAction} />
+          <Tags
+            values={subActionParams?.tags ?? []}
+            onChange={editOptionalSubAction}
+            executionMode={executionMode}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <Priority priority={subActionParams?.priority} onChange={editOptionalSubAction} />
@@ -104,7 +109,7 @@ FormView.displayName = 'FormView';
 
 export type CreateAlertProps = Pick<
   ActionParamsProps<OpsgenieActionParams>,
-  'errors' | 'index' | 'messageVariables' | 'editAction'
+  'errors' | 'index' | 'messageVariables' | 'editAction' | 'executionMode'
 > & {
   subActionParams?: Partial<OpsgenieCreateAlertParams>;
   editSubAction: EditActionCallback;
@@ -121,6 +126,7 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
   messageVariables,
   subActionParams,
   showSaveError,
+  executionMode,
 }) => {
   const [showingMoreOptions, setShowingMoreOptions] = useState<boolean>(false);
   const [showJsonEditor, setShowJsonEditor] = useState<boolean>(false);
