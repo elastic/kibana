@@ -70,7 +70,7 @@ export interface LifecycleAlertServices<
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
   getAlertStartedDate: (alertId: string) => string | null;
-  getAlertUuid: (alertId: string) => string | null;
+  getAlertUuid: (alertId: string) => string;
 }
 
 export type LifecycleRuleExecutor<
@@ -174,13 +174,14 @@ export const createLifecycleExecutor =
       },
       getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
       getAlertUuid: (alertId: string) => {
-        if (!state.trackedAlerts[alertId]) {
-          const alertUuid = v4();
-          newAlertUuids[alertId] = alertUuid;
-          return alertUuid;
+        let existingUuid = state.trackedAlerts[alertId]?.alertUuid || newAlertUuids[alertId];
+
+        if (!existingUuid) {
+          existingUuid = v4();
+          newAlertUuids[alertId] = existingUuid;
         }
 
-        return state.trackedAlerts[alertId].alertUuid;
+        return existingUuid;
       },
     };
 
@@ -242,7 +243,7 @@ export const createLifecycleExecutor =
         const { alertUuid, started } = !isNew
           ? state.trackedAlerts[alertId]
           : {
-              alertUuid: newAlertUuids[alertId] || v4(),
+              alertUuid: lifecycleAlertServices.getAlertUuid(alertId),
               started: commonRuleFields[TIMESTAMP],
             };
 
