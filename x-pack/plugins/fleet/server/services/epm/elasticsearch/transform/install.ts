@@ -282,9 +282,10 @@ const processTransformAssetsPerModule = (
     })),
   ];
 
-  const sortedTransforms = transforms.sort((t1, t2) => t1.installationOrder - t2.installationOrder);
+  const sortedTransforms = transforms.sort(
+    (t1, t2) => (t1.installationOrder ?? 0) - (t2.installationOrder ?? 1)
+  );
 
-  console.log('----Transform to install in sorted order\n', sortedTransforms);
   const transformRefs = sortedTransforms.map((t) => ({
     id: t.installationName,
     type: ElasticsearchAssetType.transform,
@@ -313,8 +314,6 @@ const installTransformsAssets = async (
   esReferences: EsAssetReference[] = [],
   previousInstalledTransformEsAssets: EsAssetReference[] = []
 ) => {
-  console.log('\npreviousInstalledTransformEsAssets\n', previousInstalledTransformEsAssets);
-
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
     const {
@@ -333,10 +332,6 @@ const installTransformsAssets = async (
       previousInstalledTransformEsAssets
     );
 
-    console.log(
-      '\n---Deleting indices with alias',
-      aliasesRefs.filter((a) => a.endsWith(TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX))
-    );
     // ensure the .latest alias points to only the latest
     // by removing any associate of old destination indices
     await Promise.all(
@@ -345,10 +340,6 @@ const installTransformsAssets = async (
         .map((alias) => deleteIndicesWithAlias({ esClient, logger, alias }))
     );
 
-    console.log(
-      '\n---Deleting previously installed transforms that have older version---\n',
-      transformsToRemove
-    );
     // delete all previous transform
     await deleteTransforms(
       esClient,
@@ -377,9 +368,6 @@ const installTransformsAssets = async (
           const pipelineId = transformSpec?.get('destinationIndex')?.pipeline;
           const isUpgraded = transformSpec?.get('upgraded') ?? true;
 
-          console.log(
-            `---Transform ${destinationIndexTemplate.transformModuleId} is upgraded = ${isUpgraded}, proceed to install templates`
-          );
           if (!isUpgraded) return;
 
           const registryElasticsearch: RegistryElasticsearch = {
@@ -398,27 +386,8 @@ const installTransformsAssets = async (
               ...(pipelineId ? { default_pipeline: pipelineId } : {}),
             },
           });
-          console.log('\n---Installing component templates\n', JSON.stringify(componentTemplates));
 
           if (destinationIndexTemplate || customMappings) {
-            console.log(
-              '\n---Installing index template\n',
-              JSON.stringify({
-                template: {
-                  settings: undefined,
-                  mappings: undefined,
-                },
-                priority: DEFAULT_TRANSFORM_TEMPLATES_PRIORITY,
-                index_patterns: [
-                  transformsSpecifications
-                    .get(destinationIndexTemplate.transformModuleId)
-                    ?.get('destinationIndex').index,
-                ],
-                _meta: destinationIndexTemplate._meta,
-                composed_of: Object.keys(componentTemplates),
-              })
-            );
-
             return installComponentAndIndexTemplateForDataStream({
               esClient,
               logger,
@@ -450,20 +419,7 @@ const installTransformsAssets = async (
     // create destination indices
     await Promise.all(
       transforms.map(async (transform) => {
-        const transformSpec = transformsSpecifications.get(transform.transformModuleId);
-        const isUpgraded = transformSpec?.get('upgraded') ?? true;
-
-        console.log(
-          `---Transform ${transform.transformModuleId} is upgraded = ${isUpgraded}, proceed to install templates`
-        );
-
         const index = transform.content.dest.index;
-        console.log(
-          '\n---Installing index\n',
-          JSON.stringify(index),
-          '\nalias\n',
-          transformsSpecifications.get(transform.transformModuleId)?.get('destinationIndexAlias')
-        );
 
         try {
           await retryTransientEsErrors(
@@ -500,7 +456,6 @@ const installTransformsAssets = async (
     const shouldInstallSequentially =
       uniqBy(transforms, 'installationOrder').length === transforms.length;
 
-    console.log('---Transforms shouldInstallSequentially = ', shouldInstallSequentially);
     if (shouldInstallSequentially) {
       for (const transform of transforms) {
         const installTransform = await handleTransformInstall({
@@ -632,15 +587,6 @@ async function handleTransformInstall({
   startTransform?: boolean;
 }): Promise<EsAssetReference> {
   try {
-    console.log(
-      `\n---Installing transform ${transform.installationName} with startTransform = ${startTransform}\n`,
-      JSON.stringify({
-        transform_id: transform.installationName,
-        defer_validation: true,
-        body: transform.content,
-      })
-    );
-
     await retryTransientEsErrors(
       () =>
         // defer validation on put if the source index is not available
@@ -665,11 +611,10 @@ async function handleTransformInstall({
   // start transform by default if not set in yml file
   // else, respect the setting
   if (startTransform === undefined || startTransform === true) {
-    console.log(`\n---Starting transform ${transform.installationName}\n`),
-      await esClient.transform.startTransform(
-        { transform_id: transform.installationName },
-        { ignore: [409] }
-      );
+    await esClient.transform.startTransform(
+      { transform_id: transform.installationName },
+      { ignore: [409] }
+    );
     logger.debug(`Started transform: ${transform.installationName}`);
   }
 
