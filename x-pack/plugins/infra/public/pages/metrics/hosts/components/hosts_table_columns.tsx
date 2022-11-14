@@ -27,7 +27,7 @@ export interface HostMetics {
   memoryTotal: SnapshotNodeMetric;
 }
 
-const formatMetric = (type: SnapshotMetricInput['type'], value: number) =>
+const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefined | null) =>
   value || value === 0 ? createInventoryMetricFormatter({ type })(value) : 'N/A';
 
 export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
@@ -52,9 +52,11 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     name: i18n.translate('xpack.infra.hostsTable.numberOfCpusColumnHeader', {
       defaultMessage: '# of CPUs',
     }),
-    field: 'cpuCores.value',
+    field: 'cpuCores',
     sortable: true,
-    render: (value: number) => <>{formatMetric('cpuCores', value)}</>,
+    render: (cpuCores: SnapshotNodeMetric) => (
+      <>{formatMetric('cpuCores', cpuCores?.value ?? cpuCores?.max)}</>
+    ),
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.diskLatencyColumnHeader', {
