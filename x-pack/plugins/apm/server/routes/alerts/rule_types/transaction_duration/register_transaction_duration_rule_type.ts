@@ -11,7 +11,6 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
-  ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { firstValueFrom } from 'rxjs';
 import { asDuration } from '@kbn/observability-plugin/common/utils/formatters';
