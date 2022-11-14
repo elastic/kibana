@@ -13,6 +13,7 @@ import {
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
 import { EuiLoadingContent } from '@elastic/eui';
+import type { Rule } from '../../../detection_engine/rule_management/logic/types';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
@@ -72,7 +73,7 @@ export const ListsDetailViewComponent: FC = () => {
           <ListWithSearch list={list} isReadOnly={isReadOnly} />
           {showManageRulesFlyout ? (
             <ManageRules
-              linkedRules={linkedRules}
+              linkedRules={linkedRules as Rule[]}
               onSave={onSaveManageRules}
               onCancel={onCancelManageRules}
               onRuleSelectionChange={onRuleSelectionChange}
