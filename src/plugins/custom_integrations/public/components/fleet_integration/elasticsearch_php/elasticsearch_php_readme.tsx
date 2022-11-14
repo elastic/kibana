@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import cuid from 'cuid';
 
 import {
   EuiButton,
@@ -65,7 +64,6 @@ const TopFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const ElasticsearchPhpClientReadme = () => {
-  const [apiKey, setApiKey] = useState<string | null>(null);
 
   return (
     <>
@@ -139,42 +137,6 @@ $ php composer.phar install `}
                 <EuiTitle>
                   <h2>
                     <FormattedMessage
-                      id="customIntegrations.languageClients.PhpElasticsearch.readme.createApiKey"
-                      defaultMessage="Create an API key"
-                    />
-                  </h2>
-                </EuiTitle>
-
-                <EuiText>
-                  <FormattedMessage
-                    id="customIntegrations.languageClients.PhpElasticsearch.readme.apiKey"
-                    defaultMessage="Use the button bellow to generate an API key. You'll need this set up your client in the next step."
-                  />
-                </EuiText>
-
-                <EuiSpacer size="m" />
-
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => setApiKey(cuid())} disabled={!!apiKey}>
-                      Generate API key
-                    </EuiButton>
-                  </EuiFlexItem>
-
-                  {apiKey && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCodeBlock paddingSize="s" isCopyable className="eui-displayInline">
-                        {apiKey}
-                      </EuiCodeBlock>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiPageSection>
-
-              <EuiPageSection>
-                <EuiTitle>
-                  <h2>
-                    <FormattedMessage
                       id="customIntegrations.languageClients.PhpElasticsearch.readme.connecting"
                       defaultMessage="Connecting to Elastic cloud"
                     />
@@ -184,7 +146,7 @@ $ php composer.phar install `}
                 <EuiText>
                   <FormattedMessage
                     id="customIntegrations.languageClients.PhpElasticsearch.readme.connectingText"
-                    defaultMessage="You can connect to Elastic Cloud using an {api_key} and a {cloud_id}:"
+                    defaultMessage="You can connect to Elastic Cloud using an {api_key} and a {cloud_id}. Where {api_key} and {cloud_id} can be retrieved using the Elastic Cloud web UI."
                     values={{
                       api_key: <EuiCode>api-key</EuiCode>,
                       cloud_id: <EuiCode>cloud-id</EuiCode>,
@@ -196,9 +158,10 @@ $ php composer.phar install `}
 
                 <EuiCodeBlock isCopyable language="php">
                   {`
+# <cloud-id> found in the 'Manage this deployment' page, and <api-key> found in the 'Management' page under the section 'Security'
 $client = ClientBuilder::create()
    ->setElasticCloudId('<cloud-id>')
-   ->setApiKey('${apiKey || '<api-key>'}')
+   ->setApiKey('<api-key>')
    ->build();
           `}
                 </EuiCodeBlock>
