@@ -65,6 +65,7 @@ export const failedFindingsAggQuery = {
 export const getRisksEsQuery = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
   size: 0,
   query,
+  // @ts-ignore
   aggs: failedFindingsAggQuery,
   pit: {
     id: pitId,
