@@ -312,7 +312,6 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
       });
-
       const deprecations = this.deprecations.start({ http });
 
       this.coreApp.start({ application, docLinks, http, notifications, uiSettings });

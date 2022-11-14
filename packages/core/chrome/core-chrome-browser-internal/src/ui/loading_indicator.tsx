@@ -24,7 +24,6 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
   public static defaultProps = { showAsBar: false };
 
   private loadingCountSubscription?: Subscription;
-  // private customLogoSubscription?: Subscription;
 
   state = {
     visible: false,
