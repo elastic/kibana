@@ -113,7 +113,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
 
-              expect(String(rule.enabled)).to.eql(String(false));
+              expect(rule.enabled).to.eql(false);
 
               // task should still exist but be disabled
               await retry.try(async () => {
@@ -183,7 +183,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
 
-              expect(String(rule.enabled)).to.eql(String(false));
+              expect(rule.enabled).to.eql(false);
 
               // task should still exist but be disabled
               const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
@@ -255,7 +255,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
 
-              expect(String(rule.enabled)).to.eql(String(false));
+              expect(rule.enabled).to.eql(false);
               // task should still exist but be disabled
               const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
               expect(taskRecord.type).to.eql('task');
@@ -322,7 +322,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
 
-              expect(String(rule.enabled)).to.eql(String(false));
+              expect(rule.enabled).to.eql(false);
               // task should still exist but be disabled
               await retry.try(async () => {
                 const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
@@ -403,7 +403,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
 
-              expect(String(rule.enabled)).to.eql(String(false));
+              expect(rule.enabled).to.eql(false);
 
               // task should still exist but be disabled
               await retry.try(async () => {
