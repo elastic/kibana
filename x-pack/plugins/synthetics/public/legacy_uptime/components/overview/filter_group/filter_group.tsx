@@ -10,6 +10,7 @@ import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import { capitalize } from 'lodash';
 import { FieldValueSuggestions, useInspectorContext } from '@kbn/observability-plugin/public';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 import { SelectedFilters } from './selected_filters';
@@ -20,6 +21,8 @@ import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../../common/constants/client_
 const Container = styled(EuiFilterGroup)`
   margin-bottom: 10px;
 `;
+
+export const TAG_KEY_FOR_AND_CONDITION = 'useANDForTagsFilter';
 
 export const FilterGroup = () => {
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
@@ -42,6 +45,8 @@ export const FilterGroup = () => {
 
   const dataView = useUptimeDataView();
 
+  const [useLogicalAND, setLogicalANDForTag] = useLocalStorage(TAG_KEY_FOR_AND_CONDITION, 'false');
+
   const onFilterFieldChange = useCallback(
     (fieldName: string, values: string[], notValues: string[]) => {
       setUpdatedFieldValues({ fieldName, values, notValues });
@@ -62,9 +67,12 @@ export const FilterGroup = () => {
               label={label}
               selectedValue={selectedItems}
               excludedValue={excludedItems}
-              onChange={(values, notValues) =>
-                onFilterFieldChange(field, values ?? [], notValues ?? [])
-              }
+              onChange={(values, notValues, isLogicalAND) => {
+                if (isLogicalAND !== undefined) {
+                  setLogicalANDForTag(isLogicalAND.toString());
+                }
+                onFilterFieldChange(field, values ?? [], notValues ?? []);
+              }}
               asCombobox={false}
               asFilterButton={true}
               forceOpen={false}
@@ -82,6 +90,8 @@ export const FilterGroup = () => {
                 adapter: inspectorAdapters.requests,
                 title: 'get' + capitalize(label) + 'FilterValues',
               }}
+              showLogicalConditionSwitch={field === 'tags'}
+              useLogicalAND={field === 'tags' ? useLogicalAND === 'true' : undefined}
             />
           ))}
       </Container>

@@ -9,6 +9,8 @@ import React, { FormEvent, useEffect, useState } from 'react';
 import {
   EuiText,
   EuiButton,
+  EuiSwitch,
+  EuiSpacer,
   EuiFilterButton,
   EuiPopover,
   EuiPopoverFooter,
@@ -72,6 +74,8 @@ export function FieldValueSelection({
   excludedValue,
   allowExclusions = true,
   compressed = true,
+  useLogicalAND,
+  showLogicalConditionSwitch = false,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
@@ -79,6 +83,12 @@ export function FieldValueSelection({
   );
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const [isLogicalAND, setIsLogicalAND] = useState(useLogicalAND);
+
+  useEffect(() => {
+    setIsLogicalAND(useLogicalAND);
+  }, [useLogicalAND]);
 
   useEffect(() => {
     setOptions(formatOptions(values, selectedValue, excludedValue, showCount));
@@ -143,7 +153,11 @@ export function FieldValueSelection({
       .filter((opt) => opt?.checked === 'off')
       .map(({ label: labelN }) => labelN);
 
-    return isEqual(selectedValue ?? [], currSelected) && isEqual(excludedValue ?? [], currExcluded);
+    return (
+      isEqual(selectedValue ?? [], currSelected) &&
+      isEqual(excludedValue ?? [], currExcluded) &&
+      isLogicalAND === useLogicalAND
+    );
   };
 
   return (
@@ -206,7 +220,19 @@ export function FieldValueSelection({
                     const selectedValuesN = options.filter((opt) => opt?.checked === 'on');
                     const excludedValuesN = options.filter((opt) => opt?.checked === 'off');
 
-                    onSelectionChange(map(selectedValuesN, 'label'), map(excludedValuesN, 'label'));
+                    if (showLogicalConditionSwitch) {
+                      onSelectionChange(
+                        map(selectedValuesN, 'label'),
+                        map(excludedValuesN, 'label'),
+                        isLogicalAND
+                      );
+                    } else {
+                      onSelectionChange(
+                        map(selectedValuesN, 'label'),
+                        map(excludedValuesN, 'label')
+                      );
+                    }
+
                     setIsPopoverOpen(false);
                     setForceOpen?.(false);
                   }}
@@ -215,6 +241,20 @@ export function FieldValueSelection({
                     defaultMessage: 'Apply',
                   })}
                 </EuiButton>
+                {showLogicalConditionSwitch && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <EuiSwitch
+                      label={i18n.translate('xpack.observability.fieldValueSelection.logicalAnd', {
+                        defaultMessage: 'Use logical AND',
+                      })}
+                      checked={Boolean(isLogicalAND)}
+                      onChange={(e) => {
+                        setIsLogicalAND(e.target.checked);
+                      }}
+                    />
+                  </>
+                )}
               </EuiPopoverFooter>
             </div>
           )}

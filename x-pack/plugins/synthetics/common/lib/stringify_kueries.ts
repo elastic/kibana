@@ -10,9 +10,18 @@
  * The strings contain all of the values chosen for the given field (which is also the key value).
  * Reduce the list of query strings to a singular string, with AND operators between.
  */
-export const stringifyKueries = (kueries: Map<string, Array<number | string>>): string =>
-  Array.from(kueries.keys())
+export const stringifyKueries = (
+  kueries: Map<string, Array<number | string>>,
+  logicalANDForTag?: boolean
+): string => {
+  const defaultCondition = 'OR';
+
+  return Array.from(kueries.keys())
     .map((key) => {
+      let condition = defaultCondition;
+      if (key === 'tags' && logicalANDForTag) {
+        condition = 'AND';
+      }
       const value = kueries.get(key);
       if (!value || value.length === 0) return '';
       return value.reduce(
@@ -26,9 +35,9 @@ export const stringifyKueries = (kueries: Map<string, Array<number | string>>): 
           } else if (array.length > 1 && index === 0) {
             return `(${expression}`;
           } else if (index + 1 === array.length) {
-            return `${prev} or ${expression})`;
+            return `${prev} ${condition} ${expression})`;
           }
-          return `${prev} or ${expression}`;
+          return `${prev} ${condition} ${expression}`;
         },
         ''
       );
@@ -43,3 +52,4 @@ export const stringifyKueries = (kueries: Map<string, Array<number | string>>): 
       }
       return `${prev} and ${cur}`;
     }, '');
+};
