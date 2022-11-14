@@ -122,7 +122,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
                   label: i18n.translate(
                     'xpack.ml.trainedModels.modelsList.startDeployment.lowPriorityLabel',
                     {
-                      defaultMessage: 'Low',
+                      defaultMessage: 'low',
                     }
                   ),
                 },
@@ -132,7 +132,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
                   label: i18n.translate(
                     'xpack.ml.trainedModels.modelsList.startDeployment.normalPriorityLabel',
                     {
-                      defaultMessage: 'Normal',
+                      defaultMessage: 'normal',
                     }
                   ),
                 },
