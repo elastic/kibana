@@ -71,7 +71,7 @@ describe('stringifyKueries', () => {
       })
     );
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"(observer.geo.name:us-east or observer.geo.name:apj or observer.geo.name:sydney or observer.geo.name:us-west)"`
+      `"(observer.geo.name:us-east OR observer.geo.name:apj OR observer.geo.name:sydney OR observer.geo.name:us-west)"`
     );
   });
 
@@ -85,7 +85,21 @@ describe('stringifyKueries', () => {
       })
     );
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"monitor.type:http and (observer.geo.name:us-east or observer.geo.name:apj or observer.geo.name:sydney or observer.geo.name:us-west)"`
+      `"monitor.type:http and (observer.geo.name:us-east OR observer.geo.name:apj OR observer.geo.name:sydney OR observer.geo.name:us-west)"`
+    );
+  });
+
+  it('handles tags AND logic', () => {
+    kueries = new Map<string, string[]>(
+      Object.entries({
+        'monitor.type': ['http'],
+        'url.port': [],
+        'observer.geo.name': ['us-east', 'apj', 'sydney', 'us-west'],
+        tags: ['tag1', 'tag2'],
+      })
+    );
+    expect(stringifyKueries(kueries, true)).toMatchInlineSnapshot(
+      `"monitor.type:http and (observer.geo.name:us-east OR observer.geo.name:apj OR observer.geo.name:sydney OR observer.geo.name:us-west) and (tags:tag1 AND tags:tag2)"`
     );
   });
 });
