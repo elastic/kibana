@@ -84,6 +84,7 @@ export function FilterItem({
     dropTarget,
     globalParams: { hideOr },
     timeRangeForSuggestionsOverride,
+    isDisabled,
   } = useContext(FiltersBuilderContextType);
   const conditionalOperationType = getBooleanRelationType(filter);
   const { euiTheme } = useEuiTheme();
@@ -289,7 +290,7 @@ export function FilterItem({
                             <EuiButtonEmpty
                               onClick={onRemoveFilter}
                               iconType="trash"
-                              isDisabled={disableRemove}
+                              isDisabled={disableRemove || isDisabled}
                               size="s"
                               color="danger"
                               aria-label={i18n.translate(
@@ -304,7 +305,7 @@ export function FilterItem({
                             <EuiFlexItem grow={false}>
                               <EuiButtonEmpty
                                 onClick={onOrButtonClick}
-                                isDisabled={disableOr}
+                                isDisabled={disableOr || isDisabled}
                                 iconType="plusInCircle"
                                 size="s"
                                 iconSize="s"
@@ -327,7 +328,7 @@ export function FilterItem({
                           <EuiFlexItem grow={false}>
                             <EuiButtonEmpty
                               onClick={onAddButtonClick}
-                              isDisabled={disableAnd}
+                              isDisabled={disableAnd || isDisabled}
                               iconType="plusInCircle"
                               size="s"
                               iconSize="s"

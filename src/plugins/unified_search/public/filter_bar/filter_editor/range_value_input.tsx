@@ -29,6 +29,7 @@ interface Props {
   intl: InjectedIntl;
   fullWidth?: boolean;
   compressed?: boolean;
+  isDisabled?: boolean;
 }
 
 export function isRangeParams(params: any): params is RangeParams {
@@ -86,6 +87,7 @@ function RangeValueInputUI(props: Props) {
               id: 'unifiedSearch.filter.filterEditor.rangeStartInputPlaceholder',
               defaultMessage: 'Start',
             })}
+            disabled={props.isDisabled}
           />
         }
         endControl={
@@ -102,6 +104,7 @@ function RangeValueInputUI(props: Props) {
               id: 'unifiedSearch.filter.filterEditor.rangeEndInputPlaceholder',
               defaultMessage: 'End',
             })}
+            disabled={props.isDisabled}
           />
         }
       />

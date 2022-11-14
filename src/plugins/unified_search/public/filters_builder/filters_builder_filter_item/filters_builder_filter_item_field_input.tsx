@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { FieldIcon } from '@kbn/react-field';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -19,6 +19,7 @@ import {
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { getFilterableFields } from '../../filter_bar/filter_editor';
+import { FiltersBuilderContextType } from '../filters_builder_context';
 
 interface FieldInputProps {
   dataView: DataView;
@@ -27,6 +28,7 @@ interface FieldInputProps {
 }
 
 export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) {
+  const { isDisabled } = useContext(FiltersBuilderContextType);
   const fields = dataView ? getFilterableFields(dataView) : [];
   const id = useGeneratedHtmlId({ prefix: 'fieldInput' });
 
@@ -64,7 +66,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
       options={euiOptions}
       selectedOptions={selectedEuiOptions}
       onChange={onComboBoxChange}
-      isDisabled={!dataView}
+      isDisabled={isDisabled}
       placeholder={i18n.translate('unifiedSearch.filter.filtersBuilder.fieldSelectPlaceholder', {
         defaultMessage: 'Select a field',
       })}

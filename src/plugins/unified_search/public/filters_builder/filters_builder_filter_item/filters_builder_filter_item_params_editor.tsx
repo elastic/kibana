@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiToolTip, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,6 +18,7 @@ import {
   isRangeParams,
 } from '../../filter_bar/filter_editor';
 import { getFieldValidityAndErrorMessage } from '../../filter_bar/filter_editor/lib';
+import { FiltersBuilderContextType } from '../filters_builder_context';
 
 interface ParamsEditorProps<TParams = unknown> {
   dataView: DataView;
@@ -54,6 +55,7 @@ export function ParamsEditor<TParams = unknown>({
   onHandleParamsUpdate,
   timeRangeForSuggestionsOverride,
 }: ParamsEditorProps<TParams>) {
+  const { isDisabled } = useContext(FiltersBuilderContextType);
   const onParamsChange = useCallback(
     (selectedParams) => {
       onHandleParamsChange(selectedParams);
@@ -89,6 +91,7 @@ export function ParamsEditor<TParams = unknown>({
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           fullWidth
           isInvalid={isInvalid}
+          isDisabled={isDisabled}
         />
       );
       break;
@@ -103,6 +106,7 @@ export function ParamsEditor<TParams = unknown>({
           onParamsUpdate={onParamsUpdate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           fullWidth
+          isDisabled={isDisabled}
         />
       );
       break;
@@ -114,6 +118,7 @@ export function ParamsEditor<TParams = unknown>({
           value={isRangeParams(params) ? params : undefined}
           onChange={onParamsChange}
           fullWidth
+          isDisabled={isDisabled}
         />
       );
       break;

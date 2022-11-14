@@ -22,6 +22,7 @@ export interface FiltersBuilderProps {
   timeRangeForSuggestionsOverride?: boolean;
   maxDepth?: number;
   hideOr?: boolean;
+  isDisabled?: boolean;
 }
 
 const rootLevelConditionType = BooleanRelation.AND;
@@ -34,6 +35,7 @@ function FiltersBuilder({
   timeRangeForSuggestionsOverride,
   maxDepth = DEFAULT_MAX_DEPTH,
   hideOr = false,
+  isDisabled = false,
 }: FiltersBuilderProps) {
   const filtersRef = useRef(filters);
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
@@ -120,6 +122,7 @@ function FiltersBuilder({
           dispatch,
           dropTarget,
           timeRangeForSuggestionsOverride,
+          isDisabled,
         }}
       >
         <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>
