@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
 import {
-  EuiButton,
   EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -64,7 +63,6 @@ const TopFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const ElasticsearchPhpClientReadme = () => {
-
   return (
     <>
       <FixedHeader>
