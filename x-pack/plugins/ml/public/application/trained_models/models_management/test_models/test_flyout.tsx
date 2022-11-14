@@ -86,7 +86,7 @@ export const TestTrainedModelFlyout: FC<Props> = ({ modelId, onClose }) => {
             >
               <FormattedMessage
                 id="xpack.ml.trainedModels.testModelsFlyout.indexTab"
-                defaultMessage="Test using existing ndex"
+                defaultMessage="Test using existing Index"
               />
             </EuiTab>
           </EuiTabs>

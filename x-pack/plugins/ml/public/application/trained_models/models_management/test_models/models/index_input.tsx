@@ -62,7 +62,7 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
       <EuiSpacer size="m" />
 
       <EuiAccordion id={'simpleAccordionId'} buttonContent="View pipeline">
-        <EuiCodeBlock language="json" fontSize="s" paddingSize="s" lineNumbers>
+        <EuiCodeBlock language="json" fontSize="s" paddingSize="s" lineNumbers isCopyable={true}>
           {JSON.stringify(inferrer.getPipeline(), null, 2)}
         </EuiCodeBlock>
       </EuiAccordion>
@@ -137,11 +137,10 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
           },
         })
       ).then((resp) => {
-        inferrer.inputText$.next(
-          resp.rawResponse.hits.hits
-            .filter(({ fields }) => isPopulatedObject(fields, [selectedField]))
-            .map(({ fields }) => fields![selectedField][0])
-        );
+        const tempExamples = resp.rawResponse.hits.hits
+          .filter(({ fields }) => isPopulatedObject(fields, [selectedField]))
+          .map(({ fields }) => fields![selectedField][0]);
+        inferrer.inputText$.next(tempExamples);
       });
     }
   }, [inferrer, selectedField, selectedDataView, search]);
@@ -164,18 +163,17 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
           const fieldName = tempFieldNames[0].value;
           setSelectedField(fieldName);
           inferrer.setInputField(fieldName);
-          loadExamples();
         }
       }
     },
-    [selectedDataView, selectedDataViewId, inferrer, loadExamples]
+    [selectedDataView, inferrer]
   );
 
   useEffect(
     function loadExamplesAfterFieldChange() {
       loadExamples();
     },
-    [selectedField, selectedDataView, loadExamples]
+    [selectedField, loadExamples]
   );
 
   function reloadExamples() {
