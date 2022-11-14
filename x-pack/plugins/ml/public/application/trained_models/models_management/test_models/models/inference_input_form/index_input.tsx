@@ -88,7 +88,10 @@ export const IndexInput: FC<Props> = ({ inferrer }) => {
       <EuiSpacer size="m" />
 
       {errorText !== null || runningState === RUNNING_STATE.FINISHED_WITH_ERRORS ? (
-        <ErrorMessage errorText={errorText} />
+        <>
+          <ErrorMessage errorText={errorText} />
+          <EuiSpacer />
+        </>
       ) : null}
 
       {runningState !== RUNNING_STATE.FINISHED

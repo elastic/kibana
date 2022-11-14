@@ -94,7 +94,10 @@ export const TextInput: FC<Props> = ({ inferrer }) => {
               {runningState === RUNNING_STATE.RUNNING ? <OutputLoadingContent text={''} /> : null}
 
               {errorText !== null || runningState === RUNNING_STATE.FINISHED_WITH_ERRORS ? (
-                <ErrorMessage errorText={errorText} />
+                <>
+                  <ErrorMessage errorText={errorText} />
+                  <EuiSpacer />
+                </>
               ) : null}
 
               {runningState === RUNNING_STATE.FINISHED ? <>{outputComponent}</> : null}
