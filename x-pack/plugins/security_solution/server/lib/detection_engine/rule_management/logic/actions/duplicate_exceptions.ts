@@ -36,16 +36,7 @@ export const duplicateExceptions = async (
   );
   // If user does not want exceptions duplicated, return empty array.
   // This will remove the shared list references between rule<-->exceptions.
-  // The rule_default list, associated only with that rule will still need to be deleted.
   if (!shouldDuplicate) {
-    // if (ruleDefaultList != null && exceptionsClient != null) {
-    //   await exceptionsClient.deleteExceptionList({
-    //     id: ruleDefaultList.id,
-    //     listId: ruleDefaultList.list_id,
-    //     namespaceType: ruleDefaultList.namespace_type,
-    //   });
-    // }
-
     return [];
   }
 
