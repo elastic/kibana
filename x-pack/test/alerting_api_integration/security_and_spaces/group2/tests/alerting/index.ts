@@ -46,6 +46,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./snooze'));
       loadTestFile(require.resolve('./global_execution_log'));
       loadTestFile(require.resolve('./get_global_execution_kpi'));
+      loadTestFile(require.resolve('./get_action_error_log'));
     });
   });
 }
