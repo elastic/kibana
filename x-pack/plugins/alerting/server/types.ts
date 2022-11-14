@@ -74,13 +74,13 @@ export interface RuleExecutorServices<
   Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > {
-  alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
-  savedObjectsClient: SavedObjectsClientContract;
-  scopedClusterClient: IScopedClusterClient;
   searchSourceClient: ISearchStartSearchSource;
+  savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
-  shouldStopExecution: () => boolean;
+  scopedClusterClient: IScopedClusterClient;
+  alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
+  shouldStopExecution: () => boolean;
 }
 
 export interface RuleExecutorOptions<
