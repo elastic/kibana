@@ -63,12 +63,7 @@ export const HostsPage = () => {
                     `}
                   >
                     <h1>{hostsTitle}</h1>
-                    <ExperimentalBadge
-                      css={css`
-                        display: flex;
-                        justify-content: center;
-                      `}
-                    />
+                    <ExperimentalBadge />
                   </div>
                 ),
                 rightSideItems: [

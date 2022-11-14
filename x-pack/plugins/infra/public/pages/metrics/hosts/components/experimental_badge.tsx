@@ -6,13 +6,16 @@
  */
 
 import { EuiBetaBadge } from '@elastic/eui';
-import type { SerializedStyles } from '@emotion/serialize';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export const ExperimentalBadge = (css: { css: SerializedStyles }) => (
+export const ExperimentalBadge = () => (
   <EuiBetaBadge
-    css={css}
+    css={css`
+      display: flex;
+      justify-content: center;
+    `}
     label={i18n.translate('xpack.infra.hostsPage.experimentalBadgeLabel', {
       defaultMessage: 'Technical preview',
     })}
