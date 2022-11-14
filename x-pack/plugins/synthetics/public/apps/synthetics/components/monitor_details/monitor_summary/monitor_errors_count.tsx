@@ -32,6 +32,7 @@ export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
 
   return (
     <ExploratoryViewEmbeddable
+      align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
