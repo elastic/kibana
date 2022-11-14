@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo, useEffect, useRef } from 'react';
+import React, { useState, Fragment, memo, useMemo, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -121,20 +121,23 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       [advancedVars, inputStreamValidationResults?.vars]
     );
 
-    const dataStreamInfo = packageInfo.data_streams?.find(
-      (ds) => ds.dataset === packagePolicyInputStream.data_stream.dataset
+    const isFeatureEnabled = useCallback(
+      (feature: ExperimentalIndexingFeature) =>
+        packagePolicy.package?.experimental_data_stream_features?.some(
+          ({ data_stream: dataStream, features }) =>
+            dataStream ===
+              getRegistryDataStreamAssetBaseName(packagePolicyInputStream.data_stream) &&
+            features[feature]
+        ) ?? false,
+      [
+        packagePolicy.package?.experimental_data_stream_features,
+        packagePolicyInputStream.data_stream,
+      ]
     );
-
-    const isFeatureEnabled = (feature: ExperimentalIndexingFeature) =>
-      packagePolicy.package?.experimental_data_stream_features?.some(
-        ({ data_stream: dataStream, features }) =>
-          dataStream === getRegistryDataStreamAssetBaseName(packagePolicyInputStream.data_stream) &&
-          features[feature]
-      ) ?? false;
 
     const newExperimentalIndexingFeature = {
       synthetic_source: isFeatureEnabled('synthetic_source'),
-      TSDB: isFeatureEnabled('TSDB') || dataStreamInfo?.elasticsearch?.index_mode === 'time_series',
+      TSDB: isFeatureEnabled('TSDB'),
     };
 
     const onIndexingSettingChange = (
@@ -365,7 +368,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         <EuiSpacer size="s" />
                         <EuiFlexItem>
                           <EuiSwitch
-                            checked={newExperimentalIndexingFeature.synthetic_source}
+                            checked={isFeatureEnabled('synthetic_source')}
                             label={
                               <FormattedMessage
                                 id="xpack.fleet.createPackagePolicy.experimentalFeatures.syntheticSourceLabel"
@@ -389,8 +392,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             }
                           >
                             <EuiSwitch
-                              disabled={newExperimentalIndexingFeature.TSDB}
-                              checked={newExperimentalIndexingFeature.TSDB}
+                              disabled={isFeatureEnabled('TSDB')}
+                              checked={isFeatureEnabled('TSDB')}
                               label={
                                 <FormattedMessage
                                   id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBLabel"
