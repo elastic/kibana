@@ -343,7 +343,7 @@ export const buildISONEOFQueryMatch = ({
   const trimmedValue = field.trim();
   if (value.length) {
     return `${trimmedValue} : (${value
-      .map((item) => (isNumber(item) ? Number(item) : `${item.trim()}`))
+      .map((item) => (isNumber(item) ? Number(item) : `${escapeQueryValue(item.trim())}`))
       .join(' OR ')})`;
   }
   return `${trimmedValue} : ''`;

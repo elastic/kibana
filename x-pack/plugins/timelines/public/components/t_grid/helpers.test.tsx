@@ -760,7 +760,7 @@ describe('Combined Queries', () => {
           indexPattern: mockIndexPattern,
           browserFields: mockBrowserFields,
           filters: [],
-          kqlQuery: { query: 'name: (a OR b OR c)', language: 'kuery' },
+          kqlQuery: { query: 'name: ("a" OR "b" OR "c")', language: 'kuery' },
           kqlMode: 'search',
         })!;
 
@@ -786,7 +786,7 @@ describe('Combined Queries', () => {
           indexPattern: mockIndexPattern,
           browserFields: mockBrowserFields,
           filters: [],
-          kqlQuery: { query: 'NOT name: (a OR b OR c)', language: 'kuery' },
+          kqlQuery: { query: 'NOT name: ("a" OR "b" OR "c")', language: 'kuery' },
           kqlMode: 'search',
         })!;
 
@@ -991,7 +991,7 @@ describe('buildISONEOFQueryMatch', () => {
         field: 'kibana.alert.worflow_status',
         value: ['a', 'b', 'c'],
       })
-    ).toBe('kibana.alert.worflow_status : (a OR b OR c)');
+    ).toBe(`kibana.alert.worflow_status : (\"a\" OR \"b\" OR \"c\")`);
   });
   it('correcty computes IS ONE OF query if value is an empty array', () => {
     expect(
