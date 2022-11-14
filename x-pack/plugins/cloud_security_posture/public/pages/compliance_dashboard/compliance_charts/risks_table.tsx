@@ -127,13 +127,13 @@ export const RisksTable = ({
     [compact, onCellClick]
   );
 
-  const descByComplianceScore = getTopRisks(cisSectionsEvaluations, maxItems);
+  const sortedByComplianceScore = getTopRisks(cisSectionsEvaluations, maxItems);
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="none">
       <EuiFlexItem>
         <EuiInMemoryTable<GroupedFindingsEvaluation>
-          items={descByComplianceScore}
+          items={sortedByComplianceScore}
           columns={columns}
         />
       </EuiFlexItem>
