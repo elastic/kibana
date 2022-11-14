@@ -662,7 +662,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
       },
       {
         id: 'ruleExecutionStatus',
-        field: 'executionStatus.status',
+        field: 'lastRun.outcome',
         name: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastResponseTitle',
           { defaultMessage: 'Last response' }

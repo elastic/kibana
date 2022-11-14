@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiHealth, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiHealth,
+  EuiToolTip,
+  EuiStat,
+} from '@elastic/eui';
 import { RuleTableItem } from '../../../../types';
 import {
   getRuleHealthColor,
@@ -15,7 +22,7 @@ import {
   getRuleStatusMessage,
 } from '../../../../common/lib/rule_status_helpers';
 
-interface RulesListTableStatusCellProps {
+export interface RulesListTableStatusCellProps {
   rule: RuleTableItem;
   onManageLicenseClick: (rule: RuleTableItem) => void;
 }
@@ -30,11 +37,21 @@ export const RulesListTableStatusCell = (props: RulesListTableStatusCellProps) =
   const tooltipMessage = lastRun?.outcome === 'failed' ? `Error: ${lastRun?.outcomeMsg}` : null;
 
   if (!statusMessage) {
-    return null;
+    return (
+      <EuiStat
+        titleSize="xs"
+        title="--"
+        description=""
+        isLoading={!lastRun?.outcome && !rule.nextRun}
+      />
+    );
   }
 
   const health = (
-    <EuiHealth data-test-subj={`ruleStatus-${lastRun?.outcome}`} color={healthColor || 'default'}>
+    <EuiHealth
+      data-test-subj={`ruleStatus-${lastRun?.outcome || 'pending'}`}
+      color={healthColor || 'default'}
+    >
       {statusMessage}
     </EuiHealth>
   );
