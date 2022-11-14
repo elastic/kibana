@@ -74,7 +74,7 @@ export const ENTITY_FIELD_LABEL = i18n.translate(
 
 export const TAGS_HELP = i18n.translate('xpack.stackConnectors.components.opsgenie.tagsHelp', {
   defaultMessage:
-    'Type one or more custom identifying tags for this case. Press enter after each tag to begin a new one.',
+    'Press enter after each tag to begin a new one.',
 });
 
 export const TAGS_FIELD_LABEL = i18n.translate(
@@ -113,5 +113,25 @@ export const RULE_TAGS_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.ruleTagsDescription',
   {
     defaultMessage: 'The tags of the rule.',
-  }
+  } 
 );
+
+export const OPSGENIE_ALIAS_HELP = i18n.translate('xpack.cases.createCase.opsGenieFieldAliasHelpText', {
+  defaultMessage:
+    'The unique alert identifier used for de-deduplication in OpsGenie.',
+});
+
+export const OPSGENIE_ENTITY_HELP = i18n.translate('xpack.cases.createCase.opsGenieFieldEntityHelpText', {
+defaultMessage:
+  'The domain of the alert. For example, the server or application name.',
+});
+
+export const OPSGENIE_SOURCE_HELP = i18n.translate('xpack.cases.createCase.opsGenieFieldSourceHelpText', {
+defaultMessage:
+  'The diplay name for the source of the alert.',
+});
+
+export const OPSGENIE_USER_HELP = i18n.translate('xpack.cases.createCase.opsGenieFieldUserHelpText', {
+defaultMessage:
+  'The display name for the owner.',
+});
