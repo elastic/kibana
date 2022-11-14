@@ -7,13 +7,15 @@
 
 import React, { useMemo } from 'react';
 
+import { EuiToolTip } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '../../../../shared_imports';
 import { Field } from '../../../../shared_imports';
-import { GROUP_BY_FIELD_PLACEHOLDER } from './translations';
+import { GROUP_BY_FIELD_PLACEHOLDER, GROUP_BY_FIELD_LICENSE_WARNING } from './translations';
 
 interface GroupByFieldsProps {
   browserFields: DataViewFieldBase[];
+  isDisabled: boolean;
   field: FieldHook;
 }
 
@@ -23,6 +25,7 @@ const fieldDescribedByIds = 'detectionEngineStepDefineRuleGroupByField';
 
 export const GroupByComponent: React.FC<GroupByFieldsProps> = ({
   browserFields,
+  isDisabled,
   field,
 }: GroupByFieldsProps) => {
   const fieldEuiFieldProps = useMemo(
@@ -33,10 +36,20 @@ export const GroupByComponent: React.FC<GroupByFieldsProps> = ({
       placeholder: GROUP_BY_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
       style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
+      isDisabled,
     }),
-    [browserFields]
+    [browserFields, isDisabled]
   );
-  return <Field field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />;
+  const fieldComponent = (
+    <Field field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />
+  );
+  return isDisabled ? (
+    <EuiToolTip position="right" content={GROUP_BY_FIELD_LICENSE_WARNING}>
+      {fieldComponent}
+    </EuiToolTip>
+  ) : (
+    fieldComponent
+  );
 };
 
 export const GroupByFields = React.memo(GroupByComponent);

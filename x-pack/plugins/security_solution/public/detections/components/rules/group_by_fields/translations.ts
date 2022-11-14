@@ -13,3 +13,10 @@ export const GROUP_BY_FIELD_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Select a field',
   }
 );
+
+export const GROUP_BY_FIELD_LICENSE_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupBy.licenseWarning',
+  {
+    defaultMessage: 'Alert suppression is enabled with Platinum license or above',
+  }
+);
