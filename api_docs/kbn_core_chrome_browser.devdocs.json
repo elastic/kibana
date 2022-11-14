@@ -91,7 +91,13 @@
             "description": [],
             "signature": [
               "(element: HTMLDivElement) => ",
-              "UnmountCallback"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.UnmountCallback",
+                "text": "UnmountCallback"
+              }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
             "deprecated": false,
@@ -108,7 +114,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
+                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -683,7 +689,13 @@
             "description": [],
             "signature": [
               "(element: HTMLElement) => ",
-              "UnmountCallback"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.UnmountCallback",
+                "text": "UnmountCallback"
+              }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
@@ -700,7 +712,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
+                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -964,7 +976,13 @@
               "\nThe category the app lives in"
             ],
             "signature": [
-              "AppCategory",
+              {
+                "pluginId": "@kbn/core-application-common",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationCommonPluginApi",
+                "section": "def-common.AppCategory",
+                "text": "AppCategory"
+              },
               " | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
@@ -2227,7 +2245,13 @@
             "description": [],
             "signature": [
               "(element: HTMLDivElement) => ",
-              "UnmountCallback"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.UnmountCallback",
+                "text": "UnmountCallback"
+              }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
             "deprecated": false,
@@ -2244,7 +2268,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
+                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toDateRange } from '../../domain/services';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
 import { createSLIClientMock, createSLORepositoryMock } from './mocks';
@@ -26,7 +27,11 @@ describe('GetSLO', () => {
     it('retrieves the SLO from the repository', async () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce({ good: 9999, total: 10000 });
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce({
+        good: 9999,
+        total: 10000,
+        date_range: toDateRange(slo.time_window),
+      });
 
       const result = await getSLO.execute(slo.id);
 
@@ -44,7 +49,7 @@ describe('GetSLO', () => {
             transaction_name: 'irrelevant',
             transaction_type: 'irrelevant',
           },
-          type: 'slo.apm.transaction_error_rate',
+          type: 'sli.apm.transaction_error_rate',
         },
         objective: {
           target: 0.999,

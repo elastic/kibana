@@ -33,6 +33,7 @@ const createStartMock = () => {
     bulkSchedule: jest.fn(),
     bulkDisable: jest.fn(),
     bulkEnable: jest.fn(),
+    getRegisteredTypes: jest.fn(),
   };
   return mock;
 };

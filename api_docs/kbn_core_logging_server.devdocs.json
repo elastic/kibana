@@ -730,16 +730,16 @@
                 "pluginId": "@kbn/core-logging-server",
                 "scope": "server",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.SizeLimitTriggeringPolicyConfig",
-                "text": "SizeLimitTriggeringPolicyConfig"
+                "section": "def-server.TimeIntervalTriggeringPolicyConfig",
+                "text": "TimeIntervalTriggeringPolicyConfig"
               },
               " | ",
               {
                 "pluginId": "@kbn/core-logging-server",
                 "scope": "server",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.TimeIntervalTriggeringPolicyConfig",
-                "text": "TimeIntervalTriggeringPolicyConfig"
+                "section": "def-server.SizeLimitTriggeringPolicyConfig",
+                "text": "SizeLimitTriggeringPolicyConfig"
               }
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
@@ -806,7 +806,13 @@
               "\nThe minimum size the file must have to roll over."
             ],
             "signature": [
-              "ByteSizeValue"
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ByteSizeValue",
+                "text": "ByteSizeValue"
+              }
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
             "deprecated": false,
@@ -1009,16 +1015,16 @@
             "pluginId": "@kbn/core-logging-server",
             "scope": "server",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.SizeLimitTriggeringPolicyConfig",
-            "text": "SizeLimitTriggeringPolicyConfig"
+            "section": "def-server.TimeIntervalTriggeringPolicyConfig",
+            "text": "TimeIntervalTriggeringPolicyConfig"
           },
           " | ",
           {
             "pluginId": "@kbn/core-logging-server",
             "scope": "server",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-server.TimeIntervalTriggeringPolicyConfig",
-            "text": "TimeIntervalTriggeringPolicyConfig"
+            "section": "def-server.SizeLimitTriggeringPolicyConfig",
+            "text": "SizeLimitTriggeringPolicyConfig"
           }
         ],
         "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
