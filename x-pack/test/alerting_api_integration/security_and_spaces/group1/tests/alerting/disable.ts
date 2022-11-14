@@ -105,15 +105,18 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(204);
-              expect(response.body).to.eql('');
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.errors).to.eql([]);
+              expect(response.body.tasks[0].enabled).to.eql(false);
+              expect(response.body.rule.attributes.enabled).to.eql(false);
+
               const { body: rule } = await supertestWithoutAuth
                 .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
 
-              expect(rule.enabled).to.eql(false);
+              expect(rule.enabled).to.be(false);
 
               // task should still exist but be disabled
               await retry.try(async () => {
@@ -175,15 +178,18 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(204);
-              expect(response.body).to.eql('');
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.errors).to.eql([]);
+              expect(response.body.tasks[0].enabled).to.eql(false);
+              expect(response.body.rule.attributes.enabled).to.eql(false);
+
               const { body: rule } = await supertestWithoutAuth
                 .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
 
-              expect(rule.enabled).to.eql(false);
+              expect(rule.enabled).to.be(false);
 
               // task should still exist but be disabled
               const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
@@ -247,15 +253,18 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(204);
-              expect(response.body).to.eql('');
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.errors).to.eql([]);
+              expect(response.body.tasks[0].enabled).to.eql(false);
+              expect(response.body.rule.attributes.enabled).to.eql(false);
+
               const { body: rule } = await supertestWithoutAuth
                 .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
 
-              expect(rule.enabled).to.eql(false);
+              expect(rule.enabled).to.be(false);
               // task should still exist but be disabled
               const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
               expect(taskRecord.type).to.eql('task');
@@ -314,15 +323,18 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(204);
-              expect(response.body).to.eql('');
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.errors).to.eql([]);
+              expect(response.body.tasks[0].enabled).to.eql(false);
+              expect(response.body.rule.attributes.enabled).to.eql(false);
+
               const { body: rule } = await supertestWithoutAuth
                 .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
 
-              expect(rule.enabled).to.eql(false);
+              expect(rule.enabled).to.be(false);
               // task should still exist but be disabled
               await retry.try(async () => {
                 const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
@@ -394,8 +406,10 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(204);
-              expect(response.body).to.eql('');
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.errors).to.eql([]);
+              expect(response.body.tasks[0].enabled).to.eql(false);
+              expect(response.body.rule.attributes.enabled).to.eql(false);
 
               const { body: rule } = await supertestWithoutAuth
                 .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -403,7 +417,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
 
-              expect(rule.enabled).to.eql(false);
+              expect(rule.enabled).to.be(false);
 
               // task should still exist but be disabled
               await retry.try(async () => {

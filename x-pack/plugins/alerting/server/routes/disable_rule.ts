@@ -31,8 +31,8 @@ export const disableRuleRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         try {
-          await rulesClient.disable({ id });
-          return res.noContent();
+          const response = await rulesClient.disable({ id });
+          return res.ok({ body: response });
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
             return e.sendResponse(res);

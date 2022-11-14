@@ -43,6 +43,7 @@ import {
 } from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
+  BulkUpdateTaskResult,
   ConcreteTaskInstance,
   TaskManagerStartContract,
   TaskStatus,
@@ -2679,7 +2680,7 @@ export class RulesClient {
     return this.apiKeyAsAlertAttributes(createdAPIKey, username);
   }
 
-  public async disable({ id }: { id: string }): Promise<void> {
+  public async disable({ id }: { id: string }): Promise<BulkUpdateTaskResult> {
     return await retryIfConflicts(
       this.logger,
       `rulesClient.disable('${id}')`,
@@ -2687,7 +2688,11 @@ export class RulesClient {
     );
   }
 
-  private async disableWithOCC({ id }: { id: string }) {
+  private async disableWithOCC({
+    id,
+  }: {
+    id: string;
+  }): Promise<BulkUpdateTaskResult & { rule: SavedObjectsUpdateResponse }> {
     let attributes: RawRule;
     let version: string | undefined;
 
@@ -2784,7 +2789,7 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     if (attributes.enabled === true) {
-      await this.unsecuredSavedObjectsClient.update(
+      const rule = await this.unsecuredSavedObjectsClient.update(
         'alert',
         id,
         this.updateMeta({
@@ -2802,11 +2807,29 @@ export class RulesClient {
       if (attributes.scheduledTaskId) {
         if (attributes.scheduledTaskId !== id) {
           await this.taskManager.removeIfExists(attributes.scheduledTaskId);
+          return {
+            rule,
+            tasks: [],
+            errors: [
+              {
+                task: {} as ConcreteTaskInstance,
+                error: new Error(
+                  `scheduledTaskId does not match ${id} !== ${attributes.scheduledTaskId}`
+                ),
+              },
+            ],
+          };
         } else {
-          await this.taskManager.bulkDisable([attributes.scheduledTaskId]);
+          const taskDisable = await this.taskManager.bulkDisable([attributes.scheduledTaskId]);
+          return { rule, ...taskDisable };
         }
       }
     }
+    return {
+      rule: {} as SavedObjectsUpdateResponse,
+      tasks: [],
+      errors: [{ task: {} as ConcreteTaskInstance, error: new Error('rule is not enabled') }],
+    };
   }
 
   public async snooze({

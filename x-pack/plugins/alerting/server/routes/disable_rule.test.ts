@@ -33,7 +33,7 @@ describe('disableRuleRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_disable"`);
 
-    rulesClient.disable.mockResolvedValueOnce();
+    rulesClient.disable.mockResolvedValueOnce({ tasks: [], errors: [] });
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -56,7 +56,7 @@ describe('disableRuleRoute', () => {
       ]
     `);
 
-    expect(res.noContent).toHaveBeenCalled();
+    expect(res.ok).toHaveBeenCalledWith({ body: { tasks: [], errors: [] } });
   });
 
   it('ensures the rule type gets validated for the license', async () => {
