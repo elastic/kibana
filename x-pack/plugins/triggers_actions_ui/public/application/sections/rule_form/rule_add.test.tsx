@@ -207,7 +207,10 @@ describe('rule_add', () => {
     expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
 
     wrapper.find('[data-test-subj="cancelSaveRuleButton"]').last().simulate('click');
-    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.CANCELED);
+    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.CANCELED, {
+      fields: ['test'],
+      test: 'some value',
+    });
   });
 
   it('renders a confirm close modal if the flyout is closed after inputs have changed', async () => {
@@ -301,7 +304,10 @@ describe('rule_add', () => {
       wrapper.update();
     });
 
-    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.SAVED);
+    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.SAVED, {
+      test: 'some value',
+      fields: ['test'],
+    });
   });
 
   it('should enforce any default interval', async () => {

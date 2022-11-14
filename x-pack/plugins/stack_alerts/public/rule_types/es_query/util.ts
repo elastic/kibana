@@ -14,4 +14,4 @@ export const isSearchSourceRule = (
   return ruleParams.searchType === 'searchSource';
 };
 
-export const useTriggersAndActionsUiDeps = () => useKibana<TriggersAndActionsUiDeps>().services;
+export const useTriggerUiActionServices = () => useKibana<TriggersAndActionsUiDeps>().services;
