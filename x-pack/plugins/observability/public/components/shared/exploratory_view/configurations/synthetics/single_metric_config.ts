@@ -91,6 +91,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         }),
         metricStateOptions: {
           titlePosition: 'bottom',
+          textAlign: 'center',
         },
       },
       {

@@ -133,6 +133,12 @@ export const REFERENCE_MODAL_TITLE = i18n.translate(
   }
 );
 
+export const defaultDeleteListMessage = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.referenceModalDefaultDescription', {
+    defaultMessage: 'Are you sure you wish to DELETE exception list with the name {listName}?',
+    values: { listName },
+  });
+
 export const REFERENCE_MODAL_CANCEL_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.referenceModalCancelButton',
   {
