@@ -60,7 +60,7 @@ const CALLOUT_MANAGEMENT_CONTACT_ADMIN = i18n.translate(
   'xpack.synthetics.monitorManagement.callout.disabled.adminContact.invalidKey',
   {
     defaultMessage:
-      'Please contact your administrator to enable monitor management, that will recreate an API Key with proper permissions',
+      'Please contact your administrator to enable monitor management.',
   }
 );
 
