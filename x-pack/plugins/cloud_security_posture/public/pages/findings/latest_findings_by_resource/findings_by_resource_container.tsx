@@ -34,7 +34,7 @@ import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import {
   LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY,
-  MAX_ITEMS,
+  MAX_FINDINGS_TO_LOAD,
 } from '../../../../common/constants';
 
 const getDefaultQuery = ({
@@ -93,7 +93,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const findingsGroupByResource = useFindingsByResource({
     ...getPaginationQuery({
       pageIndex: 0,
-      pageSize: MAX_ITEMS,
+      pageSize: MAX_FINDINGS_TO_LOAD,
     }),
     sortDirection: urlQuery.sortDirection,
     query: baseEsQuery.query,

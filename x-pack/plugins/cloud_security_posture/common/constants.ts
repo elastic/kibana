@@ -22,6 +22,8 @@ export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findin
 export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
 
+export const MAX_FINDINGS_TO_LOAD = 500;
+
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';
@@ -55,5 +57,3 @@ export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY =
   'cloudPosture:findingsByResource:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
-
-export const MAX_ITEMS = 500;

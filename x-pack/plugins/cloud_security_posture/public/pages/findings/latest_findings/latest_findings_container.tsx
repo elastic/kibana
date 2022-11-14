@@ -34,7 +34,7 @@ import { ErrorCallout } from '../layout/error_callout';
 import { getLimitProperties } from '../utils/get_limit_properties';
 import {
   LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY,
-  MAX_ITEMS,
+  MAX_FINDINGS_TO_LOAD,
 } from '../../../../common/constants';
 
 export const getDefaultQuery = ({
@@ -45,7 +45,7 @@ export const getDefaultQuery = ({
   filters,
   sort: { field: '@timestamp', direction: 'desc' },
   pageIndex: 0,
-  pageSize: MAX_ITEMS,
+  pageSize: MAX_FINDINGS_TO_LOAD,
 });
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
@@ -70,7 +70,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const findingsGroupByNone = useLatestFindings({
     ...getPaginationQuery({
       pageIndex: 0,
-      pageSize: MAX_ITEMS,
+      pageSize: MAX_FINDINGS_TO_LOAD,
     }),
     query: baseEsQuery.query,
     sort: urlQuery.sort,
@@ -91,7 +91,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     () =>
       getLimitProperties(
         findingsGroupByNone.data?.total || 0,
-        MAX_ITEMS,
+        MAX_FINDINGS_TO_LOAD,
         urlQuery.pageSize,
         urlQuery.pageIndex
       ),
@@ -191,7 +191,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
                     id="xpack.csp.findings.latestFindings.bottomBarLabel"
                     defaultMessage="These are the first {maxItems} findings matching your search, refine your search to see others."
                     values={{
-                      maxItems: MAX_ITEMS,
+                      maxItems: MAX_FINDINGS_TO_LOAD,
                     }}
                   />
                 </EuiText>
