@@ -23,7 +23,7 @@ import {
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
-import { StatusAll } from '../../../common/ui/types';
+import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
@@ -39,7 +39,7 @@ import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useUpdateCase } from '../../containers/use_update_case';
-import { useGetCases } from '../../containers/use_get_cases';
+import { useGetCases, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -127,6 +127,7 @@ describe('AllCasesListGeneric', () => {
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
     mockKibana();
     moment.tz.setDefault('UTC');
+    window.localStorage.clear();
   });
 
   it('should render AllCasesList', async () => {
@@ -255,9 +256,7 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toBeCalledWith(
         expect.objectContaining({
           queryParams: {
-            page: 1,
-            perPage: 5,
-            sortField: 'createdAt',
+            ...DEFAULT_QUERY_PARAMS,
             sortOrder: 'asc',
           },
         })
@@ -402,12 +401,7 @@ describe('AllCasesListGeneric', () => {
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          queryParams: {
-            page: 1,
-            perPage: 5,
-            sortField: 'closedAt',
-            sortOrder: 'desc',
-          },
+          queryParams: { ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.closedAt },
         })
       );
     });
@@ -421,12 +415,7 @@ describe('AllCasesListGeneric', () => {
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          queryParams: {
-            page: 1,
-            perPage: 5,
-            sortField: 'createdAt',
-            sortOrder: 'desc',
-          },
+          queryParams: DEFAULT_QUERY_PARAMS,
         })
       );
     });
@@ -440,12 +429,7 @@ describe('AllCasesListGeneric', () => {
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          queryParams: {
-            page: 1,
-            perPage: 5,
-            sortField: 'createdAt',
-            sortOrder: 'desc',
-          },
+          queryParams: DEFAULT_QUERY_PARAMS,
         })
       );
     });
@@ -618,7 +602,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution', 'observability'],
         },
-        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+        queryParams: DEFAULT_QUERY_PARAMS,
       });
 
       userEvent.click(getByTestId('options-filter-popover-button-Solution'));
@@ -644,7 +628,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution'],
         },
-        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+        queryParams: DEFAULT_QUERY_PARAMS,
       });
 
       userEvent.click(
@@ -666,7 +650,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution', 'observability'],
         },
-        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+        queryParams: DEFAULT_QUERY_PARAMS,
       });
     });
 
@@ -698,7 +682,7 @@ describe('AllCasesListGeneric', () => {
           assignees: [],
           owner: ['securitySolution'],
         },
-        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+        queryParams: DEFAULT_QUERY_PARAMS,
       });
     });
   });
