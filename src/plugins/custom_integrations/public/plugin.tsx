@@ -54,7 +54,6 @@ export class CustomIntegrationsPlugin
       javascript: ElasticsearchJsClientReadme,
       php: ElasticsearchPhpClientReadme,
       python: ElasticsearchPyClientReadme,
-
     };
 
     const ContextProvider: React.FC = ({ children }) => (
