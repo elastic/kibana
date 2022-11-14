@@ -54,6 +54,7 @@ export const useExceptionsListCard = ({
     setExceptionToEdit(exception);
     setShowEditExceptionFlyout(true);
   };
+
   const {
     lastUpdated,
     exceptionViewerStatus,

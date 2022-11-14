@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
@@ -83,7 +84,9 @@ export const SharedLists = React.memo(() => {
   const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
     exceptionReferenceModalInitialState
   );
-  const [filters, setFilters] = useState<ExceptionListFilter | undefined>(undefined);
+  const [filters, setFilters] = useState<ExceptionListFilter | undefined>({
+    types: [ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT],
+  });
   const [loadingExceptions, exceptions, pagination, setPagination, refreshExceptions] =
     useExceptionLists({
       errorMessage: i18n.ERROR_EXCEPTION_LISTS,
@@ -487,7 +490,6 @@ export const SharedLists = React.memo(() => {
                     key={excList.list_id}
                     data-test-subj="exceptionsListCard"
                     readOnly={canUserREAD && !canUserCRUD}
-                    http={http}
                     exceptionsList={excList}
                     handleDelete={handleDelete}
                     handleExport={handleExport}
