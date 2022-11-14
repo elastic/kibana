@@ -12,23 +12,20 @@ import {
   ExceptionListHeader,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
+import { EuiLoadingContent } from '@elastic/eui';
+import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
+import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
-import type { ExceptionListInfo } from '../../hooks';
 import { useExceptionListDetails } from '../../hooks';
 
-interface ExceptionListDetailsComponentProps {
-  isReadOnly: boolean;
-  list: ExceptionListInfo;
-}
-
-export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProps> = ({
-  isReadOnly = false,
-  list,
-}) => {
+export const ListsDetailViewComponent: FC = () => {
   const {
+    isLoading,
+    invalidListId,
+    isReadOnly,
+    list,
     canUserEditList,
-    allRules,
     listId,
     linkedRules,
     exportedList,
@@ -36,6 +33,7 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
     listName,
     listDescription,
     showManageRulesFlyout,
+    headerBackOptions,
     onEditListDetails,
     onExportList,
     onDeleteList,
@@ -43,9 +41,15 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
     onSaveManageRules,
     onCancelManageRules,
     onRuleSelectionChange,
-  } = useExceptionListDetails(list);
+  } = useExceptionListDetails();
+
+  if (isLoading) return <EuiLoadingContent lines={4} data-test-subj="loading" />;
+
+  if (invalidListId || !listName || !listDescription || !list) return <NotFoundPage />;
+
   return (
     <>
+      <MissingPrivilegesCallOut />
       <ExceptionListHeader
         name={listName}
         description={listDescription}
@@ -53,6 +57,7 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
         linkedRules={linkedRules}
         isReadonly={isReadOnly}
         canUserEditList={canUserEditList}
+        backOptions={headerBackOptions}
         securityLinkAnchorComponent={ListDetailsLinkAnchor}
         onEditListDetails={onEditListDetails}
         onExportList={onExportList}
@@ -67,7 +72,7 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
           <ListWithSearch list={list} isReadOnly={isReadOnly} />
           {showManageRulesFlyout ? (
             <ManageRules
-              linkedRules={allRules}
+              linkedRules={linkedRules}
               onSave={onSaveManageRules}
               onCancel={onCancelManageRules}
               onRuleSelectionChange={onRuleSelectionChange}
@@ -79,6 +84,6 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
   );
 };
 
-ExceptionListDetailsComponent.displayName = 'ExceptionListDetailsComponent';
-export const ExceptionListDetails = React.memo(ExceptionListDetailsComponent);
-ExceptionListDetails.displayName = 'ExceptionListDetails';
+ListsDetailViewComponent.displayName = 'ListsDetailViewComponent';
+export const ListsDetailView = React.memo(ListsDetailViewComponent);
+ListsDetailView.displayName = 'ListsDetailView';

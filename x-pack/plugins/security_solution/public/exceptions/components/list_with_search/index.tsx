@@ -9,6 +9,7 @@ import React from 'react';
 import type { FC } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
@@ -21,10 +22,9 @@ import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/c
 import * as i18n from '../../translations';
 import { useListWithSearchComponent } from '../../hooks/use_list_with_search';
 import { ListExceptionItems } from '..';
-import type { ExceptionListInfo } from '../../hooks';
 
 interface ListWithSearchComponentProps {
-  list: ExceptionListInfo;
+  list: ExceptionListSchema;
   isReadOnly: boolean;
 }
 

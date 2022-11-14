@@ -52,9 +52,6 @@ import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/serv
 
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 
-// TODO will be removed once the new Exception-List table is added
-// import { ExceptionListDetails } from '../../../rule_exceptions/pages/exception_list_details';
-
 export type Func = () => Promise<void>;
 
 interface ReferenceModalState {
@@ -547,7 +544,6 @@ export const SharedLists = React.memo(() => {
           titleText={i18n.REFERENCE_MODAL_TITLE}
         />
       </div>
-      {/* {showDetails && <ExceptionListDetails list={tableItems[0]} isReadOnly={false} />} */}
     </>
   );
 });

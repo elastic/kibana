@@ -22,6 +22,11 @@ export interface FetchItems {
   search?: string;
   filter?: string;
 }
+
+export interface FetchListById {
+  http: HttpSetup | undefined;
+  id: string;
+}
 export interface DeleteExceptionItem {
   id: string;
   namespaceType: NamespaceType;

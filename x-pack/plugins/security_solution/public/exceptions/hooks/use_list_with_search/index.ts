@@ -7,16 +7,18 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import type { GetExceptionItemProps } from '@kbn/securitysolution-exception-list-components';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
 import * as i18n from '../../translations';
 import { useListExceptionItems } from '..';
-import type { ExceptionListInfo } from '../use_all_exception_lists';
 
-export const useListWithSearchComponent = (list: ExceptionListInfo) => {
+export const useListWithSearchComponent = (list: ExceptionListSchema) => {
   const [showAddExceptionFlyout, setShowAddExceptionFlyout] = useState(false);
   const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
 

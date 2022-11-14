@@ -8,11 +8,50 @@
 import {
   deleteExceptionListById,
   exportExceptionList,
+  fetchExceptionListById,
   updateExceptionList,
 } from '@kbn/securitysolution-list-api';
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { DeleteExceptionList, ExportExceptionList, UpdateExceptionList } from './types';
+import type {
+  DeleteExceptionList,
+  ExportExceptionList,
+  FetchListById,
+  UpdateExceptionList,
+} from './types';
+import { fetchRules } from '../../detection_engine/rule_management/api/api';
+import type { Rule } from '../../detection_engine/rule_management/logic';
+
+export const getListById = async ({ id, http }: FetchListById) => {
+  try {
+    const abortCtrl = new AbortController();
+    return await fetchExceptionListById({
+      http: http as HttpSetup,
+      id,
+      signal: abortCtrl.signal,
+      namespaceType: 'single', // TODO ask Devin
+    });
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+export const getListRules = async (listId: string) => {
+  try {
+    const abortCtrl = new AbortController();
+    const { data: rules } = await fetchRules({
+      signal: abortCtrl.signal,
+    });
+    return rules.reduce((acc: Rule[], rule, index) => {
+      const listExceptions = rule.exceptions_list?.find(
+        (exceptionList) => exceptionList.list_id === listId
+      );
+      if (listExceptions) acc.push(rule);
+      return acc;
+    }, []);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 
 export const updateList = async ({ list, http }: UpdateExceptionList) => {
   try {

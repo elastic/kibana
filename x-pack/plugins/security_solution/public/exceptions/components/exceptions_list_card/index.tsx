@@ -98,6 +98,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       onAddExceptionClick,
       handleConfirmExceptionFlyout,
       handleCancelExceptionItemFlyout,
+      goToExceptionDetail,
     } = useExceptionsListCard({
       exceptionsList,
       handleExport,
@@ -131,7 +132,12 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                       >
                         <EuiFlexItem grow>
                           <EuiText size="m">
-                            <EuiLink data-test-subj="exception-list-name">{listName}</EuiLink>
+                            <EuiLink
+                              data-test-subj="exception-list-name"
+                              onClick={goToExceptionDetail}
+                            >
+                              {listName}
+                            </EuiLink>
                           </EuiText>
                         </EuiFlexItem>
                         <EuiFlexItem grow>

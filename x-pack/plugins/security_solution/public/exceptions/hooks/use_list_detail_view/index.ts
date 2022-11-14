@@ -4,30 +4,58 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useState, useMemo } from 'react';
-import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type {
+  BackOptions,
+  ListDetails,
+  Rule as UIRule,
+} from '@kbn/securitysolution-exception-list-components';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
+import { useParams } from 'react-router-dom';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useUserData } from '../../../detections/components/user_info';
+import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import { deleteList, exportList, updateList } from '../../api';
-import { checkIfListCannotBeEdited, mapListRulesToUIRules } from '../../utils/list.utils';
+import { getListById, deleteList, exportList, updateList, getListRules } from '../../api';
+import {
+  checkIfListCannotBeEdited,
+  isAnExceptionListItem,
+  mapListRulesToUIRules,
+} from '../../utils/list.utils';
 import * as i18n from '../../translations';
-import type { ExceptionListInfo } from '../use_all_exception_lists';
 
-export const useExceptionListDetails = (list: ExceptionListInfo) => {
-  const { name: listName, description: listDescription, list_id: listId, rules: allRules } = list;
+export const useExceptionListDetails = () => {
   const toasts = useToasts();
   const { services } = useKibana();
   const { http } = services;
+  const { navigateToApp } = services.application;
 
-  const [showManageRulesFlyout, setShowManageRulesFlyout] = useState(false);
-  const [exportedList, setExportedList] = useState<Blob>();
+  const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
+  const [isLoading, setIsLoading] = useState<boolean>();
+  const [list, setList] = useState<ExceptionListSchema | null>(null);
+  const [invalidListId, setInvalidListId] = useState(false);
+  const [linkedRules, setLinkedRules] = useState<UIRule[]>([]);
   const [canUserEditList, setCanUserEditList] = useState(true);
-  const linkedRules = useMemo(() => mapListRulesToUIRules(list.rules), [list.rules]);
   const [viewerStatus, setViewerStatus] = useState<ViewerStatus | string>('');
+  const [exportedList, setExportedList] = useState<Blob>();
 
-  useEffect(() => {
-    if (checkIfListCannotBeEdited(list)) return setCanUserEditList(false);
-  }, [list, list.list_id]);
+  const { exceptionListId } = useParams<{
+    exceptionListId: string;
+  }>();
+
+  const headerBackOptions: BackOptions = useMemo(
+    () => ({
+      pageId: SecurityPageName.exceptions,
+      path: '',
+      onNavigate: () => {
+        navigateToApp(APP_UI_ID, {
+          deepLinkId: SecurityPageName.exceptions,
+          path: '',
+        });
+      },
+    }),
+    [navigateToApp]
+  );
 
   const handleErrorStatus = useCallback(
     (error: Error, errorTitle?: string, errorDescription?: string) => {
@@ -37,55 +65,89 @@ export const useExceptionListDetails = (list: ExceptionListInfo) => {
       });
       setViewerStatus(ViewerStatus.ERROR);
     },
-    [setViewerStatus, toasts]
+    [toasts]
   );
+
+  const initializeListRules = useCallback(async (result) => {
+    const listRules = await getListRules(result.list_id);
+    //  const rules: UIRule[] = mapListRulesToUIRules(listRules);
+    setLinkedRules(listRules);
+  }, []);
+
+  const initializeList = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const result = await getListById({
+        id: exceptionListId,
+        http,
+      });
+      if (!result || !isAnExceptionListItem(result)) return setInvalidListId(true);
+
+      setList(result);
+      await initializeListRules(result);
+      setIsLoading(false);
+
+      setInvalidListId(false);
+      if (checkIfListCannotBeEdited(result)) return setCanUserEditList(false);
+    } catch (error) {
+      handleErrorStatus(error);
+    }
+  }, [exceptionListId, http, initializeListRules, handleErrorStatus]);
+
+  useEffect(() => {
+    initializeList();
+  }, [initializeList]);
+
+  const [showManageRulesFlyout, setShowManageRulesFlyout] = useState(false);
+
   const onEditListDetails = useCallback(
     async (listDetails: ListDetails) => {
       try {
-        await updateList({
-          http,
-          list: {
-            id: list.id,
-            list_id: list.list_id,
-            type: list.type,
-            name: listDetails.name,
-            description: listDetails.description || list.description,
-          },
-        });
+        if (list)
+          await updateList({
+            http,
+            list: {
+              id: list.id,
+              list_id: exceptionListId,
+              type: list.type,
+              name: listDetails.name,
+              description: listDetails.description || list.description,
+            },
+          });
       } catch (error) {
         handleErrorStatus(error);
       }
     },
-    [handleErrorStatus, http, list.description, list.id, list.list_id, list.type]
+    [exceptionListId, handleErrorStatus, http, list]
   );
   const onExportList = useCallback(async () => {
-    try {
-      const result = await exportList({
-        id: list.id,
-        http,
-        listId,
-        namespaceType: list.namespace_type,
-      });
-      setExportedList(result);
-      toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(listName));
-    } catch (error) {
-      handleErrorStatus(error);
-    }
-  }, [handleErrorStatus, http, list.id, list.namespace_type, listId, listName, toasts]);
+    //  try {
+    //   const result = await exportList({
+    //     id: exceptionListId,
+    //     http,
+    //     listId: exceptionListId,
+    //     namespaceType: list.namespace_type,
+    //   });
+    //   setExportedList(result);
+    //   toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.name));
+    // } catch (error) {
+    //   handleErrorStatus(error);
+    // }
+  }, []);
 
   const onDeleteList = useCallback(async () => {
-    try {
-      await deleteList({
-        id: list.id,
-        http,
-        namespaceType: list.namespace_type,
-      });
-      toasts?.addSuccess(i18n.EXCEPTION_LIST_DELETED_SUCCESSFULLY(listName));
-      // TODO redirect to all lists
-    } catch (error) {
-      handleErrorStatus(error);
-    }
-  }, [handleErrorStatus, http, list.id, list.namespace_type, listName, toasts]);
+    // try {
+    //   await deleteList({
+    //     id: exceptionListId,
+    //     http,
+    //     namespaceType: list?.namespace_type,
+    //   });
+    //   toasts?.addSuccess(i18n.EXCEPTION_LIST_DELETED_SUCCESSFULLY(list?.name));
+    //   // TODO redirect to all lists
+    // } catch (error) {
+    //   handleErrorStatus(error);
+    // }
+  }, []);
 
   const onManageRules = useCallback(() => {
     setShowManageRulesFlyout(true);
@@ -99,15 +161,20 @@ export const useExceptionListDetails = (list: ExceptionListInfo) => {
   }, []);
   const onRuleSelectionChange = useCallback(() => {}, []);
   return {
+    isLoading: isLoading || userInfoLoading,
+    invalidListId,
+    isReadOnly: !!(!canUserCRUD && canUserREAD),
+    list,
+    listName: list?.name,
+    listDescription: list?.description,
+    listId: exceptionListId,
+    allRules: [], // list.rules, // TODO fix
     canUserEditList,
-    allRules,
     linkedRules,
     exportedList,
     viewerStatus,
-    listName,
-    listDescription,
-    listId,
     showManageRulesFlyout,
+    headerBackOptions,
     onEditListDetails,
     onExportList,
     onDeleteList,
