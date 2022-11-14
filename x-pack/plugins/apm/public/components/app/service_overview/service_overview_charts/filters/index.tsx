@@ -19,6 +19,7 @@ type MobileFilter =
 interface Props {
   end: string;
   environment: Environment;
+  transactionType?: string;
   kuery: string;
   start: string;
   filters: Record<MobileFilter['key'], string | undefined>;
@@ -32,6 +33,7 @@ const ALL_OPTION = {
 export function MobileFilters({
   end,
   environment,
+  transactionType,
   kuery,
   start,
   filters,
@@ -45,12 +47,12 @@ export function MobileFilters({
         {
           params: {
             path: { serviceName },
-            query: { end, environment, kuery, start },
+            query: { end, environment, kuery, start, transactionType },
           },
         }
       );
     },
-    [end, environment, kuery, serviceName, start]
+    [end, environment, kuery, serviceName, start, transactionType]
   );
 
   function toSelectOptions(items?: string[]) {
@@ -70,7 +72,11 @@ export function MobileFilters({
     <EuiFlexGroup justifyContent="flexEnd">
       {data.mobileFilters.map((filter) => {
         return (
-          <EuiFlexItem grow={false} key={filter.key}>
+          <EuiFlexItem
+            grow={false}
+            key={filter.key}
+            style={{ minWidth: '225px' }}
+          >
             <EuiSelect
               prepend={filter.label}
               options={toSelectOptions(filter.options)}

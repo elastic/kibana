@@ -11,11 +11,9 @@ import React from 'react';
 import SemVer from 'semver/classes/semver';
 
 import { ReindexWarning } from '../../../../../../../common/types';
-import { MAJOR_VERSION } from '../../../../../../../common/constants';
-
 import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 
-const kibanaVersion = new SemVer(MAJOR_VERSION);
+const kibanaVersion = new SemVer('8.0.0');
 
 jest.mock('../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');

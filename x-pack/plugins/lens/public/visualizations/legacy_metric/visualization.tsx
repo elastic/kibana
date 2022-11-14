@@ -223,6 +223,7 @@ export const getLegacyMetricVisualization = ({
               defaultMessage: 'Value',
             }),
           },
+          isMetricDimension: true,
           groupLabel: i18n.translate('xpack.lens.metric.label', {
             defaultMessage: 'Metric',
           }),
@@ -314,5 +315,29 @@ export const getLegacyMetricVisualization = ({
   getErrorMessages(state) {
     // Is it possible to break it?
     return undefined;
+  },
+
+  getVisualizationInfo(state: LegacyMetricState) {
+    const dimensions = [];
+    if (state.accessor) {
+      dimensions.push({
+        id: state.accessor,
+        name: i18n.translate('xpack.lens.metric.label', {
+          defaultMessage: 'Metric',
+        }),
+      });
+    }
+
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: 'metric',
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
   },
 });

@@ -69,6 +69,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     packageVerification: true,
     // @ts-expect-error
     showDevtoolsRequest: false,
+    showRequestDiagnostics: false,
   });
 
   const HookWrapper = memo(({ children }) => {

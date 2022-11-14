@@ -21,6 +21,8 @@ import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 
+jest.mock('../../../../../common/experimental_features_service');
+
 describe('When using the release action from response actions console', () => {
   let render: (
     capabilities?: EndpointCapabilities[]

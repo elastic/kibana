@@ -25,6 +25,7 @@ import { login, visit } from '../../tasks/login';
 import { openActiveTimeline } from '../../tasks/timeline';
 
 import { ALERTS_URL } from '../../urls/navigation';
+import { fillAddFilterForm, openAddFilterPopover } from '../../tasks/search_bar';
 
 describe('Alerts timeline', () => {
   before(() => {
@@ -62,6 +63,9 @@ describe('Alerts timeline', () => {
   });
 
   it('Add an empty property to default timeline', () => {
+    // add condition to make sure the field is empty
+    openAddFilterPopover();
+    fillAddFilterForm({ key: 'file.name', operator: 'does not exist' });
     scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
     addAlertPropertyToTimeline(ALERT_TABLE_FILE_NAME_VALUES, 0);
     openActiveTimeline();
