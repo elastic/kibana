@@ -99,8 +99,6 @@ export const getFileInfo = async (
       }
     }
 
-    // TODO: add `ttl` to the return payload by retrieving the value from ILM?
-
     return {
       name,
       id,
@@ -123,7 +121,7 @@ const doesFileHaveChunks = async (
     body: {
       query: {
         term: {
-          'bid.keyword': fileId,
+          bid: fileId,
         },
       },
       // Setting `_source` to false - we don't need the actual document to be returned

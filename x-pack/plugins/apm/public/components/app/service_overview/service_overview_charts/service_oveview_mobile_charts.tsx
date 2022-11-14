@@ -6,8 +6,18 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { EuiTitle } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
@@ -71,7 +81,7 @@ export function ServiceOverviewMobileCharts({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <MobileFilters
           start={start}
           end={end}
@@ -91,6 +101,132 @@ export function ServiceOverviewMobileCharts({
           <AggregatedTransactionsBadge />
         </EuiFlexItem>
       )}
+      <EuiFlexItem>
+        <EuiHorizontalRule />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.apm.serviceOverview.mobileCallOutTitle',
+            {
+              defaultMessage: 'Mobile APM',
+            }
+          )}
+          iconType="mobile"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.apm.serviceOverview.mobileCallOutText"
+              defaultMessage="This is a mobile service, which is currently released as a technical
+            preview. You can help us improve the experience by giving feedback. {feedbackLink}."
+              values={{
+                feedbackLink: (
+                  <EuiLink href="https://ela.st/feedback-mobile-apm">
+                    {i18n.translate(
+                      'xpack.apm.serviceOverview.mobileCallOutLink',
+                      {
+                        defaultMessage: 'Give feedback',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={5}>
+            <EuiPanel hasBorder={true}>
+              <LatencyMap filters={filters} />
+            </EuiPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={7}>
+            <EuiPanel hasBorder={true}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h2>
+                    {i18n.translate('xpack.apm.serviceOverview.mostUsedTitle', {
+                      defaultMessage: 'Most used',
+                    })}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexGroup direction={rowDirection} gutterSize="s">
+                {/* Device */}
+                <EuiFlexItem>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.device',
+                      {
+                        defaultMessage: 'Devices',
+                      }
+                    )}
+                    metric={DEVICE_MODEL_NAME}
+                    start={start}
+                    end={end}
+                    kuery={kuery}
+                    filters={filters}
+                  />
+                </EuiFlexItem>
+                {/* NCT */}
+                <EuiFlexItem>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.nct',
+                      {
+                        defaultMessage: 'Network Connection Type',
+                      }
+                    )}
+                    metric={NETWORK_CONNECTION_TYPE}
+                    start={start}
+                    end={end}
+                    kuery={kuery}
+                    filters={filters}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup>
+                {/* OS version */}
+                <EuiFlexItem>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.osVersion',
+                      {
+                        defaultMessage: 'OS version',
+                      }
+                    )}
+                    metric={HOST_OS_VERSION}
+                    start={start}
+                    end={end}
+                    kuery={kuery}
+                    filters={filters}
+                  />
+                </EuiFlexItem>
+                {/* App version */}
+                <EuiFlexItem>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.appVersion',
+                      {
+                        defaultMessage: 'App version',
+                      }
+                    )}
+                    metric={SERVICE_VERSION}
+                    start={start}
+                    end={end}
+                    kuery={kuery}
+                    filters={filters}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasBorder={true}>
           <LatencyChart height={latencyChartHeight} kuery={kuery} />
@@ -153,82 +289,6 @@ export function ServiceOverviewMobileCharts({
                 }
               />
             </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiPanel hasBorder={true}>
-          <LatencyMap filters={filters} />
-        </EuiPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiFlexGroup direction={rowDirection} gutterSize="s">
-          {/* Device */}
-          <EuiFlexItem>
-            <MostUsedChart
-              title={i18n.translate(
-                'xpack.apm.serviceOverview.mostUsed.device',
-                {
-                  defaultMessage: 'Most used device',
-                }
-              )}
-              metric={DEVICE_MODEL_NAME}
-              start={start}
-              end={end}
-              kuery={kuery}
-              filters={filters}
-            />
-          </EuiFlexItem>
-          {/* NCT */}
-          <EuiFlexItem>
-            <MostUsedChart
-              title={i18n.translate('xpack.apm.serviceOverview.mostUsed.nct', {
-                defaultMessage: 'Most used NCT',
-              })}
-              metric={NETWORK_CONNECTION_TYPE}
-              start={start}
-              end={end}
-              kuery={kuery}
-              filters={filters}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup direction={rowDirection} gutterSize="s">
-          {/* OS Version */}
-          <EuiFlexItem>
-            <MostUsedChart
-              title={i18n.translate(
-                'xpack.apm.serviceOverview.mostUsed.osVersion',
-                {
-                  defaultMessage: 'Most used OS version',
-                }
-              )}
-              metric={HOST_OS_VERSION}
-              start={start}
-              end={end}
-              kuery={kuery}
-              filters={filters}
-            />
-          </EuiFlexItem>
-          {/* App version */}
-          <EuiFlexItem>
-            <MostUsedChart
-              title={i18n.translate(
-                'xpack.apm.serviceOverview.mostUsed.appVersion',
-                {
-                  defaultMessage: 'Most used app version',
-                }
-              )}
-              metric={SERVICE_VERSION}
-              start={start}
-              end={end}
-              kuery={kuery}
-              filters={filters}
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
