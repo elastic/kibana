@@ -99,6 +99,9 @@ async function createRoot({ logFileName }: CreateRootConfig) {
   return root;
 }
 
+// suite is very long, the 10mins default can cause timeouts
+jest.setTimeout(15 * 60 * 1000);
+
 describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let rootA: Root;
