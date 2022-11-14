@@ -79,9 +79,13 @@ export const getTermsBucketAgg = () =>
         id: 'terms',
         params: {
           id: format.id,
+          ...(format.params
+            ? {
+                params: format.params,
+              }
+            : {}),
           otherBucketLabel: agg.params.otherBucketLabel,
           missingBucketLabel: agg.params.missingBucketLabel,
-          ...format.params,
         },
       };
     },
