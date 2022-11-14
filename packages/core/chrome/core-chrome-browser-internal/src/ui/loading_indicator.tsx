@@ -18,13 +18,9 @@ import './loading_indicator.scss';
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
-  customLogo?: string;
 }
 
-export class LoadingIndicator extends React.Component<
-  LoadingIndicatorProps,
-  { visible: boolean; customLogo: string | undefined }
-> {
+export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
   public static defaultProps = { showAsBar: false };
 
   private loadingCountSubscription?: Subscription;
@@ -32,7 +28,6 @@ export class LoadingIndicator extends React.Component<
 
   state = {
     visible: false,
-    customLogo: undefined,
   };
 
   private timer: any;
@@ -82,7 +77,7 @@ export class LoadingIndicator extends React.Component<
       />
     ) : (
       <EuiIcon
-        type={this.props.customLogo ? this.props.customLogo : 'logoElastic'}
+        type="logoElastic"
         size="l"
         data-test-subj={testSubj}
         className="chrHeaderLogo__cluster"

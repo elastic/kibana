@@ -83,18 +83,9 @@ interface Props {
   forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
   loadingCount$?: ReturnType<HttpStart['getLoadingCount$']>;
-  customLogo: string | undefined;
-  customMark: string | undefined;
 }
 
-export function HeaderLogo({
-  href,
-  navigateToApp,
-  customLogo,
-  customMark,
-  loadingCount$,
-  ...observables
-}: Props) {
+export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables }: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
 
@@ -108,12 +99,8 @@ export function HeaderLogo({
         defaultMessage: 'Elastic home',
       })}
     >
-      <LoadingIndicator loadingCount$={loadingCount$!} customLogo={customLogo} />
-      {customMark ? (
-        <img src={customMark} width="200" height="84" alt="custom mark" />
-      ) : (
-        <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
-      )}
+      <LoadingIndicator loadingCount$={loadingCount$!} />
+      <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
     </a>
   );
 }
