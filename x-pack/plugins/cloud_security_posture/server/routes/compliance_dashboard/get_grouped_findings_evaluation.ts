@@ -54,7 +54,7 @@ export const failedFindingsAggQuery = {
       sort_by_score: {
         bucket_sort: {
           sort: {
-            score: 'asc',
+            score: 'asc' as 'asc',
           },
         },
       },
@@ -65,7 +65,6 @@ export const failedFindingsAggQuery = {
 export const getRisksEsQuery = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
   size: 0,
   query,
-  // @ts-ignore
   aggs: failedFindingsAggQuery,
   pit: {
     id: pitId,
