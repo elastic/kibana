@@ -20,6 +20,7 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +29,11 @@ import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
 import { createPlaceholderWidget } from './placeholder_widget';
-import { codeEditorKeyboardHintStyles, codeEditorStyles } from './editor.styles';
+import {
+  codeEditorFullScreenStyles,
+  codeEditorKeyboardHintStyles,
+  codeEditorStyles,
+} from './editor.styles';
 
 export interface Props {
   /** Width of editor. Defaults to 100%. */
@@ -131,7 +136,6 @@ export const CodeEditor: React.FC<Props> = ({
   overrideEditorWillMount,
   editorDidMount,
   editorWillMount,
-  transparentBackground,
   suggestionProvider,
   signatureProvider,
   hoverProvider,
@@ -169,8 +173,12 @@ export const CodeEditor: React.FC<Props> = ({
   const [isHintActive, setIsHintActive] = useState(true);
 
   const defaultStyles = codeEditorStyles();
-  const hintStyles = codeEditorKeyboardHintStyles();
-  const styles = !isHintActive ? defaultStyles : { defaultStyles, hintStyles };
+  const { euiTheme } = useEuiTheme();
+  const hintStyles = codeEditorKeyboardHintStyles(euiTheme);
+  const styles = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    !isHintActive ? defaultStyles : { defaultStyles, hintStyles };
+  }, [isHintActive, defaultStyles, hintStyles]);
 
   const _updateDimensions = useCallback(() => {
     _editor.current?.layout();
@@ -216,7 +224,7 @@ export const CodeEditor: React.FC<Props> = ({
         setIsFullScreen(false);
       }
     },
-    [stopEditing]
+    [stopEditing, setIsFullScreen]
   );
 
   const onBlurMonaco = useCallback(() => {
@@ -295,7 +303,7 @@ export const CodeEditor: React.FC<Props> = ({
         />
       </EuiToolTip>
     );
-  }, [onKeyDownHint, startEditing]);
+  }, [onKeyDownHint, startEditing, ariaLabel, isReadOnly, styles]);
 
   const _editorWillMount = useCallback(
     (__monaco: unknown) => {
@@ -327,13 +335,6 @@ export const CodeEditor: React.FC<Props> = ({
           monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
         }
       });
-
-      //   // Register themes
-      //   monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
-      //   monaco.editor.defineTheme(
-      //     'euiColorsTransparent',
-      //     useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
-      //   );
     },
     [
       overrideEditorWillMount,
@@ -392,7 +393,7 @@ export const CodeEditor: React.FC<Props> = ({
 
       editorDidMount?.(editor);
     },
-    [editorDidMount]
+    [editorDidMount, onBlurMonaco, onKeydownMonaco]
   );
 
   useEffect(() => {
@@ -442,7 +443,7 @@ export const CodeEditor: React.FC<Props> = ({
           </div>
         ) : null}
         <MonacoEditor
-          theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
+          // theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
           language={languageId}
           value={value}
           onChange={onChange}
@@ -499,6 +500,7 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
   }, []);
 
   const FullScreenButton: React.FC = () => {
+    const styles = codeEditorFullScreenStyles();
     if (!allowFullScreen) return null;
     return (
       <EuiI18n
@@ -524,6 +526,7 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
     () =>
       ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
         if (!isFullScreen) return <>{children}</>;
+        const styles = codeEditorFullScreenStyles();
 
         return (
           <EuiOverlayMask>
@@ -551,6 +554,7 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
 
   const CopyButton = () => {
     if (!showCopyButton) return null;
+    const styles = codeEditorStyles();
 
     return (
       // className="euiCodeBlock__copyButton"

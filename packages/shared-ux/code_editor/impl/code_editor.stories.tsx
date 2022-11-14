@@ -17,7 +17,7 @@ import { CodeEditor } from './code_editor';
 import mdx from './README.mdx';
 
 export default {
-  title: 'Code Editor/Code Editor',
+  title: 'Code Editor',
   description: 'A code editor',
   parameters: {
     docs: {

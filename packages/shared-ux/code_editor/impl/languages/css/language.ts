@@ -7,7 +7,7 @@
  */
 
 /* eslint-disable @kbn/eslint/module_migration */
-//@ts-ignore d.ts file for export
+// @ts-ignore d.ts file for export
 import { conf, language } from 'monaco-editor/esm/vs/basic-languages/css/css';
 
 export { conf as languageConfiguration, language as lexerRules };

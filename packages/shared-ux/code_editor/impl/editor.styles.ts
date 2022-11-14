@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-
-const { euiTheme } = useEuiTheme();
 
 export const codeEditorMonacoStyles = () => css`
    {
@@ -24,7 +22,7 @@ export const codeEditorStyles = () => css`
   }
 `;
 
-export const codeEditorControlsStyles = () => css`
+export const codeEditorControlsStyles = ({ euiTheme }: UseEuiTheme) => css`
    {
     top: ${euiTheme.size.xs};
     right: ${euiTheme.base};
@@ -33,7 +31,7 @@ export const codeEditorControlsStyles = () => css`
   }
 `;
 
-export const codeEditorFullScreenStyles = () => css`
+export const codeEditorFullScreenStyles = ({ euiTheme }: UseEuiTheme) => css`
    {
     position: absolute;
     left: 0;
@@ -45,7 +43,7 @@ export const codeEditorFullScreenStyles = () => css`
   }
 `;
 
-export const codeEditorPlaceholderStyles = () => css`
+export const codeEditorPlaceholderStyles = ({ euiTheme }: UseEuiTheme) => css`
    {
     color: ${euiTheme.colors.subduedText};
     width: max-content;
@@ -53,8 +51,8 @@ export const codeEditorPlaceholderStyles = () => css`
   }
 `;
 
-export const codeEditorKeyboardHintStyles = () => css`
-   {
+export const codeEditorKeyboardHintStyles = ({ euiTheme }: UseEuiTheme) =>
+  `{
     position: absolute;
     top: 0;
     bottom: 0;
