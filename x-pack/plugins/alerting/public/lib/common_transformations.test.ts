@@ -6,7 +6,7 @@
  */
 
 import { ApiRule, transformRule } from './common_transformations';
-import { RuleExecutionStatusErrorReasons } from '../../common';
+import { RuleExecutionStatusErrorReasons, RuleLastRunOutcomeValues } from '../../common';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -90,7 +90,7 @@ describe('common_transformations', () => {
           ignored: 4,
         },
       },
-      next_run: dateUpdated.toISOString(),
+      next_run: dateUpdated,
     };
     expect(transformRule(apiRule)).toMatchInlineSnapshot(`
       Object {
