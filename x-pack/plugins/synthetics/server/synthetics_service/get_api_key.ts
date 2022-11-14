@@ -62,9 +62,7 @@ export const getAPIKeyForSyntheticsService = async ({
           return { isValid: false, apiKey };
         }
       } else {
-        server.logger.info(
-          'Synthetics api is no longer valid'
-        );
+        server.logger.info('Synthetics api is no longer valid');
       }
 
       return { apiKey, isValid };
