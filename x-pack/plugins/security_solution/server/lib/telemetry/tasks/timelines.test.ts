@@ -60,6 +60,5 @@ describe('timeline telemetry task test', () => {
     expect(mockTelemetryReceiver.buildProcessTree).toHaveBeenCalled();
     expect(mockTelemetryReceiver.fetchTimelineEvents).toHaveBeenCalled();
     expect(mockTelemetryReceiver.fetchTimelineEndpointAlerts).toHaveBeenCalled();
-    expect(mockTelemetryEventsSender.sendOnDemand).not.toHaveBeenCalled();
   });
 });
