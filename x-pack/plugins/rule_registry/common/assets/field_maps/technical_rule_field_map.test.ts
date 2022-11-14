@@ -196,6 +196,11 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
+      "kibana.alert.suppression.docs_count": Object {
+        "array": false,
+        "required": false,
+        "type": "long",
+      },
       "kibana.alert.suppression.end": Object {
         "array": false,
         "required": false,
@@ -258,11 +263,6 @@ it('matches snapshot', () => {
         "array": true,
         "required": false,
         "type": "keyword",
-      },
-      "undefined": Object {
-        "array": false,
-        "required": false,
-        "type": "long",
       },
     }
   `);
