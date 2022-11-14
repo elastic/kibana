@@ -45,7 +45,7 @@ export enum DiscoverSidebarReducerStatus {
   COMPLETED = 'COMPLETED',
 }
 
-interface DiscoverSidebarReducerState {
+export interface DiscoverSidebarReducerState {
   dataView: DataView | null | undefined;
   allFields: DataViewField[] | null;
   fieldCounts: Record<string, number> | null;
@@ -90,17 +90,21 @@ export function discoverSidebarReducer(
         status: DiscoverSidebarReducerStatus.PROCESSING,
       };
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED:
+      const mappedAndUnmappedFields = getDataViewFieldList(
+        action.payload.dataView,
+        action.payload.fieldCounts,
+        action.payload.isPlainRecord
+      );
       return {
         ...state,
         dataView: action.payload.dataView,
         fieldCounts: action.payload.fieldCounts,
-        allFields: getDataViewFieldList(
-          action.payload.dataView,
-          action.payload.fieldCounts,
-          action.payload.isPlainRecord
-        ),
+        allFields: mappedAndUnmappedFields,
         dateRange: action.payload.dateRange,
-        status: DiscoverSidebarReducerStatus.COMPLETED,
+        status:
+          mappedAndUnmappedFields === null
+            ? DiscoverSidebarReducerStatus.PROCESSING
+            : DiscoverSidebarReducerStatus.COMPLETED,
       };
   }
 

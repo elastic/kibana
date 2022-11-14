@@ -33,7 +33,12 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
-import { getSelectedFields, shouldShowField } from './lib/group_fields';
+import {
+  getSelectedFields,
+  shouldShowField,
+  type SelectedFieldsResult,
+  INITIAL_SELECTED_FIELDS_RESULT,
+} from './lib/group_fields';
 import { doesFieldMatchFilters, FieldFilterState, setFieldFilterProp } from './lib/field_filter';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -164,22 +169,33 @@ export function DiscoverSidebarComponent({
   }, [allFields]);
 
   const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
-  const [selectedFields, setSelectedFields] = useState<DataViewField[]>([]);
+  const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
+    INITIAL_SELECTED_FIELDS_RESULT
+  );
   const [multiFieldsMap, setMultiFieldsMap] = useState<
     Map<string, Array<{ field: DataViewField; isSelected: boolean }>> | undefined
   >(undefined);
 
   useEffect(() => {
-    setSelectedFields(getSelectedFields(selectedDataView, columns));
-  }, [selectedDataView, columns, setSelectedFields]);
+    const result = getSelectedFields(selectedDataView, columns);
+    setSelectedFieldsState(result);
+  }, [selectedDataView, columns, setSelectedFieldsState]);
 
   useEffect(() => {
     if (isPlainRecord || !useNewFieldsApi) {
       setMultiFieldsMap(undefined); // we don't have to calculate multifields in this case
     } else {
-      setMultiFieldsMap(calculateMultiFields(allFields, selectedFields, useNewFieldsApi));
+      setMultiFieldsMap(
+        calculateMultiFields(allFields, selectedFieldsState.selectedFieldsMap, useNewFieldsApi)
+      );
     }
-  }, [selectedFields, allFields, useNewFieldsApi, setMultiFieldsMap, isPlainRecord]);
+  }, [
+    selectedFieldsState.selectedFieldsMap,
+    allFields,
+    useNewFieldsApi,
+    setMultiFieldsMap,
+    isPlainRecord,
+  ]);
 
   const deleteField = useMemo(
     () =>
@@ -253,7 +269,7 @@ export function DiscoverSidebarComponent({
     fieldsExistenceReader: !isPlainRecord ? fieldsExistenceReader : undefined,
     allFields,
     popularFieldsLimit: !isPlainRecord ? popularFieldsLimit : 0,
-    sortedSelectedFields: selectedFields,
+    sortedSelectedFields: selectedFieldsState.selectedFields,
     isAffectedByGlobalFilter: isGlobalFilterApplied,
     services: {
       dataViews,
@@ -281,7 +297,10 @@ export function DiscoverSidebarComponent({
           onDeleteField={deleteField}
           showFieldStats={showFieldStats}
           contextualFields={columns}
-          selected={groupName === FieldsGroupNames.SelectedFields || selectedFields.includes(field)}
+          selected={
+            groupName === FieldsGroupNames.SelectedFields ||
+            Boolean(selectedFieldsState.selectedFieldsMap[field.name])
+          }
         />
       </li>
     ),
@@ -298,7 +317,7 @@ export function DiscoverSidebarComponent({
       deleteField,
       showFieldStats,
       columns,
-      selectedFields,
+      selectedFieldsState.selectedFieldsMap,
       fieldFilter.name,
     ]
   );
@@ -395,7 +414,7 @@ export const DiscoverSidebar = memo(DiscoverSidebarComponent);
 
 function calculateMultiFields(
   allFields: DataViewField[] | null,
-  selectedFields: DataViewField[],
+  selectedFieldsMap: SelectedFieldsResult['selectedFieldsMap'] | undefined,
   useNewFieldsApi: boolean
 ) {
   if (!useNewFieldsApi || !allFields) {
@@ -410,7 +429,7 @@ function calculateMultiFields(
     }
     const multiField = {
       field,
-      isSelected: selectedFields.includes(field),
+      isSelected: Boolean(selectedFieldsMap?.[field.name]),
     };
     const value = map.get(parent) ?? [];
     value.push(multiField);

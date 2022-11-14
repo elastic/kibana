@@ -29,13 +29,27 @@ export function shouldShowField(
   return useNewFieldsApi ? !getFieldSubtypeMulti(field?.spec) : true;
 }
 
+// to avoid rerenderings for empty state
+export const INITIAL_SELECTED_FIELDS_RESULT = {
+  selectedFields: [],
+  selectedFieldsMap: {},
+};
+
+export interface SelectedFieldsResult {
+  selectedFields: DataViewField[];
+  selectedFieldsMap: Record<string, boolean>;
+}
+
 export function getSelectedFields(
   dataView: DataView | undefined,
   columns: string[]
-): DataViewField[] {
-  let selectedFields: DataViewField[] = [];
-  if (!Array.isArray(columns)) {
-    return [];
+): SelectedFieldsResult {
+  const result: SelectedFieldsResult = {
+    selectedFields: [],
+    selectedFieldsMap: {},
+  };
+  if (!Array.isArray(columns) || !columns.length) {
+    return INITIAL_SELECTED_FIELDS_RESULT;
   }
 
   // add selected columns, that are not part of the data view, to be removable
@@ -47,18 +61,15 @@ export function getSelectedFields(
         displayName: column,
         type: 'unknown_selected',
       } as DataViewField);
-    selectedFields.push(selectedField);
+    result.selectedFields.push(selectedField);
+    result.selectedFieldsMap[selectedField.name] = true;
   }
 
-  selectedFields = uniqBy(selectedFields, 'name');
+  result.selectedFields = uniqBy(result.selectedFields, 'name');
 
-  if (selectedFields.length === 1 && selectedFields[0].name === '_source') {
-    return [];
+  if (result.selectedFields.length === 1 && result.selectedFields[0].name === '_source') {
+    return INITIAL_SELECTED_FIELDS_RESULT;
   }
 
-  selectedFields.sort((a, b) => {
-    return columns.indexOf(a.name) - columns.indexOf(b.name);
-  });
-
-  return selectedFields;
+  return result;
 }
