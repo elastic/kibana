@@ -22,10 +22,6 @@ import {
 
 import { CustomIntegrationsServicesProvider } from './services';
 import { servicesFactory } from './services/kibana';
-import { SampleClientReadme } from './components/fleet_integration/sample/sample_client_readme';
-import { ElasticsearchJsClientReadme } from './components/fleet_integration/elasticsearch_js/elasticsearch_js_readme';
-import { ElasticsearchPyClientReadme } from './components/fleet_integration/elasticsearch_py/elasticsearch_py_readme';
-
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart>
 {
@@ -49,9 +45,15 @@ export class CustomIntegrationsPlugin
     const services = servicesFactory({ coreStart, startPlugins });
 
     const languageClientsUiComponents = {
-      sample: SampleClientReadme,
-      javascript: ElasticsearchJsClientReadme,
-      python: ElasticsearchPyClientReadme,
+      sample: React.lazy(async () => ({
+        default: (await import('./language_components')).SampleClientReadme,
+      })),
+      javascript: React.lazy(async () => ({
+        default: (await import('./language_components')).ElasticsearchJsClientReadme,
+      })),
+      python: React.lazy(async () => ({
+        default: (await import('./language_components')).ElasticsearchPyClientReadme,
+      })),
     };
 
     const ContextProvider: React.FC = ({ children }) => (
