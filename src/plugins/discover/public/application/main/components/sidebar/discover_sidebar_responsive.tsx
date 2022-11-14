@@ -205,11 +205,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     }
   }, [refetchFieldsExistenceInfo, sidebarState.status]);
 
-  const onFieldEditedExtended = useCallback(async () => {
-    await onFieldEdited();
-    refetchFieldsExistenceInfo(); // TODO: check if still necessary
-  }, [onFieldEdited, refetchFieldsExistenceInfo]);
-
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -269,7 +264,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
               fieldName,
               onSave: async () => {
-                await onFieldEditedExtended();
+                await onFieldEdited();
               },
             });
             if (setFieldEditorRef) {
@@ -287,7 +282,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       selectedDataView,
       setFieldEditorRef,
       closeFlyout,
-      onFieldEditedExtended,
+      onFieldEdited,
     ]
   );
 
@@ -316,7 +311,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
           <DiscoverSidebar
             {...props}
-            onFieldEdited={onFieldEditedExtended}
+            onFieldEdited={onFieldEdited}
             allFields={sidebarState.allFields}
             fieldFilter={fieldFilter}
             setFieldFilter={setFieldFilter}
@@ -380,7 +375,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               <div className="euiFlyoutBody">
                 <DiscoverSidebar
                   {...props}
-                  onFieldEdited={onFieldEditedExtended}
+                  onFieldEdited={onFieldEdited}
                   allFields={sidebarState.allFields}
                   fieldFilter={fieldFilter}
                   setFieldFilter={setFieldFilter}
