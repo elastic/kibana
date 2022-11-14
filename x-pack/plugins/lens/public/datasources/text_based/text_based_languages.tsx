@@ -27,6 +27,7 @@ import {
   DataType,
   TableChangeType,
   DatasourceDimensionTriggerProps,
+  DataSourceInfo,
 } from '../../types';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
@@ -706,6 +707,31 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     isEqual: () => true,
+    getDatasourceInfo: (state, references, indexPatterns) => {
+      return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
+        const columns = Object.entries(layer.columns).map(([colId, col]) => {
+          return {
+            id: colId,
+            role: col.meta?.type !== 'number' ? ('split' as const) : ('metric' as const),
+            operation: {
+              dataType: col?.meta?.type as DataType,
+              label: col.fieldName,
+              isBucketed: Boolean(col?.meta?.type !== 'number'),
+              hasTimeShift: false,
+              hasReducedTimeRange: false,
+            },
+          };
+        });
+
+        acc.push({
+          layerId: key,
+          columns,
+          dataView: indexPatterns?.find((dataView) => dataView.id === layer.index),
+        });
+
+        return acc;
+      }, []);
+    },
   };
 
   return TextBasedDatasource;
