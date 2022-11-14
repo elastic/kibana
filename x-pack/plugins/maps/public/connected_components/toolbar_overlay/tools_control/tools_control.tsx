@@ -124,14 +124,13 @@ export class ToolsControl extends Component<Props, State> {
     this._closePopover();
   };
   _filterFromLocation = (lat:number,lon:number) =>{
-    //Center the map
+    //Goto Center point on the map
     this.props.centerMap(lat,lon,this.props.zoom)
     //initDistanceDraw
     this._initiateDistanceDraw({actionId:ACTION_GLOBAL_APPLY_FILTER,filterLabel:"Filter From Location"}) //TODO allow setting teh label
-    //Send map click
-    setTimeout(()=>
-    this.props.setCoordinates(lat,lon)
-    ,1000)
+    //Send map click to set draw distance centerpoint 
+    this.props.setCoordinates(lat,lon) //FIXME: This only sets the map state coordinates and doesn't trigger the click event.
+
   }
   _getDrawPanels() {
     const tools = [
