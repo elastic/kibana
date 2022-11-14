@@ -59,10 +59,14 @@ export const getMonitors = (
 
   const locationFilter = parseLocationFilter(syntheticsService.locations, locations);
 
-  const filters =
-    getKqlFilter({ field: 'tags', values: tags }) +
-    getKqlFilter({ field: 'type', values: monitorType }) +
-    getKqlFilter({ field: 'locations.id', values: locationFilter });
+  const filterStr = [
+    filter,
+    getKqlFilter({ field: 'tags', values: tags }),
+    getKqlFilter({ field: 'type', values: monitorType }),
+    getKqlFilter({ field: 'locations.id', values: locationFilter }),
+  ]
+    .filter((f) => !!f)
+    .join(' AND ');
 
   return savedObjectsClient.find({
     type: syntheticsMonitorType,
@@ -72,7 +76,7 @@ export const getMonitors = (
     sortOrder,
     searchFields: ['name', 'tags.text', 'locations.id.text', 'urls', 'project_id.text'],
     search: query ? `${query}*` : undefined,
-    filter: filters + filter,
+    filter: filterStr,
     fields,
     searchAfter,
   });
@@ -122,4 +126,22 @@ const parseLocationFilter = (serviceLocations: ServiceLocations, locations?: str
 
 export const findLocationItem = (query: string, locations: ServiceLocations) => {
   return locations.find(({ id, label }) => query === id || label === query);
+};
+
+/**
+ * Returns whether the query is likely to return a subset of monitor objects.
+ * Useful where `absoluteTotal` needs to be determined with a separate call
+ * @param monitorQuery { MonitorsQuery }
+ */
+export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
+  const { query, tags, monitorType, locations, status, filter } = monitorQuery;
+
+  return (
+    !!query ||
+    !!filter ||
+    !!locations?.length ||
+    !!monitorType?.length ||
+    !!tags?.length ||
+    !!status?.length
+  );
 };
