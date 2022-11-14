@@ -108,6 +108,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
               return (
                 <EuiPortal>
                   <FleetServerHostsFlyout
+                    proxies={proxies.data?.items ?? []}
                     onClose={onCloseCallback}
                     fleetServerHost={fleetServerHost}
                   />
@@ -122,7 +123,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
           </Route>
           <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
             <EuiPortal>
-              <EditOutputFlyout onClose={onCloseCallback} />
+              <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
             </EuiPortal>
           </Route>
           <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>
@@ -154,7 +155,11 @@ export const SettingsApp = withConfirmModalProvider(() => {
 
               return (
                 <EuiPortal>
-                  <EditOutputFlyout onClose={onCloseCallback} output={output} />
+                  <EditOutputFlyout
+                    proxies={proxies.data?.items ?? []}
+                    onClose={onCloseCallback}
+                    output={output}
+                  />
                 </EuiPortal>
               );
             }}

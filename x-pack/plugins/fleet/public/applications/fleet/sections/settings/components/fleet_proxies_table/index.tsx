@@ -23,11 +23,6 @@ const NameFlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: 250px;
 `;
 
-// Allow child to be truncated
-const FlexGroupWithMinWidth = styled(EuiFlexGroup)`
-  min-width: 0px;
-`;
-
 export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> = ({
   proxies,
   deleteFleetProxy,

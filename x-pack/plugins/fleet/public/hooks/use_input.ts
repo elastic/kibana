@@ -101,6 +101,8 @@ export function useSwitchInput(defaultValue = false, disabled = false) {
     setValue(newValue);
   };
 
+  const validate = useCallback(() => true, []);
+
   return {
     value,
     props: {
@@ -108,6 +110,7 @@ export function useSwitchInput(defaultValue = false, disabled = false) {
       checked: value,
       disabled,
     },
+    validate,
     formRowProps: {},
     setValue,
     hasChanged,
