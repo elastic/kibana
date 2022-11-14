@@ -48,10 +48,10 @@ export abstract class InferenceBase<TInferResponse> {
   protected abstract readonly inferenceTypeLabel: string;
   protected inputField: string;
   protected readonly modelInputField: string;
-  public inputText$ = new BehaviorSubject<string[]>([]);
-  public inferenceResult$ = new BehaviorSubject<TInferResponse[] | null>(null);
-  public inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
-  public runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
+  private inputText$ = new BehaviorSubject<string[]>([]);
+  private inferenceResult$ = new BehaviorSubject<TInferResponse[] | null>(null);
+  private inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
+  private runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
   protected readonly info: string[] = [];
 
   constructor(
@@ -101,8 +101,24 @@ export abstract class InferenceBase<TInferResponse> {
     this.inputField = field === undefined ? this.modelInputField : field;
   }
 
-  protected getInputText() {
-    return this.inputText$.getValue()[0];
+  public setInputText(text: string[]) {
+    this.inputText$.next(text);
+  }
+
+  public getInputText() {
+    return this.inputText$.asObservable();
+  }
+
+  public getInferenceResult() {
+    return this.inferenceResult$.asObservable();
+  }
+
+  public getInferenceError() {
+    return this.inferenceError$.asObservable();
+  }
+
+  public getRunningState() {
+    return this.runningState$.asObservable();
   }
 
   protected abstract getInputComponent(): JSX.Element | null;
@@ -159,7 +175,7 @@ export abstract class InferenceBase<TInferResponse> {
     processResponse: (resp: TRawInferResponse, inputText: string) => TInferResponse
   ): Promise<TInferResponse[]> {
     this.setRunning();
-    const inputText = this.getInputText();
+    const inputText = this.inputText$.getValue()[0];
 
     const payload = getPayload(inputText);
     const resp = (await this.trainedModelsApi.inferTrainedModel(

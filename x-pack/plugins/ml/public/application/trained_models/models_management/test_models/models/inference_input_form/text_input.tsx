@@ -31,8 +31,8 @@ export const TextInput: FC<Props> = ({ inferrer }) => {
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [errorText, setErrorText] = useState<string | null>(null);
 
-  const runningState = useObservable(inferrer.runningState$);
-  const inputText = useObservable(inferrer.inputText$) ?? [];
+  const runningState = useObservable(inferrer.getRunningState());
+  const inputText = useObservable(inferrer.getInputText()) ?? [];
   const inputComponent = useMemo(() => inferrer.getInputComponent(), [inferrer]);
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
   const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);

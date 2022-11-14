@@ -27,9 +27,11 @@ type ResultResponses = Array<
 export const RawOutput: FC<{
   inferrer: InferrerType;
 }> = ({ inferrer }) => {
-  const inferenceError = useObservable(inferrer.inferenceError$);
-  const runningState = useObservable(inferrer.runningState$);
-  const inferenceResult = useObservable(inferrer.inferenceResult$ as Observable<InferenceResponse>);
+  const inferenceError = useObservable(inferrer.getInferenceError());
+  const runningState = useObservable(inferrer.getRunningState());
+  const inferenceResult = useObservable(
+    inferrer.getInferenceResult() as Observable<InferenceResponse>
+  );
 
   if (
     (runningState === RUNNING_STATE.FINISHED_WITH_ERRORS && !inferenceError) ||

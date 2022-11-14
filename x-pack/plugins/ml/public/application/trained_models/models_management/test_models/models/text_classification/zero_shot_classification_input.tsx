@@ -22,10 +22,9 @@ const ClassNameInput: FC<{
 
   useEffect(() => {
     inferrer.labelsText$.next(labelsText);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [labelsText]);
+  }, [labelsText, inferrer]);
 
-  const runningState = useObservable(inferrer.runningState$);
+  const runningState = useObservable(inferrer.getRunningState());
   return (
     <EuiFormRow
       fullWidth

@@ -24,7 +24,7 @@ const QuestionInput: FC<{
     inferrer.questionText$.next(questionText);
   }, [questionText, inferrer]);
 
-  const runningState = useObservable(inferrer.runningState$);
+  const runningState = useObservable(inferrer.getRunningState());
   return (
     <EuiFormRow
       fullWidth

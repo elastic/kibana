@@ -19,10 +19,10 @@ export const TextInput: FC<{
   const [inputText, setInputText] = useState('');
 
   useEffect(() => {
-    inferrer.inputText$.next([inputText]);
+    inferrer.setInputText([inputText]);
   }, [inputText, inferrer]);
 
-  const runningState = useObservable(inferrer.runningState$);
+  const runningState = useObservable(inferrer.getRunningState());
 
   return (
     <EuiFormRow

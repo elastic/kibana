@@ -25,7 +25,7 @@ export const getQuestionAnsweringOutputComponent = (inferrer: QuestionAnsweringI
 );
 
 const QuestionAnsweringOutput: FC<{ inferrer: QuestionAnsweringInference }> = ({ inferrer }) => {
-  const result = useObservable(inferrer.inferenceResult$);
+  const result = useObservable(inferrer.getInferenceResult());
   if (!result) {
     return null;
   }

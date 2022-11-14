@@ -32,7 +32,7 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
     setSelectedField,
   } = data;
 
-  const runningState = useObservable(inferrer.runningState$);
+  const runningState = useObservable(inferrer.getRunningState());
   const inputComponent = useMemo(() => inferrer.getInputComponent(), [inferrer]);
 
   return (
@@ -90,8 +90,6 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
 
   useEffect(
     function loadDataViewListItems() {
-      setFieldNames([]);
-      setDataViewListItems([]);
       dataViews.getIdsWithTitle().then((items) => {
         setDataViewListItems(
           items
@@ -116,7 +114,7 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
   );
 
   const loadExamples = useCallback(() => {
-    inferrer.inputText$.next([]);
+    inferrer.setInputText([]);
     if (selectedField !== undefined && selectedDataView !== null) {
       firstValueFrom(
         search({
@@ -140,7 +138,7 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
         const tempExamples = resp.rawResponse.hits.hits
           .filter(({ fields }) => isPopulatedObject(fields, [selectedField]))
           .map(({ fields }) => fields![selectedField][0]);
-        inferrer.inputText$.next(tempExamples);
+        inferrer.setInputText(tempExamples);
       });
     }
   }, [inferrer, selectedField, selectedDataView, search]);

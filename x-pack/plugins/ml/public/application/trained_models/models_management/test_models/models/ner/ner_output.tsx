@@ -65,7 +65,7 @@ const UNKNOWN_ENTITY_TYPE = {
 export const getNerOutputComponent = (inferrer: NerInference) => <NerOutput inferrer={inferrer} />;
 
 const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
-  const result = useObservable(inferrer.inferenceResult$);
+  const result = useObservable(inferrer.getInferenceResult());
 
   if (!result) {
     return null;
