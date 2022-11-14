@@ -328,8 +328,6 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
   }
 
   private renderCustomEditor() {
-    const queryDsl = this.parseFilterToQueryDsl(this.state.localFilter);
-
     return (
       <EuiFormRow
         fullWidth
@@ -341,7 +339,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
           languageId={XJsonLang.ID}
           width="100%"
           height={'250px'}
-          value={queryDsl}
+          value={this.state.queryDsl}
           onChange={this.onQueryDslChange}
           data-test-subj="customEditorInput"
           aria-label={i18n.translate('unifiedSearch.filter.filterEditor.queryDslAriaLabel', {
