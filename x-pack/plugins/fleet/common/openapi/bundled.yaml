@@ -419,6 +419,13 @@ paths:
         name: ignoreUnverified
         description: Ignore if the package is fails signature verification
         in: query
+      - schema:
+          type: boolean
+        name: full
+        description: >-
+          Return all fields from the package manifest, not just those supported
+          by the Elastic Package Registry
+        in: query
     post:
       summary: Packages - Install
       tags: []
@@ -2652,6 +2659,7 @@ components:
         has_seen_add_data_notice:
           type: boolean
         fleet_server_hosts:
+          deprecated: true
           type: array
           items:
             type: string
@@ -2791,6 +2799,10 @@ components:
           type: string
         release:
           type: string
+          deprecated: true
+          description: >-
+            release label is deprecated, derive from the version instead
+            (packages follow semver)
           enum:
             - experimental
             - beta

@@ -130,6 +130,7 @@ export function getMonitorListColumns({
     {
       align: 'left' as const,
       field: ConfigKey.ENABLED as string,
+      sortable: true,
       name: i18n.translate('xpack.synthetics.management.monitorList.enabled', {
         defaultMessage: 'Enabled',
       }),

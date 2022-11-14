@@ -96,6 +96,7 @@ export enum SecurityPageName {
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
+  sharedExceptionListDetails = 'shared-exception-list-details',
   exploreLanding = 'explore',
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
@@ -255,6 +256,12 @@ export const LEGACY_NOTIFICATIONS_ID = `siem.notifications` as const;
  * Internal actions route
  */
 export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/notifications';
+
+/**
+ * Exceptions management routes
+ */
+
+export const SHARED_EXCEPTION_LIST_URL = `/api${EXCEPTIONS_PATH}/shared` as const;
 
 /**
  * Detection engine routes
@@ -461,3 +468,5 @@ export const RISKY_HOSTS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
 export const RISKY_USERS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/user-risk-score.html';
+
+export const BULK_ADD_TO_TIMELINE_LIMIT = 2000;

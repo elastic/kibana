@@ -49,6 +49,7 @@ describe('Home page', () => {
         checkA11y({ skipFailures: false });
       });
       it('Install Fleet Server', () => {
+        cy.getBySel(FLEET_SERVER_SETUP.SELECT_HOSTS).click();
         cy.getBySel(FLEET_SERVER_SETUP.ADD_HOST_BTN).click();
         cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('Host edited');
         cy.get('[placeholder="Specify host URL"', { timeout: 15000 }).should('be.visible');
@@ -69,6 +70,7 @@ describe('Home page', () => {
         checkA11y({ skipFailures: false });
       });
       it('Add your fleet sever host', () => {
+        cy.getBySel(FLEET_SERVER_SETUP.SELECT_HOSTS).click();
         cy.getBySel(FLEET_SERVER_SETUP.ADD_HOST_BTN).click();
         cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('New host');
         cy.get('[placeholder="Specify host URL"').type('https://localhost:8220');
