@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiTitle, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiTitle, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -96,11 +96,12 @@ export function MostUsedChart({
   };
 
   return (
-    <EuiPanel hasBorder={true}>
+    <EuiPanel hasShadow={false} paddingSize="none">
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
+        <EuiTitle size="xxxs">
           <h2>{title}</h2>
         </EuiTitle>
+        <EuiSpacer size="s" />
       </EuiFlexItem>
       <EuiFlexItem>
         <EmbeddableComponent
@@ -108,7 +109,7 @@ export function MostUsedChart({
           id={`most-used-${metric.replaceAll('.', '-')}`}
           hidePanelTitles
           withDefaultActions
-          style={{ height: 200 }}
+          style={{ height: 175 }}
           attributes={lensAttributes}
           timeRange={{
             from: start,
