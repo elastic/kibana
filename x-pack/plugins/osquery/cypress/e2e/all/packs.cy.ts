@@ -166,6 +166,7 @@ describe('ALL - Packs', () => {
       findAndClickButton('Save and deploy changes');
       cy.contains(PACK_NAME);
       cy.contains(`Successfully created "${PACK_NAME}" pack`);
+      cy.getBySel('toastCloseButton').click();
     });
 
     it('to click the edit button and edit pack', () => {
@@ -186,6 +187,7 @@ describe('ALL - Packs', () => {
       cy.contains('Save and deploy changes');
       findAndClickButton('Save and deploy changes');
       cy.contains(`Successfully updated "${PACK_NAME}" pack`);
+      cy.getBySel('toastCloseButton').click();
     });
 
     it('should trigger validation when saved query is being chosen', () => {
@@ -426,6 +428,7 @@ describe('ALL - Packs', () => {
 
       cy.contains(globalPack);
       cy.contains(`Successfully created "${globalPack}" pack`);
+      cy.getBySel('toastCloseButton').click();
 
       cy.visit(FLEET_AGENT_POLICIES);
       cy.contains('Create agent policy').click();
@@ -447,7 +450,7 @@ describe('ALL - Packs', () => {
         });
       });
     });
-    it('add propershard to policies packs config', () => {
+    it('add proper shard to policies packs config', () => {
       const shardPack = 'shardPack';
       cy.contains('Packs').click();
       findAndClickButton('Add pack');
@@ -458,8 +461,8 @@ describe('ALL - Packs', () => {
       cy.get('#shardsPercentage0').type('{backspace}{backspace}5');
       findAndClickButton('Save pack');
 
-      cy.contains(shardPack);
       cy.contains(`Successfully created "${shardPack}" pack`);
+      cy.getBySel('toastCloseButton').click();
 
       cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
         const shardPolicy = response.body.items.find(

@@ -14,7 +14,6 @@ import {
   findFormFieldByRowsLabelAndType,
   submitQuery,
 } from '../../tasks/live_query';
-import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 
@@ -36,7 +35,9 @@ describe('Alert_Test', () => {
       const PACK_NAME = 'testpack';
       const RULE_NAME = 'Test-rule';
       navigateTo('/app/osquery');
-      preparePack(PACK_NAME);
+      cy.contains('Packs').click();
+      cy.getBySel('pagination-button-next').click();
+      cy.contains(PACK_NAME).click();
       findAndClickButton('Edit');
       cy.contains(`Edit ${PACK_NAME}`);
       findFormFieldByRowsLabelAndType(
@@ -46,6 +47,8 @@ describe('Alert_Test', () => {
       findAndClickButton('Update pack');
       closeModalIfVisible();
       cy.contains(`Successfully updated "${PACK_NAME}" pack`);
+      cy.getBySel('toastCloseButton').click();
+
       cy.visit('/app/security/rules');
       cy.contains(RULE_NAME).click();
       cy.wait(2000);
