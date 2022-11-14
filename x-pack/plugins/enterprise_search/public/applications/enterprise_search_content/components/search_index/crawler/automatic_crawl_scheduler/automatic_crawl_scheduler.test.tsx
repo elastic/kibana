@@ -15,7 +15,7 @@ import { EuiButton, EuiFieldNumber, EuiForm, EuiSelect, EuiSwitch } from '@elast
 
 import { CrawlUnits } from '../../../../api/crawler/types';
 
-import { AutomaticCrawlScheduler } from './automatic_crawl_scheduler';
+import { AutomaticCrawlScheduler } from './automatic_crawl_scheduler_old';
 
 const MOCK_ACTIONS = {
   // AutomaticCrawlSchedulerLogic

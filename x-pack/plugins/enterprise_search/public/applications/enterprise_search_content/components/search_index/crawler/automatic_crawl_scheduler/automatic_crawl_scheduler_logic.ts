@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
-import { CrawlSchedule, CrawlUnits } from '../../../../api/crawler/types';
+import { CrawlSchedule, CrawlScheduleFromServer, CrawlUnits } from '../../../../api/crawler/types';
+import { crawlScheduleServerToClient } from '../../../../api/crawler/utils';
 import { IndexNameLogic } from '../../index_name_logic';
 
 export interface AutomaticCrawlSchedulerLogicValues {
@@ -19,6 +20,7 @@ export interface AutomaticCrawlSchedulerLogicValues {
   crawlFrequency: CrawlSchedule['frequency'];
   crawlUnit: CrawlSchedule['unit'];
   isSubmitting: boolean;
+  useConnectorSchedule: CrawlSchedule['useConnectorSchedule'];
 }
 
 const DEFAULT_VALUES: Pick<AutomaticCrawlSchedulerLogicValues, 'crawlFrequency' | 'crawlUnit'> = {
@@ -39,6 +41,9 @@ export interface AutomaticCrawlSchedulerLogicActions {
   };
   setCrawlSchedule(crawlSchedule: CrawlSchedule): { crawlSchedule: CrawlSchedule };
   setCrawlUnit(crawlUnit: CrawlSchedule['unit']): { crawlUnit: CrawlSchedule['unit'] };
+  setUseConnectorSchedule(useConnectorSchedule: CrawlSchedule['useConnectorSchedule']): {
+    useConnectorSchedule: CrawlSchedule['useConnectorSchedule'];
+  };
   submitCrawlSchedule(): void;
   toggleCrawlAutomatically(): void;
 }
@@ -59,6 +64,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
     submitCrawlSchedule: true,
     setCrawlFrequency: (crawlFrequency: string) => ({ crawlFrequency }),
     setCrawlUnit: (crawlUnit: CrawlUnits) => ({ crawlUnit }),
+    setUseConnectorSchedule: (useConnectorSchedule) => ({ useConnectorSchedule }),
     toggleCrawlAutomatically: true,
   }),
   reducers: () => ({
@@ -94,6 +100,14 @@ export const AutomaticCrawlSchedulerLogic = kea<
         submitCrawlSchedule: () => true,
       },
     ],
+    useConnectorSchedule: [
+      false,
+      {
+        setCrawlSchedule: (_, { crawlSchedule: { useConnectorSchedule = false } }) =>
+          useConnectorSchedule,
+        setUseConnectorSchedule: (_, { useConnectorSchedule }) => useConnectorSchedule,
+      },
+    ],
   }),
   listeners: ({ actions, values }) => ({
     deleteCrawlSchedule: async () => {
@@ -104,19 +118,19 @@ export const AutomaticCrawlSchedulerLogic = kea<
         await http.delete(
           `/internal/enterprise_search/indices/${indexName}/crawler/crawl_schedule`
         );
-        actions.clearCrawlSchedule();
-        flashSuccessToast(
-          i18n.translate(
-            'xpack.enterpriseSearch.crawler.automaticCrawlScheduler.disableCrawlSchedule.successMessage',
-            {
-              defaultMessage: 'Automatic crawling has been disabled.',
-            }
-          )
-        );
+        // actions.clearCrawlSchedule();
+        // flashSuccessToast(
+        //   i18n.translate(
+        //     'xpack.enterpriseSearch.crawler.automaticCrawlScheduler.disableCrawlSchedule.successMessage',
+        //     {
+        //       defaultMessage: 'Automatic crawling has been disabled.',
+        //     }
+        //   )
+        // );
       } catch (e) {
         // A 404 is expected and means the user has no crawl schedule to delete
         if (e.response?.status === 404) {
-          actions.clearCrawlSchedule();
+          // actions.clearCrawlSchedule();
         } else {
           flashAPIErrors(e);
           // Keep the popover open
@@ -130,10 +144,10 @@ export const AutomaticCrawlSchedulerLogic = kea<
       const { indexName } = IndexNameLogic.values;
 
       try {
-        const crawlSchedule: CrawlSchedule = await http.get(
+        const crawlSchedule: CrawlScheduleFromServer = await http.get(
           `/internal/enterprise_search/indices/${indexName}/crawler/crawl_schedule`
         );
-        actions.setCrawlSchedule(crawlSchedule);
+        actions.setCrawlSchedule(crawlScheduleServerToClient(crawlSchedule));
       } catch (e) {
         // A 404 is expected and means the user does not have crawl schedule
         // for this index. We continue to use the defaults.
@@ -151,29 +165,38 @@ export const AutomaticCrawlSchedulerLogic = kea<
         actions.deleteCrawlSchedule();
       }
     },
+    setCrawlUnit: actions.saveChanges,
+    setCrawlFrequency: actions.saveChanges,
+    setUseConnectorSchedule: actions.saveChanges,
+    toggleCrawlAutomatically: actions.saveChanges,
     submitCrawlSchedule: async () => {
       const { http } = HttpLogic.values;
       const { indexName } = IndexNameLogic.values;
 
+      if (!values.crawlUnit || !values.crawlFrequency) {
+        return;
+      }
+
       try {
-        const crawlSchedule: CrawlSchedule = await http.put(
+        const crawlSchedule: CrawlScheduleFromServer = await http.put(
           `/internal/enterprise_search/indices/${indexName}/crawler/crawl_schedule`,
           {
             body: JSON.stringify({
               unit: values.crawlUnit,
               frequency: values.crawlFrequency,
+              use_connector_schedule: values.useConnectorSchedule,
             }),
           }
         );
-        actions.setCrawlSchedule(crawlSchedule);
-        flashSuccessToast(
-          i18n.translate(
-            'xpack.enterpriseSearch.crawler.automaticCrawlScheduler.submitCrawlSchedule.successMessage',
-            {
-              defaultMessage: 'Your automatic crawling schedule has been updated.',
-            }
-          )
-        );
+        actions.setCrawlSchedule(crawlScheduleServerToClient(crawlSchedule));
+        // flashSuccessToast(
+        //   i18n.translate(
+        //     'xpack.enterpriseSearch.crawler.automaticCrawlScheduler.submitCrawlSchedule.successMessage',
+        //     {
+        //       defaultMessage: 'Your automatic crawling schedule has been updated.',
+        //     }
+        //   )
+        // );
       } catch (e) {
         flashAPIErrors(e);
       } finally {
