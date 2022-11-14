@@ -8,8 +8,6 @@
 import expect from '@kbn/expect';
 
 import overviewFixtureGreenPlatinum from './fixtures/overview_green_platinum.json';
-import overviewFixtureRedPlatinum from './fixtures/overview_red_platinum.json';
-import overviewFixtureShardsRelocating from './fixtures/overview_shards_relocating.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
