@@ -89,18 +89,32 @@ describe('experimental_datastream_features', () => {
     soClient.get.mockClear();
     esClient.cluster.getComponentTemplate.mockClear();
     esClient.cluster.putComponentTemplate.mockClear();
+
+    esClient.cluster.getComponentTemplate.mockResolvedValueOnce({
+      component_templates: [
+        {
+          name: 'metrics-test.test@package',
+          component_template: {
+            template: {
+              settings: {},
+              mappings: {
+                _source: {
+                  // @ts-expect-error
+                  mode: 'stored',
+                },
+              },
+            },
+          },
+        },
+      ],
+    });
   });
 
   const soClient = savedObjectsClientMock.create();
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
   describe('when package policy does not exist (create)', () => {
-    it('updates component template', async () => {
-      const packagePolicy = getNewTestPackagePolicy({
-        isSyntheticSourceEnabled: true,
-        isTSDBEnabled: false,
-      });
-
+    beforeEach(() => {
       soClient.get.mockResolvedValueOnce({
         attributes: {
           experimental_data_stream_features: [
@@ -114,24 +128,11 @@ describe('experimental_datastream_features', () => {
         type: 'mocked',
         references: [],
       });
-
-      esClient.cluster.getComponentTemplate.mockResolvedValueOnce({
-        component_templates: [
-          {
-            name: 'metrics-test.test@package',
-            component_template: {
-              template: {
-                settings: {},
-                mappings: {
-                  _source: {
-                    // @ts-expect-error
-                    mode: 'stored',
-                  },
-                },
-              },
-            },
-          },
-        ],
+    });
+    it('updates component template', async () => {
+      const packagePolicy = getNewTestPackagePolicy({
+        isSyntheticSourceEnabled: true,
+        isTSDBEnabled: false,
       });
 
       await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
@@ -142,6 +143,42 @@ describe('experimental_datastream_features', () => {
           body: expect.objectContaining({
             template: expect.objectContaining({
               mappings: expect.objectContaining({ _source: { mode: 'synthetic' } }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should update index template', async () => {
+      const packagePolicy = getNewTestPackagePolicy({
+        isSyntheticSourceEnabled: false,
+        isTSDBEnabled: true,
+      });
+
+      esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+        index_templates: [
+          {
+            name: 'metrics-test.test',
+            index_template: {
+              template: {
+                settings: {},
+                mappings: {},
+              },
+              composed_of: [],
+              index_patterns: '',
+            },
+          },
+        ],
+      });
+
+      await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+      expect(esClient.indices.getIndexTemplate).toHaveBeenCalled();
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            template: expect.objectContaining({
+              settings: expect.objectContaining({ index: { mode: 'time_series' } }),
             }),
           }),
         })
@@ -179,12 +216,7 @@ describe('experimental_datastream_features', () => {
     });
 
     describe('when opt in status is changed', () => {
-      it('updates component template', async () => {
-        const packagePolicy = getExistingTestPackagePolicy({
-          isSyntheticSourceEnabled: true,
-          isTSDBEnabled: false,
-        });
-
+      beforeEach(() => {
         soClient.get.mockResolvedValueOnce({
           attributes: {
             experimental_data_stream_features: [
@@ -198,24 +230,11 @@ describe('experimental_datastream_features', () => {
           type: 'mocked',
           references: [],
         });
-
-        esClient.cluster.getComponentTemplate.mockResolvedValueOnce({
-          component_templates: [
-            {
-              name: 'metrics-test.test@package',
-              component_template: {
-                template: {
-                  settings: {},
-                  mappings: {
-                    _source: {
-                      // @ts-expect-error
-                      mode: 'stored',
-                    },
-                  },
-                },
-              },
-            },
-          ],
+      });
+      it('updates component template', async () => {
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: true,
+          isTSDBEnabled: false,
         });
 
         await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
@@ -226,6 +245,42 @@ describe('experimental_datastream_features', () => {
             body: expect.objectContaining({
               template: expect.objectContaining({
                 mappings: expect.objectContaining({ _source: { mode: 'synthetic' } }),
+              }),
+            }),
+          })
+        );
+      });
+
+      it('should update index template', async () => {
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: false,
+          isTSDBEnabled: true,
+        });
+
+        esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+          index_templates: [
+            {
+              name: 'metrics-test.test',
+              index_template: {
+                template: {
+                  settings: {},
+                  mappings: {},
+                },
+                composed_of: [],
+                index_patterns: '',
+              },
+            },
+          ],
+        });
+
+        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+        expect(esClient.indices.getIndexTemplate).toHaveBeenCalled();
+        expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              template: expect.objectContaining({
+                settings: expect.objectContaining({ index: { mode: 'time_series' } }),
               }),
             }),
           })
