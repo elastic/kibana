@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const config = getService('config');
-  const security = getService('security');
   const isCcs = config.get('esTestCluster.ccs');
   const esNode = isCcs ? getService('remoteEsArchiver' as 'esArchiver') : getService('esArchiver');
   const ml = getService('ml');
@@ -18,25 +17,17 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      if (isCcs) {
-        await security.testUser.setRoles(['superuser']);
-      } else {
-        await ml.securityCommon.createMlRoles();
-        await ml.securityCommon.createMlUsers();
-        await ml.securityUI.loginAsMlPowerUser();
-      }
+      await ml.securityCommon.createMlRoles();
+      await ml.securityCommon.createMlUsers();
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await ml.securityUI.logout();
 
-      if (isCcs) {
-        await security.testUser.restoreDefaults();
-      } else {
-        await ml.securityCommon.cleanMlUsers();
-        await ml.securityCommon.cleanMlRoles();
-      }
+      await ml.securityCommon.cleanMlUsers();
+      await ml.securityCommon.cleanMlRoles();
 
       await esNode.unload('x-pack/test/functional/es_archives/ml/farequote');
       await esNode.unload('x-pack/test/functional/es_archives/ml/ecommerce');

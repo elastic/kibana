@@ -87,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
