@@ -229,8 +229,8 @@ export const RULE_STATUS_ACTIVE = (total: number) => {
   return i18n.translate(
     'xpack.triggersActionsUI.sections.rulesList.totalStatusesActiveDescription',
     {
-      defaultMessage: 'Active: {total}',
-      values: { total },
+      defaultMessage: 'Active: {totalStatusesActive}',
+      values: { totalStatusesActive: total },
     }
   );
 };
@@ -239,8 +239,8 @@ export const RULE_STATUS_ERROR = (total: number) => {
   return i18n.translate(
     'xpack.triggersActionsUI.sections.rulesList.totalStatusesErrorDescription',
     {
-      defaultMessage: 'Error: {total}',
-      values: { total },
+      defaultMessage: 'Error: {totalStatusesError}',
+      values: { totalStatusesError: total },
     }
   );
 };
@@ -249,16 +249,16 @@ export const RULE_STATUS_WARNING = (total: number) => {
   return i18n.translate(
     'xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription',
     {
-      defaultMessage: 'Warning: {total}',
-      values: { total },
+      defaultMessage: 'Warning: {totalStatusesWarning}',
+      values: { totalStatusesWarning: total },
     }
   );
 };
 
 export const RULE_STATUS_OK = (total: number) => {
   return i18n.translate('xpack.triggersActionsUI.sections.rulesList.totalStatusesOkDescription', {
-    defaultMessage: 'Ok: {total}',
-    values: { total },
+    defaultMessage: 'Ok: {totalStatusesOk}',
+    values: { totalStatusesOk: total },
   });
 };
 
@@ -266,8 +266,8 @@ export const RULE_STATUS_PENDING = (total: number) => {
   return i18n.translate(
     'xpack.triggersActionsUI.sections.rulesList.totalStatusesPendingDescription',
     {
-      defaultMessage: 'Pending: {total}',
-      values: { total },
+      defaultMessage: 'Pending: {totalStatusesPending}',
+      values: { totalStatusesPending: total },
     }
   );
 };
@@ -276,8 +276,8 @@ export const RULE_STATUS_UNKNOWN = (total: number) => {
   return i18n.translate(
     'xpack.triggersActionsUI.sections.rulesList.totalStatusesUnknownDescription',
     {
-      defaultMessage: 'Unknown: {total}',
-      values: { total },
+      defaultMessage: 'Unknown: {totalStatusesUnknown}',
+      values: { totalStatusesUnknown: total },
     }
   );
 };

@@ -41,18 +41,18 @@ export const RulesListErrorBanner = (props: RulesListErrorBannerProps) => {
           &nbsp;
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.attentionBannerTitle"
-            defaultMessage="Error found in {totalOutcomesFailed, plural, one {# rule} other {# rules}}."
+            defaultMessage="Error found in {totalStatusesError, plural, one {# rule} other {# rules}}."
             values={{
-              totalOutcomesFailed: rulesLastRunOutcomes.failed,
+              totalStatusesError: rulesLastRunOutcomes.failed,
             }}
           />
           &nbsp;
           <EuiLink color="primary" onClick={onClick}>
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel"
-              defaultMessage="Show {totalOutcomesFailed, plural, one {rule} other {rules}} with error"
+              defaultMessage="Show {totalStatusesError, plural, one {rule} other {rules}} with error"
               values={{
-                totalOutcomesFailed: rulesLastRunOutcomes.failed,
+                totalStatusesError: rulesLastRunOutcomes.failed,
               }}
             />
           </EuiLink>
