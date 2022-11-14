@@ -53,7 +53,7 @@ const LEARN_MORE_LABEL = i18n.translate(
 );
 
 const API_KEY_MISSING = i18n.translate('xpack.synthetics.monitorManagement.callout.apiKeyMissing', {
-  defaultMessage: 'Monitor Management is currently disabled because of missing API Key',
+  defaultMessage: 'Monitor Management is currently disabled because of missing API key',
 });
 
 const CALLOUT_MANAGEMENT_CONTACT_ADMIN = i18n.translate(
