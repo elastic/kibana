@@ -8,6 +8,7 @@
 import { Observable } from 'rxjs';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { registerTransactionDurationRuleType } from './rule_types/transaction_duration/register_transaction_duration_rule_type';
@@ -17,12 +18,13 @@ import { APMConfig } from '../..';
 import { registerTransactionErrorRateRuleType } from './rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
 
 export interface RegisterRuleDependencies {
-  ruleDataClient: IRuleDataClient;
-  ml?: MlPluginSetup;
   alerting: AlertingPluginSetupContract;
+  basePath: IBasePath;
   config$: Observable<APMConfig>;
   logger: Logger;
-  basePath: IBasePath;
+  ml?: MlPluginSetup;
+  observability: ObservabilityPluginSetup;
+  ruleDataClient: IRuleDataClient;
 }
 
 export function registerApmRuleTypes(dependencies: RegisterRuleDependencies) {
