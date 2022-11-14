@@ -26,10 +26,19 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SavedObjectsClientFactoryProvider } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsClientFactoryProvider,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+} from '@kbn/core-saved-objects-server';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+import {
+  ISavedObjectsClientProvider,
+  SavedObjectsClientProvider,
+  SavedObjectsRepository,
+} from '@kbn/core-saved-objects-api-server-internal';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { SavedObjectsService } from './saved_objects_service';
@@ -42,6 +51,7 @@ import {
 
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
+import exp from 'constants';
 
 jest.mock('./object_types');
 jest.mock('./deprecations');
@@ -188,6 +198,125 @@ describe('SavedObjectsService', () => {
           setup.setClientFactoryProvider(secondFactory);
         }).toThrowErrorMatchingInlineSnapshot(
           `"custom client factory is already set, and can only be set once"`
+        );
+      });
+    });
+
+    describe('#extensions', () => {
+      it('registers the encryption extension to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
+        setup.setEncryptionExtension(encryptionExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: encryptionExtension,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: undefined,
+          })
+        );
+      });
+
+      it('registers the security extension to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const securityExtension: jest.Mocked<SavedObjectsSecurityExtensionFactory> = jest.fn();
+        setup.setSecurityExtension(securityExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: undefined,
+            securityExtensionFactory: securityExtension,
+            spacesExtensionFactory: undefined,
+          })
+        );
+      });
+
+      it('registers the spaces extension to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        setup.setSpacesExtension(spacesExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: undefined,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: spacesExtension,
+          })
+        );
+      });
+
+      it('registers a combination of extensions to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
+        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        setup.setEncryptionExtension(encryptionExtension);
+        setup.setSpacesExtension(spacesExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: encryptionExtension,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: spacesExtension,
+          })
+        );
+      });
+
+      it('registers all three extensions to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
+        const securityExtension: jest.Mocked<SavedObjectsSecurityExtensionFactory> = jest.fn();
+        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        setup.setEncryptionExtension(encryptionExtension);
+        setup.setSecurityExtension(securityExtension);
+        setup.setSpacesExtension(spacesExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: encryptionExtension,
+            securityExtensionFactory: securityExtension,
+            spacesExtensionFactory: spacesExtension,
+          })
+        );
+      });
+
+      it('registers no extensions to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: undefined,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: undefined,
+          })
         );
       });
     });
