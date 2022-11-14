@@ -36,8 +36,8 @@ export const checkResults = () => {
     if ($table.find('div .euiDataGridRow').length > 0) {
       cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
     } else {
-      cy.contains('Status').click();
-      cy.contains('Results').click();
+      cy.getBySel('osquery-status-tab').click();
+      cy.getBySel('osquery-results-tab').click();
       cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
     }
   });
