@@ -30,6 +30,8 @@ export const TestRunDetails = () => {
 
   const step = stepEnds.find((stepN) => stepN.synthetics?.step?.index === stepIndex);
 
+  const totalSteps = stepsLoading ? 1 : stepEnds.length;
+
   return (
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem grow={2}>
@@ -43,7 +45,7 @@ export const TestRunDetails = () => {
                     defaultMessage="Step {stepIndex} of {totalSteps}"
                     values={{
                       stepIndex,
-                      totalSteps: stepEnds?.length ?? 1,
+                      totalSteps,
                     }}
                   />
                 </h3>
@@ -52,7 +54,7 @@ export const TestRunDetails = () => {
             <EuiFlexItem grow={false}>
               <StepNumberNav
                 stepIndex={stepIndex}
-                totalSteps={stepEnds?.length ?? 1}
+                totalSteps={totalSteps}
                 handleNextStep={() => {
                   setStepIndex(stepIndex + 1);
                 }}
