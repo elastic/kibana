@@ -16,15 +16,19 @@ import {
   EuiPanel,
   EuiHorizontalRule,
   formatDate,
+  EuiToolTip,
 } from '@elastic/eui';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import { getAlertIconTooltipContent } from '../../../common/utils/alert_icon_tooltip_content';
+import { ALERT_ICONS } from '../../../common/constants';
+import { ProcessEvent, ProcessEventAlertCategory } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useDateFormat } from '../../hooks';
-
+import { getAlertCategoryDisplayText } from '../../utils/alert_category_display_text';
 export const ALERT_LIST_ITEM_TEST_ID = 'sessionView:detailPanelAlertListItem';
 export const ALERT_LIST_ITEM_ARGS_TEST_ID = 'sessionView:detailPanelAlertListItemArgs';
+export const ALERT_LIST_ITEM_FILE_PATH_TEST_ID = 'sessionView:detailPanelAlertListItemFilePath';
 export const ALERT_LIST_ITEM_TIMESTAMP_TEST_ID = 'sessionView:detailPanelAlertListItemTimestamp';
 
 interface DetailPanelAlertsListItemDeps {
@@ -57,9 +61,16 @@ export const DetailPanelAlertListItem = ({
   const uuid = rule?.uuid || '';
   const name = rule?.name || '';
 
-  const { args } = event.process ?? {};
-
+  const { args, name: processName } = event.process ?? {};
+  const { event: processEvent } = event;
   const forceState = !isInvestigated ? 'open' : undefined;
+  const category = processEvent?.category?.[0];
+  const processEventAlertCategory = category ?? ProcessEventAlertCategory.process;
+  const alertCategoryDetailDisplayText =
+    category !== ProcessEventAlertCategory.process
+      ? `${dataOrDash(processName)} ${getAlertCategoryDisplayText(event, category)}`
+      : dataOrDash(args?.join(' '));
+  const alertIconTooltipContent = getAlertIconTooltipContent(processEventAlertCategory);
 
   return minimal ? (
     <div data-test-subj={ALERT_LIST_ITEM_TEST_ID} css={styles.firstAlertPad}>
@@ -86,7 +97,9 @@ export const DetailPanelAlertListItem = ({
         hasShadow={false}
         borderRadius="m"
       >
-        <EuiText size="xs">{dataOrDash(args?.join(' '))}</EuiText>
+        <EuiText data-test-subj={ALERT_LIST_ITEM_ARGS_TEST_ID} size="xs">
+          {alertCategoryDetailDisplayText}
+        </EuiText>
       </EuiPanel>
       <EuiHorizontalRule css={styles.minimalHR} margin="m" size="full" />
     </div>
@@ -98,7 +111,14 @@ export const DetailPanelAlertListItem = ({
       buttonContent={
         <EuiText css={styles.alertTitleContainer} size="s">
           <p css={styles.alertTitle}>
-            <EuiIcon color="danger" type="alert" css={styles.alertIcon} />
+            <EuiToolTip position="top" content={alertIconTooltipContent}>
+              <EuiIcon
+                color="danger"
+                type={ALERT_ICONS[processEventAlertCategory]}
+                css={styles.alertIcon}
+              />
+            </EuiToolTip>
+
             {dataOrDash(name)}
           </p>
         </EuiText>
@@ -126,7 +146,7 @@ export const DetailPanelAlertListItem = ({
         borderRadius="m"
       >
         <EuiText data-test-subj={ALERT_LIST_ITEM_ARGS_TEST_ID} size="xs">
-          {dataOrDash(args?.join(' '))}
+          {alertCategoryDetailDisplayText}
         </EuiText>
       </EuiPanel>
       {isInvestigated && (
