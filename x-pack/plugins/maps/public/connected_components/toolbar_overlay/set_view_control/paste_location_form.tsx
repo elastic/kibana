@@ -130,7 +130,7 @@ const LOCATION_PATTERNS:any = {
             this._onCenterChange(center)
           }else{
             matched = false;
-            locationParsingError = latError || lonError
+            locationParsingError = latError || lonError || ""
           }
     
         }
