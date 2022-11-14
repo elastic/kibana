@@ -79,15 +79,16 @@ describe('ConnectorsEmailServiceProvider', () => {
       expect(serviceProvider['setupSuccessful']).toEqual(false);
     });
 
-    it('should log a warning if no default email connector has been defined', () => {
+    it('should log an info message if no default email connector has been defined', () => {
       const serviceProvider = new EmailServiceProvider(missingConnectorConfig, logger);
       serviceProvider.setup({
         actions: actionsSetup,
         licensing: licensingMock.createSetup(),
       });
 
-      expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(
         `Email Service Error: Email connector not specified.`
       );
       // eslint-disable-next-line dot-notation
