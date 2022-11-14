@@ -131,7 +131,6 @@ export const CodeEditor: React.FC<Props> = ({
   overrideEditorWillMount,
   editorDidMount,
   editorWillMount,
-  useDarkTheme,
   transparentBackground,
   suggestionProvider,
   signatureProvider,
@@ -340,7 +339,6 @@ export const CodeEditor: React.FC<Props> = ({
       overrideEditorWillMount,
       editorWillMount,
       languageId,
-      useDarkTheme,
       suggestionProvider,
       signatureProvider,
       hoverProvider,
@@ -422,7 +420,8 @@ export const CodeEditor: React.FC<Props> = ({
 
   return (
     <div
-      className="kibanaCodeEditor"
+      // className="kibanaCodeEditor"
+      css={styles}
       onKeyDown={onKeyDown}
       style={{ backgroundColor: 'yellowgreen' }}
     >
@@ -430,7 +429,8 @@ export const CodeEditor: React.FC<Props> = ({
 
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
-          <div className="kibanaCodeEditor__controls">
+          // className="kibanaCodeEditor__controls"
+          <div css={styles}>
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
                 <CopyButton />
@@ -507,7 +507,8 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
       >
         {([fullscreenCollapse, fullscreenExpand]: string[]) => (
           <EuiButtonIcon
-            className="euiCodeBlock__fullScreenButton"
+            // className="euiCodeBlock__fullScreenButton"
+            css={styles}
             onClick={toggleFullScreen}
             iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
             color="text"
@@ -527,7 +528,8 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
         return (
           <EuiOverlayMask>
             <EuiFocusTrap clickOutsideDisables={true}>
-              <div className={'kibanaCodeEditor__isFullScreen'}>{children}</div>
+              {/* className={'kibanaCodeEditor__isFullScreen'} */}
+              <div css={styles}>{children}</div>
             </EuiFocusTrap>
           </EuiOverlayMask>
         );
@@ -551,7 +553,8 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
     if (!showCopyButton) return null;
 
     return (
-      <div className="euiCodeBlock__copyButton">
+      // className="euiCodeBlock__copyButton"
+      <div css={styles}>
         <EuiI18n token="euiCodeBlock.copyButton" default="Copy">
           {(copyButton: string) => (
             <EuiCopy textToCopy={value}>
@@ -573,7 +576,3 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
 
   return { showCopyButton, CopyButton };
 };
-
-// React.lazy requires default export
-// eslint-disable-next-line import/no-default-export
-export default CodeEditor;

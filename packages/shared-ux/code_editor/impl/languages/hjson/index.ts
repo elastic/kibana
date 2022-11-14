@@ -8,6 +8,5 @@
 
 import { LangModuleType } from '@kbn/monaco';
 import { languageConfiguration, lexerRules } from './language';
-import { LANG } from './constants';
 
-export const Lang: LangModuleType = { ID: LANG, languageConfiguration, lexerRules };
+export const Lang: LangModuleType = { ID: 'hjson', languageConfiguration, lexerRules };

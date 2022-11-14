@@ -7,6 +7,5 @@
  */
 import { LangModuleType } from '@kbn/monaco';
 import { lexerRules, languageConfiguration } from './language';
-import { LANG } from './constants';
 
-export const Lang: LangModuleType = { ID: LANG, lexerRules, languageConfiguration };
+export const Lang: LangModuleType = { ID: 'css', lexerRules, languageConfiguration };
