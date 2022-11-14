@@ -780,7 +780,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               path="groupByFields"
               component={GroupByFields}
               componentProps={{
-                browserFields: aggFields,
+                browserFields: termsAggregationFields,
                 isDisabled:
                   !license.isAtLeast(minimumLicenseForSuppression) &&
                   initialState.groupByFields.length === 0,
