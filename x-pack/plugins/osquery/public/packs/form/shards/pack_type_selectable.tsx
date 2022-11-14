@@ -13,6 +13,11 @@ import { noop } from 'lodash';
 
 const StyledEuiCard = styled(EuiCard)`
   padding: 16px 92px 16px 16px !important;
+  border: ${(props) => {
+    if (props.selectable?.isSelected) {
+      return `1px solid ${props.theme.eui.euiColorPrimary}`;
+    }
+  }};
 
   .euiTitle {
     font-size: 1rem;
@@ -106,7 +111,6 @@ const PackTypeSelectableComponent = ({
                 />
               }
               titleSize="xs"
-              hasBorder
               description={i18n.translate('xpack.osquery.pack.form.globalDescription', {
                 defaultMessage: 'Use pack across all policies',
               })}
