@@ -6,7 +6,14 @@
  */
 
 import { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
+
+export interface Dependencies {
+  licensing: LicensingPluginStart;
+}
 
 export type CustomBrandingRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;

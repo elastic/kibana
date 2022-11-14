@@ -6,10 +6,12 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["public/**/*", "server/**/*", "server/routes/**/*", "common/**/*", "config.ts", "__fixtures__/*",
+  "include": ["public/**/*",
+    "server/**/*", "common/**/*", "__fixtures__/*",
     "../../../typings/**/*"],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
+    { "path": "../license_api_guard/tsconfig.json" },
+    { "path": "../licensing/tsconfig.json" }
   ]
 }
