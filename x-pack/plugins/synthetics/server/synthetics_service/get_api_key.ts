@@ -63,7 +63,7 @@ export const getAPIKeyForSyntheticsService = async ({
         }
       } else {
         server.logger.info(
-          'Synthetics api key is not valid anymore due to being deleted or for any other reason.'
+          'Synthetics api is no longer valid'
         );
       }
 
