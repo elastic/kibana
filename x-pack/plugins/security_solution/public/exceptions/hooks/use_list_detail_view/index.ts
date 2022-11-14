@@ -13,11 +13,12 @@ import type {
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import { useParams } from 'react-router-dom';
 import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { useApi } from '@kbn/securitysolution-list-hooks';
 import { patchRule } from '../../../detection_engine/rule_management/logic';
 import { useUserData } from '../../../detections/components/user_info';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import { getListById, updateList, getListRules, exportList, deleteList } from '../../api';
+import { updateList, getListRules, getListById } from '../../api';
 import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 import * as i18n from '../../translations';
 
@@ -40,12 +41,19 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 export const useExceptionListDetails = () => {
   const toasts = useToasts();
   const { services } = useKibana();
-  const { http } = services;
+  const { http, notifications } = services;
   const { navigateToApp } = services.application;
 
+  const { exportExceptionList, deleteExceptionList } = useApi(http);
+
+  const { exceptionListId } = useParams<{
+    exceptionListId: string;
+  }>();
+
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
+
   const [isLoading, setIsLoading] = useState<boolean>();
-  const [list, setList] = useState<ExceptionListSchema | null>(null);
+  const [list, setList] = useState<ExceptionListSchema | null>();
   const [invalidListId, setInvalidListId] = useState(false);
   const [linkedRules, setLinkedRules] = useState<UIRule[]>([]);
   const [canUserEditList, setCanUserEditList] = useState(true);
@@ -55,10 +63,6 @@ export const useExceptionListDetails = () => {
   const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
     exceptionReferenceModalInitialState
   );
-
-  const { exceptionListId } = useParams<{
-    exceptionListId: string;
-  }>();
 
   const headerBackOptions: BackOptions = useMemo(
     () => ({
@@ -106,7 +110,6 @@ export const useExceptionListDetails = () => {
       setInvalidListId(false);
       if (checkIfListCannotBeEdited(result)) return setCanUserEditList(false);
     } catch (error) {
-      setIsLoading(false);
       handleErrorStatus(error);
     }
   }, [exceptionListId, http, initializeListRules, handleErrorStatus]);
@@ -140,37 +143,75 @@ export const useExceptionListDetails = () => {
   const onExportList = useCallback(async () => {
     try {
       if (!list) return;
-      const result = await exportList({
-        id: exceptionListId,
-        http,
-        listId: exceptionListId,
+      await exportExceptionList({
+        id: list.id,
+        listId: list.list_id,
         namespaceType: list.namespace_type,
+        onError: (error: Error) => handleErrorStatus(error),
+        onSuccess: (blob) => {
+          setExportedList(blob);
+          toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.list_id));
+        },
       });
-      setExportedList(result);
-      toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.list_id));
     } catch (error) {
       handleErrorStatus(error);
     }
-  }, [exceptionListId, http, list, toasts, handleErrorStatus]);
+  }, [list, exportExceptionList, handleErrorStatus, toasts]);
 
+  // #region DeleteList
+
+  const handleDeleteSuccess = useCallback(
+    (listId?: string) => () => {
+      notifications.toasts.addSuccess({
+        title: i18n.exceptionDeleteSuccessMessage(listId ?? referenceModalState.listId),
+      });
+    },
+    [notifications.toasts, referenceModalState.listId]
+  );
+
+  const handleDeleteError = useCallback(
+    (err: Error & { body?: { message: string } }): void => {
+      handleErrorStatus(err);
+    },
+    [handleErrorStatus]
+  );
   const onDeleteList = useCallback(async () => {
     try {
       if (!list) return;
-      await deleteList({
-        id: exceptionListId,
-        http,
+
+      await deleteExceptionList({
+        id: list.id,
         namespaceType: list.namespace_type,
+        onError: handleDeleteError,
+        onSuccess: handleDeleteSuccess,
       });
     } catch (error) {
       handleErrorStatus(error);
+    } finally {
+      setReferenceModalState(exceptionReferenceModalInitialState);
+      setShowReferenceErrorModal(false);
+      // if (refreshExceptions != null) await refreshExceptions();
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.exceptions,
+        path: '',
+      });
     }
-  }, [exceptionListId, http, list, handleErrorStatus]);
+  }, [
+    list,
+    deleteExceptionList,
+    handleDeleteError,
+    handleDeleteSuccess,
+    handleErrorStatus,
+    navigateToApp,
+  ]);
 
   const handleDelete = useCallback(() => {
     try {
       if (!list) return;
       setReferenceModalState({
-        contentText: i18n.referenceErrorMessage(linkedRules.length),
+        contentText: linkedRules.length
+          ? i18n.referenceErrorMessage(linkedRules.length)
+          : i18n.defaultDeleteListMessage(list.name),
         rulesReferences: linkedRules.map(({ name }) => name),
         isLoading: true,
         listId: list.list_id,
@@ -181,6 +222,7 @@ export const useExceptionListDetails = () => {
       handleErrorStatus(error);
     }
   }, [handleErrorStatus, linkedRules, list]);
+
   const handleCloseReferenceErrorModal = useCallback((): void => {
     setShowReferenceErrorModal(false);
     setReferenceModalState({
@@ -213,16 +255,10 @@ export const useExceptionListDetails = () => {
       onDeleteList();
     } catch (err) {
       handleErrorStatus(err);
-    } finally {
-      setReferenceModalState(exceptionReferenceModalInitialState);
-      setShowReferenceErrorModal(false);
-
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.exceptions,
-        path: '',
-      });
     }
-  }, [exceptionListId, handleErrorStatus, linkedRules, navigateToApp, onDeleteList]);
+  }, [exceptionListId, linkedRules, handleErrorStatus, onDeleteList]);
+
+  // #endregion
 
   const onManageRules = useCallback(() => {
     setShowManageRulesFlyout(true);

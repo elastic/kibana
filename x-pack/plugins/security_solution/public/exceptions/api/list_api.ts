@@ -8,11 +8,13 @@
 import {
   deleteExceptionListById,
   exportExceptionList,
-  fetchExceptionListById,
+  fetchExceptionLists,
   updateExceptionList,
 } from '@kbn/securitysolution-list-api';
 
 import type { HttpSetup } from '@kbn/core-http-browser';
+import { getFilters } from '@kbn/securitysolution-list-utils';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
 import type {
   DeleteExceptionList,
   ExportExceptionList,
@@ -25,12 +27,24 @@ import type { Rule } from '../../detection_engine/rule_management/logic';
 export const getListById = async ({ id, http }: FetchListById) => {
   try {
     const abortCtrl = new AbortController();
-    return await fetchExceptionListById({
-      http: http as HttpSetup,
-      id,
-      signal: abortCtrl.signal,
-      namespaceType: 'single', // TODO ask Devin
+    const filters = getFilters({
+      filters: { list_id: id },
+      namespaceTypes: ['single', 'agnostic'],
+      hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
     });
+    const namespaceTypes = ['single', 'agnostic'].join();
+
+    const { data } = await fetchExceptionLists({
+      filters,
+      http: http as HttpSetup,
+      signal: abortCtrl.signal,
+      namespaceTypes,
+      pagination: {},
+    });
+    abortCtrl.abort();
+
+    if (data && data.length) return data[0];
+    return null;
   } catch (error) {
     throw new Error(error);
   }
@@ -41,6 +55,7 @@ export const getListRules = async (listId: string) => {
     const { data: rules } = await fetchRules({
       signal: abortCtrl.signal,
     });
+    abortCtrl.abort();
     return rules.reduce((acc: Rule[], rule, index) => {
       const listExceptions = rule.exceptions_list?.find(
         (exceptionList) => exceptionList.list_id === listId
@@ -61,6 +76,7 @@ export const updateList = async ({ list, http }: UpdateExceptionList) => {
       list,
       signal: abortCtrl.signal,
     });
+    abortCtrl.abort();
   } catch (error) {
     throw new Error(error);
   }
