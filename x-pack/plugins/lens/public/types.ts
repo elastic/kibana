@@ -489,13 +489,6 @@ export interface Datasource<T = unknown, P = unknown> {
    */
   getUsedDataViews: (state: T) => string[];
 
-  getSupportedActionsForLayer?: (
-    layerId: string,
-    state: T,
-    setState: StateSetter<T>,
-    openLayerSettings?: () => void
-  ) => LayerAction[];
-
   getDatasourceInfo: (
     state: T,
     references?: SavedObjectReference[],

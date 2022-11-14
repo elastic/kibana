@@ -51,6 +51,9 @@ import { onDropForVisualization, shouldRemoveSource } from './buttons/drop_targe
 import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from './flyout_container';
 
+// hide the random sampling settings from the UI
+const DISPLAY_RANDOM_SAMPLING_SETTINGS = false;
+
 const initialActiveDimensionState = {
   isNew: false,
 };
@@ -330,12 +333,6 @@ export function LayerPanel(
               );
             },
           })) || []),
-        ...(layerDatasource?.getSupportedActionsForLayer?.(
-          layerId,
-          layerDatasourceState,
-          (newState) => updateDatasource(datasourceId, newState),
-          () => setPanelSettingsOpen(true)
-        ) || []),
         ...getSharedActions({
           layerId,
           activeVisualization,
@@ -345,6 +342,11 @@ export function LayerPanel(
           layerType: activeVisualization.getLayerType(layerId, visualizationState),
           isOnlyLayer,
           isTextBasedLanguage,
+          hasLayerSettings: Boolean(
+            activeVisualization.renderLayerSettings ||
+              (layerDatasource?.renderLayerSettings && DISPLAY_RANDOM_SAMPLING_SETTINGS)
+          ),
+          openLayerSettings: () => setPanelSettingsOpen(true),
           onCloneLayer,
           onRemoveLayer: () => onRemoveLayer(layerId),
         }),
@@ -352,16 +354,13 @@ export function LayerPanel(
     [
       activeVisualization,
       core,
-      datasourceId,
       isOnlyLayer,
       isTextBasedLanguage,
       layerDatasource,
-      layerDatasourceState,
       layerId,
       layerIndex,
       onCloneLayer,
       onRemoveLayer,
-      updateDatasource,
       updateVisualization,
       visualizationState,
     ]
@@ -688,24 +687,24 @@ export function LayerPanel(
         >
           <div id={layerId}>
             <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
-              {layerDatasource?.renderLayerSettings && (
-                <NativeRenderer
-                  render={layerDatasource.renderLayerSettings}
-                  nativeProps={layerDatasourceConfigProps}
-                />
+              {layerDatasource?.renderLayerSettings && DISPLAY_RANDOM_SAMPLING_SETTINGS && (
+                <>
+                  <NativeRenderer
+                    render={layerDatasource.renderLayerSettings}
+                    nativeProps={layerDatasourceConfigProps}
+                  />
+                  <EuiSpacer size="m" />
+                </>
               )}
               {activeVisualization?.renderLayerSettings && (
-                <>
-                  <EuiSpacer size="m" />
-                  <NativeRenderer
-                    render={activeVisualization?.renderLayerSettings}
-                    nativeProps={{
-                      ...layerVisualizationConfigProps,
-                      setState: props.updateVisualization,
-                      panelRef: settingsPanelRef,
-                    }}
-                  />
-                </>
+                <NativeRenderer
+                  render={activeVisualization?.renderLayerSettings}
+                  nativeProps={{
+                    ...layerVisualizationConfigProps,
+                    setState: props.updateVisualization,
+                    panelRef: settingsPanelRef,
+                  }}
+                />
               )}
             </div>
           </div>
