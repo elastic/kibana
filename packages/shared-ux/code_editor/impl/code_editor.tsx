@@ -147,6 +147,8 @@ export const CodeEditor: React.FC<Props> = ({
   isCopyable = false,
   allowFullScreen = false,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
   // detail and not have to call methods on the <CodeEditor /> component instance.
   const MonacoEditor: typeof ReactMonacoEditor = useMemo(() => {
@@ -173,11 +175,9 @@ export const CodeEditor: React.FC<Props> = ({
   const [isHintActive, setIsHintActive] = useState(true);
 
   const defaultStyles = codeEditorStyles();
-  const { euiTheme } = useEuiTheme();
-  const hintStyles = codeEditorKeyboardHintStyles(euiTheme);
+  const hintStyles = codeEditorKeyboardHintStyles(euiTheme.levels);
   const styles = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    !isHintActive ? defaultStyles : { defaultStyles, hintStyles };
+    return !isHintActive ? defaultStyles : { defaultStyles, hintStyles };
   }, [isHintActive, defaultStyles, hintStyles]);
 
   const _updateDimensions = useCallback(() => {

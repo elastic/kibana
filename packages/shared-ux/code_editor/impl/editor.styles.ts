@@ -8,6 +8,7 @@
 
 import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { Property } from 'csstype';
 
 export const codeEditorMonacoStyles = () => css`
    {
@@ -51,21 +52,31 @@ export const codeEditorPlaceholderStyles = ({ euiTheme }: UseEuiTheme) => css`
   }
 `;
 
-export const codeEditorKeyboardHintStyles = ({ euiTheme }: UseEuiTheme) =>
-  `{
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
+export const codeEditorKeyboardHintStyles = (levels: {
+  content: Property.ZIndex;
+  mask: Property.ZIndex;
+  toast: Property.ZIndex;
+  modal: Property.ZIndex;
+  navigation: Property.ZIndex;
+  menu: Property.ZIndex;
+  header: Property.ZIndex;
+  flyout: Property.ZIndex;
+  maskBelowHeader: Property.ZIndex;
+}) =>
+  css`
+     {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
 
-    &:focus {
-      // $euiZLevel1
-      z-index: ${euiTheme.levels.mask};
-    }
+      &:focus {
+        z-index: ${levels.mask};
+      }
 
-    &--isInactive {
-      display: none;
+      &--isInactive {
+        display: none;
+      }
     }
-  }
-`;
+  `;
