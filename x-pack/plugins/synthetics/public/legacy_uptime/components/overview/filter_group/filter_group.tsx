@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { capitalize } from 'lodash';
 import { FieldValueSuggestions, useInspectorContext } from '@kbn/observability-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useSyntheticsRefreshContext } from '../../../../apps/synthetics/contexts';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 import { SelectedFilters } from './selected_filters';
@@ -36,6 +37,8 @@ export const FilterGroup = () => {
     updatedFieldValues.values,
     updatedFieldValues.notValues
   );
+
+  const { refreshApp } = useSyntheticsRefreshContext();
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
@@ -68,10 +71,11 @@ export const FilterGroup = () => {
               selectedValue={selectedItems}
               excludedValue={excludedItems}
               onChange={(values, notValues, isLogicalAND) => {
+                onFilterFieldChange(field, values ?? [], notValues ?? []);
                 if (isLogicalAND !== undefined) {
                   setLogicalANDForTag(isLogicalAND.toString());
+                  setTimeout(() => refreshApp(), 0);
                 }
-                onFilterFieldChange(field, values ?? [], notValues ?? []);
               }}
               asCombobox={false}
               asFilterButton={true}

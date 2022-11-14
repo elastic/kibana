@@ -24,23 +24,30 @@ export const stringifyKueries = (
       }
       const value = kueries.get(key);
       if (!value || value.length === 0) return '';
-      return value.reduce(
-        (prev: string, cur: string | number, index: number, array: Array<number | string>) => {
-          let expression: string = `${key}:${cur}`;
-          if (typeof cur !== 'number' && (cur.indexOf(' ') >= 0 || cur.indexOf(':') >= 0)) {
-            expression = `${key}:"${cur}"`;
-          }
-          if (array.length === 1) {
-            return expression;
-          } else if (array.length > 1 && index === 0) {
-            return `(${expression}`;
-          } else if (index + 1 === array.length) {
-            return `${prev} ${condition} ${expression})`;
-          }
-          return `${prev} ${condition} ${expression}`;
-        },
-        ''
-      );
+
+      if (value.length === 1) {
+        return `${key}: ${value[0]}`;
+      }
+
+      return `${key}: (${value.join(` ${condition} `)})`;
+
+      // return value.reduce(
+      //   (prev: string, cur: string | number, index: number, array: Array<number | string>) => {
+      //     let expression: string = `${key}:${cur}`;
+      //     if (typeof cur !== 'number' && (cur.indexOf(' ') >= 0 || cur.indexOf(':') >= 0)) {
+      //       expression = `${key}:"${cur}"`;
+      //     }
+      //     if (array.length === 1) {
+      //       return expression;
+      //     } else if (array.length > 1 && index === 0) {
+      //       return `(${expression}`;
+      //     } else if (index + 1 === array.length) {
+      //       return `${prev} ${condition} ${expression})`;
+      //     }
+      //     return `${prev} ${condition} ${expression}`;
+      //   },
+      //   ''
+      // );
     })
     .reduce((prev, cur, index, array) => {
       if (array.length === 1 || index === 0) {

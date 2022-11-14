@@ -153,10 +153,12 @@ export function FieldValueSelection({
       .filter((opt) => opt?.checked === 'off')
       .map(({ label: labelN }) => labelN);
 
+    const hasFilterSelected = (selectedValue ?? []).length > 0 || (excludedValue ?? []).length > 0;
+
     return (
       isEqual(selectedValue ?? [], currSelected) &&
       isEqual(excludedValue ?? [], currExcluded) &&
-      isLogicalAND === useLogicalAND
+      !(isLogicalAND !== useLogicalAND && hasFilterSelected)
     );
   };
 
@@ -245,6 +247,7 @@ export function FieldValueSelection({
                   <>
                     <EuiSpacer size="xs" />
                     <EuiSwitch
+                      compressed
                       label={i18n.translate('xpack.observability.fieldValueSelection.logicalAnd', {
                         defaultMessage: 'Use logical AND',
                       })}
