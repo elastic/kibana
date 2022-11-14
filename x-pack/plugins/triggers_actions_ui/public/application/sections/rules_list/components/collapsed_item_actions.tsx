@@ -219,8 +219,8 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             onCloneRule(item.id);
           },
           name: i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.duplicateRuleTitle',
-            { defaultMessage: 'Duplicate rule' }
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.cloneRuleTitle',
+            { defaultMessage: 'Clone rule' }
           ),
         },
         {
