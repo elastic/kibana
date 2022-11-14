@@ -88,22 +88,32 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
   const [fieldNames, setFieldNames] = useState<Array<{ value: string; text: string }>>([]);
   const [selectedField, setSelectedField] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    setFieldNames([]);
-    setDataViewListItems([]);
-    dataViews.getIdsWithTitle().then((items) => {
-      setDataViewListItems(items.map(({ id, title }) => ({ text: title, value: id })));
-    });
-  }, [dataViews]);
+  useEffect(
+    function loadDataViewListItems() {
+      setFieldNames([]);
+      setDataViewListItems([]);
+      dataViews.getIdsWithTitle().then((items) => {
+        setDataViewListItems(
+          items
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map(({ id, title }) => ({ text: title, value: id }))
+        );
+      });
+    },
+    [dataViews]
+  );
 
-  useEffect(() => {
-    inferrer.reset();
-    setFieldNames([]);
-    setSelectedField(undefined);
-    if (selectedDataViewId !== undefined) {
-      dataViews.get(selectedDataViewId).then((dv) => setSelectedDataView(dv));
-    }
-  }, [selectedDataViewId, dataViews, inferrer]);
+  useEffect(
+    function loadSelectedDataView() {
+      inferrer.reset();
+      setFieldNames([]);
+      setSelectedField(undefined);
+      if (selectedDataViewId !== undefined) {
+        dataViews.get(selectedDataViewId).then((dv) => setSelectedDataView(dv));
+      }
+    },
+    [selectedDataViewId, dataViews, inferrer]
+  );
 
   const loadExamples = useCallback(() => {
     inferrer.inputText$.next([]);
@@ -136,30 +146,37 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
     }
   }, [inferrer, selectedField, selectedDataView, search]);
 
-  useEffect(() => {
-    if (selectedDataView !== null) {
-      const fieldNames2 = selectedDataView.fields
-        .filter(
-          ({ displayName, esTypes, count }) =>
-            esTypes && esTypes.includes('text') && !['_id', '_index'].includes(displayName)
-        )
-        .map(({ displayName }) => ({
-          value: displayName,
-          text: displayName,
-        }));
-      setFieldNames(fieldNames2);
-      if (fieldNames2.length === 1) {
-        const fieldName = fieldNames2[0].value;
-        setSelectedField(fieldName);
-        inferrer.setInputField(fieldName);
-        loadExamples();
+  useEffect(
+    function loadFieldNames() {
+      if (selectedDataView !== null) {
+        const tempFieldNames = selectedDataView.fields
+          .filter(
+            ({ displayName, esTypes, count }) =>
+              esTypes && esTypes.includes('text') && !['_id', '_index'].includes(displayName)
+          )
+          .sort((a, b) => a.displayName.localeCompare(b.displayName))
+          .map(({ displayName }) => ({
+            value: displayName,
+            text: displayName,
+          }));
+        setFieldNames(tempFieldNames);
+        if (tempFieldNames.length === 1) {
+          const fieldName = tempFieldNames[0].value;
+          setSelectedField(fieldName);
+          inferrer.setInputField(fieldName);
+          loadExamples();
+        }
       }
-    }
-  }, [selectedDataView, selectedDataViewId, inferrer, loadExamples]);
+    },
+    [selectedDataView, selectedDataViewId, inferrer, loadExamples]
+  );
 
-  useEffect(() => {
-    loadExamples();
-  }, [selectedField, selectedDataView, loadExamples]);
+  useEffect(
+    function loadExamplesAfterFieldChange() {
+      loadExamples();
+    },
+    [selectedField, selectedDataView, loadExamples]
+  );
 
   function reloadExamples() {
     inferrer.reset();
