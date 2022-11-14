@@ -444,7 +444,7 @@ interface ScheduleTaskOptions {
   throwOnConflict: boolean; // whether to throw conflict errors or swallow them
 }
 
-type BulkAction = 'DELETE' | 'ENABLE';
+type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE';
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
@@ -1853,6 +1853,10 @@ export class RulesClient {
         WriteOperation: WriteOperations.BulkEnable,
         RuleAuditAction: RuleAuditAction.ENABLE,
       },
+      DISABLE: {
+        WriteOperation: WriteOperations.BulkDisable,
+        RuleAuditAction: RuleAuditAction.DISABLE,
+      },
     };
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
       RawRule,
@@ -2529,7 +2533,7 @@ export class RulesClient {
         }
       );
 
-    const rulesToEnable: SavedObjectsBulkUpdateObject[] = [];
+    const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const taskIdsToEnable: string[] = [];
     const errors: BulkOperationError[] = [];
     const taskIdToRuleIdMapping: Record<string, string> = {};
@@ -2641,6 +2645,178 @@ export class RulesClient {
       }
     });
     return { errors, taskIdsToEnable };
+  };
+
+  public bulkDisableRules = async (options: BulkCommonOptions) => {
+    const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
+
+    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
+    const authorizationFilter = await this.getAuthorizationFilter({ action: 'ENABLE' });
+
+    const kueryNodeFilterWithAuth =
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+        : kueryNodeFilter;
+
+    const { total } = await this.checkAuthorizationAndGetTotal({
+      filter: kueryNodeFilterWithAuth,
+      action: 'DISABLE',
+    });
+
+    // TODO retry if
+
+    const taskIdsToDisable: string[] = [];
+    const taskIdsToDelete: string[] = [];
+
+    if (taskIdsToDisable.length > 0) {
+      try {
+        const resultFromDisablingTasks = await this.taskManager.bulkDisable(taskIdsToDisable);
+        this.logger.debug(
+          `Successfully disabled schedules for underlying tasks: ${resultFromDisablingTasks.tasks
+            .map((task) => task.id)
+            .join(', ')}`
+        );
+        this.logger.error(
+          `Failure to disable schedules for underlying tasks: ${resultFromDisablingTasks.errors
+            .map((error) => error.task.id)
+            .join(', ')}`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failure to disable schedules for underlying tasks: ${taskIdsToDisable.join(
+            ', '
+          )}. TaskManager bulkDisable failed with Error: ${error.message}`
+        );
+      }
+    }
+
+    const taskIdsFailedToBeDeleted: string[] = [];
+    const taskIdsSuccessfullyDeleted: string[] = [];
+
+    if (taskIdsToDelete.length > 0) {
+      try {
+        const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
+        resultFromDeletingTasks?.statuses.forEach((status) => {
+          if (status.success) {
+            taskIdsSuccessfullyDeleted.push(status.id);
+          } else {
+            taskIdsFailedToBeDeleted.push(status.id);
+          }
+        });
+        this.logger.debug(
+          `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
+            ', '
+          )}`
+        );
+        this.logger.error(
+          `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(', ')}`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
+            ', '
+          )}. TaskManager bulkRemoveIfExist failed with Error: ${error.message}`
+        );
+      }
+    }
+
+    return { errors, total };
+  };
+
+  private bulkDisableRulesWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
+    const rulesFinder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+        {
+          filter,
+          type: 'alert',
+          perPage: 100,
+          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
+        }
+      );
+
+    const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+    const errors: BulkOperationError[] = [];
+    const ruleNameToRuleIdMapping: Record<string, string> = {};
+
+    for await (const response of rulesFinder.find()) {
+      await pMap(response.saved_objects, async (rule) => {
+        try {
+          if (rule.attributes.enabled === false) return;
+          if (rule.attributes.name) {
+            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+          }
+
+          const username = await this.getUserName();
+          const updatedAttributes = this.updateMeta({
+            ...rule.attributes,
+            enabled: false,
+            scheduledTaskId:
+              rule.attributes.scheduledTaskId === rule.id ? rule.attributes.scheduledTaskId : null,
+            updatedBy: username,
+            updatedAt: new Date().toISOString(),
+          });
+
+          rulesToDisable.push({
+            ...rule,
+            attributes: {
+              ...updatedAttributes,
+            },
+          });
+
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.DISABLE,
+              outcome: 'unknown',
+              savedObject: { type: 'alert', id: rule.id },
+            })
+          );
+        } catch (error) {
+          errors.push({
+            message: error.message,
+            rule: {
+              id: rule.id,
+              name: rule.attributes?.name,
+            },
+          });
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.DISABLE,
+              error,
+            })
+          );
+        }
+      });
+    }
+
+    const result = await this.unsecuredSavedObjectsClient.bulkCreate(rulesToDisable, {
+      overwrite: true,
+    });
+
+    const taskIdsToDisable: string[] = [];
+    const taskIdsToDelete: string[] = [];
+
+    result.saved_objects.forEach((rule) => {
+      if (rule.error === undefined) {
+        if (rule.attributes.scheduledTaskId) {
+          if (rule.attributes.scheduledTaskId !== rule.id) {
+            taskIdsToDelete.push(rule.attributes.scheduledTaskId);
+          } else {
+            taskIdsToDisable.push(rule.attributes.scheduledTaskId);
+          }
+        }
+      } else {
+        errors.push({
+          message: rule.error.message ?? 'n/a',
+          status: rule.error.statusCode,
+          rule: {
+            id: rule.id,
+            name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
+          },
+        });
+      }
+    });
+
+    return { errors, taskIdsToDisable, taskIdsToDelete };
   };
 
   private apiKeyAsAlertAttributes(
