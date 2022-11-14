@@ -28,7 +28,7 @@ describe('bulkEnableRulesRoute', () => {
   const bulkEnableRequest = { filter: '' };
   const bulkEnableResult = { errors: [], total: 1, taskIdsFailedToBeEnabled: [] };
 
-  it('should delete rules with proper parameters', async () => {
+  it('should enable rules with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 

@@ -300,15 +300,15 @@ export type BulkEditOptions<Params extends RuleTypeParams> =
   | BulkEditOptionsFilter<Params>
   | BulkEditOptionsIds<Params>;
 
-export interface BulkCommonOptionsFilter {
+interface BulkOptionsFilter {
   filter?: string | KueryNode;
 }
 
-export interface BulkCommonOptionsIds {
+interface BulkOptionsIds {
   ids?: string[];
 }
 
-export type BulkCommonOptions = BulkCommonOptionsFilter | BulkCommonOptionsIds;
+export type BulkOptions = BulkOptionsFilter | BulkOptionsIds;
 
 export interface BulkOperationError {
   message: string;
@@ -1812,9 +1812,9 @@ export class RulesClient {
     }
   };
 
-  private getAndValidateCommonBulkOptions = (options: BulkCommonOptions) => {
-    const filter = (options as BulkCommonOptionsFilter).filter;
-    const ids = (options as BulkCommonOptionsIds).ids;
+  private getAndValidateCommonBulkOptions = (options: BulkOptions) => {
+    const filter = (options as BulkOptionsFilter).filter;
+    const ids = (options as BulkOptionsIds).ids;
 
     if (!ids && !filter) {
       throw Boom.badRequest(
@@ -1912,7 +1912,7 @@ export class RulesClient {
     return { total };
   };
 
-  public bulkDeleteRules = async (options: BulkCommonOptions) => {
+  public bulkDeleteRules = async (options: BulkOptions) => {
     const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
 
     const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
@@ -2470,7 +2470,7 @@ export class RulesClient {
     }
   };
 
-  public bulkEnableRules = async (options: BulkCommonOptions) => {
+  public bulkEnableRules = async (options: BulkOptions) => {
     const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
 
     const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
