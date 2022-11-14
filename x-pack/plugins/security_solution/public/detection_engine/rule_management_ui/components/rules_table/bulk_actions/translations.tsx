@@ -155,7 +155,7 @@ export const bulkDuplicateRuleActions = {
   DUPLICATE_EXCEPTIONS_TEXT: (rulesCount: number) => (
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.with"
-      defaultMessage="Duplicate {rulesCount, plural, one {rule} other {rules}} and their exceptions."
+      defaultMessage="Duplicate {rulesCount, plural, one {rule} other {rules}} and their exceptions"
       values={{ rulesCount }}
     />
   ),
@@ -163,7 +163,7 @@ export const bulkDuplicateRuleActions = {
   DUPLICATE_WITHOUT_EXCEPTIONS_TEXT: (rulesCount: number) => (
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.without"
-      defaultMessage="Only duplicate {rulesCount, plural, one {the rule} other {rules}}."
+      defaultMessage="Only duplicate {rulesCount, plural, one {the rule} other {rules}}"
       values={{ rulesCount }}
     />
   ),
