@@ -138,7 +138,7 @@ export const getRecordRangeLabel = ({
         monitorsLabel: (
           <strong>
             {i18n.translate('xpack.synthetics.management.monitorList.recordRangeLabel', {
-              defaultMessage: '{monitorCount, plural, one {Monitor} other {Monitors}}',
+              defaultMessage: '{monitorCount, plural, one {Configuration} other {Configurations}}',
               values: {
                 monitorCount: total,
               },
