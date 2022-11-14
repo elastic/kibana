@@ -16,7 +16,7 @@ exports[`DownNoExpressionSelect component should renders against props 1`] = `
       <span
         class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
       >
-        matching monitors are down &gt;
+        matching monitors are down &gt;=
       </span>
        
       <span
@@ -42,7 +42,7 @@ exports[`DownNoExpressionSelect component should shallow renders against props 1
     />
   }
   data-test-subj="xpack.synthetics.alerts.monitorStatus.numTimesExpression"
-  description="matching monitors are down >"
+  description="matching monitors are down >="
   id="ping-count"
   value="5 times"
 />
