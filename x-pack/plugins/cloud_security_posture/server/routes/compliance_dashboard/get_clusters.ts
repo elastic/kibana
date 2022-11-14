@@ -47,6 +47,7 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
       terms: {
         field: 'cluster_id',
       },
+      // @ts-ignore
       aggs: {
         latestFindingTopHit: {
           top_hits: {
