@@ -236,7 +236,7 @@ export class SyntheticsService {
     const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server: this.server });
     if (!isValid) {
       throw new Error(
-        'API key is not valid, so cannot push configs to synthetics public locations'
+        'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
     }
 
