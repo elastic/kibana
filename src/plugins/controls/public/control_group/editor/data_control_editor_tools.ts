@@ -16,7 +16,7 @@ import { DataControlFieldRegistry, IEditableControlFactory } from '../../types';
 
 export const getDataControlFieldRegistry = memoize(
   async (dataView: DataView) => {
-    return await loadFieldRegistryFromDataViewId(dataView);
+    return await loadFieldRegistryFromDataView(dataView);
   },
   (dataView: DataView) => [dataView.id, JSON.stringify(dataView.fields.getAll())].join('|')
 );
@@ -44,7 +44,7 @@ const doubleLinkFields = (dataView: DataView) => {
   return fieldRegistry;
 };
 
-const loadFieldRegistryFromDataViewId = async (
+const loadFieldRegistryFromDataView = async (
   dataView: DataView
 ): Promise<DataControlFieldRegistry> => {
   const {
