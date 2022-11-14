@@ -11,6 +11,7 @@ import {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { RULE_TAGS_TEMPLATE } from '../../../../common/opsgenie';
 import { OpsgenieSubActions } from '../../../../common';
 import type {
   OpsgenieActionConfig,
@@ -47,6 +48,7 @@ export const getConnectorType = (): ConnectorTypeModel<
       subAction: OpsgenieSubActions.CreateAlert,
       subActionParams: {
         alias: DEFAULT_ALIAS,
+        tags: [RULE_TAGS_TEMPLATE],
       },
     },
     defaultRecoveredActionParams: {

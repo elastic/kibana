@@ -175,7 +175,6 @@ describe('<UseField />', () => {
         typeof value === 'string' ? value : JSON.stringify(value);
 
       const setup = registerTestBed(TestComp, {
-        defaultProps: { onStateChangeSpy },
         memoryRouter: { wrapComponent: false },
       });
 
