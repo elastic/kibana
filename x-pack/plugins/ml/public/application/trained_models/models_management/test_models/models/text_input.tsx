@@ -22,7 +22,7 @@ export const TextInput: FC<{
     inferrer.setInputText([inputText]);
   }, [inputText, inferrer]);
 
-  const runningState = useObservable(inferrer.getRunningState());
+  const runningState = useObservable(inferrer.getRunningState$());
 
   return (
     <EuiFormRow

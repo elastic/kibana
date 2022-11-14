@@ -105,19 +105,19 @@ export abstract class InferenceBase<TInferResponse> {
     this.inputText$.next(text);
   }
 
-  public getInputText() {
+  public getInputText$() {
     return this.inputText$.asObservable();
   }
 
-  public getInferenceResult() {
+  public getInferenceResult$() {
     return this.inferenceResult$.asObservable();
   }
 
-  public getInferenceError() {
+  public getInferenceError$() {
     return this.inferenceError$.asObservable();
   }
 
-  public getRunningState() {
+  public getRunningState$() {
     return this.runningState$.asObservable();
   }
 

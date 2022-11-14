@@ -24,7 +24,7 @@ const ClassNameInput: FC<{
     inferrer.labelsText$.next(labelsText);
   }, [labelsText, inferrer]);
 
-  const runningState = useObservable(inferrer.getRunningState());
+  const runningState = useObservable(inferrer.getRunningState$());
   return (
     <EuiFormRow
       fullWidth
