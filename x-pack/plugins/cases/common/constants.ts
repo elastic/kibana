@@ -185,3 +185,8 @@ export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
  * Delays
  */
 export const SEARCH_DEBOUNCE_MS = 500;
+
+/**
+ * Local storage keys
+ */
+export const LOCAL_STORAGE_KEYS = { casesFiltering: 'cases.list.filtering' };
