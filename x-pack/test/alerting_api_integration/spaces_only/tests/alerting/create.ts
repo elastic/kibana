@@ -100,7 +100,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updated_at)).to.eql(Date.parse(response.body.created_at));
-
+      if (response.body.next_run) {
+        expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+      }
       expect(typeof response.body.scheduled_task_id).to.be('string');
       const taskRecord = await getScheduledTask(response.body.scheduled_task_id);
       expect(taskRecord.type).to.eql('task');
@@ -195,6 +197,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
         ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
       });
+
+      if (response.body.next_run) {
+        expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+      }
 
       const esResponse = await es.get<SavedObject<RawRule>>(
         {
@@ -495,7 +501,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
         expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
         expect(Date.parse(response.body.updatedAt)).to.eql(Date.parse(response.body.createdAt));
-
+        if (response.body.next_run) {
+          expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+        }
         expect(typeof response.body.scheduledTaskId).to.be('string');
         const taskRecord = await getScheduledTask(response.body.scheduledTaskId);
         expect(taskRecord.type).to.eql('task');

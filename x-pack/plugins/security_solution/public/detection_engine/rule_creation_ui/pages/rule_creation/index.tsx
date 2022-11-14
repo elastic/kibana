@@ -18,7 +18,8 @@ import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react'
 import styled from 'styled-components';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { isMlRule, isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -30,7 +31,6 @@ import {
   getRulesUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { displaySuccessToast, useStateToaster } from '../../../../common/components/toasters';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { AccordionTitle } from '../../../../detections/components/rules/accordion_title';
@@ -71,6 +71,7 @@ import {
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { PreviewFlyout } from '../../../../detections/pages/detection_engine/rules/preview';
+import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -114,10 +115,10 @@ const CreateRulePageComponent: React.FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+  const { addSuccess } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
   const { data: dataServices } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
-  const [, dispatchToaster] = useStateToaster();
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
     ruleStepsOrder[ruleStepsOrder.indexOf(step) + 1];
@@ -206,6 +207,8 @@ const CreateRulePageComponent: React.FC = () => {
     [activeStep]
   );
 
+  const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
+
   useEffect(() => {
     const fetchDataViews = async () => {
       const dataViewsRefs = await dataServices.dataViews.getIdsWithTitle();
@@ -285,16 +288,26 @@ const CreateRulePageComponent: React.FC = () => {
             stepIsValid(scheduleStep) &&
             stepIsValid(actionsStep)
           ) {
-            const createdRule = await createRule(
-              formatRule<RuleCreateProps>(
-                defineStep.data,
-                aboutStep.data,
-                scheduleStep.data,
-                actionsStep.data
-              )
-            );
+            const startMlJobsIfNeeded = async () => {
+              if (!isMlRule(defineStep.data.ruleType) || !actionsStep.data.enabled) {
+                return;
+              }
+              await startMlJobs(defineStep.data.machineLearningJobId);
+            };
+            const [, createdRule] = await Promise.all([
+              startMlJobsIfNeeded(),
+              createRule(
+                formatRule<RuleCreateProps>(
+                  defineStep.data,
+                  aboutStep.data,
+                  scheduleStep.data,
+                  actionsStep.data
+                )
+              ),
+            ]);
 
-            displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name), dispatchToaster);
+            addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
+
             navigateToApp(APP_UI_ID, {
               deepLinkId: SecurityPageName.rules,
               path: getRuleDetailsUrl(createdRule.id),
@@ -303,7 +316,7 @@ const CreateRulePageComponent: React.FC = () => {
         }
       }
     },
-    [updateCurrentDataState, goToStep, createRule, dispatchToaster, navigateToApp]
+    [updateCurrentDataState, goToStep, createRule, navigateToApp, startMlJobs, addSuccess]
   );
 
   const getAccordionType = useCallback(
@@ -533,7 +546,7 @@ const CreateRulePageComponent: React.FC = () => {
                   addPadding={true}
                   defaultValues={stepsData.current[RuleStep.ruleActions].data}
                   isReadOnlyView={activeStep !== RuleStep.ruleActions}
-                  isLoading={isLoading || loading}
+                  isLoading={isLoading || loading || isStartingJobs}
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.ruleActions)}
                   actionMessageParams={actionMessageParams}

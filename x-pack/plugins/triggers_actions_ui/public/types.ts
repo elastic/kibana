@@ -169,6 +169,11 @@ export enum ActionConnectorMode {
   ActionForm = 'actionForm',
 }
 
+export interface BulkDeleteResponse {
+  errors: BulkOperationError[];
+  total: number;
+}
+
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;

@@ -82,7 +82,7 @@ export interface RuleExecutorServices<
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
-  ruleMonitoringService: PublicRuleMonitoringService;
+  ruleMonitoringService?: PublicRuleMonitoringService;
 }
 
 export interface RuleExecutorOptions<
