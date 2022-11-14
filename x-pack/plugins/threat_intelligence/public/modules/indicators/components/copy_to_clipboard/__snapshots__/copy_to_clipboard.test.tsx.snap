@@ -6,11 +6,11 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
           aria-label="Copy to clipboard"
-          class="euiButtonEmpty euiButtonEmpty--primary"
+          class="euiButtonEmpty css-9t7nyf-empty-primary"
           data-test-subj="abc"
           type="button"
         >
@@ -34,11 +34,11 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <button
         aria-label="Copy to clipboard"
-        class="euiButtonEmpty euiButtonEmpty--primary"
+        class="euiButtonEmpty css-9t7nyf-empty-primary"
         data-test-subj="abc"
         type="button"
       >
@@ -119,7 +119,7 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
           class="euiContextMenuItem euiContextMenuItem--small"
@@ -146,7 +146,7 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <button
         class="euiContextMenuItem euiContextMenuItem--small"

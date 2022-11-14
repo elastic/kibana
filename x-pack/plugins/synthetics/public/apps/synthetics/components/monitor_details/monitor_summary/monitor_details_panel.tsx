@@ -16,6 +16,8 @@ import {
   EuiLink,
   EuiLoadingContent,
   useEuiTheme,
+  EuiTitle,
+  EuiPanel,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -54,44 +56,49 @@ export const MonitorDetailsPanel = () => {
   `;
 
   return (
-    <div css={wrapperStyle}>
-      <EuiSpacer size="s" />
-      <EuiDescriptionList type="column" compressed={true}>
-        <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          {monitor && (
-            <MonitorEnabled
-              initialLoading={loading}
-              id={monitorId}
-              monitor={monitor}
-              reloadPage={() => {
-                dispatch(getMonitorAction.get({ monitorId }));
-              }}
-            />
-          )}
-        </EuiDescriptionListDescription>
-        <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          <EuiBadge>{capitalize(monitor?.type)}</EuiBadge>
-        </EuiDescriptionListDescription>
-        <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>Every 10 mins</EuiDescriptionListDescription>
-        <EuiDescriptionListTitle>{LOCATIONS_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          <LocationsStatus />
-        </EuiDescriptionListDescription>
-        <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
-          <EuiLink href={latestPing?.url?.full} external>
-            {latestPing?.url?.full}
-          </EuiLink>
-        </EuiDescriptionListDescription>
-        <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          {monitor && <MonitorTags tags={monitor[ConfigKey.TAGS]} />}
-        </EuiDescriptionListDescription>
-      </EuiDescriptionList>
-    </div>
+    <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+      <EuiTitle size="xs">
+        <h3>{MONITOR_DETAILS_LABEL}</h3>
+      </EuiTitle>
+      <div css={wrapperStyle}>
+        <EuiSpacer size="s" />
+        <EuiDescriptionList type="column" compressed={true}>
+          <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            {monitor && (
+              <MonitorEnabled
+                initialLoading={loading}
+                id={monitorId}
+                monitor={monitor}
+                reloadPage={() => {
+                  dispatch(getMonitorAction.get({ monitorId }));
+                }}
+              />
+            )}
+          </EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            <EuiBadge>{capitalize(monitor?.type)}</EuiBadge>
+          </EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>Every 10 mins</EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>{LOCATIONS_LABEL}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            <LocationsStatus />
+          </EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
+            <EuiLink href={latestPing?.url?.full} external>
+              {latestPing?.url?.full}
+            </EuiLink>
+          </EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            {monitor && <MonitorTags tags={monitor[ConfigKey.TAGS]} />}
+          </EuiDescriptionListDescription>
+        </EuiDescriptionList>
+      </div>
+    </EuiPanel>
   );
 };
 
@@ -120,3 +127,7 @@ const MONITOR_TYPE_LABEL = i18n.translate(
     defaultMessage: 'Monitor type',
   }
 );
+
+const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails', {
+  defaultMessage: 'Monitor details',
+});
