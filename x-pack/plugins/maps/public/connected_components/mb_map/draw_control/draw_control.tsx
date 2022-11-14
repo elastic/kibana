@@ -125,7 +125,7 @@ export class DrawControl extends Component<Props> {
     if (drawMode !== DRAW_RECTANGLE && this.props.drawShape === DRAW_SHAPE.BOUNDS) {
       this._mbDrawControl.changeMode(DRAW_RECTANGLE);
     } else if (drawMode !== DRAW_CIRCLE && this.props.drawShape === DRAW_SHAPE.DISTANCE) {
-      console.log(this._mbDrawControl.changeMode(DRAW_CIRCLE));
+      this._mbDrawControl.changeMode(DRAW_CIRCLE);
 
       if(this.props.drawState?.center){
         let {lat,lon} = this.props.drawState?.center
