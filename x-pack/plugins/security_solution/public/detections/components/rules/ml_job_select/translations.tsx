@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { errorBudgetSchema } from '../schema';
+import { i18n } from '@kbn/i18n';
 
-type ErrorBudget = t.TypeOf<typeof errorBudgetSchema>;
-
-export type { ErrorBudget };
+export const CREATE_CUSTOM_JOB_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlSelectJob.createCustomJobButtonTitle',
+  {
+    defaultMessage: 'Create custom job',
+  }
+);
