@@ -61,7 +61,7 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   mlInferencePipeline: undefined,
   mlInferencePipelineProcessors: undefined,
   mlInferencePipelinesData: undefined,
-  mlModelsData: undefined,
+  mlModelsData: null,
   mlModelsStatus: 0,
   showGetDocumentErrors: false,
   simulateExistingPipelineData: undefined,

@@ -6,10 +6,8 @@
  */
 import { kea, MakeLogicType } from 'kea';
 
-import {
-  TrainedModelConfigResponse,
-  TrainedModelStat,
-} from '@kbn/ml-plugin/common/types/trained_models';
+import { MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
+import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
 import { ApiStatus, Status, HttpError } from '../../../../../common/types/api';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
@@ -21,7 +19,7 @@ import {
 } from './ml_model_stats_logic';
 import { GetMlModelsResponse, MLModelsApiLogic, MLModelsApiLogicActions } from './ml_models_logic';
 
-export type TrainedModel = TrainedModelConfigResponse & TrainedModelStat;
+export type TrainedModel = TrainedModelConfigResponse & MlTrainedModelStats;
 
 export type TrainedModelsApiLogicActions = Actions<undefined, TrainedModel[]> & {
   getModelsApiError: MLModelsApiLogicActions['apiError'];
@@ -117,7 +115,7 @@ export const TrainedModelsApiLogic = kea<
       actions.makeGetModelsStatsRequest(undefined);
     },
   }),
-  path: ['ml_trained_models_api_logic'],
+  path: ['enterprise_search', 'api', 'ml_trained_models_api_logic'],
   selectors: ({ selectors }) => ({
     data: [
       () => [selectors.modelsData, selectors.modelStatsData],
