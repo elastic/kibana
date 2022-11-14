@@ -9842,7 +9842,6 @@
     "xpack.csp.cspSettings.rules": "CSPセキュリティルール - ",
     "xpack.csp.dashboard.cspPageTemplate.pageTitle": "クラウド態勢",
     "xpack.csp.dashboard.risksTable.cisSectionColumnLabel": "CISセクション",
-    "xpack.csp.dashboard.risksTable.findingsColumnLabel": "調査結果",
     "xpack.csp.dashboard.risksTable.viewAllButtonTitle": "すべてのフィールド調査結果を表示",
     "xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle": "クラウド態勢スコア",
     "xpack.csp.expandColumnDescriptionLabel": "拡張",

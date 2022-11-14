@@ -9855,7 +9855,6 @@
     "xpack.csp.cspSettings.rules": "Règles de sécurité du CSP - ",
     "xpack.csp.dashboard.cspPageTemplate.pageTitle": "Niveau du cloud",
     "xpack.csp.dashboard.risksTable.cisSectionColumnLabel": "Section CIS",
-    "xpack.csp.dashboard.risksTable.findingsColumnLabel": "Résultats",
     "xpack.csp.dashboard.risksTable.viewAllButtonTitle": "Afficher tous les échecs des résultats",
     "xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle": "Score du niveau du cloud",
     "xpack.csp.expandColumnDescriptionLabel": "Développer",

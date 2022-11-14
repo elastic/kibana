@@ -9860,7 +9860,6 @@
     "xpack.csp.cspSettings.rules": "CSP 安全规则 - ",
     "xpack.csp.dashboard.cspPageTemplate.pageTitle": "云态势",
     "xpack.csp.dashboard.risksTable.cisSectionColumnLabel": "CIS 部分",
-    "xpack.csp.dashboard.risksTable.findingsColumnLabel": "结果",
     "xpack.csp.dashboard.risksTable.viewAllButtonTitle": "查看所有失败的结果",
     "xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle": "云态势分数",
     "xpack.csp.expandColumnDescriptionLabel": "展开",

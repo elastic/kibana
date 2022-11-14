@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
@@ -126,6 +127,10 @@ export const CloudBenchmarksSection = ({
                 onCellClick={(resourceTypeName) =>
                   handleCellClick(cluster.meta.clusterId, resourceTypeName)
                 }
+                viewAllButtonTitle={i18n.translate(
+                  'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
+                  { defaultMessage: 'View all failed findings for this cluster' }
+                )}
                 onViewAllClick={() => handleViewAllClick(cluster.meta.clusterId)}
               />
             </div>

@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
+import { statusColors } from '../../../common/constants';
 import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
 import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
@@ -79,7 +80,7 @@ export const CloudSummarySection = ({
           { defaultMessage: 'Failing Findings' }
         ),
         title: <CompactFormattedNumber number={complianceData.stats.totalFailed} />,
-        titleColor: complianceData.stats.totalFailed > 0 ? 'danger' : 'text',
+        titleColor: complianceData.stats.totalFailed > 0 ? statusColors.failed : 'text',
         onClick: () => {
           navToFindings({ 'result.evaluation': RULE_FAILED });
         },
@@ -131,6 +132,10 @@ export const CloudSummarySection = ({
             maxItems={5}
             onCellClick={handleCellClick}
             onViewAllClick={handleViewAllClick}
+            viewAllButtonTitle={i18n.translate(
+              'xpack.csp.dashboard.risksTable.viewAllButtonTitle',
+              { defaultMessage: 'View all failed findings' }
+            )}
           />
         </ChartPanel>
       </EuiFlexItem>
