@@ -31109,7 +31109,6 @@
     "xpack.synthetics.monitorManagement.monitorFailureMessage": "Impossible d'enregistrer le moniteur. Réessayez plus tard.",
     "xpack.synthetics.monitorManagement.monitorList.actions": "Actions",
     "xpack.synthetics.monitorManagement.monitorList.enabled": "Activé",
-    "xpack.synthetics.monitorManagement.monitorList.enabled.tooltip": "Ce moniteur a été ajouté depuis un projet externe. Pour supprimer le moniteur, retirez-le du projet et retransmettez la configuration.",
     "xpack.synthetics.monitorManagement.monitorList.locations": "Emplacements",
     "xpack.synthetics.monitorManagement.monitorList.monitorName": "Nom de moniteur",
     "xpack.synthetics.monitorManagement.monitorList.monitorType": "Type de moniteur",

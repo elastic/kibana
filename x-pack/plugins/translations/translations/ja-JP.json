@@ -31085,7 +31085,6 @@
     "xpack.synthetics.monitorManagement.monitorFailureMessage": "モニターを保存できませんでした。しばらくたってから再試行してください。",
     "xpack.synthetics.monitorManagement.monitorList.actions": "アクション",
     "xpack.synthetics.monitorManagement.monitorList.enabled": "有効",
-    "xpack.synthetics.monitorManagement.monitorList.enabled.tooltip": "この監視は外部プロジェクトから追加されました。モニターを削除するには、プロジェクトから削除し、もう一度構成をプッシュします。",
     "xpack.synthetics.monitorManagement.monitorList.locations": "場所",
     "xpack.synthetics.monitorManagement.monitorList.monitorName": "モニター名",
     "xpack.synthetics.monitorManagement.monitorList.monitorType": "モニタータイプ",

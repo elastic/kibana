@@ -31120,7 +31120,6 @@
     "xpack.synthetics.monitorManagement.monitorFailureMessage": "无法保存监测。请稍后重试。",
     "xpack.synthetics.monitorManagement.monitorList.actions": "操作",
     "xpack.synthetics.monitorManagement.monitorList.enabled": "已启用",
-    "xpack.synthetics.monitorManagement.monitorList.enabled.tooltip": "已从外部项目添加此监测。要删除监测，请将其从项目中移除，然后再次推送配置。",
     "xpack.synthetics.monitorManagement.monitorList.locations": "位置",
     "xpack.synthetics.monitorManagement.monitorList.monitorName": "监测名称",
     "xpack.synthetics.monitorManagement.monitorList.monitorType": "监测类型",

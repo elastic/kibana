@@ -61,7 +61,7 @@ describe('<Actions />', () => {
       />
     );
 
-    userEvent.click(screen.getByLabelText('Delete monitor').closest('span') as HTMLElement);
+    userEvent.click(screen.getByTestId('monitorManagementDeleteMonitor'));
 
     expect(onUpdate).toHaveBeenCalled();
   });
