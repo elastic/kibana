@@ -81,6 +81,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
    */
   alertDetailsPageEnabled: false,
+
+  /**
+   * Enables the `get-file` endpoint response action
+   */
+  responseActionGetFileEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -30,6 +30,7 @@ import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
 jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../../common/experimental_features_service');
 
 describe('When using get-file action from response actions console', () => {
   let render: (
