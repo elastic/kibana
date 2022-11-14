@@ -7,10 +7,9 @@
  */
 
 export {
-  guideStateSavedObjects,
-  guideStateSavedObjectsType,
-  pluginStateSavedObjects,
-  pluginStateSavedObjectsId,
-  pluginStateSavedObjectsType,
-} from './guided_setup';
-export type { PluginStateSO } from './guided_setup';
+  findActiveGuide,
+  findAllGuides,
+  findGuideById,
+  updateGuideState,
+} from './guide_state_utils';
+export { updatePluginStatus, calculateIsActivePeriod, getPluginState } from './plugin_state_utils';

@@ -84,7 +84,8 @@ export const GettingStarted = () => {
     }
   }, [cloud, history]);
 
-  const onSkip = () => {
+  const onSkip = async () => {
+    await guidedOnboardingService?.skipGuidedOnboarding();
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
     // disable welcome screen on the home page
     localStorage.setItem(KEY_ENABLE_WELCOME, JSON.stringify(false));

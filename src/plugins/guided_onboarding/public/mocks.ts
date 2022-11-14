@@ -12,16 +12,18 @@ import { GuidedOnboardingPluginStart } from '.';
 const apiServiceMock: jest.Mocked<GuidedOnboardingPluginStart> = {
   guidedOnboardingApi: {
     setup: jest.fn(),
-    fetchActiveGuideState$: () => new BehaviorSubject(undefined),
+    fetchPluginState$: () => new BehaviorSubject(undefined),
     fetchAllGuidesState: jest.fn(),
-    updateGuideState: jest.fn(),
+    updatePluginState: jest.fn(),
     activateGuide: jest.fn(),
+    deactivateGuide: jest.fn(),
     completeGuide: jest.fn(),
     isGuideStepActive$: () => new BehaviorSubject(false),
     startGuideStep: jest.fn(),
     completeGuideStep: jest.fn(),
     isGuidedOnboardingActiveForIntegration$: () => new BehaviorSubject(false),
     completeGuidedOnboardingForIntegration: jest.fn(),
+    skipGuidedOnboarding: jest.fn(),
     isGuidePanelOpen$: new BehaviorSubject(false),
   },
 };
