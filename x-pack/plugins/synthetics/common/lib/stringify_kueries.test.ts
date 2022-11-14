@@ -78,14 +78,14 @@ describe('stringifyKueries', () => {
   it('handles skipped empty arrays', () => {
     kueries = new Map<string, string[]>(
       Object.entries({
-        tags: [],
+        tags: ['tag1', 'tag2'],
         'monitor.type': ['http'],
         'url.port': [],
         'observer.geo.name': ['us-east', 'apj', 'sydney', 'us-west'],
       })
     );
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"monitor.type:http and (observer.geo.name:us-east OR observer.geo.name:apj OR observer.geo.name:sydney OR observer.geo.name:us-west)"`
+      `"(tags:tag1 OR tags:tag2) and monitor.type:http and (observer.geo.name:us-east OR observer.geo.name:apj OR observer.geo.name:sydney OR observer.geo.name:us-west)"`
     );
   });
 
@@ -101,5 +101,17 @@ describe('stringifyKueries', () => {
     expect(stringifyKueries(kueries, true)).toMatchInlineSnapshot(
       `"monitor.type:http and (observer.geo.name:us-east OR observer.geo.name:apj OR observer.geo.name:sydney OR observer.geo.name:us-west) and (tags:tag1 AND tags:tag2)"`
     );
+  });
+
+  it('handles tags AND logic with only tags', () => {
+    kueries = new Map<string, string[]>(
+      Object.entries({
+        'monitor.type': [],
+        'url.port': [],
+        'observer.geo.name': [],
+        tags: ['tag1', 'tag2'],
+      })
+    );
+    expect(stringifyKueries(kueries, true)).toMatchInlineSnapshot(`"(tags:tag1 AND tags:tag2)"`);
   });
 });
