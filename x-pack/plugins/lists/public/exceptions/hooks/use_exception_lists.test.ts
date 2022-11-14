@@ -62,6 +62,8 @@ describe('useExceptionLists', () => {
         },
         expect.any(Function),
         expect.any(Function),
+        { field: 'exception-list.created_at', order: 'desc' },
+        expect.any(Function),
       ]);
     });
   });
@@ -102,6 +104,8 @@ describe('useExceptionLists', () => {
         },
         expect.any(Function),
         expect.any(Function),
+        { field: 'exception-list.created_at', order: 'desc' },
+        expect.any(Function),
       ]);
     });
   });
@@ -136,6 +140,7 @@ describe('useExceptionLists', () => {
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
+        sort: { field: 'exception-list.created_at', order: 'desc' },
         signal: new AbortController().signal,
       });
     });
@@ -175,6 +180,10 @@ describe('useExceptionLists', () => {
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
         signal: new AbortController().signal,
+        sort: {
+          field: 'exception-list.created_at',
+          order: 'desc',
+        },
       });
     });
   });
