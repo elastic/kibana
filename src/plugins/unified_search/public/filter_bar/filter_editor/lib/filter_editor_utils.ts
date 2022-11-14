@@ -69,9 +69,6 @@ export function isFilterValid(
 
   switch (operator.type) {
     case 'phrase':
-      if (params === undefined) {
-        return false;
-      }
       return validateParams(params, field);
     case 'phrases':
       if (!Array.isArray(params) || !params.length) {

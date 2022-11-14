@@ -108,10 +108,14 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
     this.state = {
       selectedDataView: dataView,
       customLabel: props.filter.meta.alias || '',
-      queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
+      queryDsl: this.parseFilterToQueryDsl(props.filter),
       isCustomEditorOpen: this.isUnknownFilterType(),
       localFilter: dataView ? props.filter : buildEmptyFilter(false),
     };
+  }
+
+  private parseFilterToQueryDsl(filter: Filter) {
+    return JSON.stringify(cleanFilter(filter), null, 2);
   }
 
   public render() {
@@ -197,7 +201,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
                 <EuiButton
                   fill
                   onClick={this.onSubmit}
-                  isDisabled={!this.isFiltersValid()}
+                  isDisabled={!this.isFilterValid()}
                   data-test-subj="saveFilter"
                 >
                   {this.props.mode === 'add' ? addButtonLabel : updateButtonLabel}
@@ -324,6 +328,8 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
   }
 
   private renderCustomEditor() {
+    const queryDsl = this.parseFilterToQueryDsl(this.state.localFilter);
+
     return (
       <EuiFormRow
         fullWidth
@@ -335,7 +341,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
           languageId={XJsonLang.ID}
           width="100%"
           height={'250px'}
-          value={this.state.queryDsl}
+          value={queryDsl}
           onChange={this.onQueryDslChange}
           data-test-subj="customEditorInput"
           aria-label={i18n.translate('unifiedSearch.filter.filterEditor.queryDslAriaLabel', {
@@ -360,7 +366,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
     return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
-  private isFiltersValid() {
+  private isFilterValid() {
     const { isCustomEditorOpen, queryDsl, selectedDataView, localFilter } = this.state;
 
     if (isCustomEditorOpen) {

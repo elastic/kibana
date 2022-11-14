@@ -35,10 +35,17 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
             disabled={this.props.disabled}
             compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
-            placeholder={this.props.intl.formatMessage({
-              id: 'unifiedSearch.filter.filterEditor.valueInputPlaceholder',
-              defaultMessage: 'Enter a value',
-            })}
+            placeholder={
+              typeof this.props.value === 'string'
+                ? this.props.intl.formatMessage({
+                    id: 'unifiedSearch.filter.filterEditor.emptyInputPlaceholder',
+                    defaultMessage: '(empty)',
+                  })
+                : this.props.intl.formatMessage({
+                    id: 'unifiedSearch.filter.filterEditor.valueInputPlaceholder',
+                    defaultMessage: 'Enter a value',
+                  })
+            }
             value={this.props.value}
             onChange={this.props.onChange}
             field={this.props.field}
