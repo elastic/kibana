@@ -27164,8 +27164,6 @@
     "xpack.securitySolution.detectionEngine.noApiIntegrationKeyCallOutMsg": "Kibanaを起動するごとに保存されたオブジェクトの新しい暗号化キーを作成します。永続キーがないと、Kibanaの再起動後にルールを削除または修正することができません。永続キーを設定するには、kibana.ymlファイルに32文字以上のテキスト値を付けてxpack.encryptedSavedObjects.encryptionKey設定を追加してください。",
     "xpack.securitySolution.detectionEngine.noApiIntegrationKeyCallOutTitle": "API統合キーが必要です",
     "xpack.securitySolution.detectionEngine.noIndexTitle": "検出エンジンを設定しましょう",
-    "xpack.securitySolution.detectionEngine.noPermissionsMessage": "アラートを表示するには、権限を更新する必要があります。詳細については、Kibana管理者に連絡してください。",
-    "xpack.securitySolution.detectionEngine.noPermissionsTitle": "権限が必要です",
     "xpack.securitySolution.detectionEngine.pageTitle": "検出エンジン",
     "xpack.securitySolution.detectionEngine.queryPreview.actions": "アクション",
     "xpack.securitySolution.detectionEngine.queryPreview.histogramDisclaimer": "注：複数のevent.category値のアラートは2回以上カウントされます。",

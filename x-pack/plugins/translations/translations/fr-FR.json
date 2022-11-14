@@ -27189,8 +27189,6 @@
     "xpack.securitySolution.detectionEngine.noApiIntegrationKeyCallOutMsg": "Une nouvelle clé de chiffrement est générée pour les objets enregistrés chaque fois que vous démarrez Kibana. Sans clé persistante, vous ne pouvez pas supprimer ou modifier des règles après le redémarrage de Kibana. Pour définir une clé persistante, ajoutez le paramètre xpack.encryptedSavedObjects.encryptionKey avec n'importe quelle valeur texte de 32 caractères ou plus au fichier kibana.yml.",
     "xpack.securitySolution.detectionEngine.noApiIntegrationKeyCallOutTitle": "Clé d'intégration d'API requise",
     "xpack.securitySolution.detectionEngine.noIndexTitle": "Configurons votre moteur de détection",
-    "xpack.securitySolution.detectionEngine.noPermissionsMessage": "Pour afficher les alertes, vous devez mettre à jour les privilèges. Pour en savoir plus, contactez votre administrateur Kibana.",
-    "xpack.securitySolution.detectionEngine.noPermissionsTitle": "Privilèges requis",
     "xpack.securitySolution.detectionEngine.pageTitle": "Moteur de détection",
     "xpack.securitySolution.detectionEngine.queryPreview.actions": "Actions",
     "xpack.securitySolution.detectionEngine.queryPreview.histogramDisclaimer": "Remarque : Les alertes ayant plusieurs valeurs event.category seront comptées plusieurs fois.",
