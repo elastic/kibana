@@ -66,7 +66,7 @@ describe('when navigating to integration page', () => {
     cy.getByTestSubj('addIntegrationPolicyButton').click();
   });
 
-  it.skip('checks validators for required fields', () => {
+  it('checks validators for required fields', () => {
     const requiredFields = policyFormFields.filter((field) => field.required);
 
     requiredFields.map((field) => {
@@ -76,7 +76,7 @@ describe('when navigating to integration page', () => {
     });
   });
 
-  it.skip('should display Tail-based section on latest version', () => {
+  it('should display Tail-based section on latest version', () => {
     cy.visitKibana('/app/fleet/integrations/apm/add-integration');
     cy.contains('Tail-based sampling').should('exist');
   });
