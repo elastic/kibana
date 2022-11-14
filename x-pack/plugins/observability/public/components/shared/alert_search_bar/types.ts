@@ -27,13 +27,17 @@ interface AlertSearchBarStateTransitions {
   setStatus: (status: AlertStatus) => AlertSearchBarContainerState;
 }
 
-export interface AlertSearchBarWithUrlSyncProps {
+export interface CommonAlertSearchBarProps {
   appName: string;
   setEsQuery: (query: { bool: BoolQuery }) => void;
   queries?: Query[];
 }
 
+export interface AlertSearchBarWithUrlSyncProps extends CommonAlertSearchBarProps {
+  urlStorageKey: string;
+}
+
 export interface AlertSearchBarProps
   extends AlertSearchBarContainerState,
     AlertSearchBarStateTransitions,
-    AlertSearchBarWithUrlSyncProps {}
+    CommonAlertSearchBarProps {}
