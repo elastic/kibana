@@ -135,7 +135,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(goAgent?.agentName).to.be('go');
         expect(goAgent?.agentVersion).to.contain('5.1.2');
         expect(goAgent?.agentDocsPageUrl).to.be(
-          'https://www.elastic.co/guide/en/apm/agent/go/current/index.html'
+          'https://www.elastic.co/guide/en/apm/agent/go/current/'
         );
 
         const nodeAgent = agents[nodeServiceName];
@@ -146,7 +146,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(nodeAgent?.agentVersion).to.contain('1.0.0');
         expect(nodeAgent?.agentVersion).to.contain('1.0.3');
         expect(nodeAgent?.agentDocsPageUrl).to.be(
-          'https://www.elastic.co/guide/en/apm/agent/nodejs/current/index.html'
+          'https://www.elastic.co/guide/en/apm/agent/nodejs/current/'
         );
       });
 

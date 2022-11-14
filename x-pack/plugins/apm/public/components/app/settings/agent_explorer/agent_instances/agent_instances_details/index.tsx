@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiLink, EuiLoadingContent, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { AgentExplorerFieldName } from '../../../../../../../common/agent_explorer';
-import { getServiceNodeName } from '../../../../../../../common/service_nodes';
+import { isOpenTelemetryAgentName } from '../../../../../../../common/agent_name';
+import {
+  getServiceNodeName,
+  SERVICE_NODE_NAME_MISSING,
+} from '../../../../../../../common/service_nodes';
+import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../../shared/environment_badge';
@@ -20,6 +26,7 @@ import {
   ITableColumn,
   ManagedTable,
 } from '../../../../../shared/managed_table';
+import { PopoverTooltip } from '../../../../../shared/popover_tooltip';
 import { TimestampTooltip } from '../../../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 
@@ -30,13 +37,14 @@ type AgentExplorerInstance = ValuesType<
 enum AgentExplorerInstanceFieldName {
   InstanceName = 'serviceNode',
   Environments = 'environments',
-  AgentName = 'agentName',
   AgentVersion = 'agentVersion',
   LastReport = 'lastReport',
 }
 
 export function getInstanceColumns(
-  serviceName: string
+  serviceName: string,
+  agentName: AgentName,
+  agentDocsPageUrl?: string
 ): Array<ITableColumn<AgentExplorerInstance>> {
   return [
     {
@@ -49,23 +57,52 @@ export function getInstanceColumns(
       ),
       sortable: true,
       render: (_, { serviceNode }) => {
-        const { displayedName, tooltip } = !serviceNode
-          ? {
-              displayedName: getServiceNodeName(serviceNode),
-              tooltip: i18n.translate(
-                'xpack.apm.agentExplorerInstanceTable.explainServiceNodeNameMissing',
-                {
-                  defaultMessage:
-                    'This agent instance is not tied to a service node.',
-                }
-              ),
-            }
-          : { displayedName: serviceNode, tooltip: serviceNode };
+        const displayedName = getServiceNodeName(serviceNode);
 
-        return (
+        return serviceNode === SERVICE_NODE_NAME_MISSING ? (
+          <>
+            {displayedName}
+            <PopoverTooltip
+              ariaLabel={i18n.translate(
+                'xpack.apm.agentExplorerInstanceTable.noServiceNodeName.tooltip',
+                {
+                  defaultMessage: 'Tooltip for missing serviceNodeName',
+                }
+              )}
+            >
+              <EuiText style={{ width: `${unit * 24}px` }} size="s">
+                <p>
+                  <FormattedMessage
+                    defaultMessage="You can configure the service node name through {seeDocs}."
+                    id="xpack.apm.agentExplorerInstanceTable.noServiceNodeName.tooltip.linkToDocs"
+                    values={{
+                      seeDocs: (
+                        <EuiLink
+                          href={`${agentDocsPageUrl}${
+                            !isOpenTelemetryAgentName(agentName)
+                              ? 'configuration.html#service-node-name'
+                              : ''
+                          }`}
+                          target="_blank"
+                        >
+                          {i18n.translate(
+                            'xpack.apm.agentExplorerInstanceTable.noServiceNodeName.configurationOptions',
+                            {
+                              defaultMessage: 'configuration options',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </PopoverTooltip>
+          </>
+        ) : (
           <TruncateWithTooltip
             data-test-subj="apmAgentExplorerInstanceListServiceLink"
-            text={tooltip}
+            text={displayedName}
             content={
               <>
                 {serviceNode ? (
@@ -140,12 +177,16 @@ export function getInstanceColumns(
 
 interface Props {
   serviceName: string;
+  agentName: AgentName;
+  agentDocsPageUrl?: string;
   items: AgentExplorerInstance[];
   isLoading: boolean;
 }
 
 export function AgentInstancesDetails({
   serviceName,
+  agentName,
+  agentDocsPageUrl,
   items,
   isLoading,
 }: Props) {
@@ -159,7 +200,7 @@ export function AgentInstancesDetails({
 
   return (
     <ManagedTable
-      columns={getInstanceColumns(serviceName)}
+      columns={getInstanceColumns(serviceName, agentName, agentDocsPageUrl)}
       items={items}
       noItemsMessage={i18n.translate(
         'xpack.apm.agentExplorer.table.noResults',

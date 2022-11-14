@@ -43,5 +43,5 @@ export const getAgentDocsPageUrl = (agentName: AgentName) => {
     return `https://opentelemetry.io/docs/instrumentation/${agentDocsPageName}`;
   }
 
-  return `https://www.elastic.co/guide/en/apm/agent/${agentDocsPageName}/current/index.html`;
+  return `https://www.elastic.co/guide/en/apm/agent/${agentDocsPageName}/current/`;
 };

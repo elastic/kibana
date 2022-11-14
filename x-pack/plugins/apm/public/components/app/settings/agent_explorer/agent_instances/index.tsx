@@ -101,6 +101,8 @@ export function AgentInstances({ agent, onClose }: Props) {
           <EuiSpacer size="m" />
           <AgentInstancesDetails
             serviceName={agent.serviceName}
+            agentName={agent.agentName}
+            agentDocsPageUrl={agent.agentDocsPageUrl}
             isLoading={isLoading}
             items={instances.data?.items ?? []}
           />
