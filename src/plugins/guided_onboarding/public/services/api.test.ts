@@ -17,6 +17,7 @@ import { ApiService } from './api';
 import {
   testGuide,
   testGuideFirstStep,
+  testGuideLastStep,
   testGuideManualCompletionStep,
   testGuideStep1ActiveState,
   testGuideStep1InProgressState,
@@ -358,6 +359,59 @@ describe('GuidedOnboarding ApiService', () => {
       // by default the state set in beforeEach is test guide, step 1 active
       await apiService.completeGuideStep(testGuide, testGuideFirstStep);
       expect(httpClient.put).toHaveBeenCalledTimes(0);
+    });
+
+    it('marks the guide as "ready_to_complete" if the current step is the last step in the guide and configured for manual completion', async () => {
+      const testGuideStep3InProgressState: GuideState = {
+        ...testGuideStep2ActiveState,
+        steps: [
+          testGuideStep2ActiveState.steps[0],
+          { ...testGuideStep2ActiveState.steps[1], status: 'complete' },
+          { ...testGuideStep2ActiveState.steps[2], status: 'ready_to_complete' },
+        ],
+      };
+      httpClient.get.mockResolvedValue({
+        state: [testGuideStep3InProgressState],
+      });
+      apiService.setup(httpClient);
+
+      await apiService.completeGuideStep(testGuide, testGuideLastStep);
+
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      // Verify the guide now has a "ready_to_complete" status and the last step is "complete"
+      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({
+          ...testGuideStep3InProgressState,
+          steps: [
+            ...testGuideStep3InProgressState.steps.slice(0, 2),
+            { ...testGuideStep3InProgressState.steps[2], status: 'complete' },
+          ],
+          status: 'ready_to_complete',
+        }),
+      });
+    });
+
+    it('marks the guide as "in_progress" if the current step is not the last step in the guide', async () => {
+      httpClient.get.mockResolvedValue({
+        state: [testGuideStep1InProgressState],
+      });
+      apiService.setup(httpClient);
+
+      await apiService.completeGuideStep(testGuide, testGuideFirstStep);
+
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      // Verify the guide now has a "in_progress" status and the second step is "active"
+      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({
+          ...testGuideStep2ActiveState,
+          steps: [
+            testGuideStep2ActiveState.steps[0],
+            { ...testGuideStep2ActiveState.steps[1], status: 'active' },
+            testGuideStep2ActiveState.steps[2],
+          ],
+          status: 'in_progress',
+        }),
+      });
     });
   });
 

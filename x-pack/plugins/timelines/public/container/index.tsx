@@ -14,12 +14,12 @@ import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBo
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-
 import {
   clearEventsLoading,
   clearEventsDeleted,
   setTableUpdatedAt,
   updateGraphEventId,
+  updateTotalCount,
 } from '../store/t_grid/actions';
 import {
   Direction,
@@ -61,6 +61,10 @@ export interface TimelineArgs {
   totalCount: number;
   updatedAt: number;
 }
+
+type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
+
+type TimelineEventsSearchHandler = (onNextResponse?: OnNextResponseHandler) => void;
 
 type LoadPage = (newActivePage: number) => void;
 
@@ -141,7 +145,7 @@ const useApmTracking = (timelineId: string) => {
 };
 
 const NO_CONSUMERS: AlertConsumers[] = [];
-export const useTimelineEvents = ({
+export const useTimelineEventsHandler = ({
   alertConsumers = NO_CONSUMERS,
   dataViewId,
   endDate,
@@ -157,10 +161,9 @@ export const useTimelineEvents = ({
   runtimeMappings,
   sort = initSortDefault,
   skip = false,
-  timerangeKind,
   data,
   filterStatus,
-}: UseTimelineEventsProps): [boolean, TimelineArgs] => {
+}: UseTimelineEventsProps): [boolean, TimelineArgs, TimelineEventsSearchHandler] => {
   const dispatch = useDispatch();
   const { startTracking } = useApmTracking(id);
   const refetch = useRef<Refetch>(noop);
@@ -203,6 +206,11 @@ export const useTimelineEvents = ({
     [dispatch, id]
   );
 
+  const setTotalCount = useCallback(
+    (totalCount: number) => dispatch(updateTotalCount({ id, totalCount })),
+    [dispatch, id]
+  );
+
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     consumers: {},
     id,
@@ -223,7 +231,7 @@ export const useTimelineEvents = ({
   const { addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
-    (request: TimelineRequest<typeof language> | null) => {
+    (request: TimelineRequest<typeof language> | null, onNextHandler?: OnNextResponseHandler) => {
       if (request == null || skip) {
         return;
       }
@@ -264,6 +272,8 @@ export const useTimelineEvents = ({
                       updatedAt: Date.now(),
                     };
                     setUpdated(newTimelineResponse.updatedAt);
+                    setTotalCount(newTimelineResponse.totalCount);
+                    if (onNextHandler) onNextHandler(newTimelineResponse);
                     return newTimelineResponse;
                   });
                   if (prevFilterStatus !== request.filterStatus) {
@@ -298,6 +308,7 @@ export const useTimelineEvents = ({
     [
       skip,
       data,
+      setTotalCount,
       entityType,
       dataViewId,
       setUpdated,
@@ -336,6 +347,7 @@ export const useTimelineEvents = ({
           from: startDate,
           to: endDate,
         },
+        filterStatus,
       };
 
       const newActivePage = deepEqual(prevSearchParameters, currentSearchParameters)
@@ -391,15 +403,14 @@ export const useTimelineEvents = ({
     filterStatus,
   ]);
 
-  useEffect(() => {
-    if (!deepEqual(prevTimelineRequest.current, timelineRequest)) {
-      timelineSearch(timelineRequest);
-    }
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, [id, timelineRequest, timelineSearch, timerangeKind]);
+  const timelineEventsSearchHandler = useCallback(
+    (onNextHandler?: OnNextResponseHandler) => {
+      if (!deepEqual(prevTimelineRequest.current, timelineRequest)) {
+        timelineSearch(timelineRequest, onNextHandler);
+      }
+    },
+    [timelineRequest, timelineSearch]
+  );
 
   /*
     cleanup timeline events response when the filters were removed completely
@@ -426,6 +437,55 @@ export const useTimelineEvents = ({
       });
     }
   }, [filterQuery, id, refetchGrid, wrappedLoadPage]);
+
+  return [loading, timelineResponse, timelineEventsSearchHandler];
+};
+
+export const useTimelineEvents = ({
+  alertConsumers = NO_CONSUMERS,
+  dataViewId,
+  endDate,
+  entityType,
+  excludeEcsData = false,
+  id = ID,
+  indexNames,
+  fields,
+  filterQuery,
+  filterStatus,
+  startDate,
+  language = 'kuery',
+  limit,
+  runtimeMappings,
+  sort = initSortDefault,
+  skip = false,
+  timerangeKind,
+  data,
+}: UseTimelineEventsProps): [boolean, TimelineArgs] => {
+  const [loading, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
+    alertConsumers,
+    dataViewId,
+    endDate,
+    entityType,
+    excludeEcsData,
+    filterStatus,
+    id,
+    indexNames,
+    fields,
+    filterQuery,
+    startDate,
+    language,
+    limit,
+    runtimeMappings,
+    sort,
+    skip,
+    timerangeKind,
+    data,
+  });
+
+  useEffect(() => {
+    if (!timelineSearchHandler) return;
+    timelineSearchHandler();
+  }, [timelineSearchHandler]);
 
   return [loading, timelineResponse];
 };
