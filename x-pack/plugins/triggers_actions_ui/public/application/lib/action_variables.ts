@@ -107,6 +107,14 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   });
 
   result.push({
+    name: AlertProvidedActionVariables.ruleUrl,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleUrlLabel', {
+      defaultMessage:
+        'The URL to the Stack Management rule page that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
+    }),
+  });
+
+  result.push({
     name: AlertProvidedActionVariables.date,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.dateLabel', {
       defaultMessage: 'The date the rule scheduled the action.',
@@ -153,14 +161,6 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.kibanaBaseUrlLabel', {
       defaultMessage:
         'The configured server.publicBaseUrl value or empty string if not configured.',
-    }),
-  });
-
-  result.push({
-    name: AlertProvidedActionVariables.ruleUrl,
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleUrlLabel', {
-      defaultMessage:
-        'The URL to the Stack Management rule page that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
     }),
   });
 
