@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiImage,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -20,7 +19,6 @@ import {
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 import type {
@@ -50,12 +48,10 @@ interface Props {
   fatalErrors: FatalErrorsStart;
   loginAssistanceMessage: string;
   sameSiteCookies?: ConfigType['sameSiteCookies'];
-  customLogo$?: Observable<string | undefined>;
 }
 
 interface State {
   loginState: LoginState | null;
-  customLogo: string | undefined;
 }
 
 const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['message']>> = {
@@ -87,34 +83,20 @@ const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['messag
 };
 
 export class LoginPage extends Component<Props, State> {
-  state = { loginState: null, customLogo: undefined } as State;
-  private customLogoSubscription?: Subscription;
+  state = { loginState: null } as State;
 
   public async componentDidMount() {
     const loadingCount$ = new BehaviorSubject(1);
     this.props.http.addLoadingCountSource(loadingCount$.asObservable());
+
     try {
       this.setState({ loginState: await this.props.http.get('/internal/security/login_state') });
     } catch (err) {
       this.props.fatalErrors.add(err as Error);
     }
-    if (this.props.customLogo$) {
-      this.customLogoSubscription = this.props.customLogo$.subscribe((customLogo) => {
-        this.setState({
-          ...this.state,
-          customLogo,
-        });
-      });
-    }
+
     loadingCount$.next(0);
     loadingCount$.complete();
-  }
-
-  public componentWillUnmount() {
-    if (this.customLogoSubscription) {
-      this.customLogoSubscription.unsubscribe();
-      this.customLogoSubscription = undefined;
-    }
   }
 
   public render() {
@@ -140,18 +122,14 @@ export class LoginPage extends Component<Props, State> {
       ['loginWelcome__contentDisabledForm']: !loginIsSupported,
     });
 
-    const logo = this.state.customLogo ? (
-      <EuiImage src={this.state.customLogo} size="xxl" alt="logo image" />
-    ) : (
-      <EuiIcon type="logoElastic" size="xxl" />
-    );
-
     return (
       <div className="loginWelcome login-form">
         <header className="loginWelcome__header">
           <div className={contentHeaderClasses}>
             <EuiSpacer size="xxl" />
-            <span className="loginWelcome__logo">{logo}</span>
+            <span className="loginWelcome__logo">
+              <EuiIcon type="logoElastic" size="xxl" />
+            </span>
             <EuiTitle size="m" className="loginWelcome__title">
               <h1>
                 <FormattedMessage
