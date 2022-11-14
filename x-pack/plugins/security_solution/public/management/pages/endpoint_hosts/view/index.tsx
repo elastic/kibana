@@ -135,7 +135,6 @@ export const EndpointList = () => {
     metadataTransformStats,
   } = useEndpointSelector(selector);
   const { canReadEndpointList, canAccessFleet } = useUserPrivileges().endpointPrivileges;
-  console.log(canReadEndpointList, canAccessFleet);
   const { search } = useFormatUrl(SecurityPageName.administration);
   const { search: searchParams } = useLocation();
   const { getAppUrl } = useAppUrl();
