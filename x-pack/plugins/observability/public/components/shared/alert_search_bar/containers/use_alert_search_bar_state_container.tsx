@@ -72,7 +72,7 @@ function useUrlStateSyncEffect(
     );
 
     return stop;
-  }, [stateContainer, history, timefilterService]);
+  }, [stateContainer, history, timefilterService, urlStorageKey]);
 }
 
 function setupUrlStateSync(

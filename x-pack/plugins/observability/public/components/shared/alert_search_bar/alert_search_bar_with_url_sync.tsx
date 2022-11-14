@@ -18,7 +18,7 @@ function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
   const { urlStorageKey, ...searchBarProps } = props;
   const stateProps = useAlertSearchBarStateContainer(urlStorageKey);
 
-  return <ObservabilityAlertSearchBar {...props} {...searchBarProps} />;
+  return <ObservabilityAlertSearchBar {...stateProps} {...searchBarProps} />;
 }
 
 export function ObservabilityAlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {

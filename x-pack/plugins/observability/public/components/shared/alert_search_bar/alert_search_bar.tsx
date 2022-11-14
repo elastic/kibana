@@ -17,7 +17,6 @@ import { AlertsStatusFilter } from './components';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
 import { AlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../../utils/build_es_query';
-import { isValidKuery } from '../../../utils/kuery';
 import { AlertStatus } from '../../../../common/typings';
 
 const getAlertStatusQuery = (status: string): Query[] => {
@@ -103,6 +102,7 @@ export function ObservabilityAlertSearchBar({
       rangeFrom,
       status,
       queries,
+      toasts,
     ]
   );
 
