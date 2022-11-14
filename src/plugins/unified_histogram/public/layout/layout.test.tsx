@@ -14,7 +14,11 @@ import { act } from 'react-dom/test-utils';
 import { of } from 'rxjs';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
-import type { UnifiedHistogramChartContext, UnifiedHistogramHitsContext } from '../types';
+import {
+  UnifiedHistogramChartContext,
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramHitsContext,
+} from '../types';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from './layout';
@@ -33,7 +37,7 @@ jest.mock('@elastic/eui', () => {
 
 describe('Layout', () => {
   const createHits = (): UnifiedHistogramHitsContext => ({
-    status: 'complete',
+    status: UnifiedHistogramFetchStatus.complete,
     total: 10,
   });
 

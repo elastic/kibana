@@ -72,6 +72,10 @@ describe('buildBucketInterval', () => {
       dataView,
       timeInterval: 'auto',
       response,
+      timeRange: {
+        from: '1991-03-29T08:04:00.694Z',
+        to: '2021-03-29T07:04:00.695Z',
+      },
     };
   };
 
