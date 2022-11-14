@@ -4,6 +4,9 @@
       "index": "new_terms",
       "mappings": {
         "properties": {
+          "id": {
+            "type": "keyword"
+          },
           "@timestamp": {
             "type": "date"
           },

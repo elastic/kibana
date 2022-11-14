@@ -12,12 +12,17 @@ import { orderBy } from 'lodash';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema/mocks';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
 import {
+  getNewTermsRuntimeMappings,
+  AGG_FIELD_NAME,
+} from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/new_terms/utils';
+import {
   createRule,
   deleteAllAlerts,
   deleteSignalsIndex,
   getOpenSignals,
   getPreviewAlerts,
   previewRule,
+  performSearchQuery,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
@@ -591,6 +596,145 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Low');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(23);
+      });
+    });
+
+    describe('runtime field', () => {
+      it('should return runtime field created from 2 single values', async () => {
+        // encoded base64 values of "host-0" and  "127.0.0.1" joined with underscore
+        const expectedEncodedValues = ['aG9zdC0w_MTI3LjAuMC4x'];
+        const { hits } = await performSearchQuery({
+          es,
+          query: { match: { id: 'first_doc' } },
+          index: 'new_terms',
+          fields: [AGG_FIELD_NAME],
+          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'host.ip']),
+        });
+
+        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
+      });
+
+      it('should return runtime field created from 2 single values, including number value', async () => {
+        // encoded base64 values of "user-0" and  0 joined with underscore
+        const expectedEncodedValues = ['dXNlci0w_MA=='];
+        const { hits } = await performSearchQuery({
+          es,
+          query: { match: { id: 'first_doc' } },
+          index: 'new_terms',
+          fields: [AGG_FIELD_NAME],
+          runtimeMappings: getNewTermsRuntimeMappings(['user.name', 'user.id']),
+        });
+
+        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
+      });
+
+      it('should return runtime field created from 2 single values, including boolean value', async () => {
+        // encoded base64 values of "user-0" and  true joined with underscore
+        const expectedEncodedValues = ['dXNlci0w_dHJ1ZQ=='];
+        const { hits } = await performSearchQuery({
+          es,
+          query: { match: { id: 'first_doc' } },
+          index: 'new_terms',
+          fields: [AGG_FIELD_NAME],
+          runtimeMappings: getNewTermsRuntimeMappings(['user.name', 'user.enabled']),
+        });
+
+        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
+      });
+
+      it('should return runtime field created from 3 single values', async () => {
+        // encoded base64 values of "host-0" and  "127.0.0.1" and "user-0" joined with underscore
+        const expectedEncodedValues = ['aG9zdC0w_MTI3LjAuMC4x_dXNlci0w'];
+        const { hits } = await performSearchQuery({
+          es,
+          query: { match: { id: 'first_doc' } },
+          index: 'new_terms',
+          fields: [AGG_FIELD_NAME],
+          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'host.ip', 'user.name']),
+        });
+
+        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
+      });
+
+      it('should return runtime field created from fields of arrays', async () => {
+        // encoded base64 values of all combinations of ["192.168.1.1", "192.168.1.2"]
+        // and ["tag-new-1", "tag-2", "tag-new-3"] joined with underscore
+        const expectedEncodedValues = [
+          'MTkyLjE2OC4xLjE=_dGFnLTI=',
+          'MTkyLjE2OC4xLjE=_dGFnLW5ldy0x',
+          'MTkyLjE2OC4xLjE=_dGFnLW5ldy0z',
+          'MTkyLjE2OC4xLjI=_dGFnLTI=',
+          'MTkyLjE2OC4xLjI=_dGFnLW5ldy0x',
+          'MTkyLjE2OC4xLjI=_dGFnLW5ldy0z',
+        ];
+        const { hits } = await performSearchQuery({
+          es,
+          query: { match: { id: 'doc_with_source_ip_as_array' } },
+          index: 'new_terms',
+          fields: [AGG_FIELD_NAME],
+          runtimeMappings: getNewTermsRuntimeMappings(['source.ip', 'tags']),
+        });
+
+        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
+      });
+
+      it('should return runtime field without duplicated values', async () => {
+        // encoded base64 values of "host-0" and ["tag-1", "tag-2", "tag-2", "tag-1", "tag-1"]
+        // joined with underscore, without duplicates in tags
+        const expectedEncodedValues = ['aG9zdC0w_dGFnLTE=', 'aG9zdC0w_dGFnLTI='];
+        const { hits } = await performSearchQuery({
+          es,
+          query: { match: { id: 'doc_with_duplicated_tags' } },
+          index: 'new_terms',
+          fields: [AGG_FIELD_NAME],
+          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'tags']),
+        });
+
+        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
+      });
+
+      it('should not return runtime field if one of fields is null', async () => {
+        const { hits } = await performSearchQuery({
+          es,
+          query: { match: { id: 'doc_with_null_field' } },
+          index: 'new_terms',
+          fields: [AGG_FIELD_NAME, 'possibly_null_field', 'host.name'],
+          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'possibly_null_field']),
+        });
+
+        expect(hits.hits.length).to.be(1);
+        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.be(undefined);
+        expect(hits.hits[0].fields?.possibly_null_field).to.be(undefined);
+        expect(hits.hits[0].fields?.['host.name']).to.eql(['host-0']);
+      });
+
+      it('should not return runtime field if one of fields is not defined', async () => {
+        const { hits } = await performSearchQuery({
+          es,
+          query: { match: { id: 'doc_without_large_arrays' } },
+          index: 'new_terms',
+          fields: [AGG_FIELD_NAME],
+          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'large_array_5']),
+        });
+
+        expect(hits.hits.length).to.be(1);
+        expect(hits.hits[0].fields).to.be(undefined);
+      });
+
+      // There is a limit in ES for a number of emitted values in runtime field (100)
+      // This test makes sure runtime script doesn't cause query failure and returns first 100 results
+      it('should return runtime field if number of emitted values greater than 100', async () => {
+        const { hits } = await performSearchQuery({
+          es,
+          query: { match: { id: 'first_doc' } },
+          index: 'new_terms',
+          fields: [AGG_FIELD_NAME],
+          runtimeMappings: getNewTermsRuntimeMappings(['large_array_20', 'large_array_10']),
+        });
+
+        // runtime field should have 100 values, as large_array_20 and large_array_10
+        // give in total 200 combinations
+        expect(hits.hits[0].fields?.[AGG_FIELD_NAME].length).to.be(100);
       });
     });
   });

@@ -11,6 +11,7 @@ import {
   transformBucketsToValues,
   getAggregationField,
   decodeMatchedValues,
+  getNewTermsRuntimeMappings,
   AGG_FIELD_NAME,
 } from './utils';
 
@@ -184,6 +185,27 @@ describe('new terms utils', () => {
         'host-0',
         '127.0.0.1',
       ]);
+    });
+  });
+
+  describe('getNewTermsRuntimeMappings', () => {
+    it('should not return runtime field if new terms fields is empty', () => {
+      expect(getNewTermsRuntimeMappings([])).toBeUndefined();
+    });
+    it('should not return runtime field if new terms fields has only one field', () => {
+      expect(getNewTermsRuntimeMappings(['host.name'])).toBeUndefined();
+    });
+
+    it('should return runtime field if new terms fields has more than one field', () => {
+      const runtimeMappings = getNewTermsRuntimeMappings(['host.name', 'host.ip']);
+
+      expect(runtimeMappings?.[AGG_FIELD_NAME]).toMatchObject({
+        type: 'keyword',
+        script: {
+          params: { fields: ['host.name', 'host.ip'] },
+          source: expect.any(String),
+        },
+      });
     });
   });
 });

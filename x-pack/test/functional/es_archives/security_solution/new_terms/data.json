@@ -4,6 +4,7 @@
       "index": "new_terms",
       "source": {
         "@timestamp": "2020-10-14T05:00:01.000Z",
+        "id": "first_doc",
         "possibly_null_field": "test-value",
         "host": {
           "name": "host-0",
@@ -29,6 +30,7 @@
       "index": "new_terms",
       "source": {
         "@timestamp": "2020-10-14T05:00:01.000Z",
+        "id": "doc_without_large_arrays",
         "possibly_null_field": "test-value",
         "host": {
           "name": "host-0",
@@ -39,6 +41,28 @@
         "user.enabled": false,
         "source.ip": "192.168.1.1",
         "tags": ["tag-1", "tag-2"]
+      },
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-14T05:00:01.000Z",
+        "id": "doc_with_duplicated_tags",
+        "possibly_null_field": "test-value",
+        "host": {
+          "name": "host-0",
+          "ip": "127.0.0.1"
+        },
+        "user.name": "user-1",
+        "user.id": 1,
+        "user.enabled": false,
+        "source.ip": "192.168.1.1",
+        "tags": ["tag-1", "tag-2", "tag-2", "tag-1", "tag-1"]
       },
       "type": "_doc"
     }
@@ -154,6 +178,7 @@
       "index": "new_terms",
       "source": {
         "@timestamp": "2020-10-20T05:00:04.000Z",
+        "id": "doc_with_source_ip_as_array",
         "possibly_null_field": "test-value",
         "host": {
           "name": "host-0",
@@ -175,6 +200,7 @@
       "index": "new_terms",
       "source": {
         "@timestamp": "2020-10-20T05:00:04.000Z",
+        "id": "doc_with_null_field",
         "possibly_null_field": null,
         "host": {
           "name": "host-0",

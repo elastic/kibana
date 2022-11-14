@@ -84,7 +84,7 @@ export const getNewTermsRuntimeMappings = (
   newTermsFields: string[]
 ): undefined | { [AGG_FIELD_NAME]: estypes.MappingRuntimeField } => {
   // if new terms include only one field we don't use runtime mappings and don't stich fields buckets together
-  if (newTermsFields.length === 1) {
+  if (newTermsFields.length <= 1) {
     return undefined;
   }
 
