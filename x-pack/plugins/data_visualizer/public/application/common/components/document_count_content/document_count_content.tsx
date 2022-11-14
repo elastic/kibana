@@ -70,7 +70,7 @@ export const DocumentCountContent: FC<Props> = ({
       if (setSamplingProbability) {
         setSamplingProbability(p);
       }
-    }, 200),
+    }, 100),
     [setSamplingProbability]
   );
 
@@ -134,7 +134,6 @@ export const DocumentCountContent: FC<Props> = ({
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="xs">
-        <TotalCountHeader totalCount={totalCount} approximate={approximate} loading={loading} />
         <EuiFlexItem grow={false}>
           <EuiPopover
             data-test-subj="dvRandomSamplerOptionsPopover"
@@ -234,6 +233,7 @@ export const DocumentCountContent: FC<Props> = ({
           </EuiPopover>
           <EuiFlexItem />
         </EuiFlexItem>
+        <TotalCountHeader totalCount={totalCount} approximate={approximate} loading={loading} />
       </EuiFlexGroup>
       <DocumentCountChart
         chartPoints={chartPoints}
