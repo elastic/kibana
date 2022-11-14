@@ -379,13 +379,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { pipeline, docs } = request.body;
-        const body = await client.asInternalUser.transport.request<any>({
-          method: 'POST',
-          path: `/_ingest/pipeline/_simulate`,
-          body: {
-            pipeline,
-            docs,
-          },
+        const body = await client.asInternalUser.ingest.simulate({
+          pipeline,
+          docs,
         });
         return response.ok({
           body,

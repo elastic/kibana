@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { flatten } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC } from 'react';
 import { Observable } from 'rxjs';
