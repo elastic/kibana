@@ -137,7 +137,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
               expect(response.body).to.eql({
                 id: response.body.id,
-                name: 'abc [Duplicate]',
+                name: 'abc [Clone]',
                 tags: ['foo'],
                 actions: [
                   {

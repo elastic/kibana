@@ -24,7 +24,6 @@ const snoozeRule = jest.fn();
 const unsnoozeRule = jest.fn();
 const onLoading = jest.fn();
 const onRunRule = jest.fn();
-const cloneRule = jest.fn();
 const onCloneRule = jest.fn();
 
 export const tick = (ms = 0) =>
@@ -99,7 +98,6 @@ describe('CollapsedItemActions', () => {
       unsnoozeRule,
       onLoading,
       onRunRule,
-      cloneRule,
       onCloneRule,
     };
   };
@@ -199,7 +197,7 @@ describe('CollapsedItemActions', () => {
         'Update API key'
       );
       expect(wrapper.find(`[data-test-subj="runRule"] button`).text()).toEqual('Run rule');
-      expect(wrapper.find('[data-test-subj="cloneRule"] button').text()).toEqual('Duplicate rule');
+      expect(wrapper.find('[data-test-subj="cloneRule"] button').text()).toEqual('Clone rule');
     });
 
     test('handles case when run rule is clicked', async () => {
@@ -381,7 +379,7 @@ describe('CollapsedItemActions', () => {
       expect(wrapper.find('[data-test-subj="snoozeButton"]').exists()).toBeFalsy();
     });
 
-    test('clone/duplicate rule is disabled for SIEM rules', async () => {
+    test('clone rule is disabled for SIEM rules', async () => {
       const wrapper = mountWithIntl(
         <CollapsedItemActions
           {...getPropsWithRule({
@@ -393,7 +391,7 @@ describe('CollapsedItemActions', () => {
       expect(wrapper.find(`[data-test-subj="cloneRule"] button`).prop('disabled')).toBeTruthy();
     });
 
-    test('handles case when clone/duplicate rule is clicked', async () => {
+    test('handles case when clone rule is clicked', async () => {
       const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
       wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
       await act(async () => {

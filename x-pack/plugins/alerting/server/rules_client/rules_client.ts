@@ -565,9 +565,9 @@ export class RulesClient {
       );
     }
     const ruleName =
-      ruleSavedObject.attributes.name.indexOf('[Duplicate]') > 0
+      ruleSavedObject.attributes.name.indexOf('[Clone]') > 0
         ? ruleSavedObject.attributes.name
-        : `${ruleSavedObject.attributes.name} [Duplicate]`;
+        : `${ruleSavedObject.attributes.name} [Clone]`;
     const ruleId = newId ?? SavedObjectsUtils.generateId();
     try {
       await this.authorization.ensureAuthorized({

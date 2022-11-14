@@ -66,6 +66,7 @@ import {
   unsnoozeRule,
   deleteRules,
   bulkUpdateAPIKey,
+  cloneRule,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -679,15 +680,20 @@ export const RulesList = ({
     isCloningRule,
   ]);
 
-  const onCloneRule = async (clone: () => Promise<string>) => {
+  const onCloneRule = async (ruleId: string) => {
     setIsCloningRule(true);
     try {
-      const cloneId = await clone();
-      cloneRuleId.current = cloneId;
+      const RuleCloned = await cloneRule({ http, ruleId });
+      cloneRuleId.current = RuleCloned.id;
       await loadRules();
     } catch {
       cloneRuleId.current = null;
       setIsCloningRule(false);
+      toasts.addDanger(
+        i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
+          defaultMessage: 'Unable to clone rule',
+        })
+      );
     }
   };
 
