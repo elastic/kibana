@@ -113,6 +113,7 @@ describe('RuleCommonExpressions', () => {
     );
     expect(excludeHitsButton.exists()).toBeTruthy();
     expect(excludeHitsButton.first().prop('checked')).toBeTruthy();
+    expect(excludeHitsButton.first().prop('disabled')).toBe(false);
 
     const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
     expect(testQueryButton.exists()).toBeTruthy();
@@ -210,6 +211,37 @@ describe('RuleCommonExpressions', () => {
         timeWindowSize.toString()
       )}`
     );
+  });
+
+  test(`should disable excludeHitsFromPreviousRuns when groupBy is not all`, async () => {
+    const aggType = 'avg';
+    const thresholdComparator = 'between';
+    const timeWindowSize = 987;
+    const timeWindowUnit = 's';
+    const threshold = [3, 1003];
+    const groupBy = 'top';
+    const termSize = '27';
+    const termField = 'host.name';
+
+    const wrapper = await setup({
+      ruleParams: getCommonParams({
+        aggType,
+        thresholdComparator,
+        timeWindowSize,
+        timeWindowUnit,
+        termSize,
+        termField,
+        groupBy,
+        threshold,
+      }),
+    });
+
+    expect(
+      wrapper
+        .find('[data-test-subj="excludeHitsFromPreviousRunExpression"]')
+        .first()
+        .prop('disabled')
+    ).toBe(true);
   });
 
   test(`should render excludeHitsFromPreviousRuns as unchecked when excludeHitsFromPreviousRun is false`, async () => {

@@ -100,6 +100,7 @@ export const GroupByExpression = ({
     if (
       termField &&
       termField.length > 0 &&
+      fields.length > 0 &&
       !fields.find((field: FieldOption) => field.name === termField)
     ) {
       onChangeSelectedTermField('');

@@ -88,7 +88,11 @@ export const OfExpression = ({
 
   useEffect(() => {
     // if current field set doesn't contain selected field, clear selection
-    if (aggField && !fields.find((field: FieldOption) => field.name === aggField)) {
+    if (
+      aggField &&
+      fields.length > 0 &&
+      !fields.find((field: FieldOption) => field.name === aggField)
+    ) {
       onChangeSelectedAggField(undefined);
     }
   }, [aggField, fields, onChangeSelectedAggField]);

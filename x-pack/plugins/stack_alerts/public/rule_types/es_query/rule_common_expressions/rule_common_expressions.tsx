@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCheckbox,
@@ -27,7 +27,7 @@ import {
   ValueExpression,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { builtInGroupByTypes, FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { CommonRuleParams } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { TestQueryRow, TestQueryRowProps } from '../test_query_row';
@@ -94,6 +94,13 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   excludeHitsFromPreviousRun,
   onChangeExcludeHitsFromPreviousRun,
 }) => {
+  const [isExcludeHitsDisabled, setIsExcludeHitsDisabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (groupBy) {
+      setIsExcludeHitsDisabled(groupBy !== builtInGroupByTypes.all.value);
+    }
+  }, [groupBy]);
   return (
     <>
       <EuiTitle size="xs">
@@ -194,6 +201,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
       <EuiSpacer size="m" />
       <EuiFormRow>
         <EuiCheckbox
+          disabled={isExcludeHitsDisabled}
           data-test-subj="excludeHitsFromPreviousRunExpression"
           checked={excludeHitsFromPreviousRun}
           id="excludeHitsFromPreviousRunExpressionId"
