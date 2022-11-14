@@ -11,5 +11,5 @@
   "requiredPlugins": ["licensing"],
   "requiredBundles": ["kibanaReact"],
   "optionalPlugins": ["share"],
-  "enabledOnAnonymousPages": true,
+  "enabledOnAnonymousPages": true
 }
