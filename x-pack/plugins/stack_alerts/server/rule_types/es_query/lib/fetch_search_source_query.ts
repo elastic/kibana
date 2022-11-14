@@ -12,7 +12,15 @@ import {
   ISearchStartSearchSource,
   SortDirection,
 } from '@kbn/data-plugin/common';
+import {
+  BUCKET_SELECTOR_FIELD,
+  buildAggregation,
+  isCountAggregation,
+  parseAggregationResults,
+} from '@kbn/triggers-actions-ui-plugin/common';
+import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
+import { getComparatorScript } from '../../../../common';
 
 export async function fetchSearchSourceQuery(
   ruleId: string,
@@ -24,6 +32,8 @@ export async function fetchSearchSourceQuery(
   }
 ) {
   const { logger, searchSourceClient } = services;
+  const isGroupAgg = isGroupAggregation(params.termField);
+  const isCountAgg = isCountAggregation(params.aggType);
 
   const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
@@ -42,8 +52,7 @@ export async function fetchSearchSourceQuery(
   const searchResult = await searchSource.fetch();
 
   return {
-    numMatches: Number(searchResult.hits.total),
-    searchResult,
+    parsedResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: searchResult }),
     dateStart,
     dateEnd,
   };
@@ -54,6 +63,7 @@ export function updateSearchSource(
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined
 ) {
+  const isGroupAgg = isGroupAggregation(params.termField);
   const index = searchSource.getField('index');
 
   const timeFieldName = index?.timeFieldName;
@@ -61,7 +71,7 @@ export function updateSearchSource(
     throw new Error('Invalid data view without timeFieldName.');
   }
 
-  searchSource.setField('size', params.size);
+  searchSource.setField('size', isGroupAgg ? 0 : params.size);
 
   const timerangeFilter = getTime(index, {
     from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
@@ -84,6 +94,23 @@ export function updateSearchSource(
   const searchSourceChild = searchSource.createChild();
   searchSourceChild.setField('filter', filters as Filter[]);
   searchSourceChild.setField('sort', [{ [timeFieldName]: SortDirection.desc }]);
+  searchSourceChild.setField(
+    'aggs',
+    buildAggregation({
+      aggType: params.aggType,
+      aggField: params.aggField,
+      termField: params.termField,
+      termSize: params.termSize,
+      condition: {
+        conditionScript: getComparatorScript(
+          params.thresholdComparator,
+          params.threshold,
+          BUCKET_SELECTOR_FIELD
+        ),
+      },
+      ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+    })
+  );
   return {
     searchSource: searchSourceChild,
     dateStart,

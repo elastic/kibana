@@ -8,6 +8,7 @@ import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
+import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { ComparatorFns, getHumanReadableComparator } from '../../../common';
 import { addMessages, EsQueryRuleActionContext } from './action_context';
 import { ExecutorOptions, OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
@@ -38,6 +39,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
   }
+
+  const isGroupAgg = isGroupAggregation(params.termField);
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
 
   // During each rule execution, we run the configured query, get a hit count
@@ -48,7 +51,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   // of the rule, the latestTimestamp will be used to gate the query in order to
   // avoid counting a document multiple times.
 
-  const { numMatches, searchResult, dateStart, dateEnd } = esQueryRule
+  const { parsedResults, dateStart, dateEnd } = esQueryRule
     ? await fetchEsQuery(ruleId, name, params as OnlyEsQueryRuleParams, latestTimestamp, {
         scopedClusterClient,
         logger,
@@ -58,9 +61,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         logger,
       });
 
-  // apply the rule condition
-  const conditionMet = compareFn(numMatches, params.threshold);
-
   const base = publicBaseUrl;
   const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
   const link = esQueryRule
@@ -68,13 +68,57 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     : `${base}${spacePrefix}/app/discover#/viewAlert/${ruleId}?from=${dateStart}&to=${dateEnd}&checksum=${getChecksum(
         params as OnlyEsQueryRuleParams
       )}`;
-  const baseContext: Omit<EsQueryRuleActionContext, 'conditions'> = {
-    title: name,
-    date: currentTimestamp,
-    value: numMatches,
-    hits: searchResult.hits.hits,
-    link,
-  };
+
+  const unmetGroupValues: Record<string, number> = {};
+  for (const result of parsedResults) {
+    const alertId = result.group;
+    const value = result.value ?? result.count;
+
+    // group aggregations use the bucket selector agg to compare conditions
+    // within the ES query, so only 'met' results are returned, therefore we don't need
+    // to use the compareFn
+    const met = isGroupAgg ? true : compareFn(value, params.threshold);
+
+    if (!met) {
+      unmetGroupValues[alertId] = value;
+      continue;
+    }
+
+    const baseContext: Omit<EsQueryRuleActionContext, 'conditions'> = {
+      title: name,
+      date: currentTimestamp,
+      value,
+      hits: result.hits,
+      link,
+    };
+
+    const baseActiveContext: EsQueryRuleActionContext = {
+      ...baseContext,
+      conditions: getContextConditionsDescription(params.thresholdComparator, params.threshold),
+    } as EsQueryRuleActionContext;
+
+    const actionContext = addMessages(name, baseActiveContext, params);
+    const alert = alertFactory.create(
+      alertId === 'all documents' ? ConditionMetAlertInstanceId : alertId
+    );
+
+    alert
+      // store the params we would need to recreate the query that led to this alert instance
+      .replaceState({ latestTimestamp, dateStart, dateEnd })
+      .scheduleActions(ActionGroupId, actionContext);
+
+    // update the timestamp based on the current search results
+    const firstValidTimefieldSort = getValidTimefieldSort(
+      searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
+    );
+    if (firstValidTimefieldSort) {
+      latestTimestamp = firstValidTimefieldSort;
+    }
+
+    // we only create one alert if the condition is met, so we would only ever
+    // reach the alert limit if the limit is less than 1
+    alertFactory.alertLimit.setLimitReached(alertLimit < 1);
+  }
 
   if (conditionMet) {
     const baseActiveContext: EsQueryRuleActionContext = {

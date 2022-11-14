@@ -331,7 +331,7 @@ describe('SearchSourceAlertTypeExpression', () => {
     );
   });
 
-  test('test meee should show success message if grouped Test Query is successful', async () => {
+  test('should show success message if grouped Test Query is successful', async () => {
     let wrapper = setup({
       ...defaultSearchSourceExpressionParams,
       termField: 'the-term',
