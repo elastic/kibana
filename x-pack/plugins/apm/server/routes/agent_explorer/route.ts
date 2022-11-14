@@ -92,20 +92,13 @@ const agentExplorerInstanceRoute = createApmServerRoute({
       lastReport: string;
     }>;
   }> {
-    const {
-      params,
-      request,
-      plugins: { security },
-    } = resources;
+    const { params } = resources;
 
-    const { environment, kuery, start, end, probability } = params.query;
+    const { environment, kuery, start, end } = params.query;
 
     const { serviceName } = params.path;
 
-    const [apmEventClient, randomSampler] = await Promise.all([
-      getApmEventClient(resources),
-      getRandomSampler({ security, request, probability }),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
 
     return {
       items: await getAgentInstances({
@@ -115,7 +108,6 @@ const agentExplorerInstanceRoute = createApmServerRoute({
         apmEventClient,
         start,
         end,
-        randomSampler,
       }),
     };
   },
