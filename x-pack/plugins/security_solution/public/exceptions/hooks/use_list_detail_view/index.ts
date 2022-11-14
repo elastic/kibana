@@ -12,13 +12,30 @@ import type {
 } from '@kbn/securitysolution-exception-list-components';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import { useParams } from 'react-router-dom';
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { patchRule } from '../../../detection_engine/rule_management/logic';
 import { useUserData } from '../../../detections/components/user_info';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import { getListById, updateList, getListRules, exportList } from '../../api';
+import { getListById, updateList, getListRules, exportList, deleteList } from '../../api';
 import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 import * as i18n from '../../translations';
+
+interface ReferenceModalState {
+  contentText: string;
+  rulesReferences: string[];
+  isLoading: boolean;
+  listId: string;
+  listNamespaceType: NamespaceType;
+}
+
+const exceptionReferenceModalInitialState: ReferenceModalState = {
+  contentText: '',
+  rulesReferences: [],
+  isLoading: false,
+  listId: '',
+  listNamespaceType: 'single',
+};
 
 export const useExceptionListDetails = () => {
   const toasts = useToasts();
@@ -34,6 +51,10 @@ export const useExceptionListDetails = () => {
   const [canUserEditList, setCanUserEditList] = useState(true);
   const [viewerStatus, setViewerStatus] = useState<ViewerStatus | string>('');
   const [exportedList, setExportedList] = useState<Blob>();
+  const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
+  const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
+    exceptionReferenceModalInitialState
+  );
 
   const { exceptionListId } = useParams<{
     exceptionListId: string;
@@ -85,6 +106,7 @@ export const useExceptionListDetails = () => {
       setInvalidListId(false);
       if (checkIfListCannotBeEdited(result)) return setCanUserEditList(false);
     } catch (error) {
+      setIsLoading(false);
       handleErrorStatus(error);
     }
   }, [exceptionListId, http, initializeListRules, handleErrorStatus]);
@@ -132,18 +154,75 @@ export const useExceptionListDetails = () => {
   }, [exceptionListId, http, list, toasts, handleErrorStatus]);
 
   const onDeleteList = useCallback(async () => {
-    // try {
-    //   await deleteList({
-    //     id: exceptionListId,
-    //     http,
-    //     namespaceType: list?.namespace_type,
-    //   });
-    //   toasts?.addSuccess(i18n.EXCEPTION_LIST_DELETED_SUCCESSFULLY(list?.name));
-    //   // TODO redirect to all lists
-    // } catch (error) {
-    //   handleErrorStatus(error);
-    // }
+    try {
+      if (!list) return;
+      await deleteList({
+        id: exceptionListId,
+        http,
+        namespaceType: list.namespace_type,
+      });
+    } catch (error) {
+      handleErrorStatus(error);
+    }
+  }, [exceptionListId, http, list, handleErrorStatus]);
+
+  const handleDelete = useCallback(() => {
+    try {
+      if (!list) return;
+      setReferenceModalState({
+        contentText: i18n.referenceErrorMessage(linkedRules.length),
+        rulesReferences: linkedRules.map(({ name }) => name),
+        isLoading: true,
+        listId: list.list_id,
+        listNamespaceType: list.namespace_type,
+      });
+      setShowReferenceErrorModal(true);
+    } catch (error) {
+      handleErrorStatus(error);
+    }
+  }, [handleErrorStatus, linkedRules, list]);
+  const handleCloseReferenceErrorModal = useCallback((): void => {
+    setShowReferenceErrorModal(false);
+    setReferenceModalState({
+      contentText: '',
+      rulesReferences: [],
+      isLoading: false,
+      listId: '',
+      listNamespaceType: 'single',
+    });
   }, []);
+  const handleReferenceDelete = useCallback(async (): Promise<void> => {
+    try {
+      await Promise.all(
+        linkedRules.map((rule) => {
+          const abortCtrl = new AbortController();
+          const exceptionLists = (rule.exceptions_list ?? []).filter(
+            ({ id }) => id !== exceptionListId
+          );
+
+          return patchRule({
+            ruleProperties: {
+              rule_id: rule.rule_id,
+              exceptions_list: exceptionLists,
+            },
+            signal: abortCtrl.signal,
+          });
+        })
+      );
+
+      onDeleteList();
+    } catch (err) {
+      handleErrorStatus(err);
+    } finally {
+      setReferenceModalState(exceptionReferenceModalInitialState);
+      setShowReferenceErrorModal(false);
+
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.exceptions,
+        path: '',
+      });
+    }
+  }, [exceptionListId, handleErrorStatus, linkedRules, navigateToApp, onDeleteList]);
 
   const onManageRules = useCallback(() => {
     setShowManageRulesFlyout(true);
@@ -170,6 +249,9 @@ export const useExceptionListDetails = () => {
     viewerStatus,
     showManageRulesFlyout,
     headerBackOptions,
+    referenceModalState,
+    showReferenceErrorModal,
+    handleDelete,
     onEditListDetails,
     onExportList,
     onDeleteList,
@@ -177,5 +259,7 @@ export const useExceptionListDetails = () => {
     onSaveManageRules,
     onCancelManageRules,
     onRuleSelectionChange,
+    handleCloseReferenceErrorModal,
+    handleReferenceDelete,
   };
 };

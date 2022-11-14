@@ -13,12 +13,14 @@ import {
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
 import { EuiLoadingContent } from '@elastic/eui';
+import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
 import type { Rule } from '../../../detection_engine/rule_management/logic/types';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
 import { useExceptionListDetails } from '../../hooks';
+import * as i18n from '../../translations';
 
 export const ListsDetailViewComponent: FC = () => {
   const {
@@ -35,14 +37,21 @@ export const ListsDetailViewComponent: FC = () => {
     listDescription,
     showManageRulesFlyout,
     headerBackOptions,
+    showReferenceErrorModal,
+    referenceModalState,
     onEditListDetails,
     onExportList,
-    onDeleteList,
     onManageRules,
     onSaveManageRules,
     onCancelManageRules,
     onRuleSelectionChange,
+    handleDelete,
+    handleCloseReferenceErrorModal,
+    handleReferenceDelete,
   } = useExceptionListDetails();
+
+  if (viewerStatus === ViewerStatus.ERROR)
+    return <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />;
 
   if (isLoading) return <EuiLoadingContent lines={4} data-test-subj="loading" />;
 
@@ -62,25 +71,31 @@ export const ListsDetailViewComponent: FC = () => {
         securityLinkAnchorComponent={ListDetailsLinkAnchor}
         onEditListDetails={onEditListDetails}
         onExportList={onExportList}
-        onDeleteList={onDeleteList}
+        onDeleteList={handleDelete}
         onManageRules={onManageRules}
       />
-      {viewerStatus === ViewerStatus.ERROR ? (
-        <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />
-      ) : (
-        <>
-          <AutoDownload blob={exportedList} name={listId} />
-          <ListWithSearch list={list} isReadOnly={isReadOnly} />
-          {showManageRulesFlyout ? (
-            <ManageRules
-              linkedRules={linkedRules as Rule[]}
-              onSave={onSaveManageRules}
-              onCancel={onCancelManageRules}
-              onRuleSelectionChange={onRuleSelectionChange}
-            />
-          ) : null}
-        </>
-      )}
+
+      <AutoDownload blob={exportedList} name={listId} />
+      <ListWithSearch list={list} isReadOnly={isReadOnly} />
+      <ReferenceErrorModal
+        cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
+        confirmText={i18n.REFERENCE_MODAL_CONFIRM_BUTTON}
+        contentText={referenceModalState.contentText}
+        onCancel={handleCloseReferenceErrorModal}
+        onClose={handleCloseReferenceErrorModal}
+        onConfirm={handleReferenceDelete}
+        references={referenceModalState.rulesReferences}
+        showModal={showReferenceErrorModal}
+        titleText={i18n.REFERENCE_MODAL_TITLE}
+      />
+      {showManageRulesFlyout ? (
+        <ManageRules
+          linkedRules={linkedRules as Rule[]}
+          onSave={onSaveManageRules}
+          onCancel={onCancelManageRules}
+          onRuleSelectionChange={onRuleSelectionChange}
+        />
+      ) : null}
     </>
   );
 };
