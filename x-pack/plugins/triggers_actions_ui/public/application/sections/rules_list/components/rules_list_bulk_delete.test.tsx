@@ -91,7 +91,9 @@ beforeEach(() => {
   (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
 });
 
-describe('Rules list bulk delete', () => {
+// Test are too slow. It's breaking the build. So we skipp it now and waiting for improvment according this ticket:
+// https://github.com/elastic/kibana/issues/145122
+describe.skip('Rules list bulk delete', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(authorized: boolean = true) {
