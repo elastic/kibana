@@ -43,7 +43,7 @@ export const TestRunDetails = () => {
                     defaultMessage="Step {stepIndex} of {totalSteps}"
                     values={{
                       stepIndex,
-                      totalSteps: stepEnds?.length ?? 0,
+                      totalSteps: stepEnds?.length ?? 1,
                     }}
                   />
                 </h3>
@@ -52,7 +52,7 @@ export const TestRunDetails = () => {
             <EuiFlexItem grow={false}>
               <StepNumberNav
                 stepIndex={stepIndex}
-                totalSteps={stepEnds?.length ?? 0}
+                totalSteps={stepEnds?.length ?? 1}
                 handleNextStep={() => {
                   setStepIndex(stepIndex + 1);
                 }}

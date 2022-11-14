@@ -100,8 +100,6 @@ export interface StepImagePopoverProps {
   isStepFailed: boolean;
   isLoading: boolean;
   asThumbnail?: boolean;
-  height?: number;
-  width?: number;
   size?: 'm';
 }
 
