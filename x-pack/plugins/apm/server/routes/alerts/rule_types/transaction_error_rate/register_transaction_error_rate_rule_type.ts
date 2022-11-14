@@ -248,7 +248,7 @@ export function registerTransactionErrorRateRuleType({
             .filter((name) => name)
             .join('_');
 
-          const alertUuid = getAlertUuid?.(id) || '';
+          const alertUuid = getAlertUuid(id);
 
           const alertDetailsUrl = getAlertDetailsUrl(
             basePath,

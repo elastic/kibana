@@ -255,7 +255,7 @@ export function registerTransactionDurationRuleType({
 
         const id = `${ApmRuleType.TransactionDuration}_${environmentLabel}`;
 
-        const alertUuid = getAlertUuid?.(id) || '';
+        const alertUuid = getAlertUuid(id);
 
         const alertDetailsUrl = getAlertDetailsUrl(
           basePath,

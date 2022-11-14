@@ -303,7 +303,7 @@ export function registerAnomalyRuleType({
             relativeViewInAppUrl
           );
 
-          const alertUuid = getAlertUuid?.(id) || '';
+          const alertUuid = getAlertUuid(id);
 
           const alertDetailsUrl = getAlertDetailsUrl(
             basePath,
