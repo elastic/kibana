@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimeWindow } from '../../../types/models/time_window';
+import { TimeWindow } from '../../../domain/models/time_window';
 import { oneWeek, sevenDays, sixHours } from './duration';
 
 export function sixHoursRolling(): TimeWindow {
