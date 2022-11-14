@@ -96,7 +96,7 @@ describe('when in the Administration tab', () => {
       });
 
       mockedContext.history.push('/administration/response_actions_history');
-      expect(await render().findByTestId('noIngestPermissions')).toBeTruthy();
+      expect(await render().findByTestId('noPrivilegesPage')).toBeTruthy();
     });
   });
 
