@@ -8,8 +8,9 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about the {kib} 8.5.0 release.
+Review important information about the {kib} 8.5.x releases.
 
+* <<release-notes-8.5.1>>
 * <<release-notes-8.5.0>>
 //* <<release-notes-8.4.3>>
 //* <<release-notes-8.4.2>>
@@ -36,6 +37,68 @@ Review important information about the {kib} 8.5.0 release.
 //* <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.5.1]]
+== {kib} 8.5.1
+
+coming::[8.5.1]
+
+Review the following information about the {kib} 8.5.1 release.
+
+[float]
+[[breaking-changes-8.5.1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in {kib} 8.5.1.
+// end::notable-breaking-changes[]
+
+{kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[enhancement-v8.5.1]]
+=== Enhancements
+Elastic Security::
+For the Elastic Security 8.5.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.5.1]]
+=== Bug fixes
+APM::
+* Fixes a bug where Metadata API does not filter by environment {kibana-pull}144472[#144472]
+* Fixes a bug where AWS lambda checks for an undefined value {kibana-pull}143987[#143987]
+* Limits the number of source map artifacts {kibana-pull}144963[#144963]
+* Fixes an incorrect documentation link {kibana-pull}145077[#145077]
+
+Dashboard::
+* Removes support for scripted fields in options list {kibana-pull}144643[#144643]
+* Fixes help documentation link for dashboard {kibana-pull}143894[#143894]
+
+Elastic Security::
+For the Elastic Security 8.5.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+Make asset tags space aware {kibana-pull}144066[#144066]
+
+Machine Learning::
+* Correcting the size of the free ML node on cloud {kibana-pull}144512[#144512]
+* Fixes model testing flyout reload {kibana-pull}144318[#144318]
+* Explain Log Rate Spikes: Wrap analysis in try/catch block {kibana-pull}143651[#143651]
+* Explain Log Rate Spikes: Fix uncompressed streams and backpressure handling {kibana-pull}142970[#142970]
+
+Osquery::
+* Fixes a bug that prevented users from viewing Osquery results if they were in a non-default {kib} space {kibana-pull}144210[#144210]
+
+Platform::
+Fixes the execution pipeline not to stop on a flaky subexpression {kibana-pull}143852[#143852]
+
+Uptime::
+* Adjust forumla for synthetics monitor availability {kibana-pull}144868[#144868]
+* TLS alert - do not alert when status cannot be determined {kibana-pull}144767[#144767]
+
 [[release-notes-8.5.0]]
 == {kib} 8.5.0
 
@@ -57,7 +120,6 @@ To download the {kib} 8.5.0 image, use the https://www.docker.elastic.co/r/kiban
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.5.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
 [discrete]
 [[breaking-141757]]
 .Updates bulk action API to return actionId instead of agent success
@@ -93,7 +155,10 @@ The bidirectional foreign key between agent policy and package policy has been r
 *Impact* +
 The agent policy saved object no longer includes the `package_policies` field.
 ====
-// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following:
+
+{kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
       
 [float]
 [[features-8.5.0]]
