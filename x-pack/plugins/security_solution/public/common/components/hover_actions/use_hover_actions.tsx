@@ -84,7 +84,7 @@ export const useHoverActions = ({
     const val = dataProvider.queryMatch.value;
 
     if (typeof val === 'number') {
-      return `${val}`;
+      return val.toString();
     }
 
     if (Array.isArray(val)) {
