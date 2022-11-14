@@ -15557,6 +15557,7 @@
     "xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel": "セットアップの手順を表示",
     "xpack.infra.homePage.settingsTabTitle": "設定",
     "xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder": "インフラストラクチャデータを検索…（例：host.name:host-1）",
+    "xpack.infra.hostsPage.giveFeedbackLink": "フィードバックを作成する",
     "xpack.infra.hostsTable.averageMemoryTotalColumnHeader": "メモリ合計 （平均) ",
     "xpack.infra.hostsTable.averageMemoryUsageColumnHeader": "メモリー使用状況（平均）",
     "xpack.infra.hostsTable.averageTxColumnHeader": "",

@@ -9,6 +9,10 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBetaBadge } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiLink } from '@elastic/eui';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
@@ -21,6 +25,8 @@ import { UnifiedSearchProvider } from './hooks/use_unified_search';
 import { HostContainer } from './components/hosts_container';
 
 export const HostsPage = () => {
+  const HOSTS_FEEDBACK_LINK = 'https://ela.st/feedback-host-observability';
+
   const {
     hasFailedLoadingSource,
     isLoading,
@@ -47,7 +53,34 @@ export const HostsPage = () => {
             <MetricsPageTemplate
               hasData={metricIndicesExist}
               pageHeader={{
-                pageTitle: hostsTitle,
+                alignItems: 'center',
+                pageTitle: (
+                  <div
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      gap: 0.75rem;
+                    `}
+                  >
+                    <h1>{hostsTitle}</h1>
+                    <EuiBetaBadge
+                      css={css`
+                        display: flex;
+                        justify-content: center;
+                      `}
+                      label="Technical preview"
+                      tooltipContent="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+                    />
+                  </div>
+                ),
+                rightSideItems: [
+                  <EuiLink href={HOSTS_FEEDBACK_LINK} target="_blank">
+                    <FormattedMessage
+                      id="xpack.infra.hostsPage.giveFeedbackLink"
+                      defaultMessage="Give feedback"
+                    />
+                  </EuiLink>,
+                ],
               }}
               pageSectionProps={{
                 contentProps: {

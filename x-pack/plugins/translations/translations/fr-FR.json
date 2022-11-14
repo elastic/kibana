@@ -15572,6 +15572,7 @@
     "xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel": "Voir les instructions de configuration",
     "xpack.infra.homePage.settingsTabTitle": "Paramètres",
     "xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder": "Rechercher des données d'infrastructure… (par exemple host.name:host-1)",
+    "xpack.infra.hostsPage.giveFeedbackLink": "Donner un retour",
     "xpack.infra.hostsTable.averageMemoryTotalColumnHeader": "Total de la mémoire (moy.)",
     "xpack.infra.hostsTable.averageMemoryUsageColumnHeader": "Utilisation de la mémoire (moy.)",
     "xpack.infra.hostsTable.averageRxColumnHeader": "",
