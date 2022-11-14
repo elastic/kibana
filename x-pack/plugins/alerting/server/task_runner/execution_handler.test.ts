@@ -858,7 +858,7 @@ describe('Execution Handler', () => {
       `);
     });
 
-    it('does not populate the rule.url when the alert id is set to undefined', async () => {
+    it('does not populate the rule.url when the rule id is set to undefined', async () => {
       const execParams = {
         ...defaultExecutionParams,
         rule: ruleWithUrl,

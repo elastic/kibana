@@ -297,6 +297,9 @@ export class ExecutionHandler<
 
       return ruleUrl.toString();
     } catch (error) {
+      this.logger.debug(
+        `Rule "${this.rule.id}" encountered an error while constructing the rule.url variable: ${error.message}`
+      );
       return;
     }
   }
