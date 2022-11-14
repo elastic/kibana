@@ -15,7 +15,7 @@ import { DrawState } from '../../../../common/descriptor_types';
 import { DRAW_MODE } from '../../../../common/constants';
 import { getDrawMode } from '../../../selectors/ui_selectors';
 import { getMapZoom } from '../../../selectors/map_selectors';
-import { setGotoWithCenter,setMouseCoordinates } from '../../../actions';
+import { setGotoWithCenter } from '../../../actions';
 
 
 function mapStateToProps(state: MapStoreState) {
@@ -38,9 +38,6 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     centerMap: (lat:number, lon:number, zoom:number) => {
       dispatch(setGotoWithCenter({ lat, lon, zoom }));
-    },
-    setCoordinates:(lat:number, lon:number ) => {
-      dispatch(setMouseCoordinates({lat,lon}))
     }
   };
 }

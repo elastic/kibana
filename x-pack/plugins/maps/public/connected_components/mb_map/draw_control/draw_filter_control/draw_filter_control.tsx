@@ -105,6 +105,7 @@ export class DrawFilterControl extends Component<Props, {}> {
             ? this.props.drawState.drawShape
             : undefined
         }
+        drawState={this.props.drawState}
         onDraw={this._onDraw}
         mbMap={this.props.mbMap}
         enable={this.props.filterModeActive}

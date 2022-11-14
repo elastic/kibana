@@ -21,7 +21,7 @@ import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { DRAW_SHAPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/draw_forms/distance_filter_form';
-import { DrawState } from '../../../../common/descriptor_types';
+import { DrawState, MapCenter } from '../../../../common/descriptor_types';
 import { PasteLocationForm } from '../set_view_control/paste_location_form';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 
@@ -61,7 +61,6 @@ export interface Props {
   disableToolsControl: boolean;
   zoom:number;
   centerMap: (lat: number, lon: number, zoom: number) => void;
-  setCoordinates: (lat: number, lon: number) =>void;
 }
 
 interface State {
@@ -116,7 +115,7 @@ export class ToolsControl extends Component<Props, State> {
     this._closePopover();
   };
 
-  _initiateDistanceDraw = (options: { actionId: string; filterLabel: string }) => {
+  _initiateDistanceDraw = (options: { actionId: string; filterLabel: string, center?:MapCenter|undefined }) => {
     this.props.initiateDraw({
       drawShape: DRAW_SHAPE.DISTANCE,
       ...options,
@@ -127,9 +126,8 @@ export class ToolsControl extends Component<Props, State> {
     //Goto Center point on the map
     this.props.centerMap(lat,lon,this.props.zoom)
     //initDistanceDraw
-    this._initiateDistanceDraw({actionId:ACTION_GLOBAL_APPLY_FILTER,filterLabel:"Filter From Location"}) //TODO allow setting teh label
-    //Send map click to set draw distance centerpoint 
-    this.props.setCoordinates(lat,lon) //FIXME: This only sets the map state coordinates and doesn't trigger the click event.
+    this._initiateDistanceDraw({actionId:ACTION_GLOBAL_APPLY_FILTER,filterLabel:"Filter From Location",center:{lat,lon}}) //TODO allow setting teh label
+
 
   }
   _getDrawPanels() {

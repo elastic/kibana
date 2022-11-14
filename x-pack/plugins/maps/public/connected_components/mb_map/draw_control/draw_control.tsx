@@ -13,12 +13,13 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import mapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 // @ts-expect-error
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
-import type { Map as MbMap } from '@kbn/mapbox-gl';
+import {  Map as MbMap } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { MapMouseEvent } from '@kbn/mapbox-gl';
 import { DRAW_SHAPE } from '../../../../common/constants';
 import { DrawCircle, DRAW_CIRCLE_RADIUS_LABEL_STYLE } from './draw_circle';
 import { DrawTooltip } from './draw_tooltip';
+import { DrawState } from '@kbn/maps-plugin/common/descriptor_types';
 
 const DRAW_RECTANGLE = 'draw_rectangle';
 const DRAW_CIRCLE = 'draw_circle';
@@ -28,6 +29,7 @@ mbDrawModes[DRAW_CIRCLE] = DrawCircle;
 
 export interface Props {
   drawShape?: DRAW_SHAPE;
+  drawState?:DrawState;
   onDraw: (event: { features: Feature[] }, drawControl?: MapboxDraw) => void;
   onClick?: (event: MapMouseEvent, drawControl?: MapboxDraw) => void;
   mbMap: MbMap;
@@ -123,7 +125,16 @@ export class DrawControl extends Component<Props> {
     if (drawMode !== DRAW_RECTANGLE && this.props.drawShape === DRAW_SHAPE.BOUNDS) {
       this._mbDrawControl.changeMode(DRAW_RECTANGLE);
     } else if (drawMode !== DRAW_CIRCLE && this.props.drawShape === DRAW_SHAPE.DISTANCE) {
-      this._mbDrawControl.changeMode(DRAW_CIRCLE);
+      console.log(this._mbDrawControl.changeMode(DRAW_CIRCLE));
+
+      if(this.props.drawState?.center){
+        let {lat,lon} = this.props.drawState?.center
+        
+        let f = this._mbDrawControl.getAll()
+        f.features[0].properties.center = [lon,lat]
+        this._mbDrawControl.set(f)
+      
+      }
     } else if (drawMode !== DRAW_POLYGON && this.props.drawShape === DRAW_SHAPE.POLYGON) {
       this._mbDrawControl.changeMode(DRAW_POLYGON);
     } else if (drawMode !== DRAW_LINE_STRING && this.props.drawShape === DRAW_SHAPE.LINE) {
