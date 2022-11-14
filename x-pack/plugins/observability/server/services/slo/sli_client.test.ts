@@ -11,7 +11,7 @@ import moment from 'moment';
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services';
 import { InternalQueryError } from '../../errors';
-import { Duration, DurationUnit } from '../../types/models';
+import { Duration, DurationUnit } from '../../domain/models';
 import { createSLO } from './fixtures/slo';
 import { DefaultSLIClient } from './sli_client';
 
@@ -41,7 +41,7 @@ describe('SLIClient', () => {
       it('throws when aggregations failed', async () => {
         const slo = createSLO({
           time_window: {
-            duration: new Duration(7, DurationUnit.d),
+            duration: new Duration(7, DurationUnit.Day),
             is_rolling: true,
           },
         });
@@ -60,7 +60,7 @@ describe('SLIClient', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({
             time_window: {
-              duration: new Duration(7, DurationUnit.d),
+              duration: new Duration(7, DurationUnit.Day),
               is_rolling: true,
             },
           });
@@ -114,7 +114,7 @@ describe('SLIClient', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({
             time_window: {
-              duration: new Duration(1, DurationUnit.M),
+              duration: new Duration(1, DurationUnit.Month),
               calendar: {
                 start_time: new Date('2022-09-01T00:00:00.000Z'),
               },
@@ -172,7 +172,7 @@ describe('SLIClient', () => {
           objective: {
             target: 0.95,
             timeslice_target: 0.95,
-            timeslice_window: new Duration(10, DurationUnit.m),
+            timeslice_window: new Duration(10, DurationUnit.Minute),
           },
         });
 
@@ -194,10 +194,10 @@ describe('SLIClient', () => {
             objective: {
               target: 0.95,
               timeslice_target: 0.9,
-              timeslice_window: new Duration(10, DurationUnit.m),
+              timeslice_window: new Duration(10, DurationUnit.Minute),
             },
             time_window: {
-              duration: new Duration(1, DurationUnit.M),
+              duration: new Duration(1, DurationUnit.Month),
               calendar: {
                 start_time: new Date('2022-09-01T00:00:00.000Z'),
               },
@@ -295,10 +295,10 @@ describe('SLIClient', () => {
             objective: {
               target: 0.95,
               timeslice_target: 0.9,
-              timeslice_window: new Duration(10, DurationUnit.m),
+              timeslice_window: new Duration(10, DurationUnit.Minute),
             },
             time_window: {
-              duration: new Duration(1, DurationUnit.M),
+              duration: new Duration(1, DurationUnit.Month),
               is_rolling: true,
             },
           });
@@ -393,8 +393,8 @@ describe('SLIClient', () => {
       it('calls ES with the lookback windows aggregations', async () => {
         const slo = createSLO({ budgeting_method: 'occurrences' });
         const lookbackWindows = [
-          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.h) },
-          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.m) },
+          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.Hour) },
+          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.Minute) },
         ];
         esClientMock.search.mockResolvedValueOnce({
           ...commonEsResponse,
@@ -478,13 +478,13 @@ describe('SLIClient', () => {
           objective: {
             target: 0.95,
             timeslice_target: 0.9,
-            timeslice_window: new Duration(10, DurationUnit.m),
+            timeslice_window: new Duration(10, DurationUnit.Minute),
           },
         });
 
         const lookbackWindows = [
-          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.h) },
-          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.m) },
+          { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.Hour) },
+          { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.Minute) },
         ];
         esClientMock.search.mockResolvedValueOnce({
           ...commonEsResponse,
