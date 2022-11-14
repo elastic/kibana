@@ -122,8 +122,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect((await PageObjects.discover.getSidebarSectionFieldNames('meta')).join(', ')).to.be(
           '_id, _index, _score'
         );
+
+        // Expand Unmapped section
+        await PageObjects.discover.toggleSidebarSection('unmapped');
+        expect(
+          (await PageObjects.discover.getSidebarSectionFieldNames('unmapped')).join(', ')
+        ).to.be('relatedContent');
         await kibanaServer.uiSettings.unset('discover:searchFieldsFromSource');
         await browser.refresh();
+      });
+
+      it('should show selected and popular fields', async function () {
+        await PageObjects.discover.clickFieldListItemAdd('extension');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.clickFieldListItemAdd('@message');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        expect(
+          (await PageObjects.discover.getSidebarSectionFieldNames('selected')).join(', ')
+        ).to.be('extension, @message');
+
+        const availableFields = await PageObjects.discover.getSidebarSectionFieldNames('available');
+        expect(availableFields.includes('extension')).to.be(true);
+        expect(availableFields.includes('@message')).to.be(true);
+
+        await PageObjects.discover.clickFieldListItemRemove('@message');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await PageObjects.discover.clickFieldListItemAdd('_id');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.clickFieldListItemAdd('@message');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        expect(
+          (await PageObjects.discover.getSidebarSectionFieldNames('selected')).join(', ')
+        ).to.be('extension, _id, @message');
+
+        expect(
+          (await PageObjects.discover.getSidebarSectionFieldNames('popular')).join(', ')
+        ).to.be('@message, _id, extension');
       });
     });
   });
