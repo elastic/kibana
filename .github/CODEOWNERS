@@ -47,8 +47,8 @@
 /test/functional/apps/visualize/ @elastic/kibana-visualizations
 /src/plugins/expressions/ @elastic/kibana-visualizations
 /src/plugins/unified_search/ @elastic/kibana-visualizations
-/x-pack/plugins/graph/ @elastic/kibana-data-discovery
-/x-pack/test/functional/apps/graph @elastic/kibana-data-discovery
+/x-pack/plugins/graph/ @elastic/kibana-visualizations
+/x-pack/test/functional/apps/graph @elastic/kibana-visualizations
 
 # Application Services
 /examples/dashboard_embeddable_examples/ @elastic/kibana-app-services
