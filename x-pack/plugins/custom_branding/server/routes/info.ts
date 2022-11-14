@@ -6,14 +6,14 @@
  */
 
 import { ILicense } from '@kbn/licensing-plugin/server';
-import { WhitelabellingInfoResponse } from '../../common';
-import { WhitelabellingRouter } from '../types';
-import { ConfigSchema } from '../../config';
+import { CustomBrandingInfoResponse } from '../../common';
+import { CustomBrandingRouter } from '../types';
+import { PLUGIN } from '../../public/constants';
 
-export const registerInfoRoute = (router: WhitelabellingRouter, config: ConfigSchema) => {
+export const registerInfoRoute = (router: CustomBrandingRouter) => {
   router.get(
     {
-      path: '/api/whitelabelling/info',
+      path: '/api/customBranding/info',
       validate: false,
       options: {
         authRequired: 'optional',
@@ -29,13 +29,12 @@ export const registerInfoRoute = (router: WhitelabellingRouter, config: ConfigSc
       return res.ok({
         body: {
           allowed,
-          theming: config.theme,
-        } as WhitelabellingInfoResponse,
+        } as CustomBrandingInfoResponse,
       });
     }
   );
 };
 
 const isValidLicense = (license: ILicense): boolean => {
-  return license.hasAtLeast('enterprise');
+  return license.hasAtLeast(PLUGIN.MINIMUM_LICENSE_REQUIRED);
 };

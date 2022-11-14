@@ -8,11 +8,11 @@
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 export const PLUGIN = {
-  ID: 'whitelabelling',
+  ID: 'custom-branding',
   MINIMUM_LICENSE_REQUIRED: 'enterprise' as LicenseType,
   getI18nName: (i18n: any): string => {
-    return i18n.translate('xpack.whitelabelling.appName', {
-      defaultMessage: 'Whitelabelling',
+    return i18n.translate('xpack.customBranding.appName', {
+      defaultMessage: 'Custom Branding',
     });
   },
 };

@@ -118,7 +118,7 @@ export class ChromeService {
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
     const customLogo$ = new BehaviorSubject<string | undefined>(undefined);
     const customMark$ = new BehaviorSubject<string | undefined>(undefined);
-    let whitelabellingRegistered: string | null = null;
+    let customBrandingRegistered: string | null = null;
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -303,27 +303,12 @@ export class ChromeService {
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
 
-      registerWhitelabellingPlugin: (pluginName) => {
-        if (whitelabellingRegistered) {
+      registerCustomBrandingPlugin: (pluginName) => {
+        if (customBrandingRegistered) {
           throw new Error('Another plugin already registered');
         }
-        application.setCustomLogo$(customLogo$);
-        whitelabellingRegistered = pluginName;
+        customBrandingRegistered = pluginName;
       },
-
-      setCustomLogo: (logo: string) => {
-        if (whitelabellingRegistered && whitelabellingRegistered === 'whitelabelling') {
-          customLogo$.next(logo);
-        }
-      },
-
-      setCustomMark: (mark: string) => {
-        if (whitelabellingRegistered && whitelabellingRegistered === 'whitelabelling') {
-          customMark$.next(mark);
-        }
-      },
-
-      getCustomLogo$: () => customLogo$.pipe(takeUntil(this.stop$)),
     };
   }
 

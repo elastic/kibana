@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-export interface ThemingSchema {
-  logo?: string;
-  mark?: string;
-}
+import { PluginInitializer } from '@kbn/core/public';
+import { CustomBrandingPlugin } from './plugin';
 
-export interface WhitelabellingInfoResponse {
-  allowed: boolean;
-  theming: ThemingSchema;
-}
+export const plugin: PluginInitializer<{}, {}, {}, {}> = (contextInitializer) =>
+  new CustomBrandingPlugin(contextInitializer);

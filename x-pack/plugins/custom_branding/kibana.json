@@ -1,0 +1,15 @@
+{
+  "id": "customBranding",
+  "version": "kibana",
+  "description": "Contains all the key functionality of Kibana's Custom Branding experience.",
+  "owner": {
+    "name": "Global Experience",
+    "githubTeam": "team-global-experience"
+  },
+  "server": true,
+  "ui": false,
+  "requiredPlugins": ["licensing"],
+  "requiredBundles": ["kibanaReact"],
+  "optionalPlugins": ["share"],
+  "enabledOnAnonymousPages": true
+}

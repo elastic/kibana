@@ -6,8 +6,10 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { WhitelabellingInfoResponse } from '../common';
+import { CustomBrandingInfoResponse } from '../common';
 
-export const getThemingInfo = async (http: HttpStart): Promise<WhitelabellingInfoResponse> => {
-  return await http.get<WhitelabellingInfoResponse>('/api/whitelabelling/info');
+export const getCustomBrandingInfo = async (
+  http: HttpStart
+): Promise<CustomBrandingInfoResponse> => {
+  return await http.get<CustomBrandingInfoResponse>('/api/custom-branding/info');
 };

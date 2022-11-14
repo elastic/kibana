@@ -8,8 +8,8 @@
 import { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
-export type WhitelabellingRequestHandlerContext = CustomRequestHandlerContext<{
+export type CustomBrandingRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
 }>;
 
-export type WhitelabellingRouter = IRouter<WhitelabellingRequestHandlerContext>;
+export type CustomBrandingRouter = IRouter<CustomBrandingRequestHandlerContext>;

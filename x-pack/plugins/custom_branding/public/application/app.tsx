@@ -14,7 +14,6 @@ import { ManagementAppMountParams, RegisterManagementAppArgs } from '@kbn/manage
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import { LicenseStatus } from '../types';
-import { Settings } from './settings';
 
 export interface AppDeps {
   toasts: ToastsSetup;
@@ -30,9 +29,5 @@ export interface AppDeps {
 }
 
 export const App = () => {
-  return (
-    <div>
-      <Settings />
-    </div>
-  );
+  return <div />;
 };

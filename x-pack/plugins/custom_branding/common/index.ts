@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { WhitelabellingInfoResponse, ThemingSchema } from './types';
+export type { CustomBrandingInfoResponse } from './types';

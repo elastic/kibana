@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/public';
-import { WhitelabellingPlugin } from './plugin';
+import { registerInfoRoute } from './info';
+import { CustomBrandingRouter } from '../types';
 
-export const plugin: PluginInitializer<{}, {}, {}, {}> = (contextInitializer) =>
-  new WhitelabellingPlugin(contextInitializer);
+export const registerRoutes = (router: CustomBrandingRouter) => {
+  registerInfoRoute(router);
+};

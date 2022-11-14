@@ -151,11 +151,9 @@ export interface ChromeStart {
    */
   hasHeaderBanner$(): Observable<boolean>;
 
-  setCustomLogo(customLogo: string): void;
-
-  registerWhitelabellingPlugin(pluginName: string): void;
-
-  getCustomLogo$(): Observable<string | undefined>;
-
-  setCustomMark(custoMark: string): void;
+  /**
+   * Register a plugin that will set custom branding
+   * @param pluginName name of the plugin
+   */
+  registerCustomBrandingPlugin(pluginName: string): void;
 }
