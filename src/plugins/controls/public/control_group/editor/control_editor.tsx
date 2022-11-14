@@ -52,7 +52,7 @@ import {
 } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 import { pluginServices } from '../../services';
-import { loadFieldRegistryFromDataViewId } from './data_control_editor_tools';
+import { getDataControlFieldRegistry } from './data_control_editor_tools';
 interface EditControlProps {
   embeddable?: ControlEmbeddable<DataControlInput>;
   isCreate: boolean;
@@ -116,10 +116,10 @@ export const ControlEditor = ({
   useEffect(() => {
     (async () => {
       if (state.selectedDataView?.id) {
-        setFieldRegistry(await loadFieldRegistryFromDataViewId(state.selectedDataView.id));
+        setFieldRegistry(await getDataControlFieldRegistry(await get(state.selectedDataView.id)));
       }
     })();
-  }, [state.selectedDataView]);
+  }, [state.selectedDataView?.id, get]);
 
   useMount(() => {
     let mounted = true;

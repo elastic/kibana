@@ -85,8 +85,7 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, fieldName } = request;
-
+    const { runPastTimeout, filters, fieldName, runtimeFieldMap } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
@@ -123,6 +122,9 @@ export const setupOptionsListSuggestionsRoute = (
             field: fieldName,
           },
         },
+      },
+      runtime_mappings: {
+        ...runtimeFieldMap,
       },
     };
 
