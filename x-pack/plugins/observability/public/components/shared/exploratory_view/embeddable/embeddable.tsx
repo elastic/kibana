@@ -50,6 +50,7 @@ export interface ExploratoryEmbeddableProps {
   showCalculationMethod?: boolean;
   title?: string | JSX.Element;
   withActions?: boolean | ActionTypes[];
+  align?: 'left' | 'right' | 'center';
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -80,6 +81,7 @@ export default function Embeddable({
   withActions = true,
   lensFormulaHelper,
   hideTicks,
+  align,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -168,7 +170,7 @@ export default function Embeddable({
   }
 
   return (
-    <Wrapper $customHeight={customHeight}>
+    <Wrapper $customHeight={customHeight} align={align}>
       {(title || showCalculationMethod || appendTitle) && (
         <EuiFlexGroup alignItems="center" gutterSize="none">
           {title && (
@@ -226,6 +228,7 @@ export default function Embeddable({
 
 const Wrapper = styled.div<{
   $customHeight?: string | number;
+  align?: 'left' | 'right' | 'center';
 }>`
   height: ${(props) => (props.$customHeight ? `${props.$customHeight};` : `100%;`)};
   position: relative;
@@ -239,6 +242,14 @@ const Wrapper = styled.div<{
     }
 
     .legacyMtrVis {
+      > :first-child {
+        justify-content: ${(props) =>
+          props.align === 'left'
+            ? `flex-start;`
+            : props.align === 'right'
+            ? `flex-end;`
+            : 'center;'};
+      }
       justify-content: flex-end;
       .legacyMtrVis__container {
         padding: 0;
