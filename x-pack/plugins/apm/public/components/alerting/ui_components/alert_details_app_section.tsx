@@ -21,6 +21,7 @@ import {
   ALERT_END,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getOrRedirectToTransactionType } from '../../../context/apm_service/apm_service_context';
 import { useServiceAgentFetcher } from '../../../context/apm_service/use_service_agent_fetcher';
 import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
@@ -64,16 +65,19 @@ export function AlertDetailsAppSectionTransactionDuration({
   timeZone,
 }: AlertDetailsAppSectionProps) {
   const params = rule.params;
-  const environment = String(params.environment);
+  const environment = String(params.environment) || ENVIRONMENT_ALL.value;
   const latencyAggregationType = getAggsTypeFromRule(
     params.aggregationType as string
   );
+
+  // duration is us, convert it to MS
   const alertDurationMS =
-    alert && alert.fields[ALERT_DURATION]
-      ? // duration is us, convert it to MS
-        (alert.fields[ALERT_DURATION] as unknown as number) / 1000
-      : 0;
+    (alert.fields[ALERT_DURATION] as unknown as number) / 1000;
+
   const serviceName = String(alert.fields[SERVICE_NAME]);
+
+  // Currently, we don't use comparisonEnabled nor offset.
+  // But providing them as they are required for the chart.
   const comparisonEnabled = false;
   const offset = '1d';
   const ruleWindowSizeMS = moment
@@ -151,10 +155,6 @@ export function AlertDetailsAppSectionTransactionDuration({
                 transactionType,
                 transactionName: undefined,
                 latencyAggregationType,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
               },
             },
           }
@@ -162,7 +162,6 @@ export function AlertDetailsAppSectionTransactionDuration({
       }
     },
     [
-      comparisonEnabled,
       end,
       environment,
       latencyAggregationType,
@@ -214,10 +213,6 @@ export function AlertDetailsAppSectionTransactionDuration({
                   start,
                   end,
                   transactionType,
-                  offset:
-                    comparisonEnabled && isTimeComparison(offset)
-                      ? offset
-                      : undefined,
                   transactionName: undefined,
                 },
               },
@@ -225,15 +220,7 @@ export function AlertDetailsAppSectionTransactionDuration({
           );
         }
       },
-      [
-        environment,
-        serviceName,
-        start,
-        end,
-        transactionType,
-        offset,
-        comparisonEnabled,
-      ]
+      [environment, serviceName, start, end, transactionType]
     );
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
     ChartType.THROUGHPUT
@@ -300,25 +287,13 @@ export function AlertDetailsAppSectionTransactionDuration({
                 end,
                 transactionType,
                 transactionName: undefined,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
               },
             },
           }
         );
       }
     },
-    [
-      environment,
-      serviceName,
-      start,
-      end,
-      transactionType,
-      offset,
-      comparisonEnabled,
-    ]
+    [environment, serviceName, start, end, transactionType]
   );
 
   const {
@@ -335,16 +310,6 @@ export function AlertDetailsAppSectionTransactionDuration({
         defaultMessage: 'Failed transaction rate (avg.)',
       }),
     },
-    ...(comparisonEnabled
-      ? [
-          {
-            data: dataErrorRate.previousPeriod.timeseries,
-            type: 'area',
-            color: previousPeriodColorErrorRate,
-            title: '',
-          },
-        ]
-      : []),
   ];
 
   const preferredAnomalyTimeseriesErrorRate =
