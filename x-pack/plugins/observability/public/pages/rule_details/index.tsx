@@ -46,6 +46,7 @@ import {
   ALERTS_TAB,
   RULE_DETAILS_PAGE_ID,
   RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
+  URL_STORAGE_KEY,
 } from './constants';
 import { RuleDetailsPathParams, TabId } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -216,6 +217,7 @@ export function RuleDetailsPage() {
           <ObservabilityAlertSearchbarWithUrlSync
             appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
             setEsQuery={setEsQuery}
+            urlStorageKey={URL_STORAGE_KEY}
             queries={ruleQuery.current}
           />
           <EuiSpacer size="s" />

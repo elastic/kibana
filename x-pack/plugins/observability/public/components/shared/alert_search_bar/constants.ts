@@ -11,6 +11,7 @@ import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS } from '@kbn/
 import { AlertStatusFilter } from '../../../../common/typings';
 
 export const DEFAULT_QUERIES: Query[] = [];
+export const DEFAULT_QUERY_STRING = '';
 
 export const ALL_ALERTS: AlertStatusFilter = {
   status: '',
