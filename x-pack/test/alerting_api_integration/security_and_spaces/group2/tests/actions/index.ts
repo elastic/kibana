@@ -36,6 +36,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/stack/webhook'));
     loadTestFile(require.resolve('./connector_types/stack/xmatters'));
     loadTestFile(require.resolve('./connector_types/stack/torq'));
+    loadTestFile(require.resolve('./connector_types/security/tines'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));

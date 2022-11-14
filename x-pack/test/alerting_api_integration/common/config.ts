@@ -44,6 +44,7 @@ const enabledActionTypes = [
   '.jira',
   '.resilient',
   '.slack',
+  '.tines',
   '.webhook',
   '.xmatters',
   '.torq',

@@ -30,6 +30,8 @@ import {
   getSwimlaneConnectorType,
 } from './cases';
 
+import { getTinesConnectorType } from './security';
+
 export interface RegistrationServices {
   validateEmailAddresses: (
     addresses: string[],
@@ -61,4 +63,5 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getOpsgenieConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
   connectorTypeRegistry.register(getTorqConnectorType());
+  connectorTypeRegistry.register(getTinesConnectorType());
 }
