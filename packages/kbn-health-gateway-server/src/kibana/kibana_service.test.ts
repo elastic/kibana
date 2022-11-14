@@ -43,13 +43,13 @@ describe('KibanaService', () => {
       expect(kibanaStart).toBeUndefined();
     });
 
-    test('registers /api/status route with the server', async () => {
+    test('registers / route with the server', async () => {
       const kibanaService = new KibanaService({ config, logger });
       await kibanaService.start({ server });
       expect(server.addRoute).toHaveBeenCalledWith(
         expect.objectContaining({
           method: 'GET',
-          path: '/api/status',
+          path: '/',
         })
       );
     });
