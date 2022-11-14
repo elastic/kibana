@@ -32,7 +32,7 @@ export const PrivilegedRoute = memo(({ component, hasPrivilege, path }: Privileg
       (isEndpointRbacV1Enabled && path === MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH);
 
     componentToRender = shouldUseMissingPrivilegesScreen
-      ? () => <NoPrivilegesPage documentationUrl={docLinks.links.siem.privileges} />
+      ? () => <NoPrivilegesPage documentationUrl={docLinks.links.securitySolution.privileges} />
       : NoPermissions;
   }
 
