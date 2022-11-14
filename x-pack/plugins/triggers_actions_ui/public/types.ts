@@ -167,6 +167,11 @@ export enum ActionConnectorMode {
   ActionForm = 'actionForm',
 }
 
+export interface BulkDeleteResponse {
+  errors: BulkOperationError[];
+  total: number;
+}
+
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
@@ -322,6 +327,7 @@ export interface RuleTypeParamsExpressionProps<
     key: Prop,
     value: SanitizedRule<Params>[Prop] | null
   ) => void;
+  onChangeMetaData: (metadata: MetaData) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
@@ -359,10 +365,10 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
   initialRule: Rule;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: RuleFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
-  onSave?: () => Promise<void>;
+  onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleType?: RuleType<string, string>;
 }
@@ -371,13 +377,13 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: RuleFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   ruleTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Rule>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
-  onSave?: () => Promise<void>;
+  onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
   filteredRuleTypes?: string[];

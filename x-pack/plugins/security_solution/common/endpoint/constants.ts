@@ -6,6 +6,8 @@
  */
 
 /** endpoint data streams that are used for host isolation  */
+import { getFileDataIndexName, getFileMetadataIndexName } from '@kbn/fleet-plugin/common';
+
 /** for index patterns `.logs-endpoint.actions-* and .logs-endpoint.action.responses-*`*/
 export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
 export const ENDPOINT_ACTIONS_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;
@@ -42,8 +44,8 @@ export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
 // File storage indexes supporting endpoint Upload/download
-export const FILE_STORAGE_METADATA_INDEX = '.fleet-endpoint-files';
-export const FILE_STORAGE_DATA_INDEX = '.fleet-endpoint-file-data';
+export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
+export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
 
 // Endpoint API routes
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';

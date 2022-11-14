@@ -64,14 +64,13 @@ import {
   enableRule,
   snoozeRule,
   unsnoozeRule,
-  deleteRules,
   bulkUpdateAPIKey,
   cloneRule,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
-import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
+import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -93,6 +92,14 @@ import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
 import { runRule } from '../../../lib/run_rule';
+import { bulkDeleteRules } from '../../../lib/rule_api';
+import {
+  getConfirmDeletionButtonText,
+  getConfirmDeletionModalText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
+} from '../translations';
+import { useBulkDeleteResponse } from '../../../hooks/use_bulk_delete_response';
 
 const ENTER_KEY = 13;
 
@@ -209,6 +216,8 @@ export const RulesList = ({
   });
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
+  const [rulesToDeleteFilter, setRulesToDeleteFilter] = useState<KueryNode | null | undefined>();
+  const [isDeletingRules, setIsDeletingRules] = useState<boolean>(false);
 
   // TODO - tech debt: Right now we're using null and undefined to determine if we should
   // render the bulk edit modal. Refactor this to only keep track of 1 set of rules and types
@@ -260,11 +269,11 @@ export const RulesList = ({
   );
 
   const [rulesTypesFilter, hasDefaultRuleTypesFiltersOn] = useMemo(() => {
-    if (isEmpty(typesFilter) && !isEmpty(filteredRuleTypes)) {
+    if (isEmpty(typesFilter)) {
       return [authorizedRuleTypes.map((art) => art.id), true];
     }
     return [typesFilter, false];
-  }, [typesFilter, filteredRuleTypes, authorizedRuleTypes]);
+  }, [typesFilter, authorizedRuleTypes]);
 
   const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
     page,
@@ -306,7 +315,7 @@ export const RulesList = ({
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
-  const loadData = useCallback(async () => {
+  const refreshRules = useCallback(async () => {
     if (!ruleTypesState || !hasAnyAuthorizedRuleType) {
       return;
     }
@@ -339,8 +348,8 @@ export const RulesList = ({
   }, [ruleTypesState, rulesState.data, canExecuteActions, config]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData, refresh, percentileOptions]);
+    refreshRules();
+  }, [refreshRules, refresh, percentileOptions]);
 
   useEffect(() => {
     (async () => {
@@ -636,6 +645,11 @@ export const RulesList = ({
     setRulesToSnoozeFilter(undefined);
   };
 
+  const clearRulesToDelete = () => {
+    setRulesToDelete([]);
+    setRulesToDeleteFilter(undefined);
+  };
+
   const clearRulesToUnsnooze = () => {
     setRulesToUnsnooze([]);
     setRulesToUnsnoozeFilter(undefined);
@@ -661,6 +675,7 @@ export const RulesList = ({
       rulesState.isLoading ||
       ruleTypesState.isLoading ||
       isPerformingAction ||
+      isDeletingRules ||
       isSnoozingRules ||
       isUnsnoozingRules ||
       isSchedulingRules ||
@@ -672,6 +687,7 @@ export const RulesList = ({
     rulesState,
     ruleTypesState,
     isPerformingAction,
+    isDeletingRules,
     isSnoozingRules,
     isUnsnoozingRules,
     isSchedulingRules,
@@ -780,7 +796,7 @@ export const RulesList = ({
             iconType="refresh"
             onClick={() => {
               onClearSelection();
-              loadData();
+              refreshRules();
             }}
             name="refresh"
             color="primary"
@@ -858,7 +874,7 @@ export const RulesList = ({
                 />
               </EuiHealth>
             </EuiFlexItem>
-            <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={loadData} />
+            <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={refreshRules} />
           </EuiFlexGroup>
         </EuiFlexItem>
         {rulesStatusesTotal.error > 0 && (
@@ -902,7 +918,7 @@ export const RulesList = ({
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onSort={setSort}
         onPage={setPage}
-        onRuleChanged={() => loadData()}
+        onRuleChanged={() => refreshRules()}
         onRuleClick={(rule) => {
           const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : routeToRuleDetails;
           history.push(detailsRoute.replace(`:ruleId`, rule.id));
@@ -933,7 +949,7 @@ export const RulesList = ({
             key={rule.id}
             item={rule}
             onLoading={onLoading}
-            onRuleChanged={() => loadData()}
+            onRuleChanged={() => refreshRules()}
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}
             onUpdateAPIKey={setRulesToUpdateAPIKey}
@@ -972,15 +988,17 @@ export const RulesList = ({
                 getFilter={getFilter}
                 onPerformingAction={() => setIsPerformingAction(true)}
                 onActionPerformed={() => {
-                  loadData();
+                  refreshRules();
                   setIsPerformingAction(false);
                 }}
+                isDeletingRules={isDeletingRules}
                 isSnoozingRules={isSnoozingRules}
                 isUnsnoozingRules={isUnsnoozingRules}
                 isSchedulingRules={isSchedulingRules}
                 isUnschedulingRules={isUnschedulingRules}
                 isUpdatingRuleAPIKeys={isUpdatingRuleAPIKeys}
                 setRulesToDelete={setRulesToDelete}
+                setRulesToDeleteFilter={setRulesToDeleteFilter}
                 setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
                 setRulesToSnooze={setRulesToSnooze}
                 setRulesToUnsnooze={setRulesToUnsnooze}
@@ -1032,34 +1050,54 @@ export const RulesList = ({
     return table;
   };
 
+  const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsDeleteModalVisibility(rulesToDelete.length > 0 || Boolean(rulesToDeleteFilter));
+  }, [rulesToDelete, rulesToDeleteFilter]);
+  const { showToast } = useBulkDeleteResponse({ onSearchPopulate });
+
+  const onDeleteCancel = () => {
+    setIsDeleteModalVisibility(false);
+    clearRulesToDelete();
+  };
+  const onDeleteConfirm = useCallback(async () => {
+    setIsDeleteModalVisibility(false);
+    setIsDeletingRules(true);
+
+    const { errors, total } = await bulkDeleteRules({
+      filter: rulesToDeleteFilter,
+      ids: rulesToDelete,
+      http,
+    });
+
+    setIsDeletingRules(false);
+    showToast({ errors, total });
+    await refreshRules();
+    clearRulesToDelete();
+    onClearSelection();
+  }, [http, rulesToDelete, rulesToDeleteFilter, setIsDeletingRules, toasts]);
+
+  const numberRulesToDelete = rulesToDelete.length || numberOfSelectedItems;
+
   return (
     <section data-test-subj="rulesList">
-      <DeleteModalConfirmation
-        onDeleted={async () => {
-          setRulesToDelete([]);
-          onClearSelection();
-          await loadData();
-        }}
-        onErrors={async () => {
-          // Refresh the rules from the server, some rules may have beend deleted
-          await loadData();
-          setRulesToDelete([]);
-        }}
-        onCancel={() => {
-          setRulesToDelete([]);
-        }}
-        apiDeleteCall={deleteRules}
-        idsToDelete={rulesToDelete}
-        singleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
-          defaultMessage: 'rule',
-        })}
-        multipleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.multipleTitle', {
-          defaultMessage: 'rules',
-        })}
-        setIsLoadingState={(isLoading: boolean) => {
-          setRulesState({ ...rulesState, isLoading });
-        }}
-      />
+      {isDeleteModalFlyoutVisible && (
+        <RulesDeleteModalConfirmation
+          onConfirm={onDeleteConfirm}
+          onCancel={onDeleteCancel}
+          confirmButtonText={getConfirmDeletionButtonText(
+            numberRulesToDelete,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+          confirmModalText={getConfirmDeletionModalText(
+            numberRulesToDelete,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+        />
+      )}
       <BulkSnoozeModal
         rulesToSnooze={rulesToSnooze}
         rulesToUnsnooze={rulesToUnsnooze}
@@ -1076,7 +1114,7 @@ export const RulesList = ({
           clearRulesToSnooze();
           clearRulesToUnsnooze();
           onClearSelection();
-          await loadData();
+          await refreshRules();
         }}
         onSearchPopulate={onSearchPopulate}
       />
@@ -1096,7 +1134,7 @@ export const RulesList = ({
           clearRulesToSchedule();
           clearRulesToUnschedule();
           onClearSelection();
-          await loadData();
+          await refreshRules();
         }}
         onSearchPopulate={onSearchPopulate}
       />
@@ -1115,7 +1153,7 @@ export const RulesList = ({
         onUpdated={async () => {
           clearRulesToUpdateAPIKey();
           onClearSelection();
-          await loadData();
+          await refreshRules();
         }}
         onSearchPopulate={onSearchPopulate}
       />
@@ -1130,7 +1168,7 @@ export const RulesList = ({
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
           ruleTypeIndex={ruleTypesState.data}
-          onSave={loadData}
+          onSave={refreshRules}
         />
       )}
       {editFlyoutVisible && currentRuleToEdit && (
@@ -1144,7 +1182,7 @@ export const RulesList = ({
           ruleType={
             ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
           }
-          onSave={loadData}
+          onSave={refreshRules}
         />
       )}
     </section>
