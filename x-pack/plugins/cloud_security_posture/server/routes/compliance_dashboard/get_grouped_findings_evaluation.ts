@@ -26,12 +26,14 @@ export interface FailedFindingsBucket extends KeyDocCount {
   passed_findings: {
     doc_count: number;
   };
+  score: { value: number };
 }
 
 export const failedFindingsAggQuery = {
   aggs_by_resource_type: {
     terms: {
       field: 'rule.section',
+      size: 5,
     },
     aggs: {
       failed_findings: {
@@ -39,6 +41,22 @@ export const failedFindingsAggQuery = {
       },
       passed_findings: {
         filter: { term: { 'result.evaluation': 'passed' } },
+      },
+      score: {
+        bucket_script: {
+          buckets_path: {
+            passed: 'passed_findings>_count',
+            failed: 'failed_findings>_count',
+          },
+          script: 'params.passed / (params.passed + params.failed)',
+        },
+      },
+      sort_by_score: {
+        bucket_sort: {
+          sort: {
+            score: 'asc',
+          },
+        },
       },
     },
   },

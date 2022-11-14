@@ -80,7 +80,7 @@ export const CloudSummarySection = ({
           { defaultMessage: 'Failing Findings' }
         ),
         title: <CompactFormattedNumber number={complianceData.stats.totalFailed} />,
-        titleColor: complianceData.stats.totalFailed > 0 ? statusColors.danger : 'text',
+        titleColor: complianceData.stats.totalFailed > 0 ? statusColors.failed : 'text',
         onClick: () => {
           navToFindings({ 'result.evaluation': RULE_FAILED });
         },

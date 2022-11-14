@@ -14,6 +14,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -33,8 +34,9 @@ export const getTopRisks = (
   groupedFindingsEvaluation: ComplianceDashboardData['groupedFindingsEvaluation'],
   maxItems: number
 ) => {
-  const filtered = groupedFindingsEvaluation.filter((x) => x.postureScore > 0);
-  const sorted = filtered.slice().sort((first, second) => first.postureScore - second.postureScore);
+  const sorted = groupedFindingsEvaluation
+    .slice()
+    .sort((first, second) => first.postureScore - second.postureScore);
 
   return sorted.slice(0, maxItems);
 };
@@ -47,7 +49,6 @@ export const RisksTable = ({
   viewAllButtonTitle,
   compact,
 }: RisksTableProps) => {
-  console.log(euiThemeVars);
   const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
       {
@@ -80,28 +81,38 @@ export const RisksTable = ({
             style={{ gap: euiThemeVars.gutterTypes.gutterSmall }}
           >
             <EuiFlexItem>
-              <EuiFlexGroup
-                gutterSize="none"
-                style={{
-                  height: euiThemeVars.euiSizeXS,
-                  borderRadius: euiThemeVars.euiBorderRadius,
-                  overflow: 'hidden',
-                  gap: 1,
-                }}
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.csp.complianceDashboard.complianceByCisSection.complianceColumnTooltip',
+                  {
+                    defaultMessage: '{passed}/{total}',
+                    values: { passed: data.totalPassed, total: data.totalFindings },
+                  }
+                )}
               >
-                <EuiFlexItem
+                <EuiFlexGroup
+                  gutterSize="none"
                   style={{
-                    flex: data.totalFailed,
-                    background: statusColors.danger,
+                    height: euiThemeVars.euiSizeXS,
+                    borderRadius: euiThemeVars.euiBorderRadius,
+                    overflow: 'hidden',
+                    gap: 1,
                   }}
-                />
-                <EuiFlexItem
-                  style={{
-                    flex: data.totalPassed,
-                    background: statusColors.success,
-                  }}
-                />
-              </EuiFlexGroup>
+                >
+                  <EuiFlexItem
+                    style={{
+                      flex: data.totalFailed,
+                      background: statusColors.failed,
+                    }}
+                  />
+                  <EuiFlexItem
+                    style={{
+                      flex: data.totalPassed,
+                      background: statusColors.passed,
+                    }}
+                  />
+                </EuiFlexGroup>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText

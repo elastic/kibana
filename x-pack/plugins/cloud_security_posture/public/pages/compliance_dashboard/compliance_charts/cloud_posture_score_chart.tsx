@@ -164,7 +164,7 @@ export const CloudPostureScoreChart = ({
               <CounterLink
                 text="passed"
                 count={data.totalPassed}
-                color={statusColors.success}
+                color={statusColors.passed}
                 onClick={() => onEvalCounterClick(RULE_PASSED)}
                 tooltipContent={i18n.translate(
                   'xpack.csp.cloudPostureScoreChart.counterLink.passedFindingsTooltip',
@@ -175,7 +175,7 @@ export const CloudPostureScoreChart = ({
               <CounterLink
                 text="failed"
                 count={data.totalFailed}
-                color={statusColors.danger}
+                color={statusColors.failed}
                 onClick={() => onEvalCounterClick(RULE_FAILED)}
                 tooltipContent={i18n.translate(
                   'xpack.csp.cloudPostureScoreChart.counterLink.failedFindingsTooltip',

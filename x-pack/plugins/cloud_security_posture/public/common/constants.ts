@@ -10,8 +10,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../common/constants';
 
 export const statusColors = {
-  success: euiThemeVars.euiColorVis0,
-  danger: euiThemeVars.euiColorVis9,
+  passed: euiThemeVars.euiColorVis0,
+  failed: euiThemeVars.euiColorVis9,
 };
 
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
