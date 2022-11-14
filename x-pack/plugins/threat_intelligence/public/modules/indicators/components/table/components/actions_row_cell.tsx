@@ -6,9 +6,9 @@
  */
 
 import React, { useContext, VFC } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InvestigateInTimelineButtonIcon } from '../../../../timeline';
-import { Indicator } from '../../../types';
+import { Indicator } from '../../../../../../common/types/indicator';
 import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 import { IndicatorsTableContext } from '../contexts';
 
@@ -24,13 +24,17 @@ export const ActionsRowCell: VFC<{ indicator: Indicator }> = ({ indicator }) => 
   const { setExpanded, expanded } = indicatorTableContext;
 
   return (
-    <EuiFlexGroup justifyContent="center">
-      <OpenIndicatorFlyoutButton
-        indicator={indicator}
-        onOpen={setExpanded}
-        isOpen={Boolean(expanded && expanded._id === indicator._id)}
-      />
-      <InvestigateInTimelineButtonIcon data={indicator} data-test-subj={INVESTIGATE_TEST_ID} />
+    <EuiFlexGroup justifyContent="center" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <OpenIndicatorFlyoutButton
+          indicator={indicator}
+          onOpen={setExpanded}
+          isOpen={Boolean(expanded && expanded._id === indicator._id)}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <InvestigateInTimelineButtonIcon data={indicator} data-test-subj={INVESTIGATE_TEST_ID} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

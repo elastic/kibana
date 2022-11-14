@@ -37,6 +37,16 @@ export const fetchUsage = async (core: CoreSetup, config: FleetConfigType) => {
   return usage;
 };
 
+export const fetchAgentsUsage = async (core: CoreSetup, config: FleetConfigType) => {
+  const [soClient, esClient] = await getInternalClients(core);
+  const usage = {
+    agents_enabled: getIsAgentsEnabled(config),
+    agents: await getAgentUsage(config, soClient, esClient),
+    fleet_server: await getFleetServerUsage(soClient, esClient),
+  };
+  return usage;
+};
+
 export function registerFleetUsageCollector(
   core: CoreSetup,
   config: FleetConfigType,

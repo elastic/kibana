@@ -26,11 +26,13 @@ import { sortImportResponses } from './sort_import_responses';
  */
 export const importExceptionLists = async ({
   isOverwrite,
+  generateNewListId,
   listsChunks,
   savedObjectsClient,
   user,
 }: {
   isOverwrite: boolean;
+  generateNewListId: boolean;
   listsChunks: ImportExceptionListSchemaDecoded[][];
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
@@ -56,6 +58,7 @@ export const importExceptionLists = async ({
     const { errors, listItemsToDelete, listsToCreate, listsToUpdate } =
       sortExceptionListsToUpdateOrCreate({
         existingLists: foundLists,
+        generateNewListId,
         isOverwrite,
         lists: listChunk,
         user,

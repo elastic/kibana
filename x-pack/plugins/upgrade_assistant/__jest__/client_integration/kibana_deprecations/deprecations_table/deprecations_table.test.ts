@@ -106,7 +106,7 @@ describe('Kibana deprecations - Deprecations table', () => {
   describe('No deprecations', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setupKibanaPage(httpSetup, { isReadOnlyMode: false });
+        testBed = await setupKibanaPage(httpSetup);
       });
 
       const { component } = testBed;

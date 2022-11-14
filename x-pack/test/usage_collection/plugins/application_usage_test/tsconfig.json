@@ -7,8 +7,10 @@
     "public/**/*.ts",
     "public/**/*.tsx",
   ],
-  "exclude": [],
-  "references": [
+  "exclude": [
+    "./target"
+  ],
+  "kbn_references": [
     { "path": "../../../../../src/core/tsconfig.json" },
   ]
 }

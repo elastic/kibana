@@ -6,7 +6,7 @@
  */
 
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
-import { connectorCrawlerIndex } from '../../../../__mocks__/view_index.mock';
+import { crawlerIndex } from '../../../../__mocks__/view_index.mock';
 
 import React from 'react';
 
@@ -23,14 +23,14 @@ import { IngestPipelinesCard } from './ingest_pipelines_card';
 
 const DEFAULT_VALUES = {
   // IndexViewLogic
-  indexName: connectorCrawlerIndex.name,
+  indexName: crawlerIndex.name,
   ingestionMethod: 'crawler',
   // FetchCustomPipelineApiLogic
   data: undefined,
   // PipelinesLogic
   canSetPipeline: true,
   hasIndexIngestionPipeline: false,
-  index: connectorCrawlerIndex,
+  index: crawlerIndex,
   pipelineName: DEFAULT_PIPELINE_NAME,
   pipelineState: {
     extract_binary_content: true,
@@ -53,7 +53,7 @@ describe('IngestPipelinesCard', () => {
     expect(wrapper.find(CustomPipelineItem)).toHaveLength(0);
   });
   it('does not render customize cta with index ingest pipeline', () => {
-    const pipelineName = connectorCrawlerIndex.name;
+    const pipelineName = crawlerIndex.name;
     const pipelines: Record<string, IngestPipeline | undefined> = {
       [pipelineName]: {},
       [`${pipelineName}@custom`]: {
