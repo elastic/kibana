@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
 import { EuiHorizontalRule } from '@elastic/eui';
@@ -104,22 +105,35 @@ export function ServiceOverviewMobileCharts({
         <EuiHorizontalRule />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiCallOut title="Mobile APM" iconType="mobile">
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.apm.serviceOverview.mobileCallOutTitle',
+            {
+              defaultMessage: 'Mobile APM',
+            }
+          )}
+          iconType="mobile"
+        >
           <p>
-            This is a mobile service, which is currently released as a technical
-            preview. You can help us improve the experience by giving feedback.
-            <EuiLink
-              external
-              target="_blank"
-              href="https://ela.st/feedback-mobile-apm"
-            >
-              {' '}
-              Give feeback
-            </EuiLink>
-            .
+            <FormattedMessage
+              id="xpack.apm.serviceOverview.mobileCallOutText"
+              defaultMessage="This is a mobile service, which is currently released as a technical
+            preview. You can help us improve the experience by giving feedback. {feedbackLink}."
+              values={{
+                feedbackLink: (
+                  <EuiLink href="https://ela.st/feedback-mobile-apm">
+                    {i18n.translate(
+                      'xpack.apm.serviceOverview.mobileCallOutLink',
+                      {
+                        defaultMessage: 'Give feedback',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
           </p>
         </EuiCallOut>
-
         <EuiSpacer size="s" />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -134,7 +148,11 @@ export function ServiceOverviewMobileCharts({
             <EuiPanel hasBorder={true}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
-                  <h2>Most used</h2>
+                  <h2>
+                    {i18n.translate('xpack.apm.serviceOverview.mostUsedTitle', {
+                      defaultMessage: 'Most used',
+                    })}
+                  </h2>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexGroup direction={rowDirection} gutterSize="s">
