@@ -16,12 +16,8 @@ import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types
 import { useUserData } from '../../../detections/components/user_info';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import { getListById, deleteList, exportList, updateList, getListRules } from '../../api';
-import {
-  checkIfListCannotBeEdited,
-  isAnExceptionListItem,
-  mapListRulesToUIRules,
-} from '../../utils/list.utils';
+import { getListById, updateList, getListRules } from '../../api';
+import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 import * as i18n from '../../translations';
 
 export const useExceptionListDetails = () => {
@@ -70,7 +66,6 @@ export const useExceptionListDetails = () => {
 
   const initializeListRules = useCallback(async (result) => {
     const listRules = await getListRules(result.list_id);
-    //  const rules: UIRule[] = mapListRulesToUIRules(listRules);
     setLinkedRules(listRules);
   }, []);
 
@@ -168,7 +163,6 @@ export const useExceptionListDetails = () => {
     listName: list?.name,
     listDescription: list?.description,
     listId: exceptionListId,
-    allRules: [], // list.rules, // TODO fix
     canUserEditList,
     linkedRules,
     exportedList,
