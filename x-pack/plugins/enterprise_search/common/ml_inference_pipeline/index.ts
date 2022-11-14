@@ -183,7 +183,7 @@ export const parseMlInferenceParametersFromPipeline = (
   };
 };
 
-export const parseModelStateFromStats = (trainedModelStats?: MlTrainedModelStats) => {
+export const parseModelStateFromStats = (trainedModelStats?: Partial<MlTrainedModelStats>) => {
   switch (trainedModelStats?.deployment_stats?.state) {
     case 'started':
       return TrainedModelState.Started;
@@ -199,5 +199,5 @@ export const parseModelStateFromStats = (trainedModelStats?: MlTrainedModelStats
   }
 };
 
-export const parseModelStateReasonFromStats = (trainedModelStats?: MlTrainedModelStats) =>
+export const parseModelStateReasonFromStats = (trainedModelStats?: Partial<MlTrainedModelStats>) =>
   trainedModelStats?.deployment_stats?.reason;
