@@ -168,13 +168,21 @@ export const isDetectionsPath = (pathname: string): boolean => {
   });
 };
 
-export const isAlertDetailsPage = (pathname: string): boolean => {
+const isAlertsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
-    path: `${ALERTS_PATH}/:detailName/:tabName`,
+    path: `${ALERTS_PATH}`,
     strict: false,
-    exact: true,
   });
 };
+
+const isCaseDetailsPath = (pathname: string): boolean => {
+  return !!matchPath(pathname, {
+    path: `${CASES_PATH}/:detailName`,
+    strict: false,
+  });
+};
+export const isTourPath = (pathname: string): boolean =>
+  isAlertsPath(pathname) || isCaseDetailsPath(pathname);
 
 export const isThreatIntelligencePath = (pathname: string): boolean => {
   return !!matchPath(pathname, {

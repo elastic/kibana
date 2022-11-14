@@ -329,6 +329,23 @@ export function DimensionEditor(
           }}
         />
       )}
+    </>
+  );
+}
+
+export function DimensionDataExtraEditor(
+  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
+    paletteService: PaletteRegistry;
+  }
+) {
+  const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
+
+  if (!currentLayer) {
+    return null;
+  }
+
+  return (
+    <>
       <CollapseSetting
         value={currentLayer?.collapseFns?.[props.accessor] || ''}
         onChange={(collapseFn) => {
