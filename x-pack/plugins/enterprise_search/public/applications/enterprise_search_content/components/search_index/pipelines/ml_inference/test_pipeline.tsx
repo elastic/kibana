@@ -10,18 +10,21 @@ import React from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
-  EuiCodeBlock,
-  EuiResizableContainer,
   EuiButton,
-  EuiText,
+  EuiCode,
+  EuiCodeBlock,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  useIsWithinMaxBreakpoint,
+  EuiFormRow,
+  EuiResizableContainer,
   EuiSpacer,
+  EuiText,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { MLInferenceLogic } from './ml_inference_logic';
@@ -41,14 +44,32 @@ export const TestPipeline: React.FC = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
-        <EuiText>
-          <h4>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.title',
-              { defaultMessage: 'Review pipeline results (optional)' }
-            )}
-          </h4>
-        </EuiText>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiText>
+              <h4>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.title',
+                  { defaultMessage: 'Review pipeline results (optional)' }
+                )}
+              </h4>
+            </EuiText>
+            <EuiSpacer />
+            <EuiText>
+              <h5>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.subtitle',
+                  { defaultMessage: 'Documents' }
+                )}
+              </h5>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow label="Add document" helpText="Add a test document from your index">
+              <EuiFieldText compressed prepend="Document ID" placeholder="aygZdoQBuXAnN5eR97c_" />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiResizableContainer
@@ -89,7 +110,7 @@ export const TestPipeline: React.FC = () => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
           <EuiFlexItem>
-            <EuiText>
+            <EuiText size="s">
               <p>
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.description',
@@ -98,6 +119,16 @@ export const TestPipeline: React.FC = () => {
                       'You can simulate your pipeline results by passing an array of documents.',
                   }
                 )}
+                <br />
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.example.code"
+                  defaultMessage="Use JSON format: {code}"
+                  values={{
+                    code: (
+                      <EuiCode>{'[{"_index":"index","_id":"id","_source":{"foo":"bar"}}]'}</EuiCode>
+                    ),
+                  }}
+                />
               </p>
             </EuiText>
           </EuiFlexItem>
