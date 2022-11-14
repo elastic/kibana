@@ -33,38 +33,28 @@ export class NerInference extends InferenceBase<NerResponse> {
   ];
 
   protected async inferText() {
-    try {
-      return await this.runInfer<estypes.MlInferTrainedModelResponse>(
-        (inputText: string) => {
-          return { docs: [{ [this.inputField]: inputText }] };
-        },
-        (resp, inputText) => {
-          return {
-            response: parseResponse(resp),
-            rawResponse: resp,
-            inputText,
-          };
-        }
-      );
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+    return this.runInfer<estypes.MlInferTrainedModelResponse>(
+      (inputText: string) => {
+        return { docs: [{ [this.inputField]: inputText }] };
+      },
+      (resp, inputText) => {
+        return {
+          response: parseResponse(resp),
+          rawResponse: resp,
+          inputText,
+        };
+      }
+    );
   }
 
   protected async inferIndex() {
-    try {
-      return await this.runPipelineSimulate((doc) => {
-        return {
-          response: parseResponse({ inference_results: [doc._source[this.inferenceType]] }),
-          rawResponse: doc._source[this.inferenceType],
-          inputText: doc._source[this.inputField],
-        };
-      });
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+    return this.runPipelineSimulate((doc) => {
+      return {
+        response: parseResponse({ inference_results: [doc._source[this.inferenceType]] }),
+        rawResponse: doc._source[this.inferenceType],
+        inputText: doc._source[this.inputField],
+      };
+    });
   }
 
   protected getProcessors() {

@@ -182,36 +182,46 @@ export abstract class InferenceBase<TInferResponse> {
     getInferBody: (inputText: string) => estypes.MlInferTrainedModelRequest['body'],
     processResponse: (resp: TRawInferResponse, inputText: string) => TInferResponse
   ): Promise<TInferResponse[]> {
-    this.setRunning();
-    const inputText = this.inputText$.getValue()[0];
-    const body = getInferBody(inputText);
+    try {
+      this.setRunning();
+      const inputText = this.inputText$.getValue()[0];
+      const body = getInferBody(inputText);
 
-    const resp = (await this.trainedModelsApi.inferTrainedModel(
-      this.model.model_id,
-      body,
-      DEFAULT_INFERENCE_TIME_OUT
-    )) as unknown as TRawInferResponse;
+      const resp = (await this.trainedModelsApi.inferTrainedModel(
+        this.model.model_id,
+        body,
+        DEFAULT_INFERENCE_TIME_OUT
+      )) as unknown as TRawInferResponse;
 
-    const processedResponse = processResponse(resp, inputText);
+      const processedResponse = processResponse(resp, inputText);
 
-    this.inferenceResult$.next([processedResponse]);
-    this.setFinished();
+      this.inferenceResult$.next([processedResponse]);
+      this.setFinished();
 
-    return [processedResponse];
+      return [processedResponse];
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
   }
 
   protected async runPipelineSimulate(
     processResponse: (d: estypes.IngestSimulateDocumentSimulation) => TInferResponse
   ): Promise<TInferResponse[]> {
-    this.setRunning();
-    const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
-      this.getPipeline(),
-      this.getPipelineDocs()
-    );
-    const processedResponse = docs.map((d) => processResponse(this.getDocFromResponse(d)));
-    this.inferenceResult$.next(processedResponse);
-    this.setFinished();
-    return processedResponse;
+    try {
+      this.setRunning();
+      const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
+        this.getPipeline(),
+        this.getPipelineDocs()
+      );
+      const processedResponse = docs.map((d) => processResponse(this.getDocFromResponse(d)));
+      this.inferenceResult$.next(processedResponse);
+      this.setFinished();
+      return processedResponse;
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
   }
 
   protected abstract getProcessors(): estypes.IngestProcessorContainer[];

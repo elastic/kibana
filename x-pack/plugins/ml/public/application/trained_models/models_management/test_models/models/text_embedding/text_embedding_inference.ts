@@ -38,33 +38,23 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
   ];
 
   public async inferText() {
-    try {
-      return await this.runInfer<RawTextEmbeddingResponse>(
-        (inputText: string) => {
-          return {
-            docs: [{ [this.inputField]: inputText }],
-          };
-        },
-        (resp, inputText) => {
-          return processTextResponse(resp, inputText);
-        }
-      );
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+    return this.runInfer<RawTextEmbeddingResponse>(
+      (inputText: string) => {
+        return {
+          docs: [{ [this.inputField]: inputText }],
+        };
+      },
+      (resp, inputText) => {
+        return processTextResponse(resp, inputText);
+      }
+    );
   }
 
   protected async inferIndex() {
-    try {
-      return await this.runPipelineSimulate((doc) => {
-        const inputText = doc._source[this.inputField];
-        return processIndexResponse(doc._source[this.inferenceType], inputText);
-      });
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+    return this.runPipelineSimulate((doc) => {
+      const inputText = doc._source[this.inputField];
+      return processIndexResponse(doc._source[this.inferenceType], inputText);
+    });
   }
 
   protected getProcessors() {

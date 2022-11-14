@@ -32,42 +32,32 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
   public labelsText$ = new BehaviorSubject<string>('');
 
   public async inferText() {
-    try {
-      return await this.runInfer<RawTextClassificationResponse>(
-        (inputText: string) => {
-          const labelsText = this.labelsText$.getValue();
-          const inputLabels = labelsText?.split(',').map((l) => l.trim());
-          return {
-            docs: [{ [this.inputField]: inputText }],
-            inference_config: this.getInferenceConfig({
-              labels: inputLabels,
-              multi_label: false,
-            } as estypes.MlZeroShotClassificationInferenceUpdateOptions),
-          };
-        },
-        (resp, inputText) => {
-          return processResponse(resp, this.model, inputText);
-        }
-      );
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+    return this.runInfer<RawTextClassificationResponse>(
+      (inputText: string) => {
+        const labelsText = this.labelsText$.getValue();
+        const inputLabels = labelsText?.split(',').map((l) => l.trim());
+        return {
+          docs: [{ [this.inputField]: inputText }],
+          inference_config: this.getInferenceConfig({
+            labels: inputLabels,
+            multi_label: false,
+          } as estypes.MlZeroShotClassificationInferenceUpdateOptions),
+        };
+      },
+      (resp, inputText) => {
+        return processResponse(resp, this.model, inputText);
+      }
+    );
   }
 
   protected async inferIndex() {
-    try {
-      return await this.runPipelineSimulate((doc) => {
-        return {
-          response: processInferenceResult(doc._source[this.inferenceType], this.model),
-          rawResponse: doc._source[this.inferenceType],
-          inputText: doc._source[this.inputField],
-        };
-      });
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+    return this.runPipelineSimulate((doc) => {
+      return {
+        response: processInferenceResult(doc._source[this.inferenceType], this.model),
+        rawResponse: doc._source[this.inferenceType],
+        inputText: doc._source[this.inputField],
+      };
+    });
   }
 
   private getInputLabels() {

@@ -26,37 +26,27 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
   ];
 
   public async inferText() {
-    try {
-      return await this.runInfer<RawTextClassificationResponse>(
-        (inputText: string) => {
-          return {
-            docs: [{ [this.inputField]: inputText }],
-            inference_config: this.getInferenceConfig(this.getNumTopClassesConfig()),
-          };
-        },
-        (resp, inputText) => {
-          return processResponse(resp, this.model, inputText);
-        }
-      );
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+    return this.runInfer<RawTextClassificationResponse>(
+      (inputText: string) => {
+        return {
+          docs: [{ [this.inputField]: inputText }],
+          inference_config: this.getInferenceConfig(this.getNumTopClassesConfig()),
+        };
+      },
+      (resp, inputText) => {
+        return processResponse(resp, this.model, inputText);
+      }
+    );
   }
 
   protected async inferIndex() {
-    try {
-      return await this.runPipelineSimulate((doc) => {
-        return {
-          response: processInferenceResult(doc._source[this.inferenceType], this.model),
-          rawResponse: doc._source[this.inferenceType],
-          inputText: doc._source[this.inputField],
-        };
-      });
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+    return this.runPipelineSimulate((doc) => {
+      return {
+        response: processInferenceResult(doc._source[this.inferenceType], this.model),
+        rawResponse: doc._source[this.inferenceType],
+        inputText: doc._source[this.inputField],
+      };
+    });
   }
 
   protected getProcessors() {

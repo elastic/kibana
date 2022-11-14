@@ -58,40 +58,30 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
   public questionText$ = new BehaviorSubject<string>('');
 
   public async inferText() {
-    try {
-      return await this.runInfer<RawQuestionAnsweringResponse>(
-        (inputText: string) => {
-          const question = this.questionText$.value;
-          return {
-            docs: [{ [this.inputField]: inputText }],
-            inference_config: this.getInferenceConfig({
-              ...this.getNumTopClassesConfig(),
-              question,
-            }),
-          };
-        },
-        (resp, inputText) => {
-          return processResponse(resp, inputText);
-        }
-      );
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+    return this.runInfer<RawQuestionAnsweringResponse>(
+      (inputText: string) => {
+        const question = this.questionText$.value;
+        return {
+          docs: [{ [this.inputField]: inputText }],
+          inference_config: this.getInferenceConfig({
+            ...this.getNumTopClassesConfig(),
+            question,
+          }),
+        };
+      },
+      (resp, inputText) => {
+        return processResponse(resp, inputText);
+      }
+    );
   }
 
   protected async inferIndex() {
-    try {
-      return await this.runPipelineSimulate((doc) => {
-        const pretendRawRequest = { inference_results: [doc._source[this.inferenceType]] };
-        const inputText = doc._source[this.inputField];
+    return this.runPipelineSimulate((doc) => {
+      const pretendRawRequest = { inference_results: [doc._source[this.inferenceType]] };
+      const inputText = doc._source[this.inputField];
 
-        return processResponse(pretendRawRequest, inputText);
-      });
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+      return processResponse(pretendRawRequest, inputText);
+    });
   }
 
   protected getProcessors() {
