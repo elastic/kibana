@@ -145,16 +145,6 @@ describe('Guided setup', () => {
           expect(exists('guideButton')).toBe(false);
         });
 
-        test('shows redirect button when a user quit the guide', async () => {
-          const { exists } = await setupComponentWithPluginStateMock(httpClient, {
-            status: 'quit',
-            isActivePeriod: true,
-          });
-
-          expect(exists('guideButtonRedirect')).toBe(true);
-          expect(exists('guideButton')).toBe(false);
-        });
-
         test('shows redirect button when a user skipped on the landing page', async () => {
           const { exists } = await setupComponentWithPluginStateMock(httpClient, {
             status: 'skipped',
@@ -162,6 +152,16 @@ describe('Guided setup', () => {
           });
 
           expect(exists('guideButtonRedirect')).toBe(true);
+          expect(exists('guideButton')).toBe(false);
+        });
+
+        test('hides redirect button when a user quit the guide', async () => {
+          const { exists } = await setupComponentWithPluginStateMock(httpClient, {
+            status: 'quit',
+            isActivePeriod: true,
+          });
+
+          expect(exists('guideButtonRedirect')).toBe(false);
           expect(exists('guideButton')).toBe(false);
         });
 

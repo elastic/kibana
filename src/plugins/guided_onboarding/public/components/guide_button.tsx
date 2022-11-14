@@ -51,14 +51,16 @@ export const GuideButton = ({
 
   // if there is no active guide
   if (!pluginState || !pluginState.activeGuide || !pluginState.activeGuide.isActive) {
-    // if still active period and the user has not started a guide, quit or skipped the guide,
+    // if still active period and the user has not started a guide or skipped the guide,
     // display the button that redirects to the landing page
     if (
-      pluginState?.isActivePeriod &&
-      (pluginState?.status === 'not_started' ||
-        pluginState?.status === 'quit' ||
-        pluginState?.status === 'skipped')
+      !(
+        pluginState?.isActivePeriod &&
+        (pluginState?.status === 'not_started' || pluginState?.status === 'skipped')
+      )
     ) {
+      return null;
+    } else {
       return (
         <EuiButton
           onClick={navigateToLandingPage}
@@ -73,8 +75,6 @@ export const GuideButton = ({
         </EuiButton>
       );
     }
-
-    return null;
   }
   const stepNumber = getStepNumber(pluginState.activeGuide);
   const stepReadyToComplete = pluginState.activeGuide.steps.find(
