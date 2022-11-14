@@ -66,6 +66,9 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     expect(renderResult.getByTestId('test-passcodeMessage')).toHaveTextContent(
       '(ZIP file passcode: elastic)'
     );
+    expect(renderResult.getByTestId('test-fileDeleteMessage')).toHaveTextContent(
+      'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+    );
   });
 
   it('should display custom button label', async () => {
