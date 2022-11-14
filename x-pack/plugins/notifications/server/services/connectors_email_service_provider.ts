@@ -41,16 +41,21 @@ export class EmailServiceProvider
     const { actions, licensing } = plugins;
 
     if (!actions || !licensing) {
-      return this._registerServiceError(`Error: 'actions' and 'licensing' plugins are required.`);
+      return this._registerInitializationError(
+        `Error: 'actions' and 'licensing' plugins are required.`
+      );
     }
 
     const emailConnector = this.config.connectors?.default?.email;
     if (!emailConnector) {
-      return this._registerServiceError('Error: Email connector not specified.');
+      return this._registerInitializationError(
+        'Error: Email connector not specified.',
+        this.logger.info
+      );
     }
 
     if (!actions.isPreconfiguredConnector(emailConnector)) {
-      return this._registerServiceError(
+      return this._registerInitializationError(
         `Error: Unexisting email connector '${emailConnector}' specified.`
       );
     }
@@ -75,7 +80,7 @@ export class EmailServiceProvider
           this.logger
         );
       } catch (err) {
-        this._registerServiceError(err);
+        this._registerInitializationError(err);
       }
     }
 
@@ -90,9 +95,9 @@ export class EmailServiceProvider
     };
   }
 
-  private _registerServiceError(error: string) {
+  private _registerInitializationError(error: string, log = this.logger.warn) {
     const message = `Email Service ${error}`;
     this.setupError = message;
-    this.logger.warn(message);
+    log(message);
   }
 }
