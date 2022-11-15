@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { sortBy } from 'lodash';
-
 import type { State, UserContentCommonSchema } from './table_list_view';
 import type { Action } from './actions';
 
@@ -40,7 +38,7 @@ export function getReducer<T extends UserContentCommonSchema>() {
           ...state,
           hasInitialFetchReturned: true,
           isFetchingItems: false,
-          items: !state.searchQuery ? sortBy<T>(items, 'title') : items,
+          items,
           totalItems: action.data.response.total,
           hasUpdatedAtMetadata,
           tableSort: tableSort ?? state.tableSort,
