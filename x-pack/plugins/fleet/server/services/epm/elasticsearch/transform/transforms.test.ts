@@ -93,6 +93,7 @@ pivot:
         field: agent.id
 description: Merges latest endpoint and Agent metadata documents.
 _meta:
+  fleet_transform_version: 0.2.0,
   managed: true`,
       FIELDS: `- name: '@timestamp'
   type: date
