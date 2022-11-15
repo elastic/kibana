@@ -27,6 +27,8 @@ export interface AggregatedTransactionsCounts {
 export interface APMPerService {
   service_id: string;
   timed_out: boolean;
+  num_service_nodes: number;
+  num_transaction_types: number;
   cloud: {
     availability_zones: string[];
     regions: string[];
