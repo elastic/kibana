@@ -15,6 +15,7 @@ import type {
 } from '@kbn/guided-onboarding';
 import { guidesConfig } from '../constants/guides_config';
 import { GuideConfig, StepConfig } from '../types';
+import type { PluginState } from '../../common/types';
 
 export const getGuideConfig = (guideId?: GuideId): GuideConfig | undefined => {
   if (guideId && Object.keys(guidesConfig).includes(guideId)) {
@@ -60,17 +61,28 @@ const getInProgressStepConfig = (state: GuideState): StepConfig | undefined => {
   }
 };
 
-export const isIntegrationInGuideStep = (state: GuideState, integration?: string): boolean => {
-  if (state.isActive) {
-    const stepConfig = getInProgressStepConfig(state);
-    return stepConfig ? stepConfig.integration === integration : false;
-  }
-  return false;
+export const isIntegrationInGuideStep = (
+  guideState?: GuideState,
+  integration?: string
+): boolean => {
+  if (!guideState || !guideState.isActive) return false;
+
+  const stepConfig = getInProgressStepConfig(guideState);
+  return stepConfig ? stepConfig.integration === integration : false;
 };
 
-const isGuideActive = (guideState: GuideState | undefined, guideId: GuideId): boolean => {
-  // false if guideState is undefined or the guide is not active
-  return !!(guideState && guideState.isActive && guideState.guideId === guideId);
+export const isGuideActive = (pluginState?: PluginState, guideId?: GuideId): boolean => {
+  // false if pluginState is undefined or plugin state is not in progress
+  // or active guide is undefined
+  if (!pluginState || pluginState.status !== 'in_progress' || !pluginState.activeGuide) {
+    return false;
+  }
+  // guideId is passed, check that it's the id of the active guide
+  if (guideId) {
+    const { activeGuide } = pluginState;
+    return !!(activeGuide.isActive && activeGuide.guideId === guideId);
+  }
+  return true;
 };
 
 export const isStepInProgress = (
@@ -78,12 +90,10 @@ export const isStepInProgress = (
   guideId: GuideId,
   stepId: GuideStepIds
 ): boolean => {
-  if (!isGuideActive(guideState, guideId)) {
-    return false;
-  }
+  if (!guideState || !guideState.isActive) return false;
 
   // false if the step is not 'in_progress'
-  const selectedStep = guideState!.steps.find((step) => step.id === stepId);
+  const selectedStep = guideState.steps.find((step) => step.id === stepId);
   return selectedStep ? selectedStep.status === 'in_progress' : false;
 };
 
@@ -92,10 +102,7 @@ export const isStepReadyToComplete = (
   guideId: GuideId,
   stepId: GuideStepIds
 ): boolean => {
-  if (!isGuideActive(guideState, guideId)) {
-    return false;
-  }
-
+  if (!guideState || !guideState.isActive) return false;
   // false if the step is not 'ready_to_complete'
   const selectedStep = guideState!.steps.find((step) => step.id === stepId);
   return selectedStep ? selectedStep.status === 'ready_to_complete' : false;
@@ -136,7 +143,7 @@ export const getUpdatedSteps = (
 };
 
 export const getGuideStatusOnStepCompletion = (
-  guideState: GuideState,
+  guideState: GuideState | undefined,
   guideId: GuideId,
   stepId: GuideStepIds
 ): GuideStatus => {

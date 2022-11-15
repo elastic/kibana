@@ -31,12 +31,17 @@ export const useStepPrevMetrics = (stepMetrics: StepMetrics) => {
   const lcpThreshold = findThreshold(stepMetrics?.lcp?.value, prevMetrics?.lcp?.value);
   const clsThreshold = findThreshold(stepMetrics?.cls?.value, prevMetrics?.cls?.value);
   const dclThreshold = findThreshold(stepMetrics?.dcl?.value, prevMetrics?.dcl?.value);
+  const totalThreshold = findThreshold(
+    stepMetrics?.totalDuration?.value,
+    prevMetrics?.totalDuration?.value
+  );
 
   return {
     fcpThreshold,
     lcpThreshold,
     clsThreshold,
     dclThreshold,
+    totalThreshold,
   };
 };
 

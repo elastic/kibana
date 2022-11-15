@@ -191,7 +191,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     count: 1,
     crawler: {
       id: '5',
-      index_name: 'crawler',
+      index_name: 'connector-crawler',
     },
     hidden: false,
     name: 'crawler',
