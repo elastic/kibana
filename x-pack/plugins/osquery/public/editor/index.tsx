@@ -34,7 +34,7 @@ const ResizeWrapper = styled.div`
   overflow: auto;
   resize: vertical;
   min-height: 100px;
-  max-height: 500px;
+  max-height: 1000px;
   height: 100px;
 `;
 
@@ -64,6 +64,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
         setOptions={EDITOR_SET_OPTIONS}
         editorProps={EDITOR_PROPS}
         onLoad={resize}
+        height="1000px"
         width="100%"
         commands={commands}
       />
