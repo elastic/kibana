@@ -266,10 +266,10 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   );
 };
 
-export function useChangePontDetectionContext() {
+export function useChangePointDetectionContext() {
   return useContext(ChangePointDetectionContext);
 }
 
 export function useRequestParams() {
-  return useChangePontDetectionContext().requestParams;
+  return useChangePointDetectionContext().requestParams;
 }

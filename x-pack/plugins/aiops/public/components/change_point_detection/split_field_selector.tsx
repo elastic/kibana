@@ -8,7 +8,7 @@
 import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSelect, type EuiSelectOption } from '@elastic/eui';
-import { useChangePontDetectionContext } from './change_point_detection_context';
+import { useChangePointDetectionContext } from './change_point_detection_context';
 
 interface SplitFieldSelectorProps {
   value: string;
@@ -16,7 +16,7 @@ interface SplitFieldSelectorProps {
 }
 
 export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ value, onChange }) => {
-  const { splitFieldsOptions } = useChangePontDetectionContext();
+  const { splitFieldsOptions } = useChangePointDetectionContext();
 
   const options = useMemo<EuiSelectOption[]>(() => {
     return splitFieldsOptions.map((v) => ({ value: v.name, text: v.displayName }));

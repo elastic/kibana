@@ -7,7 +7,7 @@
 
 import React, { FC, useMemo } from 'react';
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { useChangePontDetectionContext } from './change_point_detection_context';
+import { useChangePointDetectionContext } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimeRangeUpdates } from '../../hooks/use_time_filter';
@@ -29,7 +29,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
 
   const timeRange = useTimeRangeUpdates();
   const { dataView } = useDataSource();
-  const { requestParams, bucketInterval } = useChangePontDetectionContext();
+  const { requestParams, bucketInterval } = useChangePointDetectionContext();
 
   const filters = useMemo(
     () => [

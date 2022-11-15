@@ -8,7 +8,7 @@
 import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
-import { useChangePontDetectionContext } from './change_point_detection_context';
+import { useChangePointDetectionContext } from './change_point_detection_context';
 
 interface MetricFieldSelectorProps {
   value: string;
@@ -17,7 +17,7 @@ interface MetricFieldSelectorProps {
 
 export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
   ({ value, onChange }) => {
-    const { metricFieldOptions } = useChangePontDetectionContext();
+    const { metricFieldOptions } = useChangePointDetectionContext();
 
     const options = useMemo<EuiSelectOption[]>(() => {
       return metricFieldOptions.map((v) => ({ value: v.name, text: v.displayName }));

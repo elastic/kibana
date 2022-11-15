@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
 import { SearchBarWrapper } from './search_bar';
-import { useChangePontDetectionContext } from './change_point_detection_context';
+import { useChangePointDetectionContext } from './change_point_detection_context';
 import { MetricFieldSelector } from './metric_field_selector';
 import { SplitFieldSelector } from './split_field_selector';
 import { FunctionPicker } from './function_picker';
@@ -40,7 +40,7 @@ export const ChangePointDetectionPage: FC = () => {
     resultQuery,
     progress,
     pagination,
-  } = useChangePontDetectionContext();
+  } = useChangePointDetectionContext();
 
   const setFn = useCallback(
     (fn: string) => {
