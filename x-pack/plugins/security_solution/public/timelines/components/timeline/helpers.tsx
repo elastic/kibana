@@ -340,13 +340,13 @@ export const buildISONEOFQueryMatch = ({
   field: string;
   value: Array<string | number>;
 }): string => {
-  const trimmedValue = field.trim();
+  const trimmedField = field.trim();
   if (value.length) {
-    return `${trimmedValue} : (${value
+    return `${trimmedField} : (${value
       .map((item) => (isNumber(item) ? Number(item) : `${escapeQueryValue(item.trim())}`))
       .join(' OR ')})`;
   }
-  return `${trimmedValue} : ''`;
+  return `${trimmedField} : ''`;
 };
 
 export const isStringOrNumberArray = (value: unknown): value is Array<string | number> =>

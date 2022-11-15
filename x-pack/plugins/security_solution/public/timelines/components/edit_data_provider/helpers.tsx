@@ -126,8 +126,13 @@ export const getExcludedFromSelection = (selectedOperator: EuiComboBoxOptionOpti
 };
 
 /** Ensure that a value passed to ControlledDefaultInput is not an array */
-export const sanatizeValue = (value: string | number | unknown[]): string =>
-  Array.isArray(value) ? `${value[0]}` : `${value}`; // fun fact: value should never be an array
+export const sanatizeValue = (value: string | number | unknown[]): string => {
+  if (Array.isArray(value)) {
+    // fun fact: value should never be an array
+    return value.length ? `${value[0]}` : '';
+  }
+  return `${value}`;
+};
 
 /** Ensure if DataProvider is default that value is not template-like */
 export const isValueFieldInvalid = (type: DataProviderType, value: string | number) => {

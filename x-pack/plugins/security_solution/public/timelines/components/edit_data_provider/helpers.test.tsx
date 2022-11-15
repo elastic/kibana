@@ -406,13 +406,10 @@ describe('helpers', () => {
       expect(sanatizeValue(1)).toBe('1');
     });
 
-    it('returns the sting interpretation of the first value of an array', () => {
+    it('returns the string interpretation of the first value of an array', () => {
       expect(sanatizeValue(['a string', 'another value'])).toBe('a string');
       expect(sanatizeValue([1, 'another value'])).toBe('1');
-    });
-
-    it('handles odd array values', () => {
-      expect(sanatizeValue([])).toBe('undefined');
+      expect(sanatizeValue([])).toBe('');
       expect(sanatizeValue([null])).toBe('null');
       expect(sanatizeValue([undefined])).toBe('undefined');
     });

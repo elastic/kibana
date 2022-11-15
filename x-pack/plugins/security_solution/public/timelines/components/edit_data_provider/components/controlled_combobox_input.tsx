@@ -31,7 +31,7 @@ export const ControlledComboboxInput = ({
   const [includeValues, setIncludeValues] = useState(convertValuesToComboboxValueArray(value));
 
   const isInvalid = useMemo(
-    () => includeValues.every((item) => isValueFieldInvalid(type, item.label)),
+    () => includeValues.some((item) => isValueFieldInvalid(type, item.label)),
     [type, includeValues]
   );
 

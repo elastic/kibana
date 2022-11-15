@@ -908,6 +908,7 @@ describe('isStringOrNumberArray', () => {
   test('it returns false when value is an array of mixed types', () => {
     expect(isStringOrNumberArray(['mixed', 123, 'types'])).toBe(false);
   });
+
   test('it returns false when value is an array of bad values', () => {
     const badValues = [undefined, null, {}] as unknown as string[];
     expect(isStringOrNumberArray(badValues)).toBe(false);
@@ -932,6 +933,7 @@ describe('buildEXISTSQueryMatch', () => {
       buildEXISTSQueryMatch({ isFieldTypeNested: false, field: 'host', browserFields: {} })
     ).toBe(`host ${EXISTS_OPERATOR}`);
   });
+
   it('correcty computes EXISTS query with nested field', () => {
     expect(
       buildEXISTSQueryMatch({
@@ -954,16 +956,18 @@ describe('buildISQueryMatch', () => {
       })
     ).toBe(`nestedField.thirdAttributes ${IS_OPERATOR} 100000`);
   });
+
   it('correcty computes IS query with nested date field', () => {
     expect(
       buildISQueryMatch({
         isFieldTypeNested: true,
         browserFields: mockBrowserFields,
         field: 'nestedField.thirdAttributes',
-        value: 100000,
+        value: 1668521970232,
       })
-    ).toBe(`nestedField: { thirdAttributes${IS_OPERATOR} \"100000\" }`);
+    ).toBe(`nestedField: { thirdAttributes${IS_OPERATOR} \"1668521970232\" }`);
   });
+
   it('correcty computes IS query with nested string field', () => {
     expect(
       buildISQueryMatch({
@@ -985,6 +989,7 @@ describe('buildISONEOFQueryMatch', () => {
       })
     ).toBe('kibana.alert.worflow_status : (1 OR 2 OR 3)');
   });
+
   it('correcty computes IS ONE OF query with strings', () => {
     expect(
       buildISONEOFQueryMatch({
@@ -993,6 +998,7 @@ describe('buildISONEOFQueryMatch', () => {
       })
     ).toBe(`kibana.alert.worflow_status : (\"a\" OR \"b\" OR \"c\")`);
   });
+
   it('correcty computes IS ONE OF query if value is an empty array', () => {
     expect(
       buildISONEOFQueryMatch({
@@ -1000,5 +1006,23 @@ describe('buildISONEOFQueryMatch', () => {
         value: [],
       })
     ).toBe("kibana.alert.worflow_status : ''");
+  });
+
+  it('correcty computes IS ONE OF query if given a single string value', () => {
+    expect(
+      buildISONEOFQueryMatch({
+        field: 'kibana.alert.worflow_status',
+        value: ['a'],
+      })
+    ).toBe(`kibana.alert.worflow_status : (\"a\")`);
+  });
+
+  it('correcty computes IS ONE OF query if given a single numeric value', () => {
+    expect(
+      buildISONEOFQueryMatch({
+        field: 'kibana.alert.worflow_status',
+        value: [1],
+      })
+    ).toBe(`kibana.alert.worflow_status : (1)`);
   });
 });

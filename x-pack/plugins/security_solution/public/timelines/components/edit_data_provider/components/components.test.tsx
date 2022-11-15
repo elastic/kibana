@@ -94,20 +94,34 @@ describe('ControlledDefaultInput', () => {
   });
 
   describe('getDefaultValue', () => {
-    it('Returns a provided value if the value is a string or number', () => {
+    it('Returns a provided value if the value is a string', () => {
       expect(getDefaultValue('test')).toBe('test');
+    });
+
+    it('Returns a provided value if the value is a number', () => {
       expect(getDefaultValue(0)).toBe(0);
     });
 
-    it('Returns the first value of a string | number array if it exists', () => {
+    it('Returns the first value of a string array', () => {
       expect(getDefaultValue(['a', 'b'])).toBe('a');
+    });
+
+    it('Returns the first value of a number array', () => {
       expect(getDefaultValue([0, 1])).toBe(0);
+    });
+
+    it('Returns an empty string if given an empty array', () => {
       expect(getDefaultValue([])).toBe('');
     });
   });
 
   describe('convertValuesToComboboxValueArray', () => {
     it('returns an empty array if not provided correct input', () => {
+      expect(convertValuesToComboboxValueArray('test')).toEqual([]);
+      expect(convertValuesToComboboxValueArray(1)).toEqual([]);
+    });
+
+    it('returns an empty array if provided non array input', () => {
       expect(convertValuesToComboboxValueArray('test')).toEqual([]);
       expect(convertValuesToComboboxValueArray(1)).toEqual([]);
     });
