@@ -227,18 +227,34 @@ describe('percentile', () => {
 
       const aggExpressions = [
         // group 1
-        'aggSinglePercentile id="1" enabled=true schema="metric" field="foo" percentile=10',
-        'aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=20',
-        'aggSinglePercentile id="3" enabled=true schema="metric" field="foo" percentile=30',
+        `aggSinglePercentile id="1" enabled=true schema="metric" field="${field1}" percentile=10`,
+        `aggSinglePercentile id="2" enabled=true schema="metric" field="${field1}" percentile=20`,
+        `aggSinglePercentile id="3" enabled=true schema="metric" field="${field1}" percentile=30`,
         // group 2
-        'aggSinglePercentile id="4" enabled=true schema="metric" field="bar" percentile=10',
-        'aggSinglePercentile id="5" enabled=true schema="metric" field="bar" percentile=40',
+        `aggSinglePercentile id="4" enabled=true schema="metric" field="${field2}" percentile=10`,
+        `aggSinglePercentile id="5" enabled=true schema="metric" field="${field2}" percentile=40`,
         // group 3
-        'aggSinglePercentile id="6" enabled=true schema="metric" field="bar" percentile=50 timeShift="1d"',
-        'aggSinglePercentile id="7" enabled=true schema="metric" field="bar" percentile=60 timeShift="1d"',
+        `aggSinglePercentile id="6" enabled=true schema="metric" field="${field2}" percentile=50 timeShift="${timeShift1}"`,
+        `aggSinglePercentile id="7" enabled=true schema="metric" field="${field2}" percentile=60 timeShift="${timeShift1}"`,
         // group 4
-        'aggSinglePercentile id="8" enabled=true schema="metric" field="bar" percentile=70 timeShift="2d"',
-        'aggSinglePercentile id="9" enabled=true schema="metric" field="bar" percentile=80 timeShift="2d"',
+        `aggSinglePercentile id="8" enabled=true schema="metric" field="${field2}" percentile=70 timeShift="${timeShift2}"`,
+        `aggSinglePercentile id="9" enabled=true schema="metric" field="${field2}" percentile=80 timeShift="${timeShift2}"`,
+        // // group 5
+        // `aggFilteredMetric id="10" enabled=true schema="metric"
+        //   customBucket={aggFilter id="10-filter" enabled=true schema="bucket" filter={kql q="geo.dest : \\"AE\\" "} timeShift="${timeShift1}"}
+        //   customMetric={aggSinglePercentile id="10-metric" enabled=true schema="metric" field="${field1}" percentile=95}
+        //   timeShift="${timeShift1}"`,
+        // `aggFilteredMetric id="11" enabled=true schema="metric"
+        //   customBucket={aggFilter id="11-filter" enabled=true schema="bucket" filter={kql q="geo.dest : \\"AE\\" "} timeShift="${timeShift1}"}
+        //   customMetric={aggSinglePercentile id="11-metric" enabled=true schema="metric" field="${field1}" percentile=25}
+        //   timeShift="${timeShift1}"`,
+        // // group 6
+        // `aggFilteredMetric id="12" enabled=true schema="metric"
+        //   customBucket={aggFilter id="12-filter" enabled=true schema="bucket" filter={kql q="geo.dest : \\"AE\\" "}}
+        //   customMetric={aggSinglePercentile id="12-metric" enabled=true schema="metric" field="${field1}" percentile=95}`,
+        // `aggFilteredMetric id="13" enabled=true schema="metric"
+        //   customBucket={aggFilter id="13-filter" enabled=true schema="bucket" filter={kql q="geo.dest : \\"AE\\" "}}
+        //   customMetric={aggSinglePercentile id="13-metric" enabled=true schema="metric" field="${field1}" percentile=25}`,
       ];
 
       const aggs = aggExpressions.map((expression) => buildExpression(parseExpression(expression)));

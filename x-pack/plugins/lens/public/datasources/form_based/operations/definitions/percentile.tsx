@@ -8,14 +8,13 @@
 import { EuiFieldNumber, EuiRange } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping, METRIC_TYPES } from '@kbn/data-plugin/public';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import {
   buildExpression,
   buildExpressionFunction,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
-import { AggExpressionFunctionArgs } from '@kbn/data-plugin/common';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -182,7 +181,13 @@ export const percentileOperation: OperationDefinition<
     const percentileExpressionsByArgs = groupByKey<ExpressionAstExpressionBuilder>(
       aggs,
       (expressionBuilder) =>
-        getGroupByKey(expressionBuilder, ['aggSinglePercentile'], [{ name: 'field' }])
+        getGroupByKey(
+          expressionBuilder,
+          ['aggSinglePercentile'],
+          // we don't group based on percentile value (just field) since we will put
+          // all the percentile values in the final multi-percentile agg
+          [{ name: 'field' }]
+        )
     );
 
     const termsFuncs = aggs
@@ -191,10 +196,22 @@ export const percentileOperation: OperationDefinition<
       ExpressionAstFunctionBuilder<AggFunctionsMapping['aggTerms']>
     >;
 
-    // collapse them into a single esAggs expression builder
+    // collapse each group of matching aggs into a single agg expression
     Object.values(percentileExpressionsByArgs).forEach((expressionBuilders) => {
       if (expressionBuilders.length <= 1) {
         // don't need to optimize if there aren't more than one
+        return;
+      }
+
+      const {
+        functions: [firstFnBuilder],
+      } = expressionBuilders[0];
+
+      const isGroupFiltered = firstFnBuilder.name === 'aggFilteredMetric';
+
+      if (isGroupFiltered) {
+        // it doesn't currently work to put an `aggPercentiles` (multiple) as the metric (`customMetric`)
+        // arg for an `aggFilteredMetric` expression function
         return;
       }
 
@@ -203,18 +220,18 @@ export const percentileOperation: OperationDefinition<
       aggs = aggs.filter((aggBuilder) => !expressionBuilders.includes(aggBuilder));
 
       const {
-        functions: [firstFnBuilder],
+        functions: [firstPercentileFunction],
       } = expressionBuilders[0];
 
-      const esAggsColumnId = firstFnBuilder.getArgument('id')![0];
-      const aggPercentilesConfig: AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILES> = {
+      const esAggsColumnId = firstPercentileFunction.getArgument('id')![0] as string;
+      const aggPercentilesConfig = {
         id: esAggsColumnId,
-        enabled: firstFnBuilder.getArgument('enabled')?.[0],
-        schema: firstFnBuilder.getArgument('schema')?.[0],
-        field: firstFnBuilder.getArgument('field')?.[0],
-        percents: [],
+        enabled: firstPercentileFunction.getArgument('enabled')?.[0] as boolean,
+        schema: firstPercentileFunction.getArgument('schema')?.[0] as string,
+        field: firstPercentileFunction.getArgument('field')?.[0] as string,
+        percents: [] as number[],
         // time shift is added to wrapping aggFilteredMetric if filter is set
-        timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
+        timeShift: firstPercentileFunction.getArgument('timeShift')?.[0] as string,
       };
 
       const percentileToBuilder: Record<number, ExpressionAstExpressionBuilder> = {};
