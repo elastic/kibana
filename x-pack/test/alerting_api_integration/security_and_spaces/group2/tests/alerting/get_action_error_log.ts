@@ -28,7 +28,6 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
 
   describe('getActionErrorLog', () => {
     const objectRemover = new ObjectRemover(supertest);
-    let ruleId = '';
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -69,7 +68,6 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         )
         .expect(200);
       objectRemover.add(Spaces[1].id, createdRule.id, 'rule', 'alerting');
-      ruleId = createdRule.id;
 
       await waitForEvents(createdRule.id, 'alerting', new Map([['execute', { gte: 1 }]]));
       await waitForEvents(createdRule.id, 'actions', new Map([['execute', { gte: 1 }]]));
