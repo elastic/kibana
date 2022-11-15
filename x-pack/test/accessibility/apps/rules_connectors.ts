@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('createFirstRuleButton');
       await a11y.testAppSnapshot();
     });
-
+    // https://github.com/elastic/kibana/issues/144953
     it.skip('a11y test on inputs on rules panel', async () => {
       await testSubjects.click('ruleNameInput');
       await testSubjects.setValue('ruleNameInput', 'testRule');
@@ -43,20 +43,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onActiveAlert');
       await testSubjects.click('solutionsFilterButton');
-      await PageObjects.common.sleep(3000);
       await a11y.testAppSnapshot();
       await testSubjects.click('solutionapmFilterOption');
       await testSubjects.setValue('solutionsFilterButton', 'solutionapmFilterOption');
       await testSubjects.click('apm.anomaly-SelectOption');
       await a11y.testAppSnapshot();
     });
-
+    // https://github.com/elastic/kibana/issues/144953
     it.skip('a11y test on save rule without connectors panel', async () => {
       await toasts.dismissAllToasts();
       await testSubjects.click('saveRuleButton');
       await a11y.testAppSnapshot();
     });
-
+    // https://github.com/elastic/kibana/issues/144953
     it.skip('a11y test on alerts and logs page with one rule populated', async () => {
       await testSubjects.click('confirmModalConfirmButton');
       await a11y.testAppSnapshot();
@@ -65,6 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('confirmModalConfirmButton');
     });
 
+    // uncomment after rules tests a11y violations get fixed
     it.skip('a11y test on logs tab', async () => {
       await testSubjects.click('logsTab');
       await a11y.testAppSnapshot();
