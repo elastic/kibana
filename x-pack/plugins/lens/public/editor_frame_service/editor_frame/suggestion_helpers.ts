@@ -106,7 +106,8 @@ export function getSuggestions({
             datasourceState,
             visualizeTriggerFieldContext.dataViewSpec.id!,
             visualizeTriggerFieldContext.fieldName,
-            dataViews.indexPatterns
+            dataViews.indexPatterns,
+            visualizeTriggerFieldContext.breakdownField
           );
         }
       } else if (field) {
