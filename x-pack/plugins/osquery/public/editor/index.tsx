@@ -33,9 +33,9 @@ interface OsqueryEditorProps {
 const ResizeWrapper = styled.div`
   overflow: auto;
   resize: vertical;
+  height: ${(props: { height: number }) => props.height};
   min-height: 100px;
   max-height: 1000px;
-  height: 100px;
 `;
 
 const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
@@ -44,17 +44,23 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   commands,
 }) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
+  const [height, setHeight] = useState(100);
 
   useDebounce(() => onChange(editorValue), 500, [editorValue]);
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 
-  const resize = useCallback((editorInstance) => {
+  const resizeEditor = useCallback((editorInstance) => {
+    setTimeout(() => {
+      const { maxHeight } = editorInstance.renderer.layerConfig;
+      setHeight(maxHeight);
+    }, 0);
+
     document.addEventListener('mouseup', () => editorInstance.resize(), { once: true });
   }, []);
 
   return (
-    <ResizeWrapper>
+    <ResizeWrapper height={height}>
       <EuiCodeEditor
         value={editorValue}
         mode="osquery"
@@ -63,8 +69,8 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
         name="osquery_editor"
         setOptions={EDITOR_SET_OPTIONS}
         editorProps={EDITOR_PROPS}
-        onLoad={resize}
-        height="1000px"
+        onLoad={resizeEditor}
+        height={height + 'px'}
         width="100%"
         commands={commands}
       />
