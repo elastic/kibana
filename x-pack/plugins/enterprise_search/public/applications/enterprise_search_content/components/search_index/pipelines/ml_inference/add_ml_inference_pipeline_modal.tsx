@@ -215,7 +215,7 @@ export const ModalFooter: React.FC<
       break;
   }
   return (
-    <EuiModalFooter>
+    <EuiModalFooter className="enterpriseSearchInferencePipelineModalFooter">
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           {previousStep !== undefined ? (
