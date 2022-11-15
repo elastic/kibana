@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import styled from 'styled-components';
 
@@ -46,12 +46,28 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
 }) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
   const [height, setHeight] = useState(MIN_HEIGHT);
+  const editorRef = useRef<{ renderer: { layerConfig: { maxHeight: number } } }>({
+    renderer: { layerConfig: { maxHeight: 100 } },
+  });
 
-  useDebounce(() => onChange(editorValue), 500, [editorValue]);
+  useDebounce(
+    () => {
+      onChange(editorValue);
+      const maxHeight = editorRef.current?.renderer.layerConfig.maxHeight;
+
+      if (maxHeight && maxHeight > MIN_HEIGHT) {
+        setHeight(maxHeight);
+      }
+    },
+    500,
+    [editorValue]
+  );
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 
   const resizeEditor = useCallback((editorInstance) => {
+    editorRef.current.renderer = editorInstance.renderer;
+
     setTimeout(() => {
       const { maxHeight } = editorInstance.renderer.layerConfig;
       if (maxHeight > MIN_HEIGHT) {
