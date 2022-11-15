@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { hasKibanaPrivilege } from '../../common/endpoint/service/authz/authz';
 import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
@@ -239,23 +240,46 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
+
   const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
+  const isEndpointRbacEnabled = endpointRbacEnabled || endpointRbacV1Enabled;
   const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
+
   const linksToExclude: SecurityPageName[] = [];
-  const hasHostIsolationExceptions = licenseService.isPlatinumPlus()
-    ? true
-    : await checkArtifactHasData(
-        HostIsolationExceptionsApiClient.getInstance(KibanaServices.get().http)
-      );
+
+  const currentUser = await plugins.security.authc.getCurrentUser();
+
+  const isPlatinumPlus = licenseService.isPlatinumPlus();
+  let hasHostIsolationExceptions: boolean = isPlatinumPlus;
+
+  // If not Platinum+ license and user has read permissions to security solution
+  // then check if Host Isolation Exceptions exist.
+  // *** IT IS IMPORTANT *** that  this HTTP call only be made if the user has access to the
+  // Lists plugin, else non-security solution users, especially when license is not Platinum,
+  // may see failed HTTP requests in the browser console. This is the reason that
+  // `hasKibanaPrivilege()` is used below.
+  if (
+    !isPlatinumPlus &&
+    fleetAuthz &&
+    hasKibanaPrivilege(
+      fleetAuthz,
+      isEndpointRbacEnabled,
+      currentUser.roles.includes('superuser'),
+      'readHostIsolationExceptions'
+    )
+  ) {
+    hasHostIsolationExceptions = await checkArtifactHasData(
+      HostIsolationExceptionsApiClient.getInstance(KibanaServices.get().http)
+    );
+  }
 
   try {
-    const currentUserResponse = await plugins.security.authc.getCurrentUser();
     const { canReadActionsLogManagement, canReadHostIsolationExceptions } = fleetAuthz
       ? calculateEndpointAuthz(
           licenseService,
           fleetAuthz,
-          currentUserResponse.roles,
-          endpointRbacEnabled || endpointRbacV1Enabled,
+          currentUser.roles,
+          isEndpointRbacEnabled,
           endpointPermissions,
           hasHostIsolationExceptions
         )

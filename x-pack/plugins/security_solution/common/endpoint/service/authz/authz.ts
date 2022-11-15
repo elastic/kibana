@@ -19,14 +19,26 @@ export function defaultEndpointPermissions(): EndpointPermissions {
   };
 }
 
-function hasPermission(
+/**
+ * Checks to see if a given Kibana privilege was granted.
+ * Note that this only checks if the user has the privilege as part of their role. That
+ * does not indicate that the user has the granted functionality behind that privilege
+ * (ex. due to license level). To get an accurate representation of user's authorization
+ * level, use `calculateEndpointAuthz()`
+ *
+ * @param fleetAuthz
+ * @param isEndpointRbacEnabled
+ * @param isSuperuser
+ * @param privilege
+ */
+export function hasKibanaPrivilege(
   fleetAuthz: FleetAuthz,
   isEndpointRbacEnabled: boolean,
-  hasEndpointManagementAccess: boolean,
+  isSuperuser: boolean,
   privilege: typeof ENDPOINT_PRIVILEGES[number]
 ): boolean {
   // user is superuser, always return true
-  if (hasEndpointManagementAccess) {
+  if (isSuperuser) {
     return true;
   }
 
@@ -63,7 +75,7 @@ export const calculateEndpointAuthz = (
   const isEnterpriseLicense = licenseService.isEnterprise();
   const hasEndpointManagementAccess = userRoles.includes('superuser');
   const { canWriteSecuritySolution = false, canReadSecuritySolution = false } = permissions;
-  const canWriteEndpointList = hasPermission(
+  const canWriteEndpointList = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
@@ -71,13 +83,13 @@ export const calculateEndpointAuthz = (
   );
   const canReadEndpointList =
     canWriteEndpointList ||
-    hasPermission(
+    hasKibanaPrivilege(
       fleetAuthz,
       isEndpointRbacEnabled,
       hasEndpointManagementAccess,
       'readEndpointList'
     );
-  const canWritePolicyManagement = hasPermission(
+  const canWritePolicyManagement = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
@@ -85,13 +97,13 @@ export const calculateEndpointAuthz = (
   );
   const canReadPolicyManagement =
     canWritePolicyManagement ||
-    hasPermission(
+    hasKibanaPrivilege(
       fleetAuthz,
       isEndpointRbacEnabled,
       hasEndpointManagementAccess,
       'readPolicyManagement'
     );
-  const canWriteActionsLogManagement = hasPermission(
+  const canWriteActionsLogManagement = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
@@ -99,25 +111,25 @@ export const calculateEndpointAuthz = (
   );
   const canReadActionsLogManagement =
     canWriteActionsLogManagement ||
-    hasPermission(
+    hasKibanaPrivilege(
       fleetAuthz,
       isEndpointRbacEnabled,
       hasEndpointManagementAccess,
       'readActionsLogManagement'
     );
-  const canIsolateHost = hasPermission(
+  const canIsolateHost = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
     'writeHostIsolation'
   );
-  const canWriteProcessOperations = hasPermission(
+  const canWriteProcessOperations = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
     'writeProcessOperations'
   );
-  const canWriteTrustedApplications = hasPermission(
+  const canWriteTrustedApplications = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
@@ -125,13 +137,13 @@ export const calculateEndpointAuthz = (
   );
   const canReadTrustedApplications =
     canWriteTrustedApplications ||
-    hasPermission(
+    hasKibanaPrivilege(
       fleetAuthz,
       isEndpointRbacEnabled,
       hasEndpointManagementAccess,
       'readTrustedApplications'
     );
-  const hasWriteHostIsolationExceptionsPermission = hasPermission(
+  const hasWriteHostIsolationExceptionsPermission = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
@@ -139,13 +151,13 @@ export const calculateEndpointAuthz = (
   );
   const hasReadHostIsolationExceptionsPermission =
     hasWriteHostIsolationExceptionsPermission ||
-    hasPermission(
+    hasKibanaPrivilege(
       fleetAuthz,
       isEndpointRbacEnabled,
       hasEndpointManagementAccess,
       'readHostIsolationExceptions'
     );
-  const canWriteBlocklist = hasPermission(
+  const canWriteBlocklist = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
@@ -153,8 +165,13 @@ export const calculateEndpointAuthz = (
   );
   const canReadBlocklist =
     canWriteBlocklist ||
-    hasPermission(fleetAuthz, isEndpointRbacEnabled, hasEndpointManagementAccess, 'readBlocklist');
-  const canWriteEventFilters = hasPermission(
+    hasKibanaPrivilege(
+      fleetAuthz,
+      isEndpointRbacEnabled,
+      hasEndpointManagementAccess,
+      'readBlocklist'
+    );
+  const canWriteEventFilters = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
@@ -162,13 +179,13 @@ export const calculateEndpointAuthz = (
   );
   const canReadEventFilters =
     canWriteEventFilters ||
-    hasPermission(
+    hasKibanaPrivilege(
       fleetAuthz,
       isEndpointRbacEnabled,
       hasEndpointManagementAccess,
       'readEventFilters'
     );
-  const canWriteFileOperations = hasPermission(
+  const canWriteFileOperations = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
@@ -181,6 +198,7 @@ export const calculateEndpointAuthz = (
     hasWriteHostIsolationExceptionsPermission && isPlatinumPlusLicense;
 
   const canReadHostIsolationExceptions =
+    canWriteHostIsolationExceptions ||
     (hasReadHostIsolationExceptionsPermission && isPlatinumPlusLicense) ||
     // Should be able to see Host Isolation Exceptions if license was downgraded
     (hasReadHostIsolationExceptionsPermission &&
