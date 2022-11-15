@@ -455,7 +455,9 @@ describe('Create case', () => {
         expect(renderResult.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
       });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connector-jira-1'));
+      userEvent.click(renderResult.getByTestId('dropdown-connector-jira-1'), undefined, {
+        skipPointerEventsCheck: true,
+      });
 
       await waitFor(() => {
         expect(renderResult.getByTestId('issueTypeSelect')).toBeInTheDocument();
@@ -516,7 +518,9 @@ describe('Create case', () => {
         expect(renderResult.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
       });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connector-resilient-2'));
+      userEvent.click(renderResult.getByTestId('dropdown-connector-resilient-2'), undefined, {
+        skipPointerEventsCheck: true,
+      });
 
       await waitFor(() => {
         expect(renderResult.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
@@ -584,7 +588,9 @@ describe('Create case', () => {
         expect(renderResult.getByTestId('dropdown-connector-servicenow-1')).toBeInTheDocument();
       });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connector-servicenow-1'));
+      userEvent.click(renderResult.getByTestId('dropdown-connector-servicenow-1'), undefined, {
+        skipPointerEventsCheck: true,
+      });
 
       await waitFor(() => {
         expect(onChoicesSuccess).toBeDefined();
@@ -665,7 +671,9 @@ describe('Create case', () => {
         expect(renderResult.getByTestId('dropdown-connector-servicenow-sir')).toBeInTheDocument();
       });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connector-servicenow-sir'));
+      userEvent.click(renderResult.getByTestId('dropdown-connector-servicenow-sir'), undefined, {
+        skipPointerEventsCheck: true,
+      });
 
       await waitFor(() => {
         expect(onChoicesSuccess).toBeDefined();
@@ -877,7 +885,9 @@ describe('Create case', () => {
       expect(renderResult.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
     });
 
-    userEvent.click(renderResult.getByTestId('dropdown-connector-jira-1'));
+    userEvent.click(renderResult.getByTestId('dropdown-connector-jira-1'), undefined, {
+      skipPointerEventsCheck: true,
+    });
 
     userEvent.click(renderResult.getByTestId('create-case-submit'));
 
@@ -945,9 +955,7 @@ describe('Create case', () => {
         expect(assigneesComboBox.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
       });
 
-      await userEvent.type(assigneesComboBox.getByTestId('comboBoxSearchInput'), 'dr', {
-        delay: 1,
-      });
+      userEvent.type(assigneesComboBox.getByTestId('comboBoxSearchInput'), 'dr');
 
       await waitFor(() => {
         expect(
