@@ -32,7 +32,10 @@ import { usePageSlice } from '../../../common/hooks/use_page_slice';
 import { usePageSize } from '../../../common/hooks/use_page_size';
 import { ErrorCallout } from '../layout/error_callout';
 import { getLimitProperties } from '../utils/get_limit_properties';
-import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
+import {
+  MAX_FINDINGS_TO_LOAD,
+  LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
+} from '../../../common/constants';
 
 export const getDefaultQuery = ({
   query,
@@ -47,7 +50,7 @@ export const getDefaultQuery = ({
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const { pageSize, setPageSize } = usePageSize();
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
 
   /**
    * Page URL query to ES query

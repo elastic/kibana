@@ -32,6 +32,7 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
+import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
 
 const getDefaultQuery = ({
   query,
@@ -68,7 +69,7 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const { pageSize, setPageSize } = usePageSize();
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
 
   /**
    * Page URL query to ES query
