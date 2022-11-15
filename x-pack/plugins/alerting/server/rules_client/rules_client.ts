@@ -2648,7 +2648,7 @@ export class RulesClient {
     const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
 
     const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
-    const authorizationFilter = await this.getAuthorizationFilter({ action: 'ENABLE' });
+    const authorizationFilter = await this.getAuthorizationFilter({ action: 'DISABLE' });
 
     const kueryNodeFilterWithAuth =
       authorizationFilter && kueryNodeFilter
