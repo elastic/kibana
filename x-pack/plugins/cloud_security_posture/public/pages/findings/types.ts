@@ -14,7 +14,6 @@ export type FindingsGroupByKind = 'default' | 'resource';
 export interface FindingsBaseURLQuery {
   query: Query;
   filters: Filter[];
-  pageSize: number;
 }
 
 export interface FindingsBaseProps {

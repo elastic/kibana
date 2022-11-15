@@ -15,6 +15,7 @@ import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { usePageSlice } from '../../../common/hooks/use_page_slice';
+import { usePageSize } from '../../../common/hooks/use_page_size';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from '../types';
 import { FindingsByResourceQuery, useFindingsByResource } from './use_findings_by_resource';
 import { FindingsByResourceTable } from './findings_by_resource_table';
@@ -35,11 +36,9 @@ import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 const getDefaultQuery = ({
   query,
   filters,
-  pageSize,
 }: FindingsBaseURLQuery): FindingsBaseURLQuery & FindingsByResourceQuery => ({
   query,
   filters,
-  pageSize,
   pageIndex: 0,
   sortDirection: 'desc',
 });
@@ -67,8 +66,9 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 );
 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
-  const { getPersistedDefaultQuery, setPersistedPageSize } = usePersistedQuery(getDefaultQuery);
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+  const { pageSize, setPageSize } = usePageSize();
 
   /**
    * Page URL query to ES query
@@ -77,7 +77,6 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
     dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
-    pageSize: urlQuery.pageSize,
   });
 
   /**
@@ -91,11 +90,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
 
   const error = findingsGroupByResource.error || baseEsQuery.error;
 
-  const slicedPage = usePageSlice(
-    findingsGroupByResource.data?.page,
-    urlQuery.pageIndex,
-    urlQuery.pageSize
-  );
+  const slicedPage = usePageSlice(findingsGroupByResource.data?.page, urlQuery.pageIndex, pageSize);
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
@@ -153,7 +148,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
                 failed: findingsGroupByResource.data.count.failed,
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
-                  pageSize: urlQuery.pageSize,
+                  pageSize,
                   currentPageSize: slicedPage.length,
                 }),
               }}
@@ -164,16 +159,15 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             loading={findingsGroupByResource.isFetching}
             items={slicedPage}
             pagination={getPaginationTableParams({
-              pageSize: urlQuery.pageSize,
+              pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: findingsGroupByResource.data?.total || 0,
             })}
             setTableOptions={({ sort, page }) => {
-              setPersistedPageSize(page.size);
+              setPageSize(page.size);
               setUrlQuery({
                 sortDirection: sort?.direction,
                 pageIndex: page.index,
-                pageSize: page.size,
               });
             }}
             sorting={{

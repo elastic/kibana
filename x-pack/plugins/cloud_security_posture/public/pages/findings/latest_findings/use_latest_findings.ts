@@ -27,7 +27,6 @@ interface UseFindingsOptions extends FindingsBaseEsQuery {
 
 export interface FindingsGroupByNoneQuery {
   pageIndex: Pagination['pageIndex'];
-  pageSize: Pagination['pageSize'];
   sort: Sort<CspFinding>;
 }
 

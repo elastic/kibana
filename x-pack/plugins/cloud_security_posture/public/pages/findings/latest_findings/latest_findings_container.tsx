@@ -29,6 +29,7 @@ import { PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { usePageSlice } from '../../../common/hooks/use_page_slice';
+import { usePageSize } from '../../../common/hooks/use_page_size';
 import { ErrorCallout } from '../layout/error_callout';
 import { getLimitProperties } from '../utils/get_limit_properties';
 import { MAX_FINDINGS_TO_LOAD } from '../../../../common/constants';
@@ -36,18 +37,17 @@ import { MAX_FINDINGS_TO_LOAD } from '../../../../common/constants';
 export const getDefaultQuery = ({
   query,
   filters,
-  pageSize,
 }: FindingsBaseURLQuery): FindingsBaseURLQuery & FindingsGroupByNoneQuery => ({
   query,
   filters,
-  pageSize,
   sort: { field: '@timestamp', direction: 'desc' },
   pageIndex: 0,
 });
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
-  const { getPersistedDefaultQuery, setPersistedPageSize } = usePersistedQuery(getDefaultQuery);
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+  const { pageSize, setPageSize } = usePageSize();
 
   /**
    * Page URL query to ES query
@@ -56,7 +56,6 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
-    pageSize: urlQuery.pageSize,
   });
 
   /**
@@ -68,11 +67,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     enabled: !baseEsQuery.error,
   });
 
-  const slicedPage = usePageSlice(
-    findingsGroupByNone.data?.page,
-    urlQuery.pageIndex,
-    urlQuery.pageSize
-  );
+  const slicedPage = usePageSlice(findingsGroupByNone.data?.page, urlQuery.pageIndex, pageSize);
 
   const error = findingsGroupByNone.error || baseEsQuery.error;
 
@@ -81,10 +76,10 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
       getLimitProperties(
         findingsGroupByNone.data?.total || 0,
         MAX_FINDINGS_TO_LOAD,
-        urlQuery.pageSize,
+        pageSize,
         urlQuery.pageIndex
       ),
-    [findingsGroupByNone.data?.total, urlQuery.pageIndex, urlQuery.pageSize]
+    [findingsGroupByNone.data?.total, urlQuery.pageIndex, pageSize]
   );
 
   const handleDistributionClick = (evaluation: Evaluation) => {
@@ -132,7 +127,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
                 failed: findingsGroupByNone.data.count.failed,
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
-                  pageSize: urlQuery.pageSize,
+                  pageSize,
                   currentPageSize: slicedPage.length,
                 }),
               }}
@@ -143,7 +138,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             loading={findingsGroupByNone.isFetching}
             items={slicedPage}
             pagination={getPaginationTableParams({
-              pageSize: urlQuery.pageSize,
+              pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: limitedTotalItemCount,
             })}
@@ -151,11 +146,10 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
               sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
             }}
             setTableOptions={({ page, sort }) => {
-              setPersistedPageSize(page.size);
+              setPageSize(page.size);
               setUrlQuery({
                 sort,
                 pageIndex: page.index,
-                pageSize: page.size,
               });
             }}
             onAddFilter={(field, value, negate) =>

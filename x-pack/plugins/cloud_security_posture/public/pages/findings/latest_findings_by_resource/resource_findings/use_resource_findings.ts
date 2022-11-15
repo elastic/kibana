@@ -28,7 +28,6 @@ interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
 
 export interface ResourceFindingsQuery {
   pageIndex: Pagination['pageIndex'];
-  pageSize: Pagination['pageSize'];
   sort: Sort<CspFinding>;
 }
 

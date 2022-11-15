@@ -25,6 +25,7 @@ import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import { usePageSlice } from '../../../../common/hooks/use_page_slice';
+import { usePageSize } from '../../../../common/hooks/use_page_size';
 import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
 import {
   getFindingsPageSizeInfo,
@@ -41,11 +42,9 @@ import { FindingsDistributionBar } from '../../layout/findings_distribution_bar'
 const getDefaultQuery = ({
   query,
   filters,
-  pageSize,
 }: FindingsBaseURLQuery): FindingsBaseURLQuery & ResourceFindingsQuery => ({
   query,
   filters,
-  pageSize,
   sort: { field: 'result.evaluation' as keyof CspFinding, direction: 'asc' },
   pageIndex: 0,
 });
@@ -89,8 +88,9 @@ const getResourceFindingSharedValues = (sharedValues: {
 
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
-  const { getPersistedDefaultQuery, setPersistedPageSize } = usePersistedQuery(getDefaultQuery);
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+  const { pageSize, setPageSize } = usePageSize();
 
   /**
    * Page URL query to ES query
@@ -99,7 +99,6 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
     dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
-    pageSize: urlQuery.pageSize,
   });
 
   /**
@@ -114,11 +113,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
 
   const error = resourceFindings.error || baseEsQuery.error;
 
-  const slicedPage = usePageSlice(
-    resourceFindings.data?.page,
-    urlQuery.pageIndex,
-    urlQuery.pageSize
-  );
+  const slicedPage = usePageSlice(resourceFindings.data?.page, urlQuery.pageIndex, pageSize);
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
@@ -188,7 +183,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
                 failed: resourceFindings.data.count.failed,
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
-                  pageSize: urlQuery.pageSize,
+                  pageSize,
                   currentPageSize: slicedPage.length,
                 }),
               }}
@@ -199,7 +194,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             loading={resourceFindings.isFetching}
             items={slicedPage}
             pagination={getPaginationTableParams({
-              pageSize: urlQuery.pageSize,
+              pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: resourceFindings.data?.total || 0,
             })}
@@ -207,8 +202,8 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
               sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
             }}
             setTableOptions={({ page, sort }) => {
-              setPersistedPageSize(page.size);
-              setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort });
+              setPageSize(page.size);
+              setUrlQuery({ pageIndex: page.index, sort });
             }}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({
