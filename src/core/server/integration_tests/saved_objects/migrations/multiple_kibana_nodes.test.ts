@@ -13,7 +13,7 @@ import { kibanaPackageJson as pkg } from '@kbn/utils';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Root } from '../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_kibana_nodes';
 

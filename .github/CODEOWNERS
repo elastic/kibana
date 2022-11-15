@@ -15,8 +15,6 @@
 /test/functional/apps/discover/ @elastic/kibana-data-discovery
 /test/functional/apps/context/ @elastic/kibana-data-discovery
 /test/api_integration/apis/unified_field_list/ @elastic/kibana-data-discovery
-/x-pack/plugins/graph/ @elastic/kibana-data-discovery
-/x-pack/test/functional/apps/graph @elastic/kibana-data-discovery
 /src/plugins/unified_field_list/ @elastic/kibana-data-discovery
 /src/plugins/unified_histogram/ @elastic/kibana-data-discovery
 /src/plugins/saved_objects_finder/ @elastic/kibana-data-discovery
@@ -49,6 +47,8 @@
 /test/functional/apps/visualize/ @elastic/kibana-visualizations
 /src/plugins/expressions/ @elastic/kibana-visualizations
 /src/plugins/unified_search/ @elastic/kibana-visualizations
+/x-pack/plugins/graph/ @elastic/kibana-visualizations
+/x-pack/test/functional/apps/graph @elastic/kibana-visualizations
 
 # Application Services
 /examples/dashboard_embeddable_examples/ @elastic/kibana-app-services
@@ -116,6 +116,11 @@
 /docs/user/reporting @elastic/kibana-global-experience
 /docs/settings/reporting-settings.asciidoc @elastic/kibana-global-experience
 /docs/setup/configuring-reporting.asciidoc @elastic/kibana-global-experience
+
+### Global Experience Tagging
+/src/plugins/saved_objects_tagging_oss  @elastic/kibana-global-experience
+/x-pack/plugins/saved_objects_tagging/ @elastic/kibana-global-experience
+/x-pack/test/saved_object_tagging/ @elastic/kibana-global-experience
 
 ### Kibana React (to be deprecated)
 /src/plugins/kibana_react/ @elastic/kibana-global-experience
@@ -302,7 +307,6 @@
 # Core
 /examples/hello_world/ @elastic/kibana-core
 /src/core/  @elastic/kibana-core
-/src/plugins/saved_objects_tagging_oss  @elastic/kibana-core
 /config/kibana.yml @elastic/kibana-core
 /typings/ @elastic/kibana-core
 /x-pack/plugins/global_search_providers  @elastic/kibana-core
@@ -312,9 +316,7 @@
 /x-pack/plugins/global_search/  @elastic/kibana-core
 /x-pack/plugins/cloud/ @elastic/kibana-core
 /x-pack/plugins/cloud_integrations/ @elastic/kibana-core
-/x-pack/plugins/saved_objects_tagging/ @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
-/x-pack/test/saved_object_tagging/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
@@ -835,6 +837,7 @@ packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
 packages/core/rendering/core-rendering-server-internal @elastic/kibana-core
 packages/core/rendering/core-rendering-server-mocks @elastic/kibana-core
 packages/core/root/core-root-browser-internal @elastic/kibana-core
+packages/core/root/core-root-server-internal @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-browser @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server-internal @elastic/kibana-core
