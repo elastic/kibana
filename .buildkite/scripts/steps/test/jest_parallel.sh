@@ -25,6 +25,7 @@ export TEST_TYPE
 echo "--- downloading jest test run order"
 download_artifact jest_run_order.json .
 configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
+cp ./react-dom-test-utils.development.js ../../../../node_modules/react-dom/cjs/react-dom-test-utils.development.js
 
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
