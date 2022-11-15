@@ -21,6 +21,7 @@ import { ChromiumArchivePaths, HeadlessChromiumDriverFactory, install } from './
 import { ConfigType, createConfig } from './config';
 import { Screenshots } from './screenshots';
 import { getChromiumPackage } from './utils';
+import { registerRoutes } from './http/register_routes';
 
 interface SetupDeps {
   screenshotMode: ScreenshotModePluginSetup;
@@ -45,6 +46,8 @@ export interface ScreenshottingStart {
   getScreenshots: Screenshots['getScreenshots'];
 }
 
+export type ScreenshottingCoreSetup = CoreSetup<{}, ScreenshottingStart>;
+
 export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, SetupDeps> {
   private config: ConfigType;
   private logger: Logger;
@@ -59,7 +62,9 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     this.packageInfo = context.env.packageInfo;
   }
 
-  setup({ http }: CoreSetup, { screenshotMode, cloud }: SetupDeps) {
+  setup(core: ScreenshottingCoreSetup, { screenshotMode, cloud }: SetupDeps) {
+    const { http } = core;
+
     this.screenshotMode = screenshotMode;
     this.browserDriverFactory = (async () => {
       const paths = new ChromiumArchivePaths();
@@ -96,6 +101,10 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     })();
     // Already handled in `browserDriverFactory`
     this.screenshots.catch(() => {});
+
+    registerRoutes({
+      core,
+    });
 
     return {};
   }
