@@ -63,6 +63,7 @@ const previouslyRegisteredTypes = [
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
+  'guided-onboarding-plugin-state',
   'index-pattern',
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
