@@ -59,7 +59,7 @@ const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType => {
   if (ruleAggType === '99th') return LatencyAggregationType.p99;
   return LatencyAggregationType.avg;
 };
-export function AlertDetailsAppSectionTransactionDuration({
+export function AlertDetailsAppSection({
   rule,
   alert,
   timeZone,
@@ -472,4 +472,4 @@ export function AlertDetailsAppSectionTransactionDuration({
 }
 
 // eslint-disable-next-line import/no-default-export
-export default AlertDetailsAppSectionTransactionDuration;
+export default AlertDetailsAppSection;
