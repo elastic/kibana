@@ -7,13 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
-import { TopAlert } from '@kbn/observability-plugin/public/pages/alerts';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -21,44 +19,34 @@ import {
   ALERT_END,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { getOrRedirectToTransactionType } from '../../../context/apm_service/apm_service_context';
-import { useServiceAgentFetcher } from '../../../context/apm_service/use_service_agent_fetcher';
-import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
-import { asPercent } from '../../../../common/utils/formatters';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { getDurationFormatter } from '../../../../common/utils/formatters/duration';
-import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
-import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
-import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
-import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import { filterNil } from '../../shared/charts/latency_chart';
-import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { getOrRedirectToTransactionType } from '../../../../context/apm_service/apm_service_context';
+import { useServiceAgentFetcher } from '../../../../context/apm_service/use_service_agent_fetcher';
+import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
+import { asPercent } from '../../../../../common/utils/formatters';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { getDurationFormatter } from '../../../../../common/utils/formatters/duration';
+import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
+import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
+import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
+import { filterNil } from '../../../shared/charts/latency_chart';
+import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-} from '../../shared/charts/transaction_charts/helper';
-import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
+} from '../../../shared/charts/transaction_charts/helper';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import {
   ChartType,
   getTimeSeriesColor,
-} from '../../shared/charts/helper/get_timeseries_color';
+} from '../../../shared/charts/helper/get_timeseries_color';
+import { AlertDetailsAppSectionProps } from './types';
+import { getAggsTypeFromRule } from './helpers';
 
-export interface AlertDetailsAppSectionProps {
-  rule: Rule<RuleTypeParams>;
-  alert: TopAlert;
-  timeZone: string;
-}
-
-const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType => {
-  if (ruleAggType === '95th') return LatencyAggregationType.p95;
-  if (ruleAggType === '99th') return LatencyAggregationType.p99;
-  return LatencyAggregationType.avg;
-};
 export function AlertDetailsAppSection({
   rule,
   alert,

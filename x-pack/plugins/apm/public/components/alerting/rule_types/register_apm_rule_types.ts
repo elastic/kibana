@@ -47,7 +47,10 @@ export function registerApmRuleTypes(
       errors: [],
     }),
     alertDetailsAppSection: lazy(
-      () => import('../ui_components/alert_details_app_section')
+      () =>
+        import(
+          '../ui_components/alert_details_app_section/alert_details_app_section'
+        )
     ),
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
@@ -93,7 +96,10 @@ export function registerApmRuleTypes(
       errors: [],
     }),
     alertDetailsAppSection: lazy(
-      () => import('../ui_components/alert_details_app_section')
+      () =>
+        import(
+          '../ui_components/alert_details_app_section/alert_details_app_section'
+        )
     ),
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
@@ -138,7 +144,10 @@ export function registerApmRuleTypes(
       errors: [],
     }),
     alertDetailsAppSection: lazy(
-      () => import('../ui_components/alert_details_app_section')
+      () =>
+        import(
+          '../ui_components/alert_details_app_section/alert_details_app_section'
+        )
     ),
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
@@ -180,7 +189,10 @@ export function registerApmRuleTypes(
       errors: [],
     }),
     alertDetailsAppSection: lazy(
-      () => import('../ui_components/alert_details_app_section')
+      () =>
+        import(
+          '../ui_components/alert_details_app_section/alert_details_app_section'
+        )
     ),
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
