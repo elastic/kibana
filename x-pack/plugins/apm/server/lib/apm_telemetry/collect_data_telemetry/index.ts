@@ -22,10 +22,10 @@ type TelemetryTaskExecutor = (params: {
       body: { timeout: string };
     }
   >(
-    params: TSearchRequest
+    searchParams: TSearchRequest
   ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
   indicesStats(
-    params: estypes.IndicesStatsRequest
+    indicesParams: estypes.IndicesStatsRequest
     // promise returned by client has an abort property
     // so we cannot use its ReturnType
   ): Promise<{

@@ -57,7 +57,7 @@ export interface SupplementalEventFormOption<T extends OperatingSystem> {
   tooltipText?: string;
   beta?: boolean;
   indented?: boolean;
-  isDisabled?(policyConfig: UIPolicyConfig): boolean;
+  isDisabled?(uiPolicyConfig: UIPolicyConfig): boolean;
 }
 
 export interface EventsFormProps<T extends OperatingSystem> {
