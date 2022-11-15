@@ -10,7 +10,10 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
 
-import { handleExperimentalDatastreamFeatureOptIn } from './experimental_datastream_features';
+import {
+  builRoutingPath,
+  handleExperimentalDatastreamFeatureOptIn,
+} from './experimental_datastream_features';
 
 function getNewTestPackagePolicy({
   isSyntheticSourceEnabled,
@@ -102,6 +105,12 @@ describe('experimental_datastream_features', () => {
                   // @ts-expect-error
                   mode: 'stored',
                 },
+                properties: {
+                  test_dimension: {
+                    type: 'keyword',
+                    time_series_dimension: true,
+                  },
+                },
               },
             },
           },
@@ -178,7 +187,9 @@ describe('experimental_datastream_features', () => {
         expect.objectContaining({
           body: expect.objectContaining({
             template: expect.objectContaining({
-              settings: expect.objectContaining({ index: { mode: 'time_series' } }),
+              settings: expect.objectContaining({
+                index: { mode: 'time_series', routing_path: ['test_dimension'] },
+              }),
             }),
           }),
         })
@@ -280,12 +291,74 @@ describe('experimental_datastream_features', () => {
           expect.objectContaining({
             body: expect.objectContaining({
               template: expect.objectContaining({
-                settings: expect.objectContaining({ index: { mode: 'time_series' } }),
+                settings: expect.objectContaining({
+                  index: { mode: 'time_series', routing_path: ['test_dimension'] },
+                }),
               }),
             }),
           })
         );
       });
     });
+  });
+  it('should build routing path', () => {
+    const mappingProperties = {
+      cloud: {
+        properties: {
+          availability_zone: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          image: {
+            properties: {
+              id: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      },
+      test_dimension: {
+        time_series_dimension: true,
+        type: 'keyword',
+      },
+      '@timestamp': {
+        type: 'date',
+      },
+    };
+    const routingPath = builRoutingPath(mappingProperties as any);
+    expect(routingPath).toEqual(['test_dimension']);
+  });
+
+  it('should build routing path from nested properties', () => {
+    const mappingProperties = {
+      cloud: {
+        properties: {
+          availability_zone: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          image: {
+            properties: {
+              id: {
+                ignore_above: 1024,
+                type: 'keyword',
+                time_series_dimension: true,
+              },
+            },
+          },
+        },
+      },
+      test_dimension: {
+        time_series_dimension: true,
+        type: 'keyword',
+      },
+      '@timestamp': {
+        type: 'date',
+      },
+    };
+    const routingPath = builRoutingPath(mappingProperties as any);
+    expect(routingPath).toEqual(['cloud.image.id', 'test_dimension']);
   });
 });
