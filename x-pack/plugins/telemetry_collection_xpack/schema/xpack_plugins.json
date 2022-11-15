@@ -4122,6 +4122,12 @@
               "service_id": {
                 "type": "keyword"
               },
+              "num_service_nodes": {
+                "type": "long"
+              },
+              "num_transaction_types": {
+                "type": "long"
+              },
               "timed_out": {
                 "type": "boolean"
               },
