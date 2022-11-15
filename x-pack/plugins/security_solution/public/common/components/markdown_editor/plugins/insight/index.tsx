@@ -8,8 +8,7 @@
 import type { Plugin } from 'unified';
 import React, { useContext, useMemo } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
-import { EuiSpacer, EuiCodeBlock, EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
-import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
+import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useInsightQuery } from './use_insight_query';
@@ -145,32 +144,3 @@ const InsightComponent = ({ label, description, providers }: InsightComponentPro
 };
 
 export { InsightComponent as renderer };
-
-const InsightEditorComponent = ({
-  node,
-  onSave,
-  onCancel,
-}: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps>) => {
-  return (
-    <form>
-      <input type="text" />
-    </form>
-  );
-};
-
-export const plugin = {
-  name: 'insight',
-  button: {
-    label: 'Insights',
-    iconType: 'timeline',
-  },
-  helpText: (
-    <div>
-      <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
-        {'!{insight{options}}'}
-      </EuiCodeBlock>
-      <EuiSpacer size="s" />
-    </div>
-  ),
-  editor: InsightEditorComponent,
-};

@@ -8,6 +8,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { useKibana } from '../../../../lib/kibana';
 import { combineQueries } from '../../../../lib/kuery';
 import { useTimelineEvents } from '../../../../../timelines/containers';
@@ -59,7 +60,7 @@ export const useInsightQuery = ({ dataProviders }: UseInsightQuery): UseInsightQ
     dataViewId,
     fields: ['*'],
     filterQuery: combinedQueries?.filterQuery,
-    id: 'timeline-1',
+    id: TimelineId.active,
     indexNames: selectedPatterns,
     language: 'kuery',
     limit: 1,
