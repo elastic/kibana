@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const ruleDetailsRoute = '/rule/:ruleId';
-export const triggersActionsRoute = '/app/management/insightsAndAlerting/triggersActions';
+export const ruleDetailsRoute = '/rule/:ruleId' as const;
+export const triggersActionsRoute = '/app/management/insightsAndAlerting/triggersActions' as const;
 
 export const getRuleDetailsRoute = (ruleId: string) => ruleDetailsRoute.replace(':ruleId', ruleId);

@@ -747,7 +747,7 @@ describe('Execution Handler', () => {
       ],
     } as unknown as SanitizedRule<RuleTypeParams>;
 
-    it('populates the rule.url in the action params when the base url and alert id are specified', async () => {
+    it('populates the rule.url in the action params when the base url and rule id are specified', async () => {
       const execParams = {
         ...defaultExecutionParams,
         rule: ruleWithUrl,
@@ -822,96 +822,6 @@ describe('Execution Handler', () => {
             },
             "actionTypeId": "test",
             "ruleId": "1",
-            "spaceId": "test1",
-          },
-        ]
-      `);
-    });
-
-    it('does not populate the rule.url when the alert id is not defined', async () => {
-      const execParams = {
-        ...defaultExecutionParams,
-        rule: ruleWithUrl,
-        taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
-          kibanaBaseUrl: 'http://localhost:12345',
-        },
-        taskInstance: {
-          params: { spaceId: 'test1' },
-        } as unknown as ConcreteTaskInstance,
-      };
-
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
-
-      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "actionParams": Object {
-              "val": "rule url: ",
-            },
-            "actionTypeId": "test",
-            "ruleId": undefined,
-            "spaceId": "test1",
-          },
-        ]
-      `);
-    });
-
-    it('does not populate the rule.url when the rule id is set to undefined', async () => {
-      const execParams = {
-        ...defaultExecutionParams,
-        rule: ruleWithUrl,
-        taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
-          kibanaBaseUrl: 'http://localhost:12345',
-        },
-        taskInstance: {
-          params: { spaceId: 'test1', alertId: undefined },
-        } as unknown as ConcreteTaskInstance,
-      };
-
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
-
-      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "actionParams": Object {
-              "val": "rule url: ",
-            },
-            "actionTypeId": "test",
-            "ruleId": undefined,
-            "spaceId": "test1",
-          },
-        ]
-      `);
-    });
-
-    it('does not populate the rule.url when the alert id is a number', async () => {
-      const execParams = {
-        ...defaultExecutionParams,
-        rule: ruleWithUrl,
-        taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
-          kibanaBaseUrl: 'http://localhost:12345',
-        },
-        taskInstance: {
-          params: { spaceId: 'test1', alertId: 1 },
-        } as unknown as ConcreteTaskInstance,
-      };
-
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
-
-      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "actionParams": Object {
-              "val": "rule url: ",
-            },
-            "actionTypeId": "test",
-            "ruleId": 1,
             "spaceId": "test1",
           },
         ]

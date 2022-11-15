@@ -12,7 +12,7 @@ import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import { chunk, isString } from 'lodash';
+import { chunk } from 'lodash';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RawRule } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
@@ -285,13 +285,13 @@ export class ExecutionHandler<
   }
 
   private buildRuleUrl(): string | undefined {
-    if (!this.taskRunnerContext.kibanaBaseUrl || !isString(this.taskInstance.params.alertId)) {
+    if (!this.taskRunnerContext.kibanaBaseUrl) {
       return;
     }
 
     try {
       const ruleUrl = new URL(
-        `${triggersActionsRoute}${getRuleDetailsRoute(this.taskInstance.params.alertId)}`,
+        `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`,
         this.taskRunnerContext.kibanaBaseUrl
       );
 
