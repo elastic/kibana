@@ -46,7 +46,7 @@ export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseUR
     },
   } = useKibana().services;
 
-  const getPersistedDefaultQuery = useCallback(
+  return useCallback(
     () =>
       getter({
         filters: filterManager.getAppFilters(),
@@ -54,8 +54,6 @@ export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseUR
       }),
     [getter, filterManager, queryString]
   );
-
-  return getPersistedDefaultQuery;
 };
 
 export const getPaginationQuery = ({
