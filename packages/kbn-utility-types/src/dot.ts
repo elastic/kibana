@@ -41,8 +41,8 @@ type DotKey<
   TKey extends keyof TObject & string,
   TPrefix extends string
 > = TObject[TKey] extends Array<infer TValueType>
-  // @ts-expect-error
-  ? ToArray<DotObject<TValueType, `${TPrefix}${TKey}.`>>
+  ? // @ts-expect-error
+    ToArray<DotObject<TValueType, `${TPrefix}${TKey}.`>>
   : TObject[TKey] extends Record<string, any>
   ? DotObject<TObject[TKey], `${TPrefix}${TKey}.`>
   : { [key in `${TPrefix}${TKey}`]: TObject[TKey] };
