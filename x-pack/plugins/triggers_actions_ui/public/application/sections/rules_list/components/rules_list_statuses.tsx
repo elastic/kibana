@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiHealth } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 import {
@@ -33,7 +33,7 @@ export const RulesListStatuses = (props: RulesListStatusesProps) => {
 
   if (isRuleLastRunOutcomeEnabled) {
     return (
-      <>
+      <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiHealth color="success" data-test-subj="totalSucceededRulesCount">
             {RULE_LAST_RUN_OUTCOME_SUCCEEDED_DESCRIPTION(rulesLastRunOutcomes.succeeded)}
@@ -49,12 +49,12 @@ export const RulesListStatuses = (props: RulesListStatusesProps) => {
             {RULE_LAST_RUN_OUTCOME_WARNING_DESCRIPTION(rulesLastRunOutcomes.warning)}
           </EuiHealth>
         </EuiFlexItem>
-      </>
+      </EuiFlexGroup>
     );
   }
 
   return (
-    <>
+    <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiHealth color="success" data-test-subj="totalActiveRulesCount">
           {RULE_STATUS_ACTIVE(rulesStatuses.active)}
@@ -85,6 +85,6 @@ export const RulesListStatuses = (props: RulesListStatusesProps) => {
           {RULE_STATUS_UNKNOWN(rulesStatuses.unknown)}
         </EuiHealth>
       </EuiFlexItem>
-    </>
+    </EuiFlexGroup>
   );
 };

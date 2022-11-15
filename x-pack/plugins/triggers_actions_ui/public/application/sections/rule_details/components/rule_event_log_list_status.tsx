@@ -8,6 +8,12 @@
 import React, { useMemo } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
+import {
+  RULE_LAST_RUN_OUTCOME_SUCCEEDED,
+  RULE_LAST_RUN_OUTCOME_FAILED,
+  RULE_LAST_RUN_OUTCOME_WARNING,
+  ALERT_STATUS_UNKNOWN,
+} from '../../rules_list/translations';
 
 interface RuleEventLogListStatusProps {
   status: RuleAlertingOutcome;
@@ -32,10 +38,10 @@ const STATUS_TO_COLOR: Record<RuleAlertingOutcome, string> = {
 };
 
 const STATUS_TO_OUTCOME: Record<RuleAlertingOutcome, string> = {
-  success: 'succeeded',
-  failure: 'failed',
-  warning: 'warning',
-  unknown: 'unknown',
+  success: RULE_LAST_RUN_OUTCOME_SUCCEEDED,
+  failure: RULE_LAST_RUN_OUTCOME_FAILED,
+  warning: RULE_LAST_RUN_OUTCOME_WARNING,
+  unknown: ALERT_STATUS_UNKNOWN,
 };
 
 export const RuleEventLogListStatus = (props: RuleEventLogListStatusProps) => {
@@ -44,7 +50,7 @@ export const RuleEventLogListStatus = (props: RuleEventLogListStatusProps) => {
 
   const statusString = useMemo(() => {
     if (lastRunOutcomeEnabled) {
-      return STATUS_TO_OUTCOME[status];
+      return STATUS_TO_OUTCOME[status].toLocaleLowerCase();
     }
     return status;
   }, [lastRunOutcomeEnabled, status]);

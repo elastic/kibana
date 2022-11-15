@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiHealth } from '@elastic/eui';
 import { RuleLastRunOutcomes, RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
@@ -23,7 +23,6 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
   selectedOutcomes,
   onChange,
 }: RuleLastRunOutcomeFilterProps) => {
-  const [selectedValues, setSelectedValues] = useState<string[]>(selectedOutcomes);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onTogglePopover = useCallback(() => {
@@ -34,16 +33,17 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
     setIsPopoverOpen(false);
   }, [setIsPopoverOpen]);
 
-  useEffect(() => {
-    if (onChange) {
-      onChange(selectedValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedValues]);
-
-  useEffect(() => {
-    setSelectedValues(selectedOutcomes);
-  }, [selectedOutcomes]);
+  const onFilterSelectItem = useCallback(
+    (filterItem: string) => () => {
+      const isPreviouslyChecked = selectedOutcomes.includes(filterItem);
+      if (isPreviouslyChecked) {
+        onChange?.(selectedOutcomes.filter((val) => val !== filterItem));
+      } else {
+        onChange?.(selectedOutcomes.concat(filterItem));
+      }
+    },
+    [onChange, selectedOutcomes]
+  );
 
   return (
     <EuiPopover
@@ -52,9 +52,9 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
       button={
         <EuiFilterButton
           iconType="arrowDown"
-          hasActiveFilters={selectedValues.length > 0}
-          numActiveFilters={selectedValues.length}
-          numFilters={selectedValues.length}
+          hasActiveFilters={selectedOutcomes.length > 0}
+          numActiveFilters={selectedOutcomes.length}
+          numFilters={selectedOutcomes.length}
           onClick={onTogglePopover}
           data-test-subj="ruleLastRunOutcomeFilterButton"
         >
@@ -72,15 +72,8 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
             <EuiFilterSelectItem
               key={item}
               style={{ textTransform: 'capitalize' }}
-              onClick={() => {
-                const isPreviouslyChecked = selectedValues.includes(item);
-                if (isPreviouslyChecked) {
-                  setSelectedValues(selectedValues.filter((val) => val !== item));
-                } else {
-                  setSelectedValues(selectedValues.concat(item));
-                }
-              }}
-              checked={selectedValues.includes(item) ? 'on' : undefined}
+              onClick={onFilterSelectItem(item)}
+              checked={selectedOutcomes.includes(item) ? 'on' : undefined}
               data-test-subj={`ruleLastRunOutcome${item}FilterOption`}
             >
               <EuiHealth color={healthColor}>

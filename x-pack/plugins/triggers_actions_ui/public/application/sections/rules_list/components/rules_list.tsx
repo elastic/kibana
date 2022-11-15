@@ -34,6 +34,7 @@ import {
   RuleExecutionStatus,
   ALERTS_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
+  RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import {
@@ -301,7 +302,7 @@ export const RulesList = ({
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
     useLoadRuleAggregations({
       searchText,
-      typesFilter,
+      typesFilter: rulesTypesFilter,
       actionTypesFilter,
       ruleExecutionStatusesFilter,
       ruleLastRunOutcomesFilter,
@@ -489,7 +490,7 @@ export const RulesList = ({
     setShowErrors((prevValue) => {
       if (!prevValue) {
         const rulesToExpand = rulesState.data.reduce((acc, ruleItem) => {
-          if (ruleItem.lastRun?.outcome === 'failed') {
+          if (ruleItem.lastRun?.outcome === RuleLastRunOutcomeValues[2]) {
             return {
               ...acc,
               [ruleItem.id]: (

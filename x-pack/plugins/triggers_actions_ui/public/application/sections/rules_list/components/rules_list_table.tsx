@@ -62,6 +62,7 @@ import { RuleTagBadge } from './rule_tag_badge';
 import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './rules_list_notify_badge';
 import { RulesListTableStatusCell } from './rules_list_table_status_cell';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import {
   RulesListColumns,
   RulesListVisibleColumns,
@@ -214,6 +215,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
   const [isLoadingMap, setIsLoadingMap] = useState<Record<string, boolean>>({});
 
+  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
 
@@ -324,6 +327,13 @@ export const RulesListTable = (props: RulesListTableProps) => {
       },
     };
   }, [isPageSelected, onSelectPage, onSelectRow, isRowSelected]);
+
+  const ruleOutcomeColumnField = useMemo(() => {
+    if (isRuleLastRunOutcomeEnabled) {
+      return 'lastRun.outcome';
+    }
+    return 'executionStatus.status';
+  }, [isRuleLastRunOutcomeEnabled]);
 
   const getRulesTableColumns = useCallback((): RulesListColumns[] => {
     return [
@@ -662,7 +672,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
       },
       {
         id: 'ruleExecutionStatus',
-        field: 'lastRun.outcome',
+        field: ruleOutcomeColumnField,
         name: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastResponseTitle',
           { defaultMessage: 'Last response' }
@@ -781,6 +791,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     ruleTypesState.data,
     selectedPercentile,
     tagPopoverOpenIndex,
+    ruleOutcomeColumnField,
   ]);
 
   const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);
