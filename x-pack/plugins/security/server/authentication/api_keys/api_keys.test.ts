@@ -415,18 +415,12 @@ describe('API Keys', () => {
         id: '123',
         api_key: 'abc123',
       });
-      expect(result).toBeFalsy();
+      expect(result).toEqual(false);
       expect(mockClusterClient.asScoped).not.toHaveBeenCalled();
     });
 
     it('calls callCluster with proper parameters', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      mockScopedClusterClient.asCurrentUser.security.invalidateApiKey.mockResponseOnce({
-        invalidated_api_keys: ['api-key-id-1'],
-        previously_invalidated_api_keys: [],
-        error_count: 0,
-        error_details: [],
-      });
       const params = {
         id: '123',
         api_key: 'abc123',
@@ -442,6 +436,20 @@ describe('API Keys', () => {
       expect(
         mockClusterClient.asScoped().asCurrentUser.security.authenticate
       ).toHaveBeenCalledWith();
+    });
+
+    it('returns false if cannot authenticate with the API key', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(new Error());
+      const params = { id: '123', api_key: 'abc123' };
+
+      await expect(apiKeys.validate(params)).resolves.toEqual(false);
+
+      const { id, uuid, ...restFake } = getFakeKibanaRequest(params);
+      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(expect.objectContaining(restFake));
+      expect(
+        mockClusterClient.asScoped().asCurrentUser.security.authenticate
+      ).toHaveBeenCalledTimes(1);
     });
   });
 

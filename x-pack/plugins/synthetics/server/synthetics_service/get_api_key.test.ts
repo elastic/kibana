@@ -44,7 +44,7 @@ describe('getAPIKeyTest', function () {
   } as unknown as UptimeServerSetup;
 
   security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValue(true);
-  security.authc.apiKeys.validate = jest.fn().mockReturnValue({ isValid: true });
+  security.authc.apiKeys.validate = jest.fn().mockReturnValue(true);
   security.authc.apiKeys.create = jest.fn().mockReturnValue({
     id: 'test',
     name: 'service-api-key',
