@@ -26,13 +26,13 @@ export const stringifyKueries = (
       const value = kueries.get(key)?.filter((v) => v !== '');
       if (!value || value.length === 0) return '';
 
-      const isString = typeof value[0] === 'string';
+      const isNumber = !isNaN(Number(value[0]));
 
       if (value.length === 1) {
-        return isString ? `${key}: "${value[0]}"` : `${key}: ${value[0]}`;
+        return isNumber ? `${key}: ${value[0]}` : `${key}: "${value[0]}"`;
       }
 
-      const values = value.map((v) => (isString ? `"${v}"` : v)).join(` ${condition} `);
+      const values = value.map((v) => (isNumber ? v : `"${v}"`)).join(` ${condition} `);
 
       return `${key}: (${values})`;
     })
