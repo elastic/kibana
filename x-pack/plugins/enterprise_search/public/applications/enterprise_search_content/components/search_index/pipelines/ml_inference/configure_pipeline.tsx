@@ -209,11 +209,17 @@ export const ConfigurePipeline: React.FC = () => {
                 )}
                 helpText={
                   !nameError &&
+                  configuration.existingPipeline === false &&
                   i18n.translate(
                     'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.name.helpText',
                     {
                       defaultMessage:
-                        'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens.',
+                        'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens. This will create a pipeline named {pipelineName}.',
+                      values: {
+                        pipelineName: `ml-inference-${
+                          pipelineName.length > 0 ? pipelineName : '<name>'
+                        }`,
+                      },
                     }
                   )
                 }
