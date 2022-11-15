@@ -34,20 +34,22 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 import * as i18n from '../../translations/shared_list';
-import { ExceptionsTableUtilityBar } from '../../components/shared_list_utilty_bar';
+import {
+  ExceptionsTableUtilityBar,
+  ListsSearchBar,
+  ExceptionsListCard,
+  ImportExceptionListFlyout,
+  CreateSharedListFlyout,
+} from '../../components';
 import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
 import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
 import { patchRule } from '../../../detection_engine/rule_management/api/api';
-import { ExceptionsSearchBar } from '../../components/list_search_bar';
+
 import { getSearchFilters } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
 import { useUserData } from '../../../detections/components/user_info';
 import { useListsConfig } from '../../../detections/containers/detection_engine/lists/use_lists_config';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
-import { ExceptionsListCard } from '../../components/exceptions_list_card';
-
-import { ImportExceptionListFlyout } from '../../components/import_exceptions_list_flyout';
-import { CreateSharedListFlyout } from '../../components/create_shared_exception_list';
 
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 
@@ -454,7 +456,7 @@ export const SharedLists = React.memo(() => {
             color="accent"
           />
         )}
-        {!initLoading && <ExceptionsSearchBar onSearch={handleSearch} />}
+        {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
         <EuiSpacer size="m" />
 
         {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
