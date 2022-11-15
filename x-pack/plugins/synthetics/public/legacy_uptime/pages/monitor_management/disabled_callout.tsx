@@ -65,7 +65,7 @@ const CALLOUT_MANAGEMENT_DISABLED = i18n.translate(
 );
 
 const CALLOUT_MANAGEMENT_CONTACT_ADMIN = i18n.translate(
-  'xpack.synthetics.monitorManagement.callout.disabled.adminContact',
+  'xpack.synthetics.monitorManagement.disabledCallout.adminContact',
   {
     defaultMessage: 'Contact your administrator to enable Monitor Management.',
   }
