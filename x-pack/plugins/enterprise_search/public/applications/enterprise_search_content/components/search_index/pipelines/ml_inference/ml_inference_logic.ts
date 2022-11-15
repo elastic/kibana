@@ -213,9 +213,10 @@ export interface MLInferenceProcessorsValues {
   createErrors: string[];
   existingInferencePipelines: MLInferencePipelineOption[];
   formErrors: AddInferencePipelineFormErrors;
-  getDocumentApiErrorMessage: HttpError;
-  getDocumentsErr: string;
+  getDocumentApiErrorMessage: HttpError | undefined;
   getDocumentApiStatus: Status;
+  getDocumentData: typeof GetDocumentsApiLogic.values.data;
+  getDocumentsErr: string;
   index: CachedFetchIndexApiLogicValues['indexData'];
   isGetDocumentsLoading: boolean;
   isLoading: boolean;
@@ -227,6 +228,7 @@ export interface MLInferenceProcessorsValues {
   mlInferencePipelinesData: FetchMlInferencePipelinesResponse | undefined;
   mlModelsData: TrainedModelConfigResponse[] | undefined;
   mlModelsStatus: Status;
+  showGetDocumentErrors: boolean;
   simulateExistingPipelineData: typeof SimulateExistingMlInterfacePipelineApiLogic.values.data;
   simulateExistingPipelineStatus: Status;
   simulatePipelineData: typeof SimulateMlInterfacePipelineApiLogic.values.data;
@@ -234,7 +236,6 @@ export interface MLInferenceProcessorsValues {
   simulatePipelineResult: IngestSimulateResponse | undefined;
   simulatePipelineStatus: Status;
   sourceFields: string[] | undefined;
-  showGetDocumentErrors: boolean;
   supportedMLModels: TrainedModelConfigResponse[];
 }
 
@@ -450,7 +451,8 @@ export const MLInferenceLogic = kea<
     getDocumentsErr: [
       () => [selectors.getDocumentApiErrorMessage],
       (err: MLInferenceProcessorsValues['getDocumentApiErrorMessage']) => {
-        return getErrorsFromHttpResponse(err);
+        if (!err) return '';
+        return getErrorsFromHttpResponse(err)[0];
       },
     ],
     isGetDocumentsLoading: [
