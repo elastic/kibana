@@ -776,7 +776,7 @@
         "scheduledTaskId" : null,
         "legacyId" : "29ba2fa0-b076-11ec-bb3f-1f063f8e06cf",
         "monitoring" : {
-          "execution" : {
+          "run" : {
             "history" : [
               {
                 "duration" : 111,

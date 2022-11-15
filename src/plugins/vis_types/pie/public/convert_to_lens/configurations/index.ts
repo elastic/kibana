@@ -35,7 +35,7 @@ const getLayers = (
       layerType: 'data' as const,
       primaryGroups: buckets,
       secondaryGroups: [],
-      metric: metrics[0],
+      metrics: metrics.length ? [metrics[0]] : [],
       numberDisplay:
         showValuesInLegend === false
           ? NumberDisplayTypes.HIDDEN
