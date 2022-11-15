@@ -15,7 +15,11 @@ import type { ReactWrapper } from 'enzyme';
 
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
-import { TableListView, Props as TableListViewProps } from './table_list_view';
+import {
+  TableListView,
+  Props as TableListViewProps,
+  UserContentCommonSchema,
+} from './table_list_view';
 
 const mockUseEffect = useEffect;
 
@@ -115,23 +119,27 @@ describe('TableListView', () => {
     const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
     const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
     const yesterdayToString = new Date(yesterday.getTime()).toDateString();
-    const hits = [
+    const hits: UserContentCommonSchema[] = [
       {
         id: '123',
-        updatedAt: twoDaysAgo,
+        updatedAt: twoDaysAgo.toISOString(),
+        type: 'dashboard',
         attributes: {
           title: 'Item 1',
           description: 'Item 1 description',
         },
+        references: [],
       },
       {
         id: '456',
         // This is the latest updated and should come first in the table
-        updatedAt: yesterday,
+        updatedAt: yesterday.toISOString(),
+        type: 'dashboard',
         attributes: {
           title: 'Item 2',
           description: 'Item 2 description',
         },
+        references: [],
       },
     ];
 
@@ -150,8 +158,8 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 2Item 2 descriptionelasticcloud', yesterdayToString], // Comes first as it is the latest updated
-        ['Item 1Item 1 descriptionelasticcloud', twoDaysAgoToString],
+        ['Item 2Item 2 description', yesterdayToString], // Comes first as it is the latest updated
+        ['Item 1Item 1 description', twoDaysAgoToString],
       ]);
     });
 
@@ -160,7 +168,7 @@ describe('TableListView', () => {
 
       const updatedAtValues: Moment[] = [];
 
-      const updatedHits = hits.map(({ id, attributes }, i) => {
+      const updatedHits = hits.map(({ id, attributes, references }, i) => {
         const updatedAt = new Date(new Date().setDate(new Date().getDate() - (7 + i)));
         updatedAtValues.push(moment(updatedAt));
 
@@ -168,6 +176,7 @@ describe('TableListView', () => {
           id,
           updatedAt,
           attributes,
+          references,
         };
       });
 
@@ -187,8 +196,8 @@ describe('TableListView', () => {
 
       expect(tableCellsValues).toEqual([
         // Renders the datetime with this format: "July 28, 2022"
-        ['Item 1Item 1 descriptionelasticcloud', updatedAtValues[0].format('LL')],
-        ['Item 2Item 2 descriptionelasticcloud', updatedAtValues[1].format('LL')],
+        ['Item 1Item 1 description', updatedAtValues[0].format('LL')],
+        ['Item 2Item 2 description', updatedAtValues[1].format('LL')],
       ]);
     });
 
@@ -200,7 +209,7 @@ describe('TableListView', () => {
           findItems: jest.fn().mockResolvedValue({
             total: hits.length,
             // Not including the "updatedAt" metadata
-            hits: hits.map(({ attributes }) => ({ attributes })),
+            hits: hits.map(({ attributes, references }) => ({ attributes, references })),
           }),
         });
       });
@@ -211,8 +220,8 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 1Item 1 descriptionelasticcloud'], // Sorted by title
-        ['Item 2Item 2 descriptionelasticcloud'],
+        ['Item 1Item 1 description'], // Sorted by title
+        ['Item 2Item 2 description'],
       ]);
     });
 
@@ -225,7 +234,11 @@ describe('TableListView', () => {
             total: hits.length + 1,
             hits: [
               ...hits,
-              { id: '789', attributes: { title: 'Item 3', description: 'Item 3 description' } },
+              {
+                id: '789',
+                attributes: { title: 'Item 3', description: 'Item 3 description' },
+                references: [],
+              },
             ],
           }),
         });
@@ -237,9 +250,9 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 2Item 2 descriptionelasticcloud', yesterdayToString],
-        ['Item 1Item 1 descriptionelasticcloud', twoDaysAgoToString],
-        ['Item 3Item 3 descriptionelasticcloud', '-'], // Empty column as no updatedAt provided
+        ['Item 2Item 2 description', yesterdayToString],
+        ['Item 1Item 1 description', twoDaysAgoToString],
+        ['Item 3Item 3 description', '-'], // Empty column as no updatedAt provided
       ]);
     });
   });
@@ -248,10 +261,14 @@ describe('TableListView', () => {
     const initialPageSize = 20;
     const totalItems = 30;
 
-    const hits = [...Array(totalItems)].map((_, i) => ({
+    const hits: UserContentCommonSchema[] = [...Array(totalItems)].map((_, i) => ({
+      id: `item${i}`,
+      type: 'dashboard',
+      updatedAt: new Date().toISOString(),
       attributes: {
         title: `Item ${i < 10 ? `0${i}` : i}`, // prefix with "0" for correct A-Z sorting
       },
+      references: [],
     }));
 
     const props = {
@@ -275,8 +292,8 @@ describe('TableListView', () => {
       const [[firstRowTitle]] = tableCellsValues;
       const [lastRowTitle] = tableCellsValues[tableCellsValues.length - 1];
 
-      expect(firstRowTitle).toBe('Item 00elasticcloud');
-      expect(lastRowTitle).toBe('Item 19elasticcloud');
+      expect(firstRowTitle).toBe('Item 00');
+      expect(lastRowTitle).toBe('Item 19');
     });
 
     test('should navigate to page 2', async () => {
@@ -304,38 +321,48 @@ describe('TableListView', () => {
       const [[firstRowTitle]] = tableCellsValues;
       const [lastRowTitle] = tableCellsValues[tableCellsValues.length - 1];
 
-      expect(firstRowTitle).toBe('Item 20elasticcloud');
-      expect(lastRowTitle).toBe('Item 29elasticcloud');
+      expect(firstRowTitle).toBe('Item 20');
+      expect(lastRowTitle).toBe('Item 29');
     });
   });
 
   describe('column sorting', () => {
     const setupColumnSorting = registerTestBed<string, TableListViewProps>(
-      WithServices<TableListViewProps>(TableListView, { TagList: getTagList({ tags: null }) }),
+      WithServices<TableListViewProps>(TableListView, { TagList: getTagList({ references: [] }) }),
       {
         defaultProps: { ...requiredProps },
         memoryRouter: { wrapComponent: false },
       }
     );
 
+    const getActions = (testBed: TestBed) => ({
+      openSortSelect() {
+        testBed.find('tableSortSelectBtn').at(0).simulate('click');
+      },
+    });
+
     const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
     const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
     const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
     const yesterdayToString = new Date(yesterday.getTime()).toDateString();
-    const hits = [
+    const hits: UserContentCommonSchema[] = [
       {
         id: '123',
-        updatedAt: twoDaysAgo, // first asc, last desc
+        updatedAt: twoDaysAgo.toISOString(), // first asc, last desc
+        type: 'dashboard',
         attributes: {
           title: 'z-foo', // first desc, last asc
         },
+        references: [{ id: 'id-tag-1', name: 'tag-1', type: 'tag' }],
       },
       {
         id: '456',
-        updatedAt: yesterday, // first desc, last asc
+        updatedAt: yesterday.toISOString(), // first desc, last asc
+        type: 'dashboard',
         attributes: {
           title: 'a-foo', // first asc, last desc
         },
+        references: [],
       },
     ];
 
@@ -367,11 +394,12 @@ describe('TableListView', () => {
           findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
+      const { openSortSelect } = getActions(testBed!);
       const { component, find } = testBed!;
       component.update();
 
       act(() => {
-        find('tableSortSelectBtn').simulate('click');
+        openSortSelect();
       });
       component.update();
 
@@ -396,6 +424,7 @@ describe('TableListView', () => {
       });
 
       const { component, table, find } = testBed!;
+      const { openSortSelect } = getActions(testBed!);
       component.update();
 
       let { tableCellsValues } = table.getMetaData('itemsInMemTable');
@@ -406,7 +435,7 @@ describe('TableListView', () => {
       ]);
 
       act(() => {
-        find('tableSortSelectBtn').simulate('click');
+        openSortSelect();
       });
       component.update();
       const filterOptions = find('sortSelect').find('li');
@@ -451,10 +480,11 @@ describe('TableListView', () => {
       });
 
       const { component, table, find } = testBed!;
+      const { openSortSelect } = getActions(testBed!);
       component.update();
 
       act(() => {
-        find('tableSortSelectBtn').simulate('click');
+        openSortSelect();
       });
       component.update();
       let filterOptions = find('sortSelect').find('li');
@@ -493,7 +523,7 @@ describe('TableListView', () => {
       ]);
 
       act(() => {
-        find('tableSortSelectBtn').simulate('click');
+        openSortSelect();
       });
       component.update();
       filterOptions = find('sortSelect').find('li');
@@ -516,22 +546,26 @@ describe('TableListView', () => {
       }
     );
 
-    const hits = [
+    const hits: UserContentCommonSchema[] = [
       {
         id: '123',
-        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)),
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
         attributes: {
           title: 'Item 1',
           description: 'Item 1 description',
         },
+        references: [],
+        type: 'dashboard',
       },
       {
         id: '456',
-        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)),
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
         attributes: {
           title: 'Item 2',
           description: 'Item 2 description',
         },
+        references: [],
+        type: 'dashboard',
       },
     ];
 
@@ -551,6 +585,156 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
       expect(tableCellsValues[0][2]).toBe('Inspect Item 1');
       expect(tableCellsValues[1][2]).toBe('Inspect Item 2');
+    });
+  });
+
+  describe('tag filtering', () => {
+    const setupTagFiltering = registerTestBed<string, TableListViewProps>(
+      WithServices<TableListViewProps>(TableListView, {
+        getTagList: () => [
+          { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
+          { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
+          { id: 'id-tag-3', name: 'tag-3', type: 'tag', description: '', color: '' },
+          { id: 'id-tag-4', name: 'tag-4', type: 'tag', description: '', color: '' },
+        ],
+      }),
+      {
+        defaultProps: { ...requiredProps },
+        memoryRouter: { wrapComponent: false },
+      }
+    );
+
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: '123',
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 1',
+          description: 'Item 1 description',
+        },
+        references: [
+          { id: 'id-tag-1', name: 'tag-1', type: 'tag' },
+          { id: 'id-tag-2', name: 'tag-2', type: 'tag' },
+        ],
+      },
+      {
+        id: '456',
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 2',
+          description: 'Item 2 description',
+        },
+        references: [],
+      },
+    ];
+
+    test('should filter by tag from the table', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, table, find } = testBed!;
+      component.update();
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      const getLastCallArgsFromFindItems = () =>
+        findItems.mock.calls[findItems.mock.calls.length - 1];
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      // "tag-1" and "tag-2" are rendered in the column
+      expect(tableCellsValues[0][0]).toBe('Item 1Item 1 descriptiontag-1tag-2');
+
+      await act(async () => {
+        find('tag-id-tag-1').simulate('click');
+      });
+      component.update();
+
+      // The search bar should be updated
+      let expected = 'tag:(tag-1)';
+      let [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+
+      await act(async () => {
+        find('tag-id-tag-2').simulate('click');
+      });
+      component.update();
+
+      expected = 'tag:(tag-1 or tag-2)';
+      [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+
+      // Ctrl + click on a tag
+      await act(async () => {
+        find('tag-id-tag-2').simulate('click', { ctrlKey: true });
+      });
+      component.update();
+
+      expected = 'tag:(tag-1) -tag:(tag-2)';
+      [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+    });
+
+    test('should filter by tag from the search bar filter', async () => {
+      let testBed: TestBed;
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find, exists } = testBed!;
+      component.update();
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      const getLastCallArgsFromFindItems = () =>
+        findItems.mock.calls[findItems.mock.calls.length - 1];
+
+      const openTagFilterDropdown = async () => {
+        await act(async () => {
+          find('tagFilterPopoverButton').simulate('click');
+        });
+        component.update();
+      };
+
+      await openTagFilterDropdown();
+
+      expect(exists('tagSelectableList')).toBe(true);
+      await act(async () => {
+        find('tag-searchbar-option-tag-1').simulate('click');
+      });
+      component.update();
+
+      // The search bar should be updated and search term sent to the findItems() handler
+      let expected = 'tag:(tag-1)';
+      let [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+
+      // Ctrl + click one item
+      await act(async () => {
+        find('tag-searchbar-option-tag-2').simulate('click', { ctrlKey: true });
+      });
+      component.update();
+
+      expected = 'tag:(tag-1) -tag:(tag-2)';
+      [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
     });
   });
 });

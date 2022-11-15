@@ -103,11 +103,17 @@ export enum TriggerMethod {
   SCHEDULED = 'scheduled',
 }
 
+export enum FeatureName {
+  FILTERING_ADVANCED_CONFIG = 'filtering_advanced_config',
+  FILTERING_RULES = 'filtering_rules',
+}
+
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
   description: string | null;
   error: string | null;
+  features: Record<FeatureName, boolean | null> | null;
   filtering: FilteringConfig[];
   id: string;
   index_name: string;

@@ -151,9 +151,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo').expect(204, '');
 
   const defineSearchSourceAlert = async (alertName: string) => {
-    await testSubjects.click('discoverAlertsButton');
-    await testSubjects.click('discoverCreateAlertButton');
-
     await retry.waitFor('rule name value is correct', async () => {
       await testSubjects.setValue('ruleNameInput', alertName);
       const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
@@ -173,6 +170,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       "context_message": "{{context.message}}"
     }`);
     await testSubjects.click('saveRuleButton');
+  };
+
+  const openDiscoverAlertFlyout = async () => {
+    await testSubjects.click('discoverAlertsButton');
+    await testSubjects.click('discoverCreateAlertButton');
+  };
+
+  const openManagementAlertFlyout = async () => {
+    await PageObjects.common.navigateToApp('management');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await testSubjects.click('triggersActions');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await testSubjects.click('createFirstRuleButton');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await testSubjects.click('.es-query-SelectOption');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await testSubjects.click('queryFormType_searchSource');
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   const getResultsLink = async () => {
@@ -237,15 +252,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('create output index');
       await createOutputDataIndex();
 
-      log.debug('create data views');
-      const sourceDataViewResponse = await createDataView(SOURCE_DATA_INDEX);
-      const outputDataViewResponse = await createDataView(OUTPUT_DATA_INDEX);
-
       log.debug('create connector');
       connectorId = await createConnector();
-
-      sourceDataViewId = sourceDataViewResponse.body.data_view.id;
-      outputDataViewId = outputDataViewResponse.body.data_view.id;
     });
 
     after(async () => {
@@ -257,6 +265,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
+    it('should create an alert when there is no data view', async () => {
+      await openManagementAlertFlyout();
+
+      // should not have data view selected by default
+      const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+      expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
+
+      log.debug('create data views');
+      const sourceDataViewResponse = await createDataView(SOURCE_DATA_INDEX);
+      const outputDataViewResponse = await createDataView(OUTPUT_DATA_INDEX);
+
+      sourceDataViewId = sourceDataViewResponse.body.data_view.id;
+      outputDataViewId = outputDataViewResponse.body.data_view.id;
+    });
+
     it('should navigate to alert results via view in app link', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -264,6 +287,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
 
       // create an alert
+      await openDiscoverAlertFlyout();
       await defineSearchSourceAlert(RULE_NAME);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -377,6 +401,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.addRuntimeField('runtime-message-field', `emit('mock-message')`);
 
       // create an alert
+      await openDiscoverAlertFlyout();
       await defineSearchSourceAlert('test-adhoc-alert');
       await PageObjects.header.waitUntilLoadingHasFinished();
       sourceAdHocDataViewId = await PageObjects.discover.getCurrentDataViewId();

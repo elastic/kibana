@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen, fireEvent } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import * as fetchers from '../../../state/api/monitor_management';
 import { FETCH_STATUS, useFetcher as originalUseFetcher } from '@kbn/observability-plugin/public';
@@ -21,7 +20,7 @@ import {
   SourceType,
 } from '../../../../../common/runtime_types';
 
-describe('<Actions />', () => {
+describe('<DeleteMonitor />', () => {
   const onUpdate = jest.fn();
   const useFetcher = spyOnUseFetcher({});
 
@@ -29,13 +28,13 @@ describe('<Actions />', () => {
     useFetcher.mockImplementation(originalUseFetcher);
     const deleteMonitor = jest.spyOn(fetchers, 'deleteMonitor');
     const id = 'test-id';
-    render(<DeleteMonitor id={id} name="sample name" onUpdate={onUpdate} />);
+    render(<DeleteMonitor configId={id} name="sample name" onUpdate={onUpdate} />);
 
     expect(deleteMonitor).not.toBeCalled();
 
-    userEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('button'));
 
-    userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(deleteMonitor).toBeCalledWith({ id });
   });
@@ -45,15 +44,16 @@ describe('<Actions />', () => {
     const name = 'sample monitor';
     render(
       <Actions
-        id={id}
+        configId={id}
         name={name}
         onUpdate={onUpdate}
         monitors={
           [
             {
-              id: 'test-id',
+              id,
               attributes: {
                 [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
+                [ConfigKey.CONFIG_ID]: id,
               } as BrowserFields,
             },
           ] as unknown as MonitorManagementListResult['monitors']
@@ -61,7 +61,7 @@ describe('<Actions />', () => {
       />
     );
 
-    userEvent.click(screen.getByLabelText('Delete monitor').closest('span') as HTMLElement);
+    fireEvent.click(screen.getByLabelText('Delete monitor'));
 
     expect(onUpdate).toHaveBeenCalled();
   });
@@ -75,15 +75,16 @@ describe('<Actions />', () => {
     });
     render(
       <Actions
-        id={id}
+        configId={id}
         name="sample name"
         onUpdate={onUpdate}
         monitors={
           [
             {
-              id: 'test-id',
+              id,
               attributes: {
                 [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
+                [ConfigKey.CONFIG_ID]: id,
               } as BrowserFields,
             },
           ] as unknown as MonitorManagementListResult['monitors']
