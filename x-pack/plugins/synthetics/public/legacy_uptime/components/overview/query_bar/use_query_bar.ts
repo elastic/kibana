@@ -10,16 +10,9 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { useDispatch } from 'react-redux';
 import type { Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  useGetUrlParams,
-  useUptimeDataView,
-  generateUpdatedKueryString,
-  useUrlParams,
-} from '../../../hooks';
+import { useGetUrlParams, useGenerateUpdatedKueryString, useUrlParams } from '../../../hooks';
 import { setEsKueryString } from '../../../state/actions';
 import { UptimePluginServices } from '../../../../plugin';
-import { TAG_KEY_FOR_AND_CONDITION } from '../filter_group/filter_group';
 
 export enum SyntaxType {
   text = 'text',
@@ -72,18 +65,12 @@ export const useQueryBar = (): UseQueryBarUtils => {
         }
   );
 
-  const dataView = useUptimeDataView();
-
   const [, updateUrlParams] = useUrlParams();
 
-  const [logicalANDForTag] = useLocalStorage(TAG_KEY_FOR_AND_CONDITION, 'false');
-
-  const [esFilters, error] = generateUpdatedKueryString(
-    dataView,
+  const [esFilters, error] = useGenerateUpdatedKueryString(
     query.language === SyntaxType.kuery ? (query.query as string) : undefined,
     paramFilters,
-    excludedFilters,
-    logicalANDForTag === 'true'
+    excludedFilters
   );
 
   const setEsKueryFilters = useCallback(

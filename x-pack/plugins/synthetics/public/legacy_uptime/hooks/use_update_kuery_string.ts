@@ -6,7 +6,11 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { useEffect, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useUptimeRefreshContext } from '../contexts/uptime_refresh_context';
+import { useUptimeDataView } from '../contexts/uptime_data_view_context';
+import { TAG_KEY_FOR_AND_CONDITION } from '../components/overview/filter_group/filter_group';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../../common/lib';
 
 const getKueryString = (
@@ -45,14 +49,22 @@ const getKueryString = (
   return `NOT (${excludeKueryString})`;
 };
 
-export const generateUpdatedKueryString = (
-  dataView: DataView | null,
+export const useGenerateUpdatedKueryString = (
   filterQueryString = '',
   urlFilters: string,
-  excludedFilters?: string,
-  logicalANDForTag?: boolean
+  excludedFilters?: string
 ): [string?, Error?] => {
-  const kueryString = getKueryString(urlFilters, excludedFilters, logicalANDForTag);
+  const dataView = useUptimeDataView();
+
+  const { lastRefresh } = useUptimeRefreshContext();
+
+  const [useLogicalAND] = useLocalStorage(TAG_KEY_FOR_AND_CONDITION, false);
+
+  const [kueryString, setKueryString] = useState<string>('');
+
+  useEffect(() => {
+    setKueryString(getKueryString(urlFilters, excludedFilters, useLogicalAND));
+  }, [useLogicalAND, excludedFilters, urlFilters, lastRefresh]);
 
   const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
 
