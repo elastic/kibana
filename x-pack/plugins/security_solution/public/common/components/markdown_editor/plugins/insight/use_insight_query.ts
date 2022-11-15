@@ -6,11 +6,13 @@
  */
 
 import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../../lib/kibana';
 import { combineQueries } from '../../../../lib/kuery';
+import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useTimelineEvents } from '../../../../../timelines/containers';
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
@@ -27,22 +29,36 @@ export interface UseInsightQueryResult {
 
 export const useInsightQuery = ({ dataProviders }: UseInsightQuery): UseInsightQueryResult => {
   const { uiSettings } = useKibana().services;
+  const { addError } = useAppToasts();
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const { browserFields, selectedPatterns, indexPattern, dataViewId } = useSourcererDataView(
     SourcererScopeName.timeline
   );
-  const combinedQueries = combineQueries({
-    config: esQueryConfig,
-    dataProviders,
-    indexPattern,
-    browserFields,
-    filters: [],
-    kqlQuery: {
-      query: '',
-      language: 'kuery',
-    },
-    kqlMode: 'filter',
-  });
+  let combinedQueries: { filterQuery: string | undefined; kqlError: Error | undefined } | null =
+    null;
+  try {
+    combinedQueries = combineQueries({
+      config: esQueryConfig,
+      dataProviders,
+      indexPattern,
+      browserFields,
+      filters: [],
+      kqlQuery: {
+        query: '',
+        language: 'kuery',
+      },
+      kqlMode: 'filter',
+    });
+  } catch (err) {
+    addError(err, {
+      title: i18n.translate(
+        'xpack.securitySolution.markdownEditor.plugins.insightProviderFieldError',
+        {
+          defaultMessage: 'Unable to parse insight provider configuration, invalid field name',
+        }
+      ),
+    });
+  }
   const [isQueryLoading, { events, totalCount }] = useTimelineEvents({
     dataViewId,
     fields: ['*'],

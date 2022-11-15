@@ -90,7 +90,8 @@ export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
 
 export const NOTES_LINK = '[data-test-subj="markdown-link"]';
 
-export const MARKDOWN_INVESTIGATE_BUTTON = '[data-test-subj="investigate-in-timeline-button"]';
+export const MARKDOWN_INVESTIGATE_BUTTON =
+  '[data-test-subj="insight-investigate-in-timeline-button"]';
 
 export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 
