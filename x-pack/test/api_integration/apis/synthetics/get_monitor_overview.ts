@@ -13,7 +13,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('GetMonitorsOverview', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/145270
+  describe.skip('GetMonitorsOverview', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
