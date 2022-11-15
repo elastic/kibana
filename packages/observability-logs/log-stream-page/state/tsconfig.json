@@ -6,12 +6,11 @@
     "outDir": "target_types",
     "types": [
       "jest",
-      "node",
-      "react"
+      "node"
     ]
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ]
 }
