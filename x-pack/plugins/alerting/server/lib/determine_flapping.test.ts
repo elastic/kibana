@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { size } from 'lodash';
+import { keys, size } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import {
@@ -34,7 +34,7 @@ describe('determineFlapping', () => {
       '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
     };
     const { recoveredAlertsToReturn } = determineAlertsToReturn(['1'], {}, recoveredAlerts);
-    expect(size(recoveredAlertsToReturn)).toEqual(1);
+    expect(keys(recoveredAlertsToReturn)).toEqual(['1']);
   });
 
   test('should return all recovered alerts if flappingHistory is not at capacity', () => {
@@ -43,7 +43,7 @@ describe('determineFlapping', () => {
       '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
     };
     const { recoveredAlertsToReturn } = determineAlertsToReturn([], {}, recoveredAlerts);
-    expect(size(recoveredAlertsToReturn)).toEqual(1);
+    expect(keys(recoveredAlertsToReturn)).toEqual(['1']);
   });
 
   test('should return id when an alert is determined to be flapping', () => {
