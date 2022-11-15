@@ -10,11 +10,12 @@ import { RULE_TABLE_STATE_STORAGE_KEY } from '../../../../../../common/constants
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useInitializeUrlParam } from '../../../../../common/utils/global_query_string';
+import { AllRulesTabs } from '../rules_table_toolbar';
 
 import { useRulesTableContext } from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
 
-export function useInitializeRulesTableSavedState(): void {
+export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTabs) => void): void {
   const { actions } = useRulesTableContext();
   const {
     services: { storage },
@@ -27,11 +28,16 @@ export function useInitializeRulesTableSavedState(): void {
         return;
       }
 
+      const activeTab = params?.tab ?? savedState.tab;
       const isInMemorySorting = params?.isInMemorySorting ?? savedState.isInMemorySorting;
       const filterOptions = params?.filterOptions ?? savedState.filterOptions;
       const sorting = params?.sorting ?? savedState.sorting;
       const page = params?.page ?? savedState.page;
       const perPage = params?.perPage ?? savedState.perPage;
+
+      if (activeTab === AllRulesTabs.monitoring) {
+        setActiveTab(activeTab);
+      }
 
       if (isInMemorySorting !== undefined) {
         actions.setIsInMemorySorting(isInMemorySorting);
@@ -53,7 +59,7 @@ export function useInitializeRulesTableSavedState(): void {
         actions.setPerPage(perPage);
       }
     },
-    [actions, storage]
+    [actions, storage, setActiveTab]
   );
 
   useInitializeUrlParam(URL_PARAM_KEY.rulesTable, onInitializeRulesTableContextFromUrlParam);

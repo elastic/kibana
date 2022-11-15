@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { renderHook } from '@testing-library/react-hooks';
 import { RULE_TABLE_STATE_STORAGE_KEY } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useUpdateUrlParam } from '../../../../../common/utils/global_query_string';
+import { AllRulesTabs } from '../rules_table_toolbar';
 import type { RulesTableState } from './rules_table_context';
 import { useRulesTableContext } from './rules_table_context';
 import { useSyncRulesTableSavedState } from './use_sync_rules_table_saved_state';
-import { renderHook } from '@testing-library/react-hooks';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/utils/global_query_string');
@@ -70,14 +71,29 @@ describe('useSyncRulesTableSavedState', () => {
   });
 
   it('syncs the state with the url', () => {
-    renderHook(() => useSyncRulesTableSavedState());
+    renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.monitoring));
+
+    expect(updateUrlParam).toHaveBeenCalledWith({ ...expectedSavedState, tab: 'monitoring' });
+  });
+
+  it('syncs the state with the storage', () => {
+    renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.monitoring));
+
+    expect(setStorage).toHaveBeenCalledWith(RULE_TABLE_STATE_STORAGE_KEY, {
+      ...expectedSavedState,
+      tab: 'monitoring',
+    });
+  });
+
+  it('does not sync the default active tab with the url', () => {
+    renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.rules));
 
     expect(updateUrlParam).toHaveBeenCalledWith(expectedSavedState);
   });
 
-  it('syncs the state with the store', () => {
-    renderHook(() => useSyncRulesTableSavedState());
+  it('does not sync the default active tab with the storage', () => {
+    renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.rules));
 
-    expect(setStorage).toHaveBeenCalledWith(RULE_TABLE_STATE_STORAGE_KEY, expectedSavedState);
+    expect(setStorage).toHaveBeenCalledWith(expectedSavedState);
   });
 });

@@ -8,6 +8,7 @@
 import type { FilterOptions, SortingOptions } from '../../../../rule_management/logic/types';
 
 export interface RulesTableSavedState {
+  tab?: string;
   isInMemorySorting: boolean;
   filterOptions: FilterOptions;
   sorting: SortingOptions;

@@ -34,6 +34,7 @@ function mockState({
 
 describe('useInitializeRulesTableSavedState', () => {
   const urlSavedState: RulesTableSavedState = {
+    tab: 'monitoring',
     isInMemorySorting: false,
     filterOptions: {
       filter: '',
@@ -64,6 +65,7 @@ describe('useInitializeRulesTableSavedState', () => {
     perPage: 20,
   };
   let actions: Partial<RulesTableActions>;
+  let setActiveTab: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -75,6 +77,7 @@ describe('useInitializeRulesTableSavedState', () => {
       setPage: jest.fn(),
       setPerPage: jest.fn(),
     };
+    setActiveTab = jest.fn();
 
     (useRulesTableContext as jest.Mock).mockReturnValue({ actions });
   });
@@ -85,8 +88,9 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('does not restore the state', () => {
-      renderHook(() => useInitializeRulesTableSavedState());
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
+      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setIsInMemorySorting).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).not.toHaveBeenCalled();
       expect(actions.setSortingOptions).not.toHaveBeenCalled();
@@ -101,8 +105,9 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores the state', () => {
-      renderHook(() => useInitializeRulesTableSavedState());
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
+      expect(setActiveTab).toHaveBeenCalledWith('monitoring');
       expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(urlSavedState.isInMemorySorting);
       expect(actions.setFilterOptions).toHaveBeenCalledWith(urlSavedState.filterOptions);
       expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sorting);
@@ -117,8 +122,9 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores the state', () => {
-      renderHook(() => useInitializeRulesTableSavedState());
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
+      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(
         storageSavedState.isInMemorySorting
       );
@@ -135,8 +141,9 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores the state from the url', () => {
-      renderHook(() => useInitializeRulesTableSavedState());
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
+      expect(setActiveTab).toHaveBeenCalledWith('monitoring');
       expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(urlSavedState.isInMemorySorting);
       expect(actions.setFilterOptions).toHaveBeenCalledWith(urlSavedState.filterOptions);
       expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sorting);

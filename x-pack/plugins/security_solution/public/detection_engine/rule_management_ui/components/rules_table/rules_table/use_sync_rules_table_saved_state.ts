@@ -10,11 +10,12 @@ import { RULE_TABLE_STATE_STORAGE_KEY } from '../../../../../../common/constants
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useUpdateUrlParam } from '../../../../../common/utils/global_query_string';
+import { AllRulesTabs } from '../rules_table_toolbar';
 
 import { useRulesTableContext } from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
 
-export function useSyncRulesTableSavedState(): void {
+export function useSyncRulesTableSavedState(activeTab: AllRulesTabs): void {
   const { state } = useRulesTableContext();
   const {
     services: { storage },
@@ -30,7 +31,11 @@ export function useSyncRulesTableSavedState(): void {
       perPage: state.pagination.perPage,
     };
 
+    if (activeTab === AllRulesTabs.monitoring) {
+      savedState.tab = activeTab;
+    }
+
     updateUrlParam(savedState);
     storage.set(RULE_TABLE_STATE_STORAGE_KEY, savedState);
-  }, [updateUrlParam, storage, state]);
+  }, [updateUrlParam, storage, state, activeTab]);
 }
