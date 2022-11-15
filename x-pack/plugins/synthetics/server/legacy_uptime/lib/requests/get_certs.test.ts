@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import DateMath from '@kbn/datemath';
+import moment from 'moment';
 import { getCerts } from './get_certs';
 import { getUptimeESMockClient } from './test_helpers';
 
@@ -82,6 +84,10 @@ describe('getCerts', () => {
   });
 
   it('parses query result and returns expected values', async () => {
+    const dateMathSpy = jest.spyOn(DateMath, 'parse');
+
+    dateMathSpy.mockReturnValueOnce(moment(10000));
+    dateMathSpy.mockReturnValueOnce(moment(10001));
     const { esClient, uptimeEsClient } = getUptimeESMockClient();
 
     esClient.search.mockResponseOnce({
@@ -178,8 +184,8 @@ describe('getCerts', () => {
                     Object {
                       "range": Object {
                         "monitor.timespan": Object {
-                          "gte": "now-2d",
-                          "lte": "now+1h",
+                          "gte": 10000,
+                          "lte": 10001,
                         },
                       },
                     },
