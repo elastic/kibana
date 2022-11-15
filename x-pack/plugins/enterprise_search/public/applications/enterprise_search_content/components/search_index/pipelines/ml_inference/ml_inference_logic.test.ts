@@ -6,6 +6,7 @@
  */
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
+import { nerModel } from '../../../../__mocks__/ml_models.mock';
 
 import { HttpResponse } from '@kbn/core/public';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
@@ -61,7 +62,7 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   mlInferencePipeline: undefined,
   mlInferencePipelineProcessors: undefined,
   mlInferencePipelinesData: undefined,
-  mlModelsData: undefined,
+  mlModelsData: null,
   mlModelsStatus: 0,
   showGetDocumentErrors: false,
   simulateExistingPipelineData: undefined,
@@ -466,28 +467,10 @@ describe('MlInferenceLogic', () => {
         expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
       });
       it('generates inference pipeline', () => {
-        MLModelsApiLogic.actions.apiSuccess([
-          {
-            inference_config: {
-              text_classification: {
-                classification_labels: ['one', 'two'],
-                tokenization: {
-                  bert: {},
-                },
-              },
-            },
-            input: {
-              field_names: ['text_field'],
-            },
-            model_id: 'test-model',
-            model_type: 'pytorch',
-            tags: [],
-            version: '1.0.0',
-          },
-        ]);
+        MLModelsApiLogic.actions.apiSuccess([nerModel]);
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
           destinationField: '',
-          modelID: 'test-model',
+          modelID: nerModel.model_id,
           pipelineName: 'unit-test',
           sourceField: 'body',
         });
@@ -625,26 +608,13 @@ describe('MlInferenceLogic', () => {
         ...DEFAULT_VALUES.addInferencePipelineModal,
         configuration: {
           destinationField: '',
-          modelID: 'mock-model-id',
+          modelID: nerModel.model_id,
           pipelineName: 'mock-pipeline-name',
           sourceField: 'mock_text_field',
         },
         indexName: 'my-index-123',
       };
-      const mlModelsData: TrainedModelConfigResponse[] = [
-        {
-          inference_config: {
-            text_classification: {},
-          },
-          input: {
-            field_names: ['text_field'],
-          },
-          model_id: 'mock-model-id',
-          model_type: 'pytorch',
-          tags: ['test_tag'],
-          version: '1',
-        },
-      ];
+      const mlModelsData: TrainedModelConfigResponse[] = [nerModel];
       it('does nothing if mlInferencePipeline is undefined', () => {
         mount({
           ...DEFAULT_VALUES,

@@ -5,23 +5,21 @@
  * 2.0.
  */
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
-import { mlModels } from '../../__mocks__/ml_models.mock';
+import { mlModelStats } from '../../__mocks__/ml_models.mock';
 
-import { getMLModels } from './ml_models_logic';
+import { getMLModelsStats } from './ml_model_stats_logic';
 
 describe('MLModelsApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('getMLModels', () => {
+  describe('getMLModelsStats', () => {
     it('calls the ml api', async () => {
-      http.get.mockResolvedValue(mlModels);
-      const result = await getMLModels();
-      expect(http.get).toHaveBeenCalledWith('/api/ml/trained_models', {
-        query: { size: 1000, with_pipelines: true },
-      });
-      expect(result).toEqual(mlModels);
+      http.get.mockResolvedValue(mlModelStats);
+      const result = await getMLModelsStats();
+      expect(http.get).toHaveBeenCalledWith('/api/ml/trained_models/_stats');
+      expect(result).toEqual(mlModelStats);
     });
   });
 });
