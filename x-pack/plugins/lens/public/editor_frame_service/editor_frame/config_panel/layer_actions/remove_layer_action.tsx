@@ -207,6 +207,7 @@ export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
   );
 
   return {
+    id: 'removeLayerAction',
     execute: async () => {
       const storage = new Storage(localStorage);
       const lensLocalStorage = storage.get(LOCAL_STORAGE_LENS_KEY) ?? {};
