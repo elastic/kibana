@@ -9,4 +9,6 @@ export * from './getting_started.journey';
 export * from './add_monitor.journey';
 export * from './monitor_selector.journey';
 export * from './overview_sorting.journey';
+// TODO: Fix this test
 export * from './overview_scrolling.journey';
+export * from './overview_search.journey';

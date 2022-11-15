@@ -43,6 +43,7 @@ import {
   RuleMonitoring,
   MappedParams,
   RuleSnooze,
+  RuleLastRun,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -81,6 +82,7 @@ export interface RuleExecutorServices<
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
+  ruleMonitoringService?: PublicRuleMonitoringService;
 }
 
 export interface RuleExecutorOptions<
@@ -121,6 +123,32 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
+
+export interface GetSummarizedAlertsFnOpts {
+  start?: Date;
+  end?: Date;
+  executionUuid?: string;
+  ruleId: string;
+  spaceId: string;
+}
+
+// TODO - add type for these alerts when we determine which alerts-as-data
+// fields will be made available in https://github.com/elastic/kibana/issues/143741
+export interface SummarizedAlerts {
+  new: {
+    count: number;
+    alerts: unknown[];
+  };
+  ongoing: {
+    count: number;
+    alerts: unknown[];
+  };
+  recovered: {
+    count: number;
+    alerts: unknown[];
+  };
+}
+export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 
 export interface RuleType<
   Params extends RuleTypeParams = never,
@@ -166,6 +194,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  getSummarizedAlerts?: GetSummarizedAlertsFn;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
@@ -244,9 +273,11 @@ export interface RawRule extends SavedObjectAttributes {
   mutedInstanceIds: string[];
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
-  monitoring?: RuleMonitoring;
+  monitoring?: RawRuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   isSnoozedUntil?: string | null;
+  lastRun?: RawRuleLastRun | null;
+  nextRun?: string | null;
 }
 
 export interface AlertingPlugin {
@@ -275,3 +306,14 @@ export interface InvalidatePendingApiKey {
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export interface PublicRuleMonitoringService {
+  setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
+  setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
+  setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
+  setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
+  setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
+}
+
+export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
+export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
