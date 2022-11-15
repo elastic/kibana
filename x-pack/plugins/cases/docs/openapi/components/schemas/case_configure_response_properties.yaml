@@ -11,17 +11,7 @@ created_at:
 created_by:
   type: object
   properties:
-    email:
-      type: string
-      example: null
-      nullable: true
-    full_name:
-      type: string
-      example: null
-      nullable: true
-    username: 
-      type: string
-      example: elastic
+    $ref: 'user_properties.yaml'
 error:
   type: string
   nullable: true
@@ -53,17 +43,7 @@ updated_at:
 updated_by:
   type: object
   properties:
-    email:
-      type: string
-      example: null
-      nullable: true
-    full_name:
-      type: string
-      example: null
-      nullable: true
-    username: 
-      type: string
-      example: elastic
+    $ref: 'user_properties.yaml'
   nullable: true
 version:
   type: string

@@ -129,20 +129,12 @@ export const SharedLists = React.memo(() => {
     ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
       async () => {
         try {
-          if (exceptionsListsRef[id] != null && exceptionsListsRef[id].rules.length === 0) {
-            await deleteExceptionList({
-              id,
-              namespaceType,
-              onError: handleDeleteError,
-              onSuccess: handleDeleteSuccess(listId),
-            });
-
-            if (refreshExceptions != null) {
-              refreshExceptions();
-            }
-          } else {
+          if (exceptionsListsRef[id] != null) {
             setReferenceModalState({
-              contentText: i18n.referenceErrorMessage(exceptionsListsRef[id].rules.length),
+              contentText:
+                exceptionsListsRef[id].rules.length > 0
+                  ? i18n.referenceErrorMessage(exceptionsListsRef[id].rules.length)
+                  : i18n.defaultDeleteListMessage(exceptionsListsRef[id].name),
               rulesReferences: exceptionsListsRef[id].rules.map(({ name }) => name),
               isLoading: true,
               listId: id,
@@ -155,13 +147,7 @@ export const SharedLists = React.memo(() => {
           handleDeleteError(error);
         }
       },
-    [
-      deleteExceptionList,
-      exceptionsListsRef,
-      handleDeleteError,
-      handleDeleteSuccess,
-      refreshExceptions,
-    ]
+    [exceptionsListsRef, handleDeleteError]
   );
 
   const handleExportSuccess = useCallback(

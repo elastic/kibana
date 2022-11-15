@@ -618,22 +618,6 @@ export function getFormBasedDatasource({
 
     getDropProps,
     onDrop,
-    getSupportedActionsForLayer(layerId, state, _, openLayerSettings) {
-      if (!openLayerSettings) {
-        return [];
-      }
-      return [
-        {
-          displayName: i18n.translate('xpack.lens.indexPattern.layerSettingsAction', {
-            defaultMessage: 'Layer settings',
-          }),
-          execute: openLayerSettings,
-          icon: 'gear',
-          isCompatible: Boolean(state.layers[layerId]),
-          'data-test-subj': 'lnsLayerSettings',
-        },
-      ];
-    },
 
     getCustomWorkspaceRenderer: (
       state: FormBasedPrivateState,
