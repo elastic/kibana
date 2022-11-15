@@ -115,29 +115,11 @@ describe('getSetProcessorForInferenceType lib function', () => {
       description:
         "Copy the predicted_value to 'dest' if the prediction_probability is greater than 0.5",
       field: destinationField,
-      if: "ctx.ml.inference['dest'].prediction_probability > 0.5",
-      on_failure: [
-        {
-          append: {
-            field: '_source._ingest.set_errors',
-            ignore_failure: true,
-            value: [
-              {
-                message:
-                  "Processor 'set' in pipeline 'my-pipeline' failed with message '{{ _ingest.on_failure_message }}'",
-                pipeline: 'my-pipeline',
-                timestamp: '{{{ _ingest.timestamp }}}',
-              },
-            ],
-          },
-        },
-      ],
+      if: "ctx?.ml?.inference != null && ctx.ml.inference['dest'] != null && ctx.ml.inference['dest'].prediction_probability > 0.5",
       value: undefined,
     };
 
-    expect(getSetProcessorForInferenceType(destinationField, inferenceType, 'my-pipeline')).toEqual(
-      expected
-    );
+    expect(getSetProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
   });
 
   it('should return expected value for TEXT_EMBEDDING', () => {
@@ -147,36 +129,17 @@ describe('getSetProcessorForInferenceType lib function', () => {
       copy_from: 'ml.inference.dest.predicted_value',
       description: "Copy the predicted_value to 'dest'",
       field: destinationField,
-      on_failure: [
-        {
-          append: {
-            field: '_source._ingest.set_errors',
-            ignore_failure: true,
-            value: [
-              {
-                message:
-                  "Processor 'set' in pipeline 'my-pipeline' failed with message '{{ _ingest.on_failure_message }}'",
-                pipeline: 'my-pipeline',
-                timestamp: '{{{ _ingest.timestamp }}}',
-              },
-            ],
-          },
-        },
-      ],
+      if: "ctx?.ml?.inference != null && ctx.ml.inference['dest'] != null",
       value: undefined,
     };
 
-    expect(getSetProcessorForInferenceType(destinationField, inferenceType, 'my-pipeline')).toEqual(
-      expected
-    );
+    expect(getSetProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
   });
 
   it('should return undefined for unknown inferenceType', () => {
     const inferenceType = 'wrongInferenceType';
 
-    expect(
-      getSetProcessorForInferenceType(destinationField, inferenceType, 'my-pipeline')
-    ).toBeUndefined();
+    expect(getSetProcessorForInferenceType(destinationField, inferenceType)).toBeUndefined();
   });
 });
 
@@ -272,23 +235,7 @@ describe('generateMlInferencePipelineBody lib function', () => {
               description:
                 "Copy the predicted_value to 'my-destination-field' if the prediction_probability is greater than 0.5",
               field: 'my-destination-field',
-              if: "ctx.ml.inference['my-destination-field'].prediction_probability > 0.5",
-              on_failure: [
-                {
-                  append: {
-                    field: '_source._ingest.set_errors',
-                    ignore_failure: true,
-                    value: [
-                      {
-                        message:
-                          "Processor 'set' in pipeline 'my-pipeline' failed with message '{{ _ingest.on_failure_message }}'",
-                        pipeline: 'my-pipeline',
-                        timestamp: '{{{ _ingest.timestamp }}}',
-                      },
-                    ],
-                  },
-                },
-              ],
+              if: "ctx?.ml?.inference != null && ctx.ml.inference['my-destination-field'] != null && ctx.ml.inference['my-destination-field'].prediction_probability > 0.5",
             },
           }),
         ]),

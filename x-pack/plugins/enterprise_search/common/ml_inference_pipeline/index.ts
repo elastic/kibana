@@ -7,7 +7,6 @@
 
 import {
   IngestPipeline,
-  IngestProcessorContainer,
   IngestRemoveProcessor,
   IngestSetProcessor,
   MlTrainedModelConfig,
@@ -56,7 +55,7 @@ export const generateMlInferencePipelineBody = ({
 
   const inferenceType = Object.keys(model.inference_config)[0];
   const remove = getRemoveProcessorForInferenceType(destinationField, inferenceType);
-  const set = getSetProcessorForInferenceType(destinationField, inferenceType, pipelineName);
+  const set = getSetProcessorForInferenceType(destinationField, inferenceType);
 
   return {
     description: description ?? '',
@@ -112,34 +111,17 @@ export const generateMlInferencePipelineBody = ({
 
 export const getSetProcessorForInferenceType = (
   destinationField: string,
-  inferenceType: string,
-  pipelineName: string
+  inferenceType: string
 ): IngestSetProcessor | undefined => {
   let set: IngestSetProcessor | undefined;
   const prefixedDestinationField = `ml.inference.${destinationField}`;
-  const onFailure: IngestProcessorContainer[] = [
-    {
-      append: {
-        field: '_source._ingest.set_errors',
-        ignore_failure: true,
-        value: [
-          {
-            message: `Processor 'set' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
-            pipeline: pipelineName,
-            timestamp: '{{{ _ingest.timestamp }}}',
-          },
-        ],
-      },
-    },
-  ];
 
   if (inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION) {
     set = {
       copy_from: `${prefixedDestinationField}.predicted_value`,
       description: `Copy the predicted_value to '${destinationField}' if the prediction_probability is greater than 0.5`,
       field: destinationField,
-      if: `ctx.ml.inference['${destinationField}'].prediction_probability > 0.5`,
-      on_failure: onFailure,
+      if: `ctx?.ml?.inference != null && ctx.ml.inference['${destinationField}'] != null && ctx.ml.inference['${destinationField}'].prediction_probability > 0.5`,
       value: undefined,
     };
   } else if (inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING) {
@@ -147,7 +129,7 @@ export const getSetProcessorForInferenceType = (
       copy_from: `${prefixedDestinationField}.predicted_value`,
       description: `Copy the predicted_value to '${destinationField}'`,
       field: destinationField,
-      on_failure: onFailure,
+      if: `ctx?.ml?.inference != null && ctx.ml.inference['${destinationField}'] != null`,
       value: undefined,
     };
   }
