@@ -12,7 +12,7 @@ import JSON5 from 'json5';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { Root } from '../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'wait_for_migration_completion.log');
 

@@ -48,6 +48,8 @@ import type { RequestHandlerContext } from '@kbn/core-http-request-handler-conte
 import type { HttpResources } from '@kbn/core-http-resources-server';
 import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-server-internal';
 
+export { bootstrap } from '@kbn/core-root-server-internal';
+
 export type { PluginOpaqueId } from '@kbn/core-base-common';
 export type {
   CoreUsageStats,
@@ -65,8 +67,6 @@ export type {
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
-
-export { bootstrap } from './bootstrap';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   CapabilitiesProvider,

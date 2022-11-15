@@ -282,6 +282,8 @@
       "@kbn/core-rendering-server-mocks/*": ["packages/core/rendering/core-rendering-server-mocks/*"],
       "@kbn/core-root-browser-internal": ["packages/core/root/core-root-browser-internal"],
       "@kbn/core-root-browser-internal/*": ["packages/core/root/core-root-browser-internal/*"],
+      "@kbn/core-root-server-internal": ["packages/core/root/core-root-server-internal"],
+      "@kbn/core-root-server-internal/*": ["packages/core/root/core-root-server-internal/*"],
       "@kbn/core-saved-objects-api-browser": ["packages/core/saved-objects/core-saved-objects-api-browser"],
       "@kbn/core-saved-objects-api-browser/*": ["packages/core/saved-objects/core-saved-objects-api-browser/*"],
       "@kbn/core-saved-objects-api-server": ["packages/core/saved-objects/core-saved-objects-api-server"],

@@ -16,7 +16,7 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { Root } from '../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;

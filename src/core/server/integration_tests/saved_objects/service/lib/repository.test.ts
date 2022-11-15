@@ -8,7 +8,7 @@
 
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
-import { Root } from '../../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),

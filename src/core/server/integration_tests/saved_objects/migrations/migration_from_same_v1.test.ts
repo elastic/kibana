@@ -17,7 +17,7 @@ import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { Root } from '../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 

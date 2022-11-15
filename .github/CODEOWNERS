@@ -837,6 +837,7 @@ packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
 packages/core/rendering/core-rendering-server-internal @elastic/kibana-core
 packages/core/rendering/core-rendering-server-mocks @elastic/kibana-core
 packages/core/root/core-root-browser-internal @elastic/kibana-core
+packages/core/root/core-root-server-internal @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-browser @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server-internal @elastic/kibana-core

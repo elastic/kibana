@@ -282,6 +282,7 @@
     "@kbn/core-rendering-server-internal": "link:bazel-bin/packages/core/rendering/core-rendering-server-internal",
     "@kbn/core-rendering-server-mocks": "link:bazel-bin/packages/core/rendering/core-rendering-server-mocks",
     "@kbn/core-root-browser-internal": "link:bazel-bin/packages/core/root/core-root-browser-internal",
+    "@kbn/core-root-server-internal": "link:bazel-bin/packages/core/root/core-root-server-internal",
     "@kbn/core-saved-objects-api-browser": "link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-browser",
     "@kbn/core-saved-objects-api-server": "link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server",
     "@kbn/core-saved-objects-api-server-internal": "link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server-internal",

@@ -8,7 +8,7 @@
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
-import { Root } from '../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 describe('checking migration metadata changes on all registered SO types', () => {

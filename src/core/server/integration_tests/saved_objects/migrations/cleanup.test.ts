@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Util from 'util';
 import JSON5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import type { Root } from '../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 import { getMigrationDocLink } from './test_utils';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;

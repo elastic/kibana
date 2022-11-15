@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Root } from '@kbn/core-root-server-internal';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
-import { Root } from '../../root';
 
 describe('Core app routes', () => {
   let root: Root;

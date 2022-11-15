@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import type { Root } from '../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, '7_13_unknown_types.log');
 
