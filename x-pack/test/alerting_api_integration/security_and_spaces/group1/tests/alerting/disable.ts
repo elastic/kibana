@@ -32,6 +32,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
     after(() => objectRemover.removeAll());
 
     async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
+      await es.indices.refresh({ index: '.kibana_task_manager' });
       const scheduledTask = await es.get<TaskManagerDoc>({
         id: `task:${id}`,
         index: '.kibana_task_manager',
