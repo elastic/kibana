@@ -86,34 +86,58 @@ export function getTicks(min: number, max: number, timezone: string): EuiRangeTi
   return ticks;
 }
 
-export function getStepSize(ticks: EuiRangeTick[]) {
+export function getStepSize(ticks: EuiRangeTick[]): {
+  stepSize: number,
+  format: string,
+} {
   if (ticks.length < 2) {
-    return 1;
+    return {
+      stepSize: 1,
+      format: 'MMM D, YYYY @ HH:mm:ss.SSS'
+    };
   }
 
   const tickRange = ticks[1].value - ticks[0].value;
 
   if (tickRange >= moment.duration(2, 'y').asMilliseconds()) {
-    return moment.duration(1, 'y').asMilliseconds();
+    return {
+      stepSize: moment.duration(1, 'y').asMilliseconds(),
+      format: 'YYYY',
+    };
   }
 
   if (tickRange >= moment.duration(2, 'd').asMilliseconds()) {
-    return moment.duration(1, 'd').asMilliseconds();
+    return {
+      stepSize: moment.duration(1, 'd').asMilliseconds(),
+      format: 'MMM D, YYYY',
+    };
   }
 
   if (tickRange >= moment.duration(2, 'h').asMilliseconds()) {
-    return moment.duration(1, 'h').asMilliseconds();
+    return {
+      stepSize: moment.duration(1, 'h').asMilliseconds(),
+      format: 'MMM D, YYYY @ HH:mm',
+    };
   }
 
   if (tickRange >= moment.duration(2, 'm').asMilliseconds()) {
-    return moment.duration(1, 'm').asMilliseconds();
+    return {
+      stepSize: moment.duration(1, 'm').asMilliseconds(),
+      format: 'MMM D, YYYY @ HH:mm',
+    };
   }
 
   if (tickRange >= moment.duration(2, 's').asMilliseconds()) {
-    return moment.duration(1, 's').asMilliseconds();
+    return {
+      stepSize: moment.duration(1, 's').asMilliseconds(),
+      format: 'MMM D, YYYY @ HH:mm:ss',
+    };
   }
 
-  return 1;
+  return {
+    stepSize: 1,
+    format: 'MMM D, YYYY @ HH:mm:ss.SSS'
+  };
 }
 
 export function roundDownToNextStepSizeFactor(value: number, stepSize: number) {

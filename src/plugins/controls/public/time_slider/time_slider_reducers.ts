@@ -21,11 +21,13 @@ export const timeSliderReducers = {
   setTimeRangeBounds: (
     state: WritableDraft<TimeSliderReduxState>,
     action: PayloadAction<{
+      format: string;
       stepSize: number;
       timeRangeBounds: [number, number];
       ticks: EuiRangeTick[];
     }>
   ) => {
+    state.componentState.format = action.payload.format;
     state.componentState.stepSize = action.payload.stepSize;
     state.componentState.ticks = action.payload.ticks;
     state.componentState.timeRangeBounds = action.payload.timeRangeBounds;
