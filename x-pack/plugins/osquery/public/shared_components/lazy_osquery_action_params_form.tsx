@@ -6,7 +6,10 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type {
+  ArrayItem,
+  ValidationError,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../query_client';
@@ -17,7 +20,7 @@ interface LazyOsqueryActionParamsFormProps {
 }
 interface ResponseActionValidatorRef {
   validation: {
-    [key: string]: () => Promise<boolean>;
+    [key: string]: () => Promise<{ errors: ValidationError<string>; path: string }>;
   };
 }
 

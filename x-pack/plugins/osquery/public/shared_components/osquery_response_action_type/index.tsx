@@ -9,12 +9,12 @@ import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 're
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
-import { get, isEmpty, map, omit } from 'lodash';
+import { get, map, omit } from 'lodash';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import { useFormContext, useFormData } from '../../shared_imports';
-import type { ArrayItem } from '../../shared_imports';
+import type { ArrayItem, ValidationError } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
 import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
 import { PackFieldWrapper } from './pack_field_wrapper';
@@ -28,7 +28,7 @@ interface OsqueryResponseActionsParamsFormProps {
 
 interface ResponseActionValidatorRef {
   validation: {
-    [key: string]: () => Promise<boolean>;
+    [key: string]: () => Promise<{ errors: ValidationError<string>; path: string }>;
   };
 }
 
@@ -49,7 +49,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
   ResponseActionValidatorRef,
   OsqueryResponseActionsParamsFormProps
 >(({ item }, ref) => {
-  const { updateFieldValues } = useFormContext();
+  const { updateFieldValues, validate } = useFormContext();
   const [data] = useFormData({ watch: [item.path] });
   const { params: defaultParams } = get(data, item.path);
   const uniqueId = useMemo(() => uuid.v4(), []);
@@ -57,8 +57,8 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
     defaultValues: defaultParams
       ? {
           ...omit(defaultParams, ['ecsMapping', 'packId']),
-          ecs_mapping: defaultParams.ecsMapping ?? {},
-          packId: [defaultParams.packId] ?? [],
+          ecs_mapping: defaultParams.ecsMapping,
+          packId: defaultParams.packId ? [defaultParams.packId] : [],
         }
       : {
           ecs_mapping: {},
@@ -74,9 +74,8 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
     packId: watchedValues?.packId?.[0],
     skip: !watchedValues?.packId?.[0],
   });
-  const [queryType, setQueryType] = useState<string>(
-    !isEmpty(defaultParams?.queries) ? 'pack' : 'query'
-  );
+  const [queryType, setQueryType] = useState<string>(defaultParams.packId ? 'pack' : 'query');
+
   const onSubmit = useCallback(
     async (formData) => {
       updateFieldValues({
@@ -114,7 +113,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
     if (ref && ref.current) {
       // @ts-expect-error update types
       ref.current.validation[item.id] = async () => {
-        await handleSubmit(onSubmit)();
+        await validate();
 
         return {
           errors,
@@ -122,7 +121,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
         };
       };
     }
-  }, [errors, handleSubmit, isValid, item.id, item.path, onSubmit, ref, watchedValues]);
+  }, [errors, handleSubmit, isValid, item.id, item.path, onSubmit, ref, validate, watchedValues]);
 
   useEffect(() => {
     register('savedQueryId');
