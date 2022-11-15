@@ -8,6 +8,7 @@
 
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
@@ -24,7 +25,6 @@ import {
 import { NodeService, nodeConfig } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-server';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { EnvironmentService, pidConfig } from '@kbn/core-environment-server-internal';
 import {
   ExecutionContextService,
@@ -69,7 +69,7 @@ import type {
 import { RenderingService } from '@kbn/core-rendering-server-internal';
 
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
-import {
+import type {
   InternalCorePreboot,
   InternalCoreSetup,
   InternalCoreStart,
