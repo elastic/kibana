@@ -44,8 +44,7 @@ import {
 import { createEnrichEventsFunction } from '../../signals/enrichments';
 
 export const createNewTermsAlertType = (
-  createOptions: CreateRuleOptions,
-  isPreview?: boolean
+  createOptions: CreateRuleOptions
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
   const { logger } = createOptions;
   return {
@@ -108,12 +107,12 @@ export const createNewTermsAlertType = (
           aggregatableTimestampField,
           exceptionFilter,
           unprocessedExceptions,
+          alertTimestampOverride,
         },
         services,
         params,
         spaceId,
         state,
-        startedAt,
       } = execOptions;
 
       // Validate the history window size compared to `from` at runtime as well as in the `validate`
@@ -290,7 +289,6 @@ export const createNewTermsAlertType = (
               };
             });
 
-          const alertTimestampOverride = isPreview ? startedAt : undefined;
           const wrappedAlerts = wrapNewTermsAlerts({
             eventsAndTerms,
             spaceId,
