@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import DateMath from '@kbn/datemath';
 import { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
@@ -79,8 +81,8 @@ export const getCertsRequestBody = ({
             {
               range: {
                 'monitor.timespan': {
-                  gte: from,
-                  lte: to,
+                  gte: DateMath.parse(from)?.valueOf() ?? from,
+                  lte: DateMath.parse(to)?.valueOf() ?? to,
                 },
               },
             },
