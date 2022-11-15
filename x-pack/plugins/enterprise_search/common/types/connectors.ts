@@ -103,11 +103,17 @@ export enum TriggerMethod {
   SCHEDULED = 'scheduled',
 }
 
+export enum FeatureName {
+  FILTERING_ADVANCED_CONFIG = 'filtering_advanced_config',
+  FILTERING_RULES = 'filtering_rules',
+}
+
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
   description: string | null;
   error: string | null;
+  features: Record<FeatureName, boolean | null> | null;
   filtering: FilteringConfig[];
   id: string;
   index_name: string;
@@ -134,18 +140,23 @@ export interface ConnectorSyncJob {
   cancelation_requested_at: string | null;
   canceled_at: string | null;
   completed_at: string | null;
-  connector_id: string;
+  connector: {
+    configuration: ConnectorConfiguration;
+    filtering: FilteringRules | null;
+    id: string;
+    index_name: string;
+    language: string;
+    pipeline: IngestPipelineParams | null;
+    service_type: string;
+  };
   created_at: string;
   deleted_document_count: number;
   error: string | null;
-  filtering: FilteringRules | null;
   id: string;
-  index_name: string;
   indexed_document_count: number;
   indexed_document_volume: number;
   last_seen: string;
   metadata: Record<string, unknown>;
-  pipeline: IngestPipelineParams | null;
   started_at: string;
   status: SyncStatus;
   trigger_method: TriggerMethod;

@@ -9,7 +9,11 @@ import type { AgentPolicy } from '../../types';
 
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
 
-export type K8sMode = 'IS_LOADING' | 'IS_KUBERNETES' | 'IS_NOT_KUBERNETES';
+export type K8sMode =
+  | 'IS_LOADING'
+  | 'IS_KUBERNETES'
+  | 'IS_NOT_KUBERNETES'
+  | 'IS_KUBERNETES_MULTIPAGE';
 export type FlyoutMode = 'managed' | 'standalone';
 export type SelectionType = 'tabs' | 'radio' | undefined;
 
