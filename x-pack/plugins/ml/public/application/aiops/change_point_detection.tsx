@@ -11,7 +11,7 @@ import { pick } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LogCategorization } from '@kbn/aiops-plugin/public';
+import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 
 import { useMlContext } from '../contexts/ml';
 import { useMlKibana } from '../contexts/kibana';
@@ -20,7 +20,7 @@ import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
 import { MlPageHeader } from '../components/page_header';
 
-export const LogCategorizationPage: FC = () => {
+export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();
 
   const context = useMlContext();
@@ -33,8 +33,8 @@ export const LogCategorizationPage: FC = () => {
         <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
           <EuiFlexItem grow={false}>
             <FormattedMessage
-              id="xpack.ml.logCategorization.pageHeader"
-              defaultMessage="Log pattern analysis"
+              id="xpack.ml.changePointDetection.pageHeader"
+              defaultMessage="Change point detection"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -42,8 +42,8 @@ export const LogCategorizationPage: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      {dataView && (
-        <LogCategorization
+      {dataView ? (
+        <ChangePointDetection
           dataView={dataView}
           savedSearch={savedSearch}
           appDependencies={pick(services, [
@@ -61,7 +61,7 @@ export const LogCategorizationPage: FC = () => {
             'lens',
           ])}
         />
-      )}
+      ) : null}
       <HelpMenu docLink={services.docLinks.links.ml.guide} />
     </>
   );
