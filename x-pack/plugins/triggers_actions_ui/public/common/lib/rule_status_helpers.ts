@@ -56,7 +56,10 @@ export const getRuleHealthColor = (rule: Rule) => {
 };
 
 export const getIsLicenseError = (rule: Rule) => {
-  return rule.lastRun?.warning === RuleExecutionStatusErrorReasons.License;
+  return (
+    rule.lastRun?.warning === RuleExecutionStatusErrorReasons.License ||
+    rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
+  );
 };
 
 export const getRuleStatusMessage = (rule: Rule) => {
@@ -67,7 +70,7 @@ export const getRuleStatusMessage = (rule: Rule) => {
     return ALERT_STATUS_LICENSE_ERROR;
   }
   if (isRuleLastRunOutcomeEnabled) {
-    return (rule.lastRun && rulesLastRunOutcomeTranslationMapping[rule.lastRun.outcome]) || '';
+    return rule.lastRun && rulesLastRunOutcomeTranslationMapping[rule.lastRun.outcome];
   }
   return rulesStatusesTranslationsMapping[rule.executionStatus.status];
 };
