@@ -360,17 +360,22 @@ export const useTimelineEventsHandler = ({
         ...deStructureEqlOptions(prevEqlRequest),
       };
 
+      const requestTimeRange =
+        startDate && endDate
+          ? {
+              interval: '12h',
+              from: startDate,
+              to: endDate,
+            }
+          : {};
+
       const currentSearchParameters = {
         defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         querySize: limit,
         sort,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
         runtimeMappings,
+        ...(requestTimeRange ? requestTimeRange : {}),
         ...deStructureEqlOptions(eqlOptions),
       };
 
@@ -391,11 +396,7 @@ export const useTimelineEventsHandler = ({
         language,
         runtimeMappings,
         sort,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        ...(requestTimeRange ? requestTimeRange : {}),
         ...(eqlOptions ? eqlOptions : {}),
       };
 
