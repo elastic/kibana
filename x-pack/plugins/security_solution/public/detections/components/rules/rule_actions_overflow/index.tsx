@@ -14,7 +14,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { APP_UI_ID, DUPLICATE_OPTIONS, SecurityPageName } from '../../../../../common/constants';
+import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
+import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
 import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -93,7 +94,7 @@ const RuleActionsOverflowComponent = ({
                   type: BulkActionType.duplicate,
                   ids: [rule.id],
                   duplicatePayload: {
-                    include_exceptions: duplicateExceptions === DUPLICATE_OPTIONS.WITH_EXCEPTIONS,
+                    include_exceptions: duplicateExceptions === DuplicateOptions.withExceptions,
                   },
                 });
 

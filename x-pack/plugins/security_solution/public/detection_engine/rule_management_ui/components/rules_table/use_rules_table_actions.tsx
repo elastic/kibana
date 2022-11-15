@@ -8,7 +8,7 @@
 import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { DUPLICATE_OPTIONS } from '../../../../../common/constants';
+import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
 import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -76,7 +76,7 @@ export const useRulesTableActions = ({
           type: BulkActionType.duplicate,
           ids: [rule.id],
           duplicatePayload: {
-            include_exceptions: duplicateExceptions === DUPLICATE_OPTIONS.WITH_EXCEPTIONS,
+            include_exceptions: duplicateExceptions === DuplicateOptions.withExceptions,
           },
         });
         const createdRules = result?.attributes.results.created;

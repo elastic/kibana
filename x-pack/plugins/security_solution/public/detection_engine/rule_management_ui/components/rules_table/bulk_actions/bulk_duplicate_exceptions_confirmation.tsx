@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiRadioGroup, EuiText, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui';
-import { DUPLICATE_OPTIONS } from '../../../../../../common/constants';
+import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 
 import { bulkDuplicateRuleActions as i18n } from './translations';
 
@@ -23,7 +23,7 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
   rulesCount,
 }: BulkDuplicateExceptionsConfirmationProps) => {
   const [selectedDuplicateOption, setSelectedDuplicateOption] = useState(
-    DUPLICATE_OPTIONS.WITH_EXCEPTIONS
+    DuplicateOptions.withExceptions
   );
 
   const handleRadioChange = useCallback(
@@ -55,11 +55,11 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
       <EuiRadioGroup
         options={[
           {
-            id: DUPLICATE_OPTIONS.WITH_EXCEPTIONS,
+            id: DuplicateOptions.withExceptions,
             label: i18n.DUPLICATE_EXCEPTIONS_TEXT(rulesCount),
           },
           {
-            id: DUPLICATE_OPTIONS.WITHOUT_EXCEPTIONS,
+            id: DuplicateOptions.withoutExceptions,
             label: i18n.DUPLICATE_WITHOUT_EXCEPTIONS_TEXT(rulesCount),
           },
         ]}
