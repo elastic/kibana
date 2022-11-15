@@ -19,6 +19,7 @@ import {
   MonitorManagementListResult,
   SourceType,
 } from '../../../../../common/runtime_types';
+import userEvent from '@testing-library/user-event';
 
 describe('<DeleteMonitor />', () => {
   const onUpdate = jest.fn();
