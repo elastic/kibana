@@ -40,6 +40,12 @@ describe('Setup Indices', () => {
       },
       description: { type: 'text' },
       error: { type: 'keyword' },
+      features: {
+        properties: {
+          filtering_advanced_config: { type: 'boolean' },
+          filtering_rules: { type: 'boolean' },
+        },
+      },
       filtering: {
         properties: {
           active: {
@@ -148,47 +154,69 @@ describe('Setup Indices', () => {
       version: CONNECTORS_VERSION,
     },
     properties: {
+      cancelation_requested_at: { type: 'date' },
+      canceled_at: { type: 'date' },
       completed_at: { type: 'date' },
-      connector_id: {
-        type: 'keyword',
+      connector: {
+        properties: {
+          configuration: { type: 'object' },
+          filtering: {
+            properties: {
+              advanced_snippet: {
+                properties: {
+                  created_at: { type: 'date' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'object' },
+                },
+              },
+              domain: { type: 'keyword' },
+              rules: {
+                properties: {
+                  created_at: { type: 'date' },
+                  field: { type: 'keyword' },
+                  id: { type: 'keyword' },
+                  order: { type: 'short' },
+                  policy: { type: 'keyword' },
+                  rule: { type: 'keyword' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'keyword' },
+                },
+              },
+              warnings: {
+                properties: {
+                  ids: { type: 'keyword' },
+                  messages: { type: 'text' },
+                },
+              },
+            },
+          },
+          id: { type: 'keyword' },
+          index_name: { type: 'keyword' },
+          language: { type: 'keyword' },
+          pipeline: {
+            properties: {
+              extract_binary_content: { type: 'boolean' },
+              name: { type: 'keyword' },
+              reduce_whitespace: { type: 'boolean' },
+              run_ml_inference: { type: 'boolean' },
+            },
+          },
+          service_type: { type: 'keyword' },
+        },
       },
       created_at: { type: 'date' },
       deleted_document_count: { type: 'integer' },
       error: { type: 'keyword' },
-      filtering: {
-        properties: {
-          advanced_snippet: {
-            properties: {
-              created_at: { type: 'date' },
-              updated_at: { type: 'date' },
-              value: { type: 'object' },
-            },
-          },
-          domain: { type: 'keyword' },
-          rules: {
-            properties: {
-              created_at: { type: 'date' },
-              field: { type: 'keyword' },
-              id: { type: 'keyword' },
-              order: { type: 'short' },
-              policy: { type: 'keyword' },
-              rule: { type: 'keyword' },
-              updated_at: { type: 'date' },
-              value: { type: 'keyword' },
-            },
-          },
-          warnings: {
-            properties: {
-              ids: { type: 'keyword' },
-              messages: { type: 'text' },
-            },
-          },
-        },
-      },
       indexed_document_count: { type: 'integer' },
+      indexed_document_volume: { type: 'integer' },
+      last_seen: { type: 'date' },
+      metadata: { type: 'object' },
+      started_at: { type: 'date' },
       status: {
         type: 'keyword',
       },
+      total_document_count: { type: 'integer' },
+      trigger_method: { type: 'keyword' },
       worker_hostname: { type: 'keyword' },
     },
   };
