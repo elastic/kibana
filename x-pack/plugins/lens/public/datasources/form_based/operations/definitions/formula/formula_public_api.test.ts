@@ -172,7 +172,7 @@ describe('createFormulaPublicApi', () => {
     const result = publicApiHelper.insertOrReplaceFormulaColumn(
       'col',
       {
-        formula: `count(shift='start - ${shiftedDate}') - count(shift='end - ${shiftedDate}')`,
+        formula: `count(shift='startAt(${shiftedDate})') - count(shift='endAt(${shiftedDate})')`,
       },
       baseLayer,
       dataView
@@ -195,7 +195,7 @@ describe('createFormulaPublicApi', () => {
     const result = publicApiHelper.insertOrReplaceFormulaColumn(
       'col',
       {
-        formula: `count(shift='start - ${shiftedDate}') - count(shift='end - ${shiftedDate}')`,
+        formula: `count(shift='startAt(${shiftedDate})') - count(shift='endAt(${shiftedDate})')`,
       },
       baseLayer,
       dataView,
@@ -211,7 +211,7 @@ describe('createFormulaPublicApi', () => {
     const result = publicApiHelper.insertOrReplaceFormulaColumn(
       'col',
       {
-        formula: `count(shift='start - invalid') - count(shift='end - 3022')`,
+        formula: `count(shift='startAt(invalid)') - count(shift='endAt(3022)')`,
       },
       baseLayer,
       dataView
@@ -229,7 +229,7 @@ describe('createFormulaPublicApi', () => {
     const result = publicApiHelper.insertOrReplaceFormulaColumn(
       'col',
       {
-        formula: `count(shift='start - ${shiftedDate}') - count(shift='end - ${shiftedDate}')`,
+        formula: `count(shift='startAt(${shiftedDate})') - count(shift='endAt(${shiftedDate})')`,
       },
       baseLayer,
       dataView

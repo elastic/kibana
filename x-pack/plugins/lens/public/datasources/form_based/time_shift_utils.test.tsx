@@ -99,7 +99,7 @@ describe('time_shift_utils', () => {
     });
 
     it('should change absolute values to relative in seconds (rounded) with start anchor', () => {
-      expect(resolveTimeShift(`start - ${shiftedDate}`, getDateRange(), 100))
+      expect(resolveTimeShift(`startAt(${shiftedDate})`, getDateRange(), 100))
         // the raw value is 88900s, but that's not a multiple of the range interval
         // so it will be rounded to the next interval multiple, then decremented by 1 interval unit (1800s)
         // in order to include the provided date
@@ -107,7 +107,7 @@ describe('time_shift_utils', () => {
     });
 
     it('should change absolute values to relative in seconds (rounded) with end anchor', () => {
-      expect(resolveTimeShift(`end - ${shiftedDate}`, getDateRange(), 100))
+      expect(resolveTimeShift(`endAt(${shiftedDate})`, getDateRange(), 100))
         // the raw value is 261700s, but that's not a multiple of the range interval
         // so it will be rounded to the next interval multiple
         .toBe('261000s');
@@ -115,8 +115,8 @@ describe('time_shift_utils', () => {
 
     it('should always include the passed date in the computed interval', () => {
       const dateRange = getDateRange();
-      for (const anchor of ['start', 'end']) {
-        const [shift] = resolveTimeShift(`${anchor} - ${shiftedDate}`, dateRange, 100)!.split('s');
+      for (const anchor of ['startAt', 'endAt']) {
+        const [shift] = resolveTimeShift(`${anchor}(${shiftedDate})`, dateRange, 100)!.split('s');
         expect(
           moment(shiftedDate).isBetween(
             moment(dateRange.fromDate).subtract(Number(shift), 's'),
