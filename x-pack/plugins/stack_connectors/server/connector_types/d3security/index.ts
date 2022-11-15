@@ -115,23 +115,27 @@ function validateConnectorTypeConfig(
   try {
     new URL(configuredUrl);
   } catch (err) {
-    return i18n.translate('xpack.actions.builtin.d3security.d3ConfigurationErrorNoHostname', {
-      defaultMessage: 'error configuring d3security action: unable to parse url: {err}',
-      values: {
-        err,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.d3.configurationErrorNoHostname', {
+        defaultMessage: 'error configuring d3 action: unable to parse url: {err}',
+        values: {
+          err,
+        },
+      })
+    );
   }
 
   try {
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.d3security.d3ConfigurationError', {
-      defaultMessage: 'error configuring d3security action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.d3.configurationError', {
+        defaultMessage: 'error configuring d3 action: {message}',
+        values: {
+          message: allowListError.message,
+        },
+      })
+    );
   }
 }
 

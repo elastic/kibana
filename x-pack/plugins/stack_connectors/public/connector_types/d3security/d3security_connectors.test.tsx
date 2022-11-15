@@ -12,7 +12,7 @@ import { ConnectorFormTestProvider } from '../../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 describe('D3ActionConnectorFields renders', () => {
   test('D3Security connector fields are rendered', () => {

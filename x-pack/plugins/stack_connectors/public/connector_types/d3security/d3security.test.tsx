@@ -31,21 +31,27 @@ describe('d3security action params validation', () => {
   test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       body: 'message {test}',
+      severity:'test severity',
+      eventType:'test type'
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { body: [] },
+      errors: { body: [] , severity:[], eventType:[]},
     });
   });
 
   test('params validation fails when body is not valid', async () => {
     const actionParams = {
       body: '',
+      severity:'',
+      eventType:''
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         body: ['Body is required.'],
+        severity:[],
+        eventType:[]
       },
     });
   });
