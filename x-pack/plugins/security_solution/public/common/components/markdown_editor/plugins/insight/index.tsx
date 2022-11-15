@@ -10,6 +10,7 @@ import React, { useContext } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
 import { EuiSpacer, EuiCodeBlock, EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
+import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useInsightQuery } from './use_insight_query';
 import { useInsightDataProviders } from './use_insight_data_providers';
@@ -45,8 +46,6 @@ export const parser: Plugin = function () {
     let configuration: InsightComponentProps = {};
     if (hasConfiguration) {
       let configurationString = '';
-      let match = '';
-
       let openObjects = 0;
 
       for (let i = insightPrefix.length; i < value.length; i++) {
@@ -65,7 +64,6 @@ export const parser: Plugin = function () {
         }
       }
 
-      match += configurationString;
       try {
         configuration = JSON.parse(configurationString);
         return eat(value)({
@@ -73,12 +71,18 @@ export const parser: Plugin = function () {
           ...configuration,
           providers: JSON.stringify(configuration.providers),
         });
-      } catch (e) {
+      } catch (err) {
         const now = eat.now();
-        this.file.fail(`Unable to parse insight JSON configuration: ${e}`, {
-          line: now.line,
-          column: now.column + insightPrefix.length,
-        });
+        this.file.fail(
+          i18n.translate('xpack.securitySolution.markdownEditor.plugins.insightConfigError', {
+            values: { err },
+            defaultMessage: 'Unable to parse insight JSON configuration: {err}',
+          }),
+          {
+            line: now.line,
+            column: now.column + insightPrefix.length,
+          }
+        );
       }
     }
     return false;
@@ -97,7 +101,11 @@ const InsightComponent = ({ label, description, providers }: InsightComponentPro
       parsedProviders = JSON.parse(providers);
     }
   } catch (err) {
-    addError(err, { title: 'parse failure' });
+    addError(err, {
+      title: i18n.translate('xpack.securitySolution.markdownEditor.plugins.insightProviderError', {
+        defaultMessage: 'Unable to parse insight provider configuration',
+      }),
+    });
   }
   const { data: alertData } = useContext(BasicAlertDataContext);
   const dataProviders = useInsightDataProviders({
