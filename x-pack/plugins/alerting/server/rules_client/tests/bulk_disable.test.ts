@@ -19,6 +19,16 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { loggerMock } from '@kbn/logging-mocks';
 import { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
+import {
+  disabledRule2,
+  enabledRule1,
+  enabledRule2,
+  savedObjectWith409Error,
+  savedObjectWith500Error,
+  successfulSavedObject1,
+  successfulSavedObject2,
+  successfulSavedObjects,
+} from './test_helpers';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -57,57 +67,14 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
-  (logger.error as jest.Mock).mockClear();
 });
 
 setGlobalDate();
 
 describe('bulkDisableRules', () => {
   let rulesClient: RulesClient;
-  const defaultRule = {
-    id: 'id1',
-    type: 'alert',
-    attributes: {
-      name: 'fakeName',
-      consumer: 'fakeConsumer',
-      alertTypeId: 'fakeType',
-      schedule: { interval: '5m' },
-      actions: [
-        {
-          group: 'default',
-          actionTypeId: '1',
-          actionRef: '1',
-          params: {
-            foo: true,
-          },
-        },
-      ],
-    },
-    references: [],
-    version: '1',
-  };
-  const existingDecryptedRule1 = {
-    ...defaultRule,
-    attributes: {
-      ...defaultRule.attributes,
-      enabled: true,
-      scheduledTaskId: 'taskId1',
-      apiKey: Buffer.from('123:abc').toString('base64'),
-    },
-  };
-  const existingDecryptedRule2 = {
-    ...defaultRule,
-    id: 'id2',
-    attributes: {
-      ...defaultRule.attributes,
-      enabled: true,
-      scheduledTaskId: 'taskId2',
-      apiKey: Buffer.from('321:abc').toString('base64'),
-    },
-  };
-
   const mockCreatePointInTimeFinderAsInternalUser = (
-    response = { saved_objects: [existingDecryptedRule1, existingDecryptedRule2] }
+    response = { saved_objects: [enabledRule1, enabledRule2] }
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -150,22 +117,7 @@ describe('bulkDisableRules', () => {
 
   test('should disable two rule', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'id1',
-          version: '1',
-          attributes: {
-            scheduledTaskId: 'id1',
-          },
-        } as SavedObject,
-        {
-          id: 'id2',
-          version: '1',
-          attributes: {
-            scheduledTaskId: 'id2',
-          },
-        } as SavedObject,
-      ],
+      saved_objects: successfulSavedObjects,
     });
 
     const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -197,24 +149,7 @@ describe('bulkDisableRules', () => {
 
   test('should try to disable rules, one successful and one with 500 error', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'id1',
-          version: '1',
-          attributes: {
-            scheduledTaskId: 'id1',
-          },
-        } as SavedObject,
-        {
-          id: 'id2',
-          error: {
-            error: '',
-            message: 'UPS',
-            statusCode: 500,
-          },
-          version: '1',
-        } as SavedObject,
-      ],
+      saved_objects: [successfulSavedObject1, savedObjectWith500Error],
     });
 
     const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -241,37 +176,10 @@ describe('bulkDisableRules', () => {
   test('should try to disable rules, one successful and one with 409 error, which will not be deleted with retry', async () => {
     unsecuredSavedObjectsClient.bulkCreate
       .mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: 'id1',
-            version: '1',
-            attributes: {
-              scheduledTaskId: 'id1',
-            },
-          } as SavedObject,
-          {
-            id: 'id2',
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-            version: '1',
-          } as SavedObject,
-        ],
+        saved_objects: [successfulSavedObject1, savedObjectWith409Error],
       })
       .mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: 'id2',
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-            version: '1',
-          } as SavedObject,
-        ],
+        saved_objects: [savedObjectWith409Error],
       })
       .mockResolvedValueOnce({
         saved_objects: [
@@ -292,19 +200,19 @@ describe('bulkDisableRules', () => {
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule1, existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule1, enabledRule2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule2] };
         },
       });
 
@@ -322,35 +230,10 @@ describe('bulkDisableRules', () => {
   test('should try to disable rules, one successful and one with 409 error, which successfully will be disabled with retry', async () => {
     unsecuredSavedObjectsClient.bulkCreate
       .mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: 'id1',
-            version: '1',
-            attributes: {
-              scheduledTaskId: 'id1',
-            },
-          } as SavedObject,
-          {
-            id: 'id2',
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-            version: '1',
-          } as SavedObject,
-        ],
+        saved_objects: [successfulSavedObject1, savedObjectWith409Error],
       })
       .mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: 'id2',
-            version: '1',
-            attributes: {
-              scheduledTaskId: 'id2',
-            },
-          } as SavedObject,
-        ],
+        saved_objects: [successfulSavedObject2],
       });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
@@ -358,19 +241,19 @@ describe('bulkDisableRules', () => {
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule1, existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule1, enabledRule2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule1] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule1] };
         },
       });
 
@@ -418,26 +301,12 @@ describe('bulkDisableRules', () => {
     );
   });
 
-  test('should do nothing if rule is already disabled', async () => {
+  test('should skip rule if it is already disabled', async () => {
     mockCreatePointInTimeFinderAsInternalUser({
-      saved_objects: [
-        existingDecryptedRule1,
-        {
-          ...existingDecryptedRule2,
-          attributes: { ...existingDecryptedRule2.attributes, enabled: false },
-        },
-      ],
+      saved_objects: [enabledRule1, disabledRule2],
     });
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'id1',
-          version: '1',
-          attributes: {
-            scheduledTaskId: 'id1',
-          },
-        } as SavedObject,
-      ],
+      saved_objects: [successfulSavedObject1],
     });
 
     const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -464,31 +333,14 @@ describe('bulkDisableRules', () => {
   describe('taskManager', () => {
     test('should call task manager bulkDisable', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [
-          {
-            id: 'id1',
-            version: '1',
-            attributes: {
-              scheduledTaskId: 'id1',
-            },
-          } as SavedObject,
-          {
-            id: 'id2',
-            version: '1',
-            attributes: {
-              scheduledTaskId: 'id2',
-            },
-          } as SavedObject,
-        ],
+        saved_objects: successfulSavedObjects,
       });
 
       taskManager.bulkDisable.mockResolvedValue({
         tasks: [{ id: 'id1' }],
         errors: [
           {
-            task: {
-              id: 'id2',
-            },
+            task: { id: 'id2' },
             error: {
               error: '',
               message: 'UPS',
@@ -515,15 +367,13 @@ describe('bulkDisableRules', () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
-            id: 'id1',
-            version: '1',
+            ...successfulSavedObject1,
             attributes: {
               scheduledTaskId: 'taskId1',
             },
           } as SavedObject,
           {
-            id: 'id2',
-            version: '1',
+            ...successfulSavedObject2,
             attributes: {
               scheduledTaskId: 'taskId2',
             },
@@ -553,24 +403,7 @@ describe('bulkDisableRules', () => {
 
     test('should disable one task if one rule was successfully disabled and one has 500 error', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [
-          {
-            id: 'id1',
-            version: '1',
-            attributes: {
-              scheduledTaskId: 'id1',
-            },
-          } as SavedObject,
-          {
-            id: 'id2',
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 500,
-            },
-            version: '1',
-          } as SavedObject,
-        ],
+        saved_objects: [successfulSavedObject1, savedObjectWith500Error],
       });
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -582,23 +415,15 @@ describe('bulkDisableRules', () => {
     test('should disable one task if one rule was successfully disabled and one was disabled from beginning', async () => {
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [
-          existingDecryptedRule1,
+          enabledRule1,
           {
-            ...existingDecryptedRule2,
-            attributes: { ...existingDecryptedRule2.attributes, enabled: false },
+            ...enabledRule2,
+            attributes: { ...enabledRule2.attributes, enabled: false },
           },
         ],
       });
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [
-          {
-            id: 'id1',
-            version: '1',
-            attributes: {
-              scheduledTaskId: 'id1',
-            },
-          } as SavedObject,
-        ],
+        saved_objects: [successfulSavedObject1],
       });
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -609,22 +434,7 @@ describe('bulkDisableRules', () => {
 
     test('should not throw an error if taskManager.bulkDisable throw an error', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [
-          {
-            id: 'id1',
-            version: '1',
-            attributes: {
-              scheduledTaskId: 'id1',
-            },
-          } as SavedObject,
-          {
-            id: 'id2',
-            version: '1',
-            attributes: {
-              scheduledTaskId: 'id2',
-            },
-          } as SavedObject,
-        ],
+        saved_objects: successfulSavedObjects,
       });
       taskManager.bulkDisable.mockImplementation(() => {
         throw new Error('Something happend during bulkDisable');
@@ -642,8 +452,7 @@ describe('bulkDisableRules', () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
-            id: 'id1',
-            version: '1',
+            ...successfulSavedObject1,
             attributes: {
               scheduledTaskId: 'taskId1',
             },
@@ -669,15 +478,7 @@ describe('bulkDisableRules', () => {
 
     test('logs audit event when disabling rules', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [
-          {
-            id: 'id1',
-            version: '1',
-            attributes: {
-              scheduledTaskId: 'id1',
-            },
-          } as SavedObject,
-        ],
+        saved_objects: [successfulSavedObject1],
       });
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
