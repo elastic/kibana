@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { ExplainLogRateSpikesPage } from './explain_log_rate_spikes';
-export { ChangePointDetectionPage } from './change_point_detection';
+export const fnOperationTypeMapping: Record<string, string> = {
+  min: 'min',
+  max: 'max',
+  sum: 'sum',
+  avg: 'average',
+} as const;
