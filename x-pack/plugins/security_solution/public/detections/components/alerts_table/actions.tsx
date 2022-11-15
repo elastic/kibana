@@ -536,7 +536,7 @@ const createThresholdTimeline = async (
       title: i18n.translate(
         'xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailureTitle',
         {
-          defaultMessage: 'Failed to create theshold alert timeline',
+          defaultMessage: 'Failed to create threshold alert timeline',
         }
       ),
     });
@@ -824,16 +824,16 @@ const createSuppressedTimeline = async (
     const { toasts } = KibanaServices.get().notifications;
     toasts.addError(error, {
       toastMessage: i18n.translate(
-        'xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailure',
+        'xpack.securitySolution.detectionEngine.alerts.createSuppressedTimelineFailure',
         {
           defaultMessage: 'Failed to create timeline for document _id: {id}',
           values: { id: ecsData._id },
         }
       ),
       title: i18n.translate(
-        'xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailureTitle',
+        'xpack.securitySolution.detectionEngine.alerts.createSuppressedTimelineFailureTitle',
         {
-          defaultMessage: 'Failed to create theshold alert timeline',
+          defaultMessage: 'Failed to create suppressed alert timeline',
         }
       ),
     });
