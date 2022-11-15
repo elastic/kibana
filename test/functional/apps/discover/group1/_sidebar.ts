@@ -23,6 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
   const monacoEditor = getService('monacoEditor');
+  const filterBar = getService('filterBar');
+  const fieldEditor = getService('fieldEditor');
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
@@ -346,6 +348,61 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload(
           'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
+      });
+
+      it('should work with ad-hoc data views and runtime fields', async () => {
+        await PageObjects.discover.createAdHocDataView('logstash', true);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await filterBar.addFilter('extension', 'is', 'jpg');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await PageObjects.discover.addRuntimeField(
+          '_bytes-runtimefield',
+          `emit((doc["bytes"].value * 2).toString())`
+        );
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '54 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        let allFields = await PageObjects.discover.getAllFieldNames();
+        expect(allFields.includes('_bytes-runtimefield')).to.be(true);
+
+        await PageObjects.discover.editField('_bytes-runtimefield');
+        await fieldEditor.enableCustomLabel();
+        await fieldEditor.setCustomLabel('_bytes-runtimefield2');
+        await fieldEditor.save();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '54 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        allFields = await PageObjects.discover.getAllFieldNames();
+        expect(allFields.includes('_bytes-runtimefield2')).to.be(true);
+        expect(allFields.includes('_bytes-runtimefield')).to.be(false);
+
+        await PageObjects.discover.removeField('_bytes-runtimefield');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        allFields = await PageObjects.discover.getAllFieldNames();
+        expect(allFields.includes('_bytes-runtimefield2')).to.be(false);
+        expect(allFields.includes('_bytes-runtimefield')).to.be(false);
       });
     });
   });
