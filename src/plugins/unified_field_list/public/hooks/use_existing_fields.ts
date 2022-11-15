@@ -90,14 +90,6 @@ export const useExistingFieldsFetcher = (
       fetchId: string;
     }): Promise<void> => {
       if (!dataViewId || !query || !fromDate || !toDate) {
-        // console.log(
-        //   'skipped fetching existence info',
-        //   dataViewId,
-        //   fromDate,
-        //   toDate,
-        //   query,
-        //   filters
-        // );
         return;
       }
 
@@ -221,8 +213,6 @@ export const useExistingFieldsFetcher = (
   useEffect(() => {
     if (!params.disableAutoFetching) {
       refetchFieldsExistenceInfo();
-    } else {
-      // console.log('skipped auto fetching existence info');
     }
   }, [refetchFieldsExistenceInfo, params.disableAutoFetching]);
 

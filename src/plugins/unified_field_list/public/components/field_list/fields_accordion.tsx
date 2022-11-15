@@ -102,6 +102,9 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
           content={i18n.translate('unifiedFieldList.fieldsAccordion.existenceErrorLabel', {
             defaultMessage: "Field information can't be loaded",
           })}
+          iconProps={{
+            'data-test-subj': `${id}-fetchWarning`,
+          }}
         />
       );
     }

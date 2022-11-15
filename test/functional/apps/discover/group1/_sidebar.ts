@@ -12,10 +12,17 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'header',
+    'unifiedSearch',
+  ]);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
+  const monacoEditor = getService('monacoEditor');
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
@@ -75,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Available fields after scrolling down
         const emptySectionButton = await find.byCssSelector(
-          PageObjects.discover.getSidebarSectionSelector('empty')
+          PageObjects.discover.getSidebarSectionSelector('empty', true)
         );
         await emptySectionButton.scrollIntoViewIfNecessary();
         availableFields = await PageObjects.discover.getSidebarSectionFieldNames('available');
@@ -121,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Available fields after scrolling down
         const emptySectionButton = await find.byCssSelector(
-          PageObjects.discover.getSidebarSectionSelector('empty')
+          PageObjects.discover.getSidebarSectionSelector('empty', true)
         );
         await emptySectionButton.scrollIntoViewIfNecessary();
         availableFields = await PageObjects.discover.getSidebarSectionFieldNames('available');
@@ -210,6 +217,134 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
           '49 selected fields. 51 available fields.'
+        );
+
+        const testQuery = `SELECT "@tags", geo.dest, count(*) occurred FROM "logstash-*"
+          GROUP BY "@tags", geo.dest
+          HAVING occurred > 20
+          ORDER BY occurred DESC`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '3 selected fields. 3 available fields.'
+        );
+        expect(
+          (await PageObjects.discover.getSidebarSectionFieldNames('selected')).join(', ')
+        ).to.be('@tags, geo.dest, occurred');
+
+        await PageObjects.unifiedSearch.switchDataView(
+          'discover-dataView-switch-link',
+          'logstash-*',
+          true
+        );
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '1 popular field. 53 available fields. 0 empty fields. 3 meta fields.'
+        );
+      });
+
+      it('should work correctly for a data view for a missing index', async function () {
+        // but we are skipping importing the index itself
+        await kibanaServer.importExport.load(
+          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+        );
+        await browser.refresh();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await PageObjects.discover.selectIndexPattern('with-timefield');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '0 available fields. 0 meta fields.'
+        );
+        await testSubjects.existOrFail(
+          `${PageObjects.discover.getSidebarSectionSelector('available')}-fetchWarning`
+        );
+        await testSubjects.existOrFail(
+          `${PageObjects.discover.getSidebarSectionSelector(
+            'available'
+          )}NoFieldsCallout-noFieldsExist`
+        );
+
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+        await kibanaServer.importExport.unload(
+          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+        );
+      });
+
+      it('should work correctly when switching data views', async function () {
+        await esArchiver.loadIfNeeded(
+          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+        );
+        await kibanaServer.importExport.load(
+          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+        );
+
+        await browser.refresh();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await PageObjects.discover.selectIndexPattern('without-timefield');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '6 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await PageObjects.discover.selectIndexPattern('with-timefield');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '0 available fields. 7 empty fields. 3 meta fields.'
+        );
+        await testSubjects.existOrFail(
+          `${PageObjects.discover.getSidebarSectionSelector(
+            'available'
+          )}NoFieldsCallout-noFieldsMatch`
+        );
+
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await kibanaServer.importExport.unload(
+          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+        );
+
+        await esArchiver.unload(
+          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
       });
     });

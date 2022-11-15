@@ -451,15 +451,22 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('fieldListGroupedFieldGroups');
   }
 
-  public getSidebarSectionSelector(sectionName: SidebarSectionName) {
-    return `[data-test-subj="fieldListGrouped${sectionName[0].toUpperCase()}${sectionName.substring(
+  public getSidebarSectionSelector(
+    sectionName: SidebarSectionName,
+    asCSSSelector: boolean = false
+  ) {
+    const testSubj = `fieldListGrouped${sectionName[0].toUpperCase()}${sectionName.substring(
       1
-    )}Fields"]`;
+    )}Fields`;
+    if (!asCSSSelector) {
+      return testSubj;
+    }
+    return `[data-test-subj="${testSubj}"]`;
   }
 
   public async getSidebarSectionFieldNames(sectionName: SidebarSectionName): Promise<string[]> {
     const elements = await this.find.allByCssSelector(
-      `${this.getSidebarSectionSelector(sectionName)} li`
+      `${this.getSidebarSectionSelector(sectionName, true)} li`
     );
 
     if (!elements?.length) {
@@ -473,7 +480,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async toggleSidebarSection(sectionName: SidebarSectionName) {
     return await this.find.clickByCssSelector(
-      `${this.getSidebarSectionSelector(sectionName)} .euiAccordion__iconButton`
+      `${this.getSidebarSectionSelector(sectionName, true)} .euiAccordion__iconButton`
     );
   }
 

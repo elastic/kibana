@@ -123,9 +123,11 @@ export interface DiscoverSidebarResponsiveProps {
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
   const { data, dataViews, core } = services;
-  const isPlainRecord = useAppStateSelector(
-    (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
-  );
+  const [isPlainRecord, query, filters] = useAppStateSelector((state) => [
+    getRawRecordType(state.query) === RecordRawType.PLAIN,
+    state.query,
+    state.filters,
+  ]);
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -182,14 +184,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     }
   }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);
 
-  const query = useAppStateSelector((state) => state.query);
-  const filters = useAppStateSelector((state) => state.filters);
-
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
     disableAutoFetching: true,
     dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
     query: query!,
-    filters: filters!,
+    filters,
     fromDate: sidebarState.dateRange?.fromDate ?? null, // existence fetching will be skipped if `null`
     toDate: sidebarState.dateRange?.toDate ?? null,
     services: {

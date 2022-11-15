@@ -272,6 +272,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                     isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
                     fieldsExistInIndex={!!fieldsExistInIndex}
                     defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
+                    data-test-subj={`${dataTestSubject}${key}NoFieldsCallout`}
                   />
                 )}
                 renderFieldItem={renderFieldItem}
