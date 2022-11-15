@@ -118,6 +118,8 @@ const apmPerAgentSchema: Pick<
 
 export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
   service_id: keyword,
+  num_service_nodes: long,
+  num_transaction_types: long,
   timed_out: { type: 'boolean' },
   cloud: {
     availability_zones: { type: 'array', items: { type: 'keyword' } },
