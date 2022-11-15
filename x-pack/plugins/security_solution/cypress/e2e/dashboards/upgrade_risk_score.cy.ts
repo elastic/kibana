@@ -35,7 +35,7 @@ import { ENTITY_ANALYTICS_URL } from '../../urls/navigation';
 
 const spaceId = 'default';
 
-describe('Upgrade risk scores', () => {
+describe('Upgrade risk scores from 8.4', () => {
   before(() => {
     cleanKibana();
     login();
@@ -43,16 +43,16 @@ describe('Upgrade risk scores', () => {
   });
 
   beforeEach(() => {
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId, deleteAll: true });
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId, deleteAll: true });
-    installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);
-    installLegacyRiskScoreModule(RiskScoreEntity.user, spaceId);
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
+    installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId, '8.4');
+    installLegacyRiskScoreModule(RiskScoreEntity.user, spaceId, '8.4');
     visit(ENTITY_ANALYTICS_URL);
   });
 
   afterEach(() => {
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId, deleteAll: true });
-    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId, deleteAll: true });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
   });
 
   it('shows upgrade host risk button', () => {
@@ -129,6 +129,94 @@ describe('Upgrade risk scores', () => {
           `https://www.elastic.co/guide/en/security/current/${RiskScoreEntity.user}-risk-score.html`
         );
       });
+  });
+
+  it('should upgrade user risk score successfully', () => {
+    clickUpgradeRiskScore(RiskScoreEntity.user);
+    interceptUpgradeRiskScoreModule(RiskScoreEntity.user);
+    clickUpgradeRiskScoreConfirmed();
+    waitForUpgradeRiskScoreModule();
+    cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.disabled');
+
+    cy.get(RISK_SCORE_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.user)).should('exist');
+    cy.get(RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.user)).should('exist');
+
+    cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('not.exist');
+    getTransformState(getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId)).then((res) => {
+      expect(res.status).to.eq(200);
+      expect(res.body.transforms[0].id).to.eq(
+        getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId)
+      );
+      expect(res.body.transforms[0].state).to.eq('started');
+    });
+    getTransformState(getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId)).then((res) => {
+      expect(res.status).to.eq(200);
+      expect(res.body.transforms[0].id).to.eq(
+        getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId)
+      );
+      expect(res.body.transforms[0].state).to.eq('started');
+    });
+
+    findSavedObjects(RiskScoreEntity.user, spaceId).then((res) => {
+      expect(res.status).to.eq(200);
+      expect(res.body.saved_objects.length).to.eq(11);
+    });
+  });
+});
+
+describe('Upgrade risk scores from 8.3', () => {
+  const version = '8.3';
+  before(() => {
+    cleanKibana();
+    login();
+    createCustomRuleEnabled(getNewRule(), 'rule1');
+  });
+
+  beforeEach(() => {
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
+    installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId, version);
+    installLegacyRiskScoreModule(RiskScoreEntity.user, spaceId, version);
+    visit(ENTITY_ANALYTICS_URL);
+  });
+
+  afterEach(() => {
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
+    deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
+  });
+
+  it('should upgrade host risk score successfully', () => {
+    clickUpgradeRiskScore(RiskScoreEntity.host);
+
+    interceptUpgradeRiskScoreModule(RiskScoreEntity.host, version);
+
+    clickUpgradeRiskScoreConfirmed();
+    waitForUpgradeRiskScoreModule();
+
+    cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).should('be.disabled');
+
+    cy.get(RISK_SCORE_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.host)).should('exist');
+    cy.get(RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST(RiskScoreEntity.host)).should('exist');
+
+    cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).should('not.exist');
+    getTransformState(getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId)).then((res) => {
+      expect(res.status).to.eq(200);
+      expect(res.body.transforms[0].id).to.eq(
+        getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId)
+      );
+      expect(res.body.transforms[0].state).to.eq('started');
+    });
+    getTransformState(getRiskScoreLatestTransformId(RiskScoreEntity.host, spaceId)).then((res) => {
+      expect(res.status).to.eq(200);
+      expect(res.body.transforms[0].id).to.eq(
+        getRiskScoreLatestTransformId(RiskScoreEntity.host, spaceId)
+      );
+      expect(res.body.transforms[0].state).to.eq('started');
+    });
+    findSavedObjects(RiskScoreEntity.host, spaceId).then((res) => {
+      expect(res.status).to.eq(200);
+      expect(res.body.saved_objects.length).to.eq(11);
+    });
   });
 
   it('should upgrade user risk score successfully', () => {
