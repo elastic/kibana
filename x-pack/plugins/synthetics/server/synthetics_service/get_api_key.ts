@@ -23,7 +23,12 @@ export const serviceApiKeyPrivileges = {
   indices: [
     {
       names: [syntheticsIndex],
-      privileges: ['view_index_metadata', 'auto_configure', 'read'] as SecurityIndexPrivilege[],
+      privileges: [
+        'view_index_metadata',
+        'create_doc',
+        'auto_configure',
+        'read',
+      ] as SecurityIndexPrivilege[],
     },
   ],
   run_as: [],
