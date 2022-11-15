@@ -502,9 +502,13 @@ export const performBulkActionRoute = (
                   savedObjectsClient,
                   rule,
                 });
+                let shouldIncludeExceptions = true;
+                if (body.duplicate !== undefined) {
+                  shouldIncludeExceptions = body.duplicate.include_exceptions;
+                }
                 const duplicateRuleToCreate = await duplicateRule(
                   migratedRule,
-                  body.duplicate.include_exceptions,
+                  shouldIncludeExceptions,
                   exceptionsClient
                 );
                 const createdRule = await rulesClient.create({

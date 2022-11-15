@@ -231,7 +231,7 @@ type EditBulkAction = {
 
 type DuplicateBulkAction = {
   type: BulkActionType.duplicate;
-  duplicatePayload: BulkActionDuplicatePayload;
+  duplicatePayload?: BulkActionDuplicatePayload;
 } & QueryOrIds;
 
 export type BulkAction = PlainBulkAction | EditBulkAction | DuplicateBulkAction;

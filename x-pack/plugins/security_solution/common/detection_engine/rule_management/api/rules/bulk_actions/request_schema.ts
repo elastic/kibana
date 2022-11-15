@@ -177,12 +177,18 @@ export const PerformBulkActionRequestBody = t.intersection([
         ]),
       })
     ),
-    t.exact(
-      t.type({
-        action: t.literal(BulkActionType.duplicate),
-        [BulkActionType.duplicate]: bulkActionDuplicatePayload,
-      })
-    ),
+    t.intersection([
+      t.exact(
+        t.type({
+          action: t.literal(BulkActionType.duplicate),
+        })
+      ),
+      t.exact(
+        t.partial({
+          [BulkActionType.duplicate]: bulkActionDuplicatePayload,
+        })
+      ),
+    ]),
     t.exact(
       t.type({
         action: t.literal(BulkActionType.edit),
