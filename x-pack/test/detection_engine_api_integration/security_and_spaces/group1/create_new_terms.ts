@@ -18,7 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   /**
-   * Specific api integration tests for threat matching rule type
+   * Specific api integration tests for new terms rule type
    */
   describe('create_new_terms', () => {
     afterEach(async () => {
