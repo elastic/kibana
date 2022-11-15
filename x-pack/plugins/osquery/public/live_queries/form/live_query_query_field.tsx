@@ -43,7 +43,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   const [advancedContentState, setAdvancedContentState] =
     useState<EuiAccordionProps['forceState']>('closed');
   const permissions = useKibana().services.application.capabilities.osquery;
-  const ecsMapping = watch('ecs_mapping');
+  const [ecsMapping, query] = watch(['ecs_mapping', 'query']);
 
   const {
     field: { onChange, value },
@@ -55,7 +55,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyQueryError', {
           defaultMessage: 'Query is a required field',
         }),
-        value: true,
+        value: isEmpty(query),
       },
       maxLength: {
         message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
