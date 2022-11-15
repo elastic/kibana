@@ -122,7 +122,7 @@ export function runLengthDecodeBase64Url(input: string, size: number, capacity: 
   let i = 0;
   let j = 0;
 
-  for (i = 0; i < multipleOf8; i += 8) {
+  for (i = 0; i < multipleOf8 * 8; i += 8) {
     n =
       (charCodeAt(input, i) << 26) |
       (charCodeAt(input, i + 1) << 20) |

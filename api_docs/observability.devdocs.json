@@ -2390,6 +2390,20 @@
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ExploratoryEmbeddableProps.align",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "align",
+            "description": [],
+            "signature": [
+              "\"left\" | \"right\" | \"center\" | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5113,6 +5127,21 @@
           "DropResult"
         ],
         "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.enableAgentExplorerView",
+        "type": "string",
+        "tags": [],
+        "label": "enableAgentExplorerView",
+        "description": [],
+        "signature": [
+          "\"observability:apmAgentExplorerView\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7871,7 +7900,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; per_page: number; total: number; results: { id: string; name: string; description: string; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"slo.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; revision: number; created_at: string; updated_at: string; }[]; }, ",
+          ", { page: number; per_page: number; total: number; results: { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; revision: number; created_at: string; updated_at: string; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7931,7 +7960,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"slo.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7965,7 +7994,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_duration\">; params: ",
+          "<\"sli.apm.transaction_duration\">; params: ",
           "TypeC",
           "<{ environment: ",
           "UnionC",
@@ -7997,7 +8026,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_error_rate\">; params: ",
+          "<\"sli.apm.transaction_error_rate\">; params: ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -8043,7 +8072,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.kql.custom\">; params: ",
+          "<\"sli.kql.custom\">; params: ",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -8101,7 +8130,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"slo.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8131,7 +8160,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_duration\">; params: ",
+          "<\"sli.apm.transaction_duration\">; params: ",
           "TypeC",
           "<{ environment: ",
           "UnionC",
@@ -8163,7 +8192,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_error_rate\">; params: ",
+          "<\"sli.apm.transaction_error_rate\">; params: ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -8209,7 +8238,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.kql.custom\">; params: ",
+          "<\"sli.kql.custom\">; params: ",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -8334,7 +8363,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; }>; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
+          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { metrics: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; }>; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -8375,7 +8404,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; per_page: number; total: number; results: { id: string; name: string; description: string; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"slo.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; revision: number; created_at: string; updated_at: string; }[]; }, ",
+          ", { page: number; per_page: number; total: number; results: { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; revision: number; created_at: string; updated_at: string; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8435,7 +8464,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"slo.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8469,7 +8498,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_duration\">; params: ",
+          "<\"sli.apm.transaction_duration\">; params: ",
           "TypeC",
           "<{ environment: ",
           "UnionC",
@@ -8501,7 +8530,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_error_rate\">; params: ",
+          "<\"sli.apm.transaction_error_rate\">; params: ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -8547,7 +8576,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.kql.custom\">; params: ",
+          "<\"sli.kql.custom\">; params: ",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -8605,7 +8634,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"slo.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8635,7 +8664,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_duration\">; params: ",
+          "<\"sli.apm.transaction_duration\">; params: ",
           "TypeC",
           "<{ environment: ",
           "UnionC",
@@ -8667,7 +8696,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_error_rate\">; params: ",
+          "<\"sli.apm.transaction_error_rate\">; params: ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -8713,7 +8742,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.kql.custom\">; params: ",
+          "<\"sli.kql.custom\">; params: ",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -10521,6 +10550,138 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableAgentExplorerView",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableAgentExplorerView]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.description",
+                "type": "Any",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.showInLabs",
+                "type": "boolean",
+                "tags": [],
+                "label": "showInLabs",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-server.uiSettings.apmAWSLambdaPriceFactor",
             "type": "Object",
             "tags": [],
@@ -10853,7 +11014,7 @@
       "label": "ObservabilityPluginSetup",
       "description": [],
       "signature": [
-        "{ getAlertDetailsConfig(): Readonly<{} & { apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
+        "{ getAlertDetailsConfig(): Readonly<{} & { metrics: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
         {
           "pluginId": "@kbn/core-http-request-handler-context-server",
           "scope": "server",
@@ -11302,6 +11463,21 @@
         "description": [],
         "signature": [
           "\"observability:apmDefaultServiceEnvironment\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.enableAgentExplorerView",
+        "type": "string",
+        "tags": [],
+        "label": "enableAgentExplorerView",
+        "description": [],
+        "signature": [
+          "\"observability:apmAgentExplorerView\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
