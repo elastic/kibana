@@ -30,6 +30,7 @@ import { remeasureFonts } from './remeasure_fonts';
 
 import { createPlaceholderWidget } from './placeholder_widget';
 import {
+  codeEditorControlsStyles,
   codeEditorFullScreenStyles,
   codeEditorKeyboardHintStyles,
   codeEditorStyles,
@@ -419,19 +420,18 @@ export const CodeEditor: React.FC<Props> = ({
 
   const { CopyButton } = useCopy({ isCopyable, value });
 
+  const controlStyles = useMemo(() => {
+    const copyableStyles = { defaultStyles,  codeEditorControlsStyles(euiTheme) }
+    return allowFullScreen || isCopyable ? copyableStyles : defaultStyles;
+  }, [allowFullScreen, isCopyable, defaultStyles]);
+
   return (
-    <div
-      // className="kibanaCodeEditor"
-      css={styles}
-      onKeyDown={onKeyDown}
-      style={{ backgroundColor: 'yellowgreen' }}
-    >
+    <div css={styles} onKeyDown={onKeyDown} style={{ backgroundColor: 'yellowgreen' }}>
       {renderPrompt()}
 
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
-          // className="kibanaCodeEditor__controls"
-          <div css={styles}>
+          <div css={controlStyles}>
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
                 <CopyButton />
@@ -500,7 +500,9 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
   }, []);
 
   const FullScreenButton: React.FC = () => {
-    const styles = codeEditorFullScreenStyles();
+    const { euiTheme } = useEuiTheme();
+  const styles = [ codeEditorStyles, codeEditorFullScreenStyles(euiTheme) ];
+
     if (!allowFullScreen) return null;
     return (
       <EuiI18n
@@ -509,7 +511,6 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
       >
         {([fullscreenCollapse, fullscreenExpand]: string[]) => (
           <EuiButtonIcon
-            // className="euiCodeBlock__fullScreenButton"
             css={styles}
             onClick={toggleFullScreen}
             iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
@@ -525,8 +526,10 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
   const FullScreenDisplay = useMemo(
     () =>
       ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
+        const {euiTheme} = useEuiTheme();
+
         if (!isFullScreen) return <>{children}</>;
-        const styles = codeEditorFullScreenStyles();
+        const styles = codeEditorFullScreenStyles(euiTheme);
 
         return (
           <EuiOverlayMask>
