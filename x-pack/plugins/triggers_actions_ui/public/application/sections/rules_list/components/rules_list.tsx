@@ -12,7 +12,7 @@ import moment from 'moment';
 import { capitalize, isEmpty, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, ReactNode, useCallback, useMemo, useRef } from 'react';
 import {
   EuiButton,
   EuiFieldSearch,
@@ -66,6 +66,7 @@ import {
   snoozeRule,
   unsnoozeRule,
   bulkUpdateAPIKey,
+  cloneRule,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -190,6 +191,8 @@ export const RulesList = ({
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
+  const cloneRuleId = useRef<null | string>(null);
+
   useEffect(() => {
     (async () => {
       setConfig(await triggersActionsUiConfig({ http }));
@@ -248,6 +251,7 @@ export const RulesList = ({
   const [isUnsnoozingRules, setIsUnsnoozingRules] = useState<boolean>(false);
   const [isUnschedulingRules, setIsUnschedulingRules] = useState<boolean>(false);
   const [isUpdatingRuleAPIKeys, setIsUpdatingRuleAPIKeys] = useState<boolean>(false);
+  const [isCloningRule, setIsCloningRule] = useState<boolean>(false);
 
   const hasAnyAuthorizedRuleType = useMemo(() => {
     return ruleTypesState.isInitialized && ruleTypesState.data.size > 0;
@@ -331,6 +335,18 @@ export const RulesList = ({
     hasAnyAuthorizedRuleType,
     ruleTypesState,
   ]);
+
+  const tableItems = useMemo(() => {
+    if (ruleTypesState.isInitialized === false) {
+      return [];
+    }
+    return convertRulesToTableItems({
+      rules: rulesState.data,
+      ruleTypeIndex: ruleTypesState.data,
+      canExecuteActions,
+      config,
+    });
+  }, [ruleTypesState, rulesState.data, canExecuteActions, config]);
 
   useEffect(() => {
     refreshRules();
@@ -421,6 +437,17 @@ export const RulesList = ({
     tagsFilter,
     hasDefaultRuleTypesFiltersOn,
   ]);
+
+  useEffect(() => {
+    if (cloneRuleId.current) {
+      const ruleItem = tableItems.find((ti) => ti.id === cloneRuleId.current);
+      cloneRuleId.current = null;
+      setIsCloningRule(false);
+      if (ruleItem) {
+        onRuleEdit(ruleItem);
+      }
+    }
+  }, [tableItems]);
 
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
@@ -580,18 +607,6 @@ export const RulesList = ({
     ...getRuleTagFilter(),
   ];
 
-  const tableItems = useMemo(() => {
-    if (ruleTypesState.isInitialized === false) {
-      return [];
-    }
-    return convertRulesToTableItems({
-      rules: rulesState.data,
-      ruleTypeIndex: ruleTypesState.data,
-      canExecuteActions,
-      config,
-    });
-  }, [ruleTypesState, rulesState, canExecuteActions, config]);
-
   const {
     isAllSelected,
     selectedIds,
@@ -666,7 +681,8 @@ export const RulesList = ({
       isUnsnoozingRules ||
       isSchedulingRules ||
       isUnschedulingRules ||
-      isUpdatingRuleAPIKeys
+      isUpdatingRuleAPIKeys ||
+      isCloningRule
     );
   }, [
     rulesState,
@@ -678,7 +694,25 @@ export const RulesList = ({
     isSchedulingRules,
     isUnschedulingRules,
     isUpdatingRuleAPIKeys,
+    isCloningRule,
   ]);
+
+  const onCloneRule = async (ruleId: string) => {
+    setIsCloningRule(true);
+    try {
+      const RuleCloned = await cloneRule({ http, ruleId });
+      cloneRuleId.current = RuleCloned.id;
+      await loadRules();
+    } catch {
+      cloneRuleId.current = null;
+      setIsCloningRule(false);
+      toasts.addDanger(
+        i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
+          defaultMessage: 'Unable to clone rule',
+        })
+      );
+    }
+  };
 
   const table = (
     <>
@@ -921,6 +955,7 @@ export const RulesList = ({
             onEditRule={() => onRuleEdit(rule)}
             onUpdateAPIKey={setRulesToUpdateAPIKey}
             onRunRule={() => onRunRule(rule.id)}
+            onCloneRule={onCloneRule}
           />
         )}
         renderRuleError={(rule) => {
