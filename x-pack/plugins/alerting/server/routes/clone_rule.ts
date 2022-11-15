@@ -8,7 +8,12 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { verifyAccessAndContext, RewriteResponseCase, handleDisabledApiKeysError } from './lib';
+import {
+  verifyAccessAndContext,
+  RewriteResponseCase,
+  handleDisabledApiKeysError,
+  rewriteRuleLastRun,
+} from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
@@ -36,6 +41,8 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   executionStatus,
   snoozeSchedule,
   isSnoozedUntil,
+  lastRun,
+  nextRun,
   ...rest
 }) => ({
   ...rest,
@@ -70,6 +77,8 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
         })),
       }
     : {}),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 export const cloneRuleRoute = (

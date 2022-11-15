@@ -163,6 +163,18 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
+                last_run: {
+                  alerts_count: {
+                    active: 0,
+                    ignored: 0,
+                    new: 0,
+                    recovered: 0,
+                  },
+                  outcome: 'succeeded',
+                  outcome_msg: null,
+                  warning: null,
+                },
+                next_run: response.body.next_run,
               });
               expect(typeof response.body.scheduled_task_id).to.be('string');
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
