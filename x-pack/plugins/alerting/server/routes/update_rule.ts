@@ -15,13 +15,9 @@ import {
   RewriteResponseCase,
   RewriteRequestCase,
   handleDisabledApiKeysError,
-<<<<<<< HEAD
   rewriteActions,
   actionsSchema,
-||||||| 6672962d19b
-=======
   rewriteRuleLastRun,
->>>>>>> upstream/main
 } from './lib';
 import {
   RuleTypeParams,
