@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import styled from 'styled-components';
 
 import type { EuiCodeEditorProps } from '../shared_imports';
 import { EuiCodeEditor } from '../shared_imports';
@@ -29,6 +30,14 @@ interface OsqueryEditorProps {
   commands?: EuiCodeEditorProps['commands'];
 }
 
+const ResizeWrapper = styled.div`
+  overflow: auto;
+  resize: vertical;
+  min-height: 100px;
+  max-height: 500px;
+  height: 100px;
+`;
+
 const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   defaultValue,
   onChange,
@@ -40,19 +49,25 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 
+  const resize = useCallback((editorInstance) => {
+    document.addEventListener('mouseup', () => editorInstance.resize());
+  }, []);
+
   return (
-    <EuiCodeEditor
-      value={editorValue}
-      mode="osquery"
-      onChange={setEditorValue}
-      theme="tomorrow"
-      name="osquery_editor"
-      setOptions={EDITOR_SET_OPTIONS}
-      editorProps={EDITOR_PROPS}
-      height="100px"
-      width="100%"
-      commands={commands}
-    />
+    <ResizeWrapper>
+      <EuiCodeEditor
+        value={editorValue}
+        mode="osquery"
+        onChange={setEditorValue}
+        theme="tomorrow"
+        name="osquery_editor"
+        setOptions={EDITOR_SET_OPTIONS}
+        editorProps={EDITOR_PROPS}
+        onLoad={resize}
+        width="100%"
+        commands={commands}
+      />
+    </ResizeWrapper>
   );
 };
 
