@@ -71,22 +71,31 @@ export const TestPipeline: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
-              label="Add document"
-              helpText="Test with a document from your index"
+              label={i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument',
+                { defaultMessage: 'Add document' }
+              )}
+              helpText={i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.helptext',
+                { defaultMessage: 'Test with a document from your index' }
+              )}
               isInvalid={showGetDocumentErrors}
               error={getDocumentsErr}
             >
               <EuiFieldText
-                prepend="Document ID"
+                prepend={i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.documentId',
+                  { defaultMessage: 'Document ID' }
+                )}
                 inputRef={(ref: HTMLInputElement) => {
                   inputRef.current = ref;
                 }}
                 isInvalid={showGetDocumentErrors}
                 isLoading={isGetDocumentsLoading}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && inputRef.current?.value.length !== 0) {
+                  if (e.key === 'Enter' && inputRef.current?.value.trim().length !== 0) {
                     makeGetDocumentRequest({
-                      documentId: inputRef.current?.value ?? '',
+                      documentId: inputRef.current?.value.trim() ?? '',
                       indexName,
                     });
                   }
