@@ -152,7 +152,6 @@ export class SyntheticsService {
         description: 'This task periodically pushes saved monitors to Synthetics Service.',
         timeout: '1m',
         maxAttempts: 3,
-        maxConcurrency: 1,
 
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
@@ -459,7 +458,7 @@ export class SyntheticsService {
           return formatHeartbeatRequest({
             monitor: normalizeSecrets(monitor).attributes,
             monitorId: monitor.id,
-            customHeartbeatId: attributes[ConfigKey.CUSTOM_HEARTBEAT_ID],
+            heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
           });
         })
       );

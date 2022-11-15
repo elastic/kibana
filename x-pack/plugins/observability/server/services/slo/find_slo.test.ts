@@ -49,7 +49,7 @@ describe('FindSLO', () => {
                 transaction_type: 'irrelevant',
                 'threshold.us': 500000,
               },
-              type: 'slo.apm.transaction_duration',
+              type: 'sli.apm.transaction_duration',
             },
             objective: {
               target: 0.999,
