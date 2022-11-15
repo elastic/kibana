@@ -16,6 +16,7 @@ import {
   verifyAccessAndContext,
   countUsageOfPredefinedIds,
   actionsSchema,
+  rewriteRuleLastRun,
 } from './lib';
 import {
   SanitizedRule,
@@ -64,6 +65,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   muteAll,
   mutedInstanceIds,
   snoozeSchedule,
+  lastRun,
+  nextRun,
   executionStatus: { lastExecutionDate, lastDuration, ...executionStatus },
   ...rest
 }) => ({
@@ -90,6 +93,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     params,
     connector_type_id: actionTypeId,
   })),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {

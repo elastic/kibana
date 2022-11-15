@@ -15,8 +15,13 @@ import {
   RewriteResponseCase,
   RewriteRequestCase,
   handleDisabledApiKeysError,
+<<<<<<< HEAD
   rewriteActions,
   actionsSchema,
+||||||| 6672962d19b
+=======
+  rewriteRuleLastRun,
+>>>>>>> upstream/main
 } from './lib';
 import {
   RuleTypeParams,
@@ -67,6 +72,8 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   executionStatus,
   snoozeSchedule,
   isSnoozedUntil,
+  lastRun,
+  nextRun,
   ...rest
 }) => ({
   ...rest,
@@ -101,6 +108,8 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
         })),
       }
     : {}),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 export const updateRuleRoute = (

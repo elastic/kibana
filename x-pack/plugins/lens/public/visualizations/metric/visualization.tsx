@@ -669,4 +669,53 @@ export const getMetricVisualization = ({
     };
     return suggestion;
   },
+
+  getVisualizationInfo(state: MetricVisualizationState) {
+    const dimensions = [];
+    if (state.metricAccessor) {
+      dimensions.push({
+        id: state.metricAccessor,
+        name: i18n.translate('xpack.lens.primaryMetric.label', {
+          defaultMessage: 'Primary metric',
+        }),
+      });
+    }
+
+    if (state.secondaryMetricAccessor) {
+      dimensions.push({
+        id: state.secondaryMetricAccessor,
+        name: i18n.translate('xpack.lens.metric.secondaryMetric', {
+          defaultMessage: 'Secondary metric',
+        }),
+      });
+    }
+
+    if (state.maxAccessor) {
+      dimensions.push({
+        id: state.maxAccessor,
+        name: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
+      });
+    }
+
+    if (state.breakdownByAccessor) {
+      dimensions.push({
+        id: state.breakdownByAccessor,
+        name: i18n.translate('xpack.lens.metric.breakdownBy', {
+          defaultMessage: 'Break down by',
+        }),
+      });
+    }
+
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: 'metric',
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
+  },
 });

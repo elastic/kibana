@@ -29,6 +29,7 @@ export interface RuleSwitchProps {
   enabled: boolean;
   isDisabled?: boolean;
   isLoading?: boolean;
+  startMlJobsIfNeeded?: () => Promise<void>;
   onChange?: (enabled: boolean) => void;
 }
 
@@ -40,6 +41,7 @@ export const RuleSwitchComponent = ({
   isDisabled,
   isLoading,
   enabled,
+  startMlJobsIfNeeded,
   onChange,
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
@@ -53,8 +55,12 @@ export const RuleSwitchComponent = ({
       startTransaction({
         name: enabled ? SINGLE_RULE_ACTIONS.DISABLE : SINGLE_RULE_ACTIONS.ENABLE,
       });
+      const enableRule = event.target.checked;
+      if (enableRule) {
+        await startMlJobsIfNeeded?.();
+      }
       const bulkActionResponse = await executeBulkAction({
-        type: event.target.checked ? BulkActionType.enable : BulkActionType.disable,
+        type: enableRule ? BulkActionType.enable : BulkActionType.disable,
         ids: [id],
       });
       if (bulkActionResponse?.attributes.results.updated.length) {
@@ -63,7 +69,7 @@ export const RuleSwitchComponent = ({
       }
       setMyIsLoading(false);
     },
-    [enabled, executeBulkAction, id, onChange, startTransaction]
+    [enabled, executeBulkAction, id, onChange, startMlJobsIfNeeded, startTransaction]
   );
 
   const showLoader = useMemo((): boolean => {
@@ -75,7 +81,7 @@ export const RuleSwitchComponent = ({
   }, [myIsLoading, isLoading]);
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
+    <EuiFlexGroup alignItems="center" justifyContent="spaceAround" id={`rule-switch-${id}`}>
       <EuiFlexItem grow={false}>
         {showLoader ? (
           <EuiLoadingSpinner size="m" data-test-subj="ruleSwitchLoader" />

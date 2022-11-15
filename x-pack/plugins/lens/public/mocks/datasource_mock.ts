@@ -67,6 +67,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getUsedDataView: jest.fn((state, layer) => 'mockip'),
     getUsedDataViews: jest.fn(),
     onRefreshIndexPattern: jest.fn(),
+    getDatasourceInfo: jest.fn(),
   };
 }
 

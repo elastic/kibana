@@ -20,7 +20,7 @@ import type { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store/timeline';
-import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
+import { detectionsTimelineIds } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import type {
   PaginationInputPaginated,
@@ -56,6 +56,10 @@ export interface TimelineArgs {
   totalCount: number;
   updatedAt: number;
 }
+
+type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
+
+type TimelineEventsSearchHandler = (onNextResponse?: OnNextResponseHandler) => void;
 
 type LoadPage = (newActivePage: number) => void;
 
@@ -128,7 +132,7 @@ const deStructureEqlOptions = (eqlOptions?: EqlOptionsSelected) => ({
     : {}),
 });
 
-export const useTimelineEvents = ({
+export const useTimelineEventsHandler = ({
   dataViewId,
   endDate,
   eqlOptions = undefined,
@@ -143,7 +147,7 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
-}: UseTimelineEventsProps): [boolean, TimelineArgs] => {
+}: UseTimelineEventsProps): [boolean, TimelineArgs, TimelineEventsSearchHandler] => {
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
   const { data } = useKibana().services;
@@ -213,7 +217,10 @@ export const useTimelineEvents = ({
   const { addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
-    (request: TimelineRequest<typeof language> | null) => {
+    async (
+      request: TimelineRequest<typeof language> | null,
+      onNextHandler?: OnNextResponseHandler
+    ) => {
       if (request == null || pageName === '' || skip) {
         return;
       }
@@ -223,7 +230,6 @@ export const useTimelineEvents = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         const { endTracking } = startTracking({ name: `${APP_UI_ID} timeline events search` });
-
         searchSubscription$.current = data.search
           .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
             strategy:
@@ -259,8 +265,10 @@ export const useTimelineEvents = ({
                       activeTimeline.setResponse(newTimelineResponse);
                     }
                   }
+                  if (onNextHandler) onNextHandler(newTimelineResponse);
                   return newTimelineResponse;
                 });
+
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 endTracking('invalid');
@@ -318,7 +326,7 @@ export const useTimelineEvents = ({
 
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
-      asyncSearch();
+      await asyncSearch();
       refetch.current = asyncSearch;
     },
     [
@@ -336,7 +344,7 @@ export const useTimelineEvents = ({
   );
 
   useEffect(() => {
-    if (skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
+    if (indexNames.length === 0) {
       return;
     }
 
@@ -397,7 +405,7 @@ export const useTimelineEvents = ({
           activeTimeline.setActivePage(newActivePage);
         }
       }
-      if (!skipQueryForDetectionsPage(id, indexNames) && !deepEqual(prevRequest, currentRequest)) {
+      if (!deepEqual(prevRequest, currentRequest)) {
         return currentRequest;
       }
       return prevRequest;
@@ -418,19 +426,18 @@ export const useTimelineEvents = ({
     runtimeMappings,
   ]);
 
-  useEffect(() => {
-    if (
-      id !== TimelineId.active ||
-      timerangeKind === 'absolute' ||
-      !deepEqual(prevTimelineRequest.current, timelineRequest)
-    ) {
-      timelineSearch(timelineRequest);
-    }
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, [id, timelineRequest, timelineSearch, timerangeKind]);
+  const timelineSearchHandler = useCallback(
+    async (onNextHandler?: OnNextResponseHandler) => {
+      if (
+        id !== TimelineId.active ||
+        timerangeKind === 'absolute' ||
+        !deepEqual(prevTimelineRequest.current, timelineRequest)
+      ) {
+        await timelineSearch(timelineRequest, onNextHandler);
+      }
+    },
+    [id, timelineRequest, timelineSearch, timerangeKind]
+  );
 
   /*
     cleanup timeline events response when the filters were removed completely
@@ -456,6 +463,47 @@ export const useTimelineEvents = ({
       });
     }
   }, [filterQuery, id, refetchGrid, wrappedLoadPage]);
+
+  return [loading, timelineResponse, timelineSearchHandler];
+};
+
+export const useTimelineEvents = ({
+  dataViewId,
+  endDate,
+  eqlOptions = undefined,
+  id = ID,
+  indexNames,
+  fields,
+  filterQuery,
+  runtimeMappings,
+  startDate,
+  language = 'kuery',
+  limit,
+  sort = initSortDefault,
+  skip = false,
+  timerangeKind,
+}: UseTimelineEventsProps): [boolean, TimelineArgs] => {
+  const [loading, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
+    dataViewId,
+    endDate,
+    eqlOptions,
+    id,
+    indexNames,
+    fields,
+    filterQuery,
+    runtimeMappings,
+    startDate,
+    language,
+    limit,
+    sort,
+    skip,
+    timerangeKind,
+  });
+
+  useEffect(() => {
+    if (!timelineSearchHandler) return;
+    timelineSearchHandler();
+  }, [timelineSearchHandler]);
 
   return [loading, timelineResponse];
 };
