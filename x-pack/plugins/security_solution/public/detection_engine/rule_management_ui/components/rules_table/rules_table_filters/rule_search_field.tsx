@@ -54,6 +54,7 @@ export function RuleSearchField({ initialValue, onSearch }: RuleSearchFieldProps
         value={searchText}
         onChange={handleChange}
         onSearch={onSearch}
+        data-test-subj="ruleSearchField"
       />
     </SearchBarWrapper>
   );

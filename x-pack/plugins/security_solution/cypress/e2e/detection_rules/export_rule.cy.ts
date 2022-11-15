@@ -16,7 +16,7 @@ import {
 import {
   exportFirstRule,
   loadPrebuiltDetectionRulesFromHeaderBtn,
-  switchToElasticRules,
+  filterByElasticRules,
   selectNumberOfRules,
   bulkExportRules,
   selectAllRules,
@@ -59,7 +59,7 @@ describe('Export rules', () => {
 
     loadPrebuiltDetectionRulesFromHeaderBtn();
 
-    switchToElasticRules();
+    filterByElasticRules();
     selectNumberOfRules(expectedElasticRulesCount);
     bulkExportRules();
 
