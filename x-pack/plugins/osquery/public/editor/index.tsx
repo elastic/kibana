@@ -55,7 +55,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
       onChange(editorValue);
       const maxHeight = editorRef.current?.renderer.layerConfig.maxHeight;
 
-      if (maxHeight && maxHeight > MIN_HEIGHT) {
+      if (maxHeight > MIN_HEIGHT) {
         setHeight(maxHeight);
       }
     },
