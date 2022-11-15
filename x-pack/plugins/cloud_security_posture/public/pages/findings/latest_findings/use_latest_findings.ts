@@ -68,15 +68,14 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
     data,
     notifications: { toasts },
   } = useKibana().services;
-  const params = { ...options };
   return useQuery(
-    ['csp_findings', { params }],
+    ['csp_findings', { params: options }],
     async () => {
       const {
         rawResponse: { hits, aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getFindingsQuery(params),
+          params: getFindingsQuery(options),
         })
       );
       if (!aggregations) throw new Error('expected aggregations to be an defined');
