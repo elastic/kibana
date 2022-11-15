@@ -119,6 +119,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 jest.mock('../../hooks/endpoint/use_get_endpoints_list');
 
+jest.mock('../../../common/experimental_features_service');
+
 jest.mock('../../../common/components/user_privileges');
 
 let mockUseGetFileInfo: {
