@@ -1612,22 +1612,22 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     }
 
     let availableSpacesPromise: Promise<string[]> | undefined;
-    const getAvailableSpaces = async () => {
+    const getAvailableSpaces = async (spacesExtension: ISavedObjectsSpacesExtension) => {
       if (!availableSpacesPromise) {
-        // This function is only called below if the spaces extension is enabled, so we can safely use the non-null assertion operator here.
-        availableSpacesPromise = this._spacesExtension!.getSearchableNamespaces([
-          ALL_NAMESPACES_STRING,
-        ]).catch((err) => {
-          if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
-            // the user doesn't have access to any spaces; return the current space ID and allow the SOR authZ check to fail
-            return [SavedObjectsUtils.namespaceIdToString(namespace)];
-          } else {
-            throw err;
-          }
-        });
+        availableSpacesPromise = spacesExtension
+          .getSearchableNamespaces([ALL_NAMESPACES_STRING])
+          .catch((err) => {
+            if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+              // the user doesn't have access to any spaces; return the current space ID and allow the SOR authZ check to fail
+              return [SavedObjectsUtils.namespaceIdToString(namespace)];
+            } else {
+              throw err;
+            }
+          });
       }
       return availableSpacesPromise;
     };
+
     let bulkGetRequestIndexCounter = 0;
     type ExpectedBulkGetResult = Either<
       { type: string; id: string; error: Payload },
@@ -1657,7 +1657,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
         let namespaces = object.namespaces;
         if (this._spacesExtension && namespaces?.includes(ALL_NAMESPACES_STRING)) {
-          namespaces = await getAvailableSpaces();
+          namespaces = await getAvailableSpaces(this._spacesExtension);
         }
         return {
           tag: 'Right',
