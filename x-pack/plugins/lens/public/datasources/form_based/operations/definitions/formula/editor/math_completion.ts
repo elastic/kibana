@@ -367,7 +367,7 @@ function getArgumentSuggestions(
   return { list: [], type: SUGGESTION_TYPE.FIELD };
 }
 
-const anchoredAbsoluteTimeShiftRegexp = /^(start|end) - /;
+const anchoredAbsoluteTimeShiftRegexp = /^(startAt|endAt)\(/;
 
 export async function getNamedArgumentSuggestions({
   ast,
@@ -399,10 +399,10 @@ export async function getNamedArgumentSuggestions({
     const absShift = ast.value.split(MARKER)[0];
     // Translate the relative time shifts into absolute ones
     if (anchoredAbsoluteTimeShiftRegexp.test(absShift)) {
-      const refDate = absShift.startsWith('start') ? dateRange.fromDate : dateRange.toDate;
+      const refDate = absShift.startsWith('startAt') ? dateRange.fromDate : dateRange.toDate;
       return {
         list: validTimeShiftOptions.map(
-          (value) => `${moment(refDate).subtract(parseTimeShift(value), 'ms').toISOString()}`
+          (value) => `${moment(refDate).subtract(parseTimeShift(value), 'ms').toISOString()})`
         ),
         type: SUGGESTION_TYPE.SHIFTS,
       };
