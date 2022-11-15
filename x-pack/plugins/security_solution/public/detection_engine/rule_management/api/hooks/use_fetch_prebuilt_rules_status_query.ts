@@ -10,14 +10,15 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPrePackagedRulesStatus } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 import type { PrePackagedRulesStatusResponse } from '../../logic';
+import { PREBUILT_RULES_STATUS_URL } from '../../../../../common/detection_engine/prebuilt_rules/api/urls';
 
-export const PREBUILT_RULES_STATUS_QUERY_KEY = 'prePackagedRulesStatus';
+export const PREBUILT_RULES_STATUS_QUERY_KEY = ['GET', PREBUILT_RULES_STATUS_URL];
 
 export const useFetchPrebuiltRulesStatusQuery = (
-  options: UseQueryOptions<PrePackagedRulesStatusResponse>
+  options?: UseQueryOptions<PrePackagedRulesStatusResponse>
 ) => {
   return useQuery<PrePackagedRulesStatusResponse>(
-    [PREBUILT_RULES_STATUS_QUERY_KEY],
+    PREBUILT_RULES_STATUS_QUERY_KEY,
     async ({ signal }) => {
       const response = await getPrePackagedRulesStatus({ signal });
       return response;
@@ -40,7 +41,7 @@ export const useInvalidateFetchPrebuiltRulesStatusQuery = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {
-    queryClient.invalidateQueries([PREBUILT_RULES_STATUS_QUERY_KEY], {
+    queryClient.invalidateQueries(PREBUILT_RULES_STATUS_QUERY_KEY, {
       refetchType: 'active',
     });
   }, [queryClient]);

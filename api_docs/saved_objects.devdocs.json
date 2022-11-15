@@ -784,7 +784,13 @@
             "text": "SavedObject"
           },
           "<",
-          "SavedObjectAttributes",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          },
           ">, \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
           ", \"savedObjectsClient\" | \"overlays\">) => Promise<true>"
@@ -810,7 +816,13 @@
                 "text": "SavedObject"
               },
               "<",
-              "SavedObjectAttributes",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectAttributes",
+                "text": "SavedObjectAttributes"
+              },
               ">, \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
@@ -878,9 +890,21 @@
         "description": [],
         "signature": [
           "(savedObject: ",
-          "SavedObjectsStart",
+          {
+            "pluginId": "@kbn/core-saved-objects-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
+            "section": "def-common.SavedObjectsStart",
+            "text": "SavedObjectsStart"
+          },
           ", uiSettings: ",
-          "IUiSettingsClient",
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-common.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
           ") => (props: ",
           "SavedObjectFinderProps",
           ") => JSX.Element"
@@ -897,7 +921,13 @@
             "label": "savedObject",
             "description": [],
             "signature": [
-              "SavedObjectsStart"
+              {
+                "pluginId": "@kbn/core-saved-objects-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
+                "section": "def-common.SavedObjectsStart",
+                "text": "SavedObjectsStart"
+              }
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
@@ -912,7 +942,13 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              "IUiSettingsClient"
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
@@ -1027,17 +1063,53 @@
         ],
         "signature": [
           "(source: ",
-          "SavedObjectAttributes",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          },
           ", savedObject: { getEsType(): string; title: string; displayName: string; }, options: ",
-          "SavedObjectsCreateOptions",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+            "section": "def-common.SavedObjectsCreateOptions",
+            "text": "SavedObjectsCreateOptions"
+          },
           ", services: { savedObjectsClient: ",
-          "SavedObjectsClientContract",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+            "section": "def-common.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          },
           "; overlays: ",
-          "OverlayStart",
+          {
+            "pluginId": "@kbn/core-overlays-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+            "section": "def-common.OverlayStart",
+            "text": "OverlayStart"
+          },
           "; }) => Promise<",
-          "SimpleSavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+            "section": "def-common.SimpleSavedObject",
+            "text": "SimpleSavedObject"
+          },
           "<",
-          "SavedObjectAttributes",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          },
           ">>"
         ],
         "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
@@ -1054,7 +1126,13 @@
               "- serialized version of this object what will be indexed into elasticsearch."
             ],
             "signature": [
-              "SavedObjectAttributes"
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectAttributes",
+                "text": "SavedObjectAttributes"
+              }
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
             "deprecated": false,
@@ -1122,7 +1200,13 @@
               "- options to pass to the saved object create method"
             ],
             "signature": [
-              "SavedObjectsCreateOptions"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              }
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
             "deprecated": false,
@@ -1148,7 +1232,13 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false,
@@ -1162,7 +1252,13 @@
                 "label": "overlays",
                 "description": [],
                 "signature": [
-                  "OverlayStart"
+                  {
+                    "pluginId": "@kbn/core-overlays-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                    "section": "def-common.OverlayStart",
+                    "text": "OverlayStart"
+                  }
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false,
@@ -1580,9 +1676,21 @@
             "description": [],
             "signature": [
               "() => { attributes: ",
-              "SavedObjectAttributes",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectAttributes",
+                "text": "SavedObjectAttributes"
+              },
               "; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]; }"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
@@ -2034,7 +2142,13 @@
             "label": "unresolvedIndexPatternReference",
             "description": [],
             "signature": [
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               " | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
@@ -2072,7 +2186,13 @@
                 "text": "SavedObject"
               },
               "<",
-              "SavedObjectAttributes",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectAttributes",
+                "text": "SavedObjectAttributes"
+              },
               ">) => Promise<",
               {
                 "pluginId": "savedObjects",
@@ -2082,7 +2202,13 @@
                 "text": "SavedObject"
               },
               "<",
-              "SavedObjectAttributes",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectAttributes",
+                "text": "SavedObjectAttributes"
+              },
               ">>) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
@@ -2105,7 +2231,13 @@
                     "text": "SavedObject"
                   },
                   "<",
-                  "SavedObjectAttributes",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectAttributes",
+                    "text": "SavedObjectAttributes"
+                  },
                   ">"
                 ],
                 "path": "src/plugins/saved_objects/public/types.ts",
@@ -2183,9 +2315,21 @@
                 "text": "SavedObject"
               },
               "<",
-              "SavedObjectAttributes",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectAttributes",
+                "text": "SavedObjectAttributes"
+              },
               ">>(object: T, references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]) => void) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
@@ -2215,7 +2359,13 @@
                 "label": "references",
                 "description": [],
                 "signature": [
-                  "SavedObjectReference",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/saved_objects/public/types.ts",
@@ -2627,7 +2777,13 @@
             "description": [],
             "signature": [
               "(savedObject: ",
-              "SimpleSavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
               "<T>) => ",
               "IconType"
             ],
@@ -2643,7 +2799,13 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SimpleSavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SimpleSavedObject",
+                    "text": "SimpleSavedObject"
+                  },
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2663,7 +2825,13 @@
             "description": [],
             "signature": [
               "((savedObject: ",
-              "SimpleSavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
               "<T>) => string) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2678,7 +2846,13 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SimpleSavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SimpleSavedObject",
+                    "text": "SimpleSavedObject"
+                  },
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2698,7 +2872,13 @@
             "description": [],
             "signature": [
               "((savedObject: ",
-              "SimpleSavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
               "<T>) => boolean) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2713,7 +2893,13 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SimpleSavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SimpleSavedObject",
+                    "text": "SimpleSavedObject"
+                  },
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2733,7 +2919,13 @@
             "description": [],
             "signature": [
               "((savedObject: ",
-              "SimpleSavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
               "<T>) => string) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2748,7 +2940,13 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  "SimpleSavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                    "section": "def-common.SimpleSavedObject",
+                    "text": "SimpleSavedObject"
+                  },
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -3026,9 +3224,21 @@
         "description": [],
         "signature": [
           "{ savedObjects: ",
-          "SavedObjectsStart",
+          {
+            "pluginId": "@kbn/core-saved-objects-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
+            "section": "def-common.SavedObjectsStart",
+            "text": "SavedObjectsStart"
+          },
           "; uiSettings: ",
-          "IUiSettingsClient",
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-common.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
           "; } & ",
           "SavedObjectFinderProps"
         ],
@@ -3086,7 +3296,13 @@
               "text": "SavedObject"
             },
             "<",
-            "SavedObjectAttributes",
+            {
+              "pluginId": "@kbn/core-saved-objects-common",
+              "scope": "common",
+              "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+              "section": "def-common.SavedObjectAttributes",
+              "text": "SavedObjectAttributes"
+            },
             ">"
           ],
           "path": "src/plugins/saved_objects/public/plugin.ts",

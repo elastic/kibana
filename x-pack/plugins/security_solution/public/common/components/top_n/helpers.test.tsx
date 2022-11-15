@@ -18,11 +18,9 @@ import {
   rawEvents,
   removeIgnoredAlertFilters,
   shouldIgnoreAlertFilters,
+  detectionAlertsTables,
 } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-
-/** the following scopes are detection alert tables */
-const detectionAlertsTables = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
 /** the following scopes are NOT detection alert tables */
 const otherScopes = [
@@ -30,7 +28,6 @@ const otherScopes = [
   TableId.hostsPageSessions,
   TableId.networkPageEvents,
   TimelineId.active,
-  TimelineId.casePage,
   TimelineId.test,
   TableId.alternateTest,
   TableId.kubernetesPageSessions,

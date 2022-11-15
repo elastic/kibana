@@ -6,15 +6,21 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { Observable } from 'rxjs';
 import { HttpSetup } from '@kbn/core/public';
 import type { GuideState, GuideId, GuideStepIds, StepStatus } from '@kbn/guided-onboarding';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuidedOnboardingPluginSetup {}
 
 export interface GuidedOnboardingPluginStart {
   guidedOnboardingApi?: GuidedOnboardingApi;
+}
+
+export interface AppPluginStartDependencies {
+  cloud?: CloudStart;
 }
 
 export interface GuidedOnboardingApi {
@@ -49,7 +55,10 @@ export interface GuidedOnboardingApi {
 export interface StepConfig {
   id: GuideStepIds;
   title: string;
-  descriptionList: string[];
+  // description is displayed as a single paragraph, can be combined with description list
+  description?: string;
+  // description list is displayed as an unordered list, can be combined with description
+  descriptionList?: Array<string | React.ReactNode>;
   location?: {
     appID: string;
     path: string;

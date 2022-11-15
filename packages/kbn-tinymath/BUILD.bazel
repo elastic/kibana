@@ -2,7 +2,7 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("@npm//peggy:index.bzl", "peggy")
 load("//src/dev/bazel:index.bzl", "pkg_npm")
 
-PKG_BASE_NAME = "kbn-tinymath"
+PKG_DIRNAME = "kbn-tinymath"
 PKG_REQUIRE_NAME = "@kbn/tinymath"
 
 SOURCE_FILES = glob(
@@ -45,7 +45,7 @@ peggy(
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES + [
     ":srcs",
     ":grammar"
@@ -57,9 +57,7 @@ js_library(
 
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(

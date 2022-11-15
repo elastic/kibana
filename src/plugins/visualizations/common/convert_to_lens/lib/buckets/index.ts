@@ -9,9 +9,8 @@
 import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { convertToSchemaConfig } from '../../../vis_schemas';
-import { SchemaConfig } from '../../..';
+import { AggBasedColumn, SchemaConfig } from '../../..';
 import {
-  AggBasedColumn,
   CommonBucketConverterArgs,
   convertToDateHistogramColumn,
   convertToFiltersColumn,
@@ -26,6 +25,7 @@ export type BucketAggs =
   | BUCKET_TYPES.FILTERS
   | BUCKET_TYPES.RANGE
   | BUCKET_TYPES.HISTOGRAM;
+
 const SUPPORTED_BUCKETS: string[] = [
   BUCKET_TYPES.TERMS,
   BUCKET_TYPES.DATE_HISTOGRAM,
@@ -39,7 +39,7 @@ const isSupportedBucketAgg = (agg: SchemaConfig): agg is SchemaConfig<BucketAggs
 };
 
 export const getBucketColumns = (
-  { agg, dataView, metricColumns, aggs }: CommonBucketConverterArgs<BucketAggs>,
+  { agg, dataView, metricColumns, aggs, visType }: CommonBucketConverterArgs<BucketAggs>,
   {
     label,
     isSplit = false,
@@ -76,7 +76,7 @@ export const getBucketColumns = (
       if (field.type !== 'date') {
         return convertToTermsColumn(
           agg.aggId ?? '',
-          { agg, dataView, metricColumns, aggs },
+          { agg, dataView, metricColumns, aggs, visType },
           label,
           isSplit
         );
@@ -102,7 +102,9 @@ export const convertBucketToColumns = (
     dataView,
     metricColumns,
     aggs,
+    visType,
   }: {
+    visType: string;
     agg: SchemaConfig | IAggConfig;
     dataView: DataView;
     metricColumns: AggBasedColumn[];
@@ -116,7 +118,7 @@ export const convertBucketToColumns = (
     return null;
   }
   return getBucketColumns(
-    { agg: currentAgg, dataView, metricColumns, aggs },
+    { agg: currentAgg, dataView, metricColumns, aggs, visType },
     {
       label: getLabel(currentAgg),
       isSplit,

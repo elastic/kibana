@@ -50,7 +50,7 @@ import {
   convertECSMappingToObject,
 } from '../../../common/schemas/common/utils';
 import ECSSchema from '../../common/schemas/ecs/v8.5.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.4.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.5.1.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -588,10 +588,10 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             rowHeight={32}
             isClearable
             singleSelection={isSingleSelection ? SINGLE_SELECTION : false}
-            options={(resultTypeField.value === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
             idAria={idAria}
             helpText={selectedOptions[0]?.value?.description}
             {...euiFieldProps}
+            options={(resultTypeField.value === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

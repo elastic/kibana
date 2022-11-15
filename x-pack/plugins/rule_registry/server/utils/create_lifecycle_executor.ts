@@ -37,12 +37,14 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
+  // ALERT_FLAPPING,
 } from '../../common/technical_rule_data_field_names';
 import { CommonAlertFieldNameLatest, CommonAlertIdFieldNameLatest } from '../../common/schemas';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
 import { getCommonAlertFields } from './get_common_alert_fields';
+import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
 
@@ -68,7 +70,9 @@ export interface LifecycleAlertServices<
   ActionGroupIds extends string = never
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
-  getAlertStartedDate: (alertId: string) => string | null;
+  getAlertStartedDate: (alertInstanceId: string) => string | null;
+  getAlertUuid: (alertInstanceId: string) => string | null;
+  getAlertByAlertUuid: (alertUuid: string) => { [x: string]: any } | null;
 }
 
 export type LifecycleRuleExecutor<
@@ -159,6 +163,8 @@ export const createLifecycleExecutor =
 
     const currentAlerts: Record<string, ExplicitAlertFields> = {};
 
+    const newAlertUuids: Record<string, string> = {};
+
     const lifecycleAlertServices: LifecycleAlertServices<
       InstanceState,
       InstanceContext,
@@ -169,6 +175,22 @@ export const createLifecycleExecutor =
         return alertFactory.create(id);
       },
       getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
+      getAlertUuid: (alertId: string) => {
+        if (!state.trackedAlerts[alertId]) {
+          const alertUuid = v4();
+          newAlertUuids[alertId] = alertUuid;
+          return alertUuid;
+        }
+
+        return state.trackedAlerts[alertId].alertUuid;
+      },
+      getAlertByAlertUuid: async (alertUuid: string) => {
+        try {
+          return await fetchAlertByAlertUUID(ruleDataClient, alertUuid);
+        } catch (err) {
+          return null;
+        }
+      },
     };
 
     const nextWrappedState = await wrappedExecutor({
@@ -203,9 +225,9 @@ export const createLifecycleExecutor =
         commonRuleFields
       );
       result.forEach((hit) => {
-        const alertId = hit._source ? hit._source[ALERT_INSTANCE_ID] : void 0;
-        if (alertId && hit._source) {
-          trackedAlertsDataMap[alertId] = {
+        const alertInstanceId = hit._source ? hit._source[ALERT_INSTANCE_ID] : void 0;
+        if (alertInstanceId && hit._source) {
+          trackedAlertsDataMap[alertInstanceId] = {
             indexName: hit._index,
             fields: hit._source,
           };
@@ -226,10 +248,12 @@ export const createLifecycleExecutor =
         const isRecovered = !currentAlerts[alertId];
         const isActive = !isRecovered;
 
-        const { alertUuid, started } = state.trackedAlerts[alertId] ?? {
-          alertUuid: v4(),
-          started: commonRuleFields[TIMESTAMP],
-        };
+        const { alertUuid, started } = !isNew
+          ? state.trackedAlerts[alertId]
+          : {
+              alertUuid: newAlertUuids[alertId] || v4(),
+              started: commonRuleFields[TIMESTAMP],
+            };
 
         const event: ParsedTechnicalFields & ParsedExperimentalFields = {
           ...alertData?.fields,
@@ -249,8 +273,8 @@ export const createLifecycleExecutor =
           [ALERT_WORKFLOW_STATUS]: alertData?.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
+          [TAGS]: options.rule.tags,
           [VERSION]: ruleDataClient.kibanaVersion,
-          [TAGS]: options.tags,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };
 

@@ -8,7 +8,7 @@ export interface CspNavigationItem {
   readonly name: string;
   readonly path: string;
   readonly disabled?: boolean;
-  readonly exact?: boolean;
+  readonly omitSecuritySpy?: boolean;
 }
 
 export interface CspPageNavigationItem extends CspNavigationItem {
@@ -16,6 +16,7 @@ export interface CspPageNavigationItem extends CspNavigationItem {
 }
 
 export type CspPage = 'dashboard' | 'findings' | 'benchmarks';
+export type CspBenchmarksPage = 'rules';
 
 /**
  * All the IDs for the cloud security posture pages.
@@ -24,4 +25,5 @@ export type CspPage = 'dashboard' | 'findings' | 'benchmarks';
 export type CloudSecurityPosturePageId =
   | 'cloud_security_posture-dashboard'
   | 'cloud_security_posture-findings'
-  | 'cloud_security_posture-benchmarks';
+  | 'cloud_security_posture-benchmarks'
+  | 'cloud_security_posture-benchmarks-rules';

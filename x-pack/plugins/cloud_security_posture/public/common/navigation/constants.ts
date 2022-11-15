@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CspPage, CspPageNavigationItem } from './types';
+import type { CspBenchmarksPage, CspPage, CspPageNavigationItem } from './types';
 
 const NAV_ITEMS_NAMES = {
   DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
@@ -44,10 +44,12 @@ export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
   },
 };
 
-export const benchmarksNavigation = {
+export const benchmarksNavigation: Record<CspBenchmarksPage, CspPageNavigationItem> = {
   rules: {
     name: NAV_ITEMS_NAMES.RULES,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/rules`,
+    id: 'cloud_security_posture-benchmarks-rules',
+    omitSecuritySpy: true,
   },
 };
 
@@ -55,13 +57,16 @@ export const findingsNavigation = {
   findings_default: {
     name: NAV_ITEMS_NAMES.FINDINGS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/default`,
+    id: 'cloud_security_posture-findings-default',
   },
   findings_by_resource: {
     name: NAV_ITEMS_NAMES.FINDINGS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource`,
+    id: 'cloud_security_posture-findings-resource',
   },
   resource_findings: {
     name: NAV_ITEMS_NAMES.FINDINGS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource/:resourceId`,
+    id: 'cloud_security_posture-findings-resourceId',
   },
 };

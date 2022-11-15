@@ -8,32 +8,42 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Redirect, Route, type RouteProps, Switch } from 'react-router-dom';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { benchmarksNavigation, cloudPosturePages } from '../common/navigation/constants';
 import type { CspSecuritySolutionContext } from '..';
 import type { CspPageNavigationItem } from '../common/navigation/types';
 import { SecuritySolutionContext, useSecuritySolutionContext } from './security_solution_context';
 import * as pages from '../pages';
 
-const CspRoute: React.FC<RouteProps & { disabled?: boolean }> = ({ disabled, children, ...item }) =>
-  disabled ? null : <Route {...item}>{children}</Route>;
+type CspRouteProps = Omit<RouteProps, 'render'> & CspPageNavigationItem;
 
-const CspRouteWithSpy: React.FC<RouteProps & CspPageNavigationItem> = ({
-  component: Component,
+const CspRoute: React.FC<CspRouteProps> = ({
+  id,
   children,
-  ...cspRoute
+  component: Component,
+  disabled = false,
+  omitSecuritySpy = false,
+  ...cspRouteProps
 }) => {
   const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
-  return (
-    <CspRoute
-      {...cspRoute}
-      render={(props) => (
-        <>
-          {SpyRoute && <SpyRoute pageName={cspRoute.id} />}
-          {Component && <Component {...props} />}
-        </>
-      )}
-    />
-  );
+
+  if (disabled) {
+    return null;
+  }
+
+  const routeProps: RouteProps = {
+    ...cspRouteProps,
+    ...(Component && {
+      render: (renderProps) => (
+        <TrackApplicationView viewId={id}>
+          {!omitSecuritySpy && SpyRoute && <SpyRoute pageName={id} />}
+          <Component {...renderProps} />
+        </TrackApplicationView>
+      ),
+    }),
+  };
+
+  return <Route {...routeProps}>{children}</Route>;
 };
 
 const queryClient = new QueryClient({
@@ -49,13 +59,13 @@ export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
   const routerElement = (
     <QueryClientProvider client={queryClient}>
       <Switch>
-        <CspRouteWithSpy {...cloudPosturePages.findings} component={pages.Findings} />
-        <CspRouteWithSpy {...cloudPosturePages.dashboard} component={pages.ComplianceDashboard} />
+        <CspRoute {...cloudPosturePages.findings} component={pages.Findings} />
+        <CspRoute {...cloudPosturePages.dashboard} component={pages.ComplianceDashboard} />
 
         <CspRoute {...cloudPosturePages.benchmarks}>
           <Switch>
             <CspRoute {...benchmarksNavigation.rules} component={pages.Rules} />
-            <CspRouteWithSpy {...cloudPosturePages.benchmarks} component={pages.Benchmarks} />
+            <CspRoute {...cloudPosturePages.benchmarks} component={pages.Benchmarks} />
           </Switch>
         </CspRoute>
 
