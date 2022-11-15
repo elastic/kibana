@@ -500,6 +500,11 @@ describe('ruleType', () => {
           aggregatable: false,
         },
       ],
+      toSpec: () => ({
+        id: 'test-id',
+        title: 'test-title',
+        timeFieldName: 'time-field',
+      }),
     };
     const defaultParams: OnlySearchSourceRuleParams = {
       size: 100,
