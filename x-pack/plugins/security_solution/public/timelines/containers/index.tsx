@@ -360,12 +360,6 @@ export const useTimelineEventsHandler = ({
         ...deStructureEqlOptions(prevEqlRequest),
       };
 
-      const requestTimeRange =
-        startDate && endDate
-          ? {
-              timerange: { interval: '12h', from: startDate, to: endDate },
-            }
-          : {};
       const timerange =
         startDate && endDate
           ? { timerange: { interval: '12h', from: startDate, to: endDate } }
