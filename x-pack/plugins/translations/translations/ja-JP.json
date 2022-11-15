@@ -19438,7 +19438,6 @@
     "xpack.ml.trainedModels.modelsList.stopFailed": "\"{modelId}\"の停止に失敗しました",
     "xpack.ml.trainedModels.modelsList.stopSuccess": "\"{modelId}\"のデプロイが正常に停止しました。",
     "xpack.ml.trainedModels.testModelsFlyout.langIdent.output.title": "これは{lang}のようになります",
-    "xpack.ml.trainedModels.testModelsFlyout.langIdent.output.titleUnknown": "不明な言語コード：{code}",
     "xpack.ml.validateJob.modal.linkToJobTipsText": "詳細は {mlJobTipsLink} をご覧ください。",
     "xpack.ml.validateJob.modal.validateJobTitle": "ジョブ {title} の検証",
     "xpack.ml.accessDenied.description": "機械学習プラグインを表示するアクセス権がありません。プラグインにアクセスするには、機械学習機能をこのスペースで表示する必要があります。",

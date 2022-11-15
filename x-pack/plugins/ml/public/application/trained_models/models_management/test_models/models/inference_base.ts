@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { i18n } from '@kbn/i18n';
 
 import { MLHttpFetchError } from '../../../../../../common/util/errors';
 import { SupportedPytorchTasksType } from '../../../../../../common/constants/trained_models';
@@ -17,7 +18,19 @@ export type InferenceType =
   | SupportedPytorchTasksType
   | keyof estypes.AggregationsInferenceConfigContainer;
 
+export type InferenceOptions =
+  | estypes.MlRegressionInferenceOptions
+  | estypes.MlClassificationInferenceOptions
+  | estypes.MlTextClassificationInferenceOptions
+  | estypes.MlZeroShotClassificationInferenceOptions
+  | estypes.MlFillMaskInferenceOptions
+  | estypes.MlNerInferenceOptions
+  | estypes.MlPassThroughInferenceOptions
+  | estypes.MlTextEmbeddingInferenceOptions
+  | estypes.MlQuestionAnsweringInferenceUpdateOptions;
+
 const DEFAULT_INPUT_FIELD = 'text_field';
+export const DEFAULT_INFERENCE_TIME_OUT = '30s';
 
 export type FormattedNerResponse = Array<{
   value: string;
@@ -37,21 +50,29 @@ export enum RUNNING_STATE {
   FINISHED_WITH_ERRORS,
 }
 
+export enum INPUT_TYPE {
+  TEXT,
+  INDEX,
+}
+
 export abstract class InferenceBase<TInferResponse> {
   protected abstract readonly inferenceType: InferenceType;
   protected abstract readonly inferenceTypeLabel: string;
-  protected readonly inputField: string;
-  public inputText$ = new BehaviorSubject<string>('');
-  public inferenceResult$ = new BehaviorSubject<TInferResponse | null>(null);
-  public inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
-  public runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
+  protected inputField: string;
+  protected readonly modelInputField: string;
+  private inputText$ = new BehaviorSubject<string[]>([]);
+  private inferenceResult$ = new BehaviorSubject<TInferResponse[] | null>(null);
+  private inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
+  private runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
   protected readonly info: string[] = [];
 
   constructor(
-    protected trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
-    protected model: estypes.MlTrainedModelConfig
+    protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    protected readonly model: estypes.MlTrainedModelConfig,
+    protected readonly inputType: INPUT_TYPE
   ) {
-    this.inputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
+    this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
+    this.inputField = this.modelInputField;
   }
 
   public setStopped() {
@@ -76,31 +97,176 @@ export abstract class InferenceBase<TInferResponse> {
     return getInferenceInfoComponent(this.inferenceTypeLabel, this.info);
   }
 
-  protected abstract getInputComponent(): JSX.Element;
+  public getInputType() {
+    return this.inputType;
+  }
+
+  public reset() {
+    this.setInputField(undefined);
+    this.inputText$.next([]);
+    this.inferenceResult$.next(null);
+    this.inferenceError$.next(null);
+    this.runningState$.next(RUNNING_STATE.STOPPED);
+  }
+
+  public setInputField(field: string | undefined) {
+    this.inputField = field === undefined ? this.modelInputField : field;
+  }
+
+  public setInputText(text: string[]) {
+    this.inputText$.next(text);
+  }
+
+  public getInputText$() {
+    return this.inputText$.asObservable();
+  }
+
+  public getInferenceResult$() {
+    return this.inferenceResult$.asObservable();
+  }
+
+  public getInferenceError$() {
+    return this.inferenceError$.asObservable();
+  }
+
+  public getRunningState$() {
+    return this.runningState$.asObservable();
+  }
+
+  protected abstract getInputComponent(): JSX.Element | null;
   protected abstract getOutputComponent(): JSX.Element;
 
-  protected abstract infer(): Promise<TInferResponse>;
+  public async infer() {
+    return this.inputType === INPUT_TYPE.TEXT ? this.inferText() : this.inferIndex();
+  }
 
-  protected getInferenceConfig(): estypes.MlInferenceConfigCreateContainer[keyof estypes.MlInferenceConfigCreateContainer] {
+  protected abstract inferText(): Promise<TInferResponse[]>;
+  protected abstract inferIndex(): Promise<TInferResponse[]>;
+
+  public getPipeline(): estypes.IngestPipeline {
+    return {
+      processors: this.getProcessors(),
+    };
+  }
+
+  protected getBasicProcessors(
+    inferenceConfigOverrides?: InferenceOptions
+  ): estypes.IngestProcessorContainer[] {
+    const processor: estypes.IngestProcessorContainer = {
+      inference: {
+        model_id: this.model.model_id,
+        target_field: this.inferenceType,
+        field_map: {
+          [this.inputField]: this.modelInputField,
+        },
+        ...(inferenceConfigOverrides && Object.keys(inferenceConfigOverrides).length
+          ? { inference_config: this.getInferenceConfig(inferenceConfigOverrides) }
+          : {}),
+      },
+    };
+
+    return [processor];
+  }
+
+  protected getInferenceConfig(
+    inferenceConfigOverrides: InferenceOptions
+  ): estypes.MlInferenceConfigUpdateContainer {
+    return {
+      [this.inferenceType as keyof estypes.MlInferenceConfigUpdateContainer]: {
+        ...inferenceConfigOverrides,
+      },
+    };
+  }
+
+  protected async runInfer<TRawInferResponse>(
+    getInferBody: (inputText: string) => estypes.MlInferTrainedModelRequest['body'],
+    processResponse: (resp: TRawInferResponse, inputText: string) => TInferResponse
+  ): Promise<TInferResponse[]> {
+    try {
+      this.setRunning();
+      const inputText = this.inputText$.getValue()[0];
+      const body = getInferBody(inputText);
+
+      const resp = (await this.trainedModelsApi.inferTrainedModel(
+        this.model.model_id,
+        body,
+        DEFAULT_INFERENCE_TIME_OUT
+      )) as unknown as TRawInferResponse;
+
+      const processedResponse = processResponse(resp, inputText);
+
+      this.inferenceResult$.next([processedResponse]);
+      this.setFinished();
+
+      return [processedResponse];
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
+  }
+
+  protected async runPipelineSimulate(
+    processResponse: (d: estypes.IngestSimulateDocumentSimulation) => TInferResponse
+  ): Promise<TInferResponse[]> {
+    try {
+      this.setRunning();
+      const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
+        this.getPipeline(),
+        this.getPipelineDocs()
+      );
+      const processedResponse = docs.map((d) => processResponse(this.getDocFromResponse(d)));
+      this.inferenceResult$.next(processedResponse);
+      this.setFinished();
+      return processedResponse;
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
+  }
+
+  protected abstract getProcessors(): estypes.IngestProcessorContainer[];
+
+  protected getPipelineDocs() {
+    return this.inputText$.getValue().map((v) => ({
+      _source: {
+        [this.inputField]: v,
+      },
+    }));
+  }
+
+  private getDefaultInferenceConfig(): estypes.MlInferenceConfigUpdateContainer[keyof estypes.MlInferenceConfigUpdateContainer] {
     return this.model.inference_config[
-      this.inferenceType as keyof estypes.MlInferenceConfigCreateContainer
+      this.inferenceType as keyof estypes.MlInferenceConfigUpdateContainer
     ];
   }
 
   protected getNumTopClassesConfig(defaultOverride = 5) {
-    const options: estypes.MlInferenceConfigCreateContainer[keyof estypes.MlInferenceConfigCreateContainer] =
-      this.getInferenceConfig();
+    const options: estypes.MlInferenceConfigUpdateContainer[keyof estypes.MlInferenceConfigUpdateContainer] =
+      this.getDefaultInferenceConfig();
 
     if (options && 'num_top_classes' in options && (options?.num_top_classes ?? 0 > 0)) {
       return {};
     }
 
     return {
-      inference_config: {
-        [this.inferenceType]: {
-          num_top_classes: defaultOverride,
-        },
-      },
+      num_top_classes: defaultOverride,
     };
+  }
+
+  // @ts-expect-error error does not exist in type
+  protected getDocFromResponse({ doc, error }: estypes.IngestSimulatePipelineSimulation) {
+    if (doc === undefined) {
+      if (error) {
+        this.setFinishedWithErrors(error);
+        throw Error(error.reason);
+      }
+
+      throw Error(
+        i18n.translate('xpack.ml.trainedModels.testModelsFlyout.pipelineSimulate.unknownError', {
+          defaultMessage: 'Error simulating ingest pipeline',
+        })
+      );
+    }
+    return doc;
   }
 }
