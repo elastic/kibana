@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
+import { queue } from 'async';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { i18n } from '@kbn/i18n';
-import { asyncForEach } from '@kbn/std';
 import type { IRouter } from '@kbn/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
-import type { ChangePoint, NumericChartData, NumericHistogramField } from '@kbn/ml-agg-utils';
+import type {
+  ChangePoint,
+  ChangePointGroup,
+  NumericChartData,
+  NumericHistogramField,
+} from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { stringHash } from '@kbn/ml-string-hash';
 
@@ -28,7 +32,8 @@ import {
   aiopsExplainLogRateSpikesSchema,
   addErrorAction,
   pingAction,
-  resetAction,
+  resetAllAction,
+  resetErrorsAction,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
@@ -166,97 +171,131 @@ export const defineExplainLogRateSpikesRoute = (
       async function runAnalysis() {
         try {
           isRunning = true;
-          logDebugMessage('Reset.');
-          push(resetAction());
+
+          if (!request.body.overrides) {
+            logDebugMessage('Full Reset.');
+            push(resetAllAction());
+          } else {
+            logDebugMessage('Reset Errors.');
+            push(resetErrorsAction());
+          }
+
+          if (request.body.overrides?.loaded) {
+            logDebugMessage(`Set 'loaded' override to '${request.body.overrides?.loaded}'.`);
+            loaded = request.body.overrides?.loaded;
+          }
+
           pushPingWithTimeout();
 
           // Step 1: Index Info: Field candidates, total doc count, sample probability
 
           const fieldCandidates: Awaited<ReturnType<typeof fetchIndexInfo>>['fieldCandidates'] = [];
+          let fieldCandidatesCount = fieldCandidates.length;
+
           let sampleProbability = 1;
           let totalDocCount = 0;
 
-          logDebugMessage('Fetch index information.');
-          push(
-            updateLoadingStateAction({
-              ccsWarning: false,
-              loaded,
-              loadingState: i18n.translate(
-                'xpack.aiops.explainLogRateSpikes.loadingState.loadingIndexInformation',
-                {
-                  defaultMessage: 'Loading index information.',
-                }
-              ),
-            })
-          );
+          if (!request.body.overrides?.remainingFieldCandidates) {
+            logDebugMessage('Fetch index information.');
+            push(
+              updateLoadingStateAction({
+                ccsWarning: false,
+                loaded,
+                loadingState: i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.loadingState.loadingIndexInformation',
+                  {
+                    defaultMessage: 'Loading index information.',
+                  }
+                ),
+              })
+            );
 
-          try {
-            const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
-            fieldCandidates.push(...indexInfo.fieldCandidates);
-            sampleProbability = indexInfo.sampleProbability;
-            totalDocCount = indexInfo.totalDocCount;
-          } catch (e) {
-            if (!isRequestAbortedError(e)) {
-              logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
-              pushError(`Failed to fetch index information.`);
+            try {
+              const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
+              fieldCandidates.push(...indexInfo.fieldCandidates);
+              fieldCandidatesCount = fieldCandidates.length;
+              sampleProbability = indexInfo.sampleProbability;
+              totalDocCount = indexInfo.totalDocCount;
+            } catch (e) {
+              if (!isRequestAbortedError(e)) {
+                logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
+                pushError(`Failed to fetch index information.`);
+              }
+              end();
+              return;
             }
-            end();
-            return;
+
+            logDebugMessage(`Total document count: ${totalDocCount}`);
+            logDebugMessage(`Sample probability: ${sampleProbability}`);
+
+            loaded += LOADED_FIELD_CANDIDATES;
+
+            pushPingWithTimeout();
+
+            push(
+              updateLoadingStateAction({
+                ccsWarning: false,
+                loaded,
+                loadingState: i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldCandidates',
+                  {
+                    defaultMessage:
+                      'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
+                    values: {
+                      fieldCandidatesCount,
+                    },
+                  }
+                ),
+              })
+            );
+
+            if (fieldCandidatesCount === 0) {
+              endWithUpdatedLoadingState();
+            } else if (shouldStop) {
+              logDebugMessage('shouldStop after fetching field candidates.');
+              end();
+              return;
+            }
           }
 
-          logDebugMessage(`Total document count: ${totalDocCount}`);
-          logDebugMessage(`Sample probability: ${sampleProbability}`);
+          // Step 2: Significant Terms
 
-          loaded += LOADED_FIELD_CANDIDATES;
-
-          push(
-            updateLoadingStateAction({
-              ccsWarning: false,
-              loaded,
-              loadingState: i18n.translate(
-                'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldCandidates',
-                {
-                  defaultMessage:
-                    'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
-                  values: {
-                    fieldCandidatesCount: fieldCandidates.length,
-                  },
-                }
-              ),
-            })
-          );
-
-          if (fieldCandidates.length === 0) {
-            endWithUpdatedLoadingState();
-          } else if (shouldStop) {
-            logDebugMessage('shouldStop after fetching field candidates.');
-            end();
-            return;
-          }
-
-          const changePoints: ChangePoint[] = [];
+          const changePoints: ChangePoint[] = request.body.overrides?.changePoints
+            ? request.body.overrides?.changePoints
+            : [];
           const fieldsToSample = new Set<string>();
 
           // Don't use more than 10 here otherwise Kibana will emit an error
           // regarding a limit of abort signal listeners of more than 10.
-          const CHUNK_SIZE = 10;
-          let chunkCount = 0;
+          const MAX_CONCURRENT_QUERIES = 10;
 
-          const fieldCandidatesChunks = chunk(fieldCandidates, CHUNK_SIZE);
+          let remainingFieldCandidates: string[];
+          let loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
+
+          if (request.body.overrides?.remainingFieldCandidates) {
+            fieldCandidates.push(...request.body.overrides?.remainingFieldCandidates);
+            remainingFieldCandidates = request.body.overrides?.remainingFieldCandidates;
+            fieldCandidatesCount = fieldCandidates.length;
+            loadingStepSizePValues =
+              LOADED_FIELD_CANDIDATES +
+              PROGRESS_STEP_P_VALUES -
+              (request.body.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
+          } else {
+            remainingFieldCandidates = fieldCandidates;
+          }
 
           logDebugMessage('Fetch p-values.');
 
-          for (const fieldCandidatesChunk of fieldCandidatesChunks) {
-            chunkCount++;
-            logDebugMessage(
-              `Fetch p-values. Chunk ${chunkCount} of ${fieldCandidatesChunks.length}`
-            );
+          const pValuesQueue = queue(async function (fieldCandidate: string) {
+            loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
+
             let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
+
             try {
               pValues = await fetchChangePointPValues(
                 client,
                 request.body,
-                fieldCandidatesChunk,
+                [fieldCandidate],
                 logger,
                 sampleProbability,
                 pushError,
@@ -265,26 +304,24 @@ export const defineExplainLogRateSpikesRoute = (
             } catch (e) {
               if (!isRequestAbortedError(e)) {
                 logger.error(
-                  `Failed to fetch p-values for ${JSON.stringify(
-                    fieldCandidatesChunk
-                  )}, got: \n${e.toString()}`
+                  `Failed to fetch p-values for '${fieldCandidate}', got: \n${e.toString()}`
                 );
-                pushError(`Failed to fetch p-values for ${JSON.stringify(fieldCandidatesChunk)}.`);
-              } // Still continue the analysis even if chunks of p-value queries fail.
-              continue;
+                pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
+              }
+              return;
             }
+
+            remainingFieldCandidates = remainingFieldCandidates.filter((d) => d !== fieldCandidate);
 
             if (pValues.length > 0) {
               pValues.forEach((d) => {
                 fieldsToSample.add(d.fieldName);
               });
               changePoints.push(...pValues);
-            }
 
-            loaded += (1 / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES;
-            if (pValues.length > 0) {
               push(addChangePointsAction(pValues));
             }
+
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
@@ -299,15 +336,24 @@ export const defineExplainLogRateSpikesRoute = (
                     },
                   }
                 ),
+                remainingFieldCandidates,
               })
             );
+          }, MAX_CONCURRENT_QUERIES);
 
-            if (shouldStop) {
-              logDebugMessage('shouldStop fetching p-values.');
+          pValuesQueue.push(fieldCandidates, (err) => {
+            if (err) {
+              logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
+              pushError(`Failed to fetch p-values.`);
+              pValuesQueue.kill();
               end();
-              return;
+            } else if (shouldStop) {
+              logDebugMessage('shouldStop fetching p-values.');
+              pValuesQueue.kill();
+              end();
             }
-          }
+          });
+          await pValuesQueue.drain();
 
           if (changePoints.length === 0) {
             logDebugMessage('Stopping analysis, did not find change points.');
@@ -336,7 +382,8 @@ export const defineExplainLogRateSpikesRoute = (
                 // samplerShardSize
                 -1,
                 undefined,
-                abortSignal
+                abortSignal,
+                sampleProbability
               )) as [NumericChartData]
             )[0];
           } catch (e) {
@@ -381,6 +428,7 @@ export const defineExplainLogRateSpikesRoute = (
                     defaultMessage: 'Transforming significant field/value pairs into groups.',
                   }
                 ),
+                groupsMissing: true,
               })
             );
 
@@ -572,84 +620,85 @@ export const defineExplainLogRateSpikesRoute = (
 
                 logDebugMessage(`Fetch ${changePointGroups.length} group histograms.`);
 
-                const changePointGroupsChunks = chunk(changePointGroups, CHUNK_SIZE);
-
-                for (const changePointGroupsChunk of changePointGroupsChunks) {
+                const groupHistogramQueue = queue(async function (cpg: ChangePointGroup) {
                   if (shouldStop) {
                     logDebugMessage('shouldStop abort fetching group histograms.');
+                    groupHistogramQueue.kill();
                     end();
                     return;
                   }
 
-                  await asyncForEach(changePointGroupsChunk, async (cpg) => {
-                    if (overallTimeSeries !== undefined) {
-                      const histogramQuery = getHistogramQuery(
-                        request.body,
-                        cpg.group.map((d) => ({
-                          term: { [d.fieldName]: d.fieldValue },
-                        }))
-                      );
+                  if (overallTimeSeries !== undefined) {
+                    const histogramQuery = getHistogramQuery(
+                      request.body,
+                      cpg.group.map((d) => ({
+                        term: { [d.fieldName]: d.fieldValue },
+                      }))
+                    );
 
-                      let cpgTimeSeries: NumericChartData;
-                      try {
-                        cpgTimeSeries = (
-                          (await fetchHistogramsForFields(
-                            client,
-                            request.body.index,
-                            histogramQuery,
-                            // fields
-                            [
-                              {
-                                fieldName: request.body.timeFieldName,
-                                type: KBN_FIELD_TYPES.DATE,
-                                interval: overallTimeSeries.interval,
-                                min: overallTimeSeries.stats[0],
-                                max: overallTimeSeries.stats[1],
-                              },
-                            ],
-                            // samplerShardSize
-                            -1,
-                            undefined,
-                            abortSignal
-                          )) as [NumericChartData]
-                        )[0];
-                      } catch (e) {
-                        if (!isRequestAbortedError(e)) {
-                          logger.error(
-                            `Failed to fetch the histogram data for group #${
-                              cpg.id
-                            }, got: \n${e.toString()}`
-                          );
-                          pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
-                        }
-                        return;
+                    let cpgTimeSeries: NumericChartData;
+                    try {
+                      cpgTimeSeries = (
+                        (await fetchHistogramsForFields(
+                          client,
+                          request.body.index,
+                          histogramQuery,
+                          // fields
+                          [
+                            {
+                              fieldName: request.body.timeFieldName,
+                              type: KBN_FIELD_TYPES.DATE,
+                              interval: overallTimeSeries.interval,
+                              min: overallTimeSeries.stats[0],
+                              max: overallTimeSeries.stats[1],
+                            },
+                          ],
+                          // samplerShardSize
+                          -1,
+                          undefined,
+                          abortSignal,
+                          sampleProbability
+                        )) as [NumericChartData]
+                      )[0];
+                    } catch (e) {
+                      if (!isRequestAbortedError(e)) {
+                        logger.error(
+                          `Failed to fetch the histogram data for group #${
+                            cpg.id
+                          }, got: \n${e.toString()}`
+                        );
+                        pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
                       }
-                      const histogram =
-                        overallTimeSeries.data.map((o, i) => {
-                          const current = cpgTimeSeries.data.find(
-                            (d1) => d1.key_as_string === o.key_as_string
-                          ) ?? {
-                            doc_count: 0,
-                          };
-                          return {
-                            key: o.key,
-                            key_as_string: o.key_as_string ?? '',
-                            doc_count_change_point: current.doc_count,
-                            doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                          };
-                        }) ?? [];
-
-                      push(
-                        addChangePointsGroupHistogramAction([
-                          {
-                            id: cpg.id,
-                            histogram,
-                          },
-                        ])
-                      );
+                      return;
                     }
-                  });
-                }
+                    const histogram =
+                      overallTimeSeries.data.map((o, i) => {
+                        const current = cpgTimeSeries.data.find(
+                          (d1) => d1.key_as_string === o.key_as_string
+                        ) ?? {
+                          doc_count: 0,
+                        };
+                        return {
+                          key: o.key,
+                          key_as_string: o.key_as_string ?? '',
+                          doc_count_change_point: current.doc_count,
+                          doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                        };
+                      }) ?? [];
+
+                    push(
+                      addChangePointsGroupHistogramAction([
+                        {
+                          id: cpg.id,
+                          histogram,
+                        },
+                      ])
+                    );
+                  }
+                }, MAX_CONCURRENT_QUERIES);
+
+                groupHistogramQueue.push(changePointGroups);
+                await groupHistogramQueue.drain();
               }
             } catch (e) {
               if (!isRequestAbortedError(e)) {
@@ -667,90 +716,91 @@ export const defineExplainLogRateSpikesRoute = (
 
           // time series filtered by fields
           if (changePoints.length > 0 && overallTimeSeries !== undefined) {
-            const changePointsChunks = chunk(changePoints, CHUNK_SIZE);
-
-            for (const changePointsChunk of changePointsChunks) {
+            const fieldValueHistogramQueue = queue(async function (cp: ChangePoint) {
               if (shouldStop) {
                 logDebugMessage('shouldStop abort fetching field/value histograms.');
+                fieldValueHistogramQueue.kill();
                 end();
                 return;
               }
 
-              await asyncForEach(changePointsChunk, async (cp) => {
-                if (overallTimeSeries !== undefined) {
-                  const histogramQuery = getHistogramQuery(request.body, [
-                    {
-                      term: { [cp.fieldName]: cp.fieldValue },
-                    },
-                  ]);
+              if (overallTimeSeries !== undefined) {
+                const histogramQuery = getHistogramQuery(request.body, [
+                  {
+                    term: { [cp.fieldName]: cp.fieldValue },
+                  },
+                ]);
 
-                  let cpTimeSeries: NumericChartData;
+                let cpTimeSeries: NumericChartData;
 
-                  try {
-                    cpTimeSeries = (
-                      (await fetchHistogramsForFields(
-                        client,
-                        request.body.index,
-                        histogramQuery,
-                        // fields
-                        [
-                          {
-                            fieldName: request.body.timeFieldName,
-                            type: KBN_FIELD_TYPES.DATE,
-                            interval: overallTimeSeries.interval,
-                            min: overallTimeSeries.stats[0],
-                            max: overallTimeSeries.stats[1],
-                          },
-                        ],
-                        // samplerShardSize
-                        -1,
-                        undefined,
-                        abortSignal
-                      )) as [NumericChartData]
-                    )[0];
-                  } catch (e) {
-                    logger.error(
-                      `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
-                        cp.fieldValue
-                      }", got: \n${e.toString()}`
-                    );
-                    pushError(
-                      `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
-                    );
-                    return;
-                  }
-
-                  const histogram =
-                    overallTimeSeries.data.map((o, i) => {
-                      const current = cpTimeSeries.data.find(
-                        (d1) => d1.key_as_string === o.key_as_string
-                      ) ?? {
-                        doc_count: 0,
-                      };
-                      return {
-                        key: o.key,
-                        key_as_string: o.key_as_string ?? '',
-                        doc_count_change_point: current.doc_count,
-                        doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                      };
-                    }) ?? [];
-
-                  const { fieldName, fieldValue } = cp;
-
-                  loaded += (1 / changePoints.length) * PROGRESS_STEP_HISTOGRAMS;
-                  pushHistogramDataLoadingState();
-                  push(
-                    addChangePointsHistogramAction([
-                      {
-                        fieldName,
-                        fieldValue,
-                        histogram,
-                      },
-                    ])
+                try {
+                  cpTimeSeries = (
+                    (await fetchHistogramsForFields(
+                      client,
+                      request.body.index,
+                      histogramQuery,
+                      // fields
+                      [
+                        {
+                          fieldName: request.body.timeFieldName,
+                          type: KBN_FIELD_TYPES.DATE,
+                          interval: overallTimeSeries.interval,
+                          min: overallTimeSeries.stats[0],
+                          max: overallTimeSeries.stats[1],
+                        },
+                      ],
+                      // samplerShardSize
+                      -1,
+                      undefined,
+                      abortSignal,
+                      sampleProbability
+                    )) as [NumericChartData]
+                  )[0];
+                } catch (e) {
+                  logger.error(
+                    `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
+                      cp.fieldValue
+                    }", got: \n${e.toString()}`
                   );
+                  pushError(
+                    `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
+                  );
+                  return;
                 }
-              });
-            }
+
+                const histogram =
+                  overallTimeSeries.data.map((o, i) => {
+                    const current = cpTimeSeries.data.find(
+                      (d1) => d1.key_as_string === o.key_as_string
+                    ) ?? {
+                      doc_count: 0,
+                    };
+                    return {
+                      key: o.key,
+                      key_as_string: o.key_as_string ?? '',
+                      doc_count_change_point: current.doc_count,
+                      doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                    };
+                  }) ?? [];
+
+                const { fieldName, fieldValue } = cp;
+
+                loaded += (1 / changePoints.length) * PROGRESS_STEP_HISTOGRAMS;
+                pushHistogramDataLoadingState();
+                push(
+                  addChangePointsHistogramAction([
+                    {
+                      fieldName,
+                      fieldValue,
+                      histogram,
+                    },
+                  ])
+                );
+              }
+            }, MAX_CONCURRENT_QUERIES);
+
+            fieldValueHistogramQueue.push(changePoints);
+            await fieldValueHistogramQueue.drain();
           }
 
           endWithUpdatedLoadingState();

@@ -25,5 +25,6 @@
     { "path": "../security/tsconfig.json" },
     { "path": "../../../src/plugins/charts/tsconfig.json" },
     { "path": "../../../src/plugins/discover/tsconfig.json" },
+    { "path": "../lens/tsconfig.json" }
   ]
 }

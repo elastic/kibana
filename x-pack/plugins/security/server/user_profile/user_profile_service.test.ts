@@ -90,8 +90,6 @@ describe('UserProfileService', () => {
     });
 
     it('returns `null` if session is not available', async () => {
-      mockStartParams.session.get.mockResolvedValue(null);
-
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.getCurrent({ request: mockRequest })).resolves.toBeNull();
 
@@ -104,9 +102,10 @@ describe('UserProfileService', () => {
     });
 
     it('returns `null` if session available, but not user profile id', async () => {
-      mockStartParams.session.get.mockResolvedValue(
-        sessionMock.createValue({ userProfileId: undefined })
-      );
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: undefined }),
+      });
 
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.getCurrent({ request: mockRequest })).resolves.toBeNull();
@@ -137,9 +136,10 @@ describe('UserProfileService', () => {
     });
 
     it('fails if profile retrieval fails', async () => {
-      mockStartParams.session.get.mockResolvedValue(
-        sessionMock.createValue({ userProfileId: mockUserProfile.uid })
-      );
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+      });
 
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
@@ -165,9 +165,10 @@ describe('UserProfileService', () => {
     });
 
     it('fails if cannot find user profile', async () => {
-      mockStartParams.session.get.mockResolvedValue(
-        sessionMock.createValue({ userProfileId: mockUserProfile.uid })
-      );
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+      });
 
       mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
         profiles: [],
@@ -192,9 +193,10 @@ describe('UserProfileService', () => {
     });
 
     it('properly parses returned profile', async () => {
-      mockStartParams.session.get.mockResolvedValue(
-        sessionMock.createValue({ userProfileId: mockUserProfile.uid })
-      );
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+      });
 
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.getCurrent({ request: mockRequest })).resolves
@@ -231,9 +233,10 @@ describe('UserProfileService', () => {
     });
 
     it('should get user profile and application data scoped to Kibana', async () => {
-      mockStartParams.session.get.mockResolvedValue(
-        sessionMock.createValue({ userProfileId: mockUserProfile.uid })
-      );
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+      });
 
       mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
         profiles: [

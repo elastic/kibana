@@ -209,8 +209,10 @@ exports[`it renders without crashing 1`] = `
   />
   <EuiHorizontalRule />
   <EuiButton
+    color="primary"
     iconType="plusInCircle"
     onClick={[Function]}
+    size="m"
   >
     <FormattedMessage
       defaultMessage="Add index privilege"

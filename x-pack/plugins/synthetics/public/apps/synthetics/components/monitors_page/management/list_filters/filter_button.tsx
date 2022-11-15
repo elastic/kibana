@@ -15,7 +15,7 @@ export const FilterButton = ({ filter }: { filter: FilterItem }) => {
 
   const [query, setQuery] = useState('');
 
-  const updateUrlParams = useUrlParams()[1];
+  const [, updateUrlParams] = useUrlParams();
 
   const urlParams = useGetUrlParams();
 

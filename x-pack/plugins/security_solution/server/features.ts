@@ -495,15 +495,21 @@ const subFeatures: SubFeatureConfig[] = [
 ];
 
 function getSubFeatures(experimentalFeatures: ConfigType['experimentalFeatures']) {
+  let filteredSubFeatures: SubFeatureConfig[] = [];
+
   if (experimentalFeatures.endpointRbacEnabled) {
-    return subFeatures;
+    filteredSubFeatures = subFeatures;
+  } else if (experimentalFeatures.endpointRbacV1Enabled) {
+    filteredSubFeatures = responseActionSubFeatures;
   }
 
-  if (experimentalFeatures.endpointRbacV1Enabled) {
-    return responseActionSubFeatures;
+  if (!experimentalFeatures.responseActionGetFileEnabled) {
+    filteredSubFeatures = filteredSubFeatures.filter((subFeat) => {
+      return subFeat.name !== 'File Operations';
+    });
   }
 
-  return [];
+  return filteredSubFeatures;
 }
 
 export const getKibanaPrivilegesFeaturePrivileges = (
