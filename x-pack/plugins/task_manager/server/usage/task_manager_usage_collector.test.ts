@@ -321,7 +321,6 @@ function getMockMonitoredUtilization(overrides = {}): MonitoredUtilization {
           },
         },
         recurring: {
-          tasks_per_min: 2500,
           ran: {
             service_time: {
               actual: 1000,
