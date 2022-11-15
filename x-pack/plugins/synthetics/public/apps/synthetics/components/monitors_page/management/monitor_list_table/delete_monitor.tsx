@@ -111,7 +111,7 @@ export const DeleteMonitor = ({
 };
 
 export const PROJECT_MONITOR_TITLE = i18n.translate(
-  'xpack.synthetics.monitorManagement.monitorList.disclaimer.label',
+  'xpack.synthetics.monitorManagement.monitorList.disclaimer.title',
   {
     defaultMessage: "Deleting this monitor will not remove it from Project's source",
   }
