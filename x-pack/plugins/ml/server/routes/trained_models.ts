@@ -16,6 +16,7 @@ import {
   inferTrainedModelQuery,
   inferTrainedModelBody,
   threadingParamsSchema,
+  pipelineSimulateBody,
   updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
@@ -383,6 +384,39 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const body = await mlClient.stopTrainedModelDeployment({
           model_id: modelId,
           force: request.query.force ?? false,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/pipeline_simulate Simulates an ingest pipeline
+   * @apiName SimulateIngestPipeline
+   * @apiDescription Simulates an ingest pipeline.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/pipeline_simulate',
+      validate: {
+        body: pipelineSimulateBody,
+      },
+      options: {
+        tags: ['access:ml:canTestTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const { pipeline, docs } = request.body;
+        const body = await client.asInternalUser.ingest.simulate({
+          pipeline,
+          docs,
         });
         return response.ok({
           body,

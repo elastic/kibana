@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { InferenceBase, InferenceType } from '../inference_base';
-import { processResponse } from './common';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
+import type { InferenceType } from '../inference_base';
+import { processInferenceResult, processResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getLangIdentOutputComponent } from './lang_ident_output';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
@@ -24,43 +25,56 @@ export class LangIdentInference extends InferenceBase<TextClassificationResponse
     }),
   ];
 
-  public async infer() {
+  public async inferText() {
     try {
-      this.setRunning();
-      const inputText = this.inputText$.getValue();
-      const payload = {
-        docs: [{ [this.inputField]: inputText }],
-        ...this.getNumTopClassesConfig(),
-      };
-      const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
-        payload,
-        '30s'
-      )) as unknown as RawTextClassificationResponse;
-
-      const processedResponse: TextClassificationResponse = processResponse(
-        resp,
-        this.model,
-        inputText
+      return await this.runInfer<RawTextClassificationResponse>(
+        (inputText: string) => {
+          return {
+            docs: [{ [this.inputField]: inputText }],
+            inference_config: this.getInferenceConfig(this.getNumTopClassesConfig()),
+          };
+        },
+        (resp, inputText) => {
+          return processResponse(resp, this.model, inputText);
+        }
       );
-      this.inferenceResult$.next(processedResponse);
-      this.setFinished();
-
-      return processedResponse;
     } catch (error) {
       this.setFinishedWithErrors(error);
       throw error;
     }
   }
 
-  public getInputComponent(): JSX.Element {
-    const placeholder = i18n.translate(
-      'xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText',
-      {
-        defaultMessage: 'Enter a phrase to test',
-      }
-    );
-    return getGeneralInputComponent(this, placeholder);
+  protected async inferIndex() {
+    try {
+      return await this.runPipelineSimulate((doc) => {
+        return {
+          response: processInferenceResult(doc._source[this.inferenceType], this.model),
+          rawResponse: doc._source[this.inferenceType],
+          inputText: doc._source[this.inputField],
+        };
+      });
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
+  }
+
+  protected getProcessors() {
+    return this.getBasicProcessors(this.getNumTopClassesConfig());
+  }
+
+  public getInputComponent(): JSX.Element | null {
+    if (this.inputType === INPUT_TYPE.TEXT) {
+      const placeholder = i18n.translate(
+        'xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText',
+        {
+          defaultMessage: 'Enter a phrase to test',
+        }
+      );
+      return getGeneralInputComponent(this, placeholder);
+    } else {
+      return null;
+    }
   }
 
   public getOutputComponent(): JSX.Element {

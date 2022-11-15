@@ -157,13 +157,32 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    inferTrainedModel(modelId: string, payload: any, timeout?: string) {
+    inferTrainedModel(
+      modelId: string,
+      payload: estypes.MlInferTrainedModelRequest['body'],
+      timeout?: string
+    ) {
       const body = JSON.stringify(payload);
       return httpService.http<estypes.MlInferTrainedModelResponse>({
         path: `${apiBasePath}/trained_models/infer/${modelId}`,
         method: 'POST',
         body,
         ...(timeout ? { query: { timeout } as HttpFetchQuery } : {}),
+      });
+    },
+
+    trainedModelPipelineSimulate(
+      pipeline: estypes.IngestPipeline,
+      docs: estypes.IngestSimulateDocument[]
+    ) {
+      const body = JSON.stringify({
+        pipeline,
+        docs,
+      });
+      return httpService.http<estypes.IngestSimulateResponse>({
+        path: `${apiBasePath}/trained_models/pipeline_simulate`,
+        method: 'POST',
+        body,
       });
     },
   };

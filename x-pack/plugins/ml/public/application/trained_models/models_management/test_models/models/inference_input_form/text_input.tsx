@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC, useState, useMemo, useCallback } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
-import { extractErrorMessage } from '../../../../../../common/util/errors';
-import { ErrorMessage } from '../inference_error';
-import { OutputLoadingContent } from '../output_loading';
-import { RUNNING_STATE } from './inference_base';
-import { RawOutput } from './raw_output';
-import type { InferrerType } from '.';
+
+import { ErrorMessage } from '../../inference_error';
+import { extractErrorMessage } from '../../../../../../../common';
+import type { InferrerType } from '..';
+import { OutputLoadingContent } from '../../output_loading';
+import { RUNNING_STATE } from '../inference_base';
+import { RawOutput } from '../raw_output';
 
 interface Props {
   inferrer: InferrerType;
@@ -26,27 +27,24 @@ enum TAB {
   RAW,
 }
 
-export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
+export const TextInput: FC<Props> = ({ inferrer }) => {
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [errorText, setErrorText] = useState<string | null>(null);
 
-  const runningState = useObservable(inferrer.runningState$);
-  const inputText = useObservable(inferrer.inputText$);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const inputComponent = useMemo(() => inferrer.getInputComponent(), []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const outputComponent = useMemo(() => inferrer.getOutputComponent(), []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const infoComponent = useMemo(() => inferrer.getInfoComponent(), []);
+  const runningState = useObservable(inferrer.getRunningState$());
+  const inputText = useObservable(inferrer.getInputText$()) ?? [];
+  const inputComponent = useMemo(() => inferrer.getInputComponent(), [inferrer]);
+  const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
+  const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);
 
-  async function run() {
+  const run = useCallback(async () => {
     setErrorText(null);
     try {
       await inferrer.infer();
     } catch (e) {
       setErrorText(extractErrorMessage(e));
     }
-  }
+  }, [inferrer]);
 
   return (
     <>
@@ -56,7 +54,7 @@ export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
       <div>
         <EuiButton
           onClick={run}
-          disabled={runningState === RUNNING_STATE.RUNNING || inputText === ''}
+          disabled={runningState === RUNNING_STATE.RUNNING || inputText[0] === ''}
           fullWidth={false}
         >
           <FormattedMessage
@@ -96,7 +94,10 @@ export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
               {runningState === RUNNING_STATE.RUNNING ? <OutputLoadingContent text={''} /> : null}
 
               {errorText !== null || runningState === RUNNING_STATE.FINISHED_WITH_ERRORS ? (
-                <ErrorMessage errorText={errorText} />
+                <>
+                  <ErrorMessage errorText={errorText} />
+                  <EuiSpacer />
+                </>
               ) : null}
 
               {runningState === RUNNING_STATE.FINISHED ? <>{outputComponent}</> : null}

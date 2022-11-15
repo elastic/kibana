@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { estypes } from '@elastic/elasticsearch';
 import { InferenceBase } from '../inference_base';
-import { processResponse } from './common';
+import { processInferenceResult, processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 
 import { getZeroShotClassificationInput } from './zero_shot_classification_input';
@@ -30,40 +31,46 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
 
   public labelsText$ = new BehaviorSubject<string>('');
 
-  public async infer() {
-    try {
-      this.setRunning();
-      const inputText = this.inputText$.getValue();
-      const labelsText = this.labelsText$.value;
-      const inputLabels = labelsText?.split(',').map((l) => l.trim());
-      const payload = {
-        docs: [{ [this.inputField]: inputText }],
-        inference_config: {
-          [this.inferenceType]: {
+  public async inferText() {
+    return this.runInfer<RawTextClassificationResponse>(
+      (inputText: string) => {
+        const labelsText = this.labelsText$.getValue();
+        const inputLabels = labelsText?.split(',').map((l) => l.trim());
+        return {
+          docs: [{ [this.inputField]: inputText }],
+          inference_config: this.getInferenceConfig({
             labels: inputLabels,
             multi_label: false,
-          },
-        },
+          } as estypes.MlZeroShotClassificationInferenceUpdateOptions),
+        };
+      },
+      (resp, inputText) => {
+        return processResponse(resp, this.model, inputText);
+      }
+    );
+  }
+
+  protected async inferIndex() {
+    return this.runPipelineSimulate((doc) => {
+      return {
+        response: processInferenceResult(doc._source[this.inferenceType], this.model),
+        rawResponse: doc._source[this.inferenceType],
+        inputText: doc._source[this.inputField],
       };
-      const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
-        payload,
-        '30s'
-      )) as unknown as RawTextClassificationResponse;
+    });
+  }
 
-      const processedResponse: TextClassificationResponse = processResponse(
-        resp,
-        this.model,
-        inputText
-      );
-      this.inferenceResult$.next(processedResponse);
-      this.setFinished();
+  private getInputLabels() {
+    const labelsText = this.labelsText$.getValue();
+    return labelsText?.split(',').map((l) => l.trim());
+  }
 
-      return processedResponse;
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+  protected getProcessors() {
+    const inputLabels = this.getInputLabels();
+    return this.getBasicProcessors({
+      labels: inputLabels,
+      multi_label: false,
+    } as estypes.MlZeroShotClassificationInferenceUpdateOptions);
   }
 
   public getInputComponent(): JSX.Element {

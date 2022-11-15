@@ -19,11 +19,10 @@ export const TextInput: FC<{
   const [inputText, setInputText] = useState('');
 
   useEffect(() => {
-    inferrer.inputText$.next(inputText);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputText]);
+    inferrer.setInputText([inputText]);
+  }, [inputText, inferrer]);
 
-  const runningState = useObservable(inferrer.runningState$);
+  const runningState = useObservable(inferrer.getRunningState$());
 
   return (
     <EuiFormRow
