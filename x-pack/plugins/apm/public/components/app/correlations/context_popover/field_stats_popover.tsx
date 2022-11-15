@@ -28,16 +28,15 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import numeral from '@elastic/numeral';
+import { termQuery } from '../../../../../common/utils/term_query';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { isUndefinedOrNull } from '../../../../../common/utils/is_defined_or_null';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetchParams } from '../use_fetch_params';
@@ -54,13 +53,6 @@ const HIGHLIGHTED_BUCKET_PROPS = {
 };
 export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
   return !!kql ? [toElasticsearchQuery(fromKueryExpression(kql))] : [];
-}
-
-export function termQuery<T extends string>(
-  field: T,
-  value: string | boolean | number | undefined | null
-): QueryDslQueryContainer[] {
-  return isUndefinedOrNull(value) ? [] : [{ term: { [field]: value } }];
 }
 
 export type OnAddFilter = ({

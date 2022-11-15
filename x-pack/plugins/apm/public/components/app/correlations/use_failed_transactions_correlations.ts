@@ -248,8 +248,6 @@ export function useFailedTransactionsCorrelations() {
         }
       }
 
-      // setResponse.flush();
-
       setResponse({
         ...responseUpdate,
         fallbackResult,
