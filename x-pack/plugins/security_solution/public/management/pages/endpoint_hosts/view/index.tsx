@@ -683,7 +683,12 @@ export const EndpointList = () => {
   }, [showTransformFailedCallout, closeTransformFailedCallout, transformFailedCalloutDescription]);
 
   if (!canReadEndpointList || (canReadEndpointList && !canAccessFleet)) {
-    return <NoPrivileges pageName={SecurityPageName.endpoints} />;
+    return (
+      <NoPrivileges
+        pageName={SecurityPageName.endpoints}
+        documentationUrl={services?.docLinks.links.securitySolution.privileges}
+      />
+    );
   }
 
   return (

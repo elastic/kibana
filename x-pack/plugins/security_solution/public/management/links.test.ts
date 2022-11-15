@@ -62,6 +62,7 @@ describe('links', () => {
       canUnIsolateHost: true,
       canAccessEndpointManagement: true,
       canReadActionsLogManagement: true,
+      canReadEndpointList: true,
     });
 
     const filteredLinks = await getManagementFilteredLinks(
@@ -78,6 +79,7 @@ describe('links', () => {
         canUnIsolateHost: true,
         canAccessEndpointManagement: true,
         canReadActionsLogManagement: false,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
@@ -99,6 +101,7 @@ describe('links', () => {
         canUnIsolateHost: false,
         canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -117,6 +120,7 @@ describe('links', () => {
         canUnIsolateHost: true,
         canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
@@ -136,6 +140,7 @@ describe('links', () => {
         canUnIsolateHost: true,
         canAccessEndpointManagement: false,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 1 });
 
@@ -155,6 +160,7 @@ describe('links', () => {
         canUnIsolateHost: true,
         canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 1 });
 
@@ -170,6 +176,7 @@ describe('links', () => {
         canIsolateHost: false,
         canUnIsolateHost: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
@@ -188,6 +195,7 @@ describe('links', () => {
         canIsolateHost: false,
         canUnIsolateHost: true,
         canReadActionsLogManagement: false,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
