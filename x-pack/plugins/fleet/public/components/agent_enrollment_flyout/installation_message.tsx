@@ -35,7 +35,7 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      {isK8s != 'IS_KUBERNETES_MULTIPAGE' && (
+      {isK8s !== 'IS_KUBERNETES_MULTIPAGE' && (
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.enrollmentInstructions.installationMessage"
@@ -73,7 +73,7 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({
           />
         </EuiText>
       )}
-      {isK8s == 'IS_KUBERNETES_MULTIPAGE' && (
+      {isK8s === 'IS_KUBERNETES_MULTIPAGE' && (
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.enrollmentInstructions.k8sInstallationMessage"

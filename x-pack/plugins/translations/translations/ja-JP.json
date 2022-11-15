@@ -12840,7 +12840,6 @@
     "xpack.fleet.agentEnrollment.confirmation.button": "登録されたエージェントを表示",
     "xpack.fleet.agentEnrollment.copyPolicyButton": "クリップボードにコピー",
     "xpack.fleet.agentEnrollment.downloadDescriptionForK8s": "Kubernetesマニフェストをコピーまたはダウンロードします。",
-    "xpack.fleet.agentEnrollment.downloadManifestButtonk8s": "マニフェストのダウンロード",
     "xpack.fleet.agentEnrollment.downloadPolicyButton": "ポリシーのダウンロード",
     "xpack.fleet.agentEnrollment.downloadPolicyButtonk8s": "マニフェストのダウンロード",
     "xpack.fleet.agentEnrollment.enrollFleetTabLabel": "Fleetで登録",

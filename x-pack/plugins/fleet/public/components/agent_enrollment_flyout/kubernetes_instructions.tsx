@@ -50,9 +50,10 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({
     if (onCopy) onCopy();
   };
 
-  const onDownloadButtonClick = () => {
+  const onDownloadButtonClick = (downloadLink: string) => {
     setDownloadButtonClicked(true);
     if (onDownload) onDownload();
+    window.location.href = downloadLink;
   };
 
   useEffect(() => {
@@ -120,11 +121,10 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({
   const k8sDownloadYaml = (
     <>
       <EuiButton
-        href={downloadLink}
         target="_blank"
         iconSide="right"
         iconType="popout"
-        onClick={() => onDownloadButtonClick()}
+        onClick={() => onDownloadButtonClick(downloadLink)}
       >
         {downloadButtonClicked ? (
           <FormattedMessage

@@ -58,7 +58,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   }
 
   const isK8s =
-    props.packageInfo.name == 'kubernetes' ? 'IS_KUBERNETES_MULTIPAGE' : 'IS_NOT_KUBERNETES';
+    props.packageInfo.name === 'kubernetes' ? 'IS_KUBERNETES_MULTIPAGE' : 'IS_NOT_KUBERNETES';
 
   const installManagedCommands = ManualInstructions(
     enrollmentAPIKey.api_key,
@@ -79,7 +79,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     }),
   ];
 
-  if (isK8s == 'IS_KUBERNETES_MULTIPAGE') {
+  if (isK8s === 'IS_KUBERNETES_MULTIPAGE') {
     steps.push(
       KubernetesManifestApplyStep({
         isComplete: applyCommandCopied || !!enrolledAgentIds.length,
