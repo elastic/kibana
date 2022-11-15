@@ -23,11 +23,11 @@ export const createPlaceholderWidget = ({
   const widget = {
     getDomNode: () => {
       if (!domNode) {
-        const domNode = document.createElement('div');
-        domNode.innerText = placeholderText;
-        domNode.className = 'kibanaCodeEditor__placeholderContainer';
-        editor.applyFontInfo(domNode);
-        return domNode;
+        const setDomNode = document.createElement('div');
+        setDomNode.innerText = placeholderText;
+        setDomNode.className = 'kibanaCodeEditor__placeholderContainer';
+        editor.applyFontInfo(setDomNode);
+        return setDomNode;
       }
       return domNode;
     },

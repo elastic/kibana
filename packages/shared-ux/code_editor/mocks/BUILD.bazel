@@ -67,8 +67,11 @@ TYPES_DEPS = [
   "@npm//@storybook/addon-actions",
   "@npm//@types/jest",
   "@npm//@types/node",
+  "@npm//@elastic/eui",
   "//packages/shared-ux/storybook/mock:npm_module_types",
   "//packages/shared-ux/code_editor/types:npm_module_types",
+  "//packages/kbn-shared-ux-utility:npm_module_types",
+  "//packages/kbn-ambient-ui-types",
 ]
 
 jsts_transpiler(
