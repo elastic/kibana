@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { createLogStreamPageStateMachine, LogStreamPageContext, LogStreamPageEvent } from './src';
+export type { LogStreamPageContext, LogStreamPageEvent } from './src';
+
+export { createLogStreamPageStateMachine } from './src';
