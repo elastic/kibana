@@ -411,13 +411,14 @@ export const CodeEditor: React.FC<Props> = ({
       _placeholderWidget.current = createPlaceholderWidget({
         placeholderText: placeholder,
         editor: _editor.current,
+        colors: euiTheme.colors.subduedText,
       });
     }
     return () => {
       _placeholderWidget.current?.dispose();
       _placeholderWidget.current = null;
     };
-  }, [placeholder, value]);
+  }, [placeholder, value, euiTheme]);
 
   const { CopyButton } = useCopy({ isCopyable, value });
 

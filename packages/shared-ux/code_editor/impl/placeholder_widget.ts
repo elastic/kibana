@@ -7,10 +7,12 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import { codeEditorPlaceholderContainerStyles } from './editor.styles';
 
 export interface PlaceholderWidgetProps {
   placeholderText: string;
   editor: monaco.editor.ICodeEditor;
+  colors: string;
   widget?: monaco.editor.IContentWidget;
   domNode?: HTMLElement;
 }
@@ -19,13 +21,14 @@ export const createPlaceholderWidget = ({
   placeholderText,
   editor,
   domNode,
+  colors,
 }: PlaceholderWidgetProps) => {
   const widget = {
     getDomNode: () => {
       if (!domNode) {
         const setDomNode = document.createElement('div');
         setDomNode.innerText = placeholderText;
-        setDomNode.className = 'kibanaCodeEditor__placeholderContainer';
+        setDomNode.style.cssText += codeEditorPlaceholderContainerStyles(colors);
         editor.applyFontInfo(setDomNode);
         return setDomNode;
       }

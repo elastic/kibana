@@ -44,9 +44,9 @@ export const codeEditorFullScreenStyles = ({ euiTheme }: UseEuiTheme) => css`
   }
 `;
 
-export const codeEditorPlaceholderStyles = ({ euiTheme }: UseEuiTheme) => css`
+export const codeEditorPlaceholderContainerStyles = (subduedText: string) => css`
    {
-    color: ${euiTheme.colors.subduedText};
+    color: ${subduedText};
     width: max-content;
     pointer-events: none;
   }
