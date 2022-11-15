@@ -37,10 +37,10 @@ while read -r config; do
   start=$(date +%s)
 
   # prevent non-zero exit code from breaking the loop
-  set +e;
+  # set +e;
   eval "$cmd"
   lastCode=$?
-  set -e;
+  # set -e;
 
   timeSec=$(($(date +%s)-start))
   if [[ $timeSec -gt 60 ]]; then
