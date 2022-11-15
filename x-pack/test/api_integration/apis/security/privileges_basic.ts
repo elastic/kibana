@@ -13,8 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Privileges', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/145134
-    describe.skip('GET /api/security/privileges', () => {
+    describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
         // If you're removing a privilege, this breaks backwards compatibility
