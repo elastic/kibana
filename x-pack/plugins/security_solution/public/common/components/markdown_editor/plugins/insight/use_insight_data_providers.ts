@@ -11,13 +11,20 @@ import { DataProviderType } from '@kbn/timelines-plugin/common';
 import { IS_OPERATOR } from '../../../../../timelines/components/timeline/data_providers/data_provider';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 
+export interface Provider {
+  field: string;
+  value: string;
+  type: 'parameter' | 'value';
+}
+export interface UseInsightDataProvidersProps {
+  providers: Provider[][];
+  alertData?: TimelineEventsDetailsItem[] | null;
+}
+
 export const useInsightDataProviders = ({
   providers,
   alertData,
-}: {
-  providers: Array<Array<{ field: string; value: string; type: 'parameter' | 'value' }>>;
-  alertData?: TimelineEventsDetailsItem[] | null;
-}): DataProvider[] => {
+}: UseInsightDataProvidersProps): DataProvider[] => {
   function getFieldValue(fields: TimelineEventsDetailsItem[], fieldToFind: string) {
     const alertField = fields.find((dataField) => dataField.field === fieldToFind);
     return alertField?.values ? alertField.values[0] : '*';
