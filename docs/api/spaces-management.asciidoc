@@ -24,7 +24,7 @@ The following {kib} spaces APIs are available:
 
 * <<spaces-api-update-objects-spaces, Update saved objects spaces API>> to update one or more saved objects to add and/or remove them from specified spaces
 
-* <<spaces-api-get-shareable-references, Get shareable references API>> to collects references and spaces context for saved objects
+* <<spaces-api-get-shareable-references, Get shareable references API>> to collect references and spaces context for saved objects
 
 include::spaces-management/post.asciidoc[]
 include::spaces-management/put.asciidoc[]
