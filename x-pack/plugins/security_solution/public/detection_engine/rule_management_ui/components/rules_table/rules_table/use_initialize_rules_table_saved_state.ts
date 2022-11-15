@@ -29,9 +29,9 @@ export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTa
       }
 
       const activeTab = params?.tab ?? savedState.tab;
-      const isInMemorySorting = params?.isInMemorySorting ?? savedState.isInMemorySorting;
-      const filterOptions = params?.filterOptions ?? savedState.filterOptions;
-      const sorting = params?.sorting ?? savedState.sorting;
+      const isInMemorySorting = params?.inMemory ?? savedState.inMemory;
+      const filterOptions = params?.filter ?? savedState.filter;
+      const sorting = params?.sort ?? savedState.sort;
       const page = params?.page ?? savedState.page;
       const perPage = params?.perPage ?? savedState.perPage;
 

@@ -38,14 +38,14 @@ describe('useSyncRulesTableSavedState', () => {
     },
   };
   const expectedSavedState = {
-    isInMemorySorting: false,
-    filterOptions: {
+    inMemory: false,
+    filter: {
       filter: '',
       showCustomRules: false,
       showElasticRules: false,
       tags: [],
     },
-    sorting: {
+    sort: {
       field: 'name',
       order: 'desc',
     },
@@ -94,6 +94,6 @@ describe('useSyncRulesTableSavedState', () => {
   it('does not sync the default active tab with the storage', () => {
     renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.rules));
 
-    expect(setStorage).toHaveBeenCalledWith(expectedSavedState);
+    expect(setStorage).toHaveBeenCalledWith(RULE_TABLE_STATE_STORAGE_KEY, expectedSavedState);
   });
 });

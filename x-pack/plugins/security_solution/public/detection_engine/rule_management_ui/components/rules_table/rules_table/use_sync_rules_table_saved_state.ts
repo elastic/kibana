@@ -24,9 +24,9 @@ export function useSyncRulesTableSavedState(activeTab: AllRulesTabs): void {
 
   useEffect(() => {
     const savedState: RulesTableSavedState = {
-      filterOptions: state.filterOptions,
-      isInMemorySorting: state.isInMemorySorting,
-      sorting: state.sortingOptions,
+      filter: state.filterOptions,
+      inMemory: state.isInMemorySorting,
+      sort: state.sortingOptions,
       page: state.pagination.page,
       perPage: state.pagination.perPage,
     };

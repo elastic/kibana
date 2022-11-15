@@ -9,9 +9,9 @@ import type { FilterOptions, SortingOptions } from '../../../../rule_management/
 
 export interface RulesTableSavedState {
   tab?: string;
-  isInMemorySorting: boolean;
-  filterOptions: FilterOptions;
-  sorting: SortingOptions;
+  inMemory: boolean;
+  filter: FilterOptions;
+  sort: SortingOptions;
   page: number;
   perPage: number;
 }

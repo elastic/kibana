@@ -35,14 +35,14 @@ function mockState({
 describe('useInitializeRulesTableSavedState', () => {
   const urlSavedState: RulesTableSavedState = {
     tab: 'monitoring',
-    isInMemorySorting: false,
-    filterOptions: {
+    inMemory: false,
+    filter: {
       filter: '',
       showCustomRules: false,
       showElasticRules: false,
       tags: [],
     },
-    sorting: {
+    sort: {
       field: 'name',
       order: 'desc',
     },
@@ -50,14 +50,14 @@ describe('useInitializeRulesTableSavedState', () => {
     perPage: 10,
   };
   const storageSavedState: RulesTableSavedState = {
-    isInMemorySorting: true,
-    filterOptions: {
+    inMemory: true,
+    filter: {
       filter: 'test',
       showCustomRules: false,
       showElasticRules: true,
       tags: [],
     },
-    sorting: {
+    sort: {
       field: 'name',
       order: 'asc',
     },
@@ -108,9 +108,9 @@ describe('useInitializeRulesTableSavedState', () => {
       renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
       expect(setActiveTab).toHaveBeenCalledWith('monitoring');
-      expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(urlSavedState.isInMemorySorting);
-      expect(actions.setFilterOptions).toHaveBeenCalledWith(urlSavedState.filterOptions);
-      expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sorting);
+      expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(urlSavedState.inMemory);
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(urlSavedState.filter);
+      expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sort);
       expect(actions.setPage).toHaveBeenCalledWith(urlSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(urlSavedState.perPage);
     });
@@ -125,11 +125,9 @@ describe('useInitializeRulesTableSavedState', () => {
       renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
       expect(setActiveTab).not.toHaveBeenCalled();
-      expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(
-        storageSavedState.isInMemorySorting
-      );
-      expect(actions.setFilterOptions).toHaveBeenCalledWith(storageSavedState.filterOptions);
-      expect(actions.setSortingOptions).toHaveBeenCalledWith(storageSavedState.sorting);
+      expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(storageSavedState.inMemory);
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(storageSavedState.filter);
+      expect(actions.setSortingOptions).toHaveBeenCalledWith(storageSavedState.sort);
       expect(actions.setPage).toHaveBeenCalledWith(storageSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(storageSavedState.perPage);
     });
@@ -144,9 +142,9 @@ describe('useInitializeRulesTableSavedState', () => {
       renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
       expect(setActiveTab).toHaveBeenCalledWith('monitoring');
-      expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(urlSavedState.isInMemorySorting);
-      expect(actions.setFilterOptions).toHaveBeenCalledWith(urlSavedState.filterOptions);
-      expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sorting);
+      expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(urlSavedState.inMemory);
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(urlSavedState.filter);
+      expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sort);
       expect(actions.setPage).toHaveBeenCalledWith(urlSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(urlSavedState.perPage);
     });
