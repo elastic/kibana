@@ -24,6 +24,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const timelionChartSelector = 'timelionChart';
+  const config = getService('config');
+  const isCcs = config.get('esTestCluster.ccs')
+    ? getService('remoteEsArchiver' as 'esArchiver')
+    : getService('esArchiver');
+
+  const indexPatternPrefix = isCcs ? 'ftr-remote:' : null;
+  const logstashWithDashIndexPatternString = `${indexPatternPrefix}logstash-*`;
+  const logstashWithoutDashIndexPatternString = `${indexPatternPrefix}logstash*`;
+  const longWindowLogStashIndexPatternString = `${indexPatternPrefix}long-window-logstash-*`;
 
   describe('Timelion visualization', () => {
     before(async () => {
@@ -45,7 +54,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     };
 
     it('should display correct data for specified index pattern and timefield', async () => {
-      await initVisualization('.es(index=long-window-logstash-*,timefield=@timestamp)');
+      await initVisualization(
+        `.es(index=${longWindowLogStashIndexPatternString},timefield=@timestamp)`
+      );
 
       const chartData = await visChart.getAreaChartData('q:* > count', timelionChartSelector);
       expect(chartData).to.eql([3, 5, 2, 6, 1, 6, 1, 7, 0, 0]);
@@ -63,8 +74,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should display correct chart data for average, min, max and cardinality aggregations', async () => {
       await initVisualization(
-        '.es(index=logstash-*,metric=avg:bytes), .es(index=logstash-*,metric=min:bytes),' +
-          '.es(index=logstash-*,metric=max:bytes,), .es(index=logstash-*,metric=cardinality:bytes)',
+        `.es(index=${logstashWithDashIndexPatternString},metric=avg:bytes), .es(index=${logstashWithDashIndexPatternString},metric=min:bytes),` +
+        `.es(index=${logstashWithDashIndexPatternString},metric=max:bytes,), .es(index=${logstashWithDashIndexPatternString},metric=cardinality:bytes)`,
         '36h'
       );
 
@@ -97,9 +108,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const forthAreaExpectedChartData = [150, 50, 50, 50, 50, 50, 50, 150, 150, 150];
       await initVisualization(
         '.es(*).label("initial"),' +
-          '.es(*).add(term=.es(*).multiply(-1).abs()).divide(2).label("add multiply abs divide"),' +
-          '.es(q="bytes<100").derivative().sum(200).min(200).label("query derivative min sum"),' +
-          '.es(*).if(operator=gt,if=200,then=50,else=150).label("condition")'
+        '.es(*).add(term=.es(*).multiply(-1).abs()).divide(2).label("add multiply abs divide"),' +
+        '.es(q="bytes<100").derivative().sum(200).min(200).label("query derivative min sum"),' +
+        '.es(*).if(operator=gt,if=200,then=50,else=150).label("condition")'
       );
 
       const firstAreaChartData = await visChart.getAreaChartData('initial', timelionChartSelector);
@@ -133,9 +144,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         [1442901600000, 5721.775973559419],
       ];
       await initVisualization(
-        '.es(index=logstash*,timefield="@timestamp",metric=avg:machine.ram).label("Average Machine RAM amount").yaxis(2,units=bytes,position=right),' +
-          '.es(index=logstash*,timefield="@timestamp",metric=avg:bytes).label("Average Bytes for request").yaxis(1,units=bytes,position=left),' +
-          '.es(index=logstash*,timefield="@timestamp",metric=avg:bytes, offset=-12h).label("Average Bytes for request with offset").yaxis(3,units=custom:BYTES_,position=right)',
+        `.es(index=${logstashWithoutDashIndexPatternString},timefield="@timestamp",metric=avg:machine.ram).label("Average Machine RAM amount").yaxis(2,units=bytes,position=right),` +
+        `.es(index=${logstashWithoutDashIndexPatternString},timefield="@timestamp",metric=avg:bytes).label("Average Bytes for request").yaxis(1,units=bytes,position=left),` +
+        `.es(index=${logstashWithoutDashIndexPatternString},timefield="@timestamp",metric=avg:bytes, offset=-12h).label("Average Bytes for request with offset").yaxis(3,units=custom:BYTES_,position=right)`,
         '36h'
       );
 
@@ -172,7 +183,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should display correct chart data for split expression', async () => {
-      await initVisualization('.es(index=logstash-*, split=geo.dest:3)', '1 day');
+      await initVisualization(
+        `.es(index=${logstashWithDashIndexPatternString}, split=geo.dest:3)`,
+        '1 day'
+      );
 
       const firstAreaChartData = await visChart.getAreaChartData(
         'q:* > geo.dest:CN > count',
@@ -271,7 +285,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should show field suggestions for timefield argument when index pattern set', async () => {
             await monacoEditor.setCodeEditorValue('');
             await monacoEditor.typeCodeEditorValue(
-              '.es(index=logstash-*, timefield=',
+              `.es(index=${logstashWithDashIndexPatternString}, timefield=`,
               'timelionCodeEditor'
             );
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
@@ -285,7 +299,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should show field suggestions for split argument when index pattern set', async () => {
             await monacoEditor.setCodeEditorValue('');
             await monacoEditor.typeCodeEditorValue(
-              '.es(index=logstash-*, timefield=@timestamp, split=',
+              `.es(index=${logstashWithDashIndexPatternString}, timefield=@timestamp, split=`,
               'timelionCodeEditor'
             );
             // wait for split fields to load
@@ -300,7 +314,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           it('should show field suggestions for metric argument when index pattern set', async () => {
             await monacoEditor.typeCodeEditorValue(
-              '.es(index=logstash-*, timefield=@timestamp, metric=avg:',
+              `.es(index=${logstashWithDashIndexPatternString}, timefield=@timestamp, metric=avg:`,
               'timelionCodeEditor'
             );
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up

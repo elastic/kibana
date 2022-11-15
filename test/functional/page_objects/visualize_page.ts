@@ -41,20 +41,25 @@ export class VisualizePageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly visEditor = this.ctx.getPageObject('visEditor');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly config = this.ctx.getService('config');
 
+  isCcs = this.config.get('esTestCluster.ccs');
+
+  esPrefix = this.isCcs ? 'ftr-remote:' : null;
   index = {
-    LOGSTASH_TIME_BASED: 'logstash-*',
-    LOGSTASH_NON_TIME_BASED: 'logstash*',
+    LOGSTASH_TIME_BASED: `${this.esPrefix}logstash-*`,
+    LOGSTASH_NON_TIME_BASED: `${this.esPrefix}logstash*`,
   };
 
-  remoteEsPrefix = 'ftr-remote:';
-  defaultIndexString = 'logstash-*';
+  visualizeArchive = this.isCcs
+    ? 'test/functional/fixtures/kbn_archiver/ccs/visualize.json'
+    : 'test/functional/fixtures/kbn_archiver/visualize.json';
+
+  defaultIndexString = `${this.esPrefix}logstash-*`;
 
   public async initTests(isNewLibrary = false) {
     await this.kibanaServer.savedObjects.clean({ types: ['visualization'] });
-    await this.kibanaServer.importExport.load(
-      'test/functional/fixtures/kbn_archiver/visualize.json'
-    );
+    await this.kibanaServer.importExport.load(this.visualizeArchive);
 
     await this.kibanaServer.uiSettings.replace({
       defaultIndex: this.defaultIndexString,

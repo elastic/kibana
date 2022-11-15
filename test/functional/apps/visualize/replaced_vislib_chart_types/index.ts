@@ -11,7 +11,10 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
+  const config = getService('config');
+  const isCcs = config.get('esTestCluster.ccs') ? true : false;
+  const esNode = isCcs ? getService('remoteEsArchiver' as 'esArchiver') : getService('esArchiver');
+  const localEs = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   // TODO: Remove when vislib is removed
@@ -20,9 +23,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       log.debug('Starting visualize before method');
       await browser.setWindowSize(1280, 800);
       await kibanaServer.savedObjects.cleanStandardList();
-
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
+      await localEs.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos_custom');
+      await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
     });
 
     before(async () => {
@@ -42,14 +45,18 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     // Test replaced vislib chart types
-    loadTestFile(require.resolve('./_area_chart'));
-    loadTestFile(require.resolve('./_line_chart_split_series'));
-    loadTestFile(require.resolve('./_line_chart_split_chart'));
-    loadTestFile(require.resolve('./_point_series_options'));
-    loadTestFile(require.resolve('./_vertical_bar_chart'));
-    loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
-    loadTestFile(require.resolve('./_timelion'));
-    loadTestFile(require.resolve('../group3/_pie_chart'));
-    loadTestFile(require.resolve('../group2/_heatmap_chart'));
+    if (isCcs) {
+      loadTestFile(require.resolve('./_timelion'));
+    } else {
+      loadTestFile(require.resolve('./_area_chart'));
+      loadTestFile(require.resolve('./_line_chart_split_series'));
+      loadTestFile(require.resolve('./_line_chart_split_chart'));
+      loadTestFile(require.resolve('./_point_series_options'));
+      loadTestFile(require.resolve('./_vertical_bar_chart'));
+      loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
+      loadTestFile(require.resolve('./_timelion'));
+      loadTestFile(require.resolve('../group3/_pie_chart'));
+      loadTestFile(require.resolve('../group2/_heatmap_chart'));
+    }
   });
 }

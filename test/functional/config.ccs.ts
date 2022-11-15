@@ -23,6 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/console/_console_ccs'),
       require.resolve('./apps/management/ccs_compatibility'),
       require.resolve('./apps/getting_started'),
+      require.resolve('./apps/visualize/replaced_vislib_chart_types'),
     ],
 
     services: {
