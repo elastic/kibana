@@ -178,10 +178,7 @@ export function useChangePointResults(
           return {
             group_field: v.key.splitFieldTerm,
             type: changePointType,
-            p_value:
-              rawPValue === undefined
-                ? undefined
-                : Math.round((rawPValue + Number.EPSILON) * 1000) / 1000,
+            p_value: rawPValue,
             timestamp: timeAsString,
             label: changePointType,
             reason: v.change_point_request.type[changePointType].reason,
