@@ -7,9 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { ErrorCode } from '../../../common/types/error_codes';
 import { getDocument } from '../../lib/indices/document/get_document';
 import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
+import { isNotFoundException } from '../../utils/identify_exceptions';
 
 export function registerDocumentRoute({ router, log }: RouteDependencies) {
   router.get(
@@ -27,11 +29,28 @@ export function registerDocumentRoute({ router, log }: RouteDependencies) {
       const documentId = decodeURIComponent(request.params.document_id);
       const { client } = (await context.core).elasticsearch;
 
-      const documentResponse = await getDocument(client, indexName, documentId);
-      return response.ok({
-        body: documentResponse,
-        headers: { 'content-type': 'application/json' },
-      });
+      try {
+        const documentResponse = await getDocument(client, indexName, documentId);
+        return response.ok({
+          body: documentResponse,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isNotFoundException(error)) {
+          return response.customError({
+            body: {
+              attributes: {
+                error_code: ErrorCode.DOCUMENT_NOT_FOUND,
+              },
+              message: `Could not find document ${documentId}`,
+            },
+            statusCode: 404,
+          });
+        } else {
+          // otherwise, default handler
+          throw error;
+        }
+      }
     })
   );
 }
