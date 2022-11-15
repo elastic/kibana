@@ -209,7 +209,7 @@ export class ExecutionHandler<
               kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
               alertParams: this.rule.params,
               actionParams: action.params,
-              ruleUrl: this.buildRuleUrl(),
+              ruleUrl: this.buildRuleUrl(spaceId),
             }),
           }),
         };
@@ -284,14 +284,16 @@ export class ExecutionHandler<
     return executables;
   }
 
-  private buildRuleUrl(): string | undefined {
+  private buildRuleUrl(spaceId: string): string | undefined {
     if (!this.taskRunnerContext.kibanaBaseUrl) {
       return;
     }
 
     try {
       const ruleUrl = new URL(
-        `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`,
+        `${
+          spaceId !== 'default' ? `/s/${spaceId}` : ''
+        }${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`,
         this.taskRunnerContext.kibanaBaseUrl
       );
 
