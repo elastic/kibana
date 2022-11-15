@@ -94,8 +94,6 @@ describe('duplicateRule', () => {
     const rule = createTestRule();
     const result = await duplicateRule({
       rule,
-      shouldDuplicateExceptions: false,
-      exceptionsClient: undefined,
     });
 
     expect(result).toEqual({
@@ -120,8 +118,6 @@ describe('duplicateRule', () => {
     rule.name = 'PowerShell Keylogging Script';
     const result = await duplicateRule({
       rule,
-      shouldDuplicateExceptions: false,
-      exceptionsClient: undefined,
     });
 
     expect(result).toEqual(
@@ -135,8 +131,6 @@ describe('duplicateRule', () => {
     const rule = createTestRule();
     const result = await duplicateRule({
       rule,
-      shouldDuplicateExceptions: false,
-      exceptionsClient: undefined,
     });
 
     expect(result).toEqual(
@@ -153,8 +147,6 @@ describe('duplicateRule', () => {
     rule.enabled = true;
     const result = await duplicateRule({
       rule,
-      shouldDuplicateExceptions: false,
-      exceptionsClient: undefined,
     });
 
     expect(result).toEqual(
@@ -175,8 +167,6 @@ describe('duplicateRule', () => {
       const rule = createPrebuiltRule();
       const result = await duplicateRule({
         rule,
-        shouldDuplicateExceptions: false,
-        exceptionsClient: undefined,
       });
 
       expect(result).toEqual(
@@ -200,8 +190,6 @@ describe('duplicateRule', () => {
 
       const result = await duplicateRule({
         rule,
-        shouldDuplicateExceptions: false,
-        exceptionsClient: undefined,
       });
 
       expect(result).toEqual(
@@ -225,8 +213,6 @@ describe('duplicateRule', () => {
 
       const result = await duplicateRule({
         rule,
-        shouldDuplicateExceptions: false,
-        exceptionsClient: undefined,
       });
 
       expect(result).toEqual(
@@ -243,8 +229,6 @@ describe('duplicateRule', () => {
       rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
       const result = await duplicateRule({
         rule,
-        shouldDuplicateExceptions: false,
-        exceptionsClient: undefined,
       });
 
       expect(result).toEqual(
@@ -268,8 +252,6 @@ describe('duplicateRule', () => {
       const rule = createCustomRule();
       const result = await duplicateRule({
         rule,
-        shouldDuplicateExceptions: false,
-        exceptionsClient: undefined,
       });
 
       expect(result).toEqual(
@@ -293,8 +275,6 @@ describe('duplicateRule', () => {
 
       const result = await duplicateRule({
         rule,
-        shouldDuplicateExceptions: false,
-        exceptionsClient: undefined,
       });
 
       expect(result).toEqual(
@@ -318,8 +298,6 @@ describe('duplicateRule', () => {
 
       const result = await duplicateRule({
         rule,
-        shouldDuplicateExceptions: false,
-        exceptionsClient: undefined,
       });
 
       expect(result).toEqual(
@@ -336,8 +314,6 @@ describe('duplicateRule', () => {
       rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
       const result = await duplicateRule({
         rule,
-        shouldDuplicateExceptions: false,
-        exceptionsClient: undefined,
       });
 
       expect(result).toEqual(

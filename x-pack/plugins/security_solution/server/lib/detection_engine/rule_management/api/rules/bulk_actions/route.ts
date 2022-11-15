@@ -536,7 +536,8 @@ export const performBulkActionRoute = (
                   },
                 });
 
-                return updatedRule;
+                // TODO: figureout why types can't return just updatedRule
+                return { ...createdRule, ...updatedRule };
               },
               abortSignal: abortController.signal,
             });
