@@ -16,7 +16,7 @@ import {
   distinctUntilChanged,
 } from 'rxjs/operators';
 import type { Logger, LoggerFactory } from '@kbn/logging';
-import { Env, RawConfigurationProvider } from '@kbn/config';
+import type { Env, RawConfigurationProvider } from '@kbn/config';
 import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 import apm from 'elastic-apm-node';
 import { isEqual } from 'lodash';

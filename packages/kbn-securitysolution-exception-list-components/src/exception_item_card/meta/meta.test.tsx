@@ -79,7 +79,7 @@ describe('ExceptionItemCardMetaInfo', () => {
         item={getExceptionListItemSchemaMock()}
         rules={[
           {
-            exception_list: [
+            exceptions_list: [
               {
                 id: '123',
                 list_id: 'i_exist',
@@ -98,7 +98,7 @@ describe('ExceptionItemCardMetaInfo', () => {
             rule_id: 'rule-2',
           },
           {
-            exception_list: [
+            exceptions_list: [
               {
                 id: '123',
                 list_id: 'i_exist',
