@@ -8,6 +8,7 @@
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
+import { fnOperationTypeMapping } from './constants';
 
 interface FunctionPickerProps {
   value: string;
@@ -15,27 +16,17 @@ interface FunctionPickerProps {
 }
 
 export const FunctionPicker: FC<FunctionPickerProps> = React.memo(({ value, onChange }) => {
+  const options = Object.keys(fnOperationTypeMapping).map((v) => {
+    return {
+      value: v,
+      text: v,
+    };
+  });
+
   return (
     <EuiFormRow>
       <EuiSelect
-        options={[
-          {
-            value: 'min',
-            text: 'min',
-          },
-          {
-            value: 'max',
-            text: 'max',
-          },
-          {
-            value: 'sum',
-            text: 'sum',
-          },
-          {
-            value: 'avg',
-            text: 'avg',
-          },
-        ]}
+        options={options}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         prepend={i18n.translate('xpack.aiops.changePointDetection.selectFunctionLabel', {

@@ -11,6 +11,7 @@ import { useChangePontDetectionContext } from './change_point_detection_context'
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimeRangeUpdates } from '../../hooks/use_time_filter';
+import { fnOperationTypeMapping } from './constants';
 
 export interface ChartComponentProps {
   annotation: {
@@ -20,13 +21,6 @@ export interface ChartComponentProps {
     reason: string;
   };
 }
-
-const fnOperationTypeMapping: Record<string, string> = {
-  min: 'min',
-  max: 'max',
-  sum: 'sum',
-  avg: 'average',
-} as const;
 
 export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation }) => {
   const {
