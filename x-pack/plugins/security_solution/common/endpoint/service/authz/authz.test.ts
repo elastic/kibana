@@ -83,6 +83,20 @@ describe('Endpoint Authz service', () => {
           true
         );
       });
+
+      it(`should allow Host Isolation Exception read/delete when license is not Platinum+, but entries exist`, () => {
+        licenseService.isPlatinumPlus.mockReturnValue(false);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false, undefined, true)
+        ).toEqual(
+          expect.objectContaining({
+            canWriteHostIsolationExceptions: false,
+            canReadHostIsolationExceptions: true,
+            canDeleteHostIsolationExceptions: true,
+          })
+        );
+      });
     });
 
     describe('and `fleet.all` access is false', () => {
