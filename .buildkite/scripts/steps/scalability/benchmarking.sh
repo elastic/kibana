@@ -105,9 +105,6 @@ export TEST_ES_URL="http://elastic:changeme@${ES_HOST}"
 export ES_URL="http://${ES_HOST}"
 
 for journey in x-pack/test/scalability/apis/*; do
-
-  echo "--- Running $journey"
-
   echo "--- $journey - Start ES"
   node scripts/es snapshot&
   export esPid=$!
