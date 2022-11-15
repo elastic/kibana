@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/packages/observability-logs/log-stream-page/state'],
+  roots: ['<rootDir>/packages/observability-logs/log_stream_page/state'],
 };

@@ -3673,7 +3673,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-log-stream-page-state@link:bazel-bin/packages/observability-logs/log-stream-page/state":
+"@kbn/observability-logs-log-stream-page-state@link:bazel-bin/packages/observability-logs/log_stream_page/state":
   version "0.0.0"
   uid ""
 

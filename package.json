@@ -352,7 +352,7 @@
     "@kbn/ml-is-populated-object": "link:bazel-bin/x-pack/packages/ml/is_populated_object",
     "@kbn/ml-string-hash": "link:bazel-bin/x-pack/packages/ml/string_hash",
     "@kbn/monaco": "link:bazel-bin/packages/kbn-monaco",
-    "@kbn/observability-logs-log-stream-page-state": "link:bazel-bin/packages/observability-logs/log-stream-page/state",
+    "@kbn/observability-logs-log-stream-page-state": "link:bazel-bin/packages/observability-logs/log_stream_page/state",
     "@kbn/osquery-io-ts-types": "link:bazel-bin/packages/kbn-osquery-io-ts-types",
     "@kbn/plugin-discovery": "link:bazel-bin/packages/kbn-plugin-discovery",
     "@kbn/react-field": "link:bazel-bin/packages/kbn-react-field",
