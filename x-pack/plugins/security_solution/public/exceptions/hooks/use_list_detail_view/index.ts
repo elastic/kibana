@@ -15,11 +15,16 @@ import { useParams } from 'react-router-dom';
 import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
-import { patchRule } from '../../../detection_engine/rule_management/logic';
 import { useUserData } from '../../../detections/components/user_info';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import { updateList, getListRules, getListById } from '../../api';
+import {
+  updateList,
+  getListRules,
+  getListById,
+  unlinkListFromRules,
+  linkListToRules,
+} from '../../api';
 import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 import * as i18n from '../../translations';
 
@@ -54,9 +59,11 @@ export const useExceptionListDetails = () => {
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
   const [isLoading, setIsLoading] = useState<boolean>();
+  const [showManageButtonLoader, setShowManageButtonLoader] = useState<boolean>(false);
   const [list, setList] = useState<ExceptionListSchema | null>();
   const [invalidListId, setInvalidListId] = useState(false);
   const [linkedRules, setLinkedRules] = useState<UIRule[]>([]);
+  const [newLinkedRules, setNewLinkedRules] = useState<UIRule[]>([]);
   const [canUserEditList, setCanUserEditList] = useState(true);
   const [viewerStatus, setViewerStatus] = useState<ViewerStatus | string>('');
   const [exportedList, setExportedList] = useState<Blob>();
@@ -109,7 +116,6 @@ export const useExceptionListDetails = () => {
       setList(result);
       await initializeListRules(result);
       setIsLoading(false);
-
       setInvalidListId(false);
       if (checkIfListCannotBeEdited(result)) return setCanUserEditList(false);
     } catch (error) {
@@ -193,7 +199,6 @@ export const useExceptionListDetails = () => {
     } finally {
       setReferenceModalState(exceptionReferenceModalInitialState);
       setShowReferenceErrorModal(false);
-      // if (refreshExceptions != null) await refreshExceptions();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.exceptions,
         path: '',
@@ -238,23 +243,7 @@ export const useExceptionListDetails = () => {
   }, []);
   const handleReferenceDelete = useCallback(async (): Promise<void> => {
     try {
-      await Promise.all(
-        linkedRules.map((rule) => {
-          const abortCtrl = new AbortController();
-          const exceptionLists = (rule.exceptions_list ?? []).filter(
-            ({ id }) => id !== exceptionListId
-          );
-
-          return patchRule({
-            ruleProperties: {
-              rule_id: rule.rule_id,
-              exceptions_list: exceptionLists,
-            },
-            signal: abortCtrl.signal,
-          });
-        })
-      );
-
+      await unlinkListFromRules({ rules: linkedRules, listId: exceptionListId });
       onDeleteList();
     } catch (err) {
       handleErrorStatus(err);
@@ -263,17 +252,56 @@ export const useExceptionListDetails = () => {
 
   // #endregion
 
+  // #region Manage Rules
+
   const onManageRules = useCallback(() => {
     setShowManageRulesFlyout(true);
   }, []);
-  const onSaveManageRules = useCallback(() => {
-    // TODO: call API To save
-    setShowManageRulesFlyout(false);
+
+  const getRulesToAdd = useCallback(() => {
+    return newLinkedRules.filter((rule) => !linkedRules.includes(rule));
+  }, [linkedRules, newLinkedRules]);
+
+  const getRulesToRemove = useCallback(() => {
+    return linkedRules.filter((rule) => !newLinkedRules.includes(rule));
+  }, [linkedRules, newLinkedRules]);
+
+  const onRuleSelectionChange = useCallback((value) => {
+    setNewLinkedRules(value);
   }, []);
+
+  const onSaveManageRules = useCallback(async () => {
+    setShowManageButtonLoader(true);
+    try {
+      if (!list) return;
+      const rulesToAdd = getRulesToAdd();
+      const rulesToRemove = getRulesToRemove();
+      if (!rulesToAdd.length && !rulesToRemove.length) return;
+
+      await Promise.all([
+        unlinkListFromRules({ rules: rulesToRemove, listId: exceptionListId }),
+        linkListToRules({
+          rules: rulesToAdd,
+          listId: exceptionListId,
+          id: list.id,
+          listType: list.type,
+          listNamespaceType: list.namespace_type,
+        }),
+      ]);
+      setShowManageButtonLoader(false);
+      setNewLinkedRules([]);
+      setLinkedRules(newLinkedRules);
+      setShowManageRulesFlyout(false);
+    } catch (err) {
+      handleErrorStatus(err);
+    }
+  }, [list, getRulesToAdd, getRulesToRemove, exceptionListId, newLinkedRules, handleErrorStatus]);
   const onCancelManageRules = useCallback(() => {
     setShowManageRulesFlyout(false);
   }, []);
-  const onRuleSelectionChange = useCallback(() => {}, []);
+
+  // #endregion
+
   return {
     isLoading: isLoading || userInfoLoading,
     invalidListId,
@@ -290,6 +318,7 @@ export const useExceptionListDetails = () => {
     headerBackOptions,
     referenceModalState,
     showReferenceErrorModal,
+    showManageButtonLoader,
     handleDelete,
     onEditListDetails,
     onExportList,

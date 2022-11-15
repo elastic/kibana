@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import {
-  deleteExceptionListById,
-  exportExceptionList,
-  fetchExceptionLists,
-  updateExceptionList,
-} from '@kbn/securitysolution-list-api';
+import { fetchExceptionLists, updateExceptionList } from '@kbn/securitysolution-list-api';
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { getFilters } from '@kbn/securitysolution-list-utils';
+import type { List, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
 import type {
-  DeleteExceptionList,
-  ExportExceptionList,
   FetchListById,
+  LinkListToRules,
+  UnlinkListFromRules,
   UpdateExceptionList,
 } from './types';
-import { fetchRules } from '../../detection_engine/rule_management/api/api';
+import { fetchRules, patchRule } from '../../detection_engine/rule_management/api/api';
 import type { Rule } from '../../detection_engine/rule_management/logic';
 
 export const getListById = async ({ id, http }: FetchListById) => {
@@ -82,30 +78,53 @@ export const updateList = async ({ list, http }: UpdateExceptionList) => {
   }
 };
 
-export const exportList = async ({ id, listId, http, namespaceType }: ExportExceptionList) => {
+export const unlinkListFromRules = async ({ rules, listId }: UnlinkListFromRules) => {
   try {
     const abortCtrl = new AbortController();
-    return await exportExceptionList({
-      id,
-      http: http as HttpSetup,
-      listId,
-      signal: abortCtrl.signal,
-      namespaceType,
+    rules.map((rule) => {
+      const exceptionLists: ListArray | [] = (rule.exceptions_list ?? []).filter(
+        ({ list_id: id }) => id !== listId
+      );
+      return patchRule({
+        ruleProperties: {
+          rule_id: rule.rule_id,
+          exceptions_list: exceptionLists,
+        },
+        signal: abortCtrl.signal,
+      });
     });
+    // abortCtrl.abort();
   } catch (error) {
     throw new Error(error);
   }
 };
 
-export const deleteList = async ({ id, http, namespaceType }: DeleteExceptionList) => {
+export const linkListToRules = async ({
+  rules,
+  listId,
+  id,
+  listType,
+  listNamespaceType,
+}: LinkListToRules) => {
   try {
     const abortCtrl = new AbortController();
-    await deleteExceptionListById({
-      id,
-      http: http as HttpSetup,
-      signal: abortCtrl.signal,
-      namespaceType,
+    rules.map((rule) => {
+      const newExceptionList: List = {
+        list_id: listId,
+        id,
+        type: listType,
+        namespace_type: listNamespaceType,
+      };
+      const exceptionLists: ListArray | [] = [...(rule.exceptions_list ?? []), newExceptionList];
+      return patchRule({
+        ruleProperties: {
+          rule_id: rule.rule_id,
+          exceptions_list: exceptionLists,
+        },
+        signal: abortCtrl.signal,
+      });
     });
+    // abortCtrl.abort();
   } catch (error) {
     throw new Error(error);
   }

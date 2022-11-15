@@ -26,13 +26,14 @@ import * as i18n from '../../translations';
 
 interface ManageRulesProps {
   linkedRules: Rule[];
+  showButtonLoader?: boolean;
   onSave: () => void;
   onCancel: () => void;
-  onRuleSelectionChange: () => void;
+  onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
 }
 
 export const ManageRules: FC<ManageRulesProps> = memo(
-  ({ linkedRules, onSave, onCancel, onRuleSelectionChange }) => {
+  ({ linkedRules, showButtonLoader, onSave, onCancel, onRuleSelectionChange }) => {
     const complicatedFlyoutTitleId = useGeneratedHtmlId({
       prefix: 'complicatedFlyoutTitle',
     });
@@ -40,7 +41,7 @@ export const ManageRules: FC<ManageRulesProps> = memo(
       <EuiFlyout
         hideCloseButton
         ownFocus
-        onClose={onSave}
+        onClose={onCancel}
         aria-labelledby={complicatedFlyoutTitleId}
       >
         <EuiFlyoutHeader hasBorder>
@@ -66,7 +67,7 @@ export const ManageRules: FC<ManageRulesProps> = memo(
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={onSave} fill>
+              <EuiButton isLoading={showButtonLoader} onClick={onSave} fill>
                 {i18n.MANAGE_RULES_SAVE}
               </EuiButton>
             </EuiFlexItem>

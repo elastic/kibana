@@ -39,6 +39,7 @@ export const ListsDetailViewComponent: FC = () => {
     headerBackOptions,
     showReferenceErrorModal,
     referenceModalState,
+    showManageButtonLoader,
     onEditListDetails,
     onExportList,
     onManageRules,
@@ -56,7 +57,6 @@ export const ListsDetailViewComponent: FC = () => {
   if (isLoading) return <EuiLoadingContent lines={4} data-test-subj="loading" />;
 
   if (invalidListId || !listName || !listDescription || !list) return <NotFoundPage />;
-
   return (
     <>
       <MissingPrivilegesCallOut />
@@ -94,6 +94,7 @@ export const ListsDetailViewComponent: FC = () => {
           onSave={onSaveManageRules}
           onCancel={onCancelManageRules}
           onRuleSelectionChange={onRuleSelectionChange}
+          showButtonLoader={showManageButtonLoader}
         />
       ) : null}
     </>

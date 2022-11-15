@@ -7,12 +7,14 @@
 
 import type {
   CreateExceptionListItemSchema,
+  ExceptionListType,
   NamespaceType,
   UpdateExceptionListItemSchema,
   UpdateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Pagination } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
+import type { Rule } from '@kbn/securitysolution-exception-list-components';
 
 export interface FetchItems {
   http: HttpSetup | undefined;
@@ -58,4 +60,17 @@ export interface DeleteExceptionList {
   id: string;
   http: HttpSetup | undefined;
   namespaceType: NamespaceType;
+}
+
+export interface LinkListToRules {
+  rules: Rule[];
+  listId: string;
+  id: string;
+  listType: ExceptionListType;
+  listNamespaceType: NamespaceType;
+}
+
+export interface UnlinkListFromRules {
+  rules: Rule[];
+  listId: string;
 }
