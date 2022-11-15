@@ -350,13 +350,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('should work with ad-hoc data views and runtime fields', async () => {
-        await PageObjects.discover.createAdHocDataView('logstash', true);
+      it('should work when filters change', async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(
+          'jpg\n65.0%\ncss\n15.4%\npng\n9.8%\ngif\n6.6%\nphp\n3.2%'
+        );
 
         await filterBar.addFilter('extension', 'is', 'jpg');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        // check that the filter was passed down to the sidebar
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be('jpg\n100%');
+      });
+
+      it('should work with ad-hoc data views and runtime fields', async () => {
+        await PageObjects.discover.createAdHocDataView('logstash', true);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
           '53 available fields. 0 empty fields. 3 meta fields.'
