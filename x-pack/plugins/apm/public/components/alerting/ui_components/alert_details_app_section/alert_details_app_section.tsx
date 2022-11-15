@@ -20,7 +20,7 @@ import {
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { getOrRedirectToTransactionType } from '../../../../context/apm_service/apm_service_context';
+import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
 import { useServiceAgentFetcher } from '../../../../context/apm_service/use_service_agent_fetcher';
 import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
 import { asPercent } from '../../../../../common/utils/formatters';
@@ -108,7 +108,7 @@ export function AlertDetailsAppSection({
     end,
   });
 
-  const transactionType = getOrRedirectToTransactionType({
+  const transactionType = getTransactionType({
     transactionType: String(alert.fields[TRANSACTION_TYPE]),
     transactionTypes,
     agentName,

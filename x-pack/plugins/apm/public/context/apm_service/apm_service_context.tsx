@@ -7,7 +7,6 @@
 
 import React, { createContext, ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
-import { History } from 'history';
 import { isRumAgentName } from '../../../common/agent_name';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -62,12 +61,19 @@ export function ApmServiceContextProvider({
     end,
   });
 
-  const transactionType = getOrRedirectToTransactionType({
+  const currentTransactionType = getTransactionType({
     transactionType: query.transactionType,
     transactionTypes,
     agentName,
-    history,
   });
+
+  // Replace transactionType in the URL in case it is not one of the types returned by the API
+  if (
+    currentTransactionType &&
+    currentTransactionType !== query.transactionType
+  ) {
+    replace(history, { query: { transactionType: currentTransactionType } });
+  }
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
@@ -78,7 +84,7 @@ export function ApmServiceContextProvider({
       value={{
         serviceName,
         agentName,
-        transactionType,
+        transactionType: currentTransactionType,
         transactionTypes,
         runtimeName,
         fallbackToTransactions,
@@ -88,16 +94,14 @@ export function ApmServiceContextProvider({
   );
 }
 
-export function getOrRedirectToTransactionType({
+export function getTransactionType({
   transactionType,
   transactionTypes,
   agentName,
-  history,
 }: {
   transactionType?: string;
   transactionTypes: string[];
   agentName?: string;
-  history?: History;
 }) {
   if (transactionType && transactionTypes.includes(transactionType)) {
     return transactionType;
@@ -119,10 +123,5 @@ export function getOrRedirectToTransactionType({
     ? defaultTransactionType
     : transactionTypes[0];
 
-  // Replace transactionType in the URL in case it is not one of the types returned by the API
-  // Make history var optional, then check it here, as we are calling getOrRedirectToTransactionType without APM context i.e AlertDetailsAppSection for Observability
-  if (history) {
-    replace(history, { query: { transactionType: currentTransactionType } });
-  }
   return currentTransactionType;
 }
