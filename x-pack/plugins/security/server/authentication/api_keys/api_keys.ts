@@ -156,16 +156,6 @@ export interface ValidateAPIKeyParams {
 }
 
 /**
- * The return value for API Key Validation
- */
-export interface ValidateAPIKeyResult {
-  /**
-   * Indicates if the provided API Key was successfully authenticated.
-   */
-  isValid: boolean;
-}
-
-/**
  * Class responsible for managing Elasticsearch API keys.
  */
 export class APIKeys {
@@ -365,9 +355,9 @@ export class APIKeys {
    * Tries to validate an API key.
    * @param apiKeyPrams ValidateAPIKeyParams.
    */
-  async validate(apiKeyPrams: ValidateAPIKeyParams): Promise<ValidateAPIKeyResult> {
+  async validate(apiKeyPrams: ValidateAPIKeyParams): Promise<boolean> {
     if (!this.license.isEnabled()) {
-      return { isValid: false };
+      return false;
     }
 
     const fakeRequest = getFakeKibanaRequest(apiKeyPrams);
@@ -377,12 +367,12 @@ export class APIKeys {
     try {
       await this.clusterClient.asScoped(fakeRequest).asCurrentUser.security.authenticate();
       this.logger.debug(`API key was validated successfully`);
-      return { isValid: true };
+      return true;
     } catch (e) {
       this.logger.info(`Failed to validate API key: ${e.message}`);
     }
 
-    return { isValid: false };
+    return false;
   }
 
   private doesErrorIndicateAPIKeysAreDisabled(e: Record<string, any>) {

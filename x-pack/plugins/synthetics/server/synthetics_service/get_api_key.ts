@@ -38,7 +38,7 @@ export const getAPIKeyForSyntheticsService = async ({
     const apiKey = await syntheticsServiceAPIKeySavedObject.get(server);
 
     if (apiKey) {
-      const { isValid } = await server.security.authc.apiKeys.validate({
+      const isValid = await server.security.authc.apiKeys.validate({
         id: apiKey.id,
         api_key: apiKey.apiKey,
       });
