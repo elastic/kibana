@@ -17,6 +17,7 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.d.ts*",
+    "**/languages/*d.ts*",
     "**/languages/**/*.d.ts*",
   ]
 }
