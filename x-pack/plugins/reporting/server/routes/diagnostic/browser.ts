@@ -9,10 +9,9 @@ import type { DocLinksServiceSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import type { DiagnosticResponse } from '.';
-import { incrementApiUsageCounter } from '..';
 import type { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
+import { authorizedUserPreRouting, getCounters } from '../lib';
 
 const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
   'error while loading shared libraries': i18n.translate(
@@ -45,7 +44,8 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
   router.post(
     { path: `${path}`, validate: {} },
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
-      incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+      const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
+
       const { docLinks } = reporting.getPluginSetupDeps();
 
       const logsToHelpMap = logsToHelpMapFactory(docLinks);
@@ -68,6 +68,8 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
           help,
           logs,
         };
+
+        counters.usageCounter();
 
         return res.ok({ body: response });
       } catch (err) {

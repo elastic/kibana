@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { incrementApiUsageCounter } from '..';
+import moment from 'moment';
 import type { ReportingCore } from '../..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import type { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
 import { PassThroughStream } from '../../lib';
-import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { RequestHandler } from '../lib/request_handler';
+import { authorizedUserPreRouting, getCounters, RequestHandler } from '../lib';
 
 const API_BASE_URL_V1 = '/api/reporting/v1';
 const API_BASE_GENERATE_V1 = `${API_BASE_URL_V1}/generate`;
@@ -71,7 +69,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     authorizedUserPreRouting(
       reporting,
       async (user, context, req: CsvFromSavedObjectRequest, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         const logger = parentLogger.get(CSV_SEARCHSOURCE_IMMEDIATE_TYPE);
         const runTaskFn = runTaskFnFactory(reporting, logger);
@@ -107,6 +105,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           await Promise.race([stream.firstBytePromise, taskPromise]);
 
           taskPromise.catch(logError);
+
+          counters.usageCounter();
 
           return res.ok({
             body: stream,

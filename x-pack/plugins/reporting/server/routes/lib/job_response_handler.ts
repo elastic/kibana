@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { promisify } from 'util';
 import { kibanaResponseFactory } from '@kbn/core/server';
+import { promisify } from 'util';
 import { ReportingCore } from '../..';
 import { ALLOWED_JOB_CONTENT_TYPES } from '../../../common/constants';
 import { getContentStream } from '../../lib';
 import { ReportingUser } from '../../types';
+import { jobsQueryFactory } from '.';
+import type { Counters } from './get_counter';
 import { getDocumentPayloadFactory } from './get_document_payload';
-import { jobsQueryFactory } from './jobs_query';
 
 interface JobResponseHandlerParams {
   docId: string;
@@ -23,7 +24,8 @@ export async function downloadJobResponseHandler(
   res: typeof kibanaResponseFactory,
   validJobTypes: string[],
   user: ReportingUser,
-  params: JobResponseHandlerParams
+  params: JobResponseHandlerParams,
+  counters: Counters
 ) {
   const jobsQuery = jobsQueryFactory(reporting);
   const getDocumentPayload = getDocumentPayloadFactory(reporting);
@@ -49,6 +51,8 @@ export async function downloadJobResponseHandler(
       });
     }
 
+    counters.usageCounter();
+
     return res.custom({
       body: typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
       statusCode: payload.statusCode,
@@ -69,7 +73,8 @@ export async function deleteJobResponseHandler(
   res: typeof kibanaResponseFactory,
   validJobTypes: string[],
   user: ReportingUser,
-  params: JobResponseHandlerParams
+  params: JobResponseHandlerParams,
+  counters: Counters
 ) {
   const jobsQuery = jobsQueryFactory(reporting);
 
@@ -95,6 +100,9 @@ export async function deleteJobResponseHandler(
     /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
     await promisify(stream.end.bind(stream, '', 'utf8'))();
     await jobsQuery.delete(docIndex, docId);
+
+    counters.usageCounter();
+
     return res.ok({
       body: { deleted: true },
     });

@@ -8,13 +8,16 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
-import { incrementApiUsageCounter } from '..';
 import { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
-import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { jobsQueryFactory } from '../lib/jobs_query';
-import { deleteJobResponseHandler, downloadJobResponseHandler } from '../lib/job_response_handler';
-import { handleUnavailable } from '../lib/request_handler';
+import {
+  authorizedUserPreRouting,
+  deleteJobResponseHandler,
+  downloadJobResponseHandler,
+  getCounters,
+  handleUnavailable,
+  jobsQueryFactory,
+} from '../lib';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
@@ -39,7 +42,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
         if (!context.reporting) {
@@ -54,6 +57,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         const size = Math.min(100, parseInt(querySize, 10) || 10);
         const jobIds = queryIds ? queryIds.split(',') : null;
         const results = await jobsQuery.list(jobTypes, user, page, size, jobIds);
+
+        counters.usageCounter();
 
         return res.ok({
           body: results,
@@ -75,7 +80,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         validate: false,
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
         if (!context.reporting) {
@@ -87,6 +92,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         } = await reporting.getLicenseInfo();
 
         const count = await jobsQuery.count(jobTypes, user);
+
+        counters.usageCounter();
 
         return res.ok({
           body: count.toString(),
@@ -112,7 +119,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
         if (!context.reporting) {
@@ -141,6 +148,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
           });
         }
 
+        counters.usageCounter();
+
         return res.ok({
           body: result,
           headers: {
@@ -166,7 +175,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
         if (!context.reporting) {
@@ -178,7 +187,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
           management: { jobTypes = [] },
         } = await reporting.getLicenseInfo();
 
-        return downloadJobResponseHandler(reporting, res, jobTypes, user, { docId });
+        return downloadJobResponseHandler(reporting, res, jobTypes, user, { docId }, counters);
       })
     );
   };
@@ -197,7 +206,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
         if (!context.reporting) {
@@ -209,7 +218,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
           management: { jobTypes = [] },
         } = await reporting.getLicenseInfo();
 
-        return deleteJobResponseHandler(reporting, res, jobTypes, user, { docId });
+        return deleteJobResponseHandler(reporting, res, jobTypes, user, { docId }, counters);
       })
     );
   };

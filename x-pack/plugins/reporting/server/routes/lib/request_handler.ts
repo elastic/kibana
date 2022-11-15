@@ -14,6 +14,7 @@ import { API_BASE_URL } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
 import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
+import { Counters } from './get_counter';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -106,7 +107,11 @@ export class RequestHandler {
     return report;
   }
 
-  public async handleGenerateRequest(exportTypeId: string, jobParams: BaseParams) {
+  public async handleGenerateRequest(
+    exportTypeId: string,
+    jobParams: BaseParams,
+    counters: Counters
+  ) {
     // ensure the async dependencies are loaded
     if (!this.context.reporting) {
       return handleUnavailable(this.res);
@@ -134,6 +139,8 @@ export class RequestHandler {
 
       // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(this.reporting);
+
+      counters.usageCounter();
 
       return this.res.ok({
         headers: { 'content-type': 'application/json' },
