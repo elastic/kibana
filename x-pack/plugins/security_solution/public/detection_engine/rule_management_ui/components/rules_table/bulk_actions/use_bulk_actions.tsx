@@ -128,14 +128,14 @@ export const useBulkActions = ({
         startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
         closePopover();
 
-        const duplicateExceptions = await showBulkDuplicateConfirmation();
-        if (!duplicateExceptions) {
+        const modalDuplicationConfirmationResult = await showBulkDuplicateConfirmation();
+        if (modalDuplicationConfirmationResult === null) {
           return;
         }
         await executeBulkAction({
           type: BulkActionType.duplicate,
           duplicatePayload: {
-            include_exceptions: duplicateExceptions === DuplicateOptions.withExceptions,
+            include_exceptions: modalDuplicationConfirmationResult === DuplicateOptions.withExceptions,
           },
           ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });

@@ -68,15 +68,16 @@ export const useRulesTableActions = ({
       // TODO extract those handlers to hooks, like useDuplicateRule
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
-        const duplicateExceptions = await showExceptionsDuplicateConfirmation();
-        if (!duplicateExceptions) {
+        const modalDuplicationConfirmationResult = await showExceptionsDuplicateConfirmation();
+        if (modalDuplicationConfirmationResult === null) {
           return;
         }
         const result = await executeBulkAction({
           type: BulkActionType.duplicate,
           ids: [rule.id],
           duplicatePayload: {
-            include_exceptions: duplicateExceptions === DuplicateOptions.withExceptions,
+            include_exceptions:
+              modalDuplicationConfirmationResult === DuplicateOptions.withExceptions,
           },
         });
         const createdRules = result?.attributes.results.created;

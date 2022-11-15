@@ -86,15 +86,17 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
-                const duplicateExceptions = await showBulkDuplicateExceptionsConfirmation();
-                if (!duplicateExceptions) {
+                const modalDuplicationConfirmationResult =
+                  await showBulkDuplicateExceptionsConfirmation();
+                if (modalDuplicationConfirmationResult === null) {
                   return;
                 }
                 const result = await executeBulkAction({
                   type: BulkActionType.duplicate,
                   ids: [rule.id],
                   duplicatePayload: {
-                    include_exceptions: duplicateExceptions === DuplicateOptions.withExceptions,
+                    include_exceptions:
+                      modalDuplicationConfirmationResult === DuplicateOptions.withExceptions,
                   },
                 });
 
