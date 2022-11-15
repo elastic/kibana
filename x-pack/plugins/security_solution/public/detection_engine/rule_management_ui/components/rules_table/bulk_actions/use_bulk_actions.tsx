@@ -14,7 +14,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
 import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import {
-  BulkAction,
+  BulkActionType,
   BulkActionEditType,
 } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
@@ -24,11 +24,9 @@ import { useStartTransaction } from '../../../../../common/lib/apm/use_start_tra
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import * as detectionI18n from '../../../../../detections/pages/detection_engine/translations';
-import {
-  downloadExportedRules,
-  useBulkExport,
-} from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
+import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
 import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
+import { useDownloadExportedRules } from '../../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import type { FilterOptions } from '../../../../rule_management/logic/types';
 import { convertRulesFilterToKQL } from '../../../../rule_management/logic/utils';
 import { getExportedRulesDetails } from '../helpers';
@@ -37,6 +35,7 @@ import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
 import type { BulkActionForConfirmation, DryRunResult } from './types';
 import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
+import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
 
@@ -68,10 +67,11 @@ export const useBulkActions = ({
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
+  const downloadExportedRules = useDownloadExportedRules();
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
-    actions: { setLoadingRules, clearRulesSelection },
+    actions: { clearRulesSelection },
   } = rulesTableContext;
 
   const getBulkItemsPopoverContent = useCallback(
@@ -104,10 +104,8 @@ export const useBulkActions = ({
           : disabledRulesNoML.map(({ id }) => id);
 
         await executeBulkAction({
-          visibleRuleIds: ruleIds,
-          action: BulkAction.enable,
-          setLoadingRules,
-          search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
+          type: BulkActionType.enable,
+          ...(isAllSelected ? { query: filterQuery } : { ids: ruleIds }),
         });
       };
 
@@ -118,10 +116,8 @@ export const useBulkActions = ({
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
 
         await executeBulkAction({
-          visibleRuleIds: enabledIds,
-          action: BulkAction.disable,
-          setLoadingRules,
-          search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
+          type: BulkActionType.disable,
+          ...(isAllSelected ? { query: filterQuery } : { ids: enabledIds }),
         });
       };
 
@@ -130,10 +126,8 @@ export const useBulkActions = ({
         closePopover();
 
         await executeBulkAction({
-          visibleRuleIds: selectedRuleIds,
-          action: BulkAction.duplicate,
-          setLoadingRules,
-          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
+          type: BulkActionType.duplicate,
+          ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
         clearRulesSelection();
       };
@@ -151,10 +145,8 @@ export const useBulkActions = ({
         startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
 
         await executeBulkAction({
-          visibleRuleIds: selectedRuleIds,
-          action: BulkAction.delete,
-          setLoadingRules,
-          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
+          type: BulkActionType.delete,
+          ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
       };
 
@@ -162,11 +154,9 @@ export const useBulkActions = ({
         closePopover();
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
 
-        const response = await bulkExport({
-          visibleRuleIds: selectedRuleIds,
-          setLoadingRules,
-          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
-        });
+        const response = await bulkExport(
+          isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }
+        );
 
         // if response null, likely network error happened and export rules haven't been received
         if (!response) {
@@ -179,13 +169,13 @@ export const useBulkActions = ({
         // they can either cancel action or proceed with export of succeeded rules
         const hasActionBeenConfirmed = await showBulkActionConfirmation(
           transformExportDetailsToDryRunResult(details),
-          BulkAction.export
+          BulkActionType.export
         );
         if (hasActionBeenConfirmed === false) {
           return;
         }
 
-        await downloadExportedRules({ response, toasts });
+        await downloadExportedRules(response);
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -195,17 +185,17 @@ export const useBulkActions = ({
         closePopover();
 
         const dryRunResult = await executeBulkActionsDryRun({
-          action: BulkAction.edit,
-          editAction: bulkEditActionType,
-          searchParams: isAllSelected
+          type: BulkActionType.edit,
+          ...(isAllSelected
             ? { query: convertRulesFilterToKQL(filterOptions) }
-            : { ids: selectedRuleIds },
+            : { ids: selectedRuleIds }),
+          editPayload: computeDryRunEditPayload(bulkEditActionType),
         });
 
         // User has cancelled edit action or there are no custom rules to proceed
         const hasActionBeenConfirmed = await showBulkActionConfirmation(
           dryRunResult,
-          BulkAction.edit
+          BulkActionType.edit
         );
         if (hasActionBeenConfirmed === false) {
           return;
@@ -256,16 +246,15 @@ export const useBulkActions = ({
         }, 5 * 1000);
 
         await executeBulkAction({
-          visibleRuleIds: selectedRuleIds,
-          action: BulkAction.edit,
-          setLoadingRules,
-          payload: { edit: [editPayload] },
-          onFinish: () => hideWarningToast(),
-          search: prepareSearchParams({
+          type: BulkActionType.edit,
+          ...prepareSearchParams({
             ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
             dryRunResult,
           }),
+          editPayload: [editPayload],
         });
+
+        hideWarningToast();
 
         isBulkEditFinished = true;
       };
@@ -462,7 +451,6 @@ export const useBulkActions = ({
       startTransaction,
       hasMlPermissions,
       executeBulkAction,
-      setLoadingRules,
       filterQuery,
       toasts,
       clearRulesSelection,
@@ -472,6 +460,7 @@ export const useBulkActions = ({
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
+      downloadExportedRules,
     ]
   );
 

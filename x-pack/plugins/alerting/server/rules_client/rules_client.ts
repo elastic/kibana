@@ -65,6 +65,7 @@ import {
   RuleTaskState,
   AlertSummary,
   RuleExecutionStatusValues,
+  RuleLastRunOutcomeValues,
   RuleNotifyWhenType,
   RuleTypeParams,
   ResolvedSanitizedRule,
@@ -83,6 +84,10 @@ import {
   convertRuleIdsToKueryNode,
   getRuleSnoozeEndTime,
   convertEsSortToEventLogSort,
+  getDefaultMonitoring,
+  updateMonitoring,
+  convertMonitoringFromRawAndVerify,
+  getNextRun,
 } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -113,7 +118,6 @@ import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
-import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
 import {
   getMappedParams,
   getModifiedField,
@@ -148,6 +152,12 @@ export type InvalidateAPIKeyResult =
 
 export interface RuleAggregation {
   status: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+  outcome: {
     buckets: Array<{
       key: string;
       doc_count: number;
@@ -309,17 +319,9 @@ export interface BulkDeleteOptionsIds {
 
 export type BulkDeleteOptions = BulkDeleteOptionsFilter | BulkDeleteOptionsIds;
 
-export interface BulkEditError {
+export interface BulkOperationError {
   message: string;
-  rule: {
-    id: string;
-    name: string;
-  };
-}
-
-export interface BulkDeleteError {
-  message: string;
-  status: number;
+  status?: number;
   rule: {
     id: string;
     name: string;
@@ -343,6 +345,7 @@ interface IndexType {
 
 export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
+  ruleLastRunOutcome: { [status: string]: number };
   ruleEnabledStatus?: { enabled: number; disabled: number };
   ruleMutedStatus?: { muted: number; unmuted: number };
   ruleSnoozedStatus?: { snoozed: number };
@@ -372,6 +375,8 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'executionStatus'
     | 'snoozeSchedule'
     | 'isSnoozedUntil'
+    | 'lastRun'
+    | 'nextRun'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -419,6 +424,7 @@ export interface GetGlobalExecutionKPIParams {
   dateStart: string;
   dateEnd?: string;
   filter?: string;
+  namespaces?: Array<string | undefined>;
 }
 
 export interface GetGlobalExecutionLogParams {
@@ -428,6 +434,7 @@ export interface GetGlobalExecutionLogParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+  namespaces?: Array<string | undefined>;
 }
 
 export interface GetActionErrorLogByIdParams {
@@ -438,6 +445,7 @@ export interface GetActionErrorLogByIdParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+  namespace?: string;
 }
 
 interface ScheduleTaskOptions {
@@ -457,6 +465,9 @@ const preconfiguredConnectorActionRefPrefix = 'preconfigured:';
 const MAX_RULES_NUMBER_FOR_BULK_OPERATION = 10000;
 const API_KEY_GENERATE_CONCURRENCY = 50;
 const RULE_TYPE_CHECKS_CONCURRENCY = 50;
+
+const actionErrorLogDefaultFilter =
+  'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
@@ -586,6 +597,7 @@ export class RulesClient {
     } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
 
     const createTime = Date.now();
+    const lastRunTimestamp = new Date();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
@@ -603,8 +615,8 @@ export class RulesClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
-      executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
-      monitoring: getDefaultRuleMonitoring(),
+      executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
+      monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
     };
 
     const mappedParams = getMappedParams(updatedParams);
@@ -951,6 +963,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
+    namespaces,
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -1001,7 +1014,8 @@ export class RulesClient {
             perPage,
             sort,
           }),
-        }
+        },
+        namespaces
       );
 
       return formatExecutionLogResult(aggResult);
@@ -1050,9 +1064,6 @@ export class RulesClient {
       })
     );
 
-    const defaultFilter =
-      'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
-
     // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
     const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
@@ -1069,10 +1080,86 @@ export class RulesClient {
           end: parsedDateEnd.toISOString(),
           page,
           per_page: perPage,
-          filter: filter ? `(${defaultFilter}) AND (${filter})` : defaultFilter,
+          filter: filter
+            ? `(${actionErrorLogDefaultFilter}) AND (${filter})`
+            : actionErrorLogDefaultFilter,
           sort: convertEsSortToEventLogSort(sort),
         },
         rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
+      return formatExecutionErrorsResult(errorResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getActionErrorLog(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getActionErrorLogWithAuth({
+    id,
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+    namespace,
+  }: GetActionErrorLogByIdParams): Promise<IExecutionErrorsResult> {
+    this.logger.debug(`getActionErrorLogWithAuth(): getting action error logs for rule ${id}`);
+
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'kibana.alert.rule.rule_type_id',
+            consumer: 'kibana.alert.rule.consumer',
+          },
+        }
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const errorResult = await eventLogClient.findEventsWithAuthFilter(
+        'alert',
+        [id],
+        authorizationTuple.filter as KueryNode,
+        namespace,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          page,
+          per_page: perPage,
+          filter: filter
+            ? `(${actionErrorLogDefaultFilter}) AND (${filter})`
+            : actionErrorLogDefaultFilter,
+          sort: convertEsSortToEventLogSort(sort),
+        }
       );
       return formatExecutionErrorsResult(errorResult);
     } catch (err) {
@@ -1087,6 +1174,7 @@ export class RulesClient {
     dateStart,
     dateEnd,
     filter,
+    namespaces,
   }: GetGlobalExecutionKPIParams) {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -1132,7 +1220,8 @@ export class RulesClient {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
           aggs: getExecutionKPIAggregation(filter),
-        }
+        },
+        namespaces
       );
 
       return formatExecutionKPIResult(aggResult);
@@ -1358,6 +1447,9 @@ export class RulesClient {
         status: {
           terms: { field: 'alert.attributes.executionStatus.status' },
         },
+        outcome: {
+          terms: { field: 'alert.attributes.lastRun.outcome' },
+        },
         enabled: {
           terms: { field: 'alert.attributes.enabled' },
         },
@@ -1388,6 +1480,7 @@ export class RulesClient {
       // Return a placeholder with all zeroes
       const placeholder: AggregateResult = {
         alertExecutionStatus: {},
+        ruleLastRunOutcome: {},
         ruleEnabledStatus: {
           enabled: 0,
           disabled: 0,
@@ -1412,8 +1505,18 @@ export class RulesClient {
       })
     );
 
+    const ruleLastRunOutcome = resp.aggregations.outcome.buckets.map(
+      ({ key, doc_count: docCount }) => ({
+        [key]: docCount,
+      })
+    );
+
     const ret: AggregateResult = {
       alertExecutionStatus: alertExecutionStatus.reduce(
+        (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
+        {}
+      ),
+      ruleLastRunOutcome: ruleLastRunOutcome.reduce(
         (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
         {}
       ),
@@ -1423,6 +1526,11 @@ export class RulesClient {
     for (const key of RuleExecutionStatusValues) {
       if (!ret.alertExecutionStatus.hasOwnProperty(key)) {
         ret.alertExecutionStatus[key] = 0;
+      }
+    }
+    for (const key of RuleLastRunOutcomeValues) {
+      if (!ret.ruleLastRunOutcome.hasOwnProperty(key)) {
+        ret.ruleLastRunOutcome[key] = 0;
       }
     }
 
@@ -1825,18 +1933,24 @@ export class RulesClient {
     );
 
     const taskIdsFailedToBeDeleted: string[] = [];
+    const taskIdsSuccessfullyDeleted: string[] = [];
     if (taskIdsToDelete.length > 0) {
       try {
         const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
         resultFromDeletingTasks?.statuses.forEach((status) => {
-          if (!status.success) {
+          if (status.success) {
+            taskIdsSuccessfullyDeleted.push(status.id);
+          } else {
             taskIdsFailedToBeDeleted.push(status.id);
           }
         });
         this.logger.debug(
-          `Successfully deleted schedules for underlying tasks: ${taskIdsToDelete
-            .filter((id) => taskIdsFailedToBeDeleted.includes(id))
-            .join(', ')}`
+          `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
+            ', '
+          )}`
+        );
+        this.logger.error(
+          `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(', ')}`
         );
       } catch (error) {
         this.logger.error(
@@ -1870,7 +1984,7 @@ export class RulesClient {
     const rules: SavedObjectsBulkDeleteObject[] = [];
     const apiKeysToInvalidate: string[] = [];
     const taskIdsToDelete: string[] = [];
-    const errors: BulkDeleteError[] = [];
+    const errors: BulkOperationError[] = [];
     const apiKeyToRuleIdMapping: Record<string, string> = {};
     const taskIdToRuleIdMapping: Record<string, string> = {};
     const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -1926,7 +2040,7 @@ export class RulesClient {
     options: BulkEditOptions<Params>
   ): Promise<{
     rules: Array<SanitizedRule<Params>>;
-    errors: BulkEditError[];
+    errors: BulkOperationError[];
     total: number;
   }> {
     const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
@@ -2093,7 +2207,7 @@ export class RulesClient {
     apiKeysToInvalidate: string[];
     rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
     resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
-    errors: BulkEditError[];
+    errors: BulkOperationError[];
   }> {
     const rulesFinder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
@@ -2106,7 +2220,7 @@ export class RulesClient {
       );
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-    const errors: BulkEditError[] = [];
+    const errors: BulkOperationError[] = [];
     const apiKeysToInvalidate: string[] = [];
     const apiKeysMap = new Map<string, { oldApiKey?: string; newApiKey?: string }>();
     const username = await this.getUserName();
@@ -2525,17 +2639,28 @@ export class RulesClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
+      const now = new Date();
+
+      const schedule = attributes.schedule as IntervalSchedule;
 
       const updateAttributes = this.updateMeta({
         ...attributes,
         ...(!existingApiKey && (await this.createNewAPIKeySet({ attributes, username }))),
+        ...(attributes.monitoring && {
+          monitoring: updateMonitoring({
+            monitoring: attributes.monitoring,
+            timestamp: now.toISOString(),
+            duration: 0,
+          }),
+        }),
+        nextRun: getNextRun({ interval: schedule.interval }),
         enabled: true,
         updatedBy: username,
-        updatedAt: new Date().toISOString(),
+        updatedAt: now.toISOString(),
         executionStatus: {
           status: 'pending',
           lastDuration: 0,
-          lastExecutionDate: new Date().toISOString(),
+          lastExecutionDate: now.toISOString(),
           error: null,
           warning: null,
         },
@@ -2712,6 +2837,7 @@ export class RulesClient {
           scheduledTaskId: attributes.scheduledTaskId === id ? attributes.scheduledTaskId : null,
           updatedBy: await this.getUserName(),
           updatedAt: new Date().toISOString(),
+          nextRun: null,
         }),
         { version }
       );
@@ -3361,6 +3487,8 @@ export class RulesClient {
       scheduledTaskId,
       params,
       executionStatus,
+      monitoring,
+      nextRun,
       schedule,
       actions,
       snoozeSchedule,
@@ -3387,6 +3515,7 @@ export class RulesClient {
           snoozeSchedule,
         })
       : null;
+    const includeMonitoring = monitoring && !excludeFromPublicApi;
     const rule = {
       id,
       notifyWhen,
@@ -3412,6 +3541,10 @@ export class RulesClient {
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
+      ...(includeMonitoring
+        ? { monitoring: convertMonitoringFromRawAndVerify(this.logger, id, monitoring) }
+        : {}),
+      ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
     };
 
     return includeLegacyId

@@ -26,12 +26,11 @@ export interface ApmIndicesConfig {
   apmAgentConfigurationIndex: string;
   apmCustomLinkIndex: string;
 }
-export type AlertStatusFilterButton =
-  | typeof ALERT_STATUS_ACTIVE
-  | typeof ALERT_STATUS_RECOVERED
-  | '';
+
+export type AlertStatus = typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED | '';
+
 export interface AlertStatusFilter {
-  status: AlertStatusFilterButton;
+  status: AlertStatus;
   query: string;
   label: string;
 }

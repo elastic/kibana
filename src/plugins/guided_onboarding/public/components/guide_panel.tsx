@@ -31,9 +31,10 @@ import { i18n } from '@kbn/i18n';
 import { ApplicationStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
-import type { GuideConfig, StepConfig } from '../types';
+import { GuideId } from '@kbn/guided-onboarding';
+import type { GuideConfig, GuidedOnboardingApi, StepConfig } from '../types';
 
-import type { ApiService } from '../services/api';
+import type { PluginState } from '../../common/types';
 import { getGuideConfig } from '../services/helpers';
 
 import { GuideStep } from './guide_panel_step';
@@ -42,7 +43,7 @@ import { getGuidePanelStyles } from './guide_panel.styles';
 import { GuideButton } from './guide_button';
 
 interface GuidePanelProps {
-  api: ApiService;
+  api: GuidedOnboardingApi;
   application: ApplicationStart;
 }
 
@@ -58,11 +59,25 @@ const getProgress = (state?: GuideState): number => {
   return 0;
 };
 
+// Temporarily provide a different guide ID for telemetry purposes
+// Should not be necessary once https://github.com/elastic/kibana/issues/144452 is addressed
+const getTelemetryGuideId = (guideId?: GuideId) => {
+  switch (guideId) {
+    case 'security':
+      return 'siem';
+    case 'observability':
+      return 'kubernetes';
+    case 'search':
+    default:
+      return guideId;
+  }
+};
+
 export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const { euiTheme } = useEuiTheme();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isQuitGuideModalOpen, setIsQuitGuideModalOpen] = useState(false);
-  const [guideState, setGuideState] = useState<GuideState | undefined>(undefined);
+  const [pluginState, setPluginState] = useState<PluginState | undefined>(undefined);
 
   const styles = getGuidePanelStyles(euiTheme);
 
@@ -71,15 +86,16 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   };
 
   const handleStepButtonClick = async (step: GuideStepStatus, stepConfig: StepConfig) => {
-    if (guideState) {
+    if (pluginState) {
       const { id, status } = step;
+      const guideId: GuideId = pluginState!.activeGuide!.guideId!;
 
       if (status === 'ready_to_complete') {
-        return await api.completeGuideStep(guideState?.guideId, id);
+        return await api.completeGuideStep(guideId, id);
       }
 
       if (status === 'active' || status === 'in_progress') {
-        await api.startGuideStep(guideState!.guideId, id);
+        await api.startGuideStep(guideId, id);
 
         if (stepConfig.location) {
           await application.navigateToApp(stepConfig.location.appID, {
@@ -87,7 +103,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           });
 
           if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
-            await api.completeGuideStep(guideState.guideId, id);
+            await api.completeGuideStep(guideId, id);
           }
         }
       }
@@ -102,7 +118,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const completeGuide = async (
     completedGuideRedirectLocation: GuideConfig['completedGuideRedirectLocation']
   ) => {
-    await api.completeGuide(guideState!.guideId);
+    await api.completeGuide(pluginState!.activeGuide!.guideId!);
 
     if (completedGuideRedirectLocation) {
       const { appID, path } = completedGuideRedirectLocation;
@@ -122,8 +138,8 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   };
 
   useEffect(() => {
-    const subscription = api.fetchActiveGuideState$().subscribe((newGuideState) => {
-      setGuideState(newGuideState);
+    const subscription = api.fetchPluginState$().subscribe((newPluginState) => {
+      setPluginState(newPluginState);
     });
     return () => subscription.unsubscribe();
   }, [api]);
@@ -135,24 +151,22 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     return () => subscription.unsubscribe();
   }, [api]);
 
-  const guideConfig = getGuideConfig(guideState?.guideId);
+  const guideConfig = getGuideConfig(pluginState?.activeGuide?.guideId)!;
 
   // TODO handle loading, error state
   // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
-  if (!guideConfig) {
-    // TODO button show/hide logic https://github.com/elastic/kibana/issues/141129
-    return null;
-  }
 
-  const stepsCompleted = getProgress(guideState);
-  const isGuideReadyToComplete = guideState?.status === 'ready_to_complete';
+  const stepsCompleted = getProgress(pluginState?.activeGuide);
+  const isGuideReadyToComplete = pluginState?.activeGuide?.status === 'ready_to_complete';
+  const telemetryGuideId = getTelemetryGuideId(pluginState?.activeGuide?.guideId);
 
   return (
     <>
       <GuideButton
-        guideState={guideState!}
+        pluginState={pluginState}
         toggleGuidePanel={toggleGuide}
         isGuidePanelOpen={isGuideOpen}
+        navigateToLandingPage={navigateToLandingPage}
       />
 
       {isGuideOpen && (
@@ -254,7 +268,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
 
               {guideConfig?.steps.map((step, index) => {
                 const accordionId = htmlIdGenerator(`accordion${index}`)();
-                const stepState = guideState?.steps[index];
+                const stepState = pluginState?.activeGuide?.steps[index];
 
                 if (stepState) {
                   return (
@@ -265,6 +279,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                       stepNumber={index + 1}
                       handleButtonClick={() => handleStepButtonClick(stepState, step)}
                       key={accordionId}
+                      telemetryGuideId={telemetryGuideId!}
                     />
                   );
                 }
@@ -276,7 +291,8 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                     <EuiButton
                       onClick={() => completeGuide(guideConfig.completedGuideRedirectLocation)}
                       fill
-                      data-test-subj="useElasticButton"
+                      // data-test-subj used for FS tracking and testing
+                      data-test-subj={`onboarding--completeGuideButton--${telemetryGuideId}`}
                     >
                       {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
                         defaultMessage: 'Continue using Elastic',
@@ -289,7 +305,13 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           </EuiFlyoutBody>
 
           <EuiFlyoutFooter css={styles.flyoutOverrides.flyoutFooter}>
-            <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="xs">
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="center"
+              gutterSize="xs"
+              responsive={false}
+              wrap
+            >
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="questionInCircle"
@@ -348,7 +370,11 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
       )}
 
       {isQuitGuideModalOpen && (
-        <QuitGuideModal closeModal={closeQuitGuideModal} currentGuide={guideState!} />
+        <QuitGuideModal
+          closeModal={closeQuitGuideModal}
+          currentGuide={pluginState!.activeGuide!}
+          telemetryGuideId={telemetryGuideId!}
+        />
       )}
     </>
   );

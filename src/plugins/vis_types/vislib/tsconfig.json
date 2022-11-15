@@ -8,7 +8,10 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "public/fixtures/dispatch_heatmap_d3.json",
+    "public/fixtures/dispatch_heatmap_config.json",
+    "public/fixtures/dispatch_heatmap_data_point.json",
   ],
   "kbn_references": [
     { "path": "../../../core/tsconfig.json" },

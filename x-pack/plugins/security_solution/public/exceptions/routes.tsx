@@ -11,7 +11,8 @@ import { Route } from '@kbn/kibana-react-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
 import { EXCEPTIONS_PATH, SecurityPageName } from '../../common/constants';
-import { ExceptionListsTable } from '../detection_engine/rule_exceptions_ui/pages/exceptions/exceptions_table';
+import { ExceptionListsDetailView } from './pages/shared_lists/detail_view';
+import { SharedLists } from './pages/shared_lists';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 import { useReadonlyHeader } from '../use_readonly_header';
@@ -20,8 +21,17 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 const ExceptionsRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.exceptions}>
-      <ExceptionListsTable />
+      <SharedLists />
       <SpyRoute pageName={SecurityPageName.exceptions} />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
+);
+
+const ExceptionsListDetailRoute = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.sharedExceptionListDetails}>
+      <ExceptionListsDetailView />
+      <SpyRoute pageName={SecurityPageName.sharedExceptionListDetails} />
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
@@ -32,6 +42,7 @@ const ExceptionsContainerComponent: React.FC = () => {
   return (
     <Switch>
       <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />
+      <Route path={'/exceptions/shared/:exceptionListId'} component={ExceptionsListDetailRoute} />
       <Route component={NotFoundPage} />
     </Switch>
   );

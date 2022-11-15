@@ -9,6 +9,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "server/timelion.json",
     "*.ts"
   ],
   "kbn_references": [

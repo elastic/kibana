@@ -46,7 +46,7 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
       action: new EndpointActionGenerator('seed').generateActionDetails<
         ResponseActionGetFileOutputContent,
         ResponseActionGetFileParameters
-      >({ command: 'get-file', completedAt: new Date().toISOString() }),
+      >({ command: 'get-file' }),
       'data-test-subj': 'test',
     };
 
@@ -56,18 +56,27 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     };
   });
 
-  it('should show download button if file is available', () => {
+  it('should show download button if file is available', async () => {
     render();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+    });
 
     expect(renderResult.getByTestId('test-downloadButton')).not.toBeNull();
     expect(renderResult.getByTestId('test-passcodeMessage')).toHaveTextContent(
       '(ZIP file passcode: elastic)'
     );
+    expect(renderResult.getByTestId('test-fileDeleteMessage')).toHaveTextContent(
+      'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+    );
   });
 
-  it('should display custom button label', () => {
+  it('should display custom button label', async () => {
     renderProps.buttonTitle = 'hello';
     render();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+    });
 
     expect(renderResult.getByTestId('test-downloadButton')).toHaveTextContent('hello');
   });

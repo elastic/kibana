@@ -14,6 +14,42 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-node-server-internal",
+        "id": "def-server.InternalNodeServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "InternalNodeServiceStart",
+        "description": [],
+        "path": "packages/core/node/core-node-server-internal/src/node_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-node-server-internal",
+            "id": "def-server.InternalNodeServiceStart.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [
+              "\nThe Kibana process can take on specialised roles via the `node.roles` config.\n\nThe roles can be used by plugins to adjust their behavior based\non the way the Kibana process has been configured."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-node-server",
+                "scope": "server",
+                "docId": "kibKbnCoreNodeServerPluginApi",
+                "section": "def-server.NodeRoles",
+                "text": "NodeRoles"
+              }
+            ],
+            "path": "packages/core/node/core-node-server-internal/src/node_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-node-server-internal",
         "id": "def-server.PrebootDeps",
         "type": "Interface",
         "tags": [],

@@ -101,13 +101,11 @@ export function ViewAlertRoute() {
         history.push(DISCOVER_MAIN_ROUTE);
         return;
       }
-
       const fetchedSearchSource = await fetchSearchSource(fetchedAlert);
       if (!fetchedSearchSource) {
         history.push(DISCOVER_MAIN_ROUTE);
         return;
       }
-
       const dataView = fetchedSearchSource.getField('index');
       const timeFieldName = dataView?.timeFieldName;
       // data view fetch error
@@ -139,7 +137,7 @@ export function ViewAlertRoute() {
         : buildTimeRangeFilter(dataView, fetchedAlert, timeFieldName);
       const state: DiscoverAppLocatorParams = {
         query: fetchedSearchSource.getField('query') || data.query.queryString.getDefaultQuery(),
-        dataViewId: dataView.id,
+        dataViewSpec: dataView.toSpec(false),
         timeRange,
       };
 

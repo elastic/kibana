@@ -12,6 +12,10 @@ export const testGuideConfig: GuideConfig = {
   title: 'Test guide for development',
   description: `This guide is used to test the guided onboarding UI while in development and to run automated tests for the API and UI components.`,
   guideName: 'Testing example',
+  completedGuideRedirectLocation: {
+    appID: 'guidedOnboardingExample',
+    path: '/',
+  },
   docs: {
     text: 'Testing example docs',
     url: 'example.com',
@@ -51,9 +55,8 @@ export const testGuideConfig: GuideConfig = {
     {
       id: 'step3',
       title: 'Step 3 (manual completion after click)',
-      descriptionList: [
+      description:
         'This step is completed by clicking a button on the page and then clicking the popover on the guide button in the header and marking the step done',
-      ],
       manualCompletion: {
         title: 'Manual completion step title',
         description:

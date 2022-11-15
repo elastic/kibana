@@ -13,7 +13,7 @@ import {
   EuiWindowEvent,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
@@ -64,6 +64,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
 import { useLicense } from '../../../common/hooks/use_license';
+import { ResponderActionButton } from '../../../detections/components/endpoint_responder/responder_action_button';
 
 const ES_HOST_FIELD = 'host.hostname';
 const HostOverviewManage = manageQuery(HostOverview);
@@ -187,6 +188,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   />
                 }
                 title={detailName}
+                rightSideItems={[
+                  hostOverview.endpoint?.fleetAgentId && (
+                    <ResponderActionButton endpointId={hostOverview.endpoint?.fleetAgentId} />
+                  ),
+                ]}
               />
 
               <AnomalyTableProvider
