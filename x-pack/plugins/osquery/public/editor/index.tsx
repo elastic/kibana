@@ -38,13 +38,14 @@ const ResizeWrapper = styled.div`
   max-height: 1000px;
 `;
 
+const MIN_HEIGHT = 100;
 const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   defaultValue,
   onChange,
   commands,
 }) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
-  const [height, setHeight] = useState(100);
+  const [height, setHeight] = useState(MIN_HEIGHT);
 
   useDebounce(() => onChange(editorValue), 500, [editorValue]);
 
@@ -53,7 +54,9 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   const resizeEditor = useCallback((editorInstance) => {
     setTimeout(() => {
       const { maxHeight } = editorInstance.renderer.layerConfig;
-      setHeight(maxHeight);
+      if (maxHeight > MIN_HEIGHT) {
+        setHeight(maxHeight);
+      }
     }, 0);
 
     document.addEventListener('mouseup', () => editorInstance.resize(), { once: true });
