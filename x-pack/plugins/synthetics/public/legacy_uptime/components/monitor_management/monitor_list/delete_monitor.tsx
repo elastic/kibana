@@ -22,13 +22,13 @@ import { deleteMonitor } from '../../../state/api';
 import { kibanaService } from '../../../state/kibana_service';
 
 export const DeleteMonitor = ({
-  id,
+  configId,
   name,
   onUpdate,
   isDisabled,
   isProjectMonitor,
 }: {
-  id: string;
+  configId: string;
   name: string;
   isDisabled?: boolean;
   isProjectMonitor?: boolean;
@@ -45,9 +45,9 @@ export const DeleteMonitor = ({
 
   const { status } = useFetcher(() => {
     if (isDeleting) {
-      return deleteMonitor({ id });
+      return deleteMonitor({ id: configId });
     }
-  }, [id, isDeleting]);
+  }, [configId, isDeleting]);
 
   const handleDelete = () => {
     showDeleteModal();

@@ -12,7 +12,7 @@ import { URL } from 'url';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { Root } from '../../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import {
   declareGetRoute,
