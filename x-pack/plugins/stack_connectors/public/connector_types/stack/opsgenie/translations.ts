@@ -119,22 +119,30 @@ export const OPSGENIE_DOCUMENTATION = i18n.translate(
   }
 );
 
-export const OPSGENIE_ALIAS_HELP = i18n.translate('xpack.stackConnectors.components.opsgenie.fieldAliasHelpText', {
-  defaultMessage:
-    'The unique alert identifier used for de-deduplication in OpsGenie.',
-});
+export const OPSGENIE_ALIAS_HELP = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.fieldAliasHelpText',
+  {
+    defaultMessage: 'The unique alert identifier used for de-deduplication in OpsGenie.',
+  }
+);
 
-export const OPSGENIE_ENTITY_HELP = i18n.translate('xpack.stackConnectors.components.opsgenie.fieldEntityHelpText', {
-defaultMessage:
-  'The domain of the alert. For example, the application name.',
-});
+export const OPSGENIE_ENTITY_HELP = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.fieldEntityHelpText',
+  {
+    defaultMessage: 'The domain of the alert. For example, the application name.',
+  }
+);
 
-export const OPSGENIE_SOURCE_HELP = i18n.translate('xpack.stackConnectors.components.opsgenie.fieldSourceHelpText', {
-defaultMessage:
-  'The display name for the source of the alert.',
-});
+export const OPSGENIE_SOURCE_HELP = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.fieldSourceHelpText',
+  {
+    defaultMessage: 'The display name for the source of the alert.',
+  }
+);
 
-export const OPSGENIE_USER_HELP = i18n.translate('xpack.stackConnectors.components.opsgenie.fieldUserHelpText', {
-defaultMessage:
-  'The display name for the owner.',
-});
+export const OPSGENIE_USER_HELP = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.fieldUserHelpText',
+  {
+    defaultMessage: 'The display name for the owner.',
+  }
+);
