@@ -99,7 +99,9 @@ export const getAddToTimelineCellAction = ({
               providers: dataProvider,
             })
           );
-          if (closeCellPopover) closeCellPopover();
+          if (closeCellPopover) {
+            closeCellPopover();
+          }
         }, [dataProvider, dispatch]);
 
         const addToTimelineProps = useMemo(() => {
