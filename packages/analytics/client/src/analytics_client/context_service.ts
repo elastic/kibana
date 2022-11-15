@@ -31,8 +31,8 @@ export class ContextService {
     name,
     context$,
     schema,
-                                            // @ts-expect-error
-  }: ContextProviderOpts<Context>) {
+  }: // @ts-expect-error
+  ContextProviderOpts<Context>) {
     if (this.contextProvidersSubscriptions.has(name)) {
       throw new Error(`Context provider with name '${name}' already registered`);
     }
