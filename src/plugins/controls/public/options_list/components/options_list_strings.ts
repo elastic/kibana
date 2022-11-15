@@ -129,34 +129,38 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.excludeOptionsLegend', {
         defaultMessage: 'Include or exclude selections',
       }),
+    getSortPopoverTitle: () =>
+      i18n.translate('controls.optionsList.popover.sortTitle', {
+        defaultMessage: 'Sort',
+      }),
+    getSortPopoverDescription: () =>
+      i18n.translate('controls.optionsList.popover.sortDescription', {
+        defaultMessage: 'Select a sorting strategy',
+      }),
     sortBy: {
-      _count: {
-        desc: {
-          getSortByLabel: () =>
-            i18n.translate('controls.optionsList.popover.sortBy.desc_docCount', {
-              defaultMessage: 'Document count (descending)',
-            }),
-        },
-        asc: {
-          getSortByLabel: () =>
-            i18n.translate('controls.optionsList.popover.sortBy.asc_docCount', {
-              defaultMessage: 'Document count (ascending)',
-            }),
-        },
+      docDescending: {
+        getSortByLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortBy.desc_docCount', {
+            defaultMessage: 'Document count (descending)',
+          }),
       },
-      _key: {
-        desc: {
-          getSortByLabel: () =>
-            i18n.translate('controls.optionsList.popover.sortBy.desc_key', {
-              defaultMessage: 'Alphabetical (descending)',
-            }),
-        },
-        asc: {
-          getSortByLabel: () =>
-            i18n.translate('controls.optionsList.popover.sortBy.asc_key', {
-              defaultMessage: 'Alphabetical (ascending)',
-            }),
-        },
+      docAscending: {
+        getSortByLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortBy.asc_docCount', {
+            defaultMessage: 'Document count (ascending)',
+          }),
+      },
+      keyDescending: {
+        getSortByLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortBy.desc_key', {
+            defaultMessage: 'Alphabetical (descending)',
+          }),
+      },
+      keyAscending: {
+        getSortByLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortBy.asc_key', {
+            defaultMessage: 'Alphabetical (ascending)',
+          }),
       },
     },
   },

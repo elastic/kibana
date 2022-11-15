@@ -8,24 +8,20 @@
 
 import { FieldSpec, DataView, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
-import { Direction } from '@elastic/eui';
 
+import { SortingType } from './suggestions_sorting';
 import { DataControlInput } from '../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
-export interface SuggestionsSorting {
-  by: '_count' | '_key';
-  direction: Direction;
-}
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
   selectedOptions?: string[];
-  sort?: SuggestionsSorting;
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  sort?: SortingType;
   exclude?: boolean;
 }
 
@@ -70,7 +66,7 @@ export interface OptionsListRequestBody {
   parentFieldName?: string;
   textFieldName?: string;
   searchString?: string;
-  sort?: SuggestionsSorting;
   fieldSpec?: FieldSpec;
+  sort?: SortingType;
   fieldName: string;
 }

@@ -10,6 +10,11 @@ import { get, isEmpty } from 'lodash';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
+import {
+  DEFAULT_SORT,
+  OptionsListSortingOptions,
+  SortingType,
+} from '../../common/options_list/suggestions_sorting';
 import { OptionsListRequestBody } from '../../common/options_list/types';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 export interface OptionsListAggregationBuilder {
@@ -21,6 +26,10 @@ interface EsBucket {
   key: string;
   doc_count: number;
 }
+
+const getSortType = (sortKey?: SortingType) => {
+  return OptionsListSortingOptions[sortKey ?? DEFAULT_SORT];
+};
 
 /**
  * Validation aggregations
@@ -102,9 +111,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         include: `${getEscapedQuery(searchString)}.*`,
         execution_hint: 'map',
         shard_size: 10,
-        order: {
-          [sort?.by ?? '_count']: sort?.direction ?? 'desc',
-        },
+        order: getSortType(sort),
       },
     }),
     parse: (rawEsResult) =>
@@ -134,9 +141,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
             terms: {
               field: fieldName,
               shard_size: 10,
-              order: {
-                [sort?.by ?? '_count']: sort?.direction ?? 'desc',
-              },
+              order: getSortType(sort),
             },
           },
         },
@@ -157,9 +162,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         field: fieldName,
         execution_hint: 'map',
         shard_size: 10,
-        order: {
-          [sort?.by ?? '_count']: sort?.direction ?? 'desc',
-        },
+        order: getSortType(sort),
       },
     }),
     parse: (rawEsResult) =>
@@ -205,9 +208,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
               field: fieldName,
               execution_hint: 'map',
               shard_size: 10,
-              order: {
-                [sort?.by ?? '_count']: sort?.direction ?? 'desc',
-              },
+              order: getSortType(sort),
             },
           },
         },
@@ -252,9 +253,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
               include: `${getEscapedQuery(searchString)}.*`,
               execution_hint: 'map',
               shard_size: 10,
-              order: {
-                [sort?.by ?? '_count']: sort?.direction ?? 'desc',
-              },
+              order: getSortType(sort),
             },
           },
         },

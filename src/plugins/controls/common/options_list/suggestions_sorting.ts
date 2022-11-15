@@ -6,11 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { SuggestionsSorting } from './types';
+import { Direction } from '@elastic/eui';
 
-export const OptionsListSortingOptions: { [key: string]: SuggestionsSorting } = {
-  docDescending: { by: '_count', direction: 'desc' },
-  docAscending: { by: '_count', direction: 'asc' },
-  keyDescending: { by: '_key', direction: 'desc' },
-  keyAscending: { by: '_key', direction: 'asc' },
+export const DEFAULT_SORT: SortingType = 'docDescending';
+
+export type SortingType = 'docDescending' | 'docAscending' | 'keyDescending' | 'keyAscending';
+
+interface DocumentCountSort {
+  _count: Direction;
+}
+interface AlphabeticalSort {
+  _key: Direction;
+}
+
+export const OptionsListSortingOptions: {
+  [key in SortingType]: DocumentCountSort | AlphabeticalSort;
+} = {
+  docDescending: { _count: 'desc' },
+  docAscending: { _count: 'asc' },
+  keyDescending: { _key: 'desc' },
+  keyAscending: { _key: 'asc' },
 };
