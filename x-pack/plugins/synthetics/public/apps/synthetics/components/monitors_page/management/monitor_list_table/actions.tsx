@@ -8,7 +8,6 @@
 import React, { useContext, useState } from 'react';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { DeleteMonitor } from './delete_monitor';
 import { SyntheticsSettingsContext } from '../../../../contexts/synthetics_settings_context';
 
@@ -138,12 +137,3 @@ export const Actions = ({
     </>
   );
 };
-
-export const PROJECT_MONITOR_DISCLAIMER = i18n.translate(
-  'xpack.synthetics.monitorManagement.monitorList.disclaimer.label',
-  {
-    defaultMessage:
-      'This monitor was added from an external project. Deleting this monitor will not remove it from the project source. ' +
-      'Afterward, you will need to remove it from the project source as well. Otherwise it will be re-added when you use push command from the project source.',
-  }
-);

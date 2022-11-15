@@ -6,12 +6,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 import { fetchDeleteMonitor } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
-import { PROJECT_MONITOR_DISCLAIMER } from './actions';
 import * as labels from './labels';
 
 export const DeleteMonitor = ({
@@ -74,7 +76,10 @@ export const DeleteMonitor = ({
 
   return (
     <EuiConfirmModal
-      title={`${labels.DELETE_MONITOR_LABEL} ${name}`}
+      title={i18n.translate('xpack.synthetics.monitorManagement.deleteMonitorNameLabel', {
+        defaultMessage: 'Delete "{name}" monitor?',
+        values: { name },
+      })}
       onCancel={() => setIsDeleteModalVisible(false)}
       onConfirm={handleConfirmDelete}
       cancelButtonText={labels.NO_LABEL}
@@ -85,13 +90,43 @@ export const DeleteMonitor = ({
     >
       {isProjectMonitor && (
         <>
-          <EuiCallOut color="warning" iconType="help">
-            <p>{PROJECT_MONITOR_DISCLAIMER}</p>
+          <EuiCallOut color="warning" title={PROJECT_MONITOR_TITLE}>
+            <p>
+              <ProjectMonitorDisclaimer />
+            </p>
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>
       )}
-      <p>{labels.DELETE_DESCRIPTION_LABEL}</p>
     </EuiConfirmModal>
+  );
+};
+
+export const PROJECT_MONITOR_TITLE = i18n.translate(
+  'xpack.synthetics.monitorManagement.monitorList.disclaimer.label',
+  {
+    defaultMessage: "Deleting this monitor will not remove it from Project's source",
+  }
+);
+
+export const ProjectMonitorDisclaimer = () => {
+  return (
+    <FormattedMessage
+      id="xpack.synthetics.monitorManagement.monitorList.disclaimer.label"
+      defaultMessage={`Make sure to remove this monitor from Project's source, otherwise it will be recreated the next time
+    you use the push command. For more information, {docsLink} for deleting project monitors.`}
+      values={{
+        docsLink: (
+          <EuiLink
+            href="https://elastic.co/guide/en/observability/current/synthetics-manage-monitors.html#manage-monitors-delete"
+            target="_blank"
+          >
+            {i18n.translate('xpack.synthetics.monitorManagement.projectDelete.docsLink', {
+              defaultMessage: 'read our docs',
+            })}
+          </EuiLink>
+        ),
+      }}
+    />
   );
 };

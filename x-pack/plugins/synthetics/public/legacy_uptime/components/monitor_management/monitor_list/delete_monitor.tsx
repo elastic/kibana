@@ -17,7 +17,10 @@ import {
 
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { PROJECT_MONITOR_DISCLAIMER } from '../../../../apps/synthetics/components/monitors_page/management/monitor_list_table/actions';
+import {
+  ProjectMonitorDisclaimer,
+  PROJECT_MONITOR_TITLE,
+} from '../../../../apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor';
 import { deleteMonitor } from '../../../state/api';
 import { kibanaService } from '../../../state/kibana_service';
 
@@ -81,7 +84,10 @@ export const DeleteMonitor = ({
 
   const destroyModal = (
     <EuiConfirmModal
-      title={`${DELETE_MONITOR_LABEL} ${name}`}
+      title={i18n.translate('xpack.synthetics.monitorManagement.deleteMonitorNameLabel', {
+        defaultMessage: 'Delete "{name}" monitor?',
+        values: { name },
+      })}
       onCancel={() => setIsDeleteModalVisible(false)}
       onConfirm={onConfirmDelete}
       cancelButtonText={NO_LABEL}
@@ -91,13 +97,14 @@ export const DeleteMonitor = ({
     >
       {isProjectMonitor && (
         <>
-          <EuiCallOut color="warning" iconType="help">
-            <p>{PROJECT_MONITOR_DISCLAIMER}</p>
+          <EuiCallOut color="warning" iconType="help" title={PROJECT_MONITOR_TITLE}>
+            <p>
+              <ProjectMonitorDisclaimer />
+            </p>
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>
       )}
-      <p>{DELETE_DESCRIPTION_LABEL}</p>
     </EuiConfirmModal>
   );
 
@@ -118,14 +125,6 @@ export const DeleteMonitor = ({
     </>
   );
 };
-
-const DELETE_DESCRIPTION_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.confirmDescriptionLabel',
-  {
-    defaultMessage:
-      'This action will delete the monitor but keep any data collected. This action cannot be undone.',
-  }
-);
 
 const YES_LABEL = i18n.translate('xpack.synthetics.monitorManagement.yesLabel', {
   defaultMessage: 'Delete',
