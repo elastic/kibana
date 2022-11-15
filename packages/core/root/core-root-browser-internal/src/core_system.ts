@@ -7,11 +7,13 @@
  */
 
 import { filter, firstValueFrom } from 'rxjs';
+import type { LogLevelId } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
   type InjectedMetadataParams,
 } from '@kbn/core-injected-metadata-browser-internal';
+import { BrowserLoggingSystem } from '@kbn/core-logging-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -78,6 +80,7 @@ interface ExtendedNavigator {
  * @internal
  */
 export class CoreSystem {
+  private readonly loggingSystem: BrowserLoggingSystem;
   private readonly analytics: AnalyticsService;
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
@@ -106,20 +109,24 @@ export class CoreSystem {
 
     this.rootDomElement = rootDomElement;
 
-    this.i18n = new I18nService();
+    const logLevel: LogLevelId = injectedMetadata.env.mode.dev ? 'all' : 'warn';
+    this.loggingSystem = new BrowserLoggingSystem({ logLevel });
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
     });
-    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
+    this.coreContext = {
+      coreId: Symbol('core'),
+      env: injectedMetadata.env,
+      logger: this.loggingSystem.asLoggerFactory(),
+    };
 
+    this.i18n = new I18nService();
     this.analytics = new AnalyticsService(this.coreContext);
-
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
-
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
@@ -136,7 +143,6 @@ export class CoreSystem {
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
     this.executionContext = new ExecutionContextService();
-
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreAppsService(this.coreContext);
 

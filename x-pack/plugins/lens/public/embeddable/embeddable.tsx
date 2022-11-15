@@ -19,6 +19,7 @@ import {
   TimeRange,
   isOfQueryType,
 } from '@kbn/es-query';
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
@@ -53,7 +54,6 @@ import {
   SelfStyledEmbeddable,
   FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -80,6 +80,7 @@ import {
   DatasourceMap,
   Datasource,
   IndexPatternMap,
+  OperationDescriptor,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -87,7 +88,12 @@ import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
-import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
+import {
+  getActiveDatasourceIdFromDoc,
+  getIndexPatternsObjects,
+  getSearchWarningMessages,
+  inferTimeField,
+} from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import { convertDataViewIntoLensIndexPattern } from '../data_views_service/loader';
 
@@ -100,6 +106,28 @@ export interface LensUnwrapMetaInfo {
 export interface LensUnwrapResult {
   attributes: LensSavedObjectAttributes;
   metaInfo?: LensUnwrapMetaInfo;
+}
+
+interface ChartInfo {
+  layers: ChartLayerDescriptor[];
+  visualizationType: string;
+  filters: Document['state']['filters'];
+  query: Document['state']['query'];
+}
+
+export interface ChartLayerDescriptor {
+  dataView?: DataView;
+  layerId: string;
+  layerType: string;
+  chartType?: string;
+  icon?: IconType;
+  label?: string;
+  dimensions: Array<{
+    name: string;
+    id: string;
+    role: 'split' | 'metric';
+    operation: OperationDescriptor;
+  }>;
 }
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
@@ -489,6 +517,7 @@ export class Embeddable
     this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
 
     await this.initializeOutput();
+
     this.isInitialized = true;
   }
 
@@ -533,21 +562,30 @@ export class Embeddable
 
   private handleWarnings(adapters?: Partial<DefaultInspectorAdapters>) {
     const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (!activeDatasourceId || !adapters?.requests) return;
+
+    if (!activeDatasourceId || !adapters?.requests) {
+      return;
+    }
+
     const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const warnings: React.ReactNode[] = [];
-    this.deps.data.search.showWarnings(adapters.requests, (warning) => {
-      const warningMessage = activeDatasource.getSearchWarningMessages?.(
-        docDatasourceState,
-        warning
-      );
 
-      warnings.push(...(warningMessage || []));
-      if (warningMessage && warningMessage.length) return true;
-    });
-    if (warnings && this.warningDomNode) {
-      render(<Warnings warnings={warnings} />, this.warningDomNode);
+    const requestWarnings = getSearchWarningMessages(
+      adapters.requests,
+      activeDatasource,
+      docDatasourceState,
+      {
+        searchService: this.deps.data.search,
+      }
+    );
+
+    if (requestWarnings.length && this.warningDomNode) {
+      render(
+        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <Warnings warnings={requestWarnings} compressed />
+        </KibanaThemeProvider>,
+        this.warningDomNode
+      );
     }
   }
 
@@ -637,6 +675,25 @@ export class Embeddable
     }
   }
 
+  private getError(): Error | undefined {
+    const message =
+      typeof this.errors?.[0]?.longMessage === 'string'
+        ? this.errors[0].longMessage
+        : this.errors?.[0]?.shortMessage;
+
+    if (message != null) {
+      return new Error(message);
+    }
+
+    if (!this.expression) {
+      return new Error(
+        i18n.translate('xpack.lens.embeddable.failure', {
+          defaultMessage: "Visualization couldn't be displayed",
+        })
+      );
+    }
+  }
+
   /**
    *
    * @param {HTMLElement} domNode
@@ -657,7 +714,7 @@ export class Embeddable
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
-      error: undefined, // Lens handles errors internally
+      error: this.getError(),
     });
     this.renderComplete.dispatchInProgress();
 
@@ -690,7 +747,8 @@ export class Embeddable
           executionContext={this.getExecutionContext()}
           canEdit={this.getIsEditable() && input.viewMode === 'edit'}
           onExpressionError={this.onError}
-          onRuntimeError={() => {
+          onRuntimeError={(message) => {
+            this.updateOutput({ error: new Error(message) });
             this.logError('runtime');
           }}
           noPadding={this.visDisplayOptions?.noPadding}
@@ -699,8 +757,8 @@ export class Embeddable
           css={css({
             position: 'absolute',
             zIndex: 2,
-            right: euiThemeVars.euiSizeM,
-            bottom: euiThemeVars.euiSizeM,
+            left: 0,
+            bottom: 0,
           })}
           ref={(el) => {
             if (el) {
@@ -1052,6 +1110,46 @@ export class Embeddable
     return {
       hideTitle: this.visDisplayOptions?.noPanelTitle,
     };
+  }
+
+  public getChartInfo(): Readonly<ChartInfo | undefined> {
+    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
+    if (!activeDatasourceId || !this.savedVis?.visualizationType) {
+      return undefined;
+    }
+
+    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+    const dataSourceInfo = this.deps.datasourceMap[activeDatasourceId].getDatasourceInfo(
+      docDatasourceState,
+      this.savedVis?.references,
+      this.indexPatterns
+    );
+    const chartInfo = this.deps.visualizationMap[
+      this.savedVis.visualizationType
+    ].getVisualizationInfo?.(this.savedVis?.state.visualization);
+
+    const layers = chartInfo?.layers.map((l) => {
+      const dataSource = dataSourceInfo.find((info) => info.layerId === l.layerId);
+      const updatedDimensions = l.dimensions.map((d) => {
+        return {
+          ...d,
+          ...dataSource?.columns.find((c) => c.id === d.id)!,
+        };
+      });
+      return {
+        ...l,
+        dataView: dataSource?.dataView,
+        dimensions: updatedDimensions,
+      };
+    });
+    return layers
+      ? {
+          layers,
+          visualizationType: this.savedVis.visualizationType,
+          filters: this.savedVis.state.filters,
+          query: this.savedVis.state.query,
+        }
+      : undefined;
   }
 
   private get visDisplayOptions(): VisualizationDisplayOptions | undefined {

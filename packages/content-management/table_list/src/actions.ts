@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { CriteriaWithPagination, Direction } from '@elastic/eui';
+import type { CriteriaWithPagination, Direction, Query } from '@elastic/eui';
 
 import type { SortColumnField } from './components';
 
@@ -71,7 +71,10 @@ export interface ShowConfirmDeleteItemsModalAction {
 /** Action to update the search bar query text */
 export interface OnSearchQueryChangeAction {
   type: 'onSearchQueryChange';
-  data: string;
+  data: {
+    query: Query;
+    text: string;
+  };
 }
 
 export type Action<T> =

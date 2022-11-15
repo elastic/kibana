@@ -68,7 +68,6 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
       throw createFlagError(`package id must start with @kbn/ and have no spaces`);
     }
 
-    const typePkgName = `@types/${pkgId.slice(1).replace('/', '__')}`;
     const web = !!flags.web;
     const dev = !!flags.dev;
 
@@ -183,12 +182,6 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
 
     addDeps[pkgId] = `link:bazel-bin/${normalizedRepoRelativeDir}`;
     delete removeDeps[pkgId];
-
-    // for @types packages always remove from deps and add to devDeps
-    packageJson.devDependencies[
-      typePkgName
-    ] = `link:bazel-bin/${normalizedRepoRelativeDir}/npm_module_types`;
-    delete packageJson.dependencies[typePkgName];
 
     await Fsp.writeFile(packageJsonPath, sortPackageJson(JSON.stringify(packageJson)));
     log.info('Updated package.json file');

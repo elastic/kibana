@@ -12,18 +12,24 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FailedTestsCount } from './failed_tests_count';
 import { useGetUrlParams } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 import { ErrorsList } from './errors_list';
+import { MonitorFailedTests } from './failed_tests';
 
 export const MonitorErrors = () => {
   const { euiTheme } = useEuiTheme();
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+
+  const time = useMemo(
+    () => ({ from: dateRangeStart, to: dateRangeEnd }),
+    [dateRangeEnd, dateRangeStart]
+  );
 
   return (
     <>
@@ -50,6 +56,7 @@ export const MonitorErrors = () => {
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{FAILED_TESTS_LABEL}</h3>
             </EuiTitle>
+            <MonitorFailedTests time={time} />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

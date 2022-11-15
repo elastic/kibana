@@ -44,7 +44,7 @@ export interface ExpressionWrapperProps {
   style?: React.CSSProperties;
   className?: string;
   canEdit: boolean;
-  onRuntimeError: () => void;
+  onRuntimeError: (message?: string) => void;
   onExpressionError: () => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
@@ -174,7 +174,9 @@ export function ExpressionWrapper({
             syncCursor={syncCursor}
             executionContext={executionContext}
             renderError={(errorMessage, error) => {
-              onRuntimeError();
+              const messages = getOriginalRequestErrorMessages(error);
+              onRuntimeError(messages[0] ?? errorMessage);
+
               return (
                 <div data-test-subj="expression-renderer-error">
                   <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
@@ -182,7 +184,7 @@ export function ExpressionWrapper({
                       <EuiIcon type="alert" color="danger" />
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      {(getOriginalRequestErrorMessages(error) || [errorMessage]).map((message) => (
+                      {messages.map((message) => (
                         <EuiText size="s">{message}</EuiText>
                       ))}
                     </EuiFlexItem>

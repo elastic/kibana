@@ -102,7 +102,7 @@ import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
 import {
-  IUnsecuredActionsClient,
+  type IUnsecuredActionsClient,
   UnsecuredActionsClient,
 } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
@@ -136,6 +136,8 @@ export interface PluginStartContract {
     actionTypeId: string,
     options?: { notifyUsage: boolean }
   ): boolean;
+
+  getAllTypes: ActionTypeRegistry['getAllTypes'];
 
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
@@ -551,6 +553,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ) => {
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
+      getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },

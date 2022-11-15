@@ -44,4 +44,24 @@ describe('CreateCaseFlyout', () => {
     });
     expect(onClose).toBeCalled();
   });
+
+  it('renders headerContent when passed', async () => {
+    const headerContent = <p data-test-subj="testing123" />;
+    const { getByTestId } = mockedContext.render(
+      <CreateCaseFlyout {...defaultProps} headerContent={headerContent} />
+    );
+
+    await act(async () => {
+      expect(getByTestId('testing123')).toBeTruthy();
+      expect(getByTestId('create-case-flyout-header').children.length).toEqual(2);
+    });
+  });
+
+  it('does not render headerContent when undefined', async () => {
+    const { getByTestId } = mockedContext.render(<CreateCaseFlyout {...defaultProps} />);
+
+    await act(async () => {
+      expect(getByTestId('create-case-flyout-header').children.length).toEqual(1);
+    });
+  });
 });
