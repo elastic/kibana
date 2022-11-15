@@ -15,12 +15,13 @@ import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, Sort } from '../../types';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../../common/constants';
+import {
+  CSP_LATEST_FINDINGS_DATA_VIEW,
+  MAX_FINDINGS_TO_LOAD,
+} from '../../../../../common/constants';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
-  from: NonNullable<NonNullable<estypes.SearchRequest['body']>['from']>;
-  size: NonNullable<NonNullable<estypes.SearchRequest['body']>['size']>;
   sort: Sort<CspFinding>;
   enabled: boolean;
 }
@@ -44,14 +45,11 @@ export type ResourceFindingsResponseAggs = Record<
 const getResourceFindingsQuery = ({
   query,
   resourceId,
-  from,
-  size,
   sort,
 }: UseResourceFindingsOptions): estypes.SearchRequest => ({
   index: CSP_LATEST_FINDINGS_DATA_VIEW,
   body: {
-    from,
-    size,
+    size: MAX_FINDINGS_TO_LOAD,
     query: {
       ...query,
       bool: {

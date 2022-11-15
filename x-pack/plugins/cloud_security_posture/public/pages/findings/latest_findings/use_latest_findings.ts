@@ -18,11 +18,9 @@ import type { Sort } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
+import { CSP_LATEST_FINDINGS_DATA_VIEW, MAX_FINDINGS_TO_LOAD } from '../../../../common/constants';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
-  from: NonNullable<NonNullable<estypes.SearchRequest['body']>['from']>;
-  size: NonNullable<NonNullable<estypes.SearchRequest['body']>['size']>;
   sort: Sort<CspFinding>;
   enabled: boolean;
 }
@@ -55,13 +53,12 @@ export const showErrorToast = (
   else toasts.addDanger(extractErrorMessage(error, SEARCH_FAILED_TEXT));
 };
 
-export const getFindingsQuery = ({ query, size, from, sort }: UseFindingsOptions) => ({
+export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => ({
   index: CSP_LATEST_FINDINGS_DATA_VIEW,
   body: {
     query,
     sort: [{ [sort.field]: sort.direction }],
-    size,
-    from,
+    size: MAX_FINDINGS_TO_LOAD,
     aggs: getFindingsCountAggQuery(),
   },
   ignore_unavailable: false,

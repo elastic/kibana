@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiSpacer,
   EuiButtonEmpty,
@@ -15,7 +15,6 @@ import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { CspInlineDescriptionList } from '../../../../components/csp_inline_description_list';
 import type { Evaluation } from '../../../../../common/types';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
@@ -25,11 +24,11 @@ import { PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
+import { usePageSlice } from '../../../../common/hooks/use_page_slice';
 import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
 import {
   getFindingsPageSizeInfo,
   getFilters,
-  getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
   usePersistedQuery,
@@ -38,20 +37,17 @@ import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 import { ErrorCallout } from '../../layout/error_callout';
 import { FindingsDistributionBar } from '../../layout/findings_distribution_bar';
-import {
-  LOCAL_STORAGE_PAGE_SIZE_RESOURCE_FINDINGS_KEY,
-  MAX_ITEMS,
-} from '../../../../../common/constants';
 
 const getDefaultQuery = ({
   query,
   filters,
+  pageSize,
 }: FindingsBaseURLQuery): FindingsBaseURLQuery & ResourceFindingsQuery => ({
   query,
   filters,
+  pageSize,
   sort: { field: 'result.evaluation' as keyof CspFinding, direction: 'asc' },
   pageIndex: 0,
-  pageSize: 10,
 });
 
 const BackToResourcesButton = () => (
@@ -93,12 +89,8 @@ const getResourceFindingSharedValues = (sharedValues: {
 
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
-  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
+  const { getPersistedDefaultQuery, setPersistedPageSize } = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const [pageSize, setPageSize] = useLocalStorage(
-    LOCAL_STORAGE_PAGE_SIZE_RESOURCE_FINDINGS_KEY,
-    urlQuery.pageSize
-  );
 
   /**
    * Page URL query to ES query
@@ -107,16 +99,13 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
     dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
+    pageSize: urlQuery.pageSize,
   });
 
   /**
    * Page ES query result
    */
   const resourceFindings = useResourceFindings({
-    ...getPaginationQuery({
-      pageIndex: 0,
-      pageSize: MAX_ITEMS,
-    }),
     sort: urlQuery.sort,
     query: baseEsQuery.query,
     resourceId: params.resourceId,
@@ -125,13 +114,11 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
 
   const error = resourceFindings.error || baseEsQuery.error;
 
-  const slicedPage = useMemo(() => {
-    const pageSizes = pageSize !== undefined ? pageSize : 0;
-    const cursor = urlQuery.pageIndex * pageSizes;
-    if (resourceFindings.data?.page !== undefined)
-      return resourceFindings.data?.page.slice(cursor, cursor + pageSizes);
-    else return [];
-  }, [resourceFindings.data?.page, urlQuery.pageIndex, pageSize]);
+  const slicedPage = usePageSlice(
+    resourceFindings.data?.page,
+    urlQuery.pageIndex,
+    urlQuery.pageSize
+  );
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
@@ -212,7 +199,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             loading={resourceFindings.isFetching}
             items={slicedPage}
             pagination={getPaginationTableParams({
-              pageSize: pageSize || urlQuery.pageSize,
+              pageSize: urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: resourceFindings.data?.total || 0,
             })}
@@ -220,7 +207,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
               sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
             }}
             setTableOptions={({ page, sort }) => {
-              setPageSize(page.size);
+              setPersistedPageSize(page.size);
               setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort });
             }}
             onAddFilter={(field, value, negate) =>

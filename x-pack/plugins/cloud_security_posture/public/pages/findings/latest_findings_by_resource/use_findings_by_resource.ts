@@ -13,11 +13,9 @@ import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, Sort } from '../types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
+import { CSP_LATEST_FINDINGS_DATA_VIEW, MAX_FINDINGS_TO_LOAD } from '../../../../common/constants';
 
 interface UseFindingsByResourceOptions extends FindingsBaseEsQuery {
-  from: NonNullable<NonNullable<estypes.SearchRequest['body']>['from']>;
-  size: NonNullable<NonNullable<estypes.SearchRequest['body']>['size']>;
   enabled: boolean;
   sortDirection: Sort<unknown>['direction'];
 }
@@ -67,8 +65,6 @@ interface FindingsAggBucket extends estypes.AggregationsStringRareTermsBucketKey
 
 export const getFindingsByResourceAggQuery = ({
   query,
-  from,
-  size,
   sortDirection,
 }: UseFindingsByResourceOptions): estypes.SearchRequest => ({
   index: CSP_LATEST_FINDINGS_DATA_VIEW,
@@ -101,8 +97,7 @@ export const getFindingsByResourceAggQuery = ({
           },
           sort_failed_findings: {
             bucket_sort: {
-              from,
-              size,
+              size: MAX_FINDINGS_TO_LOAD,
               sort: [
                 {
                   'failed_findings>_count': { order: sortDirection },

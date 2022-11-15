@@ -10,9 +10,14 @@ import { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 export { getFilters } from './get_filters';
+import {
+  DEFAULT_VISIBLE_ROWS_PER_PAGE,
+  LOCAL_STORAGE_PAGE_SIZE_KEY,
+} from '../../../../common/constants';
 
 const getBaseQuery = ({ dataView, query, filters }: FindingsBaseURLQuery & FindingsBaseProps) => {
   try {
@@ -39,21 +44,34 @@ export const getPaginationTableParams = (
   showPerPageOptions,
 });
 
-export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseURLQuery) => T) => {
+export const usePersistedQuery = <T>(
+  getter: ({ filters, query, pageSize }: FindingsBaseURLQuery) => T
+) => {
   const {
     data: {
       query: { filterManager, queryString },
     },
   } = useKibana().services;
 
-  return useCallback(
+  const [persistedPageSize, setPersistedPageSize] = useLocalStorage(
+    LOCAL_STORAGE_PAGE_SIZE_KEY,
+    DEFAULT_VISIBLE_ROWS_PER_PAGE
+  );
+
+  const getPersistedDefaultQuery = useCallback(
     () =>
       getter({
         filters: filterManager.getAppFilters(),
         query: queryString.getQuery() as Query,
+        pageSize: persistedPageSize || DEFAULT_VISIBLE_ROWS_PER_PAGE,
       }),
-    [getter, filterManager, queryString]
+    [getter, filterManager, queryString, persistedPageSize]
   );
+
+  return {
+    getPersistedDefaultQuery,
+    setPersistedPageSize,
+  };
 };
 
 export const getPaginationQuery = ({

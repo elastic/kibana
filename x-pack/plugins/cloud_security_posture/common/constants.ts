@@ -23,6 +23,7 @@ export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
 
 export const MAX_FINDINGS_TO_LOAD = 500;
+export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 10;
 
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
@@ -50,10 +51,6 @@ export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
 export const CLOUDBEAT_VANILLA = 'cloudbeat/cis_k8s'; // Integration input
 export const CLOUDBEAT_EKS = 'cloudbeat/cis_eks'; // Integration input
 
-export const LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY = 'cloudPosture:latestFindings:pageSize';
-export const LOCAL_STORAGE_PAGE_SIZE_RESOURCE_FINDINGS_KEY =
-  'cloudPosture:resourceFindings:pageSize';
-export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY =
-  'cloudPosture:findingsByResource:pageSize';
+export const LOCAL_STORAGE_PAGE_SIZE_KEY = 'cloudPosture:findings:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
