@@ -6,10 +6,10 @@ Array [
     class="euiFlyoutHeader emotion-euiFlyoutHeader-hasBorder"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <h1
           class="euiTitle emotion-euiTitle-s"
@@ -18,7 +18,7 @@ Array [
         </h1>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
           class="euiPopover emotion-euiPopover"

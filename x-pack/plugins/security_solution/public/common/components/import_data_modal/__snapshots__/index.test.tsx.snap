@@ -6,7 +6,7 @@ Object {
   "baseElement": <body>
     <div />
     <div
-      class="euiOverlayMask"
+      class="euiOverlayMask emotion-euiOverlayMask-aboveHeader"
       data-euiportal="true"
       data-relative-to-header="above"
     >
@@ -92,7 +92,7 @@ Object {
                 class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                class="euiCheckbox"
+                class="euiCheckbox emotion-euiCheckbox"
               >
                 <input
                   class="euiCheckbox__input"

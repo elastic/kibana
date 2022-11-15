@@ -25,7 +25,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiSwitch"
+        class="euiSwitch emotion-euiSwitch"
       >
         <button
           aria-checked="false"
@@ -217,7 +217,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiSwitch"
+        class="euiSwitch emotion-euiSwitch"
       >
         <button
           aria-checked="false"

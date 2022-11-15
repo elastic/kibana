@@ -69,7 +69,7 @@ const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({
 
 // output section styles
 const topSpacingCss = css`
-  ${(props) => `${props.theme.eui.euiCodeBlockPaddingModifiers.paddingMedium} 0`}
+  ${(props) => `${props.theme.eui.euiSize} 0`}
 `;
 const dashedBorderCss = css`
   ${(props) => `1px dashed ${props.theme.eui.euiColorDisabled}`};
