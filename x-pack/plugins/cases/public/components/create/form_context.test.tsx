@@ -48,8 +48,6 @@ import { waitForComponentToUpdate } from '../../common/test_utils';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { useLicense } from '../../common/use_license';
 
-const sampleId = 'case-id';
-
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_post_push_to_service');
@@ -82,6 +80,8 @@ const pushCaseToExternalService = jest.fn();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useLicenseMock = useLicense as jest.Mock;
 
+const sampleId = 'case-id';
+
 const defaultPostCase = {
   isLoading: false,
   isError: false,
@@ -100,24 +100,29 @@ const defaultPostPushToService = {
   pushCaseToExternalService,
 };
 
-const fillFormReactTestingLib = async (renderResult: RenderResult) => {
+const sampleDataWithoutTags = {
+  ...sampleData,
+  tags: [],
+};
+
+const fillFormReactTestingLib = async (renderResult: RenderResult, withTags = false) => {
   const titleInput = within(renderResult.getByTestId('caseTitle')).getByTestId('input');
 
-  userEvent.type(titleInput, sampleData.title);
+  userEvent.paste(titleInput, sampleDataWithoutTags.title);
 
-  const descriptionInput = renderResult.container.querySelector(
-    `[data-test-subj="caseDescription"] textarea`
+  const descriptionInput = within(renderResult.getByTestId('caseDescription')).getByTestId(
+    'euiMarkdownEditorTextArea'
   );
 
-  if (descriptionInput) {
-    userEvent.type(descriptionInput, sampleData.description);
-  }
+  userEvent.paste(descriptionInput, sampleDataWithoutTags.description);
 
-  const caseTags = renderResult.getByTestId('caseTags');
+  if (withTags) {
+    const caseTags = renderResult.getByTestId('caseTags');
 
-  for (let i = 0; i < sampleTags.length; i++) {
-    const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
-    userEvent.type(tagsInput, `${sampleTags[i]}{enter}`);
+    for (let i = 0; i < sampleTags.length; i++) {
+      const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
+      userEvent.type(tagsInput, `${sampleTags[i]}{enter}`);
+    }
   }
 };
 
@@ -138,7 +143,7 @@ describe('Create case', () => {
   beforeAll(() => {
     postCase.mockResolvedValue({
       id: sampleId,
-      ...sampleData,
+      ...sampleDataWithoutTags,
     });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useCreateAttachmentsMock.mockImplementation(() => ({ createAttachments }));
@@ -208,12 +213,12 @@ describe('Create case', () => {
       );
 
       await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult);
+      await fillFormReactTestingLib(renderResult, true);
 
       userEvent.click(renderResult.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalledWith(sampleData);
+        expect(postCase).toBeCalledWith({ ...sampleDataWithoutTags, tags: sampleTags });
       });
     });
 
@@ -243,14 +248,14 @@ describe('Create case', () => {
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith({
-          ...sampleData,
+          ...sampleDataWithoutTags,
           severity: CaseSeverity.HIGH,
         });
       });
     });
 
     it('does not submits the title when the length is longer than 160 characters', async () => {
-      const longTitle = `${'a'.repeat(161)}{enter}`;
+      const longTitle = `${'a'.repeat(161)}`;
 
       const renderResult = mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
@@ -262,7 +267,7 @@ describe('Create case', () => {
       await waitForFormToRender(renderResult);
 
       const titleInput = within(renderResult.getByTestId('caseTitle')).getByTestId('input');
-      await userEvent.type(titleInput, longTitle, { delay: 1 });
+      userEvent.paste(titleInput, longTitle);
 
       userEvent.click(renderResult.getByTestId('create-case-submit'));
 
@@ -272,7 +277,6 @@ describe('Create case', () => {
         ).toBeInTheDocument();
       });
 
-      await waitForComponentToUpdate();
       expect(postCase).not.toHaveBeenCalled();
     });
 
@@ -300,7 +304,10 @@ describe('Create case', () => {
       userEvent.click(renderResult.getByTestId('create-case-submit'));
 
       await waitFor(() =>
-        expect(postCase).toBeCalledWith({ ...sampleData, settings: { syncAlerts: false } })
+        expect(postCase).toBeCalledWith({
+          ...sampleDataWithoutTags,
+          settings: { syncAlerts: false },
+        })
       );
     });
 
@@ -327,7 +334,10 @@ describe('Create case', () => {
       userEvent.click(renderResult.getByTestId('create-case-submit'));
 
       await waitFor(() =>
-        expect(postCase).toBeCalledWith({ ...sampleData, settings: { syncAlerts: false } })
+        expect(postCase).toBeCalledWith({
+          ...sampleDataWithoutTags,
+          settings: { syncAlerts: false },
+        })
       );
     });
 
@@ -379,7 +389,7 @@ describe('Create case', () => {
 
       await waitFor(() =>
         expect(postCase).toBeCalledWith({
-          ...sampleData,
+          ...sampleDataWithoutTags,
           connector: {
             fields: {
               impact: null,
@@ -426,7 +436,7 @@ describe('Create case', () => {
       userEvent.click(renderResult.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalledWith(sampleData);
+        expect(postCase).toBeCalledWith(sampleDataWithoutTags);
         expect(pushCaseToExternalService).not.toHaveBeenCalled();
       });
     });
@@ -470,7 +480,7 @@ describe('Create case', () => {
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith({
-          ...sampleData,
+          ...sampleDataWithoutTags,
           connector: {
             id: 'jira-1',
             name: 'Jira',
@@ -491,7 +501,7 @@ describe('Create case', () => {
 
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
           id: sampleId,
-          ...sampleData,
+          ...sampleDataWithoutTags,
         });
       });
     });
@@ -531,16 +541,13 @@ describe('Create case', () => {
         'comboBoxSearchInput'
       );
 
-      await userEvent.type(checkbox, 'Denial of Service{enter}', {
-        delay: 1,
-      });
-
+      userEvent.type(checkbox, 'Denial of Service{enter}');
       userEvent.selectOptions(renderResult.getByTestId('severitySelect'), ['4']);
       userEvent.click(renderResult.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith({
-          ...sampleData,
+          ...sampleDataWithoutTags,
           connector: {
             id: 'resilient-2',
             name: 'My Connector 2',
@@ -561,7 +568,7 @@ describe('Create case', () => {
 
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
           id: sampleId,
-          ...sampleData,
+          ...sampleDataWithoutTags,
         });
       });
     });
@@ -611,7 +618,7 @@ describe('Create case', () => {
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith({
-          ...sampleData,
+          ...sampleDataWithoutTags,
           connector: {
             id: 'servicenow-1',
             name: 'My Connector',
@@ -644,7 +651,7 @@ describe('Create case', () => {
 
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
           id: sampleId,
-          ...sampleData,
+          ...sampleDataWithoutTags,
         });
       });
     });
@@ -692,7 +699,7 @@ describe('Create case', () => {
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith({
-          ...sampleData,
+          ...sampleDataWithoutTags,
           connector: {
             id: 'servicenow-sir',
             name: 'My Connector SIR',
@@ -729,7 +736,7 @@ describe('Create case', () => {
 
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
           id: sampleId,
-          ...sampleData,
+          ...sampleDataWithoutTags,
         });
       });
     });
@@ -766,7 +773,7 @@ describe('Create case', () => {
       expect(afterCaseCreated).toHaveBeenCalledWith(
         {
           id: sampleId,
-          ...sampleData,
+          ...sampleDataWithoutTags,
         },
         createAttachments
       );
@@ -955,7 +962,7 @@ describe('Create case', () => {
         expect(assigneesComboBox.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
       });
 
-      userEvent.type(assigneesComboBox.getByTestId('comboBoxSearchInput'), 'dr');
+      userEvent.paste(assigneesComboBox.getByTestId('comboBoxSearchInput'), 'dr');
 
       await waitFor(() => {
         expect(
@@ -963,17 +970,13 @@ describe('Create case', () => {
         ).toBeInTheDocument();
       });
 
-      await waitFor(async () => {
-        expect(renderResult.getByText(`${userProfiles[0].user.full_name}`)).toBeInTheDocument();
-      });
-
-      userEvent.click(renderResult.getByText(`${userProfiles[0].user.full_name}`));
+      userEvent.click(await renderResult.findByText(`${userProfiles[0].user.full_name}`));
       userEvent.click(renderResult.getByTestId('create-case-submit'));
 
       await waitForComponentToUpdate();
 
       expect(postCase).toBeCalledWith({
-        ...sampleData,
+        ...sampleDataWithoutTags,
         assignees: [{ uid: userProfiles[0].uid }],
       });
     });
