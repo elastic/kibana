@@ -1341,6 +1341,7 @@ describe('rules_list component with items', () => {
   it('can filter by rule states', async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     loadRulesWithKueryFilter.mockReset();
+
     await setup();
 
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
@@ -1370,10 +1371,6 @@ describe('rules_list component with items', () => {
     );
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
 
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -1382,9 +1379,6 @@ describe('rules_list component with items', () => {
     );
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-    });
 
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
