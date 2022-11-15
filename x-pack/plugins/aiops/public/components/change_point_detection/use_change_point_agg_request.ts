@@ -113,17 +113,6 @@ export function useChangePointResults(
 
   const { runRequest, cancelRequest, isLoading } = useCancellableRequest();
 
-  useEffect(
-    function cancelRequestOnChange() {
-      cancelRequest();
-
-      return () => {
-        cancelRequest();
-      };
-    },
-    [query, cancelRequest, requestParams]
-  );
-
   const reset = useCallback(() => {
     cancelRequest();
     setProgress(0);
@@ -213,10 +202,17 @@ export function useChangePointResults(
     [runRequest, requestParams, query, dataView, splitFieldCardinality, toasts]
   );
 
-  useEffect(() => {
-    reset();
-    fetchResults();
-  }, [requestParams, query, splitFieldCardinality, fetchResults, reset]);
+  useEffect(
+    function fetchResultsOnInputChange() {
+      reset();
+      fetchResults();
+
+      return () => {
+        cancelRequest();
+      };
+    },
+    [requestParams, query, splitFieldCardinality, fetchResults, reset, cancelRequest]
+  );
 
   const pagination = useMemo(() => {
     return {
