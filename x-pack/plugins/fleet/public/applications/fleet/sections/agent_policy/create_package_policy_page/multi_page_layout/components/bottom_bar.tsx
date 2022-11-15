@@ -14,7 +14,6 @@ import { useLink } from '../../../../../../../hooks';
 import { useGetDiscoverLogsLinkForAgents } from '../hooks';
 import { FLEET_KUBERNETES_PACKAGE } from '../../../../../../../../common';
 
-
 const CenteredRoundedBottomBar = styled(EuiBottomBar)`
   max-width: 820px;
   margin: 0 auto;
