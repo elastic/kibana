@@ -173,11 +173,10 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
     onSuccess,
   ]);
 
+  const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
+
   const isDisabled =
-    isLoading ||
-    (!nameInput.hasChanged && !urlInput.hasChanged) ||
-    nameInput.props.isInvalid ||
-    urlInput.props.isInvalid;
+    isLoading || !hasChanged || nameInput.props.isInvalid || urlInput.props.isInvalid;
 
   return {
     isLoading,
