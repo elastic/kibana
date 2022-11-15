@@ -10,8 +10,6 @@ import { kea, MakeLogicType } from 'kea';
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
-
 import {
   formatPipelineName,
   generateMlInferencePipelineBody,
@@ -39,10 +37,10 @@ import {
   MappingsApiLogic,
 } from '../../../../api/mappings/mappings_logic';
 import {
-  GetMlModelsArgs,
-  GetMlModelsResponse,
-  MLModelsApiLogic,
-} from '../../../../api/ml_models/ml_models_logic';
+  TrainedModel,
+  TrainedModelsApiLogicActions,
+  TrainedModelsApiLogic,
+} from '../../../../api/ml_models/ml_trained_models_logic';
 import {
   AttachMlInferencePipelineApiLogic,
   AttachMlInferencePipelineApiLogicArgs,
@@ -144,7 +142,7 @@ interface MLInferenceProcessorsActions {
     CreateMlInferencePipelineResponse
   >['makeRequest'];
   makeGetDocumentRequest: Actions<GetDocumentsArgs, GetDocumentsResponse>['makeRequest'];
-  makeMLModelsRequest: Actions<GetMlModelsArgs, GetMlModelsResponse>['makeRequest'];
+  makeMLModelsRequest: TrainedModelsApiLogicActions['makeRequest'];
   makeMappingRequest: Actions<GetMappingsArgs, GetMappingsResponse>['makeRequest'];
   makeMlInferencePipelinesRequest: Actions<
     FetchMlInferencePipelinesArgs,
@@ -159,7 +157,7 @@ interface MLInferenceProcessorsActions {
     SimulateMlInterfacePipelineResponse
   >['makeRequest'];
   mappingsApiError: Actions<GetMappingsArgs, GetMappingsResponse>['apiError'];
-  mlModelsApiError: Actions<GetMlModelsArgs, GetMlModelsResponse>['apiError'];
+  mlModelsApiError: TrainedModelsApiLogicActions['apiError'];
   selectExistingPipeline: (pipelineName: string) => {
     pipelineName: string;
   };
@@ -226,7 +224,7 @@ export interface MLInferenceProcessorsValues {
   mlInferencePipeline: MlInferencePipeline | undefined;
   mlInferencePipelineProcessors: FetchMlInferencePipelineProcessorsResponse | undefined;
   mlInferencePipelinesData: FetchMlInferencePipelinesResponse | undefined;
-  mlModelsData: TrainedModelConfigResponse[] | undefined;
+  mlModelsData: TrainedModel[] | null;
   mlModelsStatus: Status;
   showGetDocumentErrors: boolean;
   simulateExistingPipelineData: typeof SimulateExistingMlInterfacePipelineApiLogic.values.data;
@@ -236,7 +234,7 @@ export interface MLInferenceProcessorsValues {
   simulatePipelineResult: IngestSimulateResponse | undefined;
   simulatePipelineStatus: Status;
   sourceFields: string[] | undefined;
-  supportedMLModels: TrainedModelConfigResponse[];
+  supportedMLModels: TrainedModel[];
 }
 
 export const MLInferenceLogic = kea<
@@ -265,7 +263,7 @@ export const MLInferenceLogic = kea<
       ['makeRequest as makeMlInferencePipelinesRequest'],
       MappingsApiLogic,
       ['makeRequest as makeMappingRequest', 'apiError as mappingsApiError'],
-      MLModelsApiLogic,
+      TrainedModelsApiLogic,
       ['makeRequest as makeMLModelsRequest', 'apiError as mlModelsApiError'],
       SimulateExistingMlInterfacePipelineApiLogic,
       [
@@ -307,7 +305,7 @@ export const MLInferenceLogic = kea<
       ['data as mlInferencePipelinesData'],
       MappingsApiLogic,
       ['data as mappingData', 'status as mappingStatus'],
-      MLModelsApiLogic,
+      TrainedModelsApiLogic,
       ['data as mlModelsData', 'status as mlModelsStatus'],
       SimulateExistingMlInterfacePipelineApiLogic,
       ['data as simulateExistingPipelineData', 'status as simulateExistingPipelineStatus'],
@@ -557,7 +555,7 @@ export const MLInferenceLogic = kea<
     ],
     supportedMLModels: [
       () => [selectors.mlModelsData],
-      (mlModelsData: TrainedModelConfigResponse[] | undefined) => {
+      (mlModelsData: MLInferenceProcessorsValues['mlModelsData']) => {
         return mlModelsData?.filter(isSupportedMLModel) ?? [];
       },
     ],
