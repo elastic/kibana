@@ -74,13 +74,21 @@ export const DeleteMonitor = ({
       kibanaService.toasts.addSuccess(
         {
           title: toMountPoint(
-            <p data-test-subj="uptimeDeleteMonitorSuccess">{MONITOR_DELETE_SUCCESS_LABEL}</p>
+            <p data-test-subj="uptimeDeleteMonitorSuccess">
+              {i18n.translate(
+                'xpack.synthetics.monitorManagement.monitorDeleteSuccessMessage.name',
+                {
+                  defaultMessage: 'Monitor {name} deleted successfully.',
+                  values: { name },
+                }
+              )}
+            </p>
           ),
         },
         { toastLifeTimeMs: 3000 }
       );
     }
-  }, [setIsDeleting, onUpdate, status]);
+  }, [setIsDeleting, onUpdate, status, name]);
 
   const destroyModal = (
     <EuiConfirmModal
@@ -138,13 +146,6 @@ const DELETE_MONITOR_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.deleteMonitorLabel',
   {
     defaultMessage: 'Delete monitor',
-  }
-);
-
-const MONITOR_DELETE_SUCCESS_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.monitorDeleteSuccessMessage',
-  {
-    defaultMessage: 'Monitor deleted successfully.',
   }
 );
 
