@@ -1,4 +1,3 @@
 [
-  "x-pack/plugins/triggers_actions_ui/jest.config.js",
   "x-pack/plugins/watcher/jest.config.js"
 ]
