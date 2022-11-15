@@ -15,10 +15,8 @@ import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, Sort } from '../../types';
-import {
-  CSP_LATEST_FINDINGS_DATA_VIEW,
-  MAX_FINDINGS_TO_LOAD,
-} from '../../../../../common/constants';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../../common/constants';
+import { MAX_FINDINGS_TO_LOAD } from '../../../../common/constants';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;

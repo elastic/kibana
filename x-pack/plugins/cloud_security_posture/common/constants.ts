@@ -22,9 +22,6 @@ export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findin
 export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
 
-export const MAX_FINDINGS_TO_LOAD = 500;
-export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 10;
-
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';

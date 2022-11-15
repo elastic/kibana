@@ -5,10 +5,8 @@
  * 2.0.
  */
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  DEFAULT_VISIBLE_ROWS_PER_PAGE,
-  LOCAL_STORAGE_PAGE_SIZE_KEY,
-} from '../../../common/constants';
+import { LOCAL_STORAGE_PAGE_SIZE_KEY } from '../../../common/constants';
+import { DEFAULT_VISIBLE_ROWS_PER_PAGE } from '../constants';
 
 /**
  * @description handles persisting the users table row size selection

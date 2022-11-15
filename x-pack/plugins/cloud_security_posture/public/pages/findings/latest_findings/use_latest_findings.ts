@@ -18,7 +18,8 @@ import type { Sort } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
-import { CSP_LATEST_FINDINGS_DATA_VIEW, MAX_FINDINGS_TO_LOAD } from '../../../../common/constants';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: Sort<CspFinding>;

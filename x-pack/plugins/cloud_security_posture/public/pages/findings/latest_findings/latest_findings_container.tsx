@@ -32,7 +32,7 @@ import { usePageSlice } from '../../../common/hooks/use_page_slice';
 import { usePageSize } from '../../../common/hooks/use_page_size';
 import { ErrorCallout } from '../layout/error_callout';
 import { getLimitProperties } from '../utils/get_limit_properties';
-import { MAX_FINDINGS_TO_LOAD } from '../../../../common/constants';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 
 export const getDefaultQuery = ({
   query,

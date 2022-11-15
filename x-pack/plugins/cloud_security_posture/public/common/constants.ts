@@ -15,6 +15,8 @@ export const statusColors = {
 };
 
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
+export const MAX_FINDINGS_TO_LOAD = 500;
+export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 10;
 
 export type CloudPostureIntegrations = typeof cloudPostureIntegrations;
 
