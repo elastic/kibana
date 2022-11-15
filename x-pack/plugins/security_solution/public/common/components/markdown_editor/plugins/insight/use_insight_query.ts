@@ -15,17 +15,17 @@ import { useTimelineEvents } from '../../../../../timelines/containers';
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
 
-interface UseInsightQuery {
+export interface UseInsightQuery {
   dataProviders: DataProvider[];
 }
 
-export const useInsightQuery = ({
-  dataProviders,
-}: UseInsightQuery): {
+export interface UseInsightQueryResult {
   isQueryLoading: boolean;
   totalCount: number;
   oldestTimestamp: string | null | undefined;
-} => {
+}
+
+export const useInsightQuery = ({ dataProviders }: UseInsightQuery): UseInsightQueryResult => {
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const { browserFields, selectedPatterns, indexPattern, dataViewId } = useSourcererDataView(

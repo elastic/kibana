@@ -75,8 +75,6 @@ const nonExistantField = [
 ] as Provider[][];
 
 describe('useInsightDataProviders', () => {
-  beforeEach(() => {});
-
   it('should return 2 data providers, 1 with a nested provider ANDed to it', () => {
     const { result } = renderHook<UseInsightDataProvidersProps, DataProvider[]>(() =>
       useInsightDataProviders({
