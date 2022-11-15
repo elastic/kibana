@@ -14,8 +14,7 @@ export const DataSourceContext = createContext<{
   dataView: DataView | never;
   savedSearch: SavedSearch | SavedSearchSavedObject | null;
 }>({
-  // @ts-ignore
-  get dataView() {
+  get dataView(): never {
     throw new Error('Context is not implemented');
   },
   savedSearch: null,
