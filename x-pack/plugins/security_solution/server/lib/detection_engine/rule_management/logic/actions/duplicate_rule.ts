@@ -9,11 +9,8 @@ import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../../../rule_schema';
-import { duplicateExceptions } from './duplicate_exceptions';
 
 const DUPLICATE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.cloneRule.duplicateTitle',
@@ -24,15 +21,9 @@ const DUPLICATE_TITLE = i18n.translate(
 
 interface DuplicateRuleParams {
   rule: SanitizedRule<RuleParams>;
-  shouldDuplicateExceptions: boolean;
-  exceptionsClient: ExceptionListClient | undefined;
 }
 
-export const duplicateRule = async ({
-  rule,
-  shouldDuplicateExceptions,
-  exceptionsClient,
-}: DuplicateRuleParams): Promise<InternalRuleCreate> => {
+export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<InternalRuleCreate> => {
   // Generate a new static ruleId
   const ruleId = uuid.v4();
 
@@ -42,13 +33,6 @@ export const duplicateRule = async ({
   const relatedIntegrations = isPrebuilt ? [] : rule.params.relatedIntegrations;
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
   const setup = isPrebuilt ? '' : rule.params.setup;
-  const exceptions = shouldDuplicateExceptions
-    ? await duplicateExceptions({
-        ruleId: rule.params.ruleId,
-        exceptionLists: rule.params.exceptionsList,
-        exceptionsClient,
-      })
-    : [];
 
   return {
     name: `${rule.name} [${DUPLICATE_TITLE}]`,
@@ -62,7 +46,7 @@ export const duplicateRule = async ({
       relatedIntegrations,
       requiredFields,
       setup,
-      exceptionsList: exceptions,
+      exceptionsList: [],
     },
     schedule: rule.schedule,
     enabled: false,
