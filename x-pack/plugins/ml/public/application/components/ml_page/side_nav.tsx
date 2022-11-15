@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
 import React, { ReactNode, useCallback, useMemo } from 'react';
-import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
+import { AIOPS_ENABLED, CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
 import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
@@ -266,16 +266,20 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             testSubj: 'mlMainTab logCategorization',
             relatedRouteIds: ['log_categorization'],
           },
-          {
-            id: 'changePointDetection',
-            pathId: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT,
-            name: i18n.translate('xpack.ml.navMenu.changePointDetectionLinkText', {
-              defaultMessage: 'Change Point Detection',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab changePointDetection',
-            relatedRouteIds: ['change_point_detection'],
-          },
+          ...(CHANGE_POINT_DETECTION_ENABLED
+            ? [
+                {
+                  id: 'changePointDetection',
+                  pathId: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT,
+                  name: i18n.translate('xpack.ml.navMenu.changePointDetectionLinkText', {
+                    defaultMessage: 'Change Point Detection',
+                  }),
+                  disabled: disableLinks,
+                  testSubj: 'mlMainTab changePointDetection',
+                  relatedRouteIds: ['change_point_detection'],
+                },
+              ]
+            : []),
         ],
       });
     }
