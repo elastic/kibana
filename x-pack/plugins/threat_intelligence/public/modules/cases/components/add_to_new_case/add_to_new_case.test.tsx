@@ -22,4 +22,20 @@ describe('AddToNewCase', () => {
     );
     expect(component).toMatchSnapshot();
   });
+  it('should render the EuiContextMenuItem disabled', () => {
+    const indicator: Indicator = generateMockFileIndicator();
+    const fields = { ...indicator.fields };
+    delete fields['threat.indicator.name'];
+    const indicatorMissingName = {
+      _id: indicator._id,
+      fields,
+    };
+    const onClick = () => window.alert('clicked');
+    const component = render(
+      <TestProvidersComponent>
+        <AddToNewCase indicator={indicatorMissingName} onClick={onClick} />
+      </TestProvidersComponent>
+    );
+    expect(component).toMatchSnapshot();
+  });
 });

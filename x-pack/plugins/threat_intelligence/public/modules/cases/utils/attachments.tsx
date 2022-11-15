@@ -12,6 +12,7 @@ import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client
 import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EMPTY_VALUE } from '../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { getIndicatorFieldAndValue } from '../../indicators';
 
@@ -116,9 +117,9 @@ export const generateAttachmentsMetadata = (indicator: Indicator): AttachmentMet
   ).value;
 
   return {
-    indicatorName: indicatorName || '',
-    indicatorType: indicatorType || '',
-    indicatorFeedName: indicatorFeedName || '',
-    indicatorFirstSeen: indicatorFirstSeen || '',
+    indicatorName: indicatorName || EMPTY_VALUE,
+    indicatorType: indicatorType || EMPTY_VALUE,
+    indicatorFeedName: indicatorFeedName || EMPTY_VALUE,
+    indicatorFirstSeen: indicatorFirstSeen || EMPTY_VALUE,
   };
 };

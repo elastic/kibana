@@ -29,3 +29,25 @@ export const Default: Story<void> = () => {
     </StoryProvidersComponent>
   );
 };
+
+export const Disabled: Story<void> = () => {
+  const fields = { ...mockIndicator.fields };
+  delete fields['threat.indicator.name'];
+  const mockIndicatorMissingName = {
+    _id: mockIndicator._id,
+    fields,
+  };
+
+  const items = [
+    <AddToExistingCase
+      indicator={mockIndicatorMissingName}
+      onClick={() => window.alert('Clicked')}
+    />,
+  ];
+
+  return (
+    <StoryProvidersComponent>
+      <EuiContextMenuPanel items={items} />
+    </StoryProvidersComponent>
+  );
+};

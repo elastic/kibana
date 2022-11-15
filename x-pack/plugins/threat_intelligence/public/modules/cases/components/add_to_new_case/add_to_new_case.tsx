@@ -9,6 +9,7 @@ import React, { VFC } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { EMPTY_VALUE } from '../../../../common/constants';
 import {
   AttachmentMetadata,
   generateAttachmentsMetadata,
@@ -56,6 +57,10 @@ export const AddToNewCase: VFC<AddToNewCaseProps> = ({
     attachmentMetadata
   );
 
+  // disable the item if there isn't an indicator name
+  // in the case's attachment, the indicator name is the link to open the flyout
+  const disabled: boolean = attachmentMetadata.indicatorName === EMPTY_VALUE;
+
   const menuItemClicked = () => {
     onClick();
     createCaseFlyout.open({ attachments });
@@ -66,6 +71,7 @@ export const AddToNewCase: VFC<AddToNewCaseProps> = ({
       key="attachmentsNewCase"
       onClick={() => menuItemClicked()}
       data-test-subj={dataTestSubj}
+      disabled={disabled}
     >
       <FormattedMessage
         defaultMessage="Add to new case"
