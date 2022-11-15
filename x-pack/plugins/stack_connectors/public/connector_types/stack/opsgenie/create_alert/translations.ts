@@ -114,31 +114,3 @@ export const RULE_TAGS_DESCRIPTION = i18n.translate(
     defaultMessage: 'The tags of the rule.',
   }
 );
-
-export const OPSGENIE_ALIAS_HELP = i18n.translate(
-  'xpack.cases.createCase.opsGenieFieldAliasHelpText',
-  {
-    defaultMessage: 'The unique alert identifier used for de-deduplication in OpsGenie.',
-  }
-);
-
-export const OPSGENIE_ENTITY_HELP = i18n.translate(
-  'xpack.cases.createCase.opsGenieFieldEntityHelpText',
-  {
-    defaultMessage: 'The domain of the alert. For example, the server or application name.',
-  }
-);
-
-export const OPSGENIE_SOURCE_HELP = i18n.translate(
-  'xpack.cases.createCase.opsGenieFieldSourceHelpText',
-  {
-    defaultMessage: 'The diplay name for the source of the alert.',
-  }
-);
-
-export const OPSGENIE_USER_HELP = i18n.translate(
-  'xpack.cases.createCase.opsGenieFieldUserHelpText',
-  {
-    defaultMessage: 'The display name for the owner.',
-  }
-);
