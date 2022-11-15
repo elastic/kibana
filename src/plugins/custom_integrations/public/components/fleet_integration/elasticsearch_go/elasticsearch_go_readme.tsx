@@ -115,10 +115,10 @@ export const ElasticsearchGoClientReadme = () => {
                 <EuiSpacer size="s" />
 
                 <EuiText>
-                      <FormattedMessage
-                        id="customIntegrations.languageClients.GothonElasticsearch.readme.install7.X"
-                        defaultMessage="To install the 7.x version of the client, add the package to your go.mod file:"
-                      />
+                  <FormattedMessage
+                    id="customIntegrations.languageClients.GothonElasticsearch.readme.install7.X"
+                    defaultMessage="To install the 7.x version of the client, add the package to your go.mod file:"
+                  />
                 </EuiText>
 
                 <EuiCodeBlock language="shell" isCopyable>
@@ -126,16 +126,15 @@ export const ElasticsearchGoClientReadme = () => {
                 </EuiCodeBlock>
 
                 <EuiText>
-                      <FormattedMessage
-                        id="customIntegrations.languageClients.GothonElasticsearch.readme.clone"
-                        defaultMessage="Or, clone the repository:"
-                      />
+                  <FormattedMessage
+                    id="customIntegrations.languageClients.GothonElasticsearch.readme.clone"
+                    defaultMessage="Or, clone the repository:"
+                  />
                 </EuiText>
 
                 <EuiCodeBlock language="shell" isCopyable>
                   {`$ git clone --branch 7.16 https://github.com/elastic/go-elasticsearch.git $GOPATH/src/github`}
                 </EuiCodeBlock>
-
               </EuiPageSection>
 
               <EuiPageSection>

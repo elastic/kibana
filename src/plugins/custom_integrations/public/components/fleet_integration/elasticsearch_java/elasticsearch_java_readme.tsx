@@ -132,13 +132,13 @@ export const ElasticsearchJavaClientReadme = () => {
                   </h2>
                 </EuiTitle>
                 <EuiText>
-                      <FormattedMessage
-                        id="customIntegrations.languageClients.JavaElasticsearch.readme.installMavenMsg"
-                        defaultMessage="In the {pom} of your project, add the following repository definition and dependencies:"
-                        values={{
-                          pom: <EuiCode>pom.xml</EuiCode>,
-                        }}
-                      />
+                  <FormattedMessage
+                    id="customIntegrations.languageClients.JavaElasticsearch.readme.installMavenMsg"
+                    defaultMessage="In the {pom} of your project, add the following repository definition and dependencies:"
+                    values={{
+                      pom: <EuiCode>pom.xml</EuiCode>,
+                    }}
+                  />
                 </EuiText>
 
                 <EuiSpacer size="s" />

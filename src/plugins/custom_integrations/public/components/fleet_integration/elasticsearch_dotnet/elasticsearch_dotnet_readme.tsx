@@ -115,10 +115,10 @@ export const ElasticsearchDotnetClientReadme = () => {
                 <EuiSpacer size="s" />
 
                 <EuiText>
-                      <FormattedMessage
-                        id="customIntegrations.languageClients.DotnetElasticsearch.readme.sdk"
-                        defaultMessage="For SDK style projects, you can install the Elasticsearch client by running the following .NET CLI command in your terminal:"
-                      />
+                  <FormattedMessage
+                    id="customIntegrations.languageClients.DotnetElasticsearch.readme.sdk"
+                    defaultMessage="For SDK style projects, you can install the Elasticsearch client by running the following .NET CLI command in your terminal:"
+                  />
                 </EuiText>
 
                 <EuiCodeBlock language="shell" isCopyable>
@@ -126,10 +126,10 @@ export const ElasticsearchDotnetClientReadme = () => {
                 </EuiCodeBlock>
 
                 <EuiText>
-                      <FormattedMessage
-                        id="customIntegrations.languageClients.DotnetElasticsearch.readme.manually"
-                        defaultMessage="Or, you can manually add a package reference inside your project file:"
-                      />
+                  <FormattedMessage
+                    id="customIntegrations.languageClients.DotnetElasticsearch.readme.manually"
+                    defaultMessage="Or, you can manually add a package reference inside your project file:"
+                  />
                 </EuiText>
 
                 <EuiCodeBlock language=".dotnet" isCopyable>
