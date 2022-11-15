@@ -65,7 +65,7 @@ import { EditQueryDelay } from './edit_query_delay';
 import { CHART_DIRECTION, ChartDirectionType, CHART_SIZE } from './constants';
 import { loadFullJob } from '../utils';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { fillMissingChartData, ChartDataWithNullValues } from './fill_missing_chart_data';
+import { fillMissingChartData, type ChartDataWithNullValues } from './fill_missing_chart_data';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
 const MAX_CHART_POINTS = 480;
@@ -75,6 +75,9 @@ const revertSnapshotMessage = i18n.translate(
     defaultMessage: 'Click to revert to this model snapshot.',
   }
 );
+const notAvailableMessage = i18n.translate('xpack.ml.jobsList.datafeedChart.notAvailableMessage', {
+  defaultMessage: 'N/A',
+});
 
 interface DatafeedChartFlyoutProps {
   jobId: string;
@@ -440,7 +443,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             defaultMessage: 'Count',
                           })}
                           position={Position.Left}
-                          tickFormat={(d) => (d === null ? 'N/A' : d)}
+                          tickFormat={(d) => (d === null ? notAvailableMessage : d)}
                         />
                         {showAnnotations ? (
                           <>
