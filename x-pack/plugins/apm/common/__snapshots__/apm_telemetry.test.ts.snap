@@ -1086,6 +1086,12 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         "service_id": {
                           "type": "keyword"
                         },
+                        "num_service_nodes": {
+                          "type": "long"
+                        },
+                        "num_transaction_types": {
+                          "type": "long"
+                        },
                         "timed_out": {
                           "type": "boolean"
                         },

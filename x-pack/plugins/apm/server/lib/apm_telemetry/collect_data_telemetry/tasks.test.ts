@@ -361,49 +361,61 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'indices_stats');
 
     it('returns a map of index stats', async () => {
-      const indicesStats = jest.fn().mockResolvedValueOnce({
+      const indicesStats = jest.fn().mockResolvedValue({
         _all: { total: { docs: { count: 1 }, store: { size_in_bytes: 1 } } },
         _shards: { total: 1 },
       });
 
-      expect(await task?.executor({ indices, indicesStats } as any)).toEqual({
-        indices: {
-          shards: {
-            total: 1,
-          },
-          all: {
-            total: {
-              docs: {
-                count: 1,
-              },
-              store: {
-                size_in_bytes: 1,
-              },
+      const statsResponse = {
+        shards: {
+          total: 1,
+        },
+        all: {
+          total: {
+            docs: {
+              count: 1,
+            },
+            store: {
+              size_in_bytes: 1,
             },
           },
+        },
+      };
+
+      expect(await task?.executor({ indices, indicesStats } as any)).toEqual({
+        indices: {
+          ...statsResponse,
+          metric: statsResponse,
+          traces: statsResponse,
         },
       });
     });
 
     describe('with no results', () => {
       it('returns zero values', async () => {
-        const indicesStats = jest.fn().mockResolvedValueOnce({});
+        const indicesStats = jest.fn().mockResolvedValue({});
+
+        const statsResponse = {
+          shards: {
+            total: 0,
+          },
+          all: {
+            total: {
+              docs: {
+                count: 0,
+              },
+              store: {
+                size_in_bytes: 0,
+              },
+            },
+          },
+        };
 
         expect(await task?.executor({ indices, indicesStats } as any)).toEqual({
           indices: {
-            shards: {
-              total: 0,
-            },
-            all: {
-              total: {
-                docs: {
-                  count: 0,
-                },
-                store: {
-                  size_in_bytes: 0,
-                },
-              },
-            },
+            ...statsResponse,
+            metric: statsResponse,
+            traces: statsResponse,
           },
         });
       });
