@@ -93,7 +93,6 @@ export const unlinkListFromRules = async ({ rules, listId }: UnlinkListFromRules
         signal: abortCtrl.signal,
       });
     });
-    // abortCtrl.abort();
   } catch (error) {
     throw new Error(error);
   }
@@ -124,7 +123,6 @@ export const linkListToRules = async ({
         signal: abortCtrl.signal,
       });
     });
-    // abortCtrl.abort();
   } catch (error) {
     throw new Error(error);
   }
