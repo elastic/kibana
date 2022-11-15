@@ -12860,7 +12860,6 @@
     "xpack.fleet.agentEnrollment.confirmation.button": "查看注册的代理",
     "xpack.fleet.agentEnrollment.copyPolicyButton": "复制到剪贴板",
     "xpack.fleet.agentEnrollment.downloadDescriptionForK8s": "复制或下载 Kubernetes 清单。",
-    "xpack.fleet.agentEnrollment.downloadManifestButtonk8s": "下载清单",
     "xpack.fleet.agentEnrollment.downloadPolicyButton": "下载策略",
     "xpack.fleet.agentEnrollment.downloadPolicyButtonk8s": "下载清单",
     "xpack.fleet.agentEnrollment.enrollFleetTabLabel": "在 Fleet 中注册",

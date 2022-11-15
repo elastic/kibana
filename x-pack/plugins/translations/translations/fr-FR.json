@@ -12854,7 +12854,6 @@
     "xpack.fleet.agentEnrollment.confirmation.button": "Voir les agents inscrits",
     "xpack.fleet.agentEnrollment.copyPolicyButton": "Copier dans le presse-papiers",
     "xpack.fleet.agentEnrollment.downloadDescriptionForK8s": "Copiez ou téléchargez le manifeste Kubernetes.",
-    "xpack.fleet.agentEnrollment.downloadManifestButtonk8s": "Télécharger le manifeste",
     "xpack.fleet.agentEnrollment.downloadPolicyButton": "Télécharger la politique",
     "xpack.fleet.agentEnrollment.downloadPolicyButtonk8s": "Télécharger le manifeste",
     "xpack.fleet.agentEnrollment.enrollFleetTabLabel": "Enregistrer dans Fleet",
