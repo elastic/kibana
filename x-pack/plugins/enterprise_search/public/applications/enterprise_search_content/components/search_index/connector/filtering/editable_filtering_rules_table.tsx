@@ -59,7 +59,7 @@ function validateItem(filteringRule: FilteringRule): FormErrors {
     } catch {
       return {
         value: i18n.translate(
-          'xpack.enterpriseSearch.content.index.connector.filteringRules.description',
+          'xpack.enterpriseSearch.content.index.connector.filteringRules.regExError',
           { defaultMessage: 'Value should be a regular expression' }
         ),
       };
@@ -192,7 +192,7 @@ export const FilteringRulesTable: React.FC = () => {
   return (
     <InlineEditableTable
       addButtonText={i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsAddRuleLabel',
+        'xpack.enterpriseSearch.content.index.connector.filtering.table.addRuleLabel',
         { defaultMessage: 'Add filter rule' }
       )}
       columns={columns}
@@ -227,7 +227,7 @@ export const FilteringRulesTable: React.FC = () => {
       bottomRows={[
         <EuiText size="s">
           {i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.sources.indexingRulesTable.includeEverythingMessage',
+            'xpack.enterpriseSearch.content.sources.filteringRulesTable.includeEverythingMessage',
             {
               defaultMessage: 'Include everything else from this source',
             }
