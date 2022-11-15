@@ -5,35 +5,9 @@ exports[`FilteringPanel renders 1`] = `
   <FlyoutPanel
     title="Filtering"
   >
-    <EuiBasicTable
-      columns={
-        Array [
-          Object {
-            "field": "policy",
-            "name": "Pipeline setting",
-            "render": [Function],
-          },
-          Object {
-            "field": "rule",
-            "name": "Rule",
-            "render": [Function],
-          },
-          Object {
-            "field": "value",
-            "name": "Value",
-            "render": [Function],
-          },
-        ]
-      }
-      items={Array []}
-      noItemsMessage={
-        <EuiI18n
-          default="No items found"
-          token="euiBasicTable.noItemsMessage"
-        />
-      }
-      responsive={true}
-      tableLayout="fixed"
+    <FilteringRulesTable
+      filteringRules={Array []}
+      showOrder={false}
     />
   </FlyoutPanel>
 </Fragment>
@@ -44,34 +18,9 @@ exports[`FilteringPanel renders advanced snippet 1`] = `
   <FlyoutPanel
     title="Filtering"
   >
-    <EuiBasicTable
-      columns={
+    <FilteringRulesTable
+      filteringRules={
         Array [
-          Object {
-            "field": "policy",
-            "name": "Pipeline setting",
-            "render": [Function],
-          },
-          Object {
-            "field": "rule",
-            "name": "Rule",
-            "render": [Function],
-          },
-          Object {
-            "field": "value",
-            "name": "Value",
-            "render": [Function],
-          },
-        ]
-      }
-      items={
-        Array [
-          Object {
-            "order": 0,
-            "policy": "include",
-            "rule": "equals",
-            "value": "THIS VALUE",
-          },
           Object {
             "order": 1,
             "policy": "exclude",
@@ -85,9 +34,9 @@ exports[`FilteringPanel renders advanced snippet 1`] = `
             "value": "THIS VALUE",
           },
           Object {
-            "order": 4,
-            "policy": "exclude",
-            "rule": "<",
+            "order": 0,
+            "policy": "include",
+            "rule": "equals",
             "value": "THIS VALUE",
           },
           Object {
@@ -96,16 +45,15 @@ exports[`FilteringPanel renders advanced snippet 1`] = `
             "rule": ">",
             "value": "THIS VALUE",
           },
+          Object {
+            "order": 4,
+            "policy": "exclude",
+            "rule": "<",
+            "value": "THIS VALUE",
+          },
         ]
       }
-      noItemsMessage={
-        <EuiI18n
-          default="No items found"
-          token="euiBasicTable.noItemsMessage"
-        />
-      }
-      responsive={true}
-      tableLayout="fixed"
+      showOrder={false}
     />
   </FlyoutPanel>
   <EuiSpacer />
@@ -134,34 +82,9 @@ exports[`FilteringPanel renders filtering rules list 1`] = `
   <FlyoutPanel
     title="Filtering"
   >
-    <EuiBasicTable
-      columns={
+    <FilteringRulesTable
+      filteringRules={
         Array [
-          Object {
-            "field": "policy",
-            "name": "Pipeline setting",
-            "render": [Function],
-          },
-          Object {
-            "field": "rule",
-            "name": "Rule",
-            "render": [Function],
-          },
-          Object {
-            "field": "value",
-            "name": "Value",
-            "render": [Function],
-          },
-        ]
-      }
-      items={
-        Array [
-          Object {
-            "order": 0,
-            "policy": "include",
-            "rule": "equals",
-            "value": "THIS VALUE",
-          },
           Object {
             "order": 1,
             "policy": "exclude",
@@ -175,9 +98,9 @@ exports[`FilteringPanel renders filtering rules list 1`] = `
             "value": "THIS VALUE",
           },
           Object {
-            "order": 4,
-            "policy": "exclude",
-            "rule": "<",
+            "order": 0,
+            "policy": "include",
+            "rule": "equals",
             "value": "THIS VALUE",
           },
           Object {
@@ -186,16 +109,15 @@ exports[`FilteringPanel renders filtering rules list 1`] = `
             "rule": ">",
             "value": "THIS VALUE",
           },
+          Object {
+            "order": 4,
+            "policy": "exclude",
+            "rule": "<",
+            "value": "THIS VALUE",
+          },
         ]
       }
-      noItemsMessage={
-        <EuiI18n
-          default="No items found"
-          token="euiBasicTable.noItemsMessage"
-        />
-      }
-      responsive={true}
-      tableLayout="fixed"
+      showOrder={false}
     />
   </FlyoutPanel>
 </Fragment>

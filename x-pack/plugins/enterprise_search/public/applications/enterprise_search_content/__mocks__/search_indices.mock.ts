@@ -35,6 +35,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       configuration: { foo: { label: 'bar', value: 'barbar' } },
       description: null,
       error: null,
+      features: null,
       filtering: [
         {
           active: {
@@ -120,6 +121,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       configuration: { foo: { label: 'bar', value: 'barbar' } },
       description: null,
       error: null,
+      features: null,
       filtering: [
         {
           active: {
