@@ -3294,6 +3294,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-root-server-internal@link:bazel-bin/packages/core/root/core-root-server-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-saved-objects-api-browser@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-browser":
   version "0.0.0"
   uid ""

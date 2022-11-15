@@ -39,7 +39,7 @@ export const fetchSyncJobsByConnectorId = async (
       index: CONNECTORS_JOBS_INDEX,
       query: {
         term: {
-          connector_id: connectorId,
+          'connector.id': connectorId,
         },
       },
       size,

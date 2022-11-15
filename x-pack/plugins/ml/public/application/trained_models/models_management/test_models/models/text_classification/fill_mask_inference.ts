@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { InferenceBase } from '../inference_base';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
-import { processResponse } from './common';
+import { processResponse, processInferenceResult } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getFillMaskOutputComponent } from './fill_mask_output';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
@@ -28,51 +28,53 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
     }),
   ];
 
-  public async infer() {
-    try {
-      this.setRunning();
-      const inputText = this.inputText$.getValue();
-      const payload = {
-        docs: [{ [this.inputField]: inputText }],
-        ...this.getNumTopClassesConfig(),
-      };
-      const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
-        payload,
-        '30s'
-      )) as unknown as RawTextClassificationResponse;
-
-      const processedResponse = processResponse(resp, this.model, inputText);
-      this.inferenceResult$.next(processedResponse);
-      this.setFinished();
-
-      return processedResponse;
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
-  }
-
-  public predictedValue() {
-    const result = this.inferenceResult$.value;
-    if (result === null) {
-      return '';
-    }
-    return result.response[0]?.value
-      ? result.inputText.replace(MASK, result.response[0].value)
-      : result.inputText;
-  }
-
-  public getInputComponent(): JSX.Element {
-    const placeholder = i18n.translate(
-      'xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText',
-      {
-        defaultMessage:
-          'Enter a phrase to test. Use [MASK] as a placeholder for the missing words.',
+  protected async inferText() {
+    return this.runInfer<RawTextClassificationResponse>(
+      (inputText: string) => {
+        return {
+          docs: [{ [this.inputField]: inputText }],
+          inference_config: this.getInferenceConfig(this.getNumTopClassesConfig()),
+        };
+      },
+      (resp, inputText) => {
+        return processResponse(resp, this.model, inputText);
       }
     );
+  }
 
-    return getGeneralInputComponent(this, placeholder);
+  protected async inferIndex() {
+    return this.runPipelineSimulate((doc) => {
+      return {
+        response: processInferenceResult(doc._source[this.inferenceType], this.model),
+        rawResponse: doc._source[this.inferenceType],
+        inputText: doc._source[this.inputField],
+      };
+    });
+  }
+
+  protected getProcessors() {
+    return this.getBasicProcessors(this.getNumTopClassesConfig());
+  }
+
+  public predictedValue(resp: TextClassificationResponse) {
+    const { response, inputText } = resp;
+    return response[0]?.value ? inputText.replace(MASK, response[0].value) : inputText;
+  }
+
+  public getInputComponent(): JSX.Element | null {
+    if (this.inputType === INPUT_TYPE.TEXT) {
+      const placeholder = i18n.translate(
+        'xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText',
+        {
+          defaultMessage:
+            'Enter a phrase to test. Use [MASK] as a placeholder for the missing words.',
+        }
+      );
+
+      return getGeneralInputComponent(this, placeholder);
+    } else {
+      return null;
+    }
   }
 
   public getOutputComponent(): JSX.Element {
