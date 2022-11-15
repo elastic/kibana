@@ -19468,7 +19468,6 @@
     "xpack.ml.trainedModels.modelsList.stopSuccess": "已成功停止“{modelId}”的部署。",
     "xpack.ml.trainedModels.modelsList.successfullyDeletedMessage": "{modelsCount, plural, one {模型 {modelIds}} other {# 个模型}}{modelsCount, plural, other {已}}成功删除",
     "xpack.ml.trainedModels.testModelsFlyout.langIdent.output.title": "这像是 {lang}",
-    "xpack.ml.trainedModels.testModelsFlyout.langIdent.output.titleUnknown": "语言代码未知：{code}",
     "xpack.ml.validateJob.modal.linkToJobTipsText": "有关更多信息，请参阅 {mlJobTipsLink}。",
     "xpack.ml.validateJob.modal.validateJobTitle": "验证作业 {title}",
     "xpack.ml.accessDenied.description": "您无权查看 Machine Learning 插件。要访问该插件，需要 Machine Learning 功能在此工作区中可见。",
