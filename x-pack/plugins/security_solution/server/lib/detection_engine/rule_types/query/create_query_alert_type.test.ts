@@ -17,6 +17,7 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 jest.mock('../../signals/utils', () => ({
   ...jest.requireActual('../../signals/utils'),
@@ -59,6 +60,8 @@ describe('Custom Query Alerts', () => {
         experimentalFeatures: allowedExperimentalValues,
         logger,
         version: '1.0.0',
+        id: QUERY_RULE_TYPE_ID,
+        name: 'Custom Query Rule',
       })
     );
 
@@ -105,6 +108,8 @@ describe('Custom Query Alerts', () => {
         experimentalFeatures: allowedExperimentalValues,
         logger,
         version: '1.0.0',
+        id: QUERY_RULE_TYPE_ID,
+        name: 'Custom Query Rule',
       })
     );
 
