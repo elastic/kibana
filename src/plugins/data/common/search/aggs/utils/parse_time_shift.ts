@@ -90,7 +90,7 @@ export const parseAbsoluteTimeShift = (
   // workout how long is the ref time range
   const duration = moment(timeRange.to).diff(moment(timeRange.from));
   // pick the end of the absolute range now
-  const absRangeEnd = anchor === 'start' ? tsMoment : tsMoment.add(duration);
+  const absRangeEnd = anchor === 'start' ? tsMoment.add(duration) : tsMoment;
   // return (ref end date - shift end date)
   return { value: moment.duration(moment(timeRange.to).diff(absRangeEnd)), reason: null };
 };

@@ -334,7 +334,7 @@ function roundAbsoluteInterval(timeShift: string, dateRange: DateRange, targetBa
   );
   const duration = parseTimeShiftWrapper(timeShift, dateRange);
   if (typeof duration !== 'string') {
-    const roundingOffset = timeShift.startsWith('start') ? interval.asMilliseconds() : 0;
+    const roundingOffset = timeShift.startsWith('end') ? interval.asMilliseconds() : 0;
     return `${
       (closestMultipleOfInterval(duration.asMilliseconds(), interval.asMilliseconds()) -
         roundingOffset) /
