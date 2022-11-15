@@ -14,6 +14,12 @@ import { PresentationUtilPlugin } from './plugin';
 import { pluginServices } from './services';
 
 export type {
+  PresentationCapabilitiesService,
+  PresentationDashboardsService,
+  PresentationLabsService,
+} from './services';
+
+export type {
   KibanaPluginServiceFactory,
   PluginServiceFactory,
   PluginServiceProviders,

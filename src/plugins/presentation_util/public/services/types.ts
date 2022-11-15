@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PresentationCapabilitiesService } from './capabilities/types';
-import { PresentationDashboardsService } from './dashboards/types';
-import { PresentationDataViewsService } from './data_views/types';
 import { PresentationLabsService } from './labs/types';
+import { PresentationDashboardsService } from './dashboards/types';
+import { PresentationCapabilitiesService } from './capabilities/types';
+import { PresentationDataViewsService } from './data_views/types';
 
 export interface PresentationUtilServices {
   dashboards: PresentationDashboardsService;
@@ -17,3 +17,9 @@ export interface PresentationUtilServices {
   capabilities: PresentationCapabilitiesService;
   labs: PresentationLabsService;
 }
+
+export type {
+  PresentationCapabilitiesService,
+  PresentationDashboardsService,
+  PresentationLabsService,
+};
