@@ -1768,25 +1768,6 @@ Object {
                       <div
                         class="euiFlexItem"
                       >
-                        <button
-                          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
-                          data-test-subj="RightSideMenuItemsManageRulesButton"
-                          type="button"
-                        >
-                          <span
-                            class="emotion-euiButtonDisplayContent"
-                          >
-                            <span
-                              class="eui-textTruncate"
-                            >
-                              Manage rules
-                            </span>
-                          </span>
-                        </button>
-                      </div>
-                      <div
-                        class="euiFlexItem"
-                      >
                         <div
                           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
@@ -2042,25 +2023,6 @@ Object {
                       >
                         Linked to 0 rules
                       </span>
-                    </div>
-                    <div
-                      class="euiFlexItem"
-                    >
-                      <button
-                        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
-                        data-test-subj="RightSideMenuItemsManageRulesButton"
-                        type="button"
-                      >
-                        <span
-                          class="emotion-euiButtonDisplayContent"
-                        >
-                          <span
-                            class="eui-textTruncate"
-                          >
-                            Manage rules
-                          </span>
-                        </span>
-                      </button>
                     </div>
                     <div
                       class="euiFlexItem"
