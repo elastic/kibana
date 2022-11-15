@@ -15,7 +15,7 @@ import {
   ChangePointType,
 } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
-import { useCancellableRequest } from '../../hooks/use_cancellable_request';
+import { useCancellableSearch } from '../../hooks/use_cancellable_search';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 
 interface RequestOptions {
@@ -111,7 +111,7 @@ export function useChangePointResults(
 
   const splitFieldCardinality = useSplitFieldCardinality(requestParams.splitField, query);
 
-  const { runRequest, cancelRequest, isLoading } = useCancellableRequest();
+  const { runRequest, cancelRequest, isLoading } = useCancellableSearch();
 
   const reset = useCallback(() => {
     cancelRequest();

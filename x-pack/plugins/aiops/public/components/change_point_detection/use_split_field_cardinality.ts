@@ -11,7 +11,7 @@ import type {
   AggregationsCardinalityAggregate,
   SearchResponseBody,
 } from '@elastic/elasticsearch/lib/api/types';
-import { useCancellableRequest } from '../../hooks/use_cancellable_request';
+import { useCancellableSearch } from '../../hooks/use_cancellable_search';
 import { useDataSource } from '../../hooks/use_data_source';
 
 /**
@@ -42,7 +42,7 @@ export function useSplitFieldCardinality(splitField: string, query: QueryDslQuer
     };
   }, [splitField, dataView, query]);
 
-  const { runRequest: getSplitFieldCardinality, cancelRequest } = useCancellableRequest();
+  const { runRequest: getSplitFieldCardinality, cancelRequest } = useCancellableSearch();
 
   useEffect(
     function performCardinalityCheck() {

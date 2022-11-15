@@ -14,7 +14,7 @@ import {
 import { tap } from 'rxjs/operators';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
-export function useCancellableRequest() {
+export function useCancellableSearch() {
   const { data } = useAiopsAppContext();
   const abortController = useRef(new AbortController());
   const [isLoading, setIsFetching] = useState<boolean>(false);
