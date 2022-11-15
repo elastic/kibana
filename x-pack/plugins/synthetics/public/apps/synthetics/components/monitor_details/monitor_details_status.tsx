@@ -7,13 +7,11 @@
 import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-plugin/public';
 
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 
 export const MonitorDetailsStatus: React.FC = () => {
-  const theme = useTheme();
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
 
   const { monitor } = useSelectedMonitor();
@@ -29,9 +27,9 @@ export const MonitorDetailsStatus: React.FC = () => {
   ) : !latestPing ? (
     <EuiBadge color="default">{PENDING_LABEL}</EuiBadge>
   ) : latestPing.monitor.status === 'up' ? (
-    <EuiBadge color={theme.eui.euiColorVis0}>{isBrowserType ? SUCCESS_LABEL : UP_LABEL}</EuiBadge>
+    <EuiBadge color="success">{isBrowserType ? SUCCESS_LABEL : UP_LABEL}</EuiBadge>
   ) : (
-    <EuiBadge color={theme.eui.euiColorVis9}>{isBrowserType ? FAILED_LABEL : DOWN_LABEL}</EuiBadge>
+    <EuiBadge color="danger">{isBrowserType ? FAILED_LABEL : DOWN_LABEL}</EuiBadge>
   );
 
   return <EuiDescriptionList listItems={[{ title: STATUS_LABEL, description: badge }]} />;
