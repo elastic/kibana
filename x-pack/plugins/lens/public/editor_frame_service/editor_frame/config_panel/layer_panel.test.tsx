@@ -698,6 +698,54 @@ describe('LayerPanel', () => {
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
       expect(updateDatasource).toHaveBeenCalledWith('testDatasource', { newState: true });
     });
+
+    it('should display the fake final accessor if present in the group config', async () => {
+      const fakeAccessorLabel = "I'm a fake!";
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }],
+            filterOperations: () => true,
+            fakeFinalAccessor: {
+              label: fakeAccessorLabel,
+            },
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
+      expect(instance.exists('[data-test-subj="lns-fakeDimension"]')).toBeTruthy();
+      expect(
+        instance
+          .find('[data-test-subj="lns-fakeDimension"] .lnsLayerPanel__triggerTextLabel')
+          .text()
+      ).toBe(fakeAccessorLabel);
+    });
+
+    it('should not display the fake final accessor if not present in the group config', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }],
+            filterOperations: () => true,
+            fakeFinalAccessor: undefined,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
+      expect(instance.exists('[data-test-subj="lns-fakeDimension"]')).toBeFalsy();
+    });
   });
 
   // This test is more like an integration test, since the layer panel owns all
