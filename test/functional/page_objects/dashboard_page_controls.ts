@@ -557,4 +557,11 @@ export class DashboardPageControls extends FtrService {
   public async gotoNextTimeSlice() {
     await this.testSubjects.click('timeSlider-nextTimeWindow');
   }
+
+  public async closeTimeSliderPopover() {
+    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
+    if (isOpen) {
+      await this.testSubjects.click('timeSlider-popoverToggleButton');
+    }
+  }
 }

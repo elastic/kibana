@@ -30,7 +30,7 @@ export function TimeSliderPopoverContent(props: Props) {
     <EuiFlexGroup
       className="rangeSlider__actions"
       gutterSize="none"
-      data-test-subj="timeSlider-control-actions"
+      data-test-subj="timeSlider-popoverContents"
       responsive={false}
     >
       <EuiFlexItem>
