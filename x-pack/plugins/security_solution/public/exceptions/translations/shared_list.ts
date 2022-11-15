@@ -355,6 +355,6 @@ export const SORT_BY = i18n.translate('xpack.securitySolution.exceptions.sortBy'
 export const SORT_BY_CREATE_AT = i18n.translate(
   'xpack.securitySolution.exceptions.sortByCreateAt',
   {
-    defaultMessage: 'Create At',
+    defaultMessage: 'Created At',
   }
 );
