@@ -47,6 +47,7 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
   USER_AGENT_ORIGINAL,
+  SERVICE_NODE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
@@ -1176,18 +1177,23 @@ export const tasks: TelemetryTask[] = [
             },
           },
           aggs: {
-            environments: {
+            service_names: {
               terms: {
-                field: SERVICE_ENVIRONMENT,
-                size: 1000,
+                field: SERVICE_NAME,
+                size: 2500,
               },
               aggs: {
-                service_names: {
+                environments: {
                   terms: {
-                    field: SERVICE_NAME,
-                    size: 1000,
+                    field: SERVICE_ENVIRONMENT,
+                    size: 5,
                   },
                   aggs: {
+                    instances: {
+                      cardinality: {
+                        field: SERVICE_NODE_NAME,
+                      },
+                    },
                     top_metrics: {
                       top_metrics: {
                         sort: '_score',
@@ -1256,87 +1262,84 @@ export const tasks: TelemetryTask[] = [
           },
         },
       });
-      const envBuckets = response.aggregations?.environments.buckets ?? [];
-      const data: APMPerService[] = envBuckets.flatMap((envBucket) => {
+      const serviceBuckets = response.aggregations?.service_names.buckets ?? [];
+      const data: APMPerService[] = serviceBuckets.flatMap((topLevelBucket) => {
         const envHash = createHash('sha256')
-          .update(envBucket.key as string)
+          .update(serviceBucket.key as string)
           .digest('hex');
-        const serviceBuckets = envBucket.service_names?.buckets ?? [];
-        return serviceBuckets.map((serviceBucket) => {
+        const envBuckets = serviceBucket.environments?.buckets ?? [];
+        return envBuckets.map((envBucket) => {
           const nameHash = createHash('sha256')
-            .update(serviceBucket.key as string)
+            .update(envBucket.key as string)
             .digest('hex');
           const fullServiceName = `${nameHash}~${envHash}`;
           return {
             service_id: fullServiceName,
             timed_out: response.timed_out,
+            num_service_nodes: envBucket.instances.value ?? 1,
             cloud: {
               availability_zones:
-                serviceBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
+                envBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
               regions:
-                serviceBucket[CLOUD_REGION]?.buckets.map(
+                envBucket[CLOUD_REGION]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
               providers:
-                serviceBucket[CLOUD_PROVIDER]?.buckets.map(
+                envBucket[CLOUD_PROVIDER]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
             },
             faas: {
               trigger: {
                 type:
-                  serviceBucket[FAAS_TRIGGER_TYPE]?.buckets.map(
+                  envBucket[FAAS_TRIGGER_TYPE]?.buckets.map(
                     (inner) => inner.key as string
                   ) ?? [],
               },
             },
             agent: {
-              name: serviceBucket.top_metrics?.top[0].metrics[
-                AGENT_NAME
-              ] as string,
-              version: serviceBucket.top_metrics?.top[0].metrics[
+              name: envBucket.top_metrics?.top[0].metrics[AGENT_NAME] as string,
+              version: envBucket.top_metrics?.top[0].metrics[
                 AGENT_VERSION
               ] as string,
             },
             service: {
               language: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_LANGUAGE_NAME
                 ] as string,
-                version: serviceBucket.top_metrics?.top[0].metrics[
+                version: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_LANGUAGE_VERSION
                 ] as string,
               },
               framework: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_FRAMEWORK_NAME
                 ] as string,
-                version: serviceBucket.top_metrics?.top[0].metrics[
+                version: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_FRAMEWORK_VERSION
                 ] as string,
               },
               runtime: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_RUNTIME_NAME
                 ] as string,
-                version: serviceBucket.top_metrics?.top[0].metrics[
+                version: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_RUNTIME_VERSION
                 ] as string,
               },
             },
             kubernetes: {
               pod: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   KUBERNETES_POD_NAME
                 ] as string,
               },
             },
             container: {
-              id: serviceBucket.top_metrics?.top[0].metrics[
-                CONTAINER_ID
-              ] as string,
+              id: envBucket.top_metrics?.top[0].metrics[CONTAINER_ID] as string,
             },
           };
         });
