@@ -27,9 +27,9 @@ export const parser: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
+  const insightPrefix = '!{insight';
 
   const tokenizeInsight: RemarkTokenizer = function (eat, value, silent) {
-    const insightPrefix = '!{insight';
     if (value.startsWith(insightPrefix) === false) {
       return false;
     }
@@ -87,7 +87,9 @@ export const parser: Plugin = function () {
     }
     return false;
   };
-
+  tokenizeInsight.locator = (value: string, fromIndex: number) => {
+    return value.indexOf(insightPrefix, fromIndex);
+  };
   tokenizers.insight = tokenizeInsight;
   methods.splice(methods.indexOf('text'), 0, 'insight');
 };
