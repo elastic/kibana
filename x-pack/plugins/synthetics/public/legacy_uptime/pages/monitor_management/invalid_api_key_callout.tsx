@@ -48,7 +48,7 @@ export const InvalidApiKeyCalloutCallout = () => {
 const LEARN_MORE_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.manageMonitorLoadingLabel.callout.invalidKey',
   {
-    defaultMessage: 'Learn more.',
+    defaultMessage: 'Learn more',
   }
 );
 
@@ -75,6 +75,6 @@ const CALLOUT_MANAGEMENT_DESCRIPTION = i18n.translate(
 const SYNTHETICS_ENABLE_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.syntheticsEnableLabel.invalidKey',
   {
-    defaultMessage: 'Re-enable monitor management',
+    defaultMessage: 'Enable monitor management',
   }
 );

@@ -51,9 +51,9 @@ export const DisabledCallout = () => {
 };
 
 const LEARN_MORE_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.manageMonitorLoadingLabel.callout.learnMore',
+  'xpack.synthetics.monitorManagement.manageMonitorLoadingLabel.disabledCallout.learnMore',
   {
-    defaultMessage: 'Learn more.',
+    defaultMessage: 'Learn more',
   }
 );
 
@@ -67,7 +67,7 @@ const CALLOUT_MANAGEMENT_DISABLED = i18n.translate(
 const CALLOUT_MANAGEMENT_CONTACT_ADMIN = i18n.translate(
   'xpack.synthetics.monitorManagement.callout.disabled.adminContact',
   {
-    defaultMessage: 'Please contact your administrator to enable Monitor Management.',
+    defaultMessage: 'Contact your administrator to enable Monitor Management.',
   }
 );
 
