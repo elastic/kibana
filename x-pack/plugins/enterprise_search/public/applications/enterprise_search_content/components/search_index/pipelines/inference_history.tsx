@@ -90,6 +90,10 @@ export const InferenceHistory: React.FC = () => {
             columns={historyColumns}
             items={inferenceHistory ?? []}
             rowHeader="pipeline"
+            noItemsMessage={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory.emptyMessage',
+              { defaultMessage: 'This index has no inference history' }
+            )}
           />
         )}
       </DataPanel>
