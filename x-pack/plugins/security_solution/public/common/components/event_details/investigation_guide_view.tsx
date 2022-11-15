@@ -52,7 +52,7 @@ const InvestigationGuideViewComponent: React.FC<{
       <Indent>
         <EuiText size="xs">
           <LineClamp lineClampHeight={4.5}>
-            <MarkdownRenderer scopeId={scopeId}>{maybeRule.note}</MarkdownRenderer>
+            <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
           </LineClamp>
         </EuiText>
       </Indent>

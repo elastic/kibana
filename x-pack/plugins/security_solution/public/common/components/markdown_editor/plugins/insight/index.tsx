@@ -6,39 +6,18 @@
  */
 
 import type { Plugin } from 'unified';
-import React, { useContext, useMemo, useState, useCallback } from 'react';
+import React, { useContext } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
-import {
-  EuiSpacer,
-  EuiCodeBlock,
-  EuiCallOut,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiButton,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import { useForm, FormProvider } from 'react-hook-form';
-import styled from 'styled-components';
+import { EuiSpacer, EuiCodeBlock, EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  QueryOperator,
-  DataProviderType,
-  QueryMatch,
-  DataProvider,
-  DataProvidersAnd,
-} from '@kbn/timelines-plugin/common';
-import { useKibana } from '../../../../lib/kibana';
+import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useInsightQuery } from './use_insight_query';
 import { useInsightDataProviders } from './use_insight_data_providers';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
 
 interface InsightComponentProps {
-  label: string;
+  label?: string;
   description?: string;
   providers?: string;
 }
@@ -49,11 +28,12 @@ export const parser: Plugin = function () {
   const methods = Parser.prototype.inlineMethods;
 
   const tokenizeInsight: RemarkTokenizer = function (eat, value, silent) {
-    if (value.startsWith('!{insight') === false) {
+    const insightPrefix = '!{insight';
+    if (value.startsWith(insightPrefix) === false) {
       return false;
     }
 
-    const nextChar = value[9];
+    const nextChar = value[insightPrefix.length];
     if (nextChar !== '{' && nextChar !== '}') return false;
     if (silent) {
       return true;
@@ -62,14 +42,14 @@ export const parser: Plugin = function () {
     // is there a configuration?
     const hasConfiguration = nextChar === '{';
 
-    let match = '';
     let configuration: InsightComponentProps = {};
     if (hasConfiguration) {
       let configurationString = '';
+      let match = '';
 
       let openObjects = 0;
 
-      for (let i = 9; i < value.length; i++) {
+      for (let i = insightPrefix.length; i < value.length; i++) {
         const char = value[i];
         if (char === '{') {
           openObjects++;
@@ -88,14 +68,17 @@ export const parser: Plugin = function () {
       match += configurationString;
       try {
         configuration = JSON.parse(configurationString);
-        console.log({configuration});
         return eat(value)({
           type: 'insight',
           ...configuration,
           providers: JSON.stringify(configuration.providers),
         });
       } catch (e) {
-        console.log(e);
+        const now = eat.now();
+        this.file.fail(`Unable to parse insight JSON configuration: ${e}`, {
+          line: now.line,
+          column: now.column + insightPrefix.length,
+        });
       }
     }
     return false;
@@ -106,57 +89,42 @@ export const parser: Plugin = function () {
 };
 
 // receives the configuration from the parser and renders
-const OpenInsightInTimeline = (scopeId) => {
-  const InsightComponent = ({
-    label,
-    description,
-    children,
-    position,
-    type,
-    providers,
-  }: InsightComponentProps) => {
-    let parsedProviders = {};
-    try {
-      if (providers !== undefined) {
-        parsedProviders = JSON.parse(providers);
-      }
-    } catch (err) {
+const InsightComponent = ({ label, description, providers }: InsightComponentProps) => {
+  const { addError } = useAppToasts();
+  let parsedProviders = [];
+  try {
+    if (providers !== undefined) {
+      parsedProviders = JSON.parse(providers);
     }
-    const { data: alertData, alertId } = useContext(BasicAlertDataContext);
-    console.log({parsedProviders});
-    const { dataProviders } = useInsightDataProviders({
-      providers,
-      scopeId,
-      alertData,
-      alertId,
-    });
-    const { totalCount, isQueryLoading, oldestTimestamp } = useInsightQuery({
-      dataProviders,
-      scopeId,
-      alertData,
-    });
+  } catch (err) {
+    addError(err, { title: 'parse failure' });
+  }
+  const { data: alertData } = useContext(BasicAlertDataContext);
+  const dataProviders = useInsightDataProviders({
+    providers: parsedProviders,
+    alertData,
+  });
+  const { totalCount, isQueryLoading, oldestTimestamp } = useInsightQuery({
+    dataProviders,
+  });
+  if (isQueryLoading) {
+    return <EuiLoadingSpinner size="l" />;
+  } else {
     return (
-      <EuiCallOut title={label} iconType="timeline">
-        {isQueryLoading === false ? <p>{`${totalCount} matching events`}</p> : null}
-        <p>{description}</p>
-        <InvestigateInTimelineButton
-          asEmptyButton={false}
-          dataProviders={dataProviders}
-          timeRange={oldestTimestamp}
-          keepDataView={false}
-        >
-          {label ??
-            i18n.translate('xpack.securitySolution.markdown.insights.openInsightButtonLabel', {
-              defaultMessage: 'Open Insight in Timeline',
-            })}
-        </InvestigateInTimelineButton>
-      </EuiCallOut>
+      <InvestigateInTimelineButton
+        asEmptyButton={false}
+        dataProviders={dataProviders}
+        timeRange={oldestTimestamp}
+        keepDataView={true}
+      >
+        <EuiIcon type="timeline" />
+        {` ${label} (${totalCount}) - ${description}`}
+      </InvestigateInTimelineButton>
     );
-  };
-  return InsightComponent;
+  }
 };
 
-export { OpenInsightInTimeline as renderer };
+export { InsightComponent as renderer };
 
 const InsightEditorComponent = ({
   node,

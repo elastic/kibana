@@ -13,7 +13,6 @@ import { useDispatch } from 'react-redux';
 import { sourcererSelectors } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
 import { inputsActions } from '../../../store/inputs';
-import type { TimeRange } from '../../../store/inputs/model';
 import { updateProviders, setFilters } from '../../../../timelines/store/timeline/actions';
 import { sourcererActions } from '../../../store/actions';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
@@ -22,13 +21,12 @@ import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { getDataProvider } from './use_action_cell_data_provider';
 
 export const InvestigateInTimelineButton: React.FunctionComponent<{
   asEmptyButton: boolean;
   dataProviders: DataProvider[] | null;
   filters?: Filter[] | null;
-  timeRange?: string;
+  timeRange?: string | null;
   keepDataView?: boolean;
 }> = ({ asEmptyButton, children, dataProviders, filters, timeRange, keepDataView, ...rest }) => {
   const dispatch = useDispatch();
@@ -52,7 +50,17 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
   const configureAndOpenTimeline = useCallback(() => {
     if (dataProviders || filters) {
       // Reset the current timeline
-      clearTimeline({ timeRange });
+      if (timeRange) {
+        clearTimeline({
+          timeRange: {
+            kind: 'absolute',
+            from: timeRange,
+            to: new Date().toISOString(),
+          },
+        });
+      } else {
+        clearTimeline();
+      }
       if (dataProviders) {
         // Update the timeline's providers to match the current prevalence field query
         dispatch(
@@ -93,6 +101,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
     signalIndexName,
     filters,
     timeRange,
+    keepDataView,
   ]);
 
   return asEmptyButton ? (

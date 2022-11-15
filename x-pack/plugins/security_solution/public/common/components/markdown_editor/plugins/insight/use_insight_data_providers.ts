@@ -5,89 +5,103 @@
  * 2.0.
  */
 
-import { useMemo, useEffect, useRef, useState, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
-import { noop } from 'lodash/fp';
-import deepEqual from 'fast-deep-equal';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
-
-import { useQuery } from '@tanstack/react-query';
-import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { Subscription } from 'rxjs';
-
-import { useHttp, useKibana } from '../../../../lib/kibana';
-import { convertKueryToElasticSearchQuery } from '../../../../lib/kuery';
-import { useAppToasts } from '../../../../hooks/use_app_toasts';
-import { useSourcererDataView } from '../../../../containers/sourcerer';
-import type { inputsModel } from '../../../../store';
-import type { ESQuery } from '../../../../../../common/typed_json';
-
-import { useTimelineDataFilters } from '../../../../../timelines/containers/use_timeline_data_filters';
-import { getDataProvider } from '../../../event_details/table/use_action_cell_data_provider';
-import { getEnrichedFieldInfo } from '../../../event_details/helpers';
-import type {
-  QueryOperator,
-  QueryMatch,
-  DataProvider,
-  DataProvidersAnd,
-} from '@kbn/timelines-plugin/common';
+import { useMemo } from 'react';
+import type { QueryOperator, DataProvider } from '@kbn/timelines-plugin/common';
 import { DataProviderType } from '@kbn/timelines-plugin/common';
 import { IS_OPERATOR } from '../../../../../timelines/components/timeline/data_providers/data_provider';
-import {
-  TimelineEventsQueries,
-  TimelineRequestOptionsPaginated,
-  TimelineEventsDetailsItem,
-} from '../../../../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 
 export const useInsightDataProviders = ({
   providers,
-  scopeId,
   alertData,
-  alertId,
 }: {
-  providers: { [field: string]: { value: string; type: 'parameter' | 'value' } };
-  alertData: TimelineEventsDetailsItem[];
-}): { dataProviders: DataProvider[] } => {
+  providers: Array<Array<{ field: string; value: string; type: 'parameter' | 'value' }>>;
+  alertData?: TimelineEventsDetailsItem[] | null;
+}): DataProvider[] => {
   function getFieldValue(fields: TimelineEventsDetailsItem[], fieldToFind: string) {
     const alertField = fields.find((dataField) => dataField.field === fieldToFind);
     return alertField?.values ? alertField.values[0] : '*';
   }
-  const dataProviders = useMemo(() => {
+  const dataProviders: DataProvider[] = useMemo(() => {
     if (alertData) {
-      return Object.entries(providers).map(([field, { value, type }]) => {
-        return {
-          and: [],
-          enabled: true,
-          id: JSON.stringify(field + value + type),
-          name: field,
-          excluded: false,
-          kqlQuery: '',
-          type: DataProviderType.default,
-          queryMatch: {
-            field,
-            value: type === 'parameter' ? getFieldValue(alertData, value) : value,
-            operator: IS_OPERATOR as QueryOperator,
-          },
-        };
+      return providers.map((innerProvider) => {
+        return innerProvider.reduce((prev, next, index): DataProvider => {
+          const { field, value, type } = next;
+          if (index === 0) {
+            return {
+              and: [],
+              enabled: true,
+              id: JSON.stringify(field + value + type),
+              name: field,
+              excluded: false,
+              kqlQuery: '',
+              type: DataProviderType.default,
+              queryMatch: {
+                field,
+                value: type === 'parameter' ? getFieldValue(alertData, value) : value,
+                operator: IS_OPERATOR as QueryOperator,
+              },
+            };
+          } else {
+            const newProvider = {
+              and: [],
+              enabled: true,
+              id: JSON.stringify(field + value + type),
+              name: field,
+              excluded: false,
+              kqlQuery: '',
+              type: DataProviderType.default,
+              queryMatch: {
+                field,
+                value: type === 'parameter' ? getFieldValue(alertData, value) : value,
+                operator: IS_OPERATOR as QueryOperator,
+              },
+            };
+            prev.and.push(newProvider);
+          }
+          return prev;
+        }, {} as DataProvider);
       });
     } else {
-      return Object.entries(providers).map(([field, { value, type }]) => {
-        return {
-          and: [],
-          enabled: true,
-          id: JSON.stringify(field + value + type),
-          name: field,
-          excluded: false,
-          kqlQuery: '',
-          type: type === 'parameter' ? DataProviderType.template : DataProviderType.default,
-          queryMatch: {
-            field,
-            value: type === 'parameter' ? `{${value}}` : value,
-            operator: IS_OPERATOR as QueryOperator,
-          },
-        };
+      return providers.map((innerProvider) => {
+        return innerProvider.reduce((prev, next, index) => {
+          const { field, value, type } = next;
+          if (index === 0) {
+            return {
+              and: [],
+              enabled: true,
+              id: JSON.stringify(field + value + type),
+              name: field,
+              excluded: false,
+              kqlQuery: '',
+              type: type === 'parameter' ? DataProviderType.template : DataProviderType.default,
+              queryMatch: {
+                field,
+                value: type === 'parameter' ? `{${value}}` : value,
+                operator: IS_OPERATOR as QueryOperator,
+              },
+            };
+          } else {
+            const newProvider = {
+              and: [],
+              enabled: true,
+              id: JSON.stringify(field + value + type),
+              name: field,
+              excluded: false,
+              kqlQuery: '',
+              type: type === 'parameter' ? DataProviderType.template : DataProviderType.default,
+              queryMatch: {
+                field,
+                value: type === 'parameter' ? `{${value}}` : value,
+                operator: IS_OPERATOR as QueryOperator,
+              },
+            };
+            prev.and.push(newProvider);
+          }
+          return prev;
+        }, {} as DataProvider);
       });
     }
   }, [alertData, providers]);
-  return { dataProviders };
+  return dataProviders;
 };

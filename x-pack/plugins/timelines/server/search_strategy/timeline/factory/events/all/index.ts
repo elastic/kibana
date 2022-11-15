@@ -81,6 +81,7 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
       consumers,
       inspect,
       edges,
+      // @ts-expect-error code doesn't handle TotalHits
       totalCount,
       pageInfo: {
         activePage: activePage ?? 0,

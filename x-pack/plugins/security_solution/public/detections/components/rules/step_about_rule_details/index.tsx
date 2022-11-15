@@ -22,7 +22,6 @@ import styled from 'styled-components';
 
 import { HeaderSection } from '../../../../common/components/header_section';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
-import { TableId } from '../../../../../common/types/timeline';
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
@@ -159,9 +158,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                   maxHeight={aboutPanelHeight}
                   className="eui-yScrollWithShadows"
                 >
-                  <MarkdownRenderer scopeId={TableId.alertsOnRuleDetailsPage}>
-                    {stepDataDetails.note}
-                  </MarkdownRenderer>
+                  <MarkdownRenderer>{stepDataDetails.note}</MarkdownRenderer>
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
             )}
@@ -174,9 +171,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                   maxHeight={aboutPanelHeight}
                   className="eui-yScrollWithShadows"
                 >
-                  <MarkdownRenderer scopeId={TableId.alertsOnRuleDetailsPage}>
-                    {stepDataDetails.setup}
-                  </MarkdownRenderer>
+                  <MarkdownRenderer>{stepDataDetails.setup}</MarkdownRenderer>
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
             )}
