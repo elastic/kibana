@@ -50,8 +50,14 @@ export const dashboardSavedObjectServiceFactory: DashboardSavedObjectServiceFact
         ...requiredServices,
       }),
     findDashboards: {
-      findSavedObjects: ({ hasReference, search, size }) =>
-        findDashboardSavedObjects({ hasReference, search, size, savedObjectsClient }),
+      findSavedObjects: ({ hasReference, hasNoReference, search, size }) =>
+        findDashboardSavedObjects({
+          hasReference,
+          hasNoReference,
+          search,
+          size,
+          savedObjectsClient,
+        }),
       findByIds: (ids) => findDashboardSavedObjectsByIds(savedObjectsClient, ids),
       findByTitle: (title) => findDashboardIdByTitle(title, savedObjectsClient),
     },

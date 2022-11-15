@@ -7,7 +7,7 @@
  */
 
 import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
-import { FieldSpec, DataView } from '@kbn/data-views-plugin/common';
+import { FieldSpec, DataView, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 
 import { DataControlInput } from '../types';
 
@@ -57,9 +57,11 @@ export type OptionsListRequest = Omit<
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
  */
 export interface OptionsListRequestBody {
+  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   filters?: Array<{ bool: BoolQuery }>;
   selectedOptions?: string[];
   runPastTimeout?: boolean;
+  parentFieldName?: string;
   textFieldName?: string;
   searchString?: string;
   fieldSpec?: FieldSpec;

@@ -8,7 +8,7 @@
 import type { SingleCaseMetricsFeature } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
-export const DEFAULT_TABLE_LIMIT = 5;
+export const DEFAULT_TABLE_LIMIT = 10;
 
 export const casesQueriesKeys = {
   all: ['cases'] as const,
