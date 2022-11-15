@@ -277,7 +277,9 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
   private formatDate = (epoch: number) => {
     const { getState } = this.reduxEmbeddableTools;
-    return moment.tz(epoch, getMomentTimezone(this.getTimezone())).format(getState().componentState.format);
+    return moment
+      .tz(epoch, getMomentTimezone(this.getTimezone()))
+      .format(getState().componentState.format);
   };
 
   public render = (node: HTMLElement) => {

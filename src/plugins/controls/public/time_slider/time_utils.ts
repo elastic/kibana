@@ -87,13 +87,13 @@ export function getTicks(min: number, max: number, timezone: string): EuiRangeTi
 }
 
 export function getStepSize(ticks: EuiRangeTick[]): {
-  stepSize: number,
-  format: string,
+  stepSize: number;
+  format: string;
 } {
   if (ticks.length < 2) {
     return {
       stepSize: 1,
-      format: 'MMM D, YYYY @ HH:mm:ss.SSS'
+      format: 'MMM D, YYYY @ HH:mm:ss.SSS',
     };
   }
 
@@ -136,7 +136,7 @@ export function getStepSize(ticks: EuiRangeTick[]): {
 
   return {
     stepSize: 1,
-    format: 'MMM D, YYYY @ HH:mm:ss.SSS'
+    format: 'MMM D, YYYY @ HH:mm:ss.SSS',
   };
 }
 
