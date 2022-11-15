@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { CustomBrandingPluginSetup, CustomBrandingPluginStart } from './types';
 
@@ -13,17 +12,7 @@ export class CustomBrandingPlugin
   implements Plugin<CustomBrandingPluginSetup, CustomBrandingPluginStart>
 {
   public setup(core: CoreSetup): CustomBrandingPluginSetup {
-    // Return methods that should be available to other plugins
-    return {
-      getGreeting() {
-        return i18n.translate('customBranding.greetingText', {
-          defaultMessage: 'Hello from {name}!',
-          values: {
-            name: 'plugin',
-          },
-        });
-      },
-    };
+    return {};
   }
 
   public start(core: CoreStart): CustomBrandingPluginStart {
