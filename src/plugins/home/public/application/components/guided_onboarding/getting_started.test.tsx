@@ -8,41 +8,37 @@
 
 import React from 'react';
 import { ReactWrapper, shallow } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { chromeServiceMock, applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { ApiService } from '@kbn/guided-onboarding-plugin/public/services/api';
 
 import { GettingStarted } from './getting_started';
 import { KEY_ENABLE_WELCOME } from '../home';
-import { act } from 'react-dom/test-utils';
 
-const mockFetchGuides = jest.fn();
+const mockCloud = cloudMock.createSetup();
+const mockChrome = chromeServiceMock.createStartContract();
+const mockApplication = applicationServiceMock.createStartContract();
+const mockSettingsUI = uiSettingsServiceMock.createSetupContract();
+mockSettingsUI.get.mockReturnValue(false);
+const mockHttp = httpServiceMock.createStartContract();
+const mockApiService = new ApiService();
+mockApiService.setup(mockHttp, true);
 
-jest.mock('../../kibana_services', () => {
-  const { chromeServiceMock, applicationServiceMock } =
-    jest.requireActual('@kbn/core/public/mocks');
-  const { uiSettingsServiceMock } = jest.requireActual('@kbn/core-ui-settings-browser-mocks');
-  const { cloudMock } = jest.requireActual('@kbn/cloud-plugin/public/mocks');
+jest.mock('../../kibana_services', () => ({
+  getServices: () => ({
+    cloud: mockCloud,
+    chrome: mockChrome,
+    application: mockApplication,
+    trackUiMetric: jest.fn(),
+    uiSettings: mockSettingsUI,
+    http: mockHttp,
+    guidedOnboardingService: mockApiService,
+  }),
+}));
 
-  const uiSettingsMock = uiSettingsServiceMock.createSetupContract();
-  uiSettingsMock.get.mockReturnValue(false);
-  return {
-    getServices: () => ({
-      cloud: cloudMock.createSetup(),
-      chrome: chromeServiceMock.createStartContract(),
-      application: applicationServiceMock.createStartContract(),
-      trackUiMetric: jest.fn(),
-      uiSettings: uiSettingsMock,
-      http: {
-        basePath: {
-          prepend: jest.fn(),
-        },
-      },
-      guidedOnboardingService: {
-        fetchAllGuidesState: mockFetchGuides,
-        skipGuidedOnboarding: jest.fn(),
-      },
-    }),
-  };
-});
 describe('getting started', () => {
   let storageItemValue: string | null;
   beforeAll(() => {
@@ -62,7 +58,7 @@ describe('getting started', () => {
   });
 
   test('displays loading indicator', async () => {
-    mockFetchGuides.mockImplementationOnce(() => {
+    mockHttp.get.mockImplementationOnce(() => {
       return new Promise((resolve) =>
         setTimeout(() => {
           resolve({ state: [] });
@@ -79,7 +75,7 @@ describe('getting started', () => {
   });
 
   test('displays error section', async () => {
-    mockFetchGuides.mockRejectedValueOnce(new Error('request failed'));
+    mockHttp.get.mockRejectedValueOnce(new Error('request failed'));
 
     let component: ReactWrapper;
     await act(async () => {
@@ -90,7 +86,7 @@ describe('getting started', () => {
   });
 
   test('skip button should disable home welcome screen', async () => {
-    mockFetchGuides.mockResolvedValueOnce({ state: [] });
+    mockHttp.get.mockResolvedValueOnce({ state: [] });
     let component: ReactWrapper;
     await act(async () => {
       component = mountWithIntl(<GettingStarted />);

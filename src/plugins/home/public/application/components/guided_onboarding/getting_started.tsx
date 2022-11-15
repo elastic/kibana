@@ -88,7 +88,7 @@ export const GettingStarted = () => {
 
   useEffect(() => {
     fetchGuidesState();
-  }, []);
+  }, [fetchGuidesState]);
 
   useEffect(() => {
     if (cloud?.isCloudEnabled === false) {
