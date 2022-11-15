@@ -27,7 +27,10 @@ export const CronHourly: React.FunctionComponent<Props> = ({
   <Fragment>
     <EuiFormRow
       label={
-        <FormattedMessage id="esUi.cronEditor.cronHourly.fieldTimeLabel" defaultMessage="Minute" />
+        <FormattedMessage
+          id="xpack.enterpriseSearch.cronEditor.cronHourly.fieldTimeLabel"
+          defaultMessage="Minute"
+        />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
@@ -38,9 +41,12 @@ export const CronHourly: React.FunctionComponent<Props> = ({
         value={minute}
         onChange={(e) => onChange({ minute: e.target.value })}
         fullWidth
-        prepend={i18n.translate('esUi.cronEditor.cronHourly.fieldMinute.textAtLabel', {
-          defaultMessage: 'At',
-        })}
+        prepend={i18n.translate(
+          'xpack.enterpriseSearch.cronEditor.cronHourly.fieldMinute.textAtLabel',
+          {
+            defaultMessage: 'At',
+          }
+        )}
         data-test-subj="cronFrequencyHourlyMinuteSelect"
       />
     </EuiFormRow>

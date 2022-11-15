@@ -21,7 +21,7 @@ import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic'
 describe('AutomaticCrawlSchedulerLogic', () => {
   const { mount } = new LogicMounter(AutomaticCrawlSchedulerLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
+  const { flashAPIErrors } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -103,6 +103,7 @@ describe('AutomaticCrawlSchedulerLogic', () => {
         AutomaticCrawlSchedulerLogic.actions.setCrawlSchedule({
           frequency: 3,
           unit: CrawlUnits.hours,
+          useConnectorSchedule: true,
         });
 
         expect(AutomaticCrawlSchedulerLogic.values).toMatchObject({

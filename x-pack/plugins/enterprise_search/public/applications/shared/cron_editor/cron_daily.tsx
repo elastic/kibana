@@ -31,7 +31,10 @@ export const CronDaily: React.FunctionComponent<Props> = ({
   <Fragment>
     <EuiFormRow
       label={
-        <FormattedMessage id="esUi.cronEditor.cronDaily.fieldTimeLabel" defaultMessage="Time" />
+        <FormattedMessage
+          id="xpack.enterpriseSearch.cronEditor.cronDaily.fieldTimeLabel"
+          defaultMessage="Time"
+        />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
@@ -42,14 +45,20 @@ export const CronDaily: React.FunctionComponent<Props> = ({
             disabled={disabled}
             options={hourOptions}
             value={hour}
-            aria-label={i18n.translate('esUi.cronEditor.cronDaily.hourSelectLabel', {
-              defaultMessage: 'Hour',
-            })}
+            aria-label={i18n.translate(
+              'xpack.enterpriseSearch.cronEditor.cronDaily.hourSelectLabel',
+              {
+                defaultMessage: 'Hour',
+              }
+            )}
             onChange={(e) => onChange({ hour: e.target.value })}
             fullWidth
-            prepend={i18n.translate('esUi.cronEditor.cronDaily.fieldHour.textAtLabel', {
-              defaultMessage: 'At',
-            })}
+            prepend={i18n.translate(
+              'xpack.enterpriseSearch.cronEditor.cronDaily.fieldHour.textAtLabel',
+              {
+                defaultMessage: 'At',
+              }
+            )}
             data-test-subj="cronFrequencyDailyHourSelect"
           />
         </EuiFlexItem>
@@ -59,9 +68,12 @@ export const CronDaily: React.FunctionComponent<Props> = ({
             disabled={disabled}
             options={minuteOptions}
             value={minute}
-            aria-label={i18n.translate('esUi.cronEditor.cronDaily.minuteSelectLabel', {
-              defaultMessage: 'Minute',
-            })}
+            aria-label={i18n.translate(
+              'xpack.enterpriseSearch.cronEditor.cronDaily.minuteSelectLabel',
+              {
+                defaultMessage: 'Minute',
+              }
+            )}
             onChange={(e) => onChange({ minute: e.target.value })}
             fullWidth
             prepend=":"

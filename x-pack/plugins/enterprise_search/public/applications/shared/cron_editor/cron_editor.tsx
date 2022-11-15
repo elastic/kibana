@@ -223,7 +223,10 @@ export class CronEditor extends Component<Props, State> {
       <Fragment>
         <EuiFormRow
           label={
-            <FormattedMessage id="esUi.cronEditor.fieldFrequencyLabel" defaultMessage="Frequency" />
+            <FormattedMessage
+              id="xpack.enterpriseSearch.cronEditor.fieldFrequencyLabel"
+              defaultMessage="Frequency"
+            />
           }
           fullWidth
         >
@@ -236,7 +239,7 @@ export class CronEditor extends Component<Props, State> {
               this.onChangeFrequency(e.target.value as Frequency)
             }
             fullWidth
-            prepend={i18n.translate('esUi.cronEditor.textEveryLabel', {
+            prepend={i18n.translate('xpack.enterpriseSearch.cronEditor.textEveryLabel', {
               defaultMessage: 'Every',
             })}
             data-test-subj="cronFrequencySelect"
