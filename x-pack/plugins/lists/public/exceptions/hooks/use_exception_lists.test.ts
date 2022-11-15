@@ -62,7 +62,7 @@ describe('useExceptionLists', () => {
         },
         expect.any(Function),
         expect.any(Function),
-        { field: 'exception-list-agnostic.created_at', order: 'desc' },
+        { field: 'created_at', order: 'desc' },
         expect.any(Function),
       ]);
     });
@@ -104,7 +104,7 @@ describe('useExceptionLists', () => {
         },
         expect.any(Function),
         expect.any(Function),
-        { field: 'exception-list-agnostic.created_at', order: 'desc' },
+        { field: 'created_at', order: 'desc' },
         expect.any(Function),
       ]);
     });
@@ -141,7 +141,7 @@ describe('useExceptionLists', () => {
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
         signal: new AbortController().signal,
-        sort: { field: 'exception-list-agnostic.created_at', order: 'desc' },
+        sort: { field: 'created_at', order: 'desc' },
       });
     });
   });
@@ -181,7 +181,7 @@ describe('useExceptionLists', () => {
         pagination: { page: 1, perPage: 20 },
         signal: new AbortController().signal,
         sort: {
-          field: 'exception-list-agnostic.created_at',
+          field: 'created_at',
           order: 'desc',
         },
       });

@@ -72,18 +72,8 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 
 const SORT_FIELDS: Array<{ field: string; label: string; defaultOrder: 'asc' | 'desc' }> = [
   {
-    field: `${EXCEPTION_LIST_NAMESPACE_AGNOSTIC}.name`,
-    label: i18n.SORT_BY_NAME,
-    defaultOrder: 'asc',
-  },
-  {
-    field: `${EXCEPTION_LIST_NAMESPACE_AGNOSTIC}.created_at`,
+    field: 'created_at',
     label: i18n.SORT_BY_CREATE_AT,
-    defaultOrder: 'desc',
-  },
-  {
-    field: `${EXCEPTION_LIST_NAMESPACE_AGNOSTIC}.created_by`,
-    label: i18n.SORT_BY_CREATE_BY,
     defaultOrder: 'desc',
   },
 ];

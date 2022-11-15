@@ -35,7 +35,7 @@ const DEFAULT_PAGINATION = {
 };
 
 const DEFAULT_SORT = {
-  field: 'exception-list-agnostic.created_at',
+  field: 'created_at',
   order: 'desc',
 };
 
