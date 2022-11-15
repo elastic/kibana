@@ -3183,7 +3183,7 @@
             "label": "group",
             "description": [],
             "signature": [
-              "\"none\" | \"buckets\" | \"metrics\""
+              "\"none\" | \"metrics\" | \"buckets\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
@@ -10725,6 +10725,20 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.metrics",
+            "type": "Array",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-common.PartitionLayerState.primaryGroups",
             "type": "Array",
             "tags": [],
@@ -10746,20 +10760,6 @@
             "description": [],
             "signature": [
               "string[] | undefined"
-            ],
-            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.PartitionLayerState.metric",
-            "type": "string",
-            "tags": [],
-            "label": "metric",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
