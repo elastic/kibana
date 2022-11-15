@@ -28,17 +28,20 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
 
   describe('getActionErrorLog', () => {
     const objectRemover = new ObjectRemover(supertest);
+    let ruleId = '';
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
     });
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     it('gets action error logs from an alternate space', async () => {
       const { body: createdConnector } = await supertest
-        .post(`${getUrlPrefix(Spaces[0].id)}/api/actions/connector`)
+        .post(`${getUrlPrefix(Spaces[1].id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'connector that throws',
@@ -47,10 +50,10 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(Spaces[0].id, createdConnector.id, 'action', 'actions');
+      objectRemover.add(Spaces[1].id, createdConnector.id, 'action', 'actions');
 
       const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces[0].id)}/api/alerting/rule`)
+        .post(`${getUrlPrefix(Spaces[1].id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestRuleData({
@@ -65,17 +68,17 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           })
         )
         .expect(200);
-      objectRemover.add(Spaces[0].id, createdRule.id, 'rule', 'alerting');
+      objectRemover.add(Spaces[1].id, createdRule.id, 'rule', 'alerting');
+      ruleId = createdRule.id;
 
       await waitForEvents(createdRule.id, 'alerting', new Map([['execute', { gte: 1 }]]));
       await waitForEvents(createdRule.id, 'actions', new Map([['execute', { gte: 1 }]]));
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces[1].id)}/internal/alerting/rule/${
+        `${getUrlPrefix(Spaces[0].id)}/internal/alerting/rule/${
           createdRule.id
-        }/_action_error_log?date_start=${dateStart}&with_auth=true&namespace=${Spaces[0].id}`
+        }/_action_error_log?date_start=${dateStart}&with_auth=true&namespace=${Spaces[1].id}`
       );
-
       expect(response.body.totalErrors).to.eql(1);
       expect(response.body.errors.length).to.eql(1);
 
@@ -101,7 +104,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
     await retry.try(async () => {
       return await getEventLog({
         getService,
-        spaceId: Spaces[0].id,
+        spaceId: Spaces[1].id,
         type: 'alert',
         id,
         provider,
