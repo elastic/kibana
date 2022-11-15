@@ -8,10 +8,10 @@
 export interface NewFleetProxy {
   name: string;
   url: string;
-  proxy_headers?: string;
-  certificate_authorities?: string;
-  certificate?: string;
-  certificate_key?: string;
+  proxy_headers?: Record<string, string | number | boolean> | null;
+  certificate_authorities?: string | null;
+  certificate?: string | null;
+  certificate_key?: string | null;
   is_preconfigured: boolean;
 }
 

@@ -12,6 +12,15 @@ export const PostFleetProxyRequestSchema = {
     id: schema.maybe(schema.string()),
     url: schema.string(),
     name: schema.string(),
+    proxy_headers: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([schema.string(), schema.boolean(), schema.number()])
+      )
+    ),
+    certificate_authorities: schema.maybe(schema.string()),
+    certificate: schema.maybe(schema.string()),
+    certificate_key: schema.maybe(schema.string()),
   }),
 };
 
@@ -20,6 +29,15 @@ export const PutFleetProxyRequestSchema = {
   body: schema.object({
     name: schema.maybe(schema.string()),
     url: schema.maybe(schema.string()),
+    proxy_headers: schema.nullable(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([schema.string(), schema.boolean(), schema.number()])
+      )
+    ),
+    certificate_authorities: schema.nullable(schema.string()),
+    certificate: schema.nullable(schema.string()),
+    certificate_key: schema.nullable(schema.string()),
   }),
 };
 

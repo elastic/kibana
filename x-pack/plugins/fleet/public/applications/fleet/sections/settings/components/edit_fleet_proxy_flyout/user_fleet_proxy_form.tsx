@@ -8,6 +8,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { safeDump, safeLoad } from 'js-yaml';
 
 import {
   sendPostFleetProxy,
@@ -73,7 +74,7 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
   const nameInput = useInput(fleetProxy?.name ?? '', validateName, isPreconfigured);
   const urlInput = useInput(fleetProxy?.url ?? '', validateUrl, isPreconfigured);
   const proxyHeadersInput = useInput(
-    fleetProxy?.proxy_headers ?? '',
+    fleetProxy?.proxy_headers ? safeDump(fleetProxy.proxy_headers) : '',
     () => undefined,
     isPreconfigured
   );
@@ -123,19 +124,22 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
         return;
       }
       setIsLoading(true);
+      const data = {
+        name: nameInput.value,
+        url: urlInput.value,
+        proxy_headers:
+          proxyHeadersInput.value === '' ? undefined : safeLoad(proxyHeadersInput.value),
+        certificate_authorities: certificateAuthoritiesInput.value,
+        certificate: certificateInput.value,
+        certificate_key: certificateKeyInput.value,
+      };
       if (fleetProxy) {
-        const res = await sendPutFleetProxy(fleetProxy.id, {
-          name: nameInput.value,
-          url: urlInput.value,
-        });
+        const res = await sendPutFleetProxy(fleetProxy.id, data);
         if (res.error) {
           throw res.error;
         }
       } else {
-        const res = await sendPostFleetProxy({
-          name: nameInput.value,
-          url: urlInput.value,
-        });
+        const res = await sendPostFleetProxy(data);
         if (res.error) {
           throw res.error;
         }
@@ -155,7 +159,19 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
         }),
       });
     }
-  }, [fleetProxy, nameInput.value, urlInput.value, validate, notifications, confirm, onSuccess]);
+  }, [
+    fleetProxy,
+    nameInput.value,
+    urlInput.value,
+    proxyHeadersInput.value,
+    certificateAuthoritiesInput.value,
+    certificateInput.value,
+    certificateKeyInput.value,
+    validate,
+    notifications,
+    confirm,
+    onSuccess,
+  ]);
 
   const isDisabled =
     isLoading ||
