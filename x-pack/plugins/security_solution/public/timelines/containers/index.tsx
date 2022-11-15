@@ -363,9 +363,7 @@ export const useTimelineEventsHandler = ({
       const requestTimeRange =
         startDate && endDate
           ? {
-              interval: '12h',
-              from: startDate,
-              to: endDate,
+              timerange: { interval: '12h', from: startDate, to: endDate },
             }
           : {};
 
