@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RULES_ROW, RULES_TABLE, TOASTER } from '../../screens/alerts_detection_rules';
+import { TOASTER } from '../../screens/alerts_detection_rules';
 import {
   expectNumberOfRules,
   expectToContainRule,
