@@ -764,11 +764,41 @@ describe('Execution Handler', () => {
         Array [
           Object {
             "actionParams": Object {
-              "val": "rule url: http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
+              "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
             "ruleId": "1",
             "spaceId": "test1",
+          },
+        ]
+      `);
+    });
+
+    it('populates the rule.url without the space specifier when the spaceId is the string "default"', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'http://localhost:12345',
+        },
+        taskInstance: {
+          params: { spaceId: 'default', alertId: '1' },
+        } as unknown as ConcreteTaskInstance,
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionParams": Object {
+              "val": "rule url: http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
+            },
+            "actionTypeId": "test",
+            "ruleId": "1",
+            "spaceId": "default",
           },
         ]
       `);
@@ -791,7 +821,7 @@ describe('Execution Handler', () => {
         Array [
           Object {
             "actionParams": Object {
-              "val": "rule url: http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
+              "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
             "ruleId": "1",
