@@ -83,6 +83,18 @@ For more information, refer to <<index-action-type>>.
 For more information, refer to <<jira-action-type>>.
 =====
 
+.Opsgenie connectors
+[%collapsible%open]
+=====
+
+`apiUrl`::
+(Required, string) The Opsgenie URL. For example, `https://api.opsgenie.com` or
+`https://api.eu.opsgenie.com`. If you are using the `xpack.actions.allowedHosts`
+setting, make sure the hostname is added to the allowed hosts.
+
+For more information, refer to <<opsgenie-action-type>>.
+=====
+
 .{sn-itom}, {sn-itsm}, and {sn-sir} connectors
 [%collapsible%open]
 =====
@@ -408,7 +420,7 @@ For more configuration properties, refer to <<action-types>>.
 
 `connector_type_id`::
 (Required, string) The connector type ID for the connector. For example,
-`.cases-webhook`, `.index`, `.jira`, `.server-log`, or `.servicenow-itom`.
+`.cases-webhook`, `.index`, `.jira`, `.opsgenie`, `.server-log`, or `.servicenow-itom`.
 
 `name`::
 (Required, string) The display name for the connector.
@@ -445,6 +457,14 @@ authentication.
 
 `email`::
 (Required, string) The account email for HTTP Basic authentication.
+=====
+
+.Opsgenie connectors
+[%collapsible%open]
+=====
+`apiKey`::
+(Required, string) The Opsgenie API authentication key for HTTP Basic
+authentication.
 =====
 
 .{sn-itom}, {sn-itsm}, and {sn-sir} connectors
