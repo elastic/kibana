@@ -17,14 +17,14 @@ describe('stringifyKueries', () => {
 
   it('stringifies the current values', () => {
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"foo: (\\"fooValue1\\" OR \\"fooValue2\\") AND bar: \\"barValue\\""`
+      `"foo: (fooValue1 OR fooValue2) AND bar: barValue"`
     );
   });
 
   it('correctly stringifies a single value', () => {
     kueries = new Map<string, string[]>();
     kueries.set('foo', ['fooValue']);
-    expect(stringifyKueries(kueries)).toMatchInlineSnapshot(`"foo: \\"fooValue\\""`);
+    expect(stringifyKueries(kueries)).toMatchInlineSnapshot(`"foo: fooValue"`);
   });
 
   it('returns an empty string for an empty map', () => {
@@ -40,14 +40,14 @@ describe('stringifyKueries', () => {
   it('adds quotations if the value contains a space', () => {
     kueries.set('baz', ['baz value']);
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"foo: (\\"fooValue1\\" OR \\"fooValue2\\") AND bar: \\"barValue\\" AND baz: \\"baz value\\""`
+      `"foo: (fooValue1 OR fooValue2) AND bar: barValue AND baz: \\"baz value\\""`
     );
   });
 
   it('adds quotations inside parens if there are values containing spaces', () => {
     kueries.set('foo', ['foo value 1', 'foo value 2']);
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"foo: (\\"foo value 1\\" OR \\"foo value 2\\") AND bar: \\"barValue\\""`
+      `"foo: (\\"foo value 1\\" OR \\"foo value 2\\") AND bar: barValue"`
     );
   });
 
@@ -55,21 +55,21 @@ describe('stringifyKueries', () => {
     kueries.set('foo', ['val1', 'val2', 'val3']);
     kueries.set('baz', ['baz 1', 'baz 2']);
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"foo: (\\"val1\\" OR \\"val2\\" OR \\"val3\\") AND bar: \\"barValue\\" AND baz: (\\"baz 1\\" OR \\"baz 2\\")"`
+      `"foo: (val1 OR val2 OR val3) AND bar: barValue AND baz: (\\"baz 1\\" OR \\"baz 2\\")"`
     );
   });
 
   it('handles number values', () => {
     kueries.set('port', [80, 8080, 443]);
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"foo: (\\"fooValue1\\" OR \\"fooValue2\\") AND bar: \\"barValue\\" AND port: (80 OR 8080 OR 443)"`
+      `"foo: (fooValue1 OR fooValue2) AND bar: barValue AND port: (80 OR 8080 OR 443)"`
     );
   });
 
   it('handles colon characters in values', () => {
     kueries.set('monitor.id', ['https://elastic.co', 'https://example.com']);
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"foo: (\\"fooValue1\\" OR \\"fooValue2\\") AND bar: \\"barValue\\" AND monitor.id: (\\"https://elastic.co\\" OR \\"https://example.com\\")"`
+      `"foo: (fooValue1 OR fooValue2) AND bar: barValue AND monitor.id: (\\"https://elastic.co\\" OR \\"https://example.com\\")"`
     );
   });
 
@@ -83,7 +83,7 @@ describe('stringifyKueries', () => {
       })
     );
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"observer.geo.name: (\\"us-east\\" OR \\"apj\\" OR \\"sydney\\" OR \\"us-west\\")"`
+      `"observer.geo.name: (us-east OR apj OR sydney OR us-west)"`
     );
   });
 
@@ -97,7 +97,7 @@ describe('stringifyKueries', () => {
       })
     );
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"tags: (\\"tag1\\" OR \\"tag2\\") AND monitor.type: \\"http\\" AND observer.geo.name: (\\"us-east\\" OR \\"apj\\" OR \\"sydney\\" OR \\"us-west\\")"`
+      `"tags: (tag1 OR tag2) AND monitor.type: http AND observer.geo.name: (us-east OR apj OR sydney OR us-west)"`
     );
   });
 
@@ -111,7 +111,7 @@ describe('stringifyKueries', () => {
       })
     );
     expect(stringifyKueries(kueries, true)).toMatchInlineSnapshot(
-      `"monitor.type: \\"http\\" AND observer.geo.name: (\\"us-east\\" OR \\"apj\\" OR \\"sydney\\" OR \\"us-west\\") AND tags: (\\"tag1\\" AND \\"tag2\\")"`
+      `"monitor.type: http AND observer.geo.name: (us-east OR apj OR sydney OR us-west) AND tags: (tag1 AND tag2)"`
     );
   });
 
@@ -124,9 +124,7 @@ describe('stringifyKueries', () => {
         tags: ['tag1', 'tag2'],
       })
     );
-    expect(stringifyKueries(kueries, true)).toMatchInlineSnapshot(
-      `"tags: (\\"tag1\\" AND \\"tag2\\")"`
-    );
+    expect(stringifyKueries(kueries, true)).toMatchInlineSnapshot(`"tags: (tag1 AND tag2)"`);
   });
 
   it('handles values with spaces', () => {
@@ -139,7 +137,7 @@ describe('stringifyKueries', () => {
       })
     );
     expect(stringifyKueries(kueries)).toMatchInlineSnapshot(
-      `"tags: \\"Weird tag\\" AND monitor.type: \\"http\\" AND observer.geo.name: (\\"us east\\" OR \\"apj\\" OR \\"sydney\\" OR \\"us-west\\")"`
+      `"tags: \\"Weird tag\\" AND monitor.type: http AND observer.geo.name: (\\"us east\\" OR apj OR sydney OR us-west)"`
     );
   });
 });

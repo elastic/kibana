@@ -26,13 +26,13 @@ export const stringifyKueries = (
       const value = kueries.get(key)?.filter((v) => v !== '');
       if (!value || value.length === 0) return '';
 
-      const isNumber = !isNaN(Number(value[0]));
-
       if (value.length === 1) {
-        return isNumber ? `${key}: ${value[0]}` : `${key}: "${value[0]}"`;
+        return isAlphaNumeric(value[0] as string) ? `${key}: ${value[0]}` : `${key}: "${value[0]}"`;
       }
 
-      const values = value.map((v) => (isNumber ? v : `"${v}"`)).join(` ${condition} `);
+      const values = value
+        .map((v) => (isAlphaNumeric(v as string) ? v : `"${v}"`))
+        .join(` ${condition} `);
 
       return `${key}: (${values})`;
     })
@@ -46,4 +46,9 @@ export const stringifyKueries = (
       }
       return `${prev} AND ${cur}`;
     }, '');
+};
+
+const isAlphaNumeric = (str: string) => {
+  const format = /[ `!@#$%^&*()_+=\[\]{};':"\\|,.<>\/?~]/;
+  return !format.test(str);
 };
