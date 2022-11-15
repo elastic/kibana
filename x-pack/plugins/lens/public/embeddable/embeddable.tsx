@@ -651,10 +651,6 @@ export class Embeddable
     });
   };
 
-  private onError: ExpressionWrapperProps['onExpressionError'] = () => {
-    this.renderComplete.dispatchError();
-  };
-
   getExecutionContext() {
     if (this.savedVis) {
       const parentContext = this.parent?.getInput().executionContext || this.input.executionContext;
@@ -711,12 +707,19 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
+    const error = this.getError();
+
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
-      error: this.getError(),
+      error,
     });
-    this.renderComplete.dispatchInProgress();
+
+    if (error) {
+      this.renderComplete.dispatchError();
+    } else {
+      this.renderComplete.dispatchInProgress();
+    }
 
     const input = this.getInput();
 
@@ -746,7 +749,6 @@ export class Embeddable
           style={input.style}
           executionContext={this.getExecutionContext()}
           canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-          onExpressionError={this.onError}
           onRuntimeError={(message) => {
             this.updateOutput({ error: new Error(message) });
             this.logError('runtime');

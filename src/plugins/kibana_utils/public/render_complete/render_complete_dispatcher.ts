@@ -64,6 +64,7 @@ export class RenderCompleteDispatcher {
     if (!this.el) return;
     this.count++;
     this.el.setAttribute('data-render-complete', 'true');
+    this.el.setAttribute('data-loading', 'false');
     this.el.setAttribute('data-rendering-count', String(this.count));
   }
 
