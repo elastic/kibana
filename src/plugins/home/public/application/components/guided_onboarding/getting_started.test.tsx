@@ -63,9 +63,10 @@ describe('getting started', () => {
       return new Promise((resolve) =>
         setTimeout(() => {
           resolve({ state: [] });
-        })
+        }, 1000)
       );
     });
+    mockApiService.setup(mockHttp, true);
 
     await act(async () => {
       testBed = registerTestBed(GettingStarted)();
@@ -76,6 +77,7 @@ describe('getting started', () => {
 
   test('displays error section', async () => {
     mockHttp.get.mockRejectedValueOnce(new Error('request failed'));
+    mockApiService.setup(mockHttp, true);
 
     await act(async () => {
       testBed = registerTestBed(GettingStarted)();
@@ -86,6 +88,7 @@ describe('getting started', () => {
 
   test('skip button should disable home welcome screen', async () => {
     mockHttp.get.mockResolvedValueOnce({ state: [] });
+    mockApiService.setup(mockHttp, true);
 
     await act(async () => {
       testBed = registerTestBed(GettingStarted)();
