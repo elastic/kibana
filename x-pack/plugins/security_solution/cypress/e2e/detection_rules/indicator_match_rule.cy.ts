@@ -23,8 +23,6 @@ import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
-  RULES_ROW,
-  RULES_TABLE,
   RULE_SWITCH,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';

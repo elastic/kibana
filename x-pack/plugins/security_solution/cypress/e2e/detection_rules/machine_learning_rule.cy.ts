@@ -13,8 +13,6 @@ import {
   RISK_SCORE,
   RULE_NAME,
   RULE_SWITCH,
-  RULES_ROW,
-  RULES_TABLE,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
 import {
