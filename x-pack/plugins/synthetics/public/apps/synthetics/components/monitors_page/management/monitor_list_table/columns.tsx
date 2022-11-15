@@ -20,6 +20,7 @@ import {
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
 
+import type { StatusByLocationAndMonitor } from '../../hooks/use_overview_status';
 import { getFrequencyLabel } from './labels';
 import { Actions } from './actions';
 import { MonitorEnabled } from './monitor_enabled';
@@ -31,6 +32,7 @@ export function getMonitorListColumns({
   canEditSynthetics,
   reloadPage,
   loading,
+  statusByLocationAndMonitor,
 }: {
   basePath: string;
   euiTheme: EuiThemeComputed;
@@ -39,6 +41,7 @@ export function getMonitorListColumns({
   canEditSynthetics: boolean;
   syntheticsMonitors: EncryptedSyntheticsSavedMonitor[];
   loading: boolean;
+  statusByLocationAndMonitor: StatusByLocationAndMonitor;
   reloadPage: () => void;
 }) {
   return [
@@ -79,8 +82,14 @@ export function getMonitorListColumns({
       name: i18n.translate('xpack.synthetics.management.monitorList.locations', {
         defaultMessage: 'Locations',
       }),
-      render: (locations: ServiceLocations) =>
-        locations ? <MonitorLocations locations={locations} /> : null,
+      render: (locations: ServiceLocations, monitor: EncryptedSyntheticsSavedMonitor) =>
+        locations ? (
+          <MonitorLocations
+            monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
+            locations={locations}
+            upDownByLocation={statusByLocationAndMonitor}
+          />
+        ) : null,
     },
     {
       align: 'left' as const,

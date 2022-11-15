@@ -25,6 +25,7 @@ import {
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../../common/runtime_types';
 import { SyntheticsSettingsContext } from '../../../../contexts/synthetics_settings_context';
+import type { StatusByLocationAndMonitor } from '../../hooks/use_overview_status';
 import { getMonitorListColumns } from './columns';
 import * as labels from './labels';
 
@@ -34,6 +35,7 @@ interface Props {
   total: number;
   error: IHttpSerializedFetchError | null;
   loading: boolean;
+  statusByLocationAndMonitor: StatusByLocationAndMonitor;
   loadPage: (state: MonitorListPageState) => void;
   reloadPage: () => void;
   errorSummaries?: Ping[];
@@ -45,14 +47,15 @@ export const MonitorList = ({
   total,
   error,
   loading,
+  statusByLocationAndMonitor,
   loadPage,
   reloadPage,
   errorSummaries,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const { basePath } = useContext(SyntheticsSettingsContext);
   const isXl = useIsWithinMinBreakpoint('xxl');
   const canEditSynthetics = useCanEditSynthetics();
-  const { euiTheme } = useEuiTheme();
 
   const errorSummariesById = useMemo(
     () =>
@@ -112,6 +115,7 @@ export const MonitorList = ({
     syntheticsMonitors,
     loading,
     reloadPage,
+    statusByLocationAndMonitor,
   });
 
   return (
