@@ -423,6 +423,8 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               // task should still exist but be disabled
               await retry.try(async () => {
                 const taskRecord2 = await getScheduledTask(createdAlert.scheduled_task_id);
+                expect(response.body.tasks[0].id).to.eql(createdAlert.scheduled_task_id);
+                expect(response.body.tasks[0].id).to.eql(rule.scheduled_task_id);
                 expect(taskRecord2.type).to.eql('task');
                 expect(taskRecord2.task.taskType).to.eql('alerting:test.noop');
                 expect(JSON.parse(taskRecord2.task.params)).to.eql({
