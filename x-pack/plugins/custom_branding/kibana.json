@@ -7,9 +7,9 @@
     "githubTeam": "team-global-experience"
   },
   "server": true,
-  "ui": false,
-  "requiredPlugins": ["licensing"],
-  "requiredBundles": ["kibanaReact"],
-  "optionalPlugins": ["share"],
+  "ui": true,
+  "requiredPlugins": ["licensing", "licenseApiGuard"],
+  "requiredBundles": [],
+  "optionalPlugins": [],
   "enabledOnAnonymousPages": true
 }

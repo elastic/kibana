@@ -7,11 +7,12 @@
     "declarationMap": true
   },
   "include": ["public/**/*",
-    "server/**/*", "common/**/*", "__fixtures__/*",
+    "server/**/*",
+    "__fixtures__/*",
     "../../../typings/**/*"],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../license_api_guard/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" }
+    { "path": "../../../x-pack/plugins/licensing/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/license_api_guard/tsconfig.json" }
   ]
 }
