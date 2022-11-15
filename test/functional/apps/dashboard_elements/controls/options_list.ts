@@ -36,6 +36,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const DASHBOARD_NAME = 'Test Options List Control';
 
   describe('Dashboard options list integration', () => {
+    let controlId: string;
+
+    const animalSoundAvailableOptions = [
+      'hiss',
+      'ruff',
+      'bark',
+      'grrr',
+      'meow',
+      'growl',
+      'grr',
+      'bow ow ow',
+    ];
+
     const returnToDashboard = async () => {
       await common.navigateToApp('dashboard');
       await header.waitUntilLoadingHasFinished();
@@ -45,6 +58,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.switchToEditMode();
       }
       await dashboard.waitForRenderComplete();
+    };
+
+    const ensureAvailableOptionsEql = async (expectation: string[], skipOpen?: boolean) => {
+      if (!skipOpen) await dashboardControls.optionsListOpenPopover(controlId);
+      await retry.try(async () => {
+        expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql(expectation);
+      });
+      if (!skipOpen) await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
     };
 
     before(async () => {
@@ -205,40 +226,61 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Interactions between options list and dashboard', async () => {
-      let controlId: string;
-
-      const allAvailableOptions = [
-        'hiss',
-        'ruff',
-        'bark',
-        'grrr',
-        'meow',
-        'growl',
-        'grr',
-        'bow ow ow',
-      ];
-
-      const ensureAvailableOptionsEql = async (expectation: string[], skipOpen?: boolean) => {
-        if (!skipOpen) await dashboardControls.optionsListOpenPopover(controlId);
-        await retry.try(async () => {
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql(
-            expectation
-          );
-        });
-        if (!skipOpen) await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-      };
-
+    describe('Options List Control suggestions', async () => {
       before(async () => {
-        await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await dashboardControls.createControl({
           controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
-          title: 'Animal Sounds',
         });
-
         controlId = (await dashboardControls.getAllControlIds())[0];
+        await dashboard.clickQuickSave();
+        await dashboardControls.optionsListOpenPopover(controlId);
+      });
+
+      it('sort alphabetically - ascending', async () => {
+        await dashboardControls.optionsListPopoverSetSort('keyAscending');
+        await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort(), true);
+      });
+
+      it('sort alphabetically - descending', async () => {
+        await dashboardControls.optionsListPopoverSetSort('keyDescending');
+        await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort().reverse(), true);
+      });
+
+      it('sort by document count - descending', async () => {
+        await dashboardControls.optionsListPopoverSetSort('docDescending');
+        await ensureAvailableOptionsEql(animalSoundAvailableOptions, true);
+      });
+
+      it('sort by document count - ascending', async () => {
+        await dashboardControls.optionsListPopoverSetSort('docAscending');
+        // ties are broken alphabetically, so can't just reverse `animalSoundAvailableOptions` for this check
+        await ensureAvailableOptionsEql(
+          ['bow ow ow', 'growl', 'grr', 'bark', 'grrr', 'meow', 'ruff', 'hiss'],
+          true
+        );
+      });
+
+      it('non-default value should cause unsaved changes', async () => {
+        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      });
+
+      it('returning to default value should remove unsaved changes', async () => {
+        await dashboardControls.optionsListPopoverSetSort('docDescending');
+        await retry.try(async () => {
+          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        });
+      });
+
+      after(async () => {
+        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+      });
+    });
+
+    describe('Interactions between options list and dashboard', async () => {
+      before(async () => {
+        await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
       });
 
       describe('Applies query settings to controls', async () => {
@@ -289,7 +331,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await dashboard.waitForRenderComplete();
             await header.waitUntilLoadingHasFinished();
 
-            await ensureAvailableOptionsEql(allAvailableOptions);
+            await ensureAvailableOptionsEql(animalSoundAvailableOptions);
 
             await filterBar.toggleFilterEnabled('sound.keyword');
             await dashboard.waitForRenderComplete();
@@ -317,7 +359,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
           await retry.try(async () => {
-            await ensureAvailableOptionsEql(allAvailableOptions);
+            await ensureAvailableOptionsEql(animalSoundAvailableOptions);
           });
         });
 
@@ -557,7 +599,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await queryBar.submitQuery();
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
-          await ensureAvailableOptionsEql(allAvailableOptions);
+          await ensureAvailableOptionsEql(animalSoundAvailableOptions);
           expect(await pieChart.getPieSliceCount()).to.be(2);
         });
 

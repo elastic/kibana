@@ -100,6 +100,23 @@ describe('Options list popover', () => {
       });
   });
 
+  test('disable search and sort when show only selected toggle is true', async () => {
+    const selections = ['woof', 'bark'];
+    const popover = await mountComponent({
+      explicitInput: { selectedOptions: selections },
+    });
+    let searchBox = findTestSubject(popover, 'optionsList-control-search-input');
+    let sortButton = findTestSubject(popover, 'optionsList-control-sorting-options-button');
+    expect(searchBox.prop('disabled')).toBeFalsy();
+    expect(sortButton.prop('disabled')).toBeFalsy();
+
+    clickShowOnlySelections(popover);
+    searchBox = findTestSubject(popover, 'optionsList-control-search-input');
+    sortButton = findTestSubject(popover, 'optionsList-control-sorting-options-button');
+    expect(searchBox.prop('disabled')).toBe(true);
+    expect(sortButton.prop('disabled')).toBe(true);
+  });
+
   test('should default to exclude = false', async () => {
     const popover = await mountComponent();
     const includeButton = findTestSubject(popover, 'optionsList__includeResults');

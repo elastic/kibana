@@ -134,6 +134,7 @@ export const OptionsListPopoverActionBar = ({
                     onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
                     aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
                     disabled={showOnlySelected}
+                    data-test-subj="optionsList-control-sorting-options-button"
                   />
                 </EuiToolTip>
               }
@@ -141,6 +142,7 @@ export const OptionsListPopoverActionBar = ({
               isOpen={isSortingPopoverOpen}
               closePopover={() => setIsSortingPopoverOpen(false)}
               panelPaddingSize="none"
+              data-test-subj="optionsList-control-sorting-options-popover"
             >
               <EuiPopoverTitle paddingSize="s">
                 {OptionsListStrings.popover.getSortPopoverTitle()}

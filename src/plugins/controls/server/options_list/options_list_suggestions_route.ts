@@ -128,7 +128,7 @@ export const setupOptionsListSuggestionsRoute = (
         ...runtimeFieldMap,
       },
     };
-    // console.log(JSON.stringify(body));
+
     /**
      * Run ES query
      */

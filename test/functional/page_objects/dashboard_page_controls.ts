@@ -13,6 +13,7 @@ import {
   ControlWidth,
 } from '@kbn/controls-plugin/common';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
+import { SortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 import { FtrService } from '../ftr_provider_context';
@@ -363,6 +364,17 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`clearing search from options list`);
     await this.optionsListPopoverAssertOpen();
     await this.find.clickByCssSelector('.euiFormControlLayoutClearButton');
+  }
+
+  public async optionsListPopoverSetSort(sort: SortingType) {
+    this.log.debug(`select sorting for suggestions`);
+    await this.optionsListPopoverAssertOpen();
+
+    await this.retry.waitFor('sorting popover to open', async () => {
+      await this.testSubjects.click('optionsList-control-sorting-options-button');
+      return await this.testSubjects.exists(`optionsList-control-sorting-options-popover`);
+    });
+    await this.testSubjects.click(`optionsList__sortBy_${sort}`);
   }
 
   public async optionsListPopoverSelectOption(availableOption: string) {
