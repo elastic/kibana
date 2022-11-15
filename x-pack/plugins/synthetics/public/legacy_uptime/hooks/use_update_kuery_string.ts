@@ -6,10 +6,17 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { useEffect, useState } from 'react';
+import { useUptimeRefreshContext } from '../contexts/uptime_refresh_context';
+import { useUptimeDataView } from '../contexts/uptime_data_view_context';
+import { TAG_KEY_FOR_AND_CONDITION } from '../components/overview/filter_group/filter_group';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../../common/lib';
 
-const getKueryString = (urlFilters: string, excludedFilters?: string): string => {
+const getKueryString = (
+  urlFilters: string,
+  excludedFilters?: string,
+  logicalANDForTag?: boolean
+): string => {
   let kueryString = '';
   let excludeKueryString = '';
   // We are using try/catch here because this is user entered value
@@ -18,7 +25,7 @@ const getKueryString = (urlFilters: string, excludedFilters?: string): string =>
   try {
     if (urlFilters !== '') {
       const filterMap = new Map<string, Array<string | number>>(JSON.parse(urlFilters));
-      kueryString = stringifyKueries(filterMap);
+      kueryString = stringifyKueries(filterMap, logicalANDForTag);
     }
   } catch {
     kueryString = '';
@@ -27,7 +34,7 @@ const getKueryString = (urlFilters: string, excludedFilters?: string): string =>
   try {
     if (excludedFilters) {
       const filterMap = new Map<string, Array<string | number>>(JSON.parse(excludedFilters));
-      excludeKueryString = stringifyKueries(filterMap);
+      excludeKueryString = stringifyKueries(filterMap, logicalANDForTag);
       if (kueryString) {
         return `${kueryString} and NOT (${excludeKueryString})`;
       }
@@ -41,13 +48,28 @@ const getKueryString = (urlFilters: string, excludedFilters?: string): string =>
   return `NOT (${excludeKueryString})`;
 };
 
-export const generateUpdatedKueryString = (
-  dataView: DataView | null,
+export const useGenerateUpdatedKueryString = (
   filterQueryString = '',
   urlFilters: string,
-  excludedFilters?: string
+  excludedFilters?: string,
+  disableANDFiltering?: boolean
 ): [string?, Error?] => {
-  const kueryString = getKueryString(urlFilters, excludedFilters);
+  const dataView = useUptimeDataView();
+
+  const { lastRefresh } = useUptimeRefreshContext();
+
+  const [kueryString, setKueryString] = useState<string>('');
+
+  useEffect(() => {
+    if (disableANDFiltering) {
+      setKueryString(getKueryString(urlFilters, excludedFilters));
+    } else {
+      // need a string comparison for local storage
+      const useLogicalAND = localStorage.getItem(TAG_KEY_FOR_AND_CONDITION) === 'true';
+
+      setKueryString(getKueryString(urlFilters, excludedFilters, useLogicalAND));
+    }
+  }, [excludedFilters, urlFilters, lastRefresh, disableANDFiltering]);
 
   const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
 
