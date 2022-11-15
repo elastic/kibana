@@ -72,10 +72,10 @@ const CALLOUT_MANAGEMENT_CONTACT_ADMIN = i18n.translate(
 );
 
 const CALLOUT_MANAGEMENT_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.monitorManagement.callout.description.disabled',
+  'xpack.synthetics.monitorManagement.disabledCallout.description.disabled',
   {
     defaultMessage:
-      'Monitor Management is currently disabled. To run your monitors on Elastic managed Synthetics service, enable Monitor Management. Your existing monitors are paused.',
+      'Monitor Management is currently disabled and your existing monitors are paused. You can enable Monitor Management to run your monitors.',
   }
 );
 
