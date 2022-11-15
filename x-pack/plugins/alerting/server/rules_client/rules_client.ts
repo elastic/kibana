@@ -605,6 +605,7 @@ export class RulesClient {
     const ruleType = this.ruleTypeRegistry.get(ruleSavedObject.attributes.alertTypeId);
     const username = await this.getUserName();
     const createTime = Date.now();
+    const lastRunTimestamp = new Date();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     let createdAPIKey = null;
     try {
@@ -626,8 +627,8 @@ export class RulesClient {
       snoozeSchedule: [],
       muteAll: false,
       mutedInstanceIds: [],
-      executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
-      monitoring: getDefaultRuleMonitoring(),
+      executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
+      monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
     };
 
     this.auditLogger?.log(
