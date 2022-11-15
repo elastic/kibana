@@ -358,6 +358,14 @@ describe('rules_list component with props', () => {
   });
 
   describe('Last response filter', () => {
+    beforeEach(() => {
+      (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    });
+
+    afterEach(() => {
+      (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    });
+
     let wrapper: ReactWrapper<any>;
     async function setup(editable: boolean = true) {
       loadRulesWithKueryFilter.mockResolvedValue({
@@ -408,7 +416,7 @@ describe('rules_list component with props', () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
       wrapper = mountWithIntl(
-        <RulesList lastResponseFilter={['error']} onLastResponseFilterChange={jest.fn()} />
+        <RulesList lastRunOutcomeFilter={['failed']} onLastRunOutcomeFilterChange={jest.fn()} />
       );
       await act(async () => {
         await nextTick();
@@ -420,49 +428,48 @@ describe('rules_list component with props', () => {
       expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalled();
     }
     it('can filter by last response', async () => {
-      (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
       loadRulesWithKueryFilter.mockReset();
       await setup();
 
       expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          ruleExecutionStatusesFilter: ['error'],
+          ruleLastRunOutcomesFilter: ['failed'],
         })
       );
 
-      wrapper.find('[data-test-subj="ruleExecutionStatusFilterButton"] button').simulate('click');
+      wrapper.find('[data-test-subj="ruleLastRunOutcomeFilterButton"] button').simulate('click');
 
       wrapper
-        .find('[data-test-subj="ruleExecutionStatusactiveFilterOption"]')
+        .find('[data-test-subj="ruleLastRunOutcomesucceededFilterOption"]')
         .first()
         .simulate('click');
 
       expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          ruleExecutionStatusesFilter: ['error', 'active'],
+          ruleLastRunOutcomesFilter: ['failed', 'succeeded'],
         })
       );
 
-      expect(wrapper.prop('onLastResponseFilterChange')).toHaveBeenCalled();
-      expect(wrapper.prop('onLastResponseFilterChange')).toHaveBeenLastCalledWith([
-        'error',
-        'active',
+      expect(wrapper.prop('onLastRunOutcomeFilterChange')).toHaveBeenCalled();
+      expect(wrapper.prop('onLastRunOutcomeFilterChange')).toHaveBeenLastCalledWith([
+        'failed',
+        'succeeded',
       ]);
 
-      wrapper.find('[data-test-subj="ruleExecutionStatusFilterButton"] button').simulate('click');
+      wrapper.find('[data-test-subj="ruleLastRunOutcomeFilterButton"] button').simulate('click');
       wrapper
-        .find('[data-test-subj="ruleExecutionStatuserrorFilterOption"]')
+        .find('[data-test-subj="ruleLastRunOutcomefailedFilterOption"]')
         .first()
         .simulate('click');
 
       expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          ruleExecutionStatusesFilter: ['active'],
+          ruleLastRunOutcomesFilter: ['succeeded'],
         })
       );
 
-      expect(wrapper.prop('onLastResponseFilterChange')).toHaveBeenCalled();
-      expect(wrapper.prop('onLastResponseFilterChange')).toHaveBeenLastCalledWith(['active']);
+      expect(wrapper.prop('onLastRunOutcomeFilterChange')).toHaveBeenCalled();
+      expect(wrapper.prop('onLastRunOutcomeFilterChange')).toHaveBeenLastCalledWith(['succeeded']);
     });
   });
 
@@ -844,6 +851,11 @@ describe('rules_list component with items', () => {
     loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
     loadRuleAggregationsWithKueryFilter.mockResolvedValue({
+      ruleLastRunOutcome: {
+        succeeded: 3,
+        failed: 3,
+        warning: 6,
+      },
       ruleEnabledStatus: { enabled: 2, disabled: 0 },
       ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
       ruleMutedStatus: { muted: 0, unmuted: 2 },
@@ -1005,11 +1017,9 @@ describe('rules_list component with items', () => {
       expect(
         wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastResponse"]').length
       ).toEqual(mockedRulesData.length);
-      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-active"]').length).toEqual(1);
-      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').length).toEqual(1);
-      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
-      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-unknown"]').length).toEqual(0);
-      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').length).toEqual(2);
+
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-succeeded"]').length).toEqual(2);
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-failed"]').length).toEqual(2);
       expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-warning"]').length).toEqual(1);
       expect(wrapper.find('[data-test-subj="ruleStatus-error-tooltip"]').length).toEqual(2);
       expect(
@@ -1018,10 +1028,10 @@ describe('rules_list component with items', () => {
 
       expect(wrapper.find('[data-test-subj="rulesListAutoRefresh"]').exists()).toBeTruthy();
 
-      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').first().text()).toEqual(
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-failed"]').first().text()).toEqual(
         'Error'
       );
-      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').last().text()).toEqual(
+      expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-failed"]').last().text()).toEqual(
         'License Error'
       );
     });
@@ -1042,7 +1052,7 @@ describe('rules_list component with items', () => {
       mockedRulesData.forEach((rule, index) => {
         if (rule.monitoring) {
           expect(ratios.at(index).text()).toEqual(
-            `${rule.monitoring.execution.calculated_metrics.success_ratio * 100}%`
+            `${rule.monitoring.run.calculated_metrics.success_ratio * 100}%`
           );
         } else {
           expect(ratios.at(index).text()).toEqual(`N/A`);
@@ -1060,10 +1070,10 @@ describe('rules_list component with items', () => {
       );
 
       mockedRulesData.forEach((rule, index) => {
-        if (typeof rule.monitoring?.execution.calculated_metrics.p50 === 'number') {
+        if (typeof rule.monitoring?.run.calculated_metrics.p50 === 'number') {
           // Ensure the table cells are getting the correct values
           expect(percentiles.at(index).text()).toEqual(
-            getFormattedDuration(rule.monitoring.execution.calculated_metrics.p50)
+            getFormattedDuration(rule.monitoring.run.calculated_metrics.p50)
           );
           // Ensure the tooltip is showing the correct content
           expect(
@@ -1073,7 +1083,7 @@ describe('rules_list component with items', () => {
               )
               .at(index)
               .props().content
-          ).toEqual(getFormattedMilliseconds(rule.monitoring.execution.calculated_metrics.p50));
+          ).toEqual(getFormattedMilliseconds(rule.monitoring.run.calculated_metrics.p50));
         } else {
           expect(percentiles.at(index).text()).toEqual('N/A');
         }
@@ -1149,9 +1159,9 @@ describe('rules_list component with items', () => {
       );
 
       mockedRulesData.forEach((rule, index) => {
-        if (typeof rule.monitoring?.execution.calculated_metrics.p95 === 'number') {
+        if (typeof rule.monitoring?.run.calculated_metrics.p95 === 'number') {
           expect(percentiles.at(index).text()).toEqual(
-            getFormattedDuration(rule.monitoring.execution.calculated_metrics.p95)
+            getFormattedDuration(rule.monitoring.run.calculated_metrics.p95)
           );
         } else {
           expect(percentiles.at(index).text()).toEqual('N/A');
@@ -1270,21 +1280,19 @@ describe('rules_list component with items', () => {
   });
 
   it('renders brief', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     await setup();
 
-    // { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 }
-    expect(wrapper.find('EuiHealth[data-test-subj="totalOkRulesCount"]').text()).toEqual('Ok: 1');
-    expect(wrapper.find('EuiHealth[data-test-subj="totalActiveRulesCount"]').text()).toEqual(
-      'Active: 2'
+    // ruleLastRunOutcome: {
+    //   succeeded: 3,
+    //   failed: 3,
+    //   warning: 6,
+    // }
+    expect(wrapper.find('EuiHealth[data-test-subj="totalSucceededRulesCount"]').text()).toEqual(
+      'Succeeded: 3'
     );
-    expect(wrapper.find('EuiHealth[data-test-subj="totalErrorRulesCount"]').text()).toEqual(
-      'Error: 3'
-    );
-    expect(wrapper.find('EuiHealth[data-test-subj="totalPendingRulesCount"]').text()).toEqual(
-      'Pending: 4'
-    );
-    expect(wrapper.find('EuiHealth[data-test-subj="totalUnknownRulesCount"]').text()).toEqual(
-      'Unknown: 5'
+    expect(wrapper.find('EuiHealth[data-test-subj="totalFailedRulesCount"]').text()).toEqual(
+      'Failed: 3'
     );
     expect(wrapper.find('EuiHealth[data-test-subj="totalWarningRulesCount"]').text()).toEqual(
       'Warning: 6'

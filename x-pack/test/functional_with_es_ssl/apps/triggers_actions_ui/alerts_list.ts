@@ -368,19 +368,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await refreshAlertsList();
         await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
-        expect(refreshResults.map((item: any) => item.status).sort()).to.eql(['Error', 'Ok']);
+        expect(refreshResults.map((item: any) => item.status).sort()).to.eql([
+          'Failed',
+          'Succeeded',
+        ]);
       });
       await refreshAlertsList();
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await testSubjects.click('ruleExecutionStatusFilterButton');
-      await testSubjects.click('ruleExecutionStatuserrorFilterOption'); // select Error status filter
+      await testSubjects.click('ruleLastRunOutcomeFilterButton');
+      await testSubjects.click('ruleLastRunOutcomefailedFilterOption'); // select Error status filter
       await retry.try(async () => {
         const filterErrorOnlyResults =
           await pageObjects.triggersActionsUI.getAlertsListWithStatus();
         expect(filterErrorOnlyResults.length).to.equal(1);
         expect(filterErrorOnlyResults[0].name).to.equal(`${failingAlert.name}Test: Failing`);
         expect(filterErrorOnlyResults[0].interval).to.equal('30 sec');
-        expect(filterErrorOnlyResults[0].status).to.equal('Error');
+        expect(filterErrorOnlyResults[0].status).to.equal('Failed');
         expect(filterErrorOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
     });
@@ -393,7 +396,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(refreshResults.length).to.equal(1);
         expect(refreshResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
         expect(refreshResults[0].interval).to.equal('1 min');
-        expect(refreshResults[0].status).to.equal('Ok');
+        expect(refreshResults[0].status).to.equal('Succeeded');
         expect(refreshResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
 
@@ -417,11 +420,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         await refreshAlertsList();
         expect(await testSubjects.getVisibleText('totalRulesCount')).to.be('2 rules');
-        expect(await testSubjects.getVisibleText('totalActiveRulesCount')).to.be('Active: 0');
-        expect(await testSubjects.getVisibleText('totalOkRulesCount')).to.be('Ok: 1');
-        expect(await testSubjects.getVisibleText('totalErrorRulesCount')).to.be('Error: 1');
-        expect(await testSubjects.getVisibleText('totalPendingRulesCount')).to.be('Pending: 0');
-        expect(await testSubjects.getVisibleText('totalUnknownRulesCount')).to.be('Unknown: 0');
+        expect(await testSubjects.getVisibleText('totalSucceededRulesCount')).to.be('Succeeded: 1');
+        expect(await testSubjects.getVisibleText('totalFailedRulesCount')).to.be('Failed: 1');
+        expect(await testSubjects.getVisibleText('totalWarningRulesCount')).to.be('Warning: 0');
       });
     });
 
@@ -433,7 +434,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(refreshResults.length).to.equal(1);
         expect(refreshResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
         expect(refreshResults[0].interval).to.equal('1 min');
-        expect(refreshResults[0].status).to.equal('Ok');
+        expect(refreshResults[0].status).to.equal('Succeeded');
         expect(refreshResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
 
