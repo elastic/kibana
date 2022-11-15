@@ -463,6 +463,11 @@ describe('rules_list component with props', () => {
 
       expect(wrapper.prop('onLastResponseFilterChange')).toHaveBeenCalled();
       expect(wrapper.prop('onLastResponseFilterChange')).toHaveBeenLastCalledWith(['active']);
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
     });
   });
 
@@ -924,16 +929,18 @@ describe('rules_list component with items', () => {
       ).toEqual(mockedRulesData.length);
     });
 
-    it('Last run tooltip', () => {
+    it('Last run tooltip', async () => {
       wrapper
         .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
         .first()
         .simulate('mouseOver');
 
-      // Run the timers so the EuiTooltip will be visible
-      jest.runOnlyPendingTimers();
-
-      wrapper.update();
+      await act(async () => {
+        // Run the timers so the EuiTooltip will be visible
+        jest.runOnlyPendingTimers();
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
         'Start time of the last run.'
@@ -951,15 +958,19 @@ describe('rules_list component with items', () => {
       ).toEqual(mockedRulesData.length);
     });
 
-    it('Schedule interval tooltip', () => {
+    it('Schedule interval tooltip', async () => {
       wrapper
         .find('[data-test-subj="ruleInterval-config-tooltip-0"]')
         .first()
         .simulate('mouseOver');
 
-      // Run the timers so the EuiTooltip will be visible
-      jest.runOnlyPendingTimers();
-      wrapper.update();
+      await act(async () => {
+        // Run the timers so the EuiTooltip will be visible
+        jest.runOnlyPendingTimers();
+        await nextTick();
+        wrapper.update();
+      });
+
       expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
         'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
       );
@@ -986,9 +997,13 @@ describe('rules_list component with items', () => {
         .first()
         .simulate('mouseOver');
 
-      // Run the timers so the EuiTooltip will be visible
-      jest.runOnlyPendingTimers();
-      wrapper.update();
+      await act(async () => {
+        // Run the timers so the EuiTooltip will be visible
+        jest.runOnlyPendingTimers();
+        await nextTick();
+        wrapper.update();
+      });
+
       expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
         'The length of time it took for the rule to run (mm:ss).'
       );
@@ -1080,7 +1095,7 @@ describe('rules_list component with items', () => {
       });
     });
 
-    it('Click column to sort by P50', () => {
+    it('Click column to sort by P50', async () => {
       wrapper
         .find(`[data-test-subj="rulesTable-${Percentiles.P50}ColumnName"]`)
         .first()
@@ -1116,8 +1131,12 @@ describe('rules_list component with items', () => {
         .first()
         .simulate('click');
 
-      jest.runOnlyPendingTimers();
-      wrapper.update();
+      await act(async () => {
+        // Run the timers so the EuiTooltip will be visible
+        jest.runOnlyPendingTimers();
+        await nextTick();
+        wrapper.update();
+      });
 
       // Percentile Selection
       expect(
@@ -1130,15 +1149,19 @@ describe('rules_list component with items', () => {
       expect(percentileOptions.length).toEqual(3);
     });
 
-    it('Select P95', () => {
+    it('Select P95', async () => {
       const percentileOptions = wrapper.find(
         '[data-test-subj="percentileSelectablePopover-selectable"] li'
       );
 
       percentileOptions.at(1).simulate('click');
 
-      jest.runOnlyPendingTimers();
-      wrapper.update();
+      await act(async () => {
+        // Run the timers so the EuiTooltip will be visible
+        jest.runOnlyPendingTimers();
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(
         wrapper.find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`).exists()
@@ -1159,7 +1182,7 @@ describe('rules_list component with items', () => {
       });
     });
 
-    it('Click column to sort by P95', () => {
+    it('Click column to sort by P95', async () => {
       wrapper
         .find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`)
         .first()
@@ -1179,6 +1202,10 @@ describe('rules_list component with items', () => {
         .find(`[data-test-subj="rulesTable-${Percentiles.P95}ColumnName"]`)
         .first()
         .simulate('click');
+
+      await act(async () => {
+        await nextTick();
+      });
 
       expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1315,7 +1342,16 @@ describe('rules_list component with items', () => {
 
     wrapper.find('[data-test-subj="ruleStatusFilterButton"] button').simulate('click');
 
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     wrapper.find('[data-test-subj="ruleStatusFilterOption-enabled"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+    });
 
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -1324,6 +1360,9 @@ describe('rules_list component with items', () => {
     );
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+    });
 
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -1332,6 +1371,9 @@ describe('rules_list component with items', () => {
     );
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+    });
 
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -1363,6 +1405,10 @@ describe('rules_list component with items', () => {
     );
 
     wrapper.find('[data-test-subj="ruleTagFilterButton"] button').simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
 
     const tagFilterListItems = wrapper.find(
       '[data-test-subj="ruleTagFilterSelectable"] .euiSelectableListItem'
@@ -1370,6 +1416,9 @@ describe('rules_list component with items', () => {
     expect(tagFilterListItems.length).toEqual(ruleTags.length);
 
     tagFilterListItems.at(0).simulate('click');
+    await act(async () => {
+      await nextTick();
+    });
 
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -1378,6 +1427,9 @@ describe('rules_list component with items', () => {
     );
 
     tagFilterListItems.at(1).simulate('click');
+    await act(async () => {
+      await nextTick();
+    });
 
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
