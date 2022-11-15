@@ -47,7 +47,9 @@ export interface Props<T, FormType extends FormData = FormData, I = T> {
   [key: string]: any;
 }
 
-function UseFieldComp<T = unknown, FormType extends FormData = FormData, I = T>(props: Props<T, FormType, I>) {
+function UseFieldComp<T = unknown, FormType extends FormData = FormData, I = T>(
+  props: Props<T, FormType, I>
+) {
   // @ts-expect-error
   const { field, propsToForward } = useFieldFromProps<T, FormType, I>(props);
 

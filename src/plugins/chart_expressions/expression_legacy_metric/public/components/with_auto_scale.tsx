@@ -132,7 +132,7 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
               : {}),
           }}
         >
-          { /* @ts-expect-error */ }
+          {/* @ts-expect-error */}
           <WrappedComponent {...(restProps as T)} />
         </div>
       </div>
