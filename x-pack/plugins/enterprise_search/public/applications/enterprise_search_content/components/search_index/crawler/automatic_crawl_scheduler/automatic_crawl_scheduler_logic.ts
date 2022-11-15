@@ -7,9 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
-import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
+import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { CrawlSchedule, CrawlScheduleFromServer, CrawlUnits } from '../../../../api/crawler/types';
 import { crawlScheduleServerToClient } from '../../../../api/crawler/utils';
