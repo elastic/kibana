@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -33,13 +33,18 @@ import './add_ml_inference_pipeline_modal.scss';
 
 export const TestPipeline: React.FC = () => {
   const {
-    addInferencePipelineModal: { simulateBody },
+    addInferencePipelineModal: { simulateBody, indexName },
+    getDocumentsErr,
+    isGetDocumentsLoading,
     simulatePipelineResult,
+    showGetDocumentErrors,
     simulatePipelineErrors,
   } = useValues(MLInferenceLogic);
-  const { simulatePipeline, setPipelineSimulateBody } = useActions(MLInferenceLogic);
+  const { simulatePipeline, setPipelineSimulateBody, makeGetDocumentRequest } =
+    useActions(MLInferenceLogic);
 
   const isSmallerViewport = useIsWithinMaxBreakpoint('s');
+  const inputRef = useRef<HTMLInputElement>();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
@@ -65,8 +70,28 @@ export const TestPipeline: React.FC = () => {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow label="Add document" helpText="Add a test document from your index">
-              <EuiFieldText compressed prepend="Document ID" placeholder="aygZdoQBuXAnN5eR97c_" />
+            <EuiFormRow
+              label="Add document"
+              helpText="Test with a document from your index"
+              isInvalid={showGetDocumentErrors}
+              error={getDocumentsErr}
+            >
+              <EuiFieldText
+                prepend="Document ID"
+                inputRef={(ref: HTMLInputElement) => {
+                  inputRef.current = ref;
+                }}
+                isInvalid={showGetDocumentErrors}
+                isLoading={isGetDocumentsLoading}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && inputRef.current?.value.length !== 0) {
+                    makeGetDocumentRequest({
+                      documentId: inputRef.current?.value ?? '',
+                      indexName,
+                    });
+                  }
+                }}
+              />
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
