@@ -74,7 +74,7 @@ export function RuleComponent({
   };
 
   const healthColor = getRuleHealthColor(rule);
-  const statusMessage: string = getRuleStatusMessage(rule);
+  const statusMessage = getRuleStatusMessage(rule);
 
   const renderRuleAlertList = () => {
     return suspendedComponentWithProps(
