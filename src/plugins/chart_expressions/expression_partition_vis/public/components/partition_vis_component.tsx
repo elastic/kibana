@@ -34,6 +34,7 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
   PartitionVisParams,
@@ -91,14 +92,40 @@ export interface PartitionVisComponentProps {
 }
 
 const PartitionVisComponent = (props: PartitionVisComponentProps) => {
-  const { visData, visParams: preVisParams, visType, services, syncColors } = props;
+  const {
+    visData: originalVisData,
+    visParams: preVisParams,
+    visType,
+    services,
+    syncColors,
+  } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
 
+  const {
+    table: visData,
+    metricAccessor,
+    bucketAccessors,
+  } = useMemo(
+    () =>
+      consolidateMetricColumns(
+        originalVisData,
+        visParams.dimensions.buckets,
+        visParams.dimensions.metrics,
+        visParams.metricsToLabels
+      ),
+    [
+      originalVisData,
+      visParams.dimensions.buckets,
+      visParams.dimensions.metrics,
+      visParams.metricsToLabels,
+    ]
+  );
+
   const { bucketColumns, metricColumn } = useMemo(
-    () => getColumns(props.visParams, props.visData),
-    [props.visData, props.visParams]
+    () => getColumns({ metric: metricAccessor, buckets: bucketAccessors }, visData),
+    [bucketAccessors, metricAccessor, visData]
   );
 
   const formatters = useMemo(
@@ -115,7 +142,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   const showToggleLegendElement = props.uiState !== undefined;
 
-  const [dimensions, setDimensions] = useState<undefined | PieContainerDimensions>();
+  const [containerDimensions, setContainerDimensions] = useState<
+    undefined | PieContainerDimensions
+  >();
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -123,7 +152,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     if (parentRef && parentRef.current) {
       const parentHeight = parentRef.current!.getBoundingClientRect().height;
       const parentWidth = parentRef.current!.getBoundingClientRect().width;
-      setDimensions({ width: parentWidth, height: parentHeight });
+      setContainerDimensions({ width: parentWidth, height: parentHeight });
     }
   }, [parentRef]);
 
@@ -153,13 +182,16 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       const data = getFilterClickData(
         clickedLayers,
         buckets,
+        metricColumn.id,
         vData,
+        originalVisData,
+        visParams.dimensions.metrics.length,
         splitChartDimension,
         splitChartFormatter
       );
       props.fireEvent({ name: 'filter', data: { data } });
     },
-    [props]
+    [metricColumn.id, originalVisData, props, visParams.dimensions.metrics.length]
   );
 
   // handles legend action event data
@@ -292,8 +324,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   }, [visData.rows, metricColumn]);
 
   const themeOverrides = useMemo(
-    () => getPartitionTheme(visType, visParams, chartTheme, dimensions, rescaleFactor),
-    [visType, visParams, chartTheme, dimensions, rescaleFactor]
+    () => getPartitionTheme(visType, visParams, chartTheme, containerDimensions, rescaleFactor),
+    [visType, visParams, chartTheme, containerDimensions, rescaleFactor]
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');

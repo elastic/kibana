@@ -205,7 +205,7 @@ export const crawlerIndex: CrawlerViewIndex = {
   count: 1,
   crawler: {
     id: '5',
-    index_name: 'crawler',
+    index_name: 'connector-crawler',
   },
   hidden: false,
   ingestionMethod: IngestionMethod.CRAWLER,
