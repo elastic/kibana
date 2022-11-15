@@ -25,6 +25,10 @@ function getScaledDateFormat(interval: number): string {
     return 'YYYY';
   }
 
+  if (interval >= moment.duration(90, 'd').asMilliseconds()) {
+    return 'MMM YYYY';
+  }
+
   if (interval >= moment.duration(1, 'd').asMilliseconds()) {
     return 'MMM D';
   }
