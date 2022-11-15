@@ -63,8 +63,8 @@ describe('parse time shifts', () => {
         for (const anchor of ['start', 'end']) {
           expect(
             validateAbsoluteTimeShift(`${anchor} - ${dateString}`, {
-              from: moment(dateString).subtract('1', 'd').toISOString(),
-              to: moment(dateString).add('1', 'd').toISOString(),
+              from: moment(dateString).add('5', 'd').toISOString(),
+              to: moment(dateString).add('6', 'd').toISOString(),
             })
           ).toBeUndefined();
         }
@@ -112,8 +112,8 @@ describe('parse time shifts', () => {
           for (const offset of ['Z', '+01:00', '-12:00', '-05']) {
             expect(
               validateAbsoluteTimeShift(`${anchor} - ${applyTimeZone(offset)}`, {
-                from: moment(dateString).subtract('1', 'd').toISOString(),
-                to: moment(dateString).add('1', 'd').toISOString(),
+                from: moment(dateString).add('5', 'd').toISOString(),
+                to: moment(dateString).add('6', 'd').toISOString(),
               })
             ).toBeUndefined();
           }
@@ -144,8 +144,8 @@ describe('parse time shifts', () => {
         ]) {
           expect(
             parseAbsoluteTimeShift(invalidDates, {
-              from: moment(dateString).subtract('1', 'd').toISOString(),
-              to: moment(dateString).add('1', 'd').toISOString(),
+              from: moment(dateString).add('5', 'd').toISOString(),
+              to: moment(dateString).add('6', 'd').toISOString(),
             }).value
           ).toBe('invalid');
         }
@@ -155,8 +155,8 @@ describe('parse time shifts', () => {
         for (const anchor of ['start', 'end']) {
           expect(
             parseAbsoluteTimeShift(`${anchor} - ${dateString}`, {
-              from: moment(dateString).subtract('1', 'd').toISOString(),
-              to: moment(dateString).add('1', 'd').toISOString(),
+              from: moment(dateString).add('5', 'd').toISOString(),
+              to: moment(dateString).add('6', 'd').toISOString(),
             }).reason
           ).toBe(null);
         }

@@ -119,14 +119,19 @@ export function validateAbsoluteTimeShift(
   if (!isAbsoluteTimeShift(trimmedVal)) {
     return REASON_IDS.notAbsoluteTimeShift;
   }
-  const { timestamp } = extractTokensFromAbsTimeShift(trimmedVal);
+  const { anchor, timestamp } = extractTokensFromAbsTimeShift(trimmedVal);
   // the regexp test above will make sure anchor and timestamp are both strings
   // now be very strict on the format
   const tsMoment = moment(timestamp, LONG_ISO8601_LIKE_FORMAT, true);
   if (!tsMoment.isValid()) {
     return REASON_IDS.invalidDate;
   }
-  if (timeRange && tsMoment.isAfter(timeRange.to)) {
-    return REASON_IDS.shiftAfterTimeRange;
+  if (timeRange) {
+    const duration = moment(timeRange.to).diff(moment(timeRange.from));
+    if (
+      (anchor === 'start' && tsMoment.isAfter(timeRange.from)) ||
+      tsMoment.subtract(duration).isAfter(timeRange.from)
+    )
+      return REASON_IDS.shiftAfterTimeRange;
   }
 }
