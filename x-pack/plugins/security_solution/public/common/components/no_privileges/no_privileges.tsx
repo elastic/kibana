@@ -7,10 +7,12 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
+import styled from 'styled-components';
 import { useKibana } from '../../lib/kibana';
 import { SecuritySolutionPageWrapper } from '../page_wrapper';
+import type { EmptyPageActionsProps } from '../empty_page';
 import { EmptyPage } from '../empty_page';
 import * as i18n from './translations';
 
@@ -19,12 +21,21 @@ interface NoPrivilegesPageProps {
   pageName?: string;
 }
 
+const SizedEuiFlexItem = styled(EuiFlexItem)`
+  min-height: 460px;
+  font-size: 1.1rem;
+`;
+
 export const NoPrivilegesPage = React.memo<NoPrivilegesPageProps>(
   ({ pageName, docLinkSelector }) => (
     <SecuritySolutionPageWrapper>
-      <EuiPageTemplate template="centeredContent">
-        <NoPrivileges pageName={pageName} docLinkSelector={docLinkSelector} />
-      </EuiPageTemplate>
+      <EuiFlexGroup>
+        <SizedEuiFlexItem>
+          <EuiPageTemplate.EmptyPrompt>
+            <NoPrivileges pageName={pageName} docLinkSelector={docLinkSelector} />
+          </EuiPageTemplate.EmptyPrompt>
+        </SizedEuiFlexItem>
+      </EuiFlexGroup>
     </SecuritySolutionPageWrapper>
   )
 );
@@ -33,7 +44,7 @@ NoPrivilegesPage.displayName = 'NoPrivilegePage';
 export const NoPrivileges = React.memo<NoPrivilegesPageProps>(({ pageName, docLinkSelector }) => {
   const { docLinks } = useKibana().services;
 
-  const emptyPageActions = useMemo(
+  const emptyPageActions = useMemo<EmptyPageActionsProps>(
     () => ({
       feature: {
         icon: 'documents',

@@ -6,7 +6,14 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCard,
+  EuiText,
+} from '@elastic/eui';
 import type { MouseEventHandler, ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -99,7 +106,11 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
   return (
     <EmptyPrompt
       iconType="logoSecurity"
-      title={<h2>{title}</h2>}
+      title={
+        <EuiText>
+          <h2>{title}</h2>
+        </EuiText>
+      }
       body={message && <p>{message}</p>}
       actions={<EuiFlexGroup justifyContent="center">{renderActions}</EuiFlexGroup>}
       {...rest}
