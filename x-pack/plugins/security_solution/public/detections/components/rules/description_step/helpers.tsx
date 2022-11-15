@@ -517,12 +517,25 @@ export const buildRequiredFieldsDescription = (
 
 export const buildAlertSuppressionDescription = (
   label: string,
-  description: string[],
+  values: string[],
   license: LicenseService
 ): ListItems[] => {
-  if (isEmpty(description)) {
+  if (isEmpty(values)) {
     return [];
   }
+  const description = (
+    <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+      {values.map((val: string) =>
+        isEmpty(val) ? null : (
+          <EuiFlexItem grow={false} key={`${label}-${val}`}>
+            <EuiBadgeWrap data-test-subj="stringArrayDescriptionBadgeItem" color="hollow">
+              {val}
+            </EuiBadgeWrap>
+          </EuiFlexItem>
+        )
+      )}
+    </EuiFlexGroup>
+  );
   if (license.isAtLeast(minimumLicenseForSuppression)) {
     return [
       {
