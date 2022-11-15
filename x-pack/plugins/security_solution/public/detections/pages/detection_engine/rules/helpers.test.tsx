@@ -115,6 +115,7 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        groupByFields: ['host.name'],
         newTermsFields: ['host.name'],
         historyWindowSize: '7d',
       };
@@ -258,6 +259,7 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        groupByFields: [],
         newTermsFields: [],
         historyWindowSize: '7d',
         shouldLoadQueryDynamically: true,
@@ -312,6 +314,7 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        groupByFields: [],
         newTermsFields: [],
         historyWindowSize: '7d',
         shouldLoadQueryDynamically: false,
