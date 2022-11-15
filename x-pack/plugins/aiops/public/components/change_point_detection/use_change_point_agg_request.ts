@@ -29,7 +29,7 @@ interface RequestOptions {
   afterKey?: string;
 }
 
-export const COMPOSITE_AGG_SIZE = 10;
+export const COMPOSITE_AGG_SIZE = 500;
 
 function getChangePointDetectionRequestBody(
   { index, fn, metricField, splitField, timeInterval, timeField, afterKey }: RequestOptions,
@@ -73,6 +73,17 @@ function getChangePointDetectionRequestBody(
               change_point_request: {
                 change_point: {
                   buckets_path: 'over_time>function_value',
+                },
+              },
+              select: {
+                bucket_selector: {
+                  buckets_path: { p_value: 'change_point_request.p_value' },
+                  script: 'params.p_value < 1',
+                },
+              },
+              sort: {
+                bucket_sort: {
+                  sort: [{ 'change_point_request.p_value': { order: 'asc' } }],
                 },
               },
             },
@@ -162,24 +173,21 @@ export function useChangePointResults(
           )
         );
 
-        const groups = buckets
-          .map((v) => {
-            const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
-            const timeAsString = v.change_point_request.bucket?.key;
-            const rawPValue = v.change_point_request.type[changePointType].p_value;
+        const groups = buckets.map((v) => {
+          const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
+          const timeAsString = v.change_point_request.bucket?.key;
+          const rawPValue = v.change_point_request.type[changePointType].p_value;
 
-            return {
-              group_field: v.key.splitFieldTerm,
-              type: changePointType,
-              p_value:
-                rawPValue === undefined ? undefined : Number(numberFormatter.convert(rawPValue)),
-              timestamp: timeAsString,
-              label: changePointType,
-              reason: v.change_point_request.type[changePointType].reason,
-            } as ChangePointAnnotation;
-          })
-          // Filter out change point results without p_value
-          .filter((v): v is ChangePointAnnotation => !!v && Number.isFinite(v.p_value));
+          return {
+            group_field: v.key.splitFieldTerm,
+            type: changePointType,
+            p_value:
+              rawPValue === undefined ? undefined : Number(numberFormatter.convert(rawPValue)),
+            timestamp: timeAsString,
+            label: changePointType,
+            reason: v.change_point_request.type[changePointType].reason,
+          } as ChangePointAnnotation;
+        });
 
         setResults((prev) => {
           return (
@@ -195,6 +203,8 @@ export function useChangePointResults(
             result.rawResponse.aggregations.groupings.after_key.splitFieldTerm,
             buckets.length + (prevBucketsCount ?? 0)
           );
+        } else {
+          setProgress(100);
         }
       } catch (e) {
         toasts.addError(e, {
