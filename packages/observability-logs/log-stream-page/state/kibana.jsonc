@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/observability-logs-log-stream-page-state",
+  "owner": "@elastic/infra-monitoring-ui",
+  "runtimeDeps": [],
+  "typeDeps": [],
+}

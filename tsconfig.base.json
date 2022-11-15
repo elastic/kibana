@@ -626,6 +626,8 @@
       "@kbn/utils/*": ["packages/kbn-utils/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
+      "@kbn/observability-logs-log-stream-page-state": ["packages/observability-logs/log-stream-page/state"],
+      "@kbn/observability-logs-log-stream-page-state/*": ["packages/observability-logs/log-stream-page/state/*"],
       "@kbn/shared-ux-avatar-solution": ["packages/shared-ux/avatar/solution"],
       "@kbn/shared-ux-avatar-solution/*": ["packages/shared-ux/avatar/solution/*"],
       "@kbn/shared-ux-avatar-user-profile-components": ["packages/shared-ux/avatar/user_profile/impl"],
