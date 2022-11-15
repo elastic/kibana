@@ -74,11 +74,6 @@ export interface Props {
   editorDidMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 
   /**
-   * Should the editor use the dark theme
-   */
-  useDarkTheme?: boolean;
-
-  /**
    * Should the editor use a transparent background
    */
   transparentBackground?: boolean;

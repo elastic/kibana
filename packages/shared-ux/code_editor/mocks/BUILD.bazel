@@ -8,7 +8,6 @@ PKG_REQUIRE_NAME = "@kbn/shared-ux-code-editor-mocks"
 SOURCE_FILES = glob(
   [
     "**/*.ts",
-    "**/*.tsx",
   ],
   exclude = [
     "**/*.config.js",
@@ -50,7 +49,6 @@ RUNTIME_DEPS = [
   "@npm//react",
   "@npm//@storybook/addon-actions",
   "//packages/shared-ux/storybook/mock",
-  "//packages/shared-ux/code_editor/impl",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -65,13 +63,10 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/react",
   "@npm//@storybook/addon-actions",
-  "@npm//@types/jest",
   "@npm//@types/node",
-  "@npm//@elastic/eui",
   "//packages/shared-ux/storybook/mock:npm_module_types",
   "//packages/shared-ux/code_editor/types:npm_module_types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
-  "//packages/kbn-ambient-ui-types",
 ]
 
 jsts_transpiler(
