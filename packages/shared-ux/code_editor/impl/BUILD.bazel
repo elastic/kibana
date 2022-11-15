@@ -11,7 +11,7 @@ SOURCE_FILES = glob(
     "**/*.tsx",
     "**/*.mdx",
     "**/*.d.ts",
-    "**/languages/*d.ts"
+    "**/languages/**/*d.ts"
   ],
   exclude = [
     "**/*.config.js",
