@@ -54,14 +54,14 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   if (stats === undefined || !stats.topValues) return null;
   const { topValues, fieldName, sampleCount } = stats;
 
-  const totalDocuments = stats.totalDocuments ?? 0;
+  const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
   const topValuesOtherCountPercent =
     1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);
   const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount ?? 0));
 
   const countsElement = (
     <EuiText color="subdued" size="xs">
-      {totalDocuments > (sampleCount ?? totalDocuments) ? (
+      {totalDocuments > (sampleCount ?? 0) ? (
         <FormattedMessage
           id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
           defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."

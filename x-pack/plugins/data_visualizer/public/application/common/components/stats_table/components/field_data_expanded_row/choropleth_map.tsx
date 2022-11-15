@@ -105,12 +105,16 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
     },
   } = useDataVisualizerKibana();
 
-  const { fieldName, isTopValuesSampled, topValues, sampleCount, totalDocuments } = stats!;
+  const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats!;
 
   const layerList: VectorLayerDescriptor[] = useMemo(
     () => [getChoroplethTopValuesLayer(fieldName || '', topValues || [], suggestion)],
     [suggestion, fieldName, topValues]
   );
+
+  if (!stats) return null;
+
+  const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
 
   const countsElement = totalDocuments ? (
     <EuiText color="subdued" size="xs">
