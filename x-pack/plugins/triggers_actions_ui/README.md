@@ -1147,7 +1147,7 @@ export function getActionType(): ActionTypeModel {
 
 and action params form available in Create Alert form:
 
-![D3Security action form](https://i.imgur.com/Vd7zOUq.png)
+![D3Security action form](https://i.imgur.com/wIPjkbp.png)
 
 ## Action type model definition
 
