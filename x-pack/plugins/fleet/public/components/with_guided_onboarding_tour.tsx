@@ -85,7 +85,7 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
 
   return config ? (
     <EuiTourStep
-      content={<EuiText>{config.description}</EuiText>}
+      content={<EuiText size="s">{config.description}</EuiText>}
       isStepOpen={isGuidedOnboardingTourOpen}
       maxWidth={350}
       onFinish={() => setIsGuidedOnboardingTourOpen(false)}

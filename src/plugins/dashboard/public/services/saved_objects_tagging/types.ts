@@ -18,4 +18,5 @@ export interface DashboardSavedObjectsTaggingService {
   updateTagsReferences?: SavedObjectsTaggingApi['ui']['updateTagsReferences'];
   getTagIdsFromReferences?: SavedObjectsTaggingApi['ui']['getTagIdsFromReferences'];
   getTableColumnDefinition?: SavedObjectsTaggingApi['ui']['getTableColumnDefinition'];
+  getTagList?: SavedObjectsTaggingApi['ui']['getTagList'];
 }
