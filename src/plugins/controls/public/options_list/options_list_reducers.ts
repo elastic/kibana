@@ -10,8 +10,8 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { Filter } from '@kbn/es-query';
 
-import { OptionsListReduxState, OptionsListComponentState, SuggestionsSorting } from './types';
-import { OptionsListField } from '../../common/options_list/types';
+import { OptionsListReduxState, OptionsListComponentState } from './types';
+import { OptionsListField, SuggestionsSorting } from '../../common/options_list/types';
 import { getIpRangeQuery } from '../../common/options_list/ip_search';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({

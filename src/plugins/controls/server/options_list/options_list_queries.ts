@@ -102,11 +102,9 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         include: `${getEscapedQuery(searchString)}.*`,
         execution_hint: 'map',
         shard_size: 10,
-        order: sort
-          ? {
-              [sort.by]: sort.direction,
-            }
-          : undefined,
+        order: {
+          [sort?.by ?? '_count']: sort?.direction ?? 'desc',
+        },
       },
     }),
     parse: (rawEsResult) =>
@@ -136,11 +134,9 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
             terms: {
               field: fieldName,
               shard_size: 10,
-              order: sort
-                ? {
-                    [sort.by]: sort.direction,
-                  }
-                : undefined,
+              order: {
+                [sort?.by ?? '_count']: sort?.direction ?? 'desc',
+              },
             },
           },
         },
@@ -161,11 +157,9 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         field: fieldName,
         execution_hint: 'map',
         shard_size: 10,
-        order: sort
-          ? {
-              [sort.by]: sort.direction,
-            }
-          : undefined,
+        order: {
+          [sort?.by ?? '_count']: sort?.direction ?? 'desc',
+        },
       },
     }),
     parse: (rawEsResult) =>
@@ -211,11 +205,9 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
               field: fieldName,
               execution_hint: 'map',
               shard_size: 10,
-              order: sort
-                ? {
-                    [sort.by]: sort.direction,
-                  }
-                : undefined,
+              order: {
+                [sort?.by ?? '_count']: sort?.direction ?? 'desc',
+              },
             },
           },
         },
@@ -260,11 +252,9 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
               include: `${getEscapedQuery(searchString)}.*`,
               execution_hint: 'map',
               shard_size: 10,
-              order: sort
-                ? {
-                    [sort.by]: sort.direction,
-                  }
-                : undefined,
+              order: {
+                [sort?.by ?? '_count']: sort?.direction ?? 'desc',
+              },
             },
           },
         },
