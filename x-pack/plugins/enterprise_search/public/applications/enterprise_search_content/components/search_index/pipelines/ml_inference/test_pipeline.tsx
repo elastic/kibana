@@ -33,11 +33,15 @@ import './add_ml_inference_pipeline_modal.scss';
 
 export const TestPipeline: React.FC = () => {
   const {
-    addInferencePipelineModal: { simulateBody, indexName },
+    addInferencePipelineModal: {
+      configuration: { sourceField },
+      indexName,
+      simulateBody,
+    },
     getDocumentsErr,
     isGetDocumentsLoading,
-    simulatePipelineResult,
     showGetDocumentErrors,
+    simulatePipelineResult,
     simulatePipelineErrors,
   } = useValues(MLInferenceLogic);
   const { simulatePipeline, setPipelineSimulateBody, makeGetDocumentRequest } =
@@ -159,7 +163,7 @@ export const TestPipeline: React.FC = () => {
                   defaultMessage="Use JSON format: {code}"
                   values={{
                     code: (
-                      <EuiCode>{'[{"_index":"index","_id":"id","_source":{"foo":"bar"}}]'}</EuiCode>
+                      <EuiCode>{`[{"_index":"index","_id":"id","_source":{"${sourceField}":"bar"}}]`}</EuiCode>
                     ),
                   }}
                 />
