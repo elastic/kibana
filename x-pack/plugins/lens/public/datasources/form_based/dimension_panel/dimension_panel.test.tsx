@@ -1574,7 +1574,7 @@ describe('FormBasedDimensionEditor', () => {
 
     it('should mark absolute time shift as invalid', () => {
       const props = getProps({
-        timeShift: 'start - 2022-11-02T00:00:00.000Z',
+        timeShift: 'startAt(2022-11-02T00:00:00.000Z)',
       });
       wrapper = mount(<FormBasedDimensionEditorComponent {...props} />);
 

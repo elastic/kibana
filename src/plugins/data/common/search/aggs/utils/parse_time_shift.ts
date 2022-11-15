@@ -10,7 +10,7 @@ import { TimeRange } from '../../../types';
 
 const allowedUnits = ['s', 'm', 'h', 'd', 'w', 'M', 'y'] as const;
 type AllowedUnit = typeof allowedUnits[number];
-const anchoredTimeShiftRegexp = /^(start|end)( - )(.+)$/;
+const anchoredTimeShiftRegexp = /^(startAt|endAt)\((.+)\)$/;
 const durationRegexp = /^(\d+)\s*(\w)$/;
 const invalidDate = 'invalid';
 const previousDate = 'previous';
@@ -90,7 +90,7 @@ export const parseAbsoluteTimeShift = (
   // workout how long is the ref time range
   const duration = moment(timeRange.to).diff(moment(timeRange.from));
   // pick the end of the absolute range now
-  const absRangeEnd = anchor === 'start' ? tsMoment.add(duration) : tsMoment;
+  const absRangeEnd = anchor === 'startAt' ? tsMoment.add(duration) : tsMoment;
   // return (ref end date - shift end date)
   return { value: moment.duration(moment(timeRange.to).diff(absRangeEnd)), reason: null };
 };
@@ -101,7 +101,7 @@ export const parseAbsoluteTimeShift = (
  * @returns the anchor and timestamp strings
  */
 function extractTokensFromAbsTimeShift(val: string) {
-  const [, anchor, , timestamp] = val.match(anchoredTimeShiftRegexp) || [];
+  const [, anchor, timestamp] = val.match(anchoredTimeShiftRegexp) || [];
   return { anchor, timestamp };
 }
 /**
@@ -129,7 +129,7 @@ export function validateAbsoluteTimeShift(
   if (timeRange) {
     const duration = moment(timeRange.to).diff(moment(timeRange.from));
     if (
-      (anchor === 'start' && tsMoment.isAfter(timeRange.from)) ||
+      (anchor === 'startAt' && tsMoment.isAfter(timeRange.from)) ||
       tsMoment.subtract(duration).isAfter(timeRange.from)
     )
       return REASON_IDS.shiftAfterTimeRange;

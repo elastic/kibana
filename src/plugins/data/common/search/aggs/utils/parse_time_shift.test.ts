@@ -43,8 +43,8 @@ describe('parse time shifts', () => {
     }
     describe('isAbsoluteTimeShift', () => {
       it('should return true for a valid absoluteTimeShift string', () => {
-        for (const anchor of ['start', 'end']) {
-          expect(isAbsoluteTimeShift(`${anchor} - ${dateString}`)).toBeTruthy();
+        for (const anchor of ['startAt', 'endAt']) {
+          expect(isAbsoluteTimeShift(`${anchor}(${dateString})`)).toBeTruthy();
         }
       });
 
@@ -54,15 +54,15 @@ describe('parse time shifts', () => {
 
       // that's ok, the function is used to distinguish from the relative shifts
       it('should perform only a shallow check on the string', () => {
-        expect(isAbsoluteTimeShift('start - aaaaa')).toBeTruthy();
+        expect(isAbsoluteTimeShift('startAt(aaaaa)')).toBeTruthy();
       });
     });
 
     describe('validateAbsoluteTimeShift', () => {
       it('should return no error for valid time shifts', () => {
-        for (const anchor of ['start', 'end']) {
+        for (const anchor of ['startAt', 'endAt']) {
           expect(
-            validateAbsoluteTimeShift(`${anchor} - ${dateString}`, {
+            validateAbsoluteTimeShift(`${anchor}(${dateString})`, {
               from: moment(dateString).add('5', 'd').toISOString(),
               to: moment(dateString).add('6', 'd').toISOString(),
             })
@@ -71,35 +71,35 @@ describe('parse time shifts', () => {
       });
 
       it('should return no error for valid time shifts if no time range is passed', () => {
-        for (const anchor of ['start', 'end']) {
-          expect(validateAbsoluteTimeShift(`${anchor} - ${dateString}`)).toBeUndefined();
+        for (const anchor of ['startAt', 'endAt']) {
+          expect(validateAbsoluteTimeShift(`${anchor}(${dateString})`)).toBeUndefined();
           // This will pass as the range checks are relaxed without the second argument passed
-          expect(validateAbsoluteTimeShift(`${anchor} - ${futureDateString}`)).toBeUndefined();
+          expect(validateAbsoluteTimeShift(`${anchor}(${futureDateString})`)).toBeUndefined();
         }
       });
 
       it('should return an error if the string value is not an absolute time shift', () => {
-        for (const val of ['start -', 'end -', '1d', 'aaa']) {
+        for (const val of ['startAt()', 'endAt()', '1d', 'aaa']) {
           expect(validateAbsoluteTimeShift(val)).toBe(REASON_IDS.notAbsoluteTimeShift);
         }
       });
 
       it('should return an error if the passed date is invalid', () => {
         for (const val of [
-          'start - a',
-          'end - a',
-          'start - 2022',
-          'start - 2022-11-02T00:00:00.000',
-          'end - 2022-11-02',
+          'startAt(a)',
+          'endAt(a)',
+          'startAt(2022)',
+          'startAt(2022-11-02T00:00:00.000)',
+          'endAt(2022-11-02)',
         ]) {
           expect(validateAbsoluteTimeShift(val)).toBe(REASON_IDS.invalidDate);
         }
       });
 
       it('should return an error if dateRange is passed and the shift is after that', () => {
-        for (const anchor of ['start', 'end']) {
+        for (const anchor of ['startAt', 'endAt']) {
           expect(
-            validateAbsoluteTimeShift(`${anchor} - ${futureDateString}`, {
+            validateAbsoluteTimeShift(`${anchor}(${futureDateString})`, {
               from: moment(dateString).subtract('1', 'd').toISOString(),
               to: moment(dateString).add('1', 'd').toISOString(),
             })
@@ -108,10 +108,10 @@ describe('parse time shifts', () => {
       });
 
       it('should return no error for dates with non-UTC offset', () => {
-        for (const anchor of ['start', 'end']) {
+        for (const anchor of ['startAt', 'endAt']) {
           for (const offset of ['Z', '+01:00', '-12:00', '-05']) {
             expect(
-              validateAbsoluteTimeShift(`${anchor} - ${applyTimeZone(offset)}`, {
+              validateAbsoluteTimeShift(`${anchor}(${applyTimeZone(offset)})`, {
                 from: moment(dateString).add('5', 'd').toISOString(),
                 to: moment(dateString).add('6', 'd').toISOString(),
               })
@@ -123,8 +123,8 @@ describe('parse time shifts', () => {
 
     describe('parseAbsoluteTimeShift', () => {
       it('should return an error if no time range is passed', () => {
-        for (const anchor of ['start', 'end']) {
-          expect(parseAbsoluteTimeShift(`${anchor} - ${dateString}`, undefined)).toEqual({
+        for (const anchor of ['startAt', 'endAt']) {
+          expect(parseAbsoluteTimeShift(`${anchor}(${dateString})`, undefined)).toEqual({
             value: 'invalid',
             reason: REASON_IDS.missingTimerange,
           });
@@ -133,14 +133,14 @@ describe('parse time shifts', () => {
 
       it('should return an error for invalid dates', () => {
         for (const invalidDates of [
-          'start - a',
-          'end - a',
-          'start - 2022',
-          'start - 2022-11-02T00:00:00.000',
-          'end - 2022-11-02',
+          'startAt(a)',
+          'endAt(a)',
+          'startAt(2022)',
+          'startAt(2022-11-02T00:00:00.000)',
+          'endAt(2022-11-02)',
           '1d',
           'aaa',
-          `start - ${futureDateString}`,
+          `startAt(${futureDateString})`,
         ]) {
           expect(
             parseAbsoluteTimeShift(invalidDates, {
@@ -152,9 +152,9 @@ describe('parse time shifts', () => {
       });
 
       it('should return no reason for a valid absolute time shift', () => {
-        for (const anchor of ['start', 'end']) {
+        for (const anchor of ['startAt', 'endAt']) {
           expect(
-            parseAbsoluteTimeShift(`${anchor} - ${dateString}`, {
+            parseAbsoluteTimeShift(`${anchor}(${dateString})`, {
               from: moment(dateString).add('5', 'd').toISOString(),
               to: moment(dateString).add('6', 'd').toISOString(),
             }).reason
