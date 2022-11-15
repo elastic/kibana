@@ -375,6 +375,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be('jpg\n100%');
       });
 
+      it('should work for many fields', async () => {
+        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/many_fields');
+        await kibanaServer.importExport.load(
+          'test/functional/fixtures/kbn_archiver/many_fields_data_view'
+        );
+
+        await browser.refresh();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await PageObjects.discover.selectIndexPattern('indices-stats*');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '6873 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await kibanaServer.importExport.unload(
+          'test/functional/fixtures/kbn_archiver/many_fields_data_view'
+        );
+        await esArchiver.unload('test/functional/fixtures/es_archiver/many_fields');
+      });
+
       it('should work with ad-hoc data views and runtime fields', async () => {
         await PageObjects.discover.createAdHocDataView('logstash', true);
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -424,6 +461,56 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         allFields = await PageObjects.discover.getAllFieldNames();
         expect(allFields.includes('_bytes-runtimefield2')).to.be(false);
         expect(allFields.includes('_bytes-runtimefield')).to.be(false);
+      });
+
+      it('should work correctly when time range is updated', async function () {
+        await esArchiver.loadIfNeeded(
+          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+        );
+        await kibanaServer.importExport.load(
+          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+        );
+
+        await browser.refresh();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await PageObjects.discover.selectIndexPattern('with-timefield');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '0 available fields. 7 empty fields. 3 meta fields.'
+        );
+        await testSubjects.existOrFail(
+          `${PageObjects.discover.getSidebarSectionSelector(
+            'available'
+          )}NoFieldsCallout-noFieldsMatch`
+        );
+
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 21, 2019 @ 00:00:00.000',
+          'Sep 23, 2019 @ 00:00:00.000'
+        );
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '7 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await kibanaServer.importExport.unload(
+          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+        );
+
+        await esArchiver.unload(
+          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+        );
       });
     });
   });
