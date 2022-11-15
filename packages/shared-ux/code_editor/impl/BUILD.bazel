@@ -10,6 +10,7 @@ SOURCE_FILES = glob(
     "**/*.ts",
     "**/*.tsx",
     "**/*.mdx",
+    "**/*d.ts"
   ],
   exclude = [
     "**/*.config.js",
@@ -54,7 +55,6 @@ RUNTIME_DEPS = [
   "//packages/kbn-monaco",
   "//packages/kbn-i18n-react",
   "//packages/kbn-i18n",
-  "@npm//classnames",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
