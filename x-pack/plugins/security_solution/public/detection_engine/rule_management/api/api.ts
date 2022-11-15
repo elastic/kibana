@@ -28,7 +28,10 @@ import {
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
 
-import type { BulkActionEditPayload } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type {
+  BulkActionEditPayload,
+  BulkActionDuplicatePayload,
+} from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionType } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 import type {
@@ -215,13 +218,23 @@ export interface BulkActionResponse {
 
 export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefined; ids: string[] };
 type PlainBulkAction = {
-  type: Exclude<BulkActionType, BulkActionType.edit | BulkActionType.export>;
+  type: Exclude<
+    BulkActionType,
+    BulkActionType.edit | BulkActionType.export | BulkActionType.duplicate
+  >;
 } & QueryOrIds;
+
 type EditBulkAction = {
   type: BulkActionType.edit;
   editPayload: BulkActionEditPayload[];
 } & QueryOrIds;
-export type BulkAction = PlainBulkAction | EditBulkAction;
+
+type DuplicateBulkAction = {
+  type: BulkActionType.duplicate;
+  duplicatePayload?: BulkActionDuplicatePayload;
+} & QueryOrIds;
+
+export type BulkAction = PlainBulkAction | EditBulkAction | DuplicateBulkAction;
 
 export interface PerformBulkActionProps {
   bulkAction: BulkAction;
@@ -245,6 +258,8 @@ export async function performBulkAction({
     query: bulkAction.query,
     ids: bulkAction.ids,
     edit: bulkAction.type === BulkActionType.edit ? bulkAction.editPayload : undefined,
+    duplicate:
+      bulkAction.type === BulkActionType.duplicate ? bulkAction.duplicatePayload : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
