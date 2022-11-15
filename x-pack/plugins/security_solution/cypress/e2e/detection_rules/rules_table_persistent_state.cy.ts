@@ -1,17 +1,11 @@
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import {
-  createAndEnableRule,
-  fillAboutRuleAndContinue,
-  fillDefineCustomRuleAndContinue,
-  fillScheduleRuleAndContinue,
-} from '../../tasks/create_new_rule';
-import {
-  RULE_CREATION,
   DETECTIONS_RULE_MANAGEMENT_URL,
   DASHBOARDS_URL,
+  SECURITY_DETECTIONS_RULES_URL,
 } from '../../urls/navigation';
-import { getSimpleCustomQueryRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import {
   expectNumberOfRules,
   expectToContainRule,
@@ -20,27 +14,38 @@ import {
   goToRuleDetails,
 } from '../../tasks/alerts_detection_rules';
 import { RULE_SEARCH_FIELD } from '../../screens/alerts_detection_rules';
+import { createCustomRule } from '../../tasks/api_calls/rules';
 
-function createRule(name: string, tags?: string[]): void {
-  const rule = getSimpleCustomQueryRule();
+function createRule(id: string, name: string, tags?: string[]): void {
+  const rule = getNewRule();
 
   rule.name = name;
   rule.tags = tags;
 
-  visit(RULE_CREATION);
-  fillDefineCustomRuleAndContinue(rule);
-  fillAboutRuleAndContinue(rule);
-  fillScheduleRuleAndContinue(rule);
-  createAndEnableRule();
+  createCustomRule(rule, id);
 }
 
 describe('Persistent rules table state', () => {
   before(() => {
     cleanKibana();
+
+    createRule('1', 'Test rule 1');
+    createRule('2', 'Test rule 2', ['Custom']);
+
     login();
 
-    createRule('Test rule 1');
-    createRule('Test rule 2', ['Custom']);
+    visit(SECURITY_DETECTIONS_RULES_URL);
+  });
+
+  it('reloads the state from the url if the storage was cleared', () => {
+    filterBySearchTerm('rule 1');
+
+    cy.clearLocalStorage();
+    cy.reload();
+
+    cy.get(RULE_SEARCH_FIELD).should('have.value', 'rule 1');
+    expectNumberOfRules(1);
+    expectToContainRule('rule 1');
   });
 
   it('preserved after navigation from the rules details page', () => {

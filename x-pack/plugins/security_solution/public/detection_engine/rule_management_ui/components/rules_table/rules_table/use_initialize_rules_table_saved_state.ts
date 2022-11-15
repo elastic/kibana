@@ -22,18 +22,20 @@ export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTa
   } = useKibana();
   const onInitializeRulesTableContextFromUrlParam = useCallback(
     (params: RulesTableSavedState | null) => {
-      const savedState: Partial<RulesTableSavedState> = storage.get(RULE_TABLE_STATE_STORAGE_KEY);
+      const savedState: Partial<RulesTableSavedState> | null = storage.get(
+        RULE_TABLE_STATE_STORAGE_KEY
+      );
 
       if (!params && !savedState) {
         return;
       }
 
-      const activeTab = params?.tab ?? savedState.tab;
-      const isInMemorySorting = params?.inMemory ?? savedState.inMemory;
-      const filterOptions = params?.filter ?? savedState.filter;
-      const sorting = params?.sort ?? savedState.sort;
-      const page = params?.page ?? savedState.page;
-      const perPage = params?.perPage ?? savedState.perPage;
+      const activeTab = params?.tab ?? savedState?.tab;
+      const isInMemorySorting = params?.inMemory ?? savedState?.inMemory;
+      const filterOptions = params?.filter ?? savedState?.filter;
+      const sorting = params?.sort ?? savedState?.sort;
+      const page = params?.page ?? savedState?.page;
+      const perPage = params?.perPage ?? savedState?.perPage;
 
       if (activeTab === AllRulesTabs.monitoring) {
         setActiveTab(activeTab);
