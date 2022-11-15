@@ -18,8 +18,13 @@ export const threadingParamsSchema = schema.maybe(
   schema.object({
     number_of_allocations: schema.number(),
     threads_per_allocation: schema.number(),
+    priority: schema.oneOf([schema.literal('low'), schema.literal('normal')]),
   })
 );
+
+export const updateDeploymentParamsSchema = schema.object({
+  number_of_allocations: schema.number(),
+});
 
 export const optionalModelIdSchema = schema.object({
   /**
