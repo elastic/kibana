@@ -114,7 +114,7 @@ const InsightComponent = ({ label, description, providers }: InsightComponentPro
     providers: parsedProviders,
     alertData,
   });
-  const { totalCount, isQueryLoading, oldestTimestamp } = useInsightQuery({
+  const { totalCount, isQueryLoading, oldestTimestamp, hasError } = useInsightQuery({
     dataProviders,
   });
   if (isQueryLoading) {
@@ -123,6 +123,7 @@ const InsightComponent = ({ label, description, providers }: InsightComponentPro
     return (
       <InvestigateInTimelineButton
         asEmptyButton={false}
+        isDisabled={hasError}
         dataProviders={dataProviders}
         timeRange={oldestTimestamp}
         keepDataView={true}

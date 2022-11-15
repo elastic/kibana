@@ -28,6 +28,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
   filters?: Filter[] | null;
   timeRange?: string | null;
   keepDataView?: boolean;
+  isDisabled?: boolean;
 }> = ({ asEmptyButton, children, dataProviders, filters, timeRange, keepDataView, ...rest }) => {
   const dispatch = useDispatch();
 
