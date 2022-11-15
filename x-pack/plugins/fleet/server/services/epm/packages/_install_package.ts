@@ -32,7 +32,10 @@ import type {
   PackageAssetReference,
   PackageVerificationResult,
 } from '../../../types';
-import { prepareToInstallTemplates } from '../elasticsearch/template/install';
+import {
+  ensureFileUploadWriteIndices,
+  prepareToInstallTemplates,
+} from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
 import {
   prepareToInstallPipelines,
@@ -213,6 +216,12 @@ export async function _installPackage({
     } catch (e) {
       logger.warn(`Error removing legacy templates: ${e.message}`);
     }
+
+    await ensureFileUploadWriteIndices({
+      integrationNames: [packageInfo.name],
+      esClient,
+      logger,
+    });
 
     // update current backing indices of each data stream
     await withPackageSpan('Update write indices', () =>
