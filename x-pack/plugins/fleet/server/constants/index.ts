@@ -83,3 +83,5 @@ export {
   FLEET_INSTALL_FORMAT_VERSION,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
 } from './fleet_es_assets';
+export { FILE_STORAGE_DATA_AGENT_INDEX } from './fleet_es_assets';
+export { FILE_STORAGE_METADATA_AGENT_INDEX } from './fleet_es_assets';

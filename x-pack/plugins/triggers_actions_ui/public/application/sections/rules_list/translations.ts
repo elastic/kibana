@@ -198,3 +198,108 @@ export const CLEAR_SELECTION = i18n.translate(
     defaultMessage: 'Clear selection',
   }
 );
+
+export const SINGLE_RULE_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.singleTitle',
+  {
+    defaultMessage: 'rule',
+  }
+);
+export const MULTIPLE_RULE_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.multipleTitle',
+  {
+    defaultMessage: 'rules',
+  }
+);
+
+export const CANCEL_BUTTON_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.cancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const getConfirmDeletionModalText = (
+  numIdsToDelete: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate('xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.descriptionText', {
+    defaultMessage:
+      "You won't be able to recover {numIdsToDelete, plural, one {a deleted {singleTitle}} other {deleted {multipleTitle}}}.",
+    values: {
+      numIdsToDelete,
+      singleTitle,
+      multipleTitle,
+    },
+  });
+
+export const getConfirmDeletionButtonText = (
+  numIdsToDelete: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate('xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.deleteButtonLabel', {
+    defaultMessage:
+      'Delete {numIdsToDelete, plural, one {{singleTitle}} other {# {multipleTitle}}} ',
+    values: {
+      numIdsToDelete,
+      singleTitle,
+      multipleTitle,
+    },
+  });
+
+export const getSuccessfulDeletionNotificationText = (
+  numSuccesses: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.deleteSelectedIdsSuccessNotification.descriptionText',
+    {
+      defaultMessage:
+        'Deleted {numSuccesses, number} {numSuccesses, plural, one {{singleTitle}} other {{multipleTitle}}}',
+      values: {
+        numSuccesses,
+        singleTitle,
+        multipleTitle,
+      },
+    }
+  );
+export const getFailedDeletionNotificationText = (
+  numErrors: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText',
+    {
+      defaultMessage:
+        'Failed to delete {numErrors, number} {numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}',
+      values: {
+        numErrors,
+        singleTitle,
+        multipleTitle,
+      },
+    }
+  );
+
+export const getPartialSuccessDeletionNotificationText = (
+  numberOfSuccess: number,
+  numberOfErrors: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.deleteSelectedIdsPartialSuccessNotification.descriptionText',
+    {
+      defaultMessage:
+        'Deleted {numberOfSuccess, number} {numberOfSuccess, plural, one {{singleTitle}} other {{multipleTitle}}}, {numberOfErrors, number} {numberOfErrors, plural, one {{singleTitle}} other {{multipleTitle}}} encountered errors',
+      values: {
+        numberOfSuccess,
+        numberOfErrors,
+        singleTitle,
+        multipleTitle,
+      },
+    }
+  );

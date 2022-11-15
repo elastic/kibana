@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiErrorBoundary } from '@elastic/eui';
+import styled from 'styled-components';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { useAppDataView } from './use_app_data_view';
 import { ObservabilityPublicPluginsStart, useFetcher } from '../../../..';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
-import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
-import type { DataViewState } from '../hooks/use_app_data_view';
-import type { AppDataType } from '../types';
 
 const Embeddable = React.lazy(() => import('./embeddable'));
 
@@ -30,68 +31,75 @@ function ExploratoryViewEmbeddable(props: ExploratoryEmbeddableComponentProps) {
 export function getExploratoryViewEmbeddable(
   services: CoreStart & ObservabilityPublicPluginsStart
 ) {
-  const { lens, dataViews, uiSettings } = services;
+  const { lens, dataViews: dataViewsService, uiSettings } = services;
+
+  const dataViewCache: Record<string, DataView> = {};
+
+  const lenStateHelperPromise: Promise<{ formula: FormulaPublicApi }> | null = null;
 
   return (props: ExploratoryEmbeddableProps) => {
-    if (!dataViews || !lens) {
+    const { dataTypesIndexPatterns, attributes, customHeight } = props;
+
+    if (!dataViewsService || !lens || !attributes || attributes?.length === 0) {
       return null;
     }
 
-    const [indexPatterns, setIndexPatterns] = useState<DataViewState>({} as DataViewState);
-    const [loading, setLoading] = useState(false);
-
-    const series = props.attributes && props.attributes[0];
+    const series = attributes[0];
 
     const isDarkMode = uiSettings?.get('theme:darkMode');
 
     const { data: lensHelper, loading: lensLoading } = useFetcher(async () => {
+      if (lenStateHelperPromise) {
+        return lenStateHelperPromise;
+      }
       return lens.stateHelperApi();
     }, []);
 
-    const loadIndexPattern = useCallback(
-      async ({ dataType }: { dataType: AppDataType }) => {
-        const dataTypesIndexPatterns = props.dataTypesIndexPatterns;
+    const { dataViews, loading } = useAppDataView({
+      dataViewCache,
+      dataViewsService,
+      dataTypesIndexPatterns,
+      seriesDataType: series?.dataType,
+    });
 
-        setLoading(true);
-        try {
-          const obsvIndexP = new ObservabilityDataViews(dataViews, true);
-          const indPattern = await obsvIndexP.getDataView(
-            dataType,
-            dataTypesIndexPatterns?.[dataType]
-          );
-          setIndexPatterns((prevState) => ({ ...(prevState ?? {}), [dataType]: indPattern }));
-
-          setLoading(false);
-        } catch (e) {
-          setLoading(false);
-        }
-      },
-      [props.dataTypesIndexPatterns]
-    );
-
-    useEffect(() => {
-      if (series?.dataType) {
-        loadIndexPattern({ dataType: series.dataType });
-      }
-    }, [series?.dataType, loadIndexPattern]);
-
-    if (Object.keys(indexPatterns).length === 0 || loading || !lensHelper || lensLoading) {
-      return <EuiLoadingSpinner />;
+    if (Object.keys(dataViews).length === 0 || loading || !lensHelper || lensLoading) {
+      return (
+        <LoadingWrapper customHeight={customHeight}>
+          <EuiLoadingSpinner size="l" />
+        </LoadingWrapper>
+      );
     }
 
     return (
       <EuiErrorBoundary>
         <EuiThemeProvider darkMode={isDarkMode}>
           <KibanaContextProvider services={services}>
-            <ExploratoryViewEmbeddable
-              {...props}
-              indexPatterns={indexPatterns}
-              lens={lens}
-              lensFormulaHelper={lensHelper.formula}
-            />
+            <Wrapper customHeight={props.customHeight}>
+              <ExploratoryViewEmbeddable
+                {...props}
+                dataViewState={dataViews}
+                lens={lens}
+                lensFormulaHelper={lensHelper.formula}
+              />
+            </Wrapper>
           </KibanaContextProvider>
         </EuiThemeProvider>
       </EuiErrorBoundary>
     );
   };
 }
+
+const Wrapper = styled.div<{
+  customHeight?: string;
+}>`
+  height: ${(props) => (props.customHeight ? `${props.customHeight};` : `100%;`)};
+`;
+
+const LoadingWrapper = styled.div<{
+  customHeight?: string;
+}>`
+  height: ${(props) => (props.customHeight ? `${props.customHeight};` : `100%;`)};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
