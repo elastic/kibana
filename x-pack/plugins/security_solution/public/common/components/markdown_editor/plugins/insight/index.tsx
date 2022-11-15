@@ -126,6 +126,7 @@ const InsightComponent = ({ label, description, providers }: InsightComponentPro
         dataProviders={dataProviders}
         timeRange={oldestTimestamp}
         keepDataView={true}
+        data-test-subj="insight-investigate-in-timeline-button"
       >
         <EuiIcon type="timeline" />
         {` ${label} (${totalCount}) - ${description}`}

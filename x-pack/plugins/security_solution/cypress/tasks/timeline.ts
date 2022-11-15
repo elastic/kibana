@@ -161,7 +161,7 @@ export const addNotesToTimeline = (notes: string) => {
       .then(($el) => {
         const notesCount = parseInt($el.text(), 10);
 
-        cy.get(NOTES_TEXT_AREA).type(notes);
+        cy.get(NOTES_TEXT_AREA).type(notes, { parseSpecialCharSequences: false });
         cy.get(ADD_NOTE_BUTTON).trigger('click');
         cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
       });
