@@ -102,7 +102,7 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
 
-      if (shouldSkipIndexPatternsBulkAction(ruleParams, action)) {
+      if (!action.overwrite_data_views && shouldSkipIndexPatternsBulkAction(ruleParams, action)) {
         break;
       }
 
