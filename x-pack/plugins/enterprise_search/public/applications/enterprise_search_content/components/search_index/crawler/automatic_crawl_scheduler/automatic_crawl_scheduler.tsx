@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -24,9 +24,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-import { Connector } from '../../../../../../../common/types/connectors';
+import { CrawlerIndex } from '../../../../../../../common/types/indices';
 import {
   HOURS_UNIT_LABEL,
   DAYS_UNIT_LABEL,
@@ -35,11 +36,19 @@ import {
 } from '../../../../../shared/constants';
 import { EnterpriseSearchCronEditor } from '../../../../../shared/cron_editor/enterprise_search_cron_editor';
 import { docLinks } from '../../../../../shared/doc_links/doc_links';
+import { UpdateConnectorSchedulingApiLogic } from '../../../../api/connector/update_connector_scheduling_api_logic';
 import { CrawlUnits } from '../../../../api/crawler/types';
+import { isCrawlerIndex } from '../../../../utils/indices';
+import { IndexViewLogic } from '../../index_view_logic';
 
 import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic';
 
 export const AutomaticCrawlScheduler: React.FC = () => {
+  const { index } = useValues(IndexViewLogic);
+  const { makeRequest } = useActions(UpdateConnectorSchedulingApiLogic);
+
+  const scheduling = (index as CrawlerIndex)?.connector?.scheduling;
+
   const { setCrawlFrequency, setCrawlUnit, setUseConnectorSchedule, toggleCrawlAutomatically } =
     useActions(AutomaticCrawlSchedulerLogic);
 
@@ -47,7 +56,9 @@ export const AutomaticCrawlScheduler: React.FC = () => {
     AutomaticCrawlSchedulerLogic
   );
 
-  const [scheduling, setScheduling] = useState({} as Connector['scheduling']);
+  if (!isCrawlerIndex(index)) {
+    return <></>;
+  }
 
   return (
     <>
@@ -86,11 +97,23 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                 label={
                   <>
                     <EuiTitle size="xxs">
-                      <h5>Specific time scheduling</h5>
+                      <h5>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.cronSchedulingTitle',
+                          {
+                            defaultMessage: 'Specific time scheduling',
+                          }
+                        )}
+                      </h5>
                     </EuiTitle>
                     <EuiSpacer size="s" />
                     <EuiText size="xs" color="subdued">
-                      Define the frequency and time for scheduled crawls
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.cronSchedulingDescription',
+                        {
+                          defaultMessage: 'Define the frequency and time for scheduled crawls',
+                        }
+                      )}
                     </EuiText>
                     <EuiHorizontalRule margin="s" />
                   </>
@@ -102,7 +125,12 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                 <EnterpriseSearchCronEditor
                   disabled={!crawlAutomatically || !useConnectorSchedule}
                   scheduling={scheduling}
-                  onChange={(newScheduling) => setScheduling(newScheduling)}
+                  onChange={(newScheduling) =>
+                    makeRequest({
+                      connectorId: index.connector.id,
+                      scheduling: { ...newScheduling },
+                    })
+                  }
                 />
               </EuiCheckableCard>
             </EuiFlexItem>
@@ -112,11 +140,23 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                 label={
                   <>
                     <EuiTitle size="xxs">
-                      <h5>Interval scheduling</h5>
+                      <h5>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.intervalSchedulingTitle',
+                          {
+                            defaultMessage: 'Interval scheduling',
+                          }
+                        )}
+                      </h5>
                     </EuiTitle>
                     <EuiSpacer size="s" />
                     <EuiText size="xs" color="subdued">
-                      Define the frequency and time for scheduled crawls
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.intervalSchedulingDescription',
+                        {
+                          defaultMessage: 'Define the frequency and time for scheduled crawls',
+                        }
+                      )}
                     </EuiText>
                     <EuiHorizontalRule margin="s" />
                   </>
