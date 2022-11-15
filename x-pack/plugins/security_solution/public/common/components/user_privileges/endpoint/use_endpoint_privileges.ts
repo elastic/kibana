@@ -61,9 +61,11 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   );
 
   const privileges = useMemo(() => {
+    const loading = !userRolesCheckDone || !user || !checkHostIsolationExceptionsDone;
+
     const privilegeList: EndpointPrivileges = Object.freeze({
-      loading: !userRolesCheckDone || !user || !checkHostIsolationExceptionsDone,
-      ...(fleetAuthz
+      loading,
+      ...(!loading && fleetAuthz
         ? calculateEndpointAuthz(
             licenseService,
             fleetAuthz,

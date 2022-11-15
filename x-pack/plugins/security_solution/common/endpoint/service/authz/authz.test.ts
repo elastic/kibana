@@ -206,6 +206,7 @@ describe('Endpoint Authz service', () => {
         canAccessFleet: false,
         canAccessEndpointManagement: false,
         canCreateArtifactsByPolicy: false,
+        canDeleteHostIsolationExceptions: false,
         canWriteEndpointList: false,
         canReadEndpointList: false,
         canWritePolicyManagement: false,

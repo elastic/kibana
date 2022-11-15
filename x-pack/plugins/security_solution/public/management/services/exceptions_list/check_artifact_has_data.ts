@@ -28,7 +28,8 @@ export const checkArtifactHasData = (
     queryFn: async () => {
       try {
         return await artifactApiClient.hasData();
-      } catch {
+      } catch (error) {
+        window.console.log(error);
         // Ignores possible failures and returns `false` if any exception was encountered
         return false;
       }
