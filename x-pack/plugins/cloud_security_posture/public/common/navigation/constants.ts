@@ -49,7 +49,6 @@ export const benchmarksNavigation: Record<CspBenchmarksPage, CspPageNavigationIt
     name: NAV_ITEMS_NAMES.RULES,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/rules`,
     id: 'cloud_security_posture-benchmarks-rules',
-    omitSecuritySpy: true,
   },
 };
 

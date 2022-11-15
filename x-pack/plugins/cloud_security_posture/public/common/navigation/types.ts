@@ -8,7 +8,6 @@ export interface CspNavigationItem {
   readonly name: string;
   readonly path: string;
   readonly disabled?: boolean;
-  readonly omitSecuritySpy?: boolean;
 }
 
 export interface CspPageNavigationItem extends CspNavigationItem {
