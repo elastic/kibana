@@ -15,7 +15,7 @@ export const useSnapShotCount = ({ query, filters }: { query: string; filters: [
       ? ''
       : JSON.stringify(Array.from(Object.entries(filters)));
 
-  const [esKuery, error] = useGenerateUpdatedKueryString(query, parsedFilters);
+  const [esKuery, error] = useGenerateUpdatedKueryString(query, parsedFilters, undefined, true);
 
   const { data, loading } = useFetcher(
     () =>

@@ -51,7 +51,8 @@ const getKueryString = (
 export const useGenerateUpdatedKueryString = (
   filterQueryString = '',
   urlFilters: string,
-  excludedFilters?: string
+  excludedFilters?: string,
+  disableANDFiltering?: boolean
 ): [string?, Error?] => {
   const dataView = useUptimeDataView();
 
@@ -60,11 +61,15 @@ export const useGenerateUpdatedKueryString = (
   const [kueryString, setKueryString] = useState<string>('');
 
   useEffect(() => {
-    // need a string comparison for local storage
-    const useLogicalAND = localStorage.getItem(TAG_KEY_FOR_AND_CONDITION) === 'true';
+    if (disableANDFiltering) {
+      setKueryString(getKueryString(urlFilters, excludedFilters));
+    } else {
+      // need a string comparison for local storage
+      const useLogicalAND = localStorage.getItem(TAG_KEY_FOR_AND_CONDITION) === 'true';
 
-    setKueryString(getKueryString(urlFilters, excludedFilters, useLogicalAND));
-  }, [excludedFilters, urlFilters, lastRefresh]);
+      setKueryString(getKueryString(urlFilters, excludedFilters, useLogicalAND));
+    }
+  }, [excludedFilters, urlFilters, lastRefresh, disableANDFiltering]);
 
   const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
 
