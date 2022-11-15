@@ -66,9 +66,17 @@ export const DocumentCountContent: FC<Props> = ({
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateSamplingProbability = useCallback(
-    debounce((p) => {
+    debounce((newProbability: number) => {
       if (setSamplingProbability) {
-        setSamplingProbability(p);
+        const idx = sortedIndex(RANDOM_SAMPLER_PROBABILITIES, newProbability);
+        const closestPrev = RANDOM_SAMPLER_PROBABILITIES[idx - 1];
+        const closestNext = RANDOM_SAMPLER_PROBABILITIES[idx];
+        const closestProbability =
+          Math.abs(closestPrev - newProbability) < Math.abs(closestNext - newProbability)
+            ? closestPrev
+            : closestNext;
+
+        setSamplingProbability(closestProbability / 100);
       }
     }, 100),
     [setSamplingProbability]
@@ -134,7 +142,8 @@ export const DocumentCountContent: FC<Props> = ({
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="xs">
-        <EuiFlexItem grow={false}>
+        <TotalCountHeader totalCount={totalCount} approximate={approximate} loading={loading} />
+        <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
           <EuiPopover
             data-test-subj="dvRandomSamplerOptionsPopover"
             id="dataVisualizerSamplingOptions"
@@ -208,19 +217,7 @@ export const DocumentCountContent: FC<Props> = ({
                         value: d,
                         label: d === 0.001 || d >= 5 ? `${d}%` : '',
                       }))}
-                      onChange={(e) => {
-                        const newProbability = Number(e.currentTarget.value);
-                        const idx = sortedIndex(RANDOM_SAMPLER_PROBABILITIES, newProbability);
-                        const closestPrev = RANDOM_SAMPLER_PROBABILITIES[idx - 1];
-                        const closestNext = RANDOM_SAMPLER_PROBABILITIES[idx];
-                        const closestProbability =
-                          Math.abs(closestPrev - newProbability) <
-                          Math.abs(closestNext - newProbability)
-                            ? closestPrev
-                            : closestNext;
-
-                        updateSamplingProbability(closestProbability / 100);
-                      }}
+                      onChange={(e) => updateSamplingProbability(Number(e.currentTarget.value))}
                       step={RANDOM_SAMPLER_STEP}
                       data-test-subj="dvRandomSamplerProbabilityRange"
                     />
@@ -233,7 +230,6 @@ export const DocumentCountContent: FC<Props> = ({
           </EuiPopover>
           <EuiFlexItem />
         </EuiFlexItem>
-        <TotalCountHeader totalCount={totalCount} approximate={approximate} loading={loading} />
       </EuiFlexGroup>
       <DocumentCountChart
         chartPoints={chartPoints}
