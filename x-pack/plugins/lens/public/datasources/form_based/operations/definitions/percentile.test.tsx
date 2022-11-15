@@ -198,6 +198,96 @@ describe('percentile', () => {
     });
   });
 
+  describe('getGroupByKey', () => {
+    const getKey = percentileOperation.getGroupByKey!;
+    const expressionToKey = (expression: string) =>
+      getKey(buildExpression(parseExpression(expression))) as string;
+    describe('generates unique keys based on configuration', () => {
+      const keys = [
+        [
+          `aggSinglePercentile id="0" enabled=true schema="metric" field="foo" percentile=10`,
+          `aggSinglePercentile id="1" enabled=true schema="metric" field="foo" percentile=10`,
+        ],
+        // different percentile value
+        [
+          `aggSinglePercentile id="0" enabled=true schema="metric" field="foo" percentile=20`,
+          `aggSinglePercentile id="1" enabled=true schema="metric" field="foo" percentile=20`,
+        ],
+        // different field value
+        [
+          `aggSinglePercentile id="0" enabled=true schema="metric" field="bar" percentile=10`,
+          `aggSinglePercentile id="1" enabled=true schema="metric" field="bar" percentile=10`,
+        ],
+        // filtered
+        [
+          `aggFilteredMetric id="2" enabled=true schema="metric" 
+            customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}}
+            customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
+          `aggFilteredMetric id="3" enabled=true schema="metric" 
+            customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}}
+            customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
+        ],
+        // different filter
+        [
+          `aggFilteredMetric id="4" enabled=true schema="metric" 
+            customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "}}
+            customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
+          `aggFilteredMetric id="5" enabled=true schema="metric" 
+            customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "}}
+            customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
+        ],
+      ].map((group) => group.map(expressionToKey));
+
+      it.each(keys.map((group, i) => ({ group })))('%#', ({ group: thisGroup }) => {
+        expect(thisGroup[0]).toEqual(thisGroup[1]);
+        const otherGroups = keys.filter((group) => group !== thisGroup);
+        for (const otherGroup of otherGroups) {
+          expect(thisGroup[0]).not.toEqual(otherGroup[0]);
+        }
+      });
+
+      it('snapshot', () => {
+        expect(keys).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              "aggSinglePercentile-foo-10-undefined",
+              "aggSinglePercentile-foo-10-undefined",
+            ],
+            Array [
+              "aggSinglePercentile-foo-20-undefined",
+              "aggSinglePercentile-foo-20-undefined",
+            ],
+            Array [
+              "aggSinglePercentile-bar-10-undefined",
+              "aggSinglePercentile-bar-10-undefined",
+            ],
+            Array [
+              "aggSinglePercentile-filtered-foo-10-undefined-undefined-kql-geo.dest: \\"GA\\" ",
+              "aggSinglePercentile-filtered-foo-10-undefined-undefined-kql-geo.dest: \\"GA\\" ",
+            ],
+            Array [
+              "aggSinglePercentile-filtered-foo-10-undefined-undefined-kql-geo.dest: \\"AL\\" ",
+              "aggSinglePercentile-filtered-foo-10-undefined-undefined-kql-geo.dest: \\"AL\\" ",
+            ],
+          ]
+        `);
+      });
+    });
+
+    it('returns undefined for aggs from different operation classes', () => {
+      expect(
+        expressionToKey(
+          'aggSum id="0" enabled=true schema="metric" field="bytes" emptyAsNull=false'
+        )
+      ).toBeUndefined();
+      expect(
+        expressionToKey(
+          'aggFilteredMetric id="2" enabled=true schema="metric" \n  customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggSum id="2-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}'
+        )
+      ).toBeUndefined();
+    });
+  });
+
   describe('optimizeEsAggs', () => {
     const makeEsAggBuilder = (name: string, params: object) =>
       buildExpression({
@@ -239,22 +329,6 @@ describe('percentile', () => {
         // group 4
         `aggSinglePercentile id="8" enabled=true schema="metric" field="${field2}" percentile=70 timeShift="${timeShift2}"`,
         `aggSinglePercentile id="9" enabled=true schema="metric" field="${field2}" percentile=80 timeShift="${timeShift2}"`,
-        // // group 5
-        // `aggFilteredMetric id="10" enabled=true schema="metric"
-        //   customBucket={aggFilter id="10-filter" enabled=true schema="bucket" filter={kql q="geo.dest : \\"AE\\" "} timeShift="${timeShift1}"}
-        //   customMetric={aggSinglePercentile id="10-metric" enabled=true schema="metric" field="${field1}" percentile=95}
-        //   timeShift="${timeShift1}"`,
-        // `aggFilteredMetric id="11" enabled=true schema="metric"
-        //   customBucket={aggFilter id="11-filter" enabled=true schema="bucket" filter={kql q="geo.dest : \\"AE\\" "} timeShift="${timeShift1}"}
-        //   customMetric={aggSinglePercentile id="11-metric" enabled=true schema="metric" field="${field1}" percentile=25}
-        //   timeShift="${timeShift1}"`,
-        // // group 6
-        // `aggFilteredMetric id="12" enabled=true schema="metric"
-        //   customBucket={aggFilter id="12-filter" enabled=true schema="bucket" filter={kql q="geo.dest : \\"AE\\" "}}
-        //   customMetric={aggSinglePercentile id="12-metric" enabled=true schema="metric" field="${field1}" percentile=95}`,
-        // `aggFilteredMetric id="13" enabled=true schema="metric"
-        //   customBucket={aggFilter id="13-filter" enabled=true schema="bucket" filter={kql q="geo.dest : \\"AE\\" "}}
-        //   customMetric={aggSinglePercentile id="13-metric" enabled=true schema="metric" field="${field1}" percentile=25}`,
       ];
 
       const aggs = aggExpressions.map((expression) => buildExpression(parseExpression(expression)));
@@ -278,161 +352,7 @@ describe('percentile', () => {
       expect(newAggs[3].functions[0].getArgument('field')![0]).toBe(field2);
       expect(newAggs[3].functions[0].getArgument('timeShift')![0]).toBe(timeShift2);
 
-      expect(newAggs).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "findFunction": [Function],
-            "functions": Array [
-              Object {
-                "addArgument": [Function],
-                "arguments": Object {
-                  "enabled": Array [
-                    true,
-                  ],
-                  "field": Array [
-                    "foo",
-                  ],
-                  "id": Array [
-                    "1",
-                  ],
-                  "percents": Array [
-                    10,
-                    20,
-                    30,
-                  ],
-                  "schema": Array [
-                    "metric",
-                  ],
-                },
-                "getArgument": [Function],
-                "name": "aggPercentiles",
-                "removeArgument": [Function],
-                "replaceArgument": [Function],
-                "toAst": [Function],
-                "toString": [Function],
-                "type": "expression_function_builder",
-              },
-            ],
-            "toAst": [Function],
-            "toString": [Function],
-            "type": "expression_builder",
-          },
-          Object {
-            "findFunction": [Function],
-            "functions": Array [
-              Object {
-                "addArgument": [Function],
-                "arguments": Object {
-                  "enabled": Array [
-                    true,
-                  ],
-                  "field": Array [
-                    "bar",
-                  ],
-                  "id": Array [
-                    "4",
-                  ],
-                  "percents": Array [
-                    10,
-                    40,
-                  ],
-                  "schema": Array [
-                    "metric",
-                  ],
-                },
-                "getArgument": [Function],
-                "name": "aggPercentiles",
-                "removeArgument": [Function],
-                "replaceArgument": [Function],
-                "toAst": [Function],
-                "toString": [Function],
-                "type": "expression_function_builder",
-              },
-            ],
-            "toAst": [Function],
-            "toString": [Function],
-            "type": "expression_builder",
-          },
-          Object {
-            "findFunction": [Function],
-            "functions": Array [
-              Object {
-                "addArgument": [Function],
-                "arguments": Object {
-                  "enabled": Array [
-                    true,
-                  ],
-                  "field": Array [
-                    "bar",
-                  ],
-                  "id": Array [
-                    "6",
-                  ],
-                  "percents": Array [
-                    50,
-                    60,
-                  ],
-                  "schema": Array [
-                    "metric",
-                  ],
-                  "timeShift": Array [
-                    "1d",
-                  ],
-                },
-                "getArgument": [Function],
-                "name": "aggPercentiles",
-                "removeArgument": [Function],
-                "replaceArgument": [Function],
-                "toAst": [Function],
-                "toString": [Function],
-                "type": "expression_function_builder",
-              },
-            ],
-            "toAst": [Function],
-            "toString": [Function],
-            "type": "expression_builder",
-          },
-          Object {
-            "findFunction": [Function],
-            "functions": Array [
-              Object {
-                "addArgument": [Function],
-                "arguments": Object {
-                  "enabled": Array [
-                    true,
-                  ],
-                  "field": Array [
-                    "bar",
-                  ],
-                  "id": Array [
-                    "8",
-                  ],
-                  "percents": Array [
-                    70,
-                    80,
-                  ],
-                  "schema": Array [
-                    "metric",
-                  ],
-                  "timeShift": Array [
-                    "2d",
-                  ],
-                },
-                "getArgument": [Function],
-                "name": "aggPercentiles",
-                "removeArgument": [Function],
-                "replaceArgument": [Function],
-                "toAst": [Function],
-                "toString": [Function],
-                "type": "expression_function_builder",
-              },
-            ],
-            "toAst": [Function],
-            "toString": [Function],
-            "type": "expression_builder",
-          },
-        ]
-      `);
+      expect(newAggs).toMatchSnapshot();
 
       expect(newIdMap).toMatchInlineSnapshot(`
         Object {
@@ -479,54 +399,6 @@ describe('percentile', () => {
           "col-?-8.80": Array [
             Object {
               "id": "original-8",
-            },
-          ],
-        }
-      `);
-    });
-
-    it('should handle multiple identical percentiles', () => {
-      const field1 = 'foo';
-      const field2 = 'bar';
-      const samePercentile = 90;
-
-      const aggExpressions = [
-        // group 1
-        'aggSinglePercentile id="1" enabled=true schema="metric" field="foo" percentile=90',
-        'aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=90',
-        // group 2
-        'aggSinglePercentile id="4" enabled=true schema="metric" field="bar" percentile=10',
-        'aggSinglePercentile id="3" enabled=true schema="metric" field="foo" percentile=90',
-      ];
-
-      const aggs = aggExpressions.map((expression) => buildExpression(parseExpression(expression)));
-
-      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
-
-      const { esAggsIdMap: newIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
-        aggs,
-        esAggsIdMap,
-        aggsToIdsMap
-      );
-
-      expect(newAggs.length).toBe(2);
-      expect(newIdMap[`col-?-1.${samePercentile}`].length).toBe(3);
-      expect(newIdMap).toMatchInlineSnapshot(`
-        Object {
-          "col-2-2": Array [
-            Object {
-              "id": "original-2",
-            },
-          ],
-          "col-?-1.90": Array [
-            Object {
-              "id": "original-0",
-            },
-            Object {
-              "id": "original-1",
-            },
-            Object {
-              "id": "original-3",
             },
           ],
         }

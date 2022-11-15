@@ -174,6 +174,10 @@ export const percentileOperation: OperationDefinition<
       }
     ).toAst();
   },
+
+  getGroupByKey: (agg) =>
+    getGroupByKey(agg, ['aggSinglePercentile'], [{ name: 'field' }, { name: 'percentile' }]),
+
   optimizeEsAggs: (_aggs, _esAggsIdMap, aggExpressionToEsAggsIdMap) => {
     let aggs = [..._aggs];
     const esAggsIdMap = { ..._esAggsIdMap };
@@ -210,8 +214,9 @@ export const percentileOperation: OperationDefinition<
       const isGroupFiltered = firstFnBuilder.name === 'aggFilteredMetric';
 
       if (isGroupFiltered) {
-        // it doesn't currently work to put an `aggPercentiles` (multiple) as the metric (`customMetric`)
-        // arg for an `aggFilteredMetric` expression function
+        // Even though elasticsearch DSL would support this, it doesn't currently work in ESAggs to
+        // put an `aggPercentiles` (multiple) as the metric (`customMetric`) arg for
+        // an `aggFilteredMetric` expression function
         return;
       }
 
@@ -234,34 +239,10 @@ export const percentileOperation: OperationDefinition<
         timeShift: firstPercentileFunction.getArgument('timeShift')?.[0] as string,
       };
 
-      const percentileToBuilder: Record<number, ExpressionAstExpressionBuilder> = {};
       for (const builder of expressionBuilders) {
         const percentile = builder.functions[0].getArgument('percentile')![0] as number;
 
-        if (percentile in percentileToBuilder) {
-          // found a duplicate percentile so let's optimize
-
-          const duplicateExpressionBuilder = percentileToBuilder[percentile];
-
-          const idForDuplicate = aggExpressionToEsAggsIdMap.get(duplicateExpressionBuilder);
-          const idForThisOne = aggExpressionToEsAggsIdMap.get(builder);
-
-          if (!idForDuplicate || !idForThisOne) {
-            throw new Error(
-              "Couldn't find esAggs ID for percentile expression builder... this should never happen."
-            );
-          }
-
-          esAggsIdMap[idForDuplicate].push(...esAggsIdMap[idForThisOne]);
-
-          delete esAggsIdMap[idForThisOne];
-
-          // remove current builder
-          expressionBuilders = expressionBuilders.filter((b) => b !== builder);
-        } else {
-          percentileToBuilder[percentile] = builder;
-          aggPercentilesConfig.percents!.push(percentile);
-        }
+        aggPercentilesConfig.percents!.push(percentile);
 
         // update any terms order-bys
         termsFuncs.forEach((func) => {
