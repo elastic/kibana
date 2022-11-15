@@ -36,7 +36,7 @@ export interface ExistingFieldsFetcherParams {
   fromDate: string | null;
   toDate: string | null;
   query: Query | AggregateQuery;
-  filters: Filter[];
+  filters: Filter[] | undefined;
   services: {
     core: Pick<CoreStart, 'uiSettings'>;
     data: DataPublicPluginStart;
@@ -89,8 +89,15 @@ export const useExistingFieldsFetcher = (
       dataViewId: string | undefined;
       fetchId: string;
     }): Promise<void> => {
-      if (!dataViewId || !query || !filters || !fromDate || !toDate) {
-        // console.log('skipped fetching existence info', dataViewId, fromDate, toDate);
+      if (!dataViewId || !query || !fromDate || !toDate) {
+        // console.log(
+        //   'skipped fetching existence info',
+        //   dataViewId,
+        //   fromDate,
+        //   toDate,
+        //   query,
+        //   filters
+        // );
         return;
       }
 
@@ -126,7 +133,7 @@ export const useExistingFieldsFetcher = (
             dslQuery: await buildSafeEsQuery(
               dataView,
               query,
-              filters,
+              filters || [],
               getEsQueryConfig(core.uiSettings)
             ),
             fromDate,
