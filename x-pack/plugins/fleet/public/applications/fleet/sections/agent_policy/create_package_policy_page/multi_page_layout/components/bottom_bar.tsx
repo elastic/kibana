@@ -12,6 +12,8 @@ import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } fr
 
 import { useLink } from '../../../../../../../hooks';
 import { useGetDiscoverLogsLinkForAgents } from '../hooks';
+import { FLEET_KUBERNETES_PACKAGE } from '../../../../../../../../common';
+
 
 const CenteredRoundedBottomBar = styled(EuiBottomBar)`
   max-width: 820px;
@@ -125,7 +127,7 @@ export const AgentStandaloneBottomBar: React.FC<{
 export const CreatePackagePolicyFinalBottomBar: React.FC<{
   pkgkey: string;
 }> = ({ pkgkey }) => {
-  const isK8s = pkgkey.includes('kubernetes');
+  const isK8s = pkgkey.includes(FLEET_KUBERNETES_PACKAGE);
   const { getHref } = useLink();
   const { getAbsolutePath } = useLink();
   return (
