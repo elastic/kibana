@@ -381,6 +381,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       exceptions: {
         value_lists: `${SECURITY_SOLUTION_DOCS}detections-ui-exceptions.html#manage-value-lists`,
       },
+      privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
