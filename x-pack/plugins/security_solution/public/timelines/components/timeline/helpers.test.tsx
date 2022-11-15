@@ -11,11 +11,11 @@ import { DataProviderType, EXISTS_OPERATOR, IS_OPERATOR } from './data_providers
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 
 import {
-  buildEXISTSQueryMatch,
+  buildExistsQueryMatch,
   buildGlobalQuery,
-  buildISONEOFQueryMatch,
-  buildISQueryMatch,
-  handleISOperator,
+  buildIsOneOfQueryMatch,
+  buildIsQueryMatch,
+  handleIsOperator,
   isStringOrNumberArray,
   showGlobalFilters,
 } from './helpers';
@@ -298,10 +298,10 @@ describe('isStringOrNumberArray', () => {
   });
 
   describe('queryHandlerFunctions', () => {
-    describe('handleISOperator', () => {
+    describe('handleIsOperator', () => {
       it('returns the entire query unchanged, if value is an array', () => {
         expect(
-          handleISOperator({
+          handleIsOperator({
             browserFields: {},
             field: 'host.name',
             isExcluded: '',
@@ -314,15 +314,15 @@ describe('isStringOrNumberArray', () => {
     });
   });
 
-  describe('buildEXISTSQueryMatch', () => {
+  describe('buildExistsQueryMatch', () => {
     it('correcty computes EXISTS query with no nested field', () => {
       expect(
-        buildEXISTSQueryMatch({ isFieldTypeNested: false, field: 'host', browserFields: {} })
+        buildExistsQueryMatch({ isFieldTypeNested: false, field: 'host', browserFields: {} })
       ).toBe(`host ${EXISTS_OPERATOR}`);
     });
     it('correcty computes EXISTS query with nested field', () => {
       expect(
-        buildEXISTSQueryMatch({
+        buildExistsQueryMatch({
           isFieldTypeNested: true,
           field: 'nestedField.firstAttributes',
           browserFields: mockBrowserFields,
@@ -331,10 +331,10 @@ describe('isStringOrNumberArray', () => {
     });
   });
 
-  describe('buildISQueryMatch', () => {
+  describe('buildIsQueryMatch', () => {
     it('correcty computes IS query with no nested field', () => {
       expect(
-        buildISQueryMatch({
+        buildIsQueryMatch({
           isFieldTypeNested: false,
           field: 'nestedField.thirdAttributes',
           value: 100000,
@@ -344,7 +344,7 @@ describe('isStringOrNumberArray', () => {
     });
     it('correcty computes IS query with nested date field', () => {
       expect(
-        buildISQueryMatch({
+        buildIsQueryMatch({
           isFieldTypeNested: true,
           browserFields: mockBrowserFields,
           field: 'nestedField.thirdAttributes',
@@ -354,7 +354,7 @@ describe('isStringOrNumberArray', () => {
     });
     it('correcty computes IS query with nested string field', () => {
       expect(
-        buildISQueryMatch({
+        buildIsQueryMatch({
           isFieldTypeNested: true,
           browserFields: mockBrowserFields,
           field: 'nestedField.secondAttributes',
@@ -364,10 +364,10 @@ describe('isStringOrNumberArray', () => {
     });
   });
 
-  describe('buildISOneOfQueryMatch', () => {
+  describe('buildIsOneOfQueryMatch', () => {
     it('correcty computes IS ONE OF query with numbers', () => {
       expect(
-        buildISONEOFQueryMatch({
+        buildIsOneOfQueryMatch({
           field: 'kibana.alert.worflow_status',
           value: [1, 2, 3],
         })
@@ -375,7 +375,7 @@ describe('isStringOrNumberArray', () => {
     });
     it('correcty computes IS ONE OF query with strings', () => {
       expect(
-        buildISONEOFQueryMatch({
+        buildIsOneOfQueryMatch({
           field: 'kibana.alert.worflow_status',
           value: ['a', 'b', 'c'],
         })
@@ -383,7 +383,7 @@ describe('isStringOrNumberArray', () => {
     });
     it('correcty computes IS ONE OF query if value is an empty array', () => {
       expect(
-        buildISONEOFQueryMatch({
+        buildIsOneOfQueryMatch({
           field: 'kibana.alert.worflow_status',
           value: [],
         })

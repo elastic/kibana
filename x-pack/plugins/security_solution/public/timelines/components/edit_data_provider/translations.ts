@@ -40,6 +40,7 @@ export const IS_ONE_OF = i18n.translate('xpack.securitySolution.editDataProvider
 export const IS_NOT = i18n.translate('xpack.securitySolution.editDataProvider.isNotLabel', {
   defaultMessage: 'is not',
 });
+
 export const IS_NOT_ONE_OF = i18n.translate(
   'xpack.securitySolution.editDataProvider.isNotOneOfLabel',
   {
@@ -76,3 +77,9 @@ export const SELECT_AN_OPERATOR = i18n.translate(
     defaultMessage: 'Select an operator',
   }
 );
+
+export const UNAVAILABLE_OPERATOR = (operator: string) =>
+  i18n.translate('xpack.securitySolution.editDataProvider.unavailableOperator', {
+    values: { operator },
+    defaultMessage: '{operator} operator is unavailable with templates',
+  });

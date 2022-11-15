@@ -19,7 +19,6 @@ import {
   getExcludedFromSelection,
   getFieldNames,
   getQueryOperatorFromSelection,
-  isValueFieldInvalid,
   sanatizeValue,
   selectionsAreValid,
 } from './helpers';
@@ -223,6 +222,7 @@ describe('helpers', () => {
         })
       ).toBe(false);
     });
+
     test('it should return false when the selected operator is "is one of", and the DataProviderType is template', () => {
       expect(
         selectionsAreValid({
@@ -235,6 +235,25 @@ describe('helpers', () => {
           selectedOperator: [
             {
               label: 'is one of',
+            },
+          ],
+          type: DataProviderType.template,
+        })
+      ).toBe(false);
+    });
+
+    test('it should return false when the selected operator is "is not one of", and the DataProviderType is template', () => {
+      expect(
+        selectionsAreValid({
+          browserFields: mockBrowserFields,
+          selectedField: [
+            {
+              label: 'destination.bytes',
+            },
+          ],
+          selectedOperator: [
+            {
+              label: 'is not one of',
             },
           ],
           type: DataProviderType.template,
@@ -382,21 +401,6 @@ describe('helpers', () => {
           },
         ])
       ).toBe(true);
-    });
-  });
-
-  describe('isValueFieldInvalid', () => {
-    it('returns false (not invalid) if DataProvierType type is template', () => {
-      expect(isValueFieldInvalid(DataProviderType.template, 'some string')).toBe(false);
-    });
-
-    it('returns false (not invalid) if DataProvierType type is default, and value is not template-like', () => {
-      expect(isValueFieldInvalid(DataProviderType.default, 'some string')).toBe(false);
-    });
-
-    it('returns true (invalid) if DataProvierType type is default, and value is template-like', () => {
-      expect(isValueFieldInvalid(DataProviderType.default, '{ oh nooo!')).toBe(true);
-      expect(isValueFieldInvalid(DataProviderType.default, 'oh nooo! }')).toBe(true);
     });
   });
 

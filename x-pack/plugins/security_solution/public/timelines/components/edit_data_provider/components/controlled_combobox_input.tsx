@@ -5,62 +5,53 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 
-import type { DataProviderType } from '../../timeline/data_providers/data_provider';
 import { isStringOrNumberArray } from '../../timeline/helpers';
-import { isValueFieldInvalid } from '../helpers';
 import * as i18n from '../translations';
 
 interface ControlledDataProviderInput {
-  disableButtonCallback: (disableButton: boolean) => void;
   onChangeCallback: (value: string | number | string[]) => void;
-  type: DataProviderType;
   value: string | number | Array<string | number>;
 }
 
 export const ControlledComboboxInput = ({
   value,
   onChangeCallback,
-  type,
-  disableButtonCallback,
 }: ControlledDataProviderInput) => {
   const [includeValues, setIncludeValues] = useState(convertValuesToComboboxValueArray(value));
 
-  const isInvalid = useMemo(
-    () =>
-      !includeValues.length || includeValues.some((item) => isValueFieldInvalid(type, item.label)),
-    [type, includeValues]
-  );
-
   useEffect(() => {
     onChangeCallback(convertComboboxValuesToStringArray(includeValues));
-    disableButtonCallback(isInvalid);
-  }, [includeValues, isInvalid, onChangeCallback, disableButtonCallback]);
+  }, [includeValues, onChangeCallback]);
 
-  const onCreateOption = (searchValue: string, flattenedOptions = includeValues) => {
-    const normalizedSearchValue = searchValue.trim().toLowerCase();
+  const onCreateOption = useCallback(
+    (searchValue: string, flattenedOptions: EuiComboBoxOptionOption[] = includeValues) => {
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
 
-    if (!normalizedSearchValue) {
-      return;
-    }
+      if (!normalizedSearchValue) {
+        return;
+      }
 
-    if (
-      flattenedOptions.findIndex(
-        (option) => option.label.trim().toLowerCase() === normalizedSearchValue
-      ) === -1
-    ) {
-      setIncludeValues([
-        ...includeValues,
-        {
-          label: searchValue,
-        },
-      ]);
-    }
-  };
+      if (
+        flattenedOptions.findIndex(
+          (option) => option.label.trim().toLowerCase() === normalizedSearchValue
+        ) === -1
+        // add the option, because it wasn't found in the current set of `includeValues`
+      ) {
+        setIncludeValues([
+          ...includeValues,
+          {
+            label: searchValue,
+          },
+        ]);
+      }
+    },
+    [includeValues]
+  );
 
   const onIncludeValueChanged = useCallback((updatedIncludesValues: EuiComboBoxOptionOption[]) => {
     setIncludeValues(updatedIncludesValues);
@@ -70,7 +61,7 @@ export const ControlledComboboxInput = ({
     <EuiComboBox
       noSuggestions
       isClearable={true}
-      data-test-subj="operator"
+      data-test-subj="is-one-of-combobox-input"
       selectedOptions={includeValues}
       placeholder={i18n.ENTER_ONE_OR_MORE_VALUES}
       onCreateOption={onCreateOption}
@@ -81,12 +72,8 @@ export const ControlledComboboxInput = ({
 
 export const convertValuesToComboboxValueArray = (
   values: string | number | Array<string | number>
-): EuiComboBoxOptionOption[] => {
-  if (isStringOrNumberArray(values)) {
-    return values.map((item) => ({ label: String(item) }));
-  } else return [];
-};
+): EuiComboBoxOptionOption[] =>
+  isStringOrNumberArray(values) ? values.map((item) => ({ label: String(item) })) : [];
 
-export const convertComboboxValuesToStringArray = (values: EuiComboBoxOptionOption[]): string[] => {
-  return values.map((item) => item.label);
-};
+export const convertComboboxValuesToStringArray = (values: EuiComboBoxOptionOption[]): string[] =>
+  values.map((item) => item.label);

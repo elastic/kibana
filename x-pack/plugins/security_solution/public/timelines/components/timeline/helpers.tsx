@@ -103,13 +103,13 @@ const buildQueryMatch = (
 
   switch (operator) {
     case IS_OPERATOR:
-      return handleISOperator({ browserFields, field, isExcluded, isFieldTypeNested, type, value });
+      return handleIsOperator({ browserFields, field, isExcluded, isFieldTypeNested, type, value });
 
     case EXISTS_OPERATOR:
-      return `${isExcluded}${buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested })}`;
+      return `${isExcluded}${buildExistsQueryMatch({ browserFields, field, isFieldTypeNested })}`;
 
     case IS_ONE_OF_OPERATOR:
-      return handleISONEOFOperator({ field, isExcluded, value });
+      return handleIsOneOfOperator({ field, isExcluded, value });
 
     default:
       assertUnreachable(operator);
@@ -268,7 +268,7 @@ interface OperatorHandler {
   value: string | number | Array<string | number>;
 }
 
-export const handleISOperator = ({
+export const handleIsOperator = ({
   browserFields,
   field,
   isExcluded,
@@ -283,23 +283,23 @@ export const handleISOperator = ({
   if (!isStringOrNumberArray(value)) {
     return `${isExcluded}${
       type !== DataProviderType.template
-        ? buildISQueryMatch({ browserFields, field, isFieldTypeNested, value })
-        : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested })
+        ? buildIsQueryMatch({ browserFields, field, isFieldTypeNested, value })
+        : buildExistsQueryMatch({ browserFields, field, isFieldTypeNested })
     }`;
   } else {
     return `${isExcluded}${field} : ${JSON.stringify(value)}`;
   }
 };
 
-export const handleISONEOFOperator = ({ field, isExcluded, value }: OperatorHandler) => {
+const handleIsOneOfOperator = ({ field, isExcluded, value }: OperatorHandler) => {
   if (isStringOrNumberArray(value)) {
-    return `${isExcluded}${buildISONEOFQueryMatch({ field, value })}`;
+    return `${isExcluded}${buildIsOneOfQueryMatch({ field, value })}`;
   } else {
     return `${isExcluded}${field} : ${JSON.stringify(value)}`;
   }
 };
 
-export const buildISQueryMatch = ({
+export const buildIsQueryMatch = ({
   browserFields,
   field,
   isFieldTypeNested,
@@ -319,7 +319,7 @@ export const buildISQueryMatch = ({
   }
 };
 
-export const buildEXISTSQueryMatch = ({
+export const buildExistsQueryMatch = ({
   browserFields,
   field,
   isFieldTypeNested,
@@ -333,7 +333,7 @@ export const buildEXISTSQueryMatch = ({
     : `${field} ${EXISTS_OPERATOR}`.trim();
 };
 
-export const buildISONEOFQueryMatch = ({
+export const buildIsOneOfQueryMatch = ({
   field,
   value,
 }: {

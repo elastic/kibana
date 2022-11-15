@@ -10,7 +10,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { DataProviderType } from '../../timeline/data_providers/data_provider';
 import { ControlledComboboxInput, ControlledDefaultInput } from '.';
 import {
   convertComboboxValuesToStringArray,
@@ -18,26 +17,21 @@ import {
 } from './controlled_combobox_input';
 import { getDefaultValue } from './controlled_default_input';
 
-const disabledButtonCallbackMock = jest.fn();
 const onChangeCallbackMock = jest.fn();
 
 const renderControlledComboboxInput = (badOverrideValue?: string) =>
   render(
     <ControlledComboboxInput
-      type={DataProviderType.default}
       value={badOverrideValue || ['test']}
       onChangeCallback={onChangeCallbackMock}
-      disableButtonCallback={disabledButtonCallbackMock}
     />
   );
 
 const renderControlledDefaultInput = (badOverrideValue?: string[]) =>
   render(
     <ControlledDefaultInput
-      type={DataProviderType.default}
       value={badOverrideValue || 'test'}
       onChangeCallback={onChangeCallbackMock}
-      disableButtonCallback={disabledButtonCallbackMock}
     />
   );
 
@@ -47,23 +41,20 @@ describe('ControlledComboboxInput', () => {
   it('renders the current value', () => {
     renderControlledComboboxInput();
     expect(screen.getByText('test'));
-    expect(disabledButtonCallbackMock).toHaveBeenLastCalledWith(false);
   });
 
   it('calls onChangeCallback, and disabledButtonCallback when value is removed', () => {
     renderControlledComboboxInput();
-    const removeButton = screen.getAllByRole('button')[0];
+    const removeButton = screen.getByTestId('is-one-of-combobox-input').querySelector('button');
 
-    userEvent.click(removeButton);
+    userEvent.click(removeButton as HTMLButtonElement);
     expect(onChangeCallbackMock).toHaveBeenLastCalledWith([]);
-    expect(disabledButtonCallbackMock).toHaveBeenLastCalledWith(true);
   });
 
   it('handles non arrays by defaulting to an empty state', () => {
     renderControlledComboboxInput('nonArray');
 
     expect(onChangeCallbackMock).toHaveBeenLastCalledWith([]);
-    expect(disabledButtonCallbackMock).toHaveBeenLastCalledWith(true);
   });
 });
 
@@ -73,7 +64,6 @@ describe('ControlledDefaultInput', () => {
   it('renders the current value', () => {
     renderControlledDefaultInput();
     expect(screen.getByDisplayValue('test'));
-    expect(disabledButtonCallbackMock).toHaveBeenLastCalledWith(false);
   });
 
   it('calls onChangeCallback, and disabledButtonCallback when value is changed', () => {
@@ -83,14 +73,12 @@ describe('ControlledDefaultInput', () => {
     userEvent.type(inputBox, 'new value');
 
     expect(onChangeCallbackMock).toHaveBeenLastCalledWith('new value');
-    expect(disabledButtonCallbackMock).toHaveBeenLastCalledWith(false);
   });
 
   it('handles arrays by defaulting to the first value', () => {
     renderControlledDefaultInput(['testing']);
 
     expect(onChangeCallbackMock).toHaveBeenLastCalledWith('testing');
-    expect(disabledButtonCallbackMock).toHaveBeenLastCalledWith(false);
   });
 
   describe('getDefaultValue', () => {

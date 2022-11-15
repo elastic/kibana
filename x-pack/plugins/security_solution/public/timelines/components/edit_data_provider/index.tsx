@@ -92,14 +92,8 @@ export const StatefulEditDataProvider = React.memo<Props>(
       getInitialOperatorLabel(isExcluded, operator)
     );
 
-    const [disableButton, setDisableButton] = useState<boolean>(false);
     const [updatedValue, setUpdatedValue] = useState<string | number | Array<string | number>>(
       value
-    );
-
-    const disableButtonCallback = useCallback(
-      (shouldDisable) => setDisableButton(shouldDisable),
-      []
     );
 
     const showComboBoxInput =
@@ -113,6 +107,8 @@ export const StatefulEditDataProvider = React.memo<Props>(
       updatedOperator[0].label !== i18n.EXISTS &&
       updatedOperator[0].label !== i18n.DOES_NOT_EXIST &&
       !showComboBoxInput;
+
+    const disableSave = showComboBoxInput && Array.isArray(updatedValue) && !updatedValue.length;
 
     /** Focuses the Value input if it is visible, falling back to the Save button if it's not */
     const focusInput = () => {
@@ -248,23 +244,13 @@ export const StatefulEditDataProvider = React.memo<Props>(
           <EuiFlexItem grow={false}>
             {showValueInput && (
               <EuiFormRow label={i18n.VALUE_LABEL}>
-                <ControlledDefaultInput
-                  disableButtonCallback={disableButtonCallback}
-                  onChangeCallback={onValueChange}
-                  type={type}
-                  value={value}
-                />
+                <ControlledDefaultInput onChangeCallback={onValueChange} value={value} />
               </EuiFormRow>
             )}
 
             {showComboBoxInput && type !== DataProviderType.template && (
               <EuiFormRow label={i18n.VALUE_LABEL}>
-                <ControlledComboboxInput
-                  disableButtonCallback={disableButtonCallback}
-                  onChangeCallback={onValueChange}
-                  type={type}
-                  value={value}
-                />
+                <ControlledComboboxInput onChangeCallback={onValueChange} value={value} />
               </EuiFormRow>
             )}
           </EuiFlexItem>
@@ -280,7 +266,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
                   color="warning"
                   iconType="alert"
                   size="s"
-                  title={`'${updatedOperator[0].label}' operator is unavailable with templates`}
+                  title={i18n.UNAVAILABLE_OPERATOR(updatedOperator[0].label)}
                 />
                 <EuiSpacer size="m" />
               </>
@@ -298,7 +284,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
                       browserFields,
                       selectedField: updatedField,
                       selectedOperator: updatedOperator,
-                    }) || disableButton
+                    }) || disableSave
                   }
                   onClick={handleSave}
                   size="m"

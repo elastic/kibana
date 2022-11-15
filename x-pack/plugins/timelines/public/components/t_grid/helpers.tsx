@@ -112,19 +112,19 @@ const buildQueryMatch = (
       if (!isStringOrNumberArray(value)) {
         return `${isExcluded}${
           type !== DataProviderType.template
-            ? buildISQueryMatch({ browserFields, field, isFieldTypeNested, value })
-            : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested })
+            ? buildIsQueryMatch({ browserFields, field, isFieldTypeNested, value })
+            : buildExistsQueryMatch({ browserFields, field, isFieldTypeNested })
         }`;
       } else {
         return `${isExcluded}${field} : ${JSON.stringify(value[0])}`;
       }
 
     case EXISTS_OPERATOR:
-      return `${isExcluded}${buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested })}`;
+      return `${isExcluded}${buildExistsQueryMatch({ browserFields, field, isFieldTypeNested })}`;
 
     case IS_ONE_OF_OPERATOR:
       if (isStringOrNumberArray(value)) {
-        return `${isExcluded}${buildISONEOFQueryMatch({ field, value })}`;
+        return `${isExcluded}${buildIsOneOfQueryMatch({ field, value })}`;
       } else {
         return `${isExcluded}${field} : ${JSON.stringify(value)}`;
       }
@@ -292,7 +292,7 @@ export const getDefaultViewSelection = ({
 /** This local storage key stores the `Grid / Event rendered view` selection */
 export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';
 
-export const buildISQueryMatch = ({
+export const buildIsQueryMatch = ({
   browserFields,
   field,
   isFieldTypeNested,
@@ -312,7 +312,7 @@ export const buildISQueryMatch = ({
   }
 };
 
-export const buildEXISTSQueryMatch = ({
+export const buildExistsQueryMatch = ({
   browserFields,
   field,
   isFieldTypeNested,
@@ -326,7 +326,7 @@ export const buildEXISTSQueryMatch = ({
     : `${field} ${EXISTS_OPERATOR}`;
 };
 
-export const buildISONEOFQueryMatch = ({
+export const buildIsOneOfQueryMatch = ({
   field,
   value,
 }: {

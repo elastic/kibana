@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { endsWith, findIndex, startsWith } from 'lodash/fp';
+import { findIndex } from 'lodash/fp';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DataProviderType } from '@kbn/timelines-plugin/common';
@@ -132,12 +132,4 @@ export const sanatizeValue = (value: string | number | unknown[]): string => {
     return value.length ? `${value[0]}` : '';
   }
   return `${value}`;
-};
-
-/** Ensure if DataProvider is default that value is not template-like */
-export const isValueFieldInvalid = (type: DataProviderType, value: string | number) => {
-  return (
-    type !== DataProviderType.template &&
-    (startsWith('{', sanatizeValue(value)) || endsWith('}', sanatizeValue(value)))
-  );
 };
