@@ -10,37 +10,37 @@ import React, { useMemo } from 'react';
 import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { SecuritySolutionPageWrapper } from '../page_wrapper';
 import { EmptyPage } from '../empty_page';
-import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 
 interface NoPrivilegesPageProps {
+  documentationUrl: string;
   pageName?: string;
 }
 
-export const NoPrivilegesPage = React.memo<NoPrivilegesPageProps>(({ pageName }) => {
-  return (
-    <SecuritySolutionPageWrapper>
-      <EuiPageTemplate template="centeredContent">
-        <NoPrivileges pageName={pageName} />
-      </EuiPageTemplate>
-    </SecuritySolutionPageWrapper>
-  );
-});
+export const NoPrivilegesPage = React.memo<NoPrivilegesPageProps>(
+  ({ pageName, documentationUrl }) => {
+    return (
+      <SecuritySolutionPageWrapper>
+        <EuiPageTemplate template="centeredContent">
+          <NoPrivileges pageName={pageName} documentationUrl={documentationUrl} />
+        </EuiPageTemplate>
+      </SecuritySolutionPageWrapper>
+    );
+  }
+);
 NoPrivilegesPage.displayName = 'NoPrivilegePage';
 
-export const NoPrivileges = React.memo<NoPrivilegesPageProps>(({ pageName }) => {
-  const { docLinks } = useKibana().services;
-
+export const NoPrivileges = React.memo<NoPrivilegesPageProps>(({ pageName, documentationUrl }) => {
   const emptyPageActions = useMemo(
     () => ({
       feature: {
         icon: 'documents',
         label: i18n.GO_TO_DOCUMENTATION,
-        url: `${docLinks.links.siem.privileges}`,
+        url: documentationUrl,
         target: '_blank',
       },
     }),
-    [docLinks]
+    [documentationUrl]
   );
 
   const message = pageName

@@ -17828,7 +17828,6 @@
     "xpack.lens.pie.addLayer": "ビジュアライゼーション",
     "xpack.lens.pie.donutLabel": "ドーナッツ",
     "xpack.lens.pie.groupLabel": "比率",
-    "xpack.lens.pie.groupsizeLabel": "サイズ単位",
     "xpack.lens.pie.mosaiclabel": "モザイク",
     "xpack.lens.pie.mosaicSuggestionLabel": "モザイクとして",
     "xpack.lens.pie.pielabel": "円",
