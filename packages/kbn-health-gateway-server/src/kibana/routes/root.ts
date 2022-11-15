@@ -146,6 +146,7 @@ function configureFetch(kibanaConfig: KibanaConfig) {
 
     const fetchOptions: RequestInit = {
       ...(protocol === HTTPS && { agent }),
+      // @ts-expect-error
       signal: controller.signal,
       redirect: 'manual',
     };

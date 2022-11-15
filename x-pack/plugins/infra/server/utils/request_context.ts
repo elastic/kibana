@@ -43,6 +43,7 @@ export async function assertHasInfraMlPlugins<
   assertHasInfraPlugins(context);
 
   const infraContext = await context.infra;
+  // @ts-expect-error
   if (infraContext?.mlAnomalyDetectors == null || infraContext?.mlSystem == null) {
     throw new NoMlPluginError('Failed to access ML plugin.');
   }

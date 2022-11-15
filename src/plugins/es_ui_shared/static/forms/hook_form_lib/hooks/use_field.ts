@@ -30,7 +30,7 @@ const errorsToString = (errors: ValidationError[]): string[] | null => {
   return errors.length ? errors.map((error) => error.message) : null;
 };
 
-export const useField = <T, FormType = FormData, I = T>(
+export const useField = <T, FormType extends FormData = FormData, I = T>(
   form: FormHook<FormType>,
   path: string,
   config: FieldConfig<T, FormType, I> & InternalFieldConfig<T>,

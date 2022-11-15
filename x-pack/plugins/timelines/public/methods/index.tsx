@@ -27,6 +27,7 @@ const initializeStore = ({
 }) => {
   let tGridStore = store;
   if (!tGridStore) {
+    // @ts-expect-error
     tGridStore = createStore(initialTGridState, storage);
     setStore(tGridStore);
   }

@@ -58,6 +58,7 @@ const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
         <Switch>
           <Route
             path="/workpad/:id/page/:pageNumber"
+            // @ts-expect-error
             children={(pageRoute) => (
               <WorkpadHistoryManager>
                 <WorkpadRoutingContextComponent>

@@ -127,8 +127,10 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     namespace?: string
   ): RouteValidationResultType<typeof validationRule> {
     if (isConfigSchema(validationRule)) {
+      // @ts-expect-error
       return validationRule.validate(data, {}, namespace);
     } else if (typeof validationRule === 'function') {
+      // @ts-expect-error
       return this.validateFunction(validationRule, data, namespace);
     } else {
       throw new ValidationError(

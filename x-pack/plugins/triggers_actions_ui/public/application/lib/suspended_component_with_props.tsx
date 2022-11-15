@@ -1,3 +1,5 @@
+// @ts-ignore
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -15,6 +17,7 @@ export function suspendedComponentWithProps<T = unknown>(
 ) {
   return (props: T) => (
     <Suspense fallback={<CenterJustifiedSpinner size={size ?? 'm'} />}>
+      { /* @ts-expect-error */ }
       <ComponentToSuspend {...props} />
     </Suspense>
   );
