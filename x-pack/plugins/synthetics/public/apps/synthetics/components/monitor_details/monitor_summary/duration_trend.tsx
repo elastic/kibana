@@ -25,7 +25,6 @@ export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
   const monitorId = useMonitorQueryId();
   const selectedLocation = useSelectedLocation();
 
-
   if (!selectedLocation || !monitorId) {
     return null;
   }
