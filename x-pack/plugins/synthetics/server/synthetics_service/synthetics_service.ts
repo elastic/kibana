@@ -458,7 +458,7 @@ export class SyntheticsService {
           return formatHeartbeatRequest({
             monitor: normalizeSecrets(monitor).attributes,
             monitorId: monitor.id,
-            customHeartbeatId: attributes[ConfigKey.CUSTOM_HEARTBEAT_ID],
+            heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
           });
         })
       );

@@ -110,9 +110,7 @@ export const deleteMonitor = async ({
       [
         {
           ...normalizedMonitor.attributes,
-          id:
-            (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
-            monitorId,
+          id: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
         },
       ],
       request,
