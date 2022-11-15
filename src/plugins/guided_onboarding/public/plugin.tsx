@@ -36,7 +36,7 @@ export class GuidedOnboardingPlugin
     const { chrome, http, theme, application } = core;
 
     // Initialize services
-    apiService.setup(http);
+    apiService.setup(http, !!cloud?.isCloudEnabled);
 
     // Guided onboarding UI is only available on cloud
     if (cloud?.isCloudEnabled) {
