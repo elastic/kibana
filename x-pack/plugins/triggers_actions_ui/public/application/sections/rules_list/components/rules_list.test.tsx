@@ -1358,11 +1358,6 @@ describe('rules_list component with items', () => {
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-enabled"]').first().simulate('click');
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['enabled'],
@@ -1370,10 +1365,6 @@ describe('rules_list component with items', () => {
     );
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
 
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
