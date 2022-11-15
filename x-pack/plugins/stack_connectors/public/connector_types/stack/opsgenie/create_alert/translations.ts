@@ -73,8 +73,7 @@ export const ENTITY_FIELD_LABEL = i18n.translate(
 );
 
 export const TAGS_HELP = i18n.translate('xpack.stackConnectors.components.opsgenie.tagsHelp', {
-  defaultMessage:
-    'Type one or more custom identifying tags for this case. Press enter after each tag to begin a new one.',
+  defaultMessage: 'Press enter after each tag to begin a new one.',
 });
 
 export const TAGS_FIELD_LABEL = i18n.translate(
