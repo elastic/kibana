@@ -14,14 +14,14 @@ import { TelemetryClient } from '../telemetry_client';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 
-interface ExecutorParams {
+export interface TelemetryTaskExecutorParams {
   telemetryClient: TelemetryClient;
   indices: ApmIndicesConfig;
   savedObjectsClient: ISavedObjectsClient;
 }
 
 type TelemetryTaskExecutor = (
-  params: ExecutorParams
+  params: TelemetryTaskExecutorParams
 ) => Promise<APMDataTelemetry>;
 
 export interface TelemetryTask {
@@ -29,7 +29,7 @@ export interface TelemetryTask {
   executor: TelemetryTaskExecutor;
 }
 
-export type CollectTelemetryParams = ExecutorParams & {
+export type CollectTelemetryParams = TelemetryTaskExecutorParams & {
   isProd: boolean;
   logger: Logger;
 };
