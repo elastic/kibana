@@ -32,7 +32,10 @@ export class FilePickerState {
   /**
    * Files the user has selected
    */
-  public readonly selectedFileIds$ = new BehaviorSubject<string[]>([]);
+  public readonly selectedFiles$ = new BehaviorSubject<FileJSON[]>([]);
+  public readonly selectedFileIds$ = this.selectedFiles$.pipe(
+    map((files) => files.map((file) => file.id))
+  );
 
   public readonly isLoading$ = new BehaviorSubject<boolean>(true);
   public readonly loadingError$ = new BehaviorSubject<undefined | Error>(undefined);
@@ -44,11 +47,7 @@ export class FilePickerState {
   public readonly totalPages$ = new BehaviorSubject<undefined | number>(undefined);
   public readonly isUploading$ = new BehaviorSubject<boolean>(false);
 
-  /**
-   * This is how we keep a deduplicated list of file ids representing files a user
-   * has selected
-   */
-  private readonly fileSet = new Set<string>();
+  private readonly selectedFiles = new Map<string, FileJSON>();
   private readonly retry$ = new BehaviorSubject<void>(undefined);
   private readonly subscriptions: Subscription[] = [];
   private readonly internalIsLoading$ = new BehaviorSubject<boolean>(true);
@@ -84,7 +83,6 @@ export class FilePickerState {
    * easily be passed to all relevant UI.
    *
    * @note This is not explicitly kept in sync with the selected files!
-   * @note This is not explicitly kept in sync with the selected files!
    */
   public readonly files$ = this.requests$.pipe(
     switchMap(([page, query]) => this.sendRequest(page, query)),
@@ -99,7 +97,7 @@ export class FilePickerState {
   };
 
   private sendNextSelectedFiles() {
-    this.selectedFileIds$.next(this.getSelectedFileIds());
+    this.selectedFiles$.next(Array.from(this.selectedFiles.values()));
   }
 
   private setIsLoading(value: boolean) {
@@ -110,13 +108,13 @@ export class FilePickerState {
    * If multiple selection is not configured, this will take the first file id
    * if an array of file ids was provided.
    */
-  public selectFile = (fileId: string | string[]): void => {
-    const fileIds = Array.isArray(fileId) ? fileId : [fileId];
+  public selectFile = (file: FileJSON | FileJSON[]): void => {
+    const files = Array.isArray(file) ? file : [file];
     if (!this.selectMultiple) {
-      this.fileSet.clear();
-      this.fileSet.add(fileIds[0]);
+      this.selectedFiles.clear();
+      this.selectedFiles.set(files[0].id, files[0]);
     } else {
-      for (const id of fileIds) this.fileSet.add(id);
+      for (const f of files) this.selectedFiles.set(f.id, f);
     }
     this.sendNextSelectedFiles();
   };
@@ -182,19 +180,19 @@ export class FilePickerState {
   };
 
   public hasFilesSelected = (): boolean => {
-    return this.fileSet.size > 0;
+    return this.selectedFiles.size > 0;
   };
 
   public unselectFile = (fileId: string): void => {
-    if (this.fileSet.delete(fileId)) this.sendNextSelectedFiles();
+    if (this.selectedFiles.delete(fileId)) this.sendNextSelectedFiles();
   };
 
   public isFileIdSelected = (fileId: string): boolean => {
-    return this.fileSet.has(fileId);
+    return this.selectedFiles.has(fileId);
   };
 
   public getSelectedFileIds = (): string[] => {
-    return Array.from(this.fileSet);
+    return Array.from(this.selectedFiles.keys());
   };
 
   public setQuery = (query: undefined | string): void => {
@@ -216,8 +214,8 @@ export class FilePickerState {
   };
 
   watchFileSelected$ = (id: string): Observable<boolean> => {
-    return this.selectedFileIds$.pipe(
-      map(() => this.fileSet.has(id)),
+    return this.selectedFiles$.pipe(
+      map(() => this.selectedFiles.has(id)),
       distinctUntilChanged()
     );
   };

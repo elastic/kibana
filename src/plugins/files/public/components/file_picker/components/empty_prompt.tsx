@@ -32,7 +32,7 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ kind, multiple }) => {
           immediate
           multiple={multiple}
           onDone={(file) => {
-            state.selectFile(file.map(({ id }) => id));
+            state.selectFile(file.map(({ fileJSON }) => fileJSON));
             state.retry();
           }}
         />,
