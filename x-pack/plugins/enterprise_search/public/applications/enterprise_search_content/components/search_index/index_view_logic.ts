@@ -219,7 +219,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
     hasFilteringFeature: [
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
-      (advancedFeature: boolean, basicFeature: boolean) => advancedFeature && basicFeature,
+      (advancedFeature: boolean, basicFeature: boolean) => advancedFeature || basicFeature,
     ],
     index: [
       () => [selectors.indexData],

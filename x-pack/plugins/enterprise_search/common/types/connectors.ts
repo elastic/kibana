@@ -113,7 +113,7 @@ export interface Connector {
   configuration: ConnectorConfiguration;
   description: string | null;
   error: string | null;
-  features: Record<FeatureName, boolean> | null;
+  features: Record<FeatureName, boolean | null> | null;
   filtering: FilteringConfig[];
   id: string;
   index_name: string;

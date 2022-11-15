@@ -33,20 +33,17 @@ describe('fetchConnectors lib', () => {
           _id: 'connectorId',
           _primary_term: 'primaryTerm',
           _seq_no: 5,
-          source: { source: 'source' },
+          _source: { source: 'source' },
         })
       );
       await expect(fetchConnectorById(mockClient as any, 'id')).resolves.toEqual({
-        id: 'connectorId',
-        source: 'source',
-      });
-      expect(mockClient.asCurrentUser.get).toHaveBeenCalledWith({
         primaryTerm: 'primaryTerm',
         seqNo: 5,
-        value: {
-          id: 'id',
-          index: CONNECTORS_INDEX,
-        },
+        value: { id: 'connectorId', source: 'source' },
+      });
+      expect(mockClient.asCurrentUser.get).toHaveBeenCalledWith({
+        id: 'id',
+        index: CONNECTORS_INDEX,
       });
     });
     it('should call setup connectors on index not found error', async () => {

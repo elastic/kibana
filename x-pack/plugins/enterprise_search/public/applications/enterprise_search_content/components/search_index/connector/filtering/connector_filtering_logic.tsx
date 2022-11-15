@@ -191,6 +191,19 @@ export const ConnectorFilteringLogic = kea<
         actions.setLocalFilteringRules(
           values.hasDraft ? values.filteringConfig.draft.rules : values.filteringConfig.active.rules
         );
+        actions.setLocalAdvancedSnippet(
+          values.hasDraft
+            ? JSON.stringify(
+                values.filteringConfig.draft.advanced_snippet.value ?? {},
+                undefined,
+                2
+              )
+            : JSON.stringify(
+                values.filteringConfig.active.advanced_snippet.value ?? {},
+                undefined,
+                2
+              )
+        );
       }
     },
   }),
@@ -283,7 +296,7 @@ export const ConnectorFilteringLogic = kea<
       () => [selectors.filteringConfig],
       (filteringConfig: FilteringConfig | null) =>
         filteringConfig?.active.advanced_snippet.value
-          ? JSON.stringify(filteringConfig?.active.advanced_snippet.value)
+          ? JSON.stringify(filteringConfig?.active.advanced_snippet.value, undefined, 2)
           : '',
     ],
     draftErrors: [

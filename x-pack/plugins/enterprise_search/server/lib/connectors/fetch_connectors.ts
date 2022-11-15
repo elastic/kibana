@@ -27,9 +27,9 @@ export const fetchConnectorById = async (
     });
     return connectorResult._source
       ? {
-          value: { ...connectorResult._source, id: connectorResult._id },
           primaryTerm: connectorResult._primary_term,
           seqNo: connectorResult._seq_no,
+          value: { ...connectorResult._source, id: connectorResult._id },
         }
       : undefined;
   } catch (error) {

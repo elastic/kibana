@@ -183,7 +183,7 @@ export const ConnectorFiltering: React.FC = () => {
                   </EuiText>
                 </EuiFlexItem>
                 <EuiCodeBlock isCopyable language="json">
-                  {JSON.stringify(advancedSnippet, undefined, 2)}
+                  {advancedSnippet}
                 </EuiCodeBlock>
               </EuiFlexGroup>
             </EuiPanel>

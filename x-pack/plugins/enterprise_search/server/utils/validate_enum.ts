@@ -18,14 +18,15 @@ export function validateEnum(
   enumToValidateAgainst: Record<string | number, string | number>,
   fieldName: string
 ) {
-  return (value: string) =>
-    Object.values(enumToValidateAgainst).includes(value)
-      ? null
-      : i18n.translate('xpack.enterpriseSearch.server.utils.invalidEnumValue', {
-          defaultMessage: 'Illegal value {value} for field {fieldName}',
-          values: {
-            fieldName,
-            value,
-          },
-        });
+  return (value: string) => {
+    if (!Object.values(enumToValidateAgainst).includes(value)) {
+      return i18n.translate('xpack.enterpriseSearch.server.utils.invalidEnumValue', {
+        defaultMessage: 'Illegal value {value} for field {fieldName}',
+        values: {
+          fieldName,
+          value,
+        },
+      });
+    }
+  };
 }
