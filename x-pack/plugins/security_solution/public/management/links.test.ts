@@ -213,4 +213,23 @@ describe('links', () => {
       });
     });
   });
+  describe('Endpoint List', () => {
+    it('should return all but endpoints link when no Endpoint List READ access', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
+        canIsolateHost: true,
+        canUnIsolateHost: true,
+        canAccessEndpointManagement: true,
+        canReadActionsLogManagement: true,
+        canReadEndpointList: false,
+      });
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+      expect(filteredLinks).toEqual({
+        ...links,
+        links: links.links?.filter((link) => link.id !== SecurityPageName.endpoints),
+      });
+    });
+  });
 });
