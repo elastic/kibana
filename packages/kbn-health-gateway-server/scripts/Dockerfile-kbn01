@@ -1,9 +1,0 @@
-# syntax=docker/dockerfile:1
-
-# kbn01
-FROM kibana:8.5.0
-RUN /bin/bash -c 'echo "" >> /usr/share/kibana/config/kibana.yml; \
-echo "" >> /usr/share/kibana/config/kibana.yml; \
-echo "xpack.encryptedSavedObjects.encryptionKey: ed6f5062ccb593cd1490a57479a4d0de" >> /usr/share/kibana/config/kibana.yml; \
-echo "xpack.reporting.encryptionKey: 6730a34bef16f8c4d2a340c17c525394" >> /usr/share/kibana/config/kibana.yml; \
-echo "xpack.security.encryptionKey: 0350dc6918d15dda76f56651bf381580" >> /usr/share/kibana/config/kibana.yml;'
