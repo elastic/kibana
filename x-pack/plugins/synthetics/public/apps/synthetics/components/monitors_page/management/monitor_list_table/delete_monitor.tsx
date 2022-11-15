@@ -121,8 +121,9 @@ export const ProjectMonitorDisclaimer = () => {
   return (
     <FormattedMessage
       id="xpack.synthetics.monitorManagement.monitorList.disclaimer.label"
-      defaultMessage={`Make sure to remove this monitor from Project's source, otherwise it will be recreated the next time
-    you use the push command. For more information, {docsLink} for deleting project monitors.`}
+      defaultMessage={
+        "Make sure to remove this monitor from Project's source, otherwise it will be recreated the next time you use the push command. For more information, {docsLink} for deleting project monitors."
+      }
       values={{
         docsLink: (
           <EuiLink
