@@ -125,7 +125,9 @@ export const AgentStandaloneBottomBar: React.FC<{
 export const CreatePackagePolicyFinalBottomBar: React.FC<{
   pkgkey: string;
 }> = ({ pkgkey }) => {
+  let isK8s = pkgkey.includes("kubernetes");
   const { getHref } = useLink();
+  const { getAbsolutePath } = useLink();
   return (
     <CenteredRoundedBottomBar>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -139,6 +141,7 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexItem>
+        {!isK8s && (
         <EuiFlexItem grow={false}>
           <EuiButton
             color="success"
@@ -154,6 +157,22 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
             />
           </EuiButton>
         </EuiFlexItem>
+        )}
+        {isK8s && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="success"
+              fill
+              size="m"
+              href={getAbsolutePath("/app/dashboards#/view/kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c")}
+            >
+              <FormattedMessage
+                id="xpack.fleet.confirmIncomingData. '"
+                defaultMessage="View Kubernetes metrics dashboards"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </CenteredRoundedBottomBar>
   );

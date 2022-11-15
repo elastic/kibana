@@ -32,6 +32,7 @@ interface Props {
   linuxRpmCommand: string;
   k8sCommand: string;
   hasK8sIntegration: boolean;
+  hasK8sIntegrationMultiPage: boolean;
   isManaged?: boolean;
   hasFleetServer?: boolean;
   enrollToken?: string | undefined;
@@ -52,6 +53,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxRpmCommand,
   k8sCommand,
   hasK8sIntegration,
+  hasK8sIntegrationMultiPage,
   isManaged,
   enrollToken,
   hasFleetServer,
@@ -112,6 +114,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   return (
     <>
       <>
+        {!hasK8sIntegrationMultiPage && (
         <EuiButtonGroup
           options={useReduce ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS}
           idSelected={platform}
@@ -120,6 +123,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             defaultMessage: 'Platform',
           })}
         />
+        )}
         <EuiSpacer size="s" />
         {(platform === 'deb' || platform === 'rpm') && (
           <>
@@ -135,10 +139,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
         )}
         {platform === 'kubernetes' && isManaged && (
           <>
-            <KubernetesInstructions enrollmentAPIKey={enrollToken} />
+            <KubernetesInstructions onCopy={onCopy} onDownload={onCopy} enrollmentAPIKey={enrollToken} />
             <EuiSpacer size="s" />
           </>
         )}
+        { !hasK8sIntegrationMultiPage && (
+        <>
         {platform === 'kubernetes' && (
           <EuiText>
             <EuiSpacer size="s" />
@@ -185,7 +191,11 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             )}
           </EuiCopy>
         )}
+        </>
+        )}
       </>
     </>
   );
 };
+
+
