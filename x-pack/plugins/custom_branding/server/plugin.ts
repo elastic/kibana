@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { License } from '@kbn/license-api-guard-plugin/server';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
-import { defineRoutes } from './routes';
+import { registerRoutes } from './routes';
+import type { CustomBrandingRequestHandlerContext } from './types';
 
 export class CustomBrandingPlugin implements Plugin {
   private readonly license: License;
@@ -27,10 +28,8 @@ export class CustomBrandingPlugin implements Plugin {
       pluginName: PLUGIN.getI18nName(i18n),
       logger: this.logger,
     });
-    const router = core.http.createRouter();
-
-    // Register server side APIs
-    defineRoutes(router);
+    const router = core.http.createRouter<CustomBrandingRequestHandlerContext>();
+    registerRoutes(router);
 
     return {};
   }
