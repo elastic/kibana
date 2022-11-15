@@ -211,6 +211,7 @@ export function FieldValueSelection({
               <EuiPopoverFooter paddingSize="s">
                 {showLogicalConditionSwitch && (
                   <>
+                    <EuiSpacer size="xs" />
                     <div css={{ display: 'flex', justifyContent: 'flex-end' }}>
                       <EuiSwitch
                         css={{
@@ -232,7 +233,7 @@ export function FieldValueSelection({
                         }}
                       />
                     </div>
-                    <EuiSpacer size="s" />
+                    <EuiSpacer size="m" />
                   </>
                 )}
 

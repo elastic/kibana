@@ -7,7 +7,6 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { useEffect, useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useUptimeRefreshContext } from '../contexts/uptime_refresh_context';
 import { useUptimeDataView } from '../contexts/uptime_data_view_context';
 import { TAG_KEY_FOR_AND_CONDITION } from '../components/overview/filter_group/filter_group';
@@ -58,13 +57,14 @@ export const useGenerateUpdatedKueryString = (
 
   const { lastRefresh } = useUptimeRefreshContext();
 
-  const [useLogicalAND] = useLocalStorage(TAG_KEY_FOR_AND_CONDITION, false);
-
   const [kueryString, setKueryString] = useState<string>('');
 
   useEffect(() => {
+    // need a string comparison for local storage
+    const useLogicalAND = localStorage.getItem(TAG_KEY_FOR_AND_CONDITION) === 'true';
+
     setKueryString(getKueryString(urlFilters, excludedFilters, useLogicalAND));
-  }, [useLogicalAND, excludedFilters, urlFilters, lastRefresh]);
+  }, [excludedFilters, urlFilters, lastRefresh]);
 
   const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
 
