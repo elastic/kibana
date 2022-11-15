@@ -124,7 +124,7 @@ export const IndicesStats: React.FC = () => {
             <EuiPanel color={data?.errors ? 'danger' : 'subdued'} hasShadow={false} paddingSize="l">
               <EuiStat
                 description={i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndices.jobStats.orphanedSyncs',
+                  'xpack.enterpriseSearch.content.searchIndices.jobStats.errorSyncs',
                   {
                     defaultMessage: 'Syncs errors',
                   }
