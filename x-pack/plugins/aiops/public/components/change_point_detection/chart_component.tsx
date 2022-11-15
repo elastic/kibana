@@ -7,6 +7,7 @@
 
 import React, { FC, useMemo } from 'react';
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { useChangePointDetectionContext } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -51,14 +52,14 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
           },
         },
         $state: {
-          store: 'appState',
+          store: FilterStateStore.APP_STATE,
         },
       },
     ],
     [dataView.id, requestParams.splitField, annotation.group_field]
   );
 
-  // @ts-ignore
+  // @ts-ignore incorrect types for attributes
   const attributes = useMemo<TypedLensByValueInput['attributes']>(() => {
     return {
       title: annotation.group_field,
