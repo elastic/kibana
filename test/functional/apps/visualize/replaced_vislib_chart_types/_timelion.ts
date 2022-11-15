@@ -75,7 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should display correct chart data for average, min, max and cardinality aggregations', async () => {
       await initVisualization(
         `.es(index=${logstashWithDashIndexPatternString},metric=avg:bytes), .es(index=${logstashWithDashIndexPatternString},metric=min:bytes),` +
-        `.es(index=${logstashWithDashIndexPatternString},metric=max:bytes,), .es(index=${logstashWithDashIndexPatternString},metric=cardinality:bytes)`,
+          `.es(index=${logstashWithDashIndexPatternString},metric=max:bytes,), .es(index=${logstashWithDashIndexPatternString},metric=cardinality:bytes)`,
         '36h'
       );
 
@@ -108,9 +108,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const forthAreaExpectedChartData = [150, 50, 50, 50, 50, 50, 50, 150, 150, 150];
       await initVisualization(
         '.es(*).label("initial"),' +
-        '.es(*).add(term=.es(*).multiply(-1).abs()).divide(2).label("add multiply abs divide"),' +
-        '.es(q="bytes<100").derivative().sum(200).min(200).label("query derivative min sum"),' +
-        '.es(*).if(operator=gt,if=200,then=50,else=150).label("condition")'
+          '.es(*).add(term=.es(*).multiply(-1).abs()).divide(2).label("add multiply abs divide"),' +
+          '.es(q="bytes<100").derivative().sum(200).min(200).label("query derivative min sum"),' +
+          '.es(*).if(operator=gt,if=200,then=50,else=150).label("condition")'
       );
 
       const firstAreaChartData = await visChart.getAreaChartData('initial', timelionChartSelector);
@@ -145,8 +145,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       ];
       await initVisualization(
         `.es(index=${logstashWithoutDashIndexPatternString},timefield="@timestamp",metric=avg:machine.ram).label("Average Machine RAM amount").yaxis(2,units=bytes,position=right),` +
-        `.es(index=${logstashWithoutDashIndexPatternString},timefield="@timestamp",metric=avg:bytes).label("Average Bytes for request").yaxis(1,units=bytes,position=left),` +
-        `.es(index=${logstashWithoutDashIndexPatternString},timefield="@timestamp",metric=avg:bytes, offset=-12h).label("Average Bytes for request with offset").yaxis(3,units=custom:BYTES_,position=right)`,
+          `.es(index=${logstashWithoutDashIndexPatternString},timefield="@timestamp",metric=avg:bytes).label("Average Bytes for request").yaxis(1,units=bytes,position=left),` +
+          `.es(index=${logstashWithoutDashIndexPatternString},timefield="@timestamp",metric=avg:bytes, offset=-12h).label("Average Bytes for request with offset").yaxis(3,units=custom:BYTES_,position=right)`,
         '36h'
       );
 
