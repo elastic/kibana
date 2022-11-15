@@ -388,7 +388,7 @@ export function MonitorDetailFlyout(props: Props) {
                     },
                     {
                       title: FREQUENCY_HEADER_TEXT,
-                      description: freqeuncyStr(monitorSavedObject?.attributes[ConfigKey.SCHEDULE]),
+                      description: frequencyStr(monitorSavedObject?.attributes[ConfigKey.SCHEDULE]),
                     },
                     monitorSavedObject?.attributes[ConfigKey.TAGS] &&
                     monitorSavedObject?.attributes[ConfigKey.TAGS].length
@@ -439,7 +439,7 @@ export function MonitorDetailFlyout(props: Props) {
   );
 }
 
-function freqeuncyStr(frequency: { number: string; unit: string }) {
+export function frequencyStr(frequency: { number: string; unit: string }) {
   return translateUnitMessage(
     `${frequency.number} ${unitToString(frequency.unit, parseInt(frequency.number, 10))}`
   );
