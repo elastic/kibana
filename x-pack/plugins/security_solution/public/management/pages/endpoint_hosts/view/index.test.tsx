@@ -824,6 +824,8 @@ describe('when on the endpoint list page', () => {
             endpointPrivileges: {
               ...mockInitialUserPrivilegesState().endpointPrivileges,
               canReadActionsLogManagement: false,
+              canReadEndpointList: true,
+              canAccessFleet: true,
             },
           });
           const renderResult = await renderAndWaitForData();
@@ -843,6 +845,8 @@ describe('when on the endpoint list page', () => {
             endpointPrivileges: {
               ...mockInitialUserPrivilegesState().endpointPrivileges,
               canReadActionsLogManagement: false,
+              canReadEndpointList: true,
+              canAccessFleet: true,
             },
           });
           reactTestingLibrary.act(() => {
@@ -1327,7 +1331,7 @@ describe('when on the endpoint list page', () => {
       expect(banner).toHaveTextContent(transforms[1].id);
     });
   });
-  describe('according to RBAC permissions', () => {
+  describe('endpoint list onboarding screens with RBAC', () => {
     beforeEach(() => {
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: [],
@@ -1351,6 +1355,66 @@ describe('when on the endpoint list page', () => {
       });
       const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
       expect(onboardingSteps).not.toBeNull();
+    });
+    it('user has endpoint list READ and fleet All and can view entire onboarding screen', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadEndpointList: true,
+          canAccessFleet: true,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+      expect(onboardingSteps).not.toBeNull();
+    });
+    it('user has endpoint list NONE and fleet All and cannot view entire onboarding screen', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadEndpointList: false,
+          canAccessFleet: true,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const noPrivilegesPage = await renderResult.findByTestId('noPrivilegesPage');
+      expect(noPrivilegesPage).not.toBeNull();
+    });
+    it('user has endpoint list ALL/READ and fleet NONE and cannot view entire onboarding screen', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadEndpointList: true,
+          canAccessFleet: false,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const noPrivilegesPage = await renderResult.findByTestId('noPrivilegesPage');
+      expect(noPrivilegesPage).not.toBeNull();
+    });
+    it('user has endpoint list NONE and fleet NONE and cannot view entire onboarding screen', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadEndpointList: false,
+          canAccessFleet: false,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const noPrivilegesPage = await renderResult.findByTestId('noPrivilegesPage');
+      expect(noPrivilegesPage).not.toBeNull();
     });
   });
 });

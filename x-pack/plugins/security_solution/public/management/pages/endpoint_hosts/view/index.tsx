@@ -682,7 +682,7 @@ export const EndpointList = () => {
     );
   }, [showTransformFailedCallout, closeTransformFailedCallout, transformFailedCalloutDescription]);
 
-  if (canReadEndpointList && !canAccessFleet) {
+  if (!canReadEndpointList || (canReadEndpointList && !canAccessFleet)) {
     return <NoPrivileges pageName={SecurityPageName.endpoints} />;
   }
 
