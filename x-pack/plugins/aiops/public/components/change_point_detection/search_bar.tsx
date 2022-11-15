@@ -87,7 +87,6 @@ export const SearchBarWrapper: FC<SearchBarProps> = ({
         })}
         displayStyle={'inPage'}
         isClearable
-        // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
         onFiltersUpdated={onFiltersUpdated}
       />
       {error ? (
