@@ -21,7 +21,7 @@ import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { Store } from 'redux';
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { CasesUiStart } from '@kbn/cases-plugin/public/types';
+import { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public/types';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: Array<FieldSpec & DataViewField>;
@@ -29,6 +29,10 @@ export interface SecuritySolutionDataViewBase extends DataViewBase {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ThreatIntelligencePluginSetup {}
+
+export interface SetupPlugins {
+  cases: CasesUiSetup;
+}
 
 export interface ThreatIntelligencePluginStart {
   getComponent: () => (props: {

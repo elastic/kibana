@@ -6,7 +6,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { SetupPlugins } from '@kbn/osquery-plugin/public/types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense } from 'react';
@@ -17,6 +16,7 @@ import { KibanaContextProvider } from './hooks/use_kibana';
 import {
   SecuritySolutionPluginContext,
   Services,
+  SetupPlugins,
   ThreatIntelligencePluginSetup,
   ThreatIntelligencePluginStart,
   ThreatIntelligencePluginStartDeps,
@@ -60,7 +60,7 @@ export class ThreatIntelligencePlugin implements Plugin<void, void> {
     plugins: SetupPlugins
   ): Promise<ThreatIntelligencePluginSetup> {
     const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();
-    plugins.cases?.attachmentFramework.registerExternalReference(externalAttachmentType);
+    plugins.cases.attachmentFramework.registerExternalReference(externalAttachmentType);
 
     return {};
   }

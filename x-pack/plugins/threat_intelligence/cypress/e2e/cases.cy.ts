@@ -39,8 +39,8 @@ const CASES = 'app/security/cases';
 const createNewCaseFromCases = () => {
   cy.visit(CASES);
   cy.get(CREAT_CASE_BUTTON).click();
-  cy.get(NEW_CASE_NAME_INPUT).type('case');
-  cy.get(NEW_CASE_DESCRIPTION_INPUT).type('case description');
+  cy.get(NEW_CASE_NAME_INPUT).click().type('case');
+  cy.get(NEW_CASE_DESCRIPTION_INPUT).click().type('case description');
   cy.get(NEW_CASE_CREATE_BUTTON).click();
 };
 
@@ -51,7 +51,7 @@ const createNewCaseFromTI = () => {
 };
 
 const selectExistingCase = () => {
-  cy.wait(500); // TODO find a better way to wait for the table to render
+  cy.wait(1000); // TODO find a better way to wait for the table to render
   cy.get(SELECT_EXISTING_CASE).should('exist').contains('Select').click();
 };
 
@@ -71,92 +71,96 @@ const deleteCase = () => {
   cy.get(CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON).click();
 };
 
-describe('Cases', () => {
-  describe('Invalid indicators cases interactions', () => {
-    before(() => {
-      esArchiverLoad('threat_intelligence/invalid_indicators_data');
+describe('Cases with invalid indicators', () => {
+  before(() => {
+    esArchiverLoad('threat_intelligence/invalid_indicators_data');
 
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
-    });
-    after(() => {
-      esArchiverUnload('threat_intelligence/invalid_indicators_data');
-    });
-
-    it('should disable the indicators table context menu items if invalid indicator', () => {
-      cy.get(INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON).last().click();
-      cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).should('be.disabled');
-      cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).should('be.disabled');
-    });
-
-    it('should disable the flyout context menu items if invalid indicator', () => {
-      cy.get(TOGGLE_FLYOUT_BUTTON).last().click({ force: true });
-      cy.get(FLYOUT_TAKE_ACTION_BUTTON).first().click();
-      cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).should('be.disabled');
-      cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).should('be.disabled');
-    });
+    cy.visit(THREAT_INTELLIGENCE);
+    selectRange();
+  });
+  after(() => {
+    esArchiverUnload('threat_intelligence/invalid_indicators_data');
   });
 
-  describe('Indicators cases interactions', () => {
-    before(() => {
-      esArchiverLoad('threat_intelligence/indicators_data');
-    });
-    after(() => {
-      esArchiverUnload('threat_intelligence/indicators_data');
-    });
+  it('should disable the indicators table context menu items if invalid indicator', () => {
+    const documentsNumber = 22;
+    cy.get(INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON)
+      .eq(documentsNumber - 1)
+      .click();
+    cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).should('be.disabled');
+    cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).should('be.disabled');
+  });
 
-    it('should add to existing case when clicking on the button in the indicators table', () => {
-      createNewCaseFromCases();
+  it('should disable the flyout context menu items if invalid indicator', () => {
+    const documentsNumber = 22;
+    cy.get(TOGGLE_FLYOUT_BUTTON)
+      .eq(documentsNumber - 1)
+      .click({ force: true });
+    cy.get(FLYOUT_TAKE_ACTION_BUTTON).first().click();
+    cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).should('be.disabled');
+    cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).should('be.disabled');
+  });
+});
 
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
+describe('Cases interactions', () => {
+  before(() => {
+    esArchiverLoad('threat_intelligence/indicators_data');
+  });
+  after(() => {
+    esArchiverUnload('threat_intelligence/indicators_data');
+  });
 
-      cy.get(INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON).first().click();
-      cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).first().click();
+  it('should add to existing case when clicking on the button in the indicators table', () => {
+    createNewCaseFromCases();
 
-      selectExistingCase();
-      navigateToNewCaseAndCheckAddedComment();
-      deleteCase();
-    });
+    cy.visit(THREAT_INTELLIGENCE);
+    selectRange();
 
-    it('should add to new case when clicking on the button in the indicators table', () => {
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
+    cy.get(INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON).first().click();
+    cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).first().click();
 
-      cy.get(INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON).first().click();
-      cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).first().click();
-      createNewCaseFromTI();
+    selectExistingCase();
+    navigateToNewCaseAndCheckAddedComment();
+    deleteCase();
+  });
 
-      navigateToNewCaseAndCheckAddedComment();
-      deleteCase();
-    });
+  it('should add to new case when clicking on the button in the indicators table', () => {
+    cy.visit(THREAT_INTELLIGENCE);
+    selectRange();
 
-    it('should add to existing case when clicking on the button in the indicators flyout', () => {
-      createNewCaseFromCases();
+    cy.get(INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON).first().click();
+    cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).first().click();
+    createNewCaseFromTI();
 
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
+    navigateToNewCaseAndCheckAddedComment();
+    deleteCase();
+  });
 
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
-      cy.get(FLYOUT_TAKE_ACTION_BUTTON).first().click();
-      cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).first().click();
+  it('should add to existing case when clicking on the button in the indicators flyout', () => {
+    createNewCaseFromCases();
 
-      selectExistingCase();
-      navigateToNewCaseAndCheckAddedComment();
-      deleteCase();
-    });
+    cy.visit(THREAT_INTELLIGENCE);
+    selectRange();
 
-    it('should add to new case when clicking on the button in the indicators flyout', () => {
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
+    cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
+    cy.get(FLYOUT_TAKE_ACTION_BUTTON).first().click();
+    cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).first().click();
 
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
-      cy.get(FLYOUT_TAKE_ACTION_BUTTON).first().click();
-      cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).first().click();
-      createNewCaseFromTI();
+    selectExistingCase();
+    navigateToNewCaseAndCheckAddedComment();
+    deleteCase();
+  });
 
-      navigateToNewCaseAndCheckAddedComment();
-      deleteCase();
-    });
+  it('should add to new case when clicking on the button in the indicators flyout', () => {
+    cy.visit(THREAT_INTELLIGENCE);
+    selectRange();
+
+    cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
+    cy.get(FLYOUT_TAKE_ACTION_BUTTON).first().click();
+    cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).first().click();
+    createNewCaseFromTI();
+
+    navigateToNewCaseAndCheckAddedComment();
+    deleteCase();
   });
 });
