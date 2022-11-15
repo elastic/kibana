@@ -125,7 +125,7 @@ export const AgentStandaloneBottomBar: React.FC<{
 export const CreatePackagePolicyFinalBottomBar: React.FC<{
   pkgkey: string;
 }> = ({ pkgkey }) => {
-  let isK8s = pkgkey.includes("kubernetes");
+  const isK8s = pkgkey.includes('kubernetes');
   const { getHref } = useLink();
   const { getAbsolutePath } = useLink();
   return (
@@ -142,21 +142,21 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
           </EuiFlexItem>
         </EuiFlexItem>
         {!isK8s && (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="success"
-            fill
-            size="m"
-            href={getHref('integration_details_assets', {
-              pkgkey,
-            })}
-          >
-            <FormattedMessage
-              id="xpack.fleet.confirmIncomingData.viewDataAssetsButtonText'"
-              defaultMessage="View assets"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="success"
+              fill
+              size="m"
+              href={getHref('integration_details_assets', {
+                pkgkey,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.fleet.confirmIncomingData.viewDataAssetsButtonText'"
+                defaultMessage="View assets"
+              />
+            </EuiButton>
+          </EuiFlexItem>
         )}
         {isK8s && (
           <EuiFlexItem grow={false}>
@@ -164,7 +164,9 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
               color="success"
               fill
               size="m"
-              href={getAbsolutePath("/app/dashboards#/view/kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c")}
+              href={getAbsolutePath(
+                '/app/dashboards#/view/kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c'
+              )}
             >
               <FormattedMessage
                 id="xpack.fleet.confirmIncomingData. '"

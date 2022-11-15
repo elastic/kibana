@@ -20,7 +20,7 @@ import {
 import { ManualInstructions } from '../../../../../../../../../components/enrollment_instructions';
 
 import type { InstallAgentPageProps } from './types';
-import {KubernetesManifestApplyStep} from "@kbn/fleet-plugin/public/components/agent_enrollment_flyout/steps/run_k8s_apply_command_step";
+import { KubernetesManifestApplyStep } from '../../../../../../../../../components/agent_enrollment_flyout/steps/run_k8s_apply_command_step';
 
 export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps> = (props) => {
   const {
@@ -57,7 +57,8 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     );
   }
 
-  const isK8s = (props.packageInfo.name == 'kubernetes') ? "IS_KUBERNETES_MULTIPAGE": "IS_NOT_KUBERNETES";
+  const isK8s =
+    props.packageInfo.name == 'kubernetes' ? 'IS_KUBERNETES_MULTIPAGE' : 'IS_NOT_KUBERNETES';
 
   const installManagedCommands = ManualInstructions(
     enrollmentAPIKey.api_key,
@@ -70,30 +71,33 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       installCommand: installManagedCommands,
       apiKeyData: { item: enrollmentAPIKey },
       enrollToken: enrollmentAPIKey.api_key,
-      isK8s: isK8s,
+      isK8s,
       selectedApiKeyId: enrollmentAPIKey.id,
       isComplete: commandCopied || !!enrolledAgentIds.length,
       fullCopyButton: true,
       onCopy: () => setCommandCopied(true),
-    })]
+    }),
+  ];
 
-    if (isK8s == "IS_KUBERNETES_MULTIPAGE") {
-      steps.push(KubernetesManifestApplyStep({
+  if (isK8s == 'IS_KUBERNETES_MULTIPAGE') {
+    steps.push(
+      KubernetesManifestApplyStep({
         isComplete: applyCommandCopied || !!enrolledAgentIds.length,
         fullCopyButton: true,
-        onCopy: () => setApplyCommandCopied(true)
-      }))
-    }
+        onCopy: () => setApplyCommandCopied(true),
+      })
+    );
+  }
 
-  steps.push(AgentEnrollmentConfirmationStep({
+  steps.push(
+    AgentEnrollmentConfirmationStep({
       selectedPolicyId: agentPolicy?.id,
       troubleshootLink: link,
       agentCount: enrolledAgentIds.length,
       showLoading: true,
       poll: commandCopied,
-    }));
-
-
+    })
+  );
 
   return (
     <>

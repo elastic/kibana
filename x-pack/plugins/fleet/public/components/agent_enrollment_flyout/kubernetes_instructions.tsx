@@ -30,7 +30,11 @@ interface Props {
   onDownload?: () => void;
 }
 
-export const KubernetesInstructions: React.FunctionComponent<Props> = ({ enrollmentAPIKey, onCopy, onDownload }) => {
+export const KubernetesInstructions: React.FunctionComponent<Props> = ({
+  enrollmentAPIKey,
+  onCopy,
+  onDownload,
+}) => {
   const core = useStartServices();
   const settings = useGetSettings();
   const { notifications } = core;
@@ -115,19 +119,25 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({ enrollm
 
   const k8sDownloadYaml = (
     <>
-      <EuiButton href={downloadLink} target="_blank" iconSide="right" iconType="popout" onClick={() => onDownloadButtonClick()}>
-            {downloadButtonClicked ? (
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.downloadManifestButtonk8sClicked"
-                defaultMessage="Downloaded"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.enrollmentInstructions.downloadManifestButtonk8s"
-                defaultMessage="Download Manifest"
-              />
-            )}
-          </EuiButton>
+      <EuiButton
+        href={downloadLink}
+        target="_blank"
+        iconSide="right"
+        iconType="popout"
+        onClick={() => onDownloadButtonClick()}
+      >
+        {downloadButtonClicked ? (
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.downloadManifestButtonk8sClicked"
+            defaultMessage="Downloaded"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.enrollmentInstructions.downloadManifestButtonk8s"
+            defaultMessage="Download Manifest"
+          />
+        )}
+      </EuiButton>
     </>
   );
 
@@ -136,7 +146,6 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({ enrollm
       {yaml}
     </EuiCodeBlock>
   );
-
 
   return (
     <>
