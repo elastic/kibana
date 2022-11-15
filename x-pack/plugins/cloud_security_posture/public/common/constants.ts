@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { euiPaletteForStatus } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../common/constants';
 
-const [success, warning, danger] = euiPaletteForStatus(3);
+export const statusColors = {
+  passed: euiThemeVars.euiColorVis0,
+  failed: euiThemeVars.euiColorVis9,
+};
 
-export const statusColors = { success, warning, danger };
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
 
 export type CloudPostureIntegrations = typeof cloudPostureIntegrations;
