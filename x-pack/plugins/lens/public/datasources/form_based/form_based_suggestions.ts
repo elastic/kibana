@@ -568,10 +568,10 @@ function createNewLayerWithBucketAggregation(
   breakdownField?: IndexPatternField
 ): FormBasedLayer {
   const countColumnId = generateId();
-  const splitColumnId = generateId();
 
-  const getBreakdownColumn = () =>
-    insertNewColumn({
+  const getBreakdownColumn = () => {
+    const splitColumnId = generateId();
+    return insertNewColumn({
       op: 'terms',
       layer: {
         indexPatternId: indexPattern.id,
@@ -584,6 +584,7 @@ function createNewLayerWithBucketAggregation(
       indexPattern,
       visualizationGroups: [],
     });
+  };
 
   return insertNewColumn({
     op: operation,
