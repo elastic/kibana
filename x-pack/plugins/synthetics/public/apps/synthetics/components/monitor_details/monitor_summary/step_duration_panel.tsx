@@ -34,6 +34,10 @@ export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Positio
     return null;
   }
 
+  if (!monitorId) {
+    return null;
+  }
+
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiFlexGroup alignItems="center" gutterSize="s">

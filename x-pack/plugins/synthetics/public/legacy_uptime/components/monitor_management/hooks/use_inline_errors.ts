@@ -89,7 +89,7 @@ export function useInlineErrors({
             filter: getInlineErrorFilters(),
           },
         },
-        collapse: { field: 'config_id' },
+        collapse: { field: 'monitor.id' },
         sort: [{ [sortFieldMap[sortField]]: sortOrder }],
       },
     },

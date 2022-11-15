@@ -23,6 +23,10 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
 
   const monitorId = useMonitorQueryId();
 
+  if (!monitorId) {
+    return null;
+  }
+
   return (
     <ExploratoryViewEmbeddable
       align="left"

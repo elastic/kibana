@@ -31,7 +31,10 @@ export const MonitorDetailsLink = ({
   const locationId =
     lastSelectedLocationId && monitorHasLocation ? lastSelectedLocationId : firstMonitorLocationId;
 
-  const monitorDetailLinkUrl = useMonitorDetailLocator({ monitorId: monitor.id, locationId });
+  const monitorDetailLinkUrl = useMonitorDetailLocator({
+    monitorId: monitor[ConfigKey.CONFIG_ID],
+    locationId,
+  });
 
   return (
     <>

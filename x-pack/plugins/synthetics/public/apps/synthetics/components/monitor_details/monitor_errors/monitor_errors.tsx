@@ -37,7 +37,7 @@ export const MonitorErrors = () => {
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{OVERVIEW_LABEL}</h3>
             </EuiTitle>
@@ -52,7 +52,7 @@ export const MonitorErrors = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{FAILED_TESTS_LABEL}</h3>
             </EuiTitle>
@@ -62,7 +62,7 @@ export const MonitorErrors = () => {
       </EuiFlexGroup>
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{ERRORS_LABEL}</h3>
             </EuiTitle>
@@ -70,7 +70,7 @@ export const MonitorErrors = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>
                 {FAILED_TESTS_BY_STEPS_LABEL}

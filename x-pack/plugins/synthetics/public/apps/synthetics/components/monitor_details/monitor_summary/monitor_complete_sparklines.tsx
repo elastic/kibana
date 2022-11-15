@@ -24,6 +24,10 @@ export const MonitorCompleteSparklines = (props: Props) => {
 
   const { euiTheme } = useEuiTheme();
 
+  if (!monitorId) {
+    return null;
+  }
+
   return (
     <ExploratoryViewEmbeddable
       reportType="kpi-over-time"

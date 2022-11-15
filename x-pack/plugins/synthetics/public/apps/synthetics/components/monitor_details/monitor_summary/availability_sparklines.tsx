@@ -29,7 +29,7 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
 
   const selectedLocation = useSelectedLocation();
 
-  if (!selectedLocation) {
+  if (!selectedLocation || !monitorId) {
     return null;
   }
 

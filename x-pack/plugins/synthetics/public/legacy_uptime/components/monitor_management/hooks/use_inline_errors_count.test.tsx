@@ -33,7 +33,7 @@ describe('useInlineErrorsCount', function () {
       2,
       {
         body: {
-          aggs: { total: { cardinality: { field: 'config_id' } } },
+          aggs: { total: { cardinality: { field: 'monitor.id' } } },
           query: {
             bool: {
               filter: [
