@@ -28,6 +28,7 @@ import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
 import { SuggestionsSorting } from '../../../common/options_list/types';
+import { OptionsListSortingOptions } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -61,31 +62,14 @@ export const OptionsListPopoverActionBar = ({
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
   const [options, setOptions] = useState<SortItem[]>(() => {
-    const opts = [
-      {
-        label: 'Document count (descending)',
-        'data-test-subj': 'optionsList__sortByDocCount_desc',
-        data: { by: '_count', direction: 'desc' },
-      },
-      {
-        label: 'Document count (ascending)',
-        'data-test-subj': 'optionsList__sortByDocCount_asc',
-        data: { by: '_count', direction: 'asc' },
-      },
-      {
-        label: 'Alphabetical (descending)',
-        'data-test-subj': 'optionsList__sortByAlphabetical_desc',
-        data: { by: '_key', direction: 'desc' },
-      },
-      {
-        label: 'Alphabetical (ascending)',
-        'data-test-subj': 'optionsList__sortByAlphabetical_asc',
-        data: { by: '_key', direction: 'asc' },
-      },
-    ];
-    const selectedOption = opts.find(({ data }) => isEqual(sort, data));
-    (selectedOption as SortItem).checked = 'on';
-    return opts as SortItem[];
+    return Object.values(OptionsListSortingOptions).map((data) => {
+      return {
+        data,
+        checked: isEqual(data, sort) ? 'on' : undefined,
+        'data-test-subj': `optionsList__sortBy${data.by}_${data.direction}`,
+        label: OptionsListStrings.popover.sortBy[data.by][data.direction].getSortByLabel(),
+      };
+    });
   });
 
   const onSelectChange = (updatedOptions: SortItem[]) => {

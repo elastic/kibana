@@ -13,7 +13,6 @@ import { Direction } from '@elastic/eui';
 import { DataControlInput } from '../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
-
 export interface SuggestionsSorting {
   by: '_count' | '_key';
   direction: Direction;
