@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 
 import { sourcererSelectors } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
+import type { TimeRange } from '../../../store/inputs/model';
 import { inputsActions } from '../../../store/inputs';
 import { updateProviders, setFilters } from '../../../../timelines/store/timeline/actions';
 import { sourcererActions } from '../../../store/actions';
@@ -26,7 +27,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
   asEmptyButton: boolean;
   dataProviders: DataProvider[] | null;
   filters?: Filter[] | null;
-  timeRange?: string | null;
+  timeRange?: TimeRange;
   keepDataView?: boolean;
   isDisabled?: boolean;
 }> = ({ asEmptyButton, children, dataProviders, filters, timeRange, keepDataView, ...rest }) => {
@@ -53,11 +54,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
       // Reset the current timeline
       if (timeRange) {
         clearTimeline({
-          timeRange: {
-            kind: 'absolute',
-            from: timeRange,
-            to: new Date().toISOString(),
-          },
+          timeRange,
         });
       } else {
         clearTimeline();

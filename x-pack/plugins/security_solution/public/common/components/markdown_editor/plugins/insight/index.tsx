@@ -6,7 +6,7 @@
  */
 
 import type { Plugin } from 'unified';
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
 import { EuiSpacer, EuiCodeBlock, EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
@@ -16,6 +16,7 @@ import { useInsightQuery } from './use_insight_query';
 import { useInsightDataProviders } from './use_insight_data_providers';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
+import type { AbsoluteTimeRange } from '../../../../store/inputs/model';
 
 interface InsightComponentProps {
   label?: string;
@@ -117,6 +118,13 @@ const InsightComponent = ({ label, description, providers }: InsightComponentPro
   const { totalCount, isQueryLoading, oldestTimestamp, hasError } = useInsightQuery({
     dataProviders,
   });
+  const timerange: AbsoluteTimeRange = useMemo(() => {
+    return {
+      kind: 'absolute',
+      from: oldestTimestamp ?? '',
+      to: new Date().toISOString(),
+    };
+  }, [oldestTimestamp]);
   if (isQueryLoading) {
     return <EuiLoadingSpinner size="l" />;
   } else {
@@ -125,7 +133,7 @@ const InsightComponent = ({ label, description, providers }: InsightComponentPro
         asEmptyButton={false}
         isDisabled={hasError}
         dataProviders={dataProviders}
-        timeRange={oldestTimestamp}
+        timeRange={timerange}
         keepDataView={true}
         data-test-subj="insight-investigate-in-timeline-button"
       >
