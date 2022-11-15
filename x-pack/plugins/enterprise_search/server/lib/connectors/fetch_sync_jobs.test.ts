@@ -43,7 +43,7 @@ describe('fetchSyncJobs lib', () => {
         index: '.elastic-connectors-sync-jobs',
         query: {
           term: {
-            connector_id: 'id',
+            'connector.id': 'id',
           },
         },
         size: 10,
@@ -90,7 +90,7 @@ describe('fetchSyncJobs lib', () => {
         index: '.elastic-connectors-sync-jobs',
         query: {
           term: {
-            connector_id: 'id',
+            'connector.id': 'id',
           },
         },
         size: 10,
@@ -127,7 +127,7 @@ describe('fetchSyncJobs lib', () => {
         index: '.elastic-connectors-sync-jobs',
         query: {
           term: {
-            connector_id: 'id',
+            'connector.id': 'id',
           },
         },
         size: 10,

@@ -18,11 +18,17 @@ import {
   getMlModelTypesForModelConfig,
   parseMlInferenceParametersFromPipeline,
 } from '../../../../../../../common/ml_inference_pipeline';
-import { Status } from '../../../../../../../common/types/api';
+import { Status, HttpError } from '../../../../../../../common/types/api';
 import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
+
+import {
+  GetDocumentsApiLogic,
+  GetDocumentsArgs,
+  GetDocumentsResponse,
+} from '../../../../api/documents/get_document_logic';
 import {
   CachedFetchIndexApiLogic,
   CachedFetchIndexApiLogicValues,
@@ -127,6 +133,8 @@ interface MLInferenceProcessorsActions {
     CreateMlInferencePipelineResponse
   >['apiSuccess'];
   createPipeline: () => void;
+  getDocumentApiError: Actions<GetDocumentsArgs, GetDocumentsResponse>['apiError'];
+  getDocumentApiSuccess: Actions<GetDocumentsArgs, GetDocumentsResponse>['apiSuccess'];
   makeAttachPipelineRequest: Actions<
     AttachMlInferencePipelineApiLogicArgs,
     AttachMlInferencePipelineResponse
@@ -135,6 +143,7 @@ interface MLInferenceProcessorsActions {
     CreateMlInferencePipelineApiLogicArgs,
     CreateMlInferencePipelineResponse
   >['makeRequest'];
+  makeGetDocumentRequest: Actions<GetDocumentsArgs, GetDocumentsResponse>['makeRequest'];
   makeMLModelsRequest: Actions<GetMlModelsArgs, GetMlModelsResponse>['makeRequest'];
   makeMappingRequest: Actions<GetMappingsArgs, GetMappingsResponse>['makeRequest'];
   makeMlInferencePipelinesRequest: Actions<
@@ -204,7 +213,12 @@ export interface MLInferenceProcessorsValues {
   createErrors: string[];
   existingInferencePipelines: MLInferencePipelineOption[];
   formErrors: AddInferencePipelineFormErrors;
+  getDocumentApiErrorMessage: HttpError | undefined;
+  getDocumentApiStatus: Status;
+  getDocumentData: typeof GetDocumentsApiLogic.values.data;
+  getDocumentsErr: string;
   index: CachedFetchIndexApiLogicValues['indexData'];
+  isGetDocumentsLoading: boolean;
   isLoading: boolean;
   isPipelineDataValid: boolean;
   mappingData: typeof MappingsApiLogic.values.data;
@@ -214,6 +228,7 @@ export interface MLInferenceProcessorsValues {
   mlInferencePipelinesData: FetchMlInferencePipelinesResponse | undefined;
   mlModelsData: TrainedModelConfigResponse[] | undefined;
   mlModelsStatus: Status;
+  showGetDocumentErrors: boolean;
   simulateExistingPipelineData: typeof SimulateExistingMlInterfacePipelineApiLogic.values.data;
   simulateExistingPipelineStatus: Status;
   simulatePipelineData: typeof SimulateMlInterfacePipelineApiLogic.values.data;
@@ -278,6 +293,12 @@ export const MLInferenceLogic = kea<
         'apiSuccess as attachApiSuccess',
         'makeRequest as makeAttachPipelineRequest',
       ],
+      GetDocumentsApiLogic,
+      [
+        'apiError as getDocumentApiError',
+        'apiSuccess as getDocumentApiSuccess',
+        'makeRequest as makeGetDocumentRequest',
+      ],
     ],
     values: [
       CachedFetchIndexApiLogic,
@@ -294,6 +315,12 @@ export const MLInferenceLogic = kea<
       ['data as simulatePipelineData', 'status as simulatePipelineStatus'],
       FetchMlInferencePipelineProcessorsApiLogic,
       ['data as mlInferencePipelineProcessors'],
+      GetDocumentsApiLogic,
+      [
+        'data as getDocumentData',
+        'status as getDocumentApiStatus',
+        'error as getDocumentApiErrorMessage',
+      ],
     ],
   },
   events: {},
@@ -375,26 +402,16 @@ export const MLInferenceLogic = kea<
           ...EMPTY_PIPELINE_CONFIGURATION,
         },
         indexName: '',
-        simulateBody: `
-[
-  {
-    "_index": "index",
-    "_id": "id",
-    "_source": {
-      "foo": "bar"
-    }
-  },
-  {
-    "_index": "index",
-    "_id": "id",
-    "_source": {
-      "foo": "baz"
-    }
-  }
+        simulateBody: `[
+
 ]`,
         step: AddInferencePipelineSteps.Configuration,
       },
       {
+        getDocumentApiSuccess: (modal, doc) => ({
+          ...modal,
+          simulateBody: JSON.stringify([doc], undefined, 2),
+        }),
         setAddInferencePipelineStep: (modal, { step }) => ({ ...modal, step }),
         setIndexName: (modal, { indexName }) => ({ ...modal, indexName }),
         setInferencePipelineConfiguration: (modal, { configuration }) => ({
@@ -420,8 +437,8 @@ export const MLInferenceLogic = kea<
       [],
       {
         setSimulatePipelineErrors: (_, { errors }) => errors,
-        simulatePipelineApiError: (_, error) => getErrorsFromHttpResponse(error),
         simulateExistingPipelineApiError: (_, error) => getErrorsFromHttpResponse(error),
+        simulatePipelineApiError: (_, error) => getErrorsFromHttpResponse(error),
       },
     ],
   },
@@ -430,6 +447,19 @@ export const MLInferenceLogic = kea<
       () => [selectors.addInferencePipelineModal],
       (modal: AddInferencePipelineModal) =>
         validateInferencePipelineConfiguration(modal.configuration),
+    ],
+    getDocumentsErr: [
+      () => [selectors.getDocumentApiErrorMessage],
+      (err: MLInferenceProcessorsValues['getDocumentApiErrorMessage']) => {
+        if (!err) return '';
+        return getErrorsFromHttpResponse(err)[0];
+      },
+    ],
+    isGetDocumentsLoading: [
+      () => [selectors.getDocumentApiStatus],
+      (status) => {
+        return status === Status.LOADING;
+      },
     ],
     isLoading: [
       () => [selectors.mlModelsStatus, selectors.mappingStatus],
@@ -440,6 +470,12 @@ export const MLInferenceLogic = kea<
     isPipelineDataValid: [
       () => [selectors.formErrors],
       (errors: AddInferencePipelineFormErrors) => Object.keys(errors).length === 0,
+    ],
+    showGetDocumentErrors: [
+      () => [selectors.getDocumentApiStatus],
+      (status: MLInferenceProcessorsValues['getDocumentApiStatus']) => {
+        return status === Status.ERROR;
+      },
     ],
     mlInferencePipeline: [
       () => [
