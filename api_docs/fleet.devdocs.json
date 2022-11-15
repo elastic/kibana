@@ -8691,6 +8691,76 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.getFileDataIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "getFileDataIndexName",
+        "description": [
+          "\nReturns the index name for File data (chunks) storage for a given integration"
+        ],
+        "signature": [
+          "(integrationName: string) => string"
+        ],
+        "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getFileDataIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "integrationName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.getFileMetadataIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "getFileMetadataIndexName",
+        "description": [
+          "\nReturns the index name for File Metadata storage for a given integration"
+        ],
+        "signature": [
+          "(integrationName: string) => string"
+        ],
+        "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getFileMetadataIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "integrationName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/file_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.isValidNamespace",
         "type": "Function",
         "tags": [],
@@ -15130,7 +15200,7 @@
         "label": "FleetServerAgentComponentStatus",
         "description": [],
         "signature": [
-          "\"degraded\" | \"starting\" | \"configuring\" | \"healthy\" | \"failed\" | \"stopping\" | \"stopped\""
+          "\"failed\" | \"degraded\" | \"starting\" | \"configuring\" | \"healthy\" | \"stopping\" | \"stopped\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
         "deprecated": false,

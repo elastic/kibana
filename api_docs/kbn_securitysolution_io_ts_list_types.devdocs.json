@@ -1242,13 +1242,20 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
-            "id": "def-common.ExceptionListFilter.type",
+            "id": "def-common.ExceptionListFilter.types",
             "type": "CompoundType",
             "tags": [],
-            "label": "type",
+            "label": "types",
             "description": [],
             "signature": [
-              "string | null | undefined"
+              {
+                "pluginId": "@kbn/securitysolution-io-ts-list-types",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+                "section": "def-common.ExceptionListTypeEnum",
+                "text": "ExceptionListTypeEnum"
+              },
+              "[] | null | undefined"
             ],
             "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
             "deprecated": false,

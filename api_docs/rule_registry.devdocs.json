@@ -1602,23 +1602,15 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ", TAlertInstanceContext extends { [x: string]: unknown; }, TServices extends { alertWithLifecycle: ",
+          ", TAlertInstanceState extends { [x: string]: unknown; }, TAlertInstanceContext extends { [x: string]: unknown; }, TActionGroupIds extends string, TServices extends ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
             "docId": "kibRuleRegistryPluginApi",
-            "section": "def-server.LifecycleAlertService",
-            "text": "LifecycleAlertService"
+            "section": "def-server.LifecycleAlertServices",
+            "text": "LifecycleAlertServices"
           },
-          "<Record<string, any>, TAlertInstanceContext, string>; }>(type: ",
-          {
-            "pluginId": "ruleRegistry",
-            "scope": "server",
-            "docId": "kibRuleRegistryPluginApi",
-            "section": "def-server.AlertTypeWithExecutor",
-            "text": "AlertTypeWithExecutor"
-          },
-          "<Record<string, any>, TParams, TAlertInstanceContext, TServices>) => ",
+          "<TAlertInstanceState, TAlertInstanceContext, TActionGroupIds>>(type: ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -1626,7 +1618,15 @@
             "section": "def-server.AlertTypeWithExecutor",
             "text": "AlertTypeWithExecutor"
           },
-          "<Record<string, any>, TParams, TAlertInstanceContext, any>"
+          "<TAlertInstanceState, TParams, TAlertInstanceContext, TServices>) => ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.AlertTypeWithExecutor",
+            "text": "AlertTypeWithExecutor"
+          },
+          "<TAlertInstanceState, TParams, TAlertInstanceContext, any>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
         "deprecated": false,
@@ -3045,7 +3045,7 @@
             "label": "getAlertUuid",
             "description": [],
             "signature": [
-              "(alertInstanceId: string) => string | null"
+              "(alertInstanceId: string) => string"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
             "deprecated": false,

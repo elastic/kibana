@@ -27,61 +27,6 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server",
-            "id": "def-server.ElasticsearchClientsMetrics.protocol",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "protocol",
-            "description": [
-              "The protocol (or protocols) that these Agents are using"
-            ],
-            "signature": [
-              "\"http\" | \"none\" | \"mixed\" | \"https\""
-            ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-metrics-server",
-            "id": "def-server.ElasticsearchClientsMetrics.connectedNodes",
-            "type": "number",
-            "tags": [],
-            "label": "connectedNodes",
-            "description": [
-              "Number of ES nodes that ES-js client is connecting to"
-            ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-metrics-server",
-            "id": "def-server.ElasticsearchClientsMetrics.nodesWithActiveSockets",
-            "type": "number",
-            "tags": [],
-            "label": "nodesWithActiveSockets",
-            "description": [
-              "Number of nodes with active connections"
-            ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-metrics-server",
-            "id": "def-server.ElasticsearchClientsMetrics.nodesWithIdleSockets",
-            "type": "number",
-            "tags": [],
-            "label": "nodesWithIdleSockets",
-            "description": [
-              "Number of nodes with available connections (alive but idle).\nNote that a node can have both active and idle connections at the same time"
-            ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-metrics-server",
             "id": "def-server.ElasticsearchClientsMetrics.totalActiveSockets",
             "type": "number",
             "tags": [],
@@ -114,58 +59,6 @@
             "label": "totalQueuedRequests",
             "description": [
               "Total number of queued requests (all nodes, all connections)"
-            ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-metrics-server",
-            "id": "def-server.ElasticsearchClientsMetrics.mostActiveNodeSockets",
-            "type": "number",
-            "tags": [],
-            "label": "mostActiveNodeSockets",
-            "description": [
-              "Number of active connections of the node with most active connections"
-            ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-metrics-server",
-            "id": "def-server.ElasticsearchClientsMetrics.averageActiveSocketsPerNode",
-            "type": "number",
-            "tags": [],
-            "label": "averageActiveSocketsPerNode",
-            "description": [
-              "Average of active sockets per node (all connections)"
-            ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-metrics-server",
-            "id": "def-server.ElasticsearchClientsMetrics.mostIdleNodeSockets",
-            "type": "number",
-            "tags": [],
-            "label": "mostIdleNodeSockets",
-            "description": [
-              "Number of idle connections of the node with most idle connections"
-            ],
-            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-metrics-server",
-            "id": "def-server.ElasticsearchClientsMetrics.averageIdleSocketsPerNode",
-            "type": "number",
-            "tags": [],
-            "label": "averageIdleSocketsPerNode",
-            "description": [
-              "Average of available (idle) sockets per node (all connections)"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
             "deprecated": false,

@@ -197,6 +197,27 @@
           },
           {
             "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.ParsedSearchQuery.tagReferencesToExclude",
+            "type": "Array",
+            "tags": [],
+            "label": "tagReferencesToExclude",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsFindOptionsReference",
+                "text": "SavedObjectsFindOptionsReference"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
             "id": "def-public.ParsedSearchQuery.valid",
             "type": "boolean",
             "tags": [],
@@ -390,6 +411,32 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.SavedObjectsTaggingApiUi.getTagList",
+            "type": "Function",
+            "tags": [],
+            "label": "getTagList",
+            "description": [
+              "\nReturn a list of available tags"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "common",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-common.Tag",
+                "text": "Tag"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -1132,6 +1179,54 @@
               {
                 "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-public.TagListComponentProps.onClick.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "tag",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "savedObjectsTaggingOss",
+                    "scope": "common",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
+                    "section": "def-common.TagWithOptionalId",
+                    "text": "TagWithOptionalId"
+                  }
+                ],
+                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.TagListComponentProps.tagRender",
+            "type": "Function",
+            "tags": [],
+            "label": "tagRender",
+            "description": [
+              "\nHandler to render the tag"
+            ],
+            "signature": [
+              "((tag: ",
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "common",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-common.TagWithOptionalId",
+                "text": "TagWithOptionalId"
+              },
+              ") => JSX.Element) | undefined"
+            ],
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.TagListComponentProps.tagRender.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "tag",
