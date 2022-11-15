@@ -32,7 +32,7 @@ export interface RuleStatusPanelProps {
   isEditable: boolean;
   requestRefresh: () => void;
   healthColor: string;
-  statusMessage?: string;
+  statusMessage?: string | null;
 }
 
 type ComponentOpts = Pick<
