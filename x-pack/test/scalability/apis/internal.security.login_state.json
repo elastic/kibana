@@ -1,5 +1,5 @@
 {
-  "journeyName": "internal/security/login_state",
+  "journeyName": "GET internal/security/login_state",
   "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
     "warmup": [
@@ -27,7 +27,7 @@
     {
       "requests": [
         {
-          "date": "2022-09-29T09:31:32.543Z",
+          "date": "2022-11-14T09:31:49.963Z",
           "http": {
             "method": "GET",
             "path": "/internal/security/login_state",

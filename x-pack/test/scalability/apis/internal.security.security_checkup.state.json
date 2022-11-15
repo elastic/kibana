@@ -1,5 +1,5 @@
 {
-  "journeyName": "GET internal/security/me",
+  "journeyName": "GET internal/security/security_checkup/state",
   "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
     "warmup": [
@@ -30,9 +30,8 @@
           "date": "2022-11-14T09:31:49.963Z",
           "http": {
             "method": "GET",
-            "path": "/internal/security/me",
+            "path": "/internal/security/security_checkup/state",
             "headers": {
-              "Cookie": "sid=Fe26.2**b4f51707bfe081641d5680f3564a6294e67f8cdf9b17bb543a22603c3e5438c5*ZqvJow9BriNpSrz9HE30xQ*En2Xa60I0w2mq8nkcifbSzcdsUokfWbx1A_TMkzOsFTDOTA5s0RKHsVyMRWvy_tjdWjCP3SAb2zAtLZ7HPJcNpbU90kv4xIjK_m8uc6HEBFkhQ6ijm1-j-uA_wOQdVBC4A7amUguve7lM3pFC7dYLaQ2FrrWH_Bb_H8CjOLa--TaONtvX51IGKXZT4zMOiZNXslnkjeVFZx9jRYVWsfWDPl5RfqJqj0wpDCW7v96ky2hq0C9BAJTnfmoPJDNtVKP**48f28d549b53ae7b586bca0706b669c20d6bcb35a942607e17b847ed4b5963ce*sqUogNXrlfFFWAG_y_U8gRbHQZXOn1KUH2QyBra9RHA",
               "Kbn-Version": "8.6.0-SNAPSHOT",
               "Accept-Encoding": "gzip, deflate, br",
               "Content-Type": "application/json"
