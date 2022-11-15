@@ -46,7 +46,7 @@ describe('<Actions />', () => {
     );
   });
 
-  it('disables deleting for project monitors', () => {
+  it('allows deleting for project monitors', () => {
     render(
       <Actions
         configId="test-id"
@@ -66,6 +66,6 @@ describe('<Actions />', () => {
       />
     );
 
-    expect(screen.getByLabelText('Delete monitor')).toBeDisabled();
+    expect(screen.getByLabelText('Delete monitor')).not.toBeDisabled();
   });
 });
