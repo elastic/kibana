@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './src/technical_field_names';
-export * from './src/alerts_as_data_rbac';
-export * from './src/alerts_as_data_severity';
-export * from './src/alerts_as_data_status';
-export * from './src/routes/stack_rule_paths';
+export const ruleDetailsRoute = '/rule/:ruleId' as const;
+export const triggersActionsRoute = '/app/management/insightsAndAlerting/triggersActions' as const;
+
+export const getRuleDetailsRoute = (ruleId: string) => ruleDetailsRoute.replace(':ruleId', ruleId);
