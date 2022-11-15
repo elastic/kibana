@@ -217,7 +217,8 @@ describe('suggestion helpers', () => {
       datasourceStates.mock.state,
       '1',
       'test',
-      dataViews.indexPatterns
+      dataViews.indexPatterns,
+      undefined
     );
   });
 
@@ -258,13 +259,15 @@ describe('suggestion helpers', () => {
       multiDatasourceStates.mock.state,
       '1',
       'test',
-      dataViews.indexPatterns
+      dataViews.indexPatterns,
+      undefined
     );
     expect(multiDatasourceMap.mock2.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
       multiDatasourceStates.mock2.state,
       '1',
       'test',
-      dataViews.indexPatterns
+      dataViews.indexPatterns,
+      undefined
     );
     expect(
       multiDatasourceMap.mock3.getDatasourceSuggestionsForVisualizeField
