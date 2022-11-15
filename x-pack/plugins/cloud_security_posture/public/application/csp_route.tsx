@@ -15,7 +15,7 @@ import type { CspPageNavigationItem } from '../common/navigation/types';
 type CspRouteProps = Omit<RouteProps, 'render'> & CspPageNavigationItem;
 
 // Security SpyRoute can be automatically rendered for pages with static paths, Security will manage everything using the `links` object.
-// Pages with dynamic paths are not in the Security `links` object, they must render SpyRoute with the parameters on its own, if needed.
+// Pages with dynamic paths are not in the Security `links` object, they must render SpyRoute with the parameters values, if needed.
 const STATIC_PATH_PAGE_IDS = Object.fromEntries(
   Object.values(cloudPosturePages).map(({ id }) => [id, true])
 );
