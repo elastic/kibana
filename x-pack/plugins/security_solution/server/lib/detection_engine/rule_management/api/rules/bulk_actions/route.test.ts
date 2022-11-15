@@ -364,7 +364,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "action",Invalid value "undefined" supplied to "duplicate",Invalid value "undefined" supplied to "edit"'
+        'Invalid value "undefined" supplied to "action",Invalid value "undefined" supplied to "edit"'
       );
     });
 
@@ -376,7 +376,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown" supplied to "action",Invalid value "undefined" supplied to "duplicate",Invalid value "undefined" supplied to "edit"'
+        'Invalid value "unknown" supplied to "action",Invalid value "undefined" supplied to "edit"'
       );
     });
 
