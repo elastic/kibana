@@ -14,7 +14,7 @@ import { useTheme } from '../../../hooks/use_theme';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 const EmptyBannerContainer = euiStyled.div`
-  margin: ${({ theme }) => theme.eui.euiSizeXS};
+  margin: ${({ theme }) => theme.eui.euiSizeS};
   /* Add some extra margin so it displays to the right of the controls. */
   left: calc(
     ${({ theme }) => theme.eui.euiSizeXXL} +
