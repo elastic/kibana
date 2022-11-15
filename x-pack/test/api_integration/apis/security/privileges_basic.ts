@@ -101,7 +101,6 @@ export default function ({ getService }: FtrProviderContext) {
               'actions_log_management_all',
               'actions_log_management_read',
               'all',
-              'file_operations_all',
               'host_isolation_all',
               'minimal_all',
               'minimal_read',
