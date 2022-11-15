@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { FunctionComponent } from 'react';
 import numeral from '@elastic/numeral';
 import useObservable from 'react-use/lib/useObservable';
@@ -31,7 +31,6 @@ interface Props {
 
 export const FileCard: FunctionComponent<Props> = ({ file, onClickDelete }) => {
   const { kind, state, client } = useFilePickerContext();
-  const [isHovering, setIsHovering] = useState(false);
   const { euiTheme } = useEuiTheme();
   const displayImage = isImage({ type: file.mimeType });
   const isSelected$ = useMemo(() => state.watchFileSelected$(file.id), [file.id, state]);
@@ -40,13 +39,7 @@ export const FileCard: FunctionComponent<Props> = ({ file, onClickDelete }) => {
   const imageHeight = `calc(${euiTheme.size.xxxl} * 2)`;
 
   return (
-    <div
-      css={css`
-        position: relative;
-      `}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-    >
+    <div css={{ position: 'relative', '&:hover > button': { display: 'block' } }}>
       <EuiCard
         title=""
         css={css`
@@ -120,19 +113,18 @@ export const FileCard: FunctionComponent<Props> = ({ file, onClickDelete }) => {
         }
         hasBorder
       />
-      {isHovering && (
-        <EuiButtonIcon
-          iconType="trash"
-          aria-label="Delete"
-          color="danger"
-          css={css`
-            position: absolute;
-            right: 5px;
-            top: 5px;
-          `}
-          onClick={() => onClickDelete({ id: file.id, name: file.name })}
-        />
-      )}
+      <EuiButtonIcon
+        iconType="trash"
+        aria-label="Delete"
+        color="danger"
+        css={{
+          position: 'absolute',
+          right: `${euiTheme.size.s}`,
+          top: `${euiTheme.size.s}`,
+          display: 'none',
+        }}
+        onClick={() => onClickDelete({ id: file.id, name: file.name })}
+      />
     </div>
   );
 };

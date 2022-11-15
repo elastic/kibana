@@ -27,7 +27,6 @@ const defaultProps: FilePickerProps = {
   kind,
   onDone: action('done!'),
   onClose: action('close!'),
-  onDeleteFile: action('deleted!'),
   multiple: true,
 };
 

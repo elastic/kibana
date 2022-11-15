@@ -17,11 +17,7 @@ import { i18nTexts } from '../i18n_texts';
 import { useFilePickerContext } from '../context';
 import { FileCard, FileToBeDestroyed } from './file_card';
 
-interface FileGridProps {
-  onDeleteFile: (id: string) => void;
-}
-
-export const FileGrid: FunctionComponent<FileGridProps> = ({ onDeleteFile }) => {
+export const FileGrid: FunctionComponent = () => {
   const { state } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const files = useObservable(state.files$, []);
@@ -32,7 +28,8 @@ export const FileGrid: FunctionComponent<FileGridProps> = ({ onDeleteFile }) => 
     return <EuiEmptyPrompt title={<h3>{i18nTexts.emptyFileGridPrompt}</h3>} titleSize="s" />;
   }
 
-  const destroyFile = (id: string) => onDeleteFile(id);
+  // eslint-disable-next-line no-console
+  const destroyFile = (id: string) => console.log(id);
   const closeDestroyModal = () => setFileToBeDestroyed(undefined);
   const showDestroyModal = (file: { id: string; name: string }) => setFileToBeDestroyed(file);
 
