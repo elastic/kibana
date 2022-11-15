@@ -38,8 +38,8 @@ export const deleteExceptionListWithoutRuleReference = () => {
 };
 
 export const deleteExceptionListWithRuleReference = () => {
-  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
-  cy.get(EXCEPTIONS_TABLE_DELETE_BTN).first().click();
+  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).last().click();
+  cy.get(EXCEPTIONS_TABLE_DELETE_BTN).last().click();
   cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
   cy.get(EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN).first().click();
   cy.get(EXCEPTIONS_TABLE_MODAL).should('not.exist');
