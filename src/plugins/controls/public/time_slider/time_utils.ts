@@ -25,7 +25,7 @@ function getScaledDateFormat(interval: number): string {
     return 'YYYY';
   }
 
-  if (interval >= moment.duration(90, 'd').asMilliseconds()) {
+  if (interval >= moment.duration(30, 'd').asMilliseconds()) {
     return 'MMM YYYY';
   }
 
@@ -92,7 +92,28 @@ export function getStepSize(ticks: EuiRangeTick[]) {
   }
 
   const tickRange = ticks[1].value - ticks[0].value;
-  return calcAutoIntervalNear(5, tickRange).asMilliseconds();
+
+  if (tickRange >= moment.duration(2, 'y').asMilliseconds()) {
+    return moment.duration(1, 'y').asMilliseconds();
+  }
+
+  if (tickRange >= moment.duration(2, 'd').asMilliseconds()) {
+    return moment.duration(1, 'd').asMilliseconds();
+  }
+
+  if (tickRange >= moment.duration(2, 'h').asMilliseconds()) {
+    return moment.duration(1, 'h').asMilliseconds();
+  }
+
+  if (tickRange >= moment.duration(2, 'm').asMilliseconds()) {
+    return moment.duration(1, 'm').asMilliseconds();
+  }
+
+  if (tickRange >= moment.duration(2, 's').asMilliseconds()) {
+    return moment.duration(1, 's').asMilliseconds();
+  }
+
+  return 1;
 }
 
 export function roundDownToNextStepSizeFactor(value: number, stepSize: number) {
