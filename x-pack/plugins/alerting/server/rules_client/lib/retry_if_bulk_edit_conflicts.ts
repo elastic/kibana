@@ -80,7 +80,10 @@ export const retryIfBulkEditConflicts = async (
     const results = [...accResults, ...resultSavedObjects.filter((res) => res.error === undefined)];
     const apiKeysToInvalidate = [...accApiKeysToInvalidate, ...localApiKeysToInvalidate];
     const errors = [...accErrors, ...localErrors];
-    const skipped = [...accSkipped, ...localSkipped];
+    // Create array of unique skipped rules by id
+    const skipped = [
+      ...new Map([...accSkipped, ...localSkipped].map((item) => [item.id, item])).values(),
+    ];
 
     if (conflictErrorMap.size === 0) {
       return {
@@ -134,7 +137,7 @@ export const retryIfBulkEditConflicts = async (
             apiKeysToInvalidate,
             results,
             errors,
-            accSkipped
+            skipped
           ),
         {
           concurrency: 1,

@@ -117,7 +117,15 @@ describe('ruleParamsModifier', () => {
         ],
       ])(
         'should add index patterns to rule, case:"%s"',
-        (caseName, { existingIndexPatterns, indexPatternsToAdd, resultingIndexPatterns, isParamsUpdateSkipped }) => {
+        (
+          caseName,
+          {
+            existingIndexPatterns,
+            indexPatternsToAdd,
+            resultingIndexPatterns,
+            isParamsUpdateSkipped,
+          }
+        ) => {
           const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
             { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
             [
@@ -173,7 +181,15 @@ describe('ruleParamsModifier', () => {
         ],
       ])(
         'should delete index patterns from rule, case:"%s"',
-        (caseName, { existingIndexPatterns, indexPatternsToDelete, resultingIndexPatterns, isParamsUpdateSkipped }) => {
+        (
+          caseName,
+          {
+            existingIndexPatterns,
+            indexPatternsToDelete,
+            resultingIndexPatterns,
+            isParamsUpdateSkipped,
+          }
+        ) => {
           const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
             { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
             [
@@ -220,7 +236,15 @@ describe('ruleParamsModifier', () => {
         ],
       ])(
         'should overwrite index patterns in rule, case:"%s"',
-        (caseName, { existingIndexPatterns, indexPatternsToOverwrite, resultingIndexPatterns, isParamsUpdateSkipped }) => {
+        (
+          caseName,
+          {
+            existingIndexPatterns,
+            indexPatternsToOverwrite,
+            resultingIndexPatterns,
+            isParamsUpdateSkipped,
+          }
+        ) => {
           const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
             { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
             [
@@ -240,7 +264,8 @@ describe('ruleParamsModifier', () => {
       const testDataViewId = 'test-data-view-id';
 
       const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
-        { dataViewId: testDataViewId } as RuleAlertType['params'], [
+        { dataViewId: testDataViewId } as RuleAlertType['params'],
+        [
           {
             type: BulkActionEditType.delete_index_patterns,
             value: ['index-2-*'],

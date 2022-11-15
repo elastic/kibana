@@ -60,6 +60,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
 };
 
+const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');
+
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
@@ -93,7 +95,7 @@ describe('bulkEdit()', () => {
     ...existingRule,
     attributes: {
       ...existingRule.attributes,
-      apiKey: Buffer.from('123:abc').toString('base64'),
+      apiKey: MOCK_API_KEY,
     },
   };
 
@@ -129,7 +131,14 @@ describe('bulkEdit()', () => {
       total: 1,
     });
 
-    mockCreatePointInTimeFinderAsInternalUser();
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [
+        {
+          ...existingDecryptedRule,
+          attributes: { ...existingDecryptedRule.attributes, enabled: true },
+        },
+      ],
+    });
 
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [existingRule],
@@ -150,7 +159,19 @@ describe('bulkEdit()', () => {
       producer: 'alerts',
     });
   });
+
   describe('tags operations', () => {
+    beforeEach(() => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, tags: ['foo'] },
+          },
+        ],
+      });
+    });
+
     test('should add new tag', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
@@ -229,7 +250,6 @@ describe('bulkEdit()', () => {
           },
         ],
       });
-
       const result = await rulesClient.bulkEdit({
         filter: '',
         operations: [
@@ -714,6 +734,16 @@ describe('bulkEdit()', () => {
   });
 
   describe('apiKey operations', () => {
+    beforeEach(() => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, tags: ['foo'] },
+          },
+        ],
+      });
+    });
     test('should bulk update API key', async () => {
       // Does not generate API key for disabled rules
       await rulesClient.bulkEdit({
@@ -964,6 +994,18 @@ describe('bulkEdit()', () => {
   });
 
   describe('apiKeys', () => {
+    beforeEach(() => {
+      createAPIKeyMock.mockResolvedValueOnce({ apiKeysEnabled: true, result: { api_key: '111' } });
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, enabled: true },
+          },
+        ],
+      });
+    });
+
     test('should call createPointInTimeFinderDecryptedAsInternalUser that returns api Keys', async () => {
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
@@ -1021,16 +1063,6 @@ describe('bulkEdit()', () => {
     });
 
     test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if bulkCreate failed', async () => {
-      createAPIKeyMock.mockReturnValue({ apiKeysEnabled: true, result: { api_key: '111' } });
-      mockCreatePointInTimeFinderAsInternalUser({
-        saved_objects: [
-          {
-            ...existingDecryptedRule,
-            attributes: { ...existingDecryptedRule.attributes, enabled: true },
-          },
-        ],
-      });
-
       unsecuredSavedObjectsClient.bulkCreate.mockImplementation(() => {
         throw new Error('Fail');
       });
@@ -1057,16 +1089,6 @@ describe('bulkEdit()', () => {
     });
 
     test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if SO update failed', async () => {
-      createAPIKeyMock.mockReturnValue({ apiKeysEnabled: true, result: { api_key: '111' } });
-      mockCreatePointInTimeFinderAsInternalUser({
-        saved_objects: [
-          {
-            ...existingDecryptedRule,
-            attributes: { ...existingDecryptedRule.attributes, enabled: true },
-          },
-        ],
-      });
-
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
@@ -1128,15 +1150,6 @@ describe('bulkEdit()', () => {
     });
 
     test('should return error in rule errors if key is not generated', async () => {
-      mockCreatePointInTimeFinderAsInternalUser({
-        saved_objects: [
-          {
-            ...existingDecryptedRule,
-            attributes: { ...existingDecryptedRule.attributes, enabled: true },
-          },
-        ],
-      });
-
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
         operations: [
@@ -1152,6 +1165,12 @@ describe('bulkEdit()', () => {
   });
 
   describe('params validation', () => {
+    beforeEach(() => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [existingDecryptedRule],
+      });
+    });
+
     test('should return error for rule that failed params validation', async () => {
       ruleTypeRegistry.get.mockReturnValue({
         id: '123',
@@ -1218,7 +1237,7 @@ describe('bulkEdit()', () => {
           {
             field: 'tags',
             operation: 'add',
-            value: ['test-1'],
+            value: ['test-1', 'another-tag'],
           },
         ],
       });

@@ -20,7 +20,7 @@ import {
   getRuleMock,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
-import { BulkEditSkipReason, performBulkActionRoute } from './route';
+import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getPerformBulkActionSchemaMock,
@@ -241,6 +241,7 @@ describe('Perform bulk action route', () => {
     it('returns partial failure error if update of few rules fail', async () => {
       clients.rulesClient.bulkEdit.mockResolvedValue({
         rules: [mockRule, mockRule],
+        skipped: [],
         errors: [
           {
             message: 'mocked validation message',
@@ -366,15 +367,11 @@ describe('Perform bulk action route', () => {
     it('returns partial failure error with skipped rules if some but not all errors are expected reasons to skip rule', async () => {
       clients.rulesClient.bulkEdit.mockResolvedValue({
         rules: [mockRule, mockRule],
+        skipped: [
+          { id: 'skipped-rule-id-1', name: 'Skipped Rule 1', skip_reason: 'RULE_NOT_MODIFIED' },
+          { id: 'skipped-rule-id-2', name: 'Skipped Rule 2', skip_reason: 'RULE_NOT_MODIFIED' },
+        ],
         errors: [
-          {
-            message: BulkEditSkipReason.DataViewExistsAndNotOverriden,
-            rule: { id: 'failed-rule-id-1', name: 'Detect Root/Admin Users' },
-          },
-          {
-            message: BulkEditSkipReason.DataViewExistsAndNotOverriden,
-            rule: { id: 'failed-rule-id-2', name: 'Detect Root/Admin Users' },
-          },
           {
             message: 'test failure',
             rule: { id: 'failed-rule-id-3', name: 'Detect Root/Admin Users' },
@@ -416,19 +413,14 @@ describe('Perform bulk action route', () => {
       });
     });
 
-    it('returns success with skipped rules if all errors thrown are expected reasons to skip rule', async () => {
+    it('returns success with skipped rules if some rules are skipped, but no errors are reported', async () => {
       clients.rulesClient.bulkEdit.mockResolvedValue({
         rules: [mockRule, mockRule],
-        errors: [
-          {
-            message: BulkEditSkipReason.DataViewExistsAndNotOverriden,
-            rule: { id: 'skipped-rule-id-1', name: 'Detect Root/Admin Users' },
-          },
-          {
-            message: BulkEditSkipReason.DataViewExistsAndNotOverriden,
-            rule: { id: 'skipped-rule-id-2', name: 'Detect Root/Admin Users' },
-          },
+        skipped: [
+          { id: 'skipped-rule-id-1', name: 'Skipped Rule 1', skip_reason: 'RULE_NOT_MODIFIED' },
+          { id: 'skipped-rule-id-2', name: 'Skipped Rule 2', skip_reason: 'RULE_NOT_MODIFIED' },
         ],
+        errors: [],
         total: 4,
       });
 
@@ -450,6 +442,51 @@ describe('Perform bulk action route', () => {
         },
         rules_count: 4,
         success: true,
+      });
+    });
+
+    // TODO: Update this behavior to return 200 with updated rules, skipped rules and errors
+    it('returns 500 with skipped rules if some rules are skipped, but some errors are reported', async () => {
+      clients.rulesClient.bulkEdit.mockResolvedValue({
+        rules: [mockRule, mockRule],
+        skipped: [
+          { id: 'skipped-rule-id-1', name: 'Skipped Rule 1', skip_reason: 'RULE_NOT_MODIFIED' },
+          { id: 'skipped-rule-id-2', name: 'Skipped Rule 2', skip_reason: 'RULE_NOT_MODIFIED' },
+        ],
+        errors: [
+          {
+            message: 'test failure',
+            rule: { id: 'failed-rule-id-3', name: 'Detect Root/Admin Users' },
+          },
+        ],
+        total: 5,
+      });
+
+      const response = await server.inject(
+        getBulkActionEditRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          summary: {
+            failed: 1,
+            skipped: 2,
+            succeeded: 2,
+            total: 5,
+          },
+          results: someBulkActionResults(),
+          errors: [
+            {
+              message: 'test failure',
+              rules: [{ id: 'failed-rule-id-3', name: 'Detect Root/Admin Users' }],
+              status_code: 500,
+            },
+          ],
+        },
+        message: 'Bulk edit partially failed',
+        status_code: 500,
       });
     });
   });

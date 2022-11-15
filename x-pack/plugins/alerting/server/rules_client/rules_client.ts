@@ -2420,7 +2420,6 @@ export class RulesClient {
         }
       );
     }
-
     const { result, apiKeysToInvalidate } = await this.saveBulkUpdatedRules(rules, apiKeysMap);
 
     return {
@@ -2605,6 +2604,10 @@ export class RulesClient {
           // Silently skip adding snooze or snooze schedules on security
           // rules until we implement snoozing of their rules
           if (rule.attributes.consumer === AlertConsumers.SIEM) {
+            // While the rule is technically not updated, we are still marking
+            // the rule as updated in case of snoozing, until support
+            // for snoozing is added.
+            isAttributesUpdateSkipped = false;
             break;
           }
           if (operation.operation === 'set') {
@@ -2633,10 +2636,12 @@ export class RulesClient {
               ...getBulkUnsnoozeAttributes(attributes, idsToDelete),
             };
           }
+          isAttributesUpdateSkipped = false;
           break;
         }
         case 'apiKey': {
           hasUpdateApiKeyOperation = true;
+          isAttributesUpdateSkipped = false;
           break;
         }
         default: {
@@ -3154,7 +3159,6 @@ export class RulesClient {
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-
     // collect generated API keys
     if (apiKeyAttributes.apiKey) {
       apiKeysMap.set(rule.id, {
