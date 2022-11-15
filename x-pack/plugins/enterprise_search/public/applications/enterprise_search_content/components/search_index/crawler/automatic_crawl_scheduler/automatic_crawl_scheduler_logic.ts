@@ -116,22 +116,10 @@ export const AutomaticCrawlSchedulerLogic = kea<
         await http.delete(
           `/internal/enterprise_search/indices/${indexName}/crawler/crawl_schedule`
         );
-        // actions.clearCrawlSchedule();
-        // flashSuccessToast(
-        //   i18n.translate(
-        //     'xpack.enterpriseSearch.crawler.automaticCrawlScheduler.disableCrawlSchedule.successMessage',
-        //     {
-        //       defaultMessage: 'Automatic crawling has been disabled.',
-        //     }
-        //   )
-        // );
       } catch (e) {
         // A 404 is expected and means the user has no crawl schedule to delete
-        if (e.response?.status === 404) {
-          // actions.clearCrawlSchedule();
-        } else {
+        if (e.response?.status !== 404) {
           flashAPIErrors(e);
-          // Keep the popover open
         }
       } finally {
         actions.onDoneSubmitting();
@@ -149,9 +137,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
       } catch (e) {
         // A 404 is expected and means the user does not have crawl schedule
         // for this index. We continue to use the defaults.
-        if (e.response?.status === 404) {
-          actions.clearCrawlSchedule();
-        } else {
+        if (e.response?.status !== 404) {
           flashAPIErrors(e);
         }
       }
@@ -187,14 +173,6 @@ export const AutomaticCrawlSchedulerLogic = kea<
           }
         );
         actions.setCrawlSchedule(crawlScheduleServerToClient(crawlSchedule));
-        // flashSuccessToast(
-        //   i18n.translate(
-        //     'xpack.enterpriseSearch.crawler.automaticCrawlScheduler.submitCrawlSchedule.successMessage',
-        //     {
-        //       defaultMessage: 'Your automatic crawling schedule has been updated.',
-        //     }
-        //   )
-        // );
       } catch (e) {
         flashAPIErrors(e);
       } finally {
