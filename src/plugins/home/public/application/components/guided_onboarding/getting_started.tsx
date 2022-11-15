@@ -163,7 +163,12 @@ export const GettingStarted = () => {
               })}
             </EuiText>
             <EuiSpacer />
-            <EuiButton iconSide="right" onClick={fetchGuidesState} iconType="refresh">
+            <EuiButton
+              iconSide="right"
+              onClick={fetchGuidesState}
+              iconType="refresh"
+              color="danger"
+            >
               {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionRefreshButton', {
                 defaultMessage: 'Refresh',
               })}

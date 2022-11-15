@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { ReactWrapper, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject, registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { chromeServiceMock, applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
@@ -41,6 +41,7 @@ jest.mock('../../kibana_services', () => ({
 
 describe('getting started', () => {
   let storageItemValue: string | null;
+  let testBed: TestBed;
   beforeAll(() => {
     storageItemValue = localStorage.getItem(KEY_ENABLE_WELCOME);
     localStorage.removeItem(KEY_ENABLE_WELCOME);
@@ -66,38 +67,37 @@ describe('getting started', () => {
       );
     });
 
-    let component: ReactWrapper;
     await act(async () => {
-      component = mountWithIntl(<GettingStarted />);
+      testBed = registerTestBed(GettingStarted)();
     });
-    component!.update();
-    expect(findTestSubject(component!, 'onboarding--loadingIndicator').exists()).toBe(true);
+    testBed!.component.update();
+    expect(findTestSubject(testBed!.component, 'onboarding--loadingIndicator').exists()).toBe(true);
   });
 
   test('displays error section', async () => {
     mockHttp.get.mockRejectedValueOnce(new Error('request failed'));
 
-    let component: ReactWrapper;
     await act(async () => {
-      component = mountWithIntl(<GettingStarted />);
+      testBed = registerTestBed(GettingStarted)();
     });
-    component!.update();
-    expect(findTestSubject(component!, 'onboarding--errorSection').exists()).toBe(true);
+    testBed!.component.update();
+    expect(findTestSubject(testBed!.component, 'onboarding--errorSection').exists()).toBe(true);
   });
 
   test('skip button should disable home welcome screen', async () => {
     mockHttp.get.mockResolvedValueOnce({ state: [] });
-    let component: ReactWrapper;
+
     await act(async () => {
-      component = mountWithIntl(<GettingStarted />);
+      testBed = registerTestBed(GettingStarted)();
     });
-    const skipButton = findTestSubject(component!, 'onboarding--skipGuideLink');
+    testBed!.component.update();
+
+    const skipButton = findTestSubject(testBed!.component, 'onboarding--skipGuideLink');
 
     await act(async () => {
       await skipButton.simulate('click');
     });
-
-    component!.update();
+    testBed!.component.update();
 
     expect(localStorage.getItem(KEY_ENABLE_WELCOME)).toBe('false');
   });
