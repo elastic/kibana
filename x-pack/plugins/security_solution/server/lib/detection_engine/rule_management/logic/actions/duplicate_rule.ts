@@ -22,11 +22,17 @@ const DUPLICATE_TITLE = i18n.translate(
   }
 );
 
-export const duplicateRule = async (
-  rule: SanitizedRule<RuleParams>,
-  shouldDuplicateExceptions: boolean,
-  exceptionsClient: ExceptionListClient | undefined
-): Promise<InternalRuleCreate> => {
+interface DuplicateRuleParams {
+  rule: SanitizedRule<RuleParams>;
+  shouldDuplicateExceptions: boolean;
+  exceptionsClient: ExceptionListClient | undefined;
+}
+
+export const duplicateRule = async ({
+  rule,
+  shouldDuplicateExceptions,
+  exceptionsClient,
+}: DuplicateRuleParams): Promise<InternalRuleCreate> => {
   // Generate a new static ruleId
   const ruleId = uuid.v4();
 
@@ -36,12 +42,13 @@ export const duplicateRule = async (
   const relatedIntegrations = isPrebuilt ? [] : rule.params.relatedIntegrations;
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
   const setup = isPrebuilt ? '' : rule.params.setup;
-  const exceptions = await duplicateExceptions(
-    rule.params.ruleId,
-    rule.params.exceptionsList,
-    shouldDuplicateExceptions,
-    exceptionsClient
-  );
+  const exceptions = shouldDuplicateExceptions
+    ? await duplicateExceptions({
+        ruleId: rule.params.ruleId,
+        exceptionLists: rule.params.exceptionsList,
+        exceptionsClient,
+      })
+    : [];
 
   return {
     name: `${rule.name} [${DUPLICATE_TITLE}]`,

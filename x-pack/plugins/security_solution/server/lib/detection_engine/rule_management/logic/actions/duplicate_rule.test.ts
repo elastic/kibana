@@ -92,7 +92,11 @@ describe('duplicateRule', () => {
 
   it('returns an object with fields copied from a given rule', async () => {
     const rule = createTestRule();
-    const result = await duplicateRule(rule, false, undefined);
+    const result = await duplicateRule({
+      rule,
+      shouldDuplicateExceptions: false,
+      exceptionsClient: undefined,
+    });
 
     expect(result).toEqual({
       name: expect.anything(), // covered in a separate test
@@ -114,7 +118,11 @@ describe('duplicateRule', () => {
   it('appends [Duplicate] to the name', async () => {
     const rule = createTestRule();
     rule.name = 'PowerShell Keylogging Script';
-    const result = await duplicateRule(rule, false, undefined);
+    const result = await duplicateRule({
+      rule,
+      shouldDuplicateExceptions: false,
+      exceptionsClient: undefined,
+    });
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -125,7 +133,11 @@ describe('duplicateRule', () => {
 
   it('generates a new ruleId', async () => {
     const rule = createTestRule();
-    const result = await duplicateRule(rule, false, undefined);
+    const result = await duplicateRule({
+      rule,
+      shouldDuplicateExceptions: false,
+      exceptionsClient: undefined,
+    });
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -139,7 +151,11 @@ describe('duplicateRule', () => {
   it('makes sure the duplicated rule is disabled', async () => {
     const rule = createTestRule();
     rule.enabled = true;
-    const result = await duplicateRule(rule, false, undefined);
+    const result = await duplicateRule({
+      rule,
+      shouldDuplicateExceptions: false,
+      exceptionsClient: undefined,
+    });
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -157,7 +173,11 @@ describe('duplicateRule', () => {
 
     it('transforms it to a custom (mutable) rule', async () => {
       const rule = createPrebuiltRule();
-      const result = await duplicateRule(rule, false, undefined);
+      const result = await duplicateRule({
+        rule,
+        shouldDuplicateExceptions: false,
+        exceptionsClient: undefined,
+      });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -178,7 +198,11 @@ describe('duplicateRule', () => {
         },
       ];
 
-      const result = await duplicateRule(rule, false, undefined);
+      const result = await duplicateRule({
+        rule,
+        shouldDuplicateExceptions: false,
+        exceptionsClient: undefined,
+      });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -199,7 +223,11 @@ describe('duplicateRule', () => {
         },
       ];
 
-      const result = await duplicateRule(rule, false, undefined);
+      const result = await duplicateRule({
+        rule,
+        shouldDuplicateExceptions: false,
+        exceptionsClient: undefined,
+      });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -213,7 +241,11 @@ describe('duplicateRule', () => {
     it('resets setup guide to an empty string', async () => {
       const rule = createPrebuiltRule();
       rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
-      const result = await duplicateRule(rule, false, undefined);
+      const result = await duplicateRule({
+        rule,
+        shouldDuplicateExceptions: false,
+        exceptionsClient: undefined,
+      });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -234,7 +266,11 @@ describe('duplicateRule', () => {
 
     it('keeps it custom', async () => {
       const rule = createCustomRule();
-      const result = await duplicateRule(rule, false, undefined);
+      const result = await duplicateRule({
+        rule,
+        shouldDuplicateExceptions: false,
+        exceptionsClient: undefined,
+      });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -255,7 +291,11 @@ describe('duplicateRule', () => {
         },
       ];
 
-      const result = await duplicateRule(rule, false, undefined);
+      const result = await duplicateRule({
+        rule,
+        shouldDuplicateExceptions: false,
+        exceptionsClient: undefined,
+      });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -276,7 +316,11 @@ describe('duplicateRule', () => {
         },
       ];
 
-      const result = await duplicateRule(rule, false, undefined);
+      const result = await duplicateRule({
+        rule,
+        shouldDuplicateExceptions: false,
+        exceptionsClient: undefined,
+      });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -290,7 +334,11 @@ describe('duplicateRule', () => {
     it('copies setup guide as is', async () => {
       const rule = createCustomRule();
       rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
-      const result = await duplicateRule(rule, false, undefined);
+      const result = await duplicateRule({
+        rule,
+        shouldDuplicateExceptions: false,
+        exceptionsClient: undefined,
+      });
 
       expect(result).toEqual(
         expect.objectContaining({

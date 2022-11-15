@@ -6,39 +6,33 @@
  */
 
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { RuleParams } from '../../../rule_schema';
 
-export const duplicateExceptions = async (
-  ruleId: RuleParams['ruleId'],
-  exceptionLists: RuleParams['exceptionsList'],
-  shouldDuplicate: boolean,
-  exceptionsClient: ExceptionListClient | undefined
-): Promise<RuleParams['exceptionsList']> => {
+interface DuplicateExceptionsParams {
+  ruleId: RuleParams['ruleId'];
+  exceptionLists: RuleParams['exceptionsList'];
+  exceptionsClient: ExceptionListClient | undefined;
+}
+
+export const duplicateExceptions = async ({
+  ruleId,
+  exceptionLists,
+  exceptionsClient,
+}: DuplicateExceptionsParams): Promise<RuleParams['exceptionsList']> => {
   if (exceptionLists == null) {
     return [];
   }
 
   // Sort the shared lists and the rule_default lists.
   // Only a single rule_default list should exist per rule.
-  const [[ruleDefaultList], sharedLists] = exceptionLists.reduce<[ListArray, ListArray]>(
-    (acc, list) => {
-      const [def, shared] = acc;
-      if (list.type === ExceptionListTypeEnum.RULE_DEFAULT) {
-        return [[list], shared];
-      } else {
-        return [def, [...shared, list]];
-      }
-    },
-    [[], []]
+  const ruleDefaultList = exceptionLists.find(
+    (list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT
   );
-  // If user does not want exceptions duplicated, return empty array.
-  // This will remove the shared list references between rule<-->exceptions.
-  if (!shouldDuplicate) {
-    return [];
-  }
+  const sharedLists = exceptionLists.filter(
+    (list) => list.type !== ExceptionListTypeEnum.RULE_DEFAULT
+  );
 
   // For rule_default list (exceptions that live only on a single rule), we need
   // to create a new rule_default list to assign to duplicated rule
