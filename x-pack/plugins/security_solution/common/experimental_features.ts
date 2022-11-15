@@ -71,12 +71,6 @@ export const allowedExperimentalValues = Object.freeze({
    * if endpointRbacEnabled is enabled, it will take precedence.
    */
   endpointRbacV1Enabled: true,
-
-  /**
-   * Enables the Guided Onboarding tour in security
-   */
-  guidedOnboarding: false,
-
   /**
    * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
    */
