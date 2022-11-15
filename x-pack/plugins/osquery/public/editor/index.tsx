@@ -50,7 +50,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 
   const resize = useCallback((editorInstance) => {
-    document.addEventListener('mouseup', () => editorInstance.resize());
+    document.addEventListener('mouseup', () => editorInstance.resize(), { once: true });
   }, []);
 
   return (
