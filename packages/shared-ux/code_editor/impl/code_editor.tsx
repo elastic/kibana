@@ -21,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -421,9 +422,12 @@ export const CodeEditor: React.FC<Props> = ({
   const { CopyButton } = useCopy({ isCopyable, value });
 
   const controlStyles = useMemo(() => {
-    const copyableStyles = { defaultStyles,  codeEditorControlsStyles(euiTheme) }
+    const copyableStyles = [
+      defaultStyles,
+      codeEditorControlsStyles(euiTheme as unknown as UseEuiTheme<{}>),
+    ];
     return allowFullScreen || isCopyable ? copyableStyles : defaultStyles;
-  }, [allowFullScreen, isCopyable, defaultStyles]);
+  }, [allowFullScreen, isCopyable, defaultStyles, euiTheme]);
 
   return (
     <div css={styles} onKeyDown={onKeyDown} style={{ backgroundColor: 'yellowgreen' }}>
@@ -501,7 +505,10 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
 
   const FullScreenButton: React.FC = () => {
     const { euiTheme } = useEuiTheme();
-  const styles = [ codeEditorStyles, codeEditorFullScreenStyles(euiTheme) ];
+    const styles = [
+      codeEditorStyles,
+      codeEditorFullScreenStyles(euiTheme as unknown as UseEuiTheme),
+    ];
 
     if (!allowFullScreen) return null;
     return (
@@ -526,10 +533,11 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
   const FullScreenDisplay = useMemo(
     () =>
       ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
-        const {euiTheme} = useEuiTheme();
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const { euiTheme } = useEuiTheme();
 
         if (!isFullScreen) return <>{children}</>;
-        const styles = codeEditorFullScreenStyles(euiTheme);
+        const styles = codeEditorFullScreenStyles(euiTheme as unknown as UseEuiTheme);
 
         return (
           <EuiOverlayMask>
