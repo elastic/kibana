@@ -138,6 +138,7 @@ import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 import { getActiveScheduledSnoozes } from '../lib/is_rule_snoozed';
 import { isSnoozeExpired } from '../lib';
+import { isDetectionEngineAADRuleType } from '../saved_objects/migrations/utils';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -359,6 +360,11 @@ export interface FindResult<Params extends RuleTypeParams> {
   data: Array<SanitizedRule<Params>>;
 }
 
+interface SavedObjectOptions {
+  id?: string;
+  migrationVersion?: Record<string, string>;
+}
+
 export interface CreateOptions<Params extends RuleTypeParams> {
   data: Omit<
     Rule<Params>,
@@ -378,10 +384,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'lastRun'
     | 'nextRun'
   > & { actions: NormalizedAlertAction[] };
-  options?: {
-    id?: string;
-    migrationVersion?: Record<string, string>;
-  };
+  options?: SavedObjectOptions;
 }
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -538,6 +541,112 @@ export class RulesClient {
     this.eventLogger = eventLogger;
   }
 
+  public async clone<Params extends RuleTypeParams = never>(
+    id: string,
+    { newId }: { newId?: string }
+  ): Promise<SanitizedRule<Params>> {
+    let ruleSavedObject: SavedObject<RawRule>;
+
+    try {
+      ruleSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        'alert',
+        id,
+        {
+          namespace: this.namespace,
+        }
+      );
+    } catch (e) {
+      // We'll skip invalidating the API key since we failed to load the decrypted saved object
+      this.logger.error(
+        `update(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
+      );
+      // Still attempt to load the object using SOC
+      ruleSavedObject = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+    }
+
+    /*
+     * As the time of the creation of this PR, security solution already have a clone/duplicate API
+     * with some specific business logic so to avoid weird bugs, I prefer to exclude them from this
+     * functionality until we resolve our difference
+     */
+    if (
+      isDetectionEngineAADRuleType(ruleSavedObject) ||
+      ruleSavedObject.attributes.consumer === AlertConsumers.SIEM
+    ) {
+      throw Boom.badRequest(
+        'The clone functionality is not enable for rule who belongs to security solution'
+      );
+    }
+    const ruleName =
+      ruleSavedObject.attributes.name.indexOf('[Clone]') > 0
+        ? ruleSavedObject.attributes.name
+        : `${ruleSavedObject.attributes.name} [Clone]`;
+    const ruleId = newId ?? SavedObjectsUtils.generateId();
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: ruleSavedObject.attributes.alertTypeId,
+        consumer: ruleSavedObject.attributes.consumer,
+        operation: WriteOperations.Create,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.CREATE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleSavedObject.attributes.alertTypeId);
+    // Throws an error if alert type isn't registered
+    const ruleType = this.ruleTypeRegistry.get(ruleSavedObject.attributes.alertTypeId);
+    const username = await this.getUserName();
+    const createTime = Date.now();
+    const lastRunTimestamp = new Date();
+    const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = ruleSavedObject.attributes.enabled
+        ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, ruleName))
+        : null;
+    } catch (error) {
+      throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
+    }
+    const rawRule: RawRule = {
+      ...ruleSavedObject.attributes,
+      name: ruleName,
+      ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
+      legacyId,
+      createdBy: username,
+      updatedBy: username,
+      createdAt: new Date(createTime).toISOString(),
+      updatedAt: new Date(createTime).toISOString(),
+      snoozeSchedule: [],
+      muteAll: false,
+      mutedInstanceIds: [],
+      executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
+      monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+    };
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.CREATE,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    return await this.createRuleSavedObject({
+      intervalInMs: parseDuration(rawRule.schedule.interval),
+      rawRule,
+      references: ruleSavedObject.references,
+      ruleId,
+    });
+  }
+
   public async create<Params extends RuleTypeParams = never>({
     data,
     options,
@@ -625,11 +734,33 @@ export class RulesClient {
       rawRule.mapped_params = mappedParams;
     }
 
+    return await this.createRuleSavedObject({
+      intervalInMs,
+      rawRule,
+      references,
+      ruleId: id,
+      options,
+    });
+  }
+
+  private async createRuleSavedObject<Params extends RuleTypeParams = never>({
+    intervalInMs,
+    rawRule,
+    references,
+    ruleId,
+    options,
+  }: {
+    intervalInMs: number;
+    rawRule: RawRule;
+    references: SavedObjectReference[];
+    ruleId: string;
+    options?: SavedObjectOptions;
+  }) {
     this.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.CREATE,
         outcome: 'unknown',
-        savedObject: { type: 'alert', id },
+        savedObject: { type: 'alert', id: ruleId },
       })
     );
 
@@ -641,7 +772,7 @@ export class RulesClient {
         {
           ...options,
           references,
-          id,
+          id: ruleId,
         }
       );
     } catch (e) {
@@ -654,14 +785,14 @@ export class RulesClient {
 
       throw e;
     }
-    if (data.enabled) {
+    if (rawRule.enabled) {
       let scheduledTask;
       try {
         scheduledTask = await this.scheduleTask({
           id: createdAlert.id,
-          consumer: data.consumer,
+          consumer: rawRule.consumer,
           ruleTypeId: rawRule.alertTypeId,
-          schedule: data.schedule,
+          schedule: rawRule.schedule,
           throwOnConflict: true,
         });
       } catch (e) {
@@ -685,7 +816,7 @@ export class RulesClient {
     // Log warning if schedule interval is less than the minimum but we're not enforcing it
     if (intervalInMs < this.minimumScheduleIntervalInMs && !this.minimumScheduleInterval.enforce) {
       this.logger.warn(
-        `Rule schedule interval (${data.schedule.interval}) for "${createdAlert.attributes.alertTypeId}" rule type with ID "${createdAlert.id}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+        `Rule schedule interval (${rawRule.schedule.interval}) for "${createdAlert.attributes.alertTypeId}" rule type with ID "${createdAlert.id}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
       );
     }
 
