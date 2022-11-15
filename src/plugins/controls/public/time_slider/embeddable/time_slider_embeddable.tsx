@@ -34,6 +34,7 @@ import {
   roundDownToNextStepSizeFactor,
   roundUpToNextStepSizeFactor,
 } from '../time_utils';
+import { getRoundedTimeRangeBounds } from '../time_slider_selectors';
 
 export class TimeSliderControlEmbeddable extends Embeddable<
   TimeSliderControlEmbeddableInput,
@@ -225,7 +226,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const range = getState().componentState.range;
     const ticks = getState().componentState.ticks;
     const tickRange = ticks[1].value - ticks[0].value;
-    const timeRangeBounds = getState().componentState.timeRangeBounds;
+    const timeRangeBounds = getRoundedTimeRangeBounds(getState());
 
     if (value === undefined || value[TO_INDEX] >= timeRangeBounds[TO_INDEX]) {
       const from = timeRangeBounds[FROM_INDEX];
@@ -254,7 +255,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const range = getState().componentState.range;
     const ticks = getState().componentState.ticks;
     const tickRange = ticks[1].value - ticks[0].value;
-    const timeRangeBounds = getState().componentState.timeRangeBounds;
+    const timeRangeBounds = getRoundedTimeRangeBounds(getState());
 
     if (value === undefined || value[FROM_INDEX] <= timeRangeBounds[FROM_INDEX]) {
       const to = timeRangeBounds[TO_INDEX];
