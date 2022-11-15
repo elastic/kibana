@@ -173,6 +173,7 @@ export const ConfigurePipeline: React.FC = () => {
                     existingPipeline: e.target.value === 'true',
                   })
                 }
+                value={configuration.existingPipeline?.toString() ?? ''}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -320,7 +321,7 @@ export const ConfigurePipeline: React.FC = () => {
               label={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.destinationField.label',
                 {
-                  defaultMessage: 'Destination field (optional)',
+                  defaultMessage: 'Target field (optional)',
                 }
               )}
               helpText={
