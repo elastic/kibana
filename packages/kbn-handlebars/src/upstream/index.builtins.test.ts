@@ -273,6 +273,20 @@ describe('builtin helpers', () => {
         .toCompileTo('0. goodbye!  0 0 0 1 After 0 1. Goodbye!  1 0 1 1 After 1 cruel world!');
     });
 
+    // TODO: This test has been added to the `4.x` branch of the handlebars.js repo along with a code-fix,
+    // but a new version of the handlebars package containing this fix has not yet been published to npm.
+    //
+    // Before enabling this code, a new version of handlebars needs to be released and the corrosponding
+    // updates needs to be applied to this implementation.
+    //
+    // See: https://github.com/handlebars-lang/handlebars.js/commit/30dbf0478109ded8f12bb29832135d480c17e367
+    it.skip('each with block params and strict compilation', () => {
+      expectTemplate('{{#each goodbyes as |value index|}}{{index}}. {{value.text}}!{{/each}}')
+        .withCompileOptions({ strict: true })
+        .withInput({ goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }] })
+        .toCompileTo('0. goodbye!1. Goodbye!');
+    });
+
     it('each object with @index', () => {
       expectTemplate('{{#each goodbyes}}{{@index}}. {{text}}! {{/each}}cruel {{world}}!')
         .withInput({
