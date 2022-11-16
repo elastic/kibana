@@ -10,7 +10,7 @@ import { RiskScoreEntity, RiskScoreFields } from '../search_strategy';
 import type { Pipeline, Processor } from '../types/risk_scores';
 
 /**
- * 8.3 and after 8.5, all the transforms, scripts,
+ * Aside from 8.4, all the transforms, scripts,
  * and ingest pipelines (and dashboard saved objects) are created with spaceId
  * so they won't affect each other across different spaces.
  */
