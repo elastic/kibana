@@ -546,6 +546,88 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.BackOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "BackOptions",
+        "description": [],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.pageId",
+            "type": "string",
+            "tags": [],
+            "label": "pageId",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.BackOptions.onNavigate",
+            "type": "Function",
+            "tags": [],
+            "label": "onNavigate",
+            "description": [],
+            "signature": [
+              "(path: string) => void"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-exception-list-components",
+                "id": "def-common.BackOptions.onNavigate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
         "id": "def-common.ExceptionItemCardCommentsProps",
         "type": "Interface",
         "tags": [],
@@ -1343,10 +1425,10 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Rule.exception_list",
+            "id": "def-common.Rule.exceptions_list",
             "type": "Array",
             "tags": [],
-            "label": "exception_list",
+            "label": "exceptions_list",
             "description": [],
             "signature": [
               "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[] | undefined"

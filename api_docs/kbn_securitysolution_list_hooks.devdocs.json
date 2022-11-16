@@ -387,7 +387,7 @@
           "\nHook for fetching ExceptionLists\n"
         ],
         "signature": [
-          "({ errorMessage, http, initialPagination, filterOptions, namespaceTypes, notifications, hideLists, }: ",
+          "({ errorMessage, http, initialPagination, filterOptions, namespaceTypes, notifications, hideLists, initialSort, }: ",
           {
             "pluginId": "@kbn/securitysolution-io-ts-list-types",
             "scope": "common",
@@ -413,7 +413,7 @@
             "id": "def-common.useExceptionLists.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  errorMessage,\n  http,\n  initialPagination = DEFAULT_PAGINATION,\n  filterOptions = {},\n  namespaceTypes,\n  notifications,\n  hideLists = [],\n}",
+            "label": "{\n  errorMessage,\n  http,\n  initialPagination = DEFAULT_PAGINATION,\n  filterOptions = {},\n  namespaceTypes,\n  notifications,\n  hideLists = [],\n  initialSort = DEFAULT_SORT,\n}",
             "description": [],
             "signature": [
               {
@@ -1353,7 +1353,23 @@
             "section": "def-common.Func",
             "text": "Func"
           },
-          " | null]"
+          " | null, sort: ",
+          {
+            "pluginId": "@kbn/securitysolution-io-ts-list-types",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+            "section": "def-common.Sort",
+            "text": "Sort"
+          },
+          ", setSort: React.Dispatch<React.SetStateAction<",
+          {
+            "pluginId": "@kbn/securitysolution-io-ts-list-types",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+            "section": "def-common.Sort",
+            "text": "Sort"
+          },
+          ">>]"
         ],
         "path": "packages/kbn-securitysolution-list-hooks/src/use_exception_lists/index.ts",
         "deprecated": false,

@@ -141,10 +141,10 @@
             "pluginId": "files",
             "scope": "public",
             "docId": "kibFilesPluginApi",
-            "section": "def-public.Props",
-            "text": "Props"
+            "section": "def-public.UploadFileProps",
+            "text": "UploadFileProps"
           },
-          "<string>) => JSX.Element"
+          ") => JSX.Element"
         ],
         "path": "src/plugins/files/public/components/upload_file/index.tsx",
         "deprecated": false,
@@ -153,7 +153,7 @@
           {
             "parentPluginId": "files",
             "id": "def-public.UploadFile.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "props",
             "description": [],
@@ -162,10 +162,9 @@
                 "pluginId": "files",
                 "scope": "public",
                 "docId": "kibFilesPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              },
-              "<string>"
+                "section": "def-public.UploadFileProps",
+                "text": "UploadFileProps"
+              }
             ],
             "path": "src/plugins/files/public/components/upload_file/index.tsx",
             "deprecated": false,
@@ -911,289 +910,6 @@
         "type": "Interface",
         "tags": [],
         "label": "Props",
-        "description": [
-          "\nUploadFile component props"
-        ],
-        "signature": [
-          {
-            "pluginId": "files",
-            "scope": "public",
-            "docId": "kibFilesPluginApi",
-            "section": "def-public.Props",
-            "text": "Props"
-          },
-          "<Kind>"
-        ],
-        "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.kind",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "kind",
-            "description": [
-              "\nA file kind that should be registered during plugin startup. See {@link FileServiceStart}."
-            ],
-            "signature": [
-              "Kind"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.allowClear",
-            "type": "CompoundType",
-            "tags": [
-              "note"
-            ],
-            "label": "allowClear",
-            "description": [
-              "\nAllow users to clear a file after uploading.\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.immediate",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "immediate",
-            "description": [
-              "\nStart uploading the file as soon as it is provided\nby the user."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.meta",
-            "type": "Object",
-            "tags": [],
-            "label": "meta",
-            "description": [
-              "\nMetadata that you want to associate with any uploaded files"
-            ],
-            "signature": [
-              "Record<string, unknown> | undefined"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.fullWidth",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "fullWidth",
-            "description": [
-              "\nWhether to display the file picker with width 100%;"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.allowRepeatedUploads",
-            "type": "CompoundType",
-            "tags": [
-              "default"
-            ],
-            "label": "allowRepeatedUploads",
-            "description": [
-              "\nWhether this component should display a \"done\" state after processing an\nupload or return to the initial state to allow for another upload.\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.initialPromptText",
-            "type": "string",
-            "tags": [],
-            "label": "initialPromptText",
-            "description": [
-              "\nThe initial text prompt"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.onDone",
-            "type": "Function",
-            "tags": [],
-            "label": "onDone",
-            "description": [
-              "\nCalled when the an upload process fully completes"
-            ],
-            "signature": [
-              "(files: UploadedFile[]) => void"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "files",
-                "id": "def-public.Props.onDone.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "files",
-                "description": [],
-                "signature": [
-                  "UploadedFile[]"
-                ],
-                "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.onError",
-            "type": "Function",
-            "tags": [],
-            "label": "onError",
-            "description": [
-              "\nCalled when an error occurs during upload"
-            ],
-            "signature": [
-              "((e: Error) => void) | undefined"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "files",
-                "id": "def-public.Props.onError.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "e",
-                "description": [],
-                "signature": [
-                  "Error"
-                ],
-                "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.onUploadStart",
-            "type": "Function",
-            "tags": [],
-            "label": "onUploadStart",
-            "description": [
-              "\nWill be called whenever an upload starts"
-            ],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.onUploadEnd",
-            "type": "Function",
-            "tags": [],
-            "label": "onUploadEnd",
-            "description": [
-              "\nWill be called when attempt ends, in error otherwise"
-            ],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.compressed",
-            "type": "CompoundType",
-            "tags": [
-              "default",
-              "note"
-            ],
-            "label": "compressed",
-            "description": [
-              "\nWhether to display the component in it's compact form.\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.multiple",
-            "type": "CompoundType",
-            "tags": [
-              "default"
-            ],
-            "label": "multiple",
-            "description": [
-              "\nAllow upload more than one file at a time\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/files/public/components/upload_file/upload_file.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "files",
-        "id": "def-public.Props",
-        "type": "Interface",
-        "tags": [],
-        "label": "Props",
         "description": [],
         "signature": [
           {
@@ -1253,7 +969,15 @@
               "\nWill be called after a user has a selected a set of files"
             ],
             "signature": [
-              "(fileIds: string[]) => void"
+              "(files: ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<unknown>[]) => void"
             ],
             "path": "src/plugins/files/public/components/file_picker/file_picker.tsx",
             "deprecated": false,
@@ -1264,10 +988,17 @@
                 "id": "def-public.Props.onDone.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "fileIds",
+                "label": "files",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  {
+                    "pluginId": "files",
+                    "scope": "common",
+                    "docId": "kibFilesPluginApi",
+                    "section": "def-common.FileJSON",
+                    "text": "FileJSON"
+                  },
+                  "<unknown>[]"
                 ],
                 "path": "src/plugins/files/public/components/file_picker/file_picker.tsx",
                 "deprecated": false,
@@ -1284,12 +1015,12 @@
             "tags": [],
             "label": "onUpload",
             "description": [
-              "\nWhen a user has succesfully uploaded some files this callback will be called"
+              "\nWhen a user has successfully uploaded some files this callback will be called"
             ],
             "signature": [
               "((done: ",
               "DoneNotification",
-              "[]) => void) | undefined"
+              "<unknown>[]) => void) | undefined"
             ],
             "path": "src/plugins/files/public/components/file_picker/file_picker.tsx",
             "deprecated": false,
@@ -1304,7 +1035,7 @@
                 "description": [],
                 "signature": [
                   "DoneNotification",
-                  "[]"
+                  "<unknown>[]"
                 ],
                 "path": "src/plugins/files/public/components/file_picker/file_picker.tsx",
                 "deprecated": false,
@@ -1534,6 +1265,28 @@
           "<unknown>[]; total: number; }>; }"
         ],
         "path": "src/plugins/files/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.UploadFileProps",
+        "type": "Type",
+        "tags": [],
+        "label": "UploadFileProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "files",
+            "scope": "public",
+            "docId": "kibFilesPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          "<string> & { lazyLoadFallback?: React.ReactNode; }"
+        ],
+        "path": "src/plugins/files/public/components/upload_file/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
