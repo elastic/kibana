@@ -57,7 +57,7 @@ describe('SearchAndFilterBar', () => {
       packageVerification: true,
       // @ts-expect-error
       showDevtoolsRequest: false,
-      showRequestDiagnostics: false,
+      diagnosticFileUploadEnabled: false,
     });
   });
   it('should show no Actions button when no agent is selected', async () => {
