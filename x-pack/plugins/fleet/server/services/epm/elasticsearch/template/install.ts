@@ -354,6 +354,13 @@ export async function ensureDefaultComponentTemplates(
   );
 }
 
+/*
+ * Given a list of integration names, if the integrations support file upload
+ * then ensure that the alias has a matching write index, as we use "plain" indices
+ * not data streams.
+ * e.g .fleet-file-data-agent must have .fleet-file-data-agent-00001 as the write index
+ * before files can be uploaded.
+ */
 export async function ensureFileUploadWriteIndices(opts: {
   esClient: ElasticsearchClient;
   logger: Logger;
