@@ -6,10 +6,12 @@
  */
 import React from 'react';
 import {
+  EuiBottomBar,
   EuiButtonIcon,
   EuiSpacer,
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
+  EuiText,
   EuiTitle,
   EuiToolTip,
   PropsOf,
@@ -25,6 +27,8 @@ import {
   FINDINGS_TABLE_CELL_ADD_FILTER,
   FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
 } from '../test_subjects';
+import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-plugin/public/common/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
 
@@ -266,4 +270,21 @@ const FilterableCell: React.FC<{
       />
     </div>
   </div>
+);
+
+export const LimitedResultsBar = () => (
+  <>
+    <EuiSpacer size="xxl" />
+    <EuiBottomBar data-test-subj="test-bottom-bar">
+      <EuiText textAlign="center">
+        <FormattedMessage
+          id="xpack.csp.findings..bottomBarLabel"
+          defaultMessage="These are the first {maxItems} findings matching your search, refine your search to see others."
+          values={{
+            maxItems: MAX_FINDINGS_TO_LOAD,
+          }}
+        />
+      </EuiText>
+    </EuiBottomBar>
+  </>
 );
