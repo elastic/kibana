@@ -85,6 +85,13 @@ export default ({ getService }: FtrProviderContext) => {
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
         });
 
+        it('Invalid input should not break the page', async () => {
+          await observability.alerts.common.submitQuery('""""');
+          await testSubjects.existOrFail('errorToastMessage');
+          // Page should not go blank with invalid input
+          await testSubjects.existOrFail('alertsPageWithData');
+        });
+
         it('Applies filters correctly', async () => {
           await observability.alerts.common.submitQuery('kibana.alert.status: recovered');
           await retry.try(async () => {
