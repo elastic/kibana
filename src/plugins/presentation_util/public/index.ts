@@ -18,7 +18,6 @@ export type {
   PresentationDashboardsService,
   PresentationLabsService,
 } from './services';
-export { getStubPluginServices } from './services';
 
 export type {
   KibanaPluginServiceFactory,

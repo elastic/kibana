@@ -8,7 +8,7 @@
 
 import { PresentationUtilPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../create';
-import { PresentationDashboardsService } from '../dashboards';
+import type { PresentationDashboardsService } from './types';
 
 export type DashboardsServiceFactory = KibanaPluginServiceFactory<
   PresentationDashboardsService,
@@ -18,7 +18,6 @@ export type DashboardsServiceFactory = KibanaPluginServiceFactory<
 export interface PartialDashboardAttributes {
   title: string;
 }
-
 export const dashboardsServiceFactory: DashboardsServiceFactory = ({ coreStart }) => {
   const findDashboards = async (query: string = '', fields: string[] = []) => {
     const { find } = coreStart.savedObjects.client;

@@ -9,7 +9,7 @@
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { PluginServiceFactory } from '../create';
-import { PresentationDataViewsService } from '../data_views';
+import { PresentationDataViewsService } from './types';
 
 export type DataViewsServiceFactory = PluginServiceFactory<PresentationDataViewsService>;
 

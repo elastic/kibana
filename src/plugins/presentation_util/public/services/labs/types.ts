@@ -17,7 +17,7 @@ import {
   environmentNames,
   isProjectEnabledByStatus,
   SolutionName,
-} from '../../common';
+} from '../../../common';
 
 export interface PresentationLabsService {
   isProjectEnabled: (id: ProjectID) => boolean;

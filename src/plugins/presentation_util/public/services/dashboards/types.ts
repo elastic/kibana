@@ -7,7 +7,7 @@
  */
 
 import { SimpleSavedObject } from '@kbn/core/public';
-import { PartialDashboardAttributes } from './kibana/dashboards';
+import { PartialDashboardAttributes } from './dashboards_service';
 
 export interface PresentationDashboardsService {
   findDashboards: (

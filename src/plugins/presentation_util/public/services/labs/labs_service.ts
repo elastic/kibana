@@ -24,7 +24,7 @@ import {
   setStorageStatus,
   setUISettingsStatus,
   applyProjectStatus,
-} from '../labs';
+} from './types';
 
 export type LabsServiceFactory = KibanaPluginServiceFactory<
   PresentationLabsService,

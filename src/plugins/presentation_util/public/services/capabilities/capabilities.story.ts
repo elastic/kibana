@@ -7,8 +7,8 @@
  */
 
 import { PluginServiceFactory } from '../create';
-import { StorybookParams } from '.';
-import { PresentationCapabilitiesService } from '../capabilities';
+import { StorybookParams } from '../plugin_services.story';
+import { PresentationCapabilitiesService } from './types';
 
 type CapabilitiesServiceFactory = PluginServiceFactory<
   PresentationCapabilitiesService,
