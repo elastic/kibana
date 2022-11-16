@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { TimelineId } from '../../../../../../common/types/timeline';
@@ -33,29 +33,29 @@ export const useInsightQuery = ({ dataProviders }: UseInsightQuery): UseInsightQ
     SourcererScopeName.timeline
   );
   const [hasError, setHasError] = useState(false);
-  const [combinedQueries, setCombinedQueries] = useState<{
-    filterQuery: string | undefined;
-    kqlError: Error | undefined;
-  } | null>(null);
-  useEffect(() => {
+  const combinedQueries = useMemo(() => {
     try {
-      const parsedCombinedQueries = combineQueries({
-        config: esQueryConfig,
-        dataProviders,
-        indexPattern,
-        browserFields,
-        filters: [],
-        kqlQuery: {
-          query: '',
-          language: 'kuery',
-        },
-        kqlMode: 'filter',
-      });
-      setCombinedQueries(parsedCombinedQueries);
+      if (hasError === false) {
+        const parsedCombinedQueries = combineQueries({
+          config: esQueryConfig,
+          dataProviders,
+          indexPattern,
+          browserFields,
+          filters: [],
+          kqlQuery: {
+            query: '',
+            language: 'kuery',
+          },
+          kqlMode: 'filter',
+        });
+        return parsedCombinedQueries;
+      }
     } catch (err) {
       setHasError(true);
+      return null;
     }
-  }, [browserFields, dataProviders, indexPattern, esQueryConfig]);
+  }, [browserFields, dataProviders, esQueryConfig, hasError, indexPattern]);
+
   const [isQueryLoading, { events, totalCount }] = useTimelineEvents({
     dataViewId,
     fields: ['*'],
