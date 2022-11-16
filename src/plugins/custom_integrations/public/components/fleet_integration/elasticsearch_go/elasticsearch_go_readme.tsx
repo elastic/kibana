@@ -140,7 +140,7 @@ export const ElasticsearchGoClientReadme = () => {
                 </EuiText>
 
                 <EuiSpacer size="s" />
-                
+
                 <EuiCodeBlock language="shell" isCopyable>
                   {`$ git clone --branch main https://github.com/elastic/go-elasticsearch.git $GOPATH/src/github.com/elastic/go-elasticsearch`}
                 </EuiCodeBlock>
