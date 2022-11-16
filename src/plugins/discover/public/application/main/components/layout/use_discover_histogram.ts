@@ -13,7 +13,10 @@ import {
   triggerVisualizeActions,
 } from '@kbn/unified-field-list-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
+import {
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramHitsContext,
+} from '@kbn/unified-histogram-plugin/public';
 import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { getUiActions } from '../../../../kibana_services';
@@ -158,25 +161,23 @@ export const useDiscoverHistogram = ({
    * Total hits
    */
 
-  const sendTotalHitsError = useMemo(
-    () => sendErrorTo(data, savedSearchData$.totalHits$),
-    [data, savedSearchData$.totalHits$]
-  );
+  const [localHitsContext, setLocalHitsContext] = useState<UnifiedHistogramHitsContext>();
 
   const onTotalHitsChange = useCallback(
     (status: UnifiedHistogramFetchStatus, result?: number | Error) => {
       if (result instanceof Error) {
-        sendTotalHitsError(result);
+        sendErrorTo(data, savedSearchData$.totalHits$);
         return;
       }
 
       const { fetchStatus, recordRawType } = savedSearchData$.totalHits$.getValue();
 
-      // If we have a partial result already, we don't
-      // want to update the total hits back to loading
+      // If we have a partial result already, we don't want to update the total hits back to loading
       if (fetchStatus === FetchStatus.PARTIAL && status === UnifiedHistogramFetchStatus.loading) {
         return;
       }
+
+      setLocalHitsContext({ status, total: result });
 
       savedSearchData$.totalHits$.next({
         fetchStatus: status.toString() as FetchStatus,
@@ -184,9 +185,12 @@ export const useDiscoverHistogram = ({
         recordRawType,
       });
     },
-    [savedSearchData$.totalHits$, sendTotalHitsError]
+    [data, savedSearchData$.totalHits$]
   );
 
+  // We only rely on the totalHits$ observable if we don't have a local hits context yet,
+  // since we only want to show the partial results on the first load, or there will be
+  // a flickering effect as the loading spinner is quickly shown and hidden again on fetches
   const { fetchStatus: hitsFetchStatus, result: hitsTotal } = useDataState(
     savedSearchData$.totalHits$
   );
@@ -195,11 +199,11 @@ export const useDiscoverHistogram = ({
     () =>
       isPlainRecord
         ? undefined
-        : {
+        : localHitsContext ?? {
             status: hitsFetchStatus.toString() as UnifiedHistogramFetchStatus,
             total: hitsTotal,
           },
-    [hitsFetchStatus, hitsTotal, isPlainRecord]
+    [hitsFetchStatus, hitsTotal, isPlainRecord, localHitsContext]
   );
 
   /**
