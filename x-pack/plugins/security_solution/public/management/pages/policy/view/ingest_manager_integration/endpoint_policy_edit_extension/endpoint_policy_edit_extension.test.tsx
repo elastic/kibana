@@ -65,8 +65,12 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
 
   it('should NOT show artifact cards if no endpoint management authz', async () => {
     useEndpointPrivilegesMock.mockReturnValue({
-      ...getEndpointPrivilegesInitialStateMock(),
-      canAccessEndpointManagement: false,
+      ...getEndpointPrivilegesInitialStateMock({
+        canReadTrustedApplications: false,
+        canReadEventFilters: false,
+        canReadBlocklist: false,
+        canReadHostIsolationExceptions: false,
+      }),
     });
     const renderResult = render();
 
@@ -76,4 +80,28 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
       });
     });
   });
+
+  it.each([
+    ['trustedApps', 'trusted_apps'],
+    ['eventFilters', 'event_filters'],
+    ['hostIsolationExceptions', 'host_isolation_exceptions'],
+    ['blocklists', 'blocklist'],
+  ])(
+    'should link to the %s list page if no Authz for policy management',
+    async (artifactTestIdPrefix, pageUrlName) => {
+      useEndpointPrivilegesMock.mockReturnValue({
+        ...getEndpointPrivilegesInitialStateMock({
+          canReadPolicyManagement: false,
+        }),
+      });
+
+      const { getByTestId } = render();
+
+      await waitFor(() => {
+        expect(
+          getByTestId(`${artifactTestIdPrefix}-link-to-exceptions`).getAttribute('href')
+        ).toEqual(`/app/security/administration/${pageUrlName}?includedPolicies=someid%2Cglobal`);
+      });
+    }
+  );
 });
