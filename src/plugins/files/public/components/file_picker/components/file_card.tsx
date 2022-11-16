@@ -22,6 +22,7 @@ import './file_card.scss';
 export interface FileToBeDestroyed {
   id: string;
   name: string;
+  kind: string;
 }
 
 interface Props {
@@ -123,7 +124,7 @@ export const FileCard: FunctionComponent<Props> = ({ file, onClickDelete }) => {
           top: `${euiTheme.size.s}`,
           display: 'none',
         }}
-        onClick={() => onClickDelete({ id: file.id, name: file.name })}
+        onClick={() => onClickDelete({ id: file.id, name: file.name, kind })}
       />
     </div>
   );

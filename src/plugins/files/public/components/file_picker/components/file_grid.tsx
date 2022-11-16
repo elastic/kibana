@@ -18,7 +18,7 @@ import { useFilePickerContext } from '../context';
 import { FileCard, FileToBeDestroyed } from './file_card';
 
 export const FileGrid: FunctionComponent = () => {
-  const { state } = useFilePickerContext();
+  const { client, state } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const files = useObservable(state.files$, []);
 
@@ -28,10 +28,15 @@ export const FileGrid: FunctionComponent = () => {
     return <EuiEmptyPrompt title={<h3>{i18nTexts.emptyFileGridPrompt}</h3>} titleSize="s" />;
   }
 
-  // eslint-disable-next-line no-console
-  const destroyFile = (id: string) => console.log(id);
+  const onClickDelete = async () => {
+    if (fileToBeDestroyed?.id && fileToBeDestroyed?.kind) {
+      await client.delete({ id: fileToBeDestroyed.id, kind: fileToBeDestroyed.kind });
+      state.resetFilters();
+      closeDestroyModal();
+    }
+  };
   const closeDestroyModal = () => setFileToBeDestroyed(undefined);
-  const showDestroyModal = (file: { id: string; name: string }) => setFileToBeDestroyed(file);
+  const showDestroyModal = (file: FileToBeDestroyed) => setFileToBeDestroyed(file);
 
   const destroyModal = () => {
     if (!isEmpty(fileToBeDestroyed)) {
@@ -39,7 +44,7 @@ export const FileGrid: FunctionComponent = () => {
         <EuiConfirmModal
           title="Delete File"
           onCancel={closeDestroyModal}
-          onConfirm={() => destroyFile(fileToBeDestroyed!.id)}
+          onConfirm={() => onClickDelete()}
           cancelButtonText="Cancel"
           confirmButtonText="Delete"
           buttonColor="danger"
