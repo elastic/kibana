@@ -8,7 +8,7 @@
 import { EuiDatePicker, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { Moment } from 'moment';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
@@ -28,11 +28,23 @@ const ExceptionItemExpireTime: React.FC<ExceptionItmeExpireTimeProps> = ({
   setExpireTime,
 }): JSX.Element => {
   const [dateTime, setDateTime] = useState<Moment | undefined>(expireTime);
+  const [isInvalid, setIsInvalid] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
 
-  const handleChange = (date: Moment | null) => {
-    setDateTime(date ?? undefined);
-    setExpireTime(date ?? undefined);
-  };
+  const handleChange = useCallback(
+    (date: Moment | null) => {
+      setDateTime(date ?? undefined);
+      setExpireTime(date ?? undefined);
+      if (date?.isBefore()) {
+        setIsInvalid(true);
+        setErrors([i18n.EXCEPTION_EXPIRE_TIME_ERROR]);
+      } else {
+        setIsInvalid(false);
+        setErrors([]);
+      }
+    },
+    [setDateTime, setExpireTime]
+  );
 
   return (
     <div>
@@ -40,10 +52,11 @@ const ExceptionItemExpireTime: React.FC<ExceptionItmeExpireTimeProps> = ({
         <h3>{i18n.EXCEPTION_EXPIRE_TIME_HEADER}</h3>
       </SectionHeader>
       <EuiSpacer size="s" />
-      <EuiFormRow label={i18n.EXPIRE_TIME_LABEL}>
+      <EuiFormRow error={errors} isInvalid={isInvalid} label={i18n.EXPIRE_TIME_LABEL}>
         <EuiDatePicker
           showTimeSelect
           selected={dateTime}
+          isInvalid={isInvalid}
           onChange={handleChange}
           onClear={() => handleChange(null)}
           minDate={moment()}

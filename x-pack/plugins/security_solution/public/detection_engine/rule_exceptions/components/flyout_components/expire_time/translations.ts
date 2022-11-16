@@ -20,3 +20,10 @@ export const EXCEPTION_EXPIRE_TIME_HEADER = i18n.translate(
     defaultMessage: 'Exception Expiration',
   }
 );
+
+export const EXCEPTION_EXPIRE_TIME_ERROR = i18n.translate(
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.expireTime.exceptionExpireTimeError',
+  {
+    defaultMessage: 'Selected date and time must be in the future.',
+  }
+);
