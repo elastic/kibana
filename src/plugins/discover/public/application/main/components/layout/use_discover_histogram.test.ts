@@ -110,10 +110,9 @@ describe('useDiscoverHistogram', () => {
       availableFields$,
     };
 
-    const searchSessionService = {
-      ...getSessionServiceMock(),
-      getSession$: () => new BehaviorSubject(searchSessionId ?? undefined),
-    };
+    const session = getSessionServiceMock();
+
+    session.getSession$.mockReturnValue(new BehaviorSubject(searchSessionId ?? undefined));
 
     const hook = renderHook(() => {
       return useDiscoverHistogram({
@@ -125,7 +124,7 @@ describe('useDiscoverHistogram', () => {
         isTimeBased,
         isPlainRecord,
         inspectorAdapters: { requests: new RequestAdapter() },
-        searchSessionManager: createSearchSessionMock(searchSessionService).searchSessionManager,
+        searchSessionManager: createSearchSessionMock(session).searchSessionManager,
       });
     });
 
