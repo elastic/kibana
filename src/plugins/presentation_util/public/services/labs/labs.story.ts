@@ -9,7 +9,7 @@
 import { EnvironmentName, projectIDs, Project } from '../../../common';
 import { PluginServiceFactory } from '../create';
 import { projects, ProjectID, getProjectIDs, SolutionName } from '../../../common';
-import { PresentationLabsService, isEnabledByStorageValue, applyProjectStatus } from '../labs';
+import { PresentationLabsService, isEnabledByStorageValue, applyProjectStatus } from './types';
 
 export type LabsServiceFactory = PluginServiceFactory<PresentationLabsService>;
 

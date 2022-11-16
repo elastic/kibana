@@ -7,18 +7,19 @@
  */
 
 import {
+  PluginServices,
   PluginServiceProviders,
   KibanaPluginServiceParams,
   PluginServiceProvider,
   PluginServiceRegistry,
-} from '../create';
-import { PresentationUtilPluginStartDeps } from '../../types';
-import { PresentationUtilServices } from '..';
+} from './create';
+import { PresentationUtilPluginStartDeps } from '../types';
 
-import { capabilitiesServiceFactory } from './capabilities';
-import { dataViewsServiceFactory } from './data_views';
-import { dashboardsServiceFactory } from './dashboards';
-import { labsServiceFactory } from './labs';
+import { capabilitiesServiceFactory } from './capabilities/capabilities_service';
+import { dataViewsServiceFactory } from './data_views/data_views_service';
+import { dashboardsServiceFactory } from './dashboards/dashboards_service';
+import { labsServiceFactory } from './labs/labs_service';
+import { PresentationUtilServices } from './types';
 
 export const providers: PluginServiceProviders<
   PresentationUtilServices,
@@ -29,6 +30,8 @@ export const providers: PluginServiceProviders<
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
 };
+
+export const pluginServices = new PluginServices<PresentationUtilServices>();
 
 export const registry = new PluginServiceRegistry<
   PresentationUtilServices,

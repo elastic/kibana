@@ -16,7 +16,7 @@ import {
   SolutionName,
 } from '../../../common';
 import { PluginServiceFactory } from '../create';
-import { PresentationLabsService, isEnabledByStorageValue, applyProjectStatus } from '../labs';
+import { PresentationLabsService, isEnabledByStorageValue, applyProjectStatus } from './types';
 
 export type LabsServiceFactory = PluginServiceFactory<PresentationLabsService>;
 
