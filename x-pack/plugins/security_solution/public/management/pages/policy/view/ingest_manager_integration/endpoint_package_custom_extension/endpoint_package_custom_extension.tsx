@@ -9,8 +9,9 @@ import type { ReactElement } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { NoPrivileges } from '../../../../../../common/components/no_privileges';
 import { useCanAccessSomeArtifacts } from '../hooks/use_can_access_some_artifacts';
-import { useHttp } from '../../../../../../common/lib/kibana';
+import { useHttp, useKibana } from '../../../../../../common/lib/kibana';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../host_isolation_exceptions/view/hooks';
 import { TrustedAppsApiClient } from '../../../../trusted_apps/service/api_client';
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
@@ -30,7 +31,6 @@ import {
   TRUSTED_APPS_LABELS,
 } from './translations';
 import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint';
-import { NoPermissions } from '../../../../../components/no_permissons';
 
 const TrustedAppsArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
   const http = useHttp();
@@ -113,6 +113,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
     const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
     const { loading, canReadBlocklist, canReadEventFilters, canReadTrustedApplications } =
       useEndpointPrivileges();
+    const { docLinks } = useKibana().services;
 
     const userCanAccessContent = useCanAccessSomeArtifacts();
 
@@ -122,7 +123,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       }
 
       if (!userCanAccessContent) {
-        return <NoPermissions />;
+        return <NoPrivileges documentationUrl={docLinks.links.securitySolution.privileges} />;
       }
 
       return (
@@ -156,6 +157,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       canReadEventFilters,
       canReadTrustedApplications,
       canSeeHostIsolationExceptions,
+      docLinks.links.securitySolution.privileges,
       loading,
       props,
       userCanAccessContent,
