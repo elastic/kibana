@@ -177,6 +177,7 @@
     "StopTrainedModelDeployment",
     "PutTrainedModel",
     "DeleteTrainedModel",
+    "SimulateIngestPipeline",
     "InferTrainedModelDeployment",
 
     "Alerting",
