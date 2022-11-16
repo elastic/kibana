@@ -18,6 +18,11 @@ export interface ImageConfig {
 export interface ImageFileSrc {
   type: 'file';
   fileId: string;
+  fileImageMeta: {
+    blurHash?: string;
+    width: number;
+    height: number;
+  };
 }
 
 export interface ImageUrlSrc {

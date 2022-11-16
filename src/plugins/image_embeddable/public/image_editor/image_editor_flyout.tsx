@@ -25,42 +25,33 @@ import {
   EuiSelect,
   EuiColorPicker,
   useColorPickerState,
-  RecursivePartial,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FilePicker, UploadFile } from '@kbn/files-plugin/public';
+import type { FileImageMetadata } from '@kbn/files-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { ImageConfig } from '../types';
 import { imageEmbeddableFileKind } from '../../common';
 import { ImageViewer } from '../image_viewer';
+import { ValidateUrlFn } from '../utils/validate_url';
+import { validateImageConfig, DraftImageConfig } from '../utils/validate_image_config';
 
 export interface ImageEditorFlyoutProps {
   onCancel: () => void;
   onSave: (imageConfig: ImageConfig) => void;
   initialImageConfig?: ImageConfig;
-}
-
-type DraftImageConfig = RecursivePartial<ImageConfig>;
-function isImageConfigValid(
-  draftConfig: DraftImageConfig,
-  { srcUrlError }: { srcUrlError: string | null }
-): draftConfig is ImageConfig {
-  if (!draftConfig.src) return false;
-  if (draftConfig.src.type === 'file') {
-    if (!draftConfig.src.fileId) return false;
-  } else if (draftConfig.src.type === 'url') {
-    if (!draftConfig.src.url) return false;
-    // if (srcUrlError) return false;
-    if (!validateUrl(draftConfig.src.url).isValid) return false;
-  }
-
-  return true;
+  validateUrl: ValidateUrlFn;
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
   const [fileId, setFileId] = useState<undefined | string>(() =>
     props.initialImageConfig?.src?.type === 'file' ? props.initialImageConfig.src.fileId : undefined
+  );
+  const [fileImageMeta, setFileImageMeta] = useState<undefined | FileImageMetadata>(() =>
+    props.initialImageConfig?.src?.type === 'file'
+      ? props.initialImageConfig.src.fileImageMeta
+      : undefined
   );
   const [srcType, setSrcType] = useState<ImageConfig['src']['type']>(
     () => props.initialImageConfig?.src?.type ?? 'file'
@@ -69,7 +60,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
     props.initialImageConfig?.src?.type === 'url' ? props.initialImageConfig.src.url : ''
   );
   const [srcUrlError, setSrcUrlError] = useState<string | null>(() => {
-    if (srcUrl) return validateUrl(srcUrl)?.error ?? null;
+    if (srcUrl) return props.validateUrl(srcUrl)?.error ?? null;
     return null;
   });
   const [isFilePickerOpen, setIsFilePickerOpen] = useState<boolean>(false);
@@ -90,7 +81,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             type: 'url',
             url: srcUrl,
           }
-        : { type: 'file', fileId },
+        : { type: 'file', fileId, fileImageMeta },
     altText,
     backgroundColor: colorErrors ? undefined : color,
     sizing: {
@@ -98,7 +89,9 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
     },
   };
 
-  const isDraftImageConfigValid = isImageConfigValid(draftImageConfig, { srcUrlError });
+  const isDraftImageConfigValid = validateImageConfig(draftImageConfig, {
+    validateUrl: props.validateUrl,
+  });
 
   const onSave = () => {
     if (!isDraftImageConfigValid) return;
@@ -130,6 +123,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 onChange={() => setIsFilePickerOpen(true)}
                 onClear={() => {
                   setFileId(undefined);
+                  setFileImageMeta(undefined);
                 }}
               />
             ) : (
@@ -214,7 +208,8 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 value={srcUrl}
                 onChange={(e) => {
                   const url = e.target.value;
-                  const { isValid, error } = validateUrl(url);
+
+                  const { isValid, error } = props.validateUrl(url);
                   if (!isValid) {
                     setSrcUrlError(error!);
                   } else {
@@ -307,8 +302,9 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           onClose={() => {
             setIsFilePickerOpen(false);
           }}
-          onDone={(fileIds) => {
-            setFileId(fileIds[0]);
+          onDone={([file]) => {
+            setFileId(file.id);
+            setFileImageMeta(file.meta as FileImageMetadata);
             setIsFilePickerOpen(false);
           }}
         />
@@ -317,16 +313,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
   );
 }
 
-const SAFE_URL_PATTERN = /^(?:(?:https?|mailto):|[^&:/?#]*(?:[/?#]|$))/gi;
-const generalFormatError = i18n.translate(
-  'imageEmbeddable.imageEditor.urlFormatGeneralErrorMessage',
-  {
-    defaultMessage: 'Invalid format. Example: {exampleUrl}',
-    values: {
-      exampleUrl: 'https://elastic.co/my-image.png',
-    },
-  }
-);
 const failedToLoadImageFromURL = (url: string) =>
   i18n.translate('imageEmbeddable.imageEditor.urlFailedToLoadImageErrorMessage', {
     defaultMessage: 'Failed to load image from URL "{url}".',
@@ -334,21 +320,3 @@ const failedToLoadImageFromURL = (url: string) =>
       url,
     },
   });
-export function validateUrl(url: string): { isValid: boolean; error?: string } {
-  if (!url)
-    return {
-      isValid: false,
-      error: generalFormatError,
-    };
-
-  try {
-    new URL(url);
-    if (!url.match(SAFE_URL_PATTERN)) throw new Error();
-    return { isValid: true };
-  } catch (e) {
-    return {
-      isValid: false,
-      error: generalFormatError,
-    };
-  }
-}

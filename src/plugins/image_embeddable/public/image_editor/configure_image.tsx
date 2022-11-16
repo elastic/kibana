@@ -15,6 +15,8 @@ import { ImageConfig } from '../types';
 import { ImageEditorFlyout } from './image_editor_flyout';
 import { ImageViewerContext } from '../image_viewer';
 import { OverlayStart, ApplicationStart, FilesClient, FileImageMetadata } from '../imports';
+import { imageEmbeddableFileKind } from '../../common';
+import { ValidateUrlFn } from '../utils/validate_url';
 
 /**
  * @throws in case user cancels
@@ -24,6 +26,7 @@ export async function configureImage(
     files: FilesClient<FileImageMetadata>;
     overlays: OverlayStart;
     currentAppId$: ApplicationStart['currentAppId$'];
+    validateUrl: ValidateUrlFn;
   },
   initialImageConfig?: ImageConfig
 ): Promise<ImageConfig> {
@@ -50,13 +53,16 @@ export async function configureImage(
         <FilesContext client={deps.files}>
           <ImageViewerContext.Provider
             value={{
-              filesClient: deps.files,
+              getImageDownloadHref: (fileId: string) =>
+                deps.files.getDownloadHref({ fileKind: imageEmbeddableFileKind.id, id: fileId }),
+              validateUrl: deps.validateUrl,
             }}
           >
             <ImageEditorFlyout
               onCancel={onCancel}
               onSave={onSave}
               initialImageConfig={initialImageConfig}
+              validateUrl={deps.validateUrl}
             />
           </ImageViewerContext.Provider>
         </FilesContext>

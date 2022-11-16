@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { IExternalUrl } from '@kbn/core-http-browser';
 import {
   IContainer,
   EmbeddableInput,
@@ -19,12 +20,14 @@ import {
 import { ImageEmbeddable, IMAGE_EMBEDDABLE_TYPE } from './image_embeddable';
 import { ImageConfig } from '../types';
 import { imageEmbeddableFileKind } from '../../common';
+import { createValidateUrl } from '../utils/validate_url';
 
 export interface ImageEmbeddableFactoryDeps {
   start: () => {
     application: ApplicationStart;
     overlays: OverlayStart;
     files: FilesClient<FileImageMetadata>;
+    externalUrl: IExternalUrl;
   };
 }
 
@@ -50,6 +53,7 @@ export class ImageEmbeddableFactoryDefinition
           this.deps
             .start()
             .files.getDownloadHref({ id: fileId, fileKind: imageEmbeddableFileKind.id }),
+        validateUrl: createValidateUrl(this.deps.start().externalUrl),
       },
       initialInput,
       parent
@@ -74,6 +78,7 @@ export class ImageEmbeddableFactoryDefinition
         files: this.deps.start().files,
         overlays: this.deps.start().overlays,
         currentAppId$: this.deps.start().application.currentAppId$,
+        validateUrl: createValidateUrl(this.deps.start().externalUrl),
       },
       initialInput ? initialInput.imageConfig : undefined
     );

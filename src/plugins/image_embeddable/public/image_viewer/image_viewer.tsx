@@ -7,20 +7,19 @@
  */
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { FileImageMetadata } from '@kbn/files-plugin/common';
-import { FilesClient, Image } from '@kbn/files-plugin/public';
-import { EuiButtonIcon, useEuiTheme, EuiEmptyPrompt, EuiImage } from '@elastic/eui';
+import { Image } from '@kbn/files-plugin/public';
+import { EuiButtonIcon, EuiEmptyPrompt, EuiImage, useEuiTheme } from '@elastic/eui';
 import { ImageConfig } from '../types';
-import { imageEmbeddableFileKind } from '../../common';
 import notFound from './not_found/not_found_light.png';
 import notFound2x from './not_found/not_found_light@2x.png';
+import { validateImageConfig } from '../utils/validate_image_config';
+import { createValidateUrl } from '../utils/validate_url';
+
 // TODO: support dark theme also
 
 export interface ImageViewerContextValue {
-  /**
-   * A files client that will be retrieve image file by fileId
-   */
-  filesClient: FilesClient<FileImageMetadata>;
+  getImageDownloadHref: (fileId: string) => string;
+  validateUrl: ReturnType<typeof createValidateUrl>;
 }
 
 export const ImageViewerContext = createContext<ImageViewerContextValue>(
@@ -47,15 +46,18 @@ export function ImageViewer({
   onError?: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
-  const { filesClient } = useImageViewerContext();
+  const { getImageDownloadHref, validateUrl } = useImageViewerContext();
+
+  const isImageConfigValid = validateImageConfig(imageConfig, { validateUrl });
 
   const src =
     imageConfig.src.type === 'url'
       ? imageConfig.src.url
-      : filesClient.getDownloadHref({
-          fileKind: imageEmbeddableFileKind.id,
-          id: imageConfig.src.fileId,
-        });
+      : getImageDownloadHref(imageConfig.src.fileId);
+
+  // TODO: needs fixes on <Blurhash/> side to position the same as the image
+  // const blurHash =
+  //   imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta?.blurHash : undefined;
 
   const [hasFailedToLoad, setFailedToLoad] = useState<boolean>(false);
 
@@ -67,7 +69,9 @@ export function ImageViewer({
     <div
       style={{
         position: 'relative',
-        backgroundColor: imageConfig.backgroundColor ?? euiTheme.colors.lightestShade,
+        backgroundColor: imageConfig.backgroundColor || euiTheme.colors.lightestShade,
+        width: '100%',
+        height: '100%',
       }}
       css={`
         .visually-hidden {
@@ -81,30 +85,34 @@ export function ImageViewer({
         }
       `}
     >
-      {hasFailedToLoad && <NotFound />}
-      <Image
-        src={src}
-        alt={imageConfig.altText ?? ''}
-        className={hasFailedToLoad ? `visually-hidden` : ''}
-        title={onChange ? 'Click to select a different image' : undefined}
-        style={{
-          width: '100%',
-          aspectRatio: '16 / 9',
-          objectFit: imageConfig?.sizing?.objectFit ?? 'cover',
-          cursor: onChange ? 'pointer' : 'initial',
-          display: 'block', // needed to remove gap under the image
-        }}
-        wrapperProps={{
-          style: { display: 'block', height: '100%', width: '100%', aspectRatio: '16 / 9' },
-        }}
-        onClick={() => {
-          if (onChange) onChange();
-        }}
-        onError={() => {
-          setFailedToLoad(true);
-          if (onError) onError();
-        }}
-      />
+      {(hasFailedToLoad || !isImageConfigValid) && <NotFound />}
+      {isImageConfigValid && (
+        <Image
+          src={src}
+          // meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
+          alt={imageConfig.altText ?? ''}
+          className={hasFailedToLoad ? `visually-hidden` : ''}
+          title={onChange ? 'Click to select a different image' : undefined}
+          style={{
+            width: '100%',
+            height: '100%',
+            aspectRatio: '16 / 9',
+            objectFit: imageConfig?.sizing?.objectFit ?? 'cover',
+            cursor: onChange ? 'pointer' : 'initial',
+            display: 'block', // needed to remove gap under the image
+          }}
+          wrapperProps={{
+            style: { display: 'block', height: '100%', width: '100%', aspectRatio: '16 / 9' },
+          }}
+          onClick={() => {
+            if (onChange) onChange();
+          }}
+          onError={() => {
+            setFailedToLoad(true);
+            if (onError) onError();
+          }}
+        />
+      )}
       {onClear && (
         <EuiButtonIcon
           style={{ position: 'absolute', top: '-4px', right: '-4px' }}

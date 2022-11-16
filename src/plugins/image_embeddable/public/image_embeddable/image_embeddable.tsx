@@ -8,10 +8,11 @@
 
 // import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Image } from '@kbn/files-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { ImageEmbeddableInput } from './image_embeddable_factory';
+import { ImageViewer, ImageViewerContext } from '../image_viewer';
+import { createValidateUrl } from '../utils/validate_url';
 
 export const IMAGE_EMBEDDABLE_TYPE = 'IMAGE_EMBEDDABLE';
 
@@ -19,7 +20,10 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
   public readonly type = IMAGE_EMBEDDABLE_TYPE;
 
   constructor(
-    private deps: { getImageDownloadHref: (fileId: string) => string },
+    private deps: {
+      getImageDownloadHref: (fileId: string) => string;
+      validateUrl: ReturnType<typeof createValidateUrl>;
+    },
     initialInput: ImageEmbeddableInput,
     parent?: IContainer
   ) {
@@ -38,28 +42,14 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
       const input = useObservable(props.embeddable.getInput$(), props.embeddable.getInput());
 
       return (
-        <div
-          data-test-subj="imageEmbeddable"
-          data-render-complete="true"
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: input.imageConfig.backgroundColor,
+        <ImageViewerContext.Provider
+          value={{
+            getImageDownloadHref: this.deps.getImageDownloadHref,
+            validateUrl: this.deps.validateUrl,
           }}
         >
-          {input.imageConfig.src.type === 'file' && (
-            <Image
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: input.imageConfig.sizing?.objectFit ?? 'contain',
-              }}
-              wrapperProps={{ style: { display: 'block', height: '100%', width: '100%' } }}
-              src={this.deps.getImageDownloadHref(input.imageConfig.src.fileId)}
-              alt={input.imageConfig.altText ?? ''}
-            />
-          )}
-        </div>
+          <ImageViewer imageConfig={input.imageConfig} />
+        </ImageViewerContext.Provider>
       );
     };
 

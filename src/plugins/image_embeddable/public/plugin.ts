@@ -44,6 +44,7 @@ export class ImageEmbeddablePlugin
           application: start().core.application,
           overlays: start().core.overlays,
           files: start().plugins.files.filesClientFactory.asUnscoped(),
+          externalUrl: start().core.http.externalUrl,
         }),
       })
     );
