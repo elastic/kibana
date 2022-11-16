@@ -687,16 +687,12 @@
                 "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
               },
               {
-                "plugin": "core",
-                "path": "src/core/server/server.ts"
+                "plugin": "@kbn/core-root-server-internal",
+                "path": "packages/core/root/core-root-server-internal/src/server.ts"
               },
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
               },
               {
                 "plugin": "dashboard",
@@ -705,6 +701,10 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
               },
               {
                 "plugin": "osquery",
