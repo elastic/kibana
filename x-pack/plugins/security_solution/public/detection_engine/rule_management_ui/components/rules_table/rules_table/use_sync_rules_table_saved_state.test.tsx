@@ -64,7 +64,7 @@ describe('useSyncRulesTableSavedState', () => {
 
     (useUpdateUrlParam as jest.Mock).mockReturnValue(updateUrlParam);
     (useKibana as jest.Mock).mockReturnValue({
-      services: { storage: { set: setStorage } },
+      services: { sessionStorage: { set: setStorage } },
     });
   });
 

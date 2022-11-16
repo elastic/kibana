@@ -18,7 +18,7 @@ import type { RulesTableSavedState } from './rules_table_saved_state';
 export function useSyncRulesTableSavedState(activeTab: AllRulesTabs): void {
   const { state } = useRulesTableContext();
   const {
-    services: { storage },
+    services: { sessionStorage },
   } = useKibana();
   const updateUrlParam = useUpdateUrlParam<RulesTableSavedState>(URL_PARAM_KEY.rulesTable);
 
@@ -35,6 +35,6 @@ export function useSyncRulesTableSavedState(activeTab: AllRulesTabs): void {
     }
 
     updateUrlParam(savedState);
-    storage.set(RULES_TABLE_STATE_STORAGE_KEY, savedState);
-  }, [updateUrlParam, storage, state, activeTab]);
+    sessionStorage.set(RULES_TABLE_STATE_STORAGE_KEY, savedState);
+  }, [updateUrlParam, sessionStorage, state, activeTab]);
 }

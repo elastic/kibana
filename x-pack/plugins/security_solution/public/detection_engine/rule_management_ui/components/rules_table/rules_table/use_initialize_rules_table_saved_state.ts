@@ -21,11 +21,11 @@ import type { RulesTableSavedState } from './rules_table_saved_state';
 export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTabs) => void): void {
   const { actions } = useRulesTableContext();
   const {
-    services: { storage },
+    services: { sessionStorage },
   } = useKibana();
   const onInitializeRulesTableContextFromUrlParam = useCallback(
     (params: RulesTableSavedState | null) => {
-      const savedState: Partial<RulesTableSavedState> | null = storage.get(
+      const savedState: Partial<RulesTableSavedState> | null = sessionStorage.get(
         RULES_TABLE_STATE_STORAGE_KEY
       );
 
@@ -59,7 +59,7 @@ export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTa
         actions.setPerPage(perPage);
       }
     },
-    [actions, storage, setActiveTab]
+    [actions, sessionStorage, setActiveTab]
   );
 
   useInitializeUrlParam(URL_PARAM_KEY.rulesTable, onInitializeRulesTableContextFromUrlParam);

@@ -29,7 +29,7 @@ function mockState({
     (_, cb: (params: RulesTableSavedState | null) => void) => cb(urlState)
   );
   (useKibana as jest.Mock).mockReturnValue({
-    services: { storage: { get: jest.fn().mockReturnValue(storageState) } },
+    services: { sessionStorage: { get: jest.fn().mockReturnValue(storageState) } },
   });
 }
 

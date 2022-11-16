@@ -37,10 +37,18 @@ describe('Persistent rules table state', () => {
     visit(SECURITY_DETECTIONS_RULES_URL);
   });
 
+  beforeEach(() => {
+    cy.window().then((win) => {
+      win.sessionStorage.clear();
+    });
+  });
+
   it('reloads the state from the url if the storage was cleared', () => {
     filterBySearchTerm('rule 1');
 
-    cy.clearLocalStorage();
+    cy.window().then((win) => {
+      win.sessionStorage.clear();
+    });
     cy.reload();
 
     cy.get(RULE_SEARCH_FIELD).should('have.value', 'rule 1');
