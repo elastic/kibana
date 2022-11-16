@@ -87,7 +87,7 @@ export function getMonitorListColumns({
           <MonitorLocations
             monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations}
-            upDownByLocation={statusByLocationAndMonitor}
+            statusByLocationAndMonitor={statusByLocationAndMonitor}
           />
         ) : null,
     },

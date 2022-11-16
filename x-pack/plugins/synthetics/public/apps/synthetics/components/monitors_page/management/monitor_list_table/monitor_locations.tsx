@@ -16,12 +16,12 @@ import { EXPAND_LOCATIONS_LABEL } from './labels';
 interface Props {
   locations: ServiceLocations;
   monitorId: string;
-  upDownByLocation: StatusByLocationAndMonitor;
+  statusByLocationAndMonitor: StatusByLocationAndMonitor;
 }
 
 const INITIAL_LIMIT = 3;
 
-export const MonitorLocations = ({ locations, monitorId, upDownByLocation }: Props) => {
+export const MonitorLocations = ({ locations, monitorId, statusByLocationAndMonitor }: Props) => {
   const { euiTheme } = useEuiTheme();
   const theme = useTheme();
   const { locations: allLocations } = useLocations();
@@ -50,7 +50,7 @@ export const MonitorLocations = ({ locations, monitorId, upDownByLocation }: Pro
               theme,
               locationLabelsById[location.id],
               monitorId,
-              upDownByLocation
+              statusByLocationAndMonitor
             )}
             css={{ marginRight: 2 }}
           />
@@ -76,14 +76,16 @@ function getLocationStatusColor(
   euiTheme: ReturnType<typeof useTheme>,
   locationLabel: string | undefined,
   monitorId: string,
-  upDownByLocation: StatusByLocationAndMonitor
+  statusByLocationAndMonitor: StatusByLocationAndMonitor
 ) {
   const {
     eui: { euiColorVis9, euiColorVis0, euiSideNavDisabledTextcolor },
   } = euiTheme;
 
   const status =
-    locationLabel && upDownByLocation ? upDownByLocation[locationLabel]?.[monitorId] : undefined;
+    locationLabel && statusByLocationAndMonitor
+      ? statusByLocationAndMonitor[locationLabel]?.[monitorId]
+      : undefined;
 
   return status === 'up'
     ? euiColorVis0

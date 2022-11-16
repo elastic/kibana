@@ -27,7 +27,7 @@ export function useOverviewStatus({ pageState }: { pageState: MonitorOverviewPag
         if (!acc[cur.location]) {
           acc[cur.location] = {};
         }
-        acc[cur.location][cur.configId] = index <= (status?.upConfigs ?? []).length ? 'up' : 'down';
+        acc[cur.location][cur.configId] = index < (status?.upConfigs ?? []).length ? 'up' : 'down';
 
         return acc;
       },
