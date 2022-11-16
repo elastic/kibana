@@ -2808,6 +2808,56 @@ export class RulesClient {
     return { errors, taskIdsToEnable };
   };
 
+  private recoverRuleAlerts = async (id: string, attributes: RawRule) => {
+    if (!this.eventLogger || !attributes.scheduledTaskId) return;
+    try {
+      const { state } = taskInstanceToAlertTaskInstance(
+        await this.taskManager.get(attributes.scheduledTaskId),
+        attributes as unknown as SanitizedRule
+      );
+
+      const recoveredAlerts = mapValues<Record<string, RawAlert>, Alert>(
+        state.alertInstances ?? {},
+        (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
+      );
+      const recoveredAlertIds = Object.keys(recoveredAlerts);
+
+      for (const alertId of recoveredAlertIds) {
+        const { group: actionGroup } = recoveredAlerts[alertId].getLastScheduledActions() ?? {};
+        const instanceState = recoveredAlerts[alertId].getState();
+        const message = `instance '${alertId}' has recovered due to the rule was disabled`;
+
+        const event = createAlertEventLogRecordObject({
+          ruleId: id,
+          ruleName: attributes.name,
+          ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
+          consumer: attributes.consumer,
+          instanceId: alertId,
+          action: EVENT_LOG_ACTIONS.recoveredInstance,
+          message,
+          state: instanceState,
+          group: actionGroup,
+          namespace: this.namespace,
+          spaceId: this.spaceId,
+          savedObjects: [
+            {
+              id,
+              type: 'alert',
+              typeId: attributes.alertTypeId,
+              relation: SAVED_OBJECT_REL_PRIMARY,
+            },
+          ],
+        });
+        this.eventLogger.logEvent(event);
+      }
+    } catch (error) {
+      // this should not block the rest of the disable process
+      this.logger.warn(
+        `rulesClient.disable('${id}') - Could not write recovery events - ${error.message}`
+      );
+    }
+  };
+
   public bulkDisableRules = async (options: BulkOptions) => {
     const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
 
@@ -2905,6 +2955,9 @@ export class RulesClient {
       await pMap(response.saved_objects, async (rule) => {
         try {
           if (rule.attributes.enabled === false) return;
+
+          this.recoverRuleAlerts(rule.id, rule.attributes);
+
           if (rule.attributes.name) {
             ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
           }
@@ -3275,55 +3328,8 @@ export class RulesClient {
       version = alert.version;
     }
 
-    if (this.eventLogger && attributes.scheduledTaskId) {
-      try {
-        const { state } = taskInstanceToAlertTaskInstance(
-          await this.taskManager.get(attributes.scheduledTaskId),
-          attributes as unknown as SanitizedRule
-        );
+    this.recoverRuleAlerts(id, attributes);
 
-        const recoveredAlertInstances = mapValues<Record<string, RawAlert>, Alert>(
-          state.alertInstances ?? {},
-          (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
-        );
-        const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
-
-        for (const instanceId of recoveredAlertInstanceIds) {
-          const { group: actionGroup } =
-            recoveredAlertInstances[instanceId].getLastScheduledActions() ?? {};
-          const instanceState = recoveredAlertInstances[instanceId].getState();
-          const message = `instance '${instanceId}' has recovered due to the rule was disabled`;
-
-          const event = createAlertEventLogRecordObject({
-            ruleId: id,
-            ruleName: attributes.name,
-            ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
-            consumer: attributes.consumer,
-            instanceId,
-            action: EVENT_LOG_ACTIONS.recoveredInstance,
-            message,
-            state: instanceState,
-            group: actionGroup,
-            namespace: this.namespace,
-            spaceId: this.spaceId,
-            savedObjects: [
-              {
-                id,
-                type: 'alert',
-                typeId: attributes.alertTypeId,
-                relation: SAVED_OBJECT_REL_PRIMARY,
-              },
-            ],
-          });
-          this.eventLogger.logEvent(event);
-        }
-      } catch (error) {
-        // this should not block the rest of the disable process
-        this.logger.warn(
-          `rulesClient.disable('${id}') - Could not write recovery events - ${error.message}`
-        );
-      }
-    }
     try {
       await this.authorization.ensureAuthorized({
         ruleTypeId: attributes.alertTypeId,
