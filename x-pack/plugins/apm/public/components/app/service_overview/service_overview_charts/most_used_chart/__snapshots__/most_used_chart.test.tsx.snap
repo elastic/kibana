@@ -86,7 +86,9 @@ Object {
           "layerType": "data",
           "legendDisplay": "hide",
           "legendPosition": "bottom",
-          "metric": "countColumn",
+          "metrics": Array [
+            "countColumn",
+          ],
           "nestedLegend": false,
           "numberDisplay": "percent",
           "primaryGroups": Array [
