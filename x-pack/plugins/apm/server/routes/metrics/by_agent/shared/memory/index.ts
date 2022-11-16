@@ -63,7 +63,7 @@ export const percentSystemMemoryUsedScript = {
 export const percentCgroupMemoryUsedScript = {
   lang: 'painless',
   source: `
-    if(doc.containsKey('${METRIC_CGROUP_MEMORY_LIMIT_BYTES}') && doc.containsKey('${METRIC_CGROUP_MEMORY_USAGE_BYTES}')){
+    if(doc.containsKey('${METRIC_SYSTEM_TOTAL_MEMORY}') && doc.containsKey('${METRIC_CGROUP_MEMORY_USAGE_BYTES}')){
       /*
         When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
         This number represents the max possible value for the limit field.
