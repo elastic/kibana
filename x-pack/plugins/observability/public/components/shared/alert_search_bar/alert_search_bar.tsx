@@ -20,7 +20,9 @@ import { buildEsQuery } from '../../../utils/build_es_query';
 import { AlertStatus } from '../../../../common/typings';
 
 const getAlertStatusQuery = (status: string): Query[] => {
-  return status ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }] : [];
+  return ALERT_STATUS_QUERY[status]
+    ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }]
+    : [];
 };
 
 export function ObservabilityAlertSearchBar({
