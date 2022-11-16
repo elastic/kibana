@@ -36,7 +36,7 @@ jest.mock('react-router-dom', () => ({
     return mockLocation;
   }),
   useHistory: jest.fn().mockReturnValue({
-    push: jest.fn(),
+    replace: jest.fn(),
     location: {
       search: '',
     },
@@ -71,12 +71,12 @@ describe('useAllCasesQueryParams', () => {
     });
   });
 
-  it('calls history.push with default values on first run', () => {
+  it('calls history.replace with default values on first run', () => {
     renderHook(() => useAllCasesQueryParams(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(useHistory().push).toHaveBeenCalledWith({
+    expect(useHistory().replace).toHaveBeenCalledWith({
       search: stringify(URL_DEFAULTS),
     });
   });
@@ -109,7 +109,7 @@ describe('useAllCasesQueryParams', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(useHistory().push).toHaveBeenCalledWith({
+    expect(useHistory().replace).toHaveBeenCalledWith({
       search: stringify(expectedUrl),
     });
   });
@@ -126,7 +126,7 @@ describe('useAllCasesQueryParams', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(useHistory().push).toHaveBeenCalledWith({
+    expect(useHistory().replace).toHaveBeenCalledWith({
       search: stringify(expectedUrl),
     });
   });
