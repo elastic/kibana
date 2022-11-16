@@ -61621,12 +61621,12 @@ async function isElasticCommitter() {
   }
 }
 
-async function upToDate(settingsPath) {
+function upToDate(settingsPath) {
   try {
     const stat = Object(fs__WEBPACK_IMPORTED_MODULE_1__["statSync"])(settingsPath);
 
     if (stat.isFile()) {
-      const readSettingsFile = await Object(fs__WEBPACK_IMPORTED_MODULE_1__["readFileSync"])(settingsPath, 'utf8');
+      const readSettingsFile = Object(fs__WEBPACK_IMPORTED_MODULE_1__["readFileSync"])(settingsPath, 'utf8');
       return readSettingsFile.startsWith('# V2 ');
     }
   } catch (error) {
@@ -61643,7 +61643,7 @@ async function setupRemoteCache(repoRootPath) {
   _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] setting up remote cache settings if necessary`);
   const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache');
 
-  if (!upToDate(settingsPath)) {
+  if (upToDate(settingsPath)) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] remote cache settings already up to date, skipping`);
     return;
   }

@@ -23,11 +23,11 @@ async function isElasticCommitter() {
   }
 }
 
-async function upToDate(settingsPath: string) {
+function upToDate(settingsPath: string) {
   try {
     const stat = statSync(settingsPath);
     if (stat.isFile()) {
-      const readSettingsFile = await readFileSync(settingsPath, 'utf8');
+      const readSettingsFile = readFileSync(settingsPath, 'utf8');
       return readSettingsFile.startsWith('# V2 ');
     }
   } catch (error) {
@@ -45,7 +45,7 @@ export async function setupRemoteCache(repoRootPath: string) {
 
   const settingsPath = resolve(repoRootPath, '.bazelrc.cache');
 
-  if (!upToDate(settingsPath)) {
+  if (upToDate(settingsPath)) {
     log.debug(`[bazel_tools] remote cache settings already up to date, skipping`);
     return;
   }
