@@ -44,6 +44,7 @@ export const getPluginState = async (savedObjectsClient: SavedObjectsClient) => 
       await updatePluginStatus(savedObjectsClient, 'not_started');
       // @yulia, we need to add a user permissions
       // check here instead of swallowing this error
+      // see issue: https://github.com/elastic/kibana/issues/145434
       // eslint-disable-next-line no-empty
     } catch (e) {}
 
