@@ -5,16 +5,16 @@
     "warmup": [
       {
         "action": "constantUsersPerSec",
-        "userCount": 20,
+        "userCount": 10,
         "duration": "30s"
       }
     ],
     "test": [
       {
-        "action": "rampUsersPerSec",
-        "minUsersCount": 1,
-        "maxUsersCount": 1000,
-        "duration": "5m"
+        "action": "incrementUsersPerSec",
+        "userCount": 20,
+        "times": 25,
+        "duration": "5s"
       }
     ],
     "maxDuration": "10m"
