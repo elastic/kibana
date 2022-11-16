@@ -33,7 +33,7 @@ function assertDowngraded(transformed: Record<string, any>) {
   expect(transformed.tags).not.toContain('error');
 }
 
-describe.only('server logging LogInterceptor', () => {
+describe('server logging LogInterceptor', () => {
   describe('#downgradeIfEconnreset()', () => {
     it('transforms ECONNRESET events', () => {
       const interceptor = new LogInterceptor();
