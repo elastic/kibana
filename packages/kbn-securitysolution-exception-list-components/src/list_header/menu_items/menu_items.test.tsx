@@ -79,6 +79,21 @@ describe('MenuItems', () => {
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.getByTestId('MenuActionsActionItem2')).toBeDisabled();
   });
+  it('should not render Manage rules', () => {
+    const wrapper = render(
+      <MenuItems
+        isReadonly={false}
+        canUserEditList={false}
+        linkedRules={rules}
+        securityLinkAnchorComponent={securityLinkAnchorComponentMock}
+        onExportList={onExportList}
+        onDeleteList={onDeleteList}
+        onManageRules={onManageRules}
+      />
+    );
+    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.queryByTestId('ManageRulesButton')).not.toBeInTheDocument();
+  });
   it('should call onManageRules', () => {
     const wrapper = render(
       <MenuItems
