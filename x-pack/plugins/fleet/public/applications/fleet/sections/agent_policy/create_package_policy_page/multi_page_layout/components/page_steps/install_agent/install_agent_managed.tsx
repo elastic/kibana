@@ -19,8 +19,9 @@ import {
 } from '../../../../../../../../../components/agent_enrollment_flyout/steps';
 import { ManualInstructions } from '../../../../../../../../../components/enrollment_instructions';
 
-import type { InstallAgentPageProps } from './types';
 import { KubernetesManifestApplyStep } from '../../../../../../../../../components/agent_enrollment_flyout/steps/run_k8s_apply_command_step';
+
+import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps> = (props) => {
   const {
