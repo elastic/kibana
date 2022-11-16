@@ -20,7 +20,7 @@ pageLoadAssetSize:
   controls: 40000
   core: 435325
   crossClusterReplication: 65408
-  customIntegrations: 44305
+  customIntegrations: 22034
   dashboard: 82025
   dashboardEnhanced: 65646
   data: 454087
@@ -61,7 +61,7 @@ pageLoadAssetSize:
   globalSearchProviders: 25554
   graph: 31504
   grokdebugger: 26779
-  guidedOnboarding: 26875
+  guidedOnboarding: 42965
   home: 30182
   indexLifecycleManagement: 107090
   indexManagement: 140608
