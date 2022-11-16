@@ -66,6 +66,10 @@ export interface SavedObjectsTaggingApiUi {
    * @param tagId
    */
   getTag(tagId: string): Tag | undefined;
+  /**
+   * Return a list of available tags
+   */
+  getTagList(): Tag[];
 
   /**
    * Type-guard to safely manipulate tag-enhanced `SavedObject` from the `savedObject` plugin.
@@ -222,6 +226,10 @@ export interface TagListComponentProps {
    * Handler to execute when clicking on a tag
    */
   onClick?: (tag: TagWithOptionalId) => void;
+  /**
+   * Handler to render the tag
+   */
+  tagRender?: (tag: TagWithOptionalId) => JSX.Element;
 }
 
 /**
@@ -321,6 +329,7 @@ export interface GetSearchBarFilterOptions {
 export interface ParsedSearchQuery {
   searchTerm: string;
   tagReferences: SavedObjectsFindOptionsReference[];
+  tagReferencesToExclude: SavedObjectsFindOptionsReference[];
   valid: boolean;
 }
 

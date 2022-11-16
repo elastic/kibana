@@ -33,7 +33,7 @@ import { KEY_ENABLE_WELCOME } from '../home';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 const gettingStartedBreadcrumb = i18n.translate('home.breadcrumbs.gettingStartedTitle', {
-  defaultMessage: 'Guided setup',
+  defaultMessage: 'Setup guides',
 });
 const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionTitle', {
   defaultMessage: 'What would you like to do first?',
@@ -84,7 +84,8 @@ export const GettingStarted = () => {
     }
   }, [cloud, history]);
 
-  const onSkip = () => {
+  const onSkip = async () => {
+    await guidedOnboardingService?.skipGuidedOnboarding();
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
     // disable welcome screen on the home page
     localStorage.setItem(KEY_ENABLE_WELCOME, JSON.stringify(false));
