@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { RenderResult } from '@testing-library/react';
-import { act, waitFor, within } from '@testing-library/react';
+import type { Screen } from '@testing-library/react';
+import { act, waitFor, within, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { CaseSeverity, CommentType, ConnectorTypes } from '../../../common/api';
@@ -105,30 +105,36 @@ const sampleDataWithoutTags = {
   tags: [],
 };
 
-const fillFormReactTestingLib = async (renderResult: RenderResult, withTags = false) => {
-  const titleInput = within(renderResult.getByTestId('caseTitle')).getByTestId('input');
+const fillFormReactTestingLib = async ({
+  renderer,
+  withTags = false,
+}: {
+  renderer: Screen;
+  withTags?: boolean;
+}) => {
+  const titleInput = within(renderer.getByTestId('caseTitle')).getByTestId('input');
 
   userEvent.paste(titleInput, sampleDataWithoutTags.title);
 
-  const descriptionInput = within(renderResult.getByTestId('caseDescription')).getByTestId(
+  const descriptionInput = within(renderer.getByTestId('caseDescription')).getByTestId(
     'euiMarkdownEditorTextArea'
   );
 
   userEvent.paste(descriptionInput, sampleDataWithoutTags.description);
 
   if (withTags) {
-    const caseTags = renderResult.getByTestId('caseTags');
+    const caseTags = renderer.getByTestId('caseTags');
 
-    for (let i = 0; i < sampleTags.length; i++) {
+    for (const tag of sampleTags) {
       const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
-      userEvent.type(tagsInput, `${sampleTags[i]}{enter}`);
+      userEvent.type(tagsInput, `${tag}{enter}`);
     }
   }
 };
 
-const waitForFormToRender = async (renderResult: RenderResult) => {
+const waitForFormToRender = async (renderer: Screen) => {
   await waitFor(() => {
-    expect(renderResult.getByTestId('caseTitle')).toBeTruthy();
+    expect(renderer.getByTestId('caseTitle')).toBeTruthy();
   });
 };
 
@@ -181,22 +187,22 @@ describe('Create case', () => {
 
   describe('Step 1 - Case Fields', () => {
     it('renders correctly', async () => {
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
+      await waitForFormToRender(screen);
 
-      expect(renderResult.getByTestId('caseTitle')).toBeTruthy();
-      expect(renderResult.getByTestId('caseSeverity')).toBeTruthy();
-      expect(renderResult.getByTestId('caseDescription')).toBeTruthy();
-      expect(renderResult.getByTestId('createCaseAssigneesComboBox')).toBeTruthy();
-      expect(renderResult.getByTestId('caseTags')).toBeTruthy();
-      expect(renderResult.getByTestId('caseConnectors')).toBeTruthy();
-      expect(renderResult.getByTestId('case-creation-form-steps')).toBeTruthy();
+      expect(screen.getByTestId('caseTitle')).toBeTruthy();
+      expect(screen.getByTestId('caseSeverity')).toBeTruthy();
+      expect(screen.getByTestId('caseDescription')).toBeTruthy();
+      expect(screen.getByTestId('createCaseAssigneesComboBox')).toBeTruthy();
+      expect(screen.getByTestId('caseTags')).toBeTruthy();
+      expect(screen.getByTestId('caseConnectors')).toBeTruthy();
+      expect(screen.getByTestId('case-creation-form-steps')).toBeTruthy();
     });
 
     it('should post case on submit click', async () => {
@@ -205,17 +211,17 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult, true);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen, withTags: true });
 
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith({ ...sampleDataWithoutTags, tags: sampleTags });
@@ -228,23 +234,23 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(renderResult.getByTestId('case-severity-selection'));
+      userEvent.click(screen.getByTestId('case-severity-selection'));
       await waitForEuiPopoverOpen();
 
-      expect(renderResult.getByTestId('case-severity-selection-high')).toBeVisible();
+      expect(screen.getByTestId('case-severity-selection-high')).toBeVisible();
 
-      userEvent.click(renderResult.getByTestId('case-severity-selection-high'));
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.click(screen.getByTestId('case-severity-selection-high'));
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith({
@@ -255,25 +261,25 @@ describe('Create case', () => {
     });
 
     it('does not submits the title when the length is longer than 160 characters', async () => {
-      const longTitle = `${'a'.repeat(161)}`;
+      const longTitle = 'a'.repeat(161);
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
+      await waitForFormToRender(screen);
 
-      const titleInput = within(renderResult.getByTestId('caseTitle')).getByTestId('input');
+      const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
       userEvent.paste(titleInput, longTitle);
 
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(
-          renderResult.getByText('The length of the title is too long. The maximum length is 160.')
+          screen.getByText('The length of the title is too long. The maximum length is 160.')
         ).toBeInTheDocument();
       });
 
@@ -286,22 +292,20 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      const syncAlertsButton = within(renderResult.getByTestId('caseSyncAlerts')).getByTestId(
-        'input'
-      );
+      const syncAlertsButton = within(screen.getByTestId('caseSyncAlerts')).getByTestId('input');
 
       userEvent.click(syncAlertsButton);
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() =>
         expect(postCase).toBeCalledWith({
@@ -321,17 +325,17 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() =>
         expect(postCase).toBeCalledWith({
@@ -342,18 +346,18 @@ describe('Create case', () => {
     });
 
     it('should select LOW as the default severity', async () => {
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
+      await waitForFormToRender(screen);
 
-      expect(renderResult.getByTestId('caseSeverity')).toBeTruthy();
+      expect(screen.getByTestId('caseSeverity')).toBeTruthy();
       // there should be 2 low elements. one for the options popover and one for the displayed one.
-      expect(renderResult.getAllByTestId('case-severity-selection-low').length).toBe(2);
+      expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(2);
 
       await waitForComponentToUpdate();
     });
@@ -375,17 +379,17 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() =>
         expect(postCase).toBeCalledWith({
@@ -423,17 +427,17 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith(sampleDataWithoutTags);
@@ -449,34 +453,34 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connectors'));
+      userEvent.click(screen.getByTestId('dropdown-connectors'));
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
+        expect(screen.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
       });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connector-jira-1'), undefined, {
+      userEvent.click(screen.getByTestId('dropdown-connector-jira-1'), undefined, {
         skipPointerEventsCheck: true,
       });
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('issueTypeSelect')).toBeInTheDocument();
-        expect(renderResult.getByTestId('prioritySelect')).toBeInTheDocument();
+        expect(screen.getByTestId('issueTypeSelect')).toBeInTheDocument();
+        expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
       });
 
-      userEvent.selectOptions(renderResult.getByTestId('issueTypeSelect'), ['10007']);
-      userEvent.selectOptions(renderResult.getByTestId('prioritySelect'), ['Low']);
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.selectOptions(screen.getByTestId('issueTypeSelect'), ['10007']);
+      userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['Low']);
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith({
@@ -512,38 +516,38 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connectors'));
+      userEvent.click(screen.getByTestId('dropdown-connectors'));
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
+        expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
       });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connector-resilient-2'), undefined, {
+      userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
         skipPointerEventsCheck: true,
       });
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
-        expect(renderResult.getByTestId('severitySelect')).toBeInTheDocument();
+        expect(screen.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
+        expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
       });
 
-      const checkbox = within(renderResult.getByTestId('incidentTypeComboBox')).getByTestId(
+      const checkbox = within(screen.getByTestId('incidentTypeComboBox')).getByTestId(
         'comboBoxSearchInput'
       );
 
       userEvent.type(checkbox, 'Denial of Service{enter}');
-      userEvent.selectOptions(renderResult.getByTestId('severitySelect'), ['4']);
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith({
@@ -579,23 +583,23 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connectors'));
+      userEvent.click(screen.getByTestId('dropdown-connectors'));
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('dropdown-connector-servicenow-1')).toBeInTheDocument();
+        expect(screen.getByTestId('dropdown-connector-servicenow-1')).toBeInTheDocument();
       });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connector-servicenow-1'), undefined, {
+      userEvent.click(screen.getByTestId('dropdown-connector-servicenow-1'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -609,12 +613,12 @@ describe('Create case', () => {
       });
 
       ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
-        userEvent.selectOptions(renderResult.getByTestId(subj), ['2']);
+        userEvent.selectOptions(screen.getByTestId(subj), ['2']);
       });
 
-      userEvent.selectOptions(renderResult.getByTestId('categorySelect'), ['software']);
-      userEvent.selectOptions(renderResult.getByTestId('subcategorySelect'), ['os']);
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.selectOptions(screen.getByTestId('categorySelect'), ['software']);
+      userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['os']);
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith({
@@ -662,23 +666,23 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connectors'));
+      userEvent.click(screen.getByTestId('dropdown-connectors'));
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('dropdown-connector-servicenow-sir')).toBeInTheDocument();
+        expect(screen.getByTestId('dropdown-connector-servicenow-sir')).toBeInTheDocument();
       });
 
-      userEvent.click(renderResult.getByTestId('dropdown-connector-servicenow-sir'), undefined, {
+      userEvent.click(screen.getByTestId('dropdown-connector-servicenow-sir'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -691,11 +695,11 @@ describe('Create case', () => {
         onChoicesSuccess(useGetChoicesResponse.choices);
       });
 
-      userEvent.click(renderResult.getByTestId('destIpCheckbox'));
-      userEvent.selectOptions(renderResult.getByTestId('prioritySelect'), ['1']);
-      userEvent.selectOptions(renderResult.getByTestId('categorySelect'), ['Denial of Service']);
-      userEvent.selectOptions(renderResult.getByTestId('subcategorySelect'), ['26']);
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.click(screen.getByTestId('destIpCheckbox'));
+      userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['1']);
+      userEvent.selectOptions(screen.getByTestId('categorySelect'), ['Denial of Service']);
+      userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['26']);
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toBeCalledWith({
@@ -748,26 +752,26 @@ describe('Create case', () => {
       data: connectorsMock,
     });
 
-    const renderResult = mockedContext.render(
+    mockedContext.render(
       <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
       </FormContext>
     );
 
-    await waitForFormToRender(renderResult);
-    await fillFormReactTestingLib(renderResult);
+    await waitForFormToRender(screen);
+    await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(renderResult.getByTestId('dropdown-connectors'));
+    userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
+      expect(screen.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
     });
 
-    userEvent.click(renderResult.getByTestId('dropdown-connector-jira-1'), undefined, {
+    userEvent.click(screen.getByTestId('dropdown-connector-jira-1'), undefined, {
       skipPointerEventsCheck: true,
     });
-    userEvent.click(renderResult.getByTestId('create-case-submit'));
+    userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitFor(() => {
       expect(afterCaseCreated).toHaveBeenCalledWith(
@@ -808,17 +812,17 @@ describe('Create case', () => {
       },
     ];
 
-    const renderResult = mockedContext.render(
+    mockedContext.render(
       <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
       </FormContext>
     );
 
-    await waitForFormToRender(renderResult);
-    await fillFormReactTestingLib(renderResult);
+    await waitForFormToRender(screen);
+    await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(renderResult.getByTestId('create-case-submit'));
+    userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitForComponentToUpdate();
 
@@ -837,17 +841,17 @@ describe('Create case', () => {
     });
     const attachments: CaseAttachments = [];
 
-    const renderResult = mockedContext.render(
+    mockedContext.render(
       <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
       </FormContext>
     );
 
-    await waitForFormToRender(renderResult);
-    await fillFormReactTestingLib(renderResult);
+    await waitForFormToRender(screen);
+    await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(renderResult.getByTestId('create-case-submit'));
+    userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitForComponentToUpdate();
 
@@ -872,7 +876,7 @@ describe('Create case', () => {
       },
     ];
 
-    const renderResult = mockedContext.render(
+    mockedContext.render(
       <FormContext
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
@@ -883,20 +887,20 @@ describe('Create case', () => {
       </FormContext>
     );
 
-    await waitForFormToRender(renderResult);
-    await fillFormReactTestingLib(renderResult);
+    await waitForFormToRender(screen);
+    await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(renderResult.getByTestId('dropdown-connectors'));
+    userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
+      expect(screen.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
     });
 
-    userEvent.click(renderResult.getByTestId('dropdown-connector-jira-1'), undefined, {
+    userEvent.click(screen.getByTestId('dropdown-connector-jira-1'), undefined, {
       skipPointerEventsCheck: true,
     });
 
-    userEvent.click(renderResult.getByTestId('create-case-submit'));
+    userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitFor(() => {
       expect(postCase).toHaveBeenCalled();
@@ -927,17 +931,17 @@ describe('Create case', () => {
         actions: { save: false, show: false },
       };
 
-      const result = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(result);
-      await fillFormReactTestingLib(result);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(result.getByTestId('create-case-submit'));
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitForComponentToUpdate();
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
@@ -946,17 +950,17 @@ describe('Create case', () => {
 
   describe('Assignees', () => {
     it('should submit assignees', async () => {
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
-      await fillFormReactTestingLib(renderResult);
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
 
-      const assigneesComboBox = within(renderResult.getByTestId('createCaseAssigneesComboBox'));
+      const assigneesComboBox = within(screen.getByTestId('createCaseAssigneesComboBox'));
 
       await waitFor(() => {
         expect(assigneesComboBox.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
@@ -966,12 +970,12 @@ describe('Create case', () => {
 
       await waitFor(() => {
         expect(
-          renderResult.getByTestId('comboBoxOptionsList createCaseAssigneesComboBox-optionsList')
+          screen.getByTestId('comboBoxOptionsList createCaseAssigneesComboBox-optionsList')
         ).toBeInTheDocument();
       });
 
-      userEvent.click(await renderResult.findByText(`${userProfiles[0].user.full_name}`));
-      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      userEvent.click(await screen.findByText(`${userProfiles[0].user.full_name}`));
+      userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitForComponentToUpdate();
 
@@ -984,16 +988,16 @@ describe('Create case', () => {
     it('should not render the assignees on basic license', async () => {
       useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
 
-      const renderResult = mockedContext.render(
+      mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       );
 
-      await waitForFormToRender(renderResult);
+      await waitForFormToRender(screen);
       await waitForComponentToUpdate();
-      expect(renderResult.queryByTestId('createCaseAssigneesComboBox')).toBeNull();
+      expect(screen.queryByTestId('createCaseAssigneesComboBox')).toBeNull();
     });
   });
 });
