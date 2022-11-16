@@ -67,7 +67,7 @@ export const tasks: TelemetryTask[] = [
     // adding a composite aggregation on a number of fields and counting the number of buckets. The resulting count is an
     // approximation of the amount of metric documents that will be created. We record both the expected metric document count plus
     // the transaction count for that time range.
-    executor: async ({ indices, search }) => {
+    executor: async ({ indices, telemetryClient }) => {
       async function getBucketCountFromPaginatedQuery(
         sources: estypes.AggregationsCompositeAggregationSource[],
         prevResult?: {
@@ -89,6 +89,7 @@ export const tasks: TelemetryTask[] = [
         const params = {
           index: [indices.transaction],
           body: {
+            track_total_hits: true,
             size: 0,
             timeout,
             query: {
@@ -99,7 +100,6 @@ export const tasks: TelemetryTask[] = [
                 ],
               },
             },
-            track_total_hits: true,
             aggs: {
               transaction_metric_groups: {
                 composite: {
@@ -116,7 +116,7 @@ export const tasks: TelemetryTask[] = [
           },
         };
 
-        const result = await search(params);
+        const result = await telemetryClient.search(params);
 
         let nextAfter: any;
 
@@ -126,12 +126,14 @@ export const tasks: TelemetryTask[] = [
             result.aggregations.transaction_metric_groups.buckets.length;
         }
 
+        const transactionCount = result.hits.total.value;
+
         if (nextAfter) {
           return await getBucketCountFromPaginatedQuery(
             sources,
             {
               expected_metric_document_count,
-              transaction_count: result.hits.total.value,
+              transaction_count: transactionCount,
             },
             nextAfter
           );
@@ -139,14 +141,14 @@ export const tasks: TelemetryTask[] = [
 
         return {
           expected_metric_document_count,
-          transaction_count: result.hits.total.value,
-          ratio: expected_metric_document_count / result.hits.total.value,
+          transaction_count: transactionCount,
+          ratio: expected_metric_document_count / transactionCount,
         };
       }
 
       // fixed date range for reliable results
       const lastTransaction = (
-        await search({
+        await telemetryClient.search({
           index: indices.transaction,
           body: {
             timeout,
@@ -158,6 +160,7 @@ export const tasks: TelemetryTask[] = [
               },
             },
             size: 1,
+            track_total_hits: false,
             sort: {
               '@timestamp': 'desc' as const,
             },
@@ -245,7 +248,7 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'cloud',
-    executor: async ({ indices, search }) => {
+    executor: async ({ indices, telemetryClient }) => {
       function getBucketKeys({
         buckets,
       }: {
@@ -261,7 +264,7 @@ export const tasks: TelemetryTask[] = [
       const region = 'region';
       const provider = 'provider';
 
-      const response = await search({
+      const response = await telemetryClient.search({
         index: [
           indices.error,
           indices.metric,
@@ -269,6 +272,7 @@ export const tasks: TelemetryTask[] = [
           indices.transaction,
         ],
         body: {
+          track_total_hits: false,
           size: 0,
           timeout,
           aggs: {
@@ -306,7 +310,7 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'host',
-    executor: async ({ indices, search }) => {
+    executor: async ({ indices, telemetryClient }) => {
       function getBucketKeys({
         buckets,
       }: {
@@ -318,7 +322,7 @@ export const tasks: TelemetryTask[] = [
         return buckets.map((bucket) => bucket.key as string);
       }
 
-      const response = await search({
+      const response = await telemetryClient.search({
         index: [
           indices.error,
           indices.metric,
@@ -326,6 +330,7 @@ export const tasks: TelemetryTask[] = [
           indices.transaction,
         ],
         body: {
+          track_total_hits: false,
           size: 0,
           timeout,
           aggs: {
@@ -353,14 +358,16 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'environments',
-    executor: async ({ indices, search }) => {
-      const response = await search({
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.search({
         index: [indices.transaction],
         body: {
+          track_total_hits: false,
+          size: 0,
           timeout,
           query: {
             bool: {
-              filter: [{ range: { '@timestamp': { gte: 'now-1d' } } }],
+              filter: [range1d],
             },
           },
           aggs: {
@@ -435,7 +442,7 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'processor_events',
-    executor: async ({ indices, search }) => {
+    executor: async ({ indices, telemetryClient }) => {
       const indicesByProcessorEvent = {
         error: indices.error,
         metric: indices.metric,
@@ -461,10 +468,11 @@ export const tasks: TelemetryTask[] = [
         return prevJob.then(async (data) => {
           const { processorEvent, timeRange } = current;
 
-          const totalHitsResponse = await search({
+          const totalHitsResponse = await telemetryClient.search({
             index: indicesByProcessorEvent[processorEvent],
             body: {
               size: 0,
+              track_total_hits: true,
               timeout,
               query: {
                 bool: {
@@ -474,15 +482,17 @@ export const tasks: TelemetryTask[] = [
                   ],
                 },
               },
-              track_total_hits: true,
             },
           });
 
           const retainmentResponse =
             timeRange === 'all'
-              ? await search({
+              ? await telemetryClient.search({
                   index: indicesByProcessorEvent[processorEvent],
+                  size: 10,
                   body: {
+                    track_total_hits: false,
+                    size: 0,
                     timeout,
                     query: {
                       bool: {
@@ -531,22 +541,20 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'agent_configuration',
-    executor: async ({ indices, search }) => {
-      const agentConfigurationCount = (
-        await search({
-          index: indices.apmAgentConfigurationIndex,
-          body: {
-            size: 0,
-            timeout,
-            track_total_hits: true,
-          },
-        })
-      ).hits.total.value;
+    executor: async ({ indices, telemetryClient }) => {
+      const agentConfigurationCount = await telemetryClient.search({
+        index: indices.apmAgentConfigurationIndex,
+        body: {
+          size: 0,
+          timeout,
+          track_total_hits: true,
+        },
+      });
 
       return {
         counts: {
           agent_configuration: {
-            all: agentConfigurationCount,
+            all: agentConfigurationCount.hits.total.value,
           },
         },
       };
@@ -554,11 +562,11 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'services',
-    executor: async ({ indices, search }) => {
+    executor: async ({ indices, telemetryClient }) => {
       const servicesPerAgent = await AGENT_NAMES.reduce(
         (prevJob, agentName) => {
           return prevJob.then(async (data) => {
-            const response = await search({
+            const response = await telemetryClient.search({
               index: [
                 indices.error,
                 indices.span,
@@ -567,6 +575,7 @@ export const tasks: TelemetryTask[] = [
               ],
               body: {
                 size: 0,
+                track_total_hits: false,
                 timeout,
                 query: {
                   bool: {
@@ -607,8 +616,8 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'versions',
-    executor: async ({ search, indices }) => {
-      const response = await search({
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.search({
         index: [indices.transaction, indices.span, indices.error],
         terminate_after: 1,
         body: {
@@ -617,6 +626,7 @@ export const tasks: TelemetryTask[] = [
               field: 'observer.version',
             },
           },
+          track_total_hits: false,
           size: 1,
           timeout,
           sort: {
@@ -651,13 +661,14 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'groupings',
-    executor: async ({ search, indices }) => {
+    executor: async ({ indices, telemetryClient }) => {
       const errorGroupsCount = (
-        await search({
+        await telemetryClient.search({
           index: indices.error,
           body: {
             size: 0,
             timeout,
+            track_total_hits: false,
             query: {
               bool: {
                 filter: [
@@ -689,9 +700,10 @@ export const tasks: TelemetryTask[] = [
       ).aggregations?.top_service.buckets[0]?.error_groups.value;
 
       const transactionGroupsCount = (
-        await search({
+        await telemetryClient.search({
           index: indices.transaction,
           body: {
+            track_total_hits: false,
             size: 0,
             timeout,
             query: {
@@ -725,7 +737,7 @@ export const tasks: TelemetryTask[] = [
       ).aggregations?.top_service.buckets[0]?.transaction_groups.value;
 
       const tracesPerDayCount = (
-        await search({
+        await telemetryClient.search({
           index: indices.transaction,
           body: {
             query: {
@@ -747,9 +759,10 @@ export const tasks: TelemetryTask[] = [
       ).hits.total.value;
 
       const servicesCount = (
-        await search({
+        await telemetryClient.search({
           index: [indices.transaction, indices.error, indices.metric],
           body: {
+            track_total_hits: false,
             size: 0,
             timeout,
             query: {
@@ -788,10 +801,10 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'integrations',
-    executor: async ({ transportRequest }) => {
+    executor: async ({ telemetryClient }) => {
       const apmJobs = ['apm-*', '*-high_mean_response_time'];
 
-      const response = (await transportRequest({
+      const response = (await telemetryClient.transportRequest({
         method: 'get',
         path: `/_ml/anomaly_detectors/${apmJobs.join(',')}`,
       })) as { body?: { count: number } };
@@ -807,15 +820,16 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'agents',
-    executor: async ({ search, indices }) => {
+    executor: async ({ indices, telemetryClient }) => {
       const size = 3;
 
       const agentData = await AGENT_NAMES.reduce(async (prevJob, agentName) => {
         const data = await prevJob;
 
-        const response = await search({
+        const response = await telemetryClient.search({
           index: [indices.error, indices.metric, indices.transaction],
           body: {
+            track_total_hits: false,
             size: 0,
             timeout,
             query: {
@@ -1001,8 +1015,8 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'indices_stats',
-    executor: async ({ indicesStats, indices }) => {
-      const response = await indicesStats({
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.indicesStats({
         index: [
           indices.apmAgentConfigurationIndex,
           indices.error,
@@ -1014,11 +1028,11 @@ export const tasks: TelemetryTask[] = [
         ],
       });
 
-      const metricIndicesResponse = await indicesStats({
+      const metricIndicesResponse = await telemetryClient.indicesStats({
         index: [indices.metric],
       });
 
-      const tracesIndicesResponse = await indicesStats({
+      const tracesIndicesResponse = await telemetryClient.indicesStats({
         index: [indices.span, indices.transaction],
       });
 
@@ -1077,10 +1091,11 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'cardinality',
-    executor: async ({ indices, search }) => {
-      const allAgentsCardinalityResponse = await search({
+    executor: async ({ indices, telemetryClient }) => {
+      const allAgentsCardinalityResponse = await telemetryClient.search({
         index: [indices.transaction],
         body: {
+          track_total_hits: false,
           size: 0,
           timeout,
           query: {
@@ -1103,9 +1118,10 @@ export const tasks: TelemetryTask[] = [
         },
       });
 
-      const rumAgentCardinalityResponse = await search({
+      const rumAgentCardinalityResponse = await telemetryClient.search({
         index: [indices.transaction],
         body: {
+          track_total_hits: false,
           size: 0,
           timeout,
           query: {
@@ -1204,10 +1220,11 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'per_service',
-    executor: async ({ indices, search }) => {
-      const response = await search({
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.search({
         index: [indices.transaction],
         body: {
+          track_total_hits: false,
           size: 0,
           timeout,
           query: {
