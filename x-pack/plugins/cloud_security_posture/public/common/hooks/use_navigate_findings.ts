@@ -43,7 +43,7 @@ export const useNavigateFindings = () => {
         ...(query && { search: encodeQuery(getFindingsQuery(query)) }),
       });
     },
-    [history.push]
+    [history]
   );
 };
 
