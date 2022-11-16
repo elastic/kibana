@@ -177,7 +177,7 @@ for use in their own application.
 
 
 |{kib-repo}blob/{branch}/src/plugins/files/README.md[files]
-|File upload, download, sharing, and serving over HTTP implementation in Kibana.
+|The files service provides functionality to manage, retrieve, share files in Kibana.
 
 
 |{kib-repo}blob/{branch}/src/plugins/guided_onboarding/README.md[guidedOnboarding]
