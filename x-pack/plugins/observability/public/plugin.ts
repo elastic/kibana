@@ -52,9 +52,13 @@ import { getExploratoryViewEmbeddable } from './components/shared/exploratory_vi
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
+import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
 export interface ConfigSchema {
   unsafe: {
+    slo: {
+      enabled: boolean;
+    };
     alertDetails: {
       apm: {
         enabled: boolean;
@@ -187,6 +191,8 @@ export class Plugin
         isDev: this.initContext.env.mode.dev,
       });
     };
+
+    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
 
     const appUpdater$ = this.appUpdater$;
     const app = {
