@@ -137,7 +137,7 @@ export const getRecordRangeLabel = ({
         total: <EuiI18nNumber value={total} />,
         monitorsLabel: (
           <strong>
-            {i18n.translate('xpack.synthetics.management.monitorList.recordRangeLabel', {
+            {i18n.translate('xpack.synthetics.management.monitorList.configurationRangeLabel', {
               defaultMessage: '{monitorCount, plural, one {Configuration} other {Configurations}}',
               values: {
                 monitorCount: total,
@@ -190,12 +190,9 @@ export const DISABLE_MONITOR_LABEL = i18n.translate(
   }
 );
 
-export const PROJECT_MONITOR_DESC = i18n.translate(
-  'xpack.synthetics.management.projectMonitorDescription',
-  {
-    defaultMessage: 'A project monitor',
-  }
-);
+export const PROJECT = i18n.translate('xpack.synthetics.management.project', {
+  defaultMessage: 'Project',
+});
 
 export const getMonitorEnabledSuccessLabel = (name: string) =>
   i18n.translate('xpack.synthetics.management.monitorEnabledSuccessMessage', {

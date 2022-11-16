@@ -39,14 +39,17 @@ export const MonitorDetailsLink = ({
   });
 
   const isProjectMonitor = monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+  const projectLabel = isProjectMonitor
+    ? `${labels.PROJECT}: ${monitor[ConfigKey.PROJECT_ID]}`
+    : '';
 
   return (
     <>
       <EuiLink href={monitorDetailLinkUrl}>{monitor.name}</EuiLink>
       {isProjectMonitor ? (
         <EuiIcon
-          title={labels.PROJECT_MONITOR_DESC}
-          aria-label={labels.PROJECT_MONITOR_DESC}
+          title={projectLabel}
+          aria-label={projectLabel}
           type="symlink"
           size="s"
           css={{ margin: 4 }}
