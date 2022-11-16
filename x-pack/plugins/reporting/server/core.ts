@@ -153,12 +153,12 @@ export class ReportingCore {
   private async assertKibanaIsAvailable(): Promise<void> {
     const { status } = this.getPluginSetupDeps();
 
-    await status.overall$
-      .pipe(
+    await Rx.firstValueFrom(
+      status.overall$.pipe(
         filter((current) => current.level === ServiceStatusLevels.available),
         first()
       )
-      .toPromise();
+    );
   }
 
   /*

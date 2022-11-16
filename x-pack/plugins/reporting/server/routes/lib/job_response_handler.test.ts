@@ -25,6 +25,11 @@ let jobsQuery: jest.Mocked<ReturnType<typeof jobsQueryFactory>>;
 let response: jest.Mocked<typeof kibanaResponseFactory>;
 let write: jest.Mocked<Writable['_write']>;
 
+const mockCounters = {
+  usageCounter: jest.fn(),
+  handleError: jest.fn(),
+};
+
 beforeEach(async () => {
   const schema = createMockConfigSchema();
   core = await createMockReportingCore(schema);
@@ -55,7 +60,14 @@ beforeEach(async () => {
 describe('deleteJobResponseHandler', () => {
   it('should return not found response when there is no job', async () => {
     jobsQuery.get.mockResolvedValueOnce(undefined);
-    await deleteJobResponseHandler(core, response, [], { username: 'somebody' }, { docId: 'id' });
+    await deleteJobResponseHandler(
+      core,
+      response,
+      [],
+      { username: 'somebody' },
+      { docId: 'id' },
+      mockCounters
+    );
 
     expect(response.notFound).toHaveBeenCalled();
   });
@@ -69,7 +81,8 @@ describe('deleteJobResponseHandler', () => {
       response,
       [CSV_JOB_TYPE],
       { username: 'somebody' },
-      { docId: 'id' }
+      { docId: 'id' },
+      mockCounters
     );
 
     expect(response.unauthorized).toHaveBeenCalledWith({ body: expect.any(String) });
@@ -85,7 +98,8 @@ describe('deleteJobResponseHandler', () => {
       response,
       [PDF_JOB_TYPE],
       { username: 'somebody' },
-      { docId: 'id' }
+      { docId: 'id' },
+      mockCounters
     );
 
     expect(write).toHaveBeenCalledWith(Buffer.from(''), expect.anything(), expect.anything());
@@ -105,7 +119,8 @@ describe('deleteJobResponseHandler', () => {
       response,
       [PDF_JOB_TYPE],
       { username: 'somebody' },
-      { docId: 'id' }
+      { docId: 'id' },
+      mockCounters
     );
 
     expect(response.customError).toHaveBeenCalledWith({
@@ -118,7 +133,14 @@ describe('deleteJobResponseHandler', () => {
 describe('downloadJobResponseHandler', () => {
   it('should return not found response when there is no job', async () => {
     jobsQuery.get.mockResolvedValueOnce(undefined);
-    await downloadJobResponseHandler(core, response, [], { username: 'somebody' }, { docId: 'id' });
+    await downloadJobResponseHandler(
+      core,
+      response,
+      [],
+      { username: 'somebody' },
+      { docId: 'id' },
+      mockCounters
+    );
 
     expect(response.notFound).toHaveBeenCalled();
   });
@@ -132,7 +154,8 @@ describe('downloadJobResponseHandler', () => {
       response,
       [CSV_JOB_TYPE],
       { username: 'somebody' },
-      { docId: 'id' }
+      { docId: 'id' },
+      mockCounters
     );
 
     expect(response.unauthorized).toHaveBeenCalledWith({ body: expect.any(String) });
@@ -150,7 +173,8 @@ describe('downloadJobResponseHandler', () => {
       response,
       [PDF_JOB_TYPE],
       { username: 'somebody' },
-      { docId: 'id' }
+      { docId: 'id' },
+      mockCounters
     );
 
     expect(response.badRequest).toHaveBeenCalledWith({ body: expect.any(String) });
@@ -173,7 +197,8 @@ describe('downloadJobResponseHandler', () => {
       response,
       [PDF_JOB_TYPE],
       { username: 'somebody' },
-      { docId: 'id' }
+      { docId: 'id' },
+      mockCounters
     );
 
     expect(response.custom).toHaveBeenCalledWith({
@@ -201,7 +226,8 @@ describe('downloadJobResponseHandler', () => {
       response,
       [PDF_JOB_TYPE],
       { username: 'somebody' },
-      { docId: 'id' }
+      { docId: 'id' },
+      mockCounters
     );
 
     expect(response.custom).toHaveBeenCalledWith({
