@@ -33,7 +33,7 @@ function assertDowngraded(transformed: Record<string, any>) {
   expect(transformed.tags).not.toContain('error');
 }
 
-describe('server logging LogInterceptor', () => {
+describe.only('server logging LogInterceptor', () => {
   describe('#downgradeIfEconnreset()', () => {
     it('transforms ECONNRESET events', () => {
       const interceptor = new LogInterceptor();
@@ -142,6 +142,22 @@ describe('server logging LogInterceptor', () => {
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ message });
       assertDowngraded(interceptor.downgradeIfHTTPWhenHTTPS(event)!);
+    });
+
+    it('ignores non events', () => {
+      const interceptor = new LogInterceptor();
+      const event = stubClientErrorEvent({ message: 'Not error' });
+      expect(interceptor.downgradeIfEcanceled(event)).toBe(null);
+    });
+  });
+
+  describe('#downgradeIfCertUntrusted', () => {
+    it('transforms https requests when serving untrusted https errors', () => {
+      const message =
+        '4584650176:error:1408F09C:SSL routines:ssl3_read_bytes:sslv3 alert certificate unknown:../deps/openssl/openssl/ssl/record/ssl3_record.c:322:\n';
+      const interceptor = new LogInterceptor();
+      const event = stubClientErrorEvent({ message });
+      assertDowngraded(interceptor.downgradeIfCertUntrusted(event)!);
     });
 
     it('ignores non events', () => {

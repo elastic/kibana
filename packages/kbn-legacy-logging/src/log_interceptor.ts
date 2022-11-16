@@ -16,6 +16,8 @@ import { AnyEvent } from './log_events';
  */
 const OPENSSL_GET_RECORD_REGEX = /ssl3_get_record:http/;
 
+const OPENSSL_READ_RECORD_REGEX = /ssl3_read_bytes:sslv3/;
+
 function doTagsMatch(event: AnyEvent, tags: string[]) {
   return isEqual(event.tags, tags);
 }
@@ -55,6 +57,7 @@ function downgradeIfErrorType(errorType: string, event: AnyEvent) {
 }
 
 function downgradeIfErrorMessage(match: RegExp | string, event: AnyEvent) {
+  let tagLevel: string = 'debug';
   const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
   const errorMessage = get(event, 'error.message');
   const matchesErrorMessage = isClientError && doesMessageMatch(errorMessage, match);
@@ -62,12 +65,16 @@ function downgradeIfErrorMessage(match: RegExp | string, event: AnyEvent) {
   if (!matchesErrorMessage) {
     return null;
   }
-
+  // log in debug if OPENSSL_GET_RECORD_REGEX; log at info if OPENSSL_READ_RECORD_REGEX
+  // see https://github.com/elastic/kibana/issues/35004
+  if (doesMessageMatch(errorMessage, OPENSSL_READ_RECORD_REGEX)) {
+    tagLevel = 'info';
+  }
   return {
     event: 'log',
     pid: event.pid,
     timestamp: event.timestamp,
-    tags: ['debug', 'connection'],
+    tags: [tagLevel, 'connection'],
     data: errorMessage,
   };
 }
@@ -130,13 +137,18 @@ export class LogInterceptor extends Stream.Transform {
     return downgradeIfErrorMessage(OPENSSL_GET_RECORD_REGEX, event);
   }
 
+  downgradeIfCertUntrusted(event: AnyEvent) {
+    return downgradeIfErrorMessage(OPENSSL_READ_RECORD_REGEX, event);
+  }
+
   _transform(event: AnyEvent, enc: string, next: Stream.TransformCallback) {
     const downgraded =
       this.downgradeIfEconnreset(event) ||
       this.downgradeIfEpipe(event) ||
       this.downgradeIfEcanceled(event) ||
       this.downgradeIfHTTPSWhenHTTP(event) ||
-      this.downgradeIfHTTPWhenHTTPS(event);
+      this.downgradeIfHTTPWhenHTTPS(event) ||
+      this.downgradeIfCertUntrusted(event);
 
     this.push(downgraded || event);
     next();
