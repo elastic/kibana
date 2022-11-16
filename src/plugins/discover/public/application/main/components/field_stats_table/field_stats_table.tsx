@@ -155,7 +155,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         dataView,
         savedSearch,
         query,
-        filters,
+        filters: services.data.query.filterManager.getFilters(),
         visibleFieldNames: columns,
         onAddFilter,
         sessionId: searchSessionId,
@@ -177,6 +177,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     searchSessionId,
     availableFields$,
     savedSearchDataTotalHits$,
+    services.data,
   ]);
 
   useEffect(() => {

@@ -288,7 +288,7 @@ function DiscoverFieldComponent({
   const [infoIsOpen, setOpen] = useState(false);
   const isDocumentRecord = !!onAddFilter;
   const query = useAppStateSelector((state) => state.query);
-  const filters = useAppStateSelector((state) => state.filters);
+  const filters = useAppStateSelector(() => data.query.filterManager.getFilters());
 
   const addFilterAndClosePopover: typeof onAddFilter | undefined = useMemo(
     () =>
