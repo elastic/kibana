@@ -116,7 +116,7 @@ export const ElasticsearchGoClientReadme = () => {
 
                 <EuiText>
                   <FormattedMessage
-                    id="customIntegrations.languageClients.GoElasticsearch.readme.install"
+                    id="customIntegrations.languageClients.GoElasticsearch.readme.addPackage"
                     defaultMessage="Add the package to your {go_file} file:"
                     values={{
                       go_file: <EuiCode>go.mod</EuiCode>,
