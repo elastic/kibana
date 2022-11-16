@@ -78,6 +78,9 @@ import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
+import { GroupByFields } from '../group_by_fields';
+import { useLicense } from '../../../../common/hooks/use_license';
+import { minimumLicenseForSuppression } from '../../../../../common/detection_engine/rule_schema';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -134,6 +137,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const [dataViewTitle, setDataViewTitle] = useState<string>();
+  const license = useLicense();
 
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
@@ -770,6 +774,19 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </RuleTypeEuiFormRow>
             </>
           )}
+
+          <RuleTypeEuiFormRow $isVisible={isQueryRule(ruleType)}>
+            <UseField
+              path="groupByFields"
+              component={GroupByFields}
+              componentProps={{
+                browserFields: termsAggregationFields,
+                isDisabled:
+                  !license.isAtLeast(minimumLicenseForSuppression) &&
+                  initialState.groupByFields.length === 0,
+              }}
+            />
+          </RuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
