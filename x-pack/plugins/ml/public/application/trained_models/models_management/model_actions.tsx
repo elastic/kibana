@@ -31,7 +31,7 @@ export function useModelActions({
   fetchModels,
 }: {
   isLoading: boolean;
-  onTestAction: (model: ModelItem) => void;
+  onTestAction: (model: string) => void;
   onModelsDeleteRequest: (modelsIds: string[]) => void;
   onLoading: (isLoading: boolean) => void;
   fetchModels: () => void;
@@ -360,7 +360,7 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         available: isTestable,
-        onClick: onTestAction,
+        onClick: (item) => onTestAction(item.model_id),
         enabled: (item) => canTestTrainedModels && isTestEnabled(item),
       },
     ],

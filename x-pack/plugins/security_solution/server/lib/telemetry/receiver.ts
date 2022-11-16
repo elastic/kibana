@@ -58,6 +58,7 @@ import type {
   ValueListIndicatorMatchResponseAggregation,
 } from './types';
 import { telemetryConfiguration } from './configuration';
+import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 
 export interface ITelemetryReceiver {
   start(
@@ -277,7 +278,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `.ds-metrics-endpoint.metrics-*`,
+      index: ENDPOINT_METRICS_INDEX,
       ignore_unavailable: false,
       body: {
         size: 0, // no query results required - only aggregation quantity
