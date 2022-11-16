@@ -61627,7 +61627,7 @@ async function upToDate(settingsPath) {
 
     if (stat.isFile()) {
       const readSettingsFile = await Object(fs__WEBPACK_IMPORTED_MODULE_1__["readFileSync"])(settingsPath, 'utf8');
-      return readSettingsFile.startsWith('# 7.17 V2 ');
+      return readSettingsFile.startsWith('# V2 ');
     }
   } catch (error) {
     return false;

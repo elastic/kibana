@@ -28,7 +28,7 @@ async function upToDate(settingsPath: string) {
     const stat = statSync(settingsPath);
     if (stat.isFile()) {
       const readSettingsFile = await readFileSync(settingsPath, 'utf8');
-      return readSettingsFile.startsWith('# 7.17 V2 ');
+      return readSettingsFile.startsWith('# V2 ');
     }
   } catch (error) {
     return false;
