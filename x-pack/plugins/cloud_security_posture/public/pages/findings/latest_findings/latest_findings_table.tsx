@@ -84,7 +84,7 @@ const FindingsTableComponent = ({
           <h2>
             <FormattedMessage
               id="xpack.csp.findings.latestFindings.noFindingsTitle"
-              defaultMessage="There are no Findings. Refine your search"
+              defaultMessage="There are no Findings."
             />
           </h2>
         }
