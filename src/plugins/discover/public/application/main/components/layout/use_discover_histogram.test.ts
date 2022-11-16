@@ -33,6 +33,7 @@ import { setTimeout } from 'timers/promises';
 import { calculateBounds } from '@kbn/data-plugin/public';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 
 const mockData = dataPluginMock.createStartContract();
 
@@ -69,12 +70,14 @@ describe('useDiscoverHistogram', () => {
     canVisualize = true,
     storage = new LocalStorageMock({}) as unknown as Storage,
     stateContainer = {},
+    searchSessionId = '123',
   }: {
     isPlainRecord?: boolean;
     isTimeBased?: boolean;
     canVisualize?: boolean;
     storage?: Storage;
     stateContainer?: unknown;
+    searchSessionId?: string | null;
   } = {}) => {
     mockStorage = storage;
     mockCanVisualize = canVisualize;
@@ -107,6 +110,11 @@ describe('useDiscoverHistogram', () => {
       availableFields$,
     };
 
+    const searchSessionService = {
+      ...getSessionServiceMock(),
+      getSession$: () => new BehaviorSubject(searchSessionId ?? undefined),
+    };
+
     const hook = renderHook(() => {
       return useDiscoverHistogram({
         stateContainer: stateContainer as GetStateReturn,
@@ -117,7 +125,7 @@ describe('useDiscoverHistogram', () => {
         isTimeBased,
         isPlainRecord,
         inspectorAdapters: { requests: new RequestAdapter() },
-        searchSessionManager: createSearchSessionMock().searchSessionManager,
+        searchSessionManager: createSearchSessionMock(searchSessionService).searchSessionManager,
       });
     });
 
@@ -125,6 +133,11 @@ describe('useDiscoverHistogram', () => {
 
     return hook;
   };
+
+  it('should return undefined if there is no search session', async () => {
+    const { result } = await renderUseDiscoverHistogram({ searchSessionId: null });
+    expect(result.current).toBeUndefined();
+  });
 
   describe('contexts', () => {
     it('should output the correct hits context', async () => {
