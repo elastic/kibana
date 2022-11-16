@@ -15,7 +15,9 @@
   "references": [
     "https://www.lunasec.io/docs/blog/log4j-zero-day/",
     "https://github.com/christophetd/log4shell-vulnerable-app",
-    "https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf"
+    "https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf",
+    "https://www.elastic.co/security-labs/detecting-log4j2-with-elastic-security",
+    "https://www.elastic.co/security-labs/analysis-of-log4shell-cve-2021-45046"
   ],
   "required_fields": [
     {
@@ -100,5 +102,5 @@
     }
   ],
   "type": "eql",
-  "version": 100
+  "version": 101
 }
