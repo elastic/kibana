@@ -18,7 +18,7 @@ export const MonitorStatus = ({
   loading?: boolean;
   compressed?: boolean;
   monitor: EncryptedSyntheticsMonitor;
-  status?: 'up' | 'down';
+  status?: string;
 }) => {
   const isBrowserType = monitor.type === 'browser';
 
