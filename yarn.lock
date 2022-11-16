@@ -3674,10 +3674,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-log-stream-page-state@link:bazel-bin/packages/observability-logs/log_stream_page/state":
-  version "0.0.0"
-  uid ""
-
 "@kbn/optimizer-webpack-helpers@link:bazel-bin/packages/kbn-optimizer-webpack-helpers":
   version "0.0.0"
   uid ""
