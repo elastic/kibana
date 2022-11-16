@@ -9,6 +9,7 @@ import type {
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 
 import type { Usage } from '../collectors/register';
@@ -19,15 +20,15 @@ const EVENT_TYPE = 'fleet_usage';
 
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
-  private taskId = 'Fleet-Usage-Sender-Task';
+  private taskVersion = '1.0.0';
   private taskType = 'Fleet-Usage-Sender';
+  private wasStarted: boolean = false;
+  private interval = '1h';
 
   constructor(
     taskManager: TaskManagerSetupContract,
     core: CoreSetup,
-    fetchUsage: () => Promise<Usage>,
-    kibanaVersion: string,
-    isProductionMode: boolean
+    fetchUsage: () => Promise<Usage>
   ) {
     taskManager.registerTaskDefinitions({
       [this.taskType]: {
@@ -36,21 +37,11 @@ export class FleetUsageSender {
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
-            async run() {
-              appContextService.getLogger().info('Running Fleet Usage telemetry send task');
-
-              try {
-                const usageData = await fetchUsage();
-                appContextService.getLogger().debug(JSON.stringify(usageData));
-                core.analytics.reportEvent(EVENT_TYPE, usageData);
-              } catch (error) {
-                appContextService
-                  .getLogger()
-                  .error('Error occurred while sending Fleet Usage telemetry: ' + error);
-              }
+            run: async () => {
+              return this.runTask(taskInstance, core, fetchUsage);
             },
 
-            async cancel() {},
+            cancel: async () => {},
           };
         },
       },
@@ -58,20 +49,63 @@ export class FleetUsageSender {
     this.registerTelemetryEventType(core);
   }
 
+  private runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    fetchUsage: () => Promise<Usage>
+  ) => {
+    if (!this.wasStarted) {
+      appContextService.getLogger().debug('[runTask()] Aborted. Task not started yet');
+      return;
+    }
+    // Check that this task is current
+    if (taskInstance.id !== this.taskId) {
+      throwUnrecoverableError(new Error('Outdated task version for task: ' + taskInstance.id));
+      return;
+    }
+    appContextService.getLogger().info('Running Fleet Usage telemetry send task');
+
+    try {
+      const usageData = await fetchUsage();
+      appContextService.getLogger().debug(JSON.stringify(usageData));
+      core.analytics.reportEvent(EVENT_TYPE, usageData);
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .error('Error occurred while sending Fleet Usage telemetry: ' + error);
+    }
+  };
+
+  private get taskId() {
+    return `${this.taskType}-${this.taskVersion}`;
+  }
+
   public async start(taskManager: TaskManagerStartContract) {
     this.taskManager = taskManager;
 
-    appContextService.getLogger().info(`Task ${this.taskId} scheduled with interval 1h`);
-    await this.taskManager?.ensureScheduled({
-      id: this.taskId,
-      taskType: this.taskType,
-      schedule: {
-        interval: '1h',
-      },
-      scope: ['fleet'],
-      state: {},
-      params: {},
-    });
+    if (!taskManager) {
+      appContextService.getLogger().error('missing required service during start');
+      return;
+    }
+
+    this.wasStarted = true;
+
+    try {
+      appContextService.getLogger().info(`Task ${this.taskId} scheduled with interval 1h`);
+
+      await this.taskManager.ensureScheduled({
+        id: this.taskId,
+        taskType: this.taskType,
+        schedule: {
+          interval: this.interval,
+        },
+        scope: ['fleet'],
+        state: {},
+        params: {},
+      });
+    } catch (e) {
+      appContextService.getLogger().error(`Error scheduling task, received error: ${e}`);
+    }
   }
 
   /**
@@ -179,6 +213,13 @@ export class FleetUsageSender {
               version: { type: 'keyword' },
               enabled: { type: 'boolean' },
             },
+          },
+        },
+        agent_versions: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: { description: 'The agent versions enrolled in this deployment.' },
           },
         },
       },

@@ -8,6 +8,7 @@
 import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
 
 import type { FleetConfigType } from '../../common/types';
+import { AGENTS_INDEX } from '../../common';
 import * as AgentService from '../services/agents';
 
 export interface AgentUsage {
@@ -46,4 +47,20 @@ export const getAgentUsage = async (
     total_all_statuses: total + inactive,
     updating,
   };
+};
+
+export const getAgentVersions = async (esClient?: ElasticsearchClient) => {
+  if (!esClient) {
+    return {};
+  }
+  const response = await esClient.search({
+    index: AGENTS_INDEX,
+    size: 0,
+    aggs: {
+      versions: {
+        terms: { field: 'agent.version' },
+      },
+    },
+  });
+  return ((response?.aggregations?.versions as any).buckets ?? []).map((bucket: any) => bucket.key);
 };

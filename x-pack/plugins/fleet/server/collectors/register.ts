@@ -11,7 +11,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { FleetConfigType } from '..';
 
 import { getIsAgentsEnabled } from './config_collectors';
-import { getAgentUsage } from './agent_collectors';
+import { getAgentUsage, getAgentVersions } from './agent_collectors';
 import type { AgentUsage } from './agent_collectors';
 import { getInternalClients } from './helpers';
 import { getPackageUsage } from './package_collectors';
@@ -26,7 +26,20 @@ export interface Usage {
   fleet_server: FleetServerUsage;
 }
 
-export const fetchUsage = async (core: CoreSetup, config: FleetConfigType) => {
+export const fetchFleetUsage = async (core: CoreSetup, config: FleetConfigType) => {
+  const [soClient, esClient] = await getInternalClients(core);
+  const usage = {
+    agents_enabled: getIsAgentsEnabled(config),
+    agents: await getAgentUsage(config, soClient, esClient),
+    fleet_server: await getFleetServerUsage(soClient, esClient),
+    packages: await getPackageUsage(soClient),
+    agent_versions: await getAgentVersions(esClient),
+  };
+  return usage;
+};
+
+// used by kibana daily collector
+const fetchUsage = async (core: CoreSetup, config: FleetConfigType) => {
   const [soClient, esClient] = await getInternalClients(core);
   const usage = {
     agents_enabled: getIsAgentsEnabled(config),
