@@ -101,7 +101,7 @@ export function ChangeDataView({
       const dataViewsRefs: DataViewListItemEnhanced[] = savedDataViews
         ? savedDataViews
         : await data.dataViews.getIdsWithTitle();
-      if (adHocDataViews?.length) {
+      if (adHocDataViews?.length && !isTextBasedLangSelected) {
         adHocDataViews.forEach((adHocDataView) => {
           if (adHocDataView.id) {
             dataViewsRefs.push({
@@ -116,15 +116,13 @@ export function ChangeDataView({
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews, isTextBasedLangSelected]);
 
   useEffect(() => {
-    if (trigger.label) {
-      if (textBasedLanguage) {
-        setTriggerLabel(textBasedLanguage.toUpperCase());
-      } else {
-        setTriggerLabel(trigger.label);
-      }
+    if (textBasedLanguage) {
+      setTriggerLabel(textBasedLanguage.toUpperCase());
+    } else {
+      setTriggerLabel(trigger.label);
     }
   }, [textBasedLanguage, trigger.label]);
 
@@ -157,7 +155,7 @@ export function ChangeDataView({
         {...rest}
       >
         <>
-          {isAdHocSelected && (
+          {isAdHocSelected && !isTextBasedLangSelected && (
             <EuiIcon
               type={adhoc}
               color="primary"

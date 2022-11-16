@@ -362,7 +362,7 @@ export const LensTopNavMenu = ({
         const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
           datasourceStates[activeDatasourceId].state
         );
-        const dataView = await data.dataViews.get(dataViewId);
+        const dataView = dataViewId ? await data.dataViews.get(dataViewId) : undefined;
         setCurrentIndexPattern(dataView ?? indexPatterns[0]);
       }
     };

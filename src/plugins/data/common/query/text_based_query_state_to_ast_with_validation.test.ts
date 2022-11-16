@@ -68,7 +68,7 @@ describe('textBasedQueryStateToAstWithValidation', () => {
     );
   });
 
-  it('returns an error for text based language with non existing dataview', async () => {
+  it('eturns an object with the correct structure for text based language with non existing dataview', async () => {
     const dataViewsService = {
       getIdsWithTitle: jest.fn(() => {
         return [
@@ -87,16 +87,20 @@ describe('textBasedQueryStateToAstWithValidation', () => {
       }),
     } as unknown as DataViewsContract;
 
-    await expect(
-      textBasedQueryStateToAstWithValidation({
-        filters: [],
-        query: { sql: 'SELECT * FROM another_dataview' },
-        time: {
-          from: 'now',
-          to: 'now+7d',
-        },
-        dataViewsService,
+    const actual = await textBasedQueryStateToAstWithValidation({
+      filters: [],
+      query: { sql: 'SELECT * FROM another_dataview' },
+      time: {
+        from: 'now',
+        to: 'now+7d',
+      },
+      dataViewsService,
+    });
+    expect(actual).toHaveProperty(
+      'chain.2.arguments',
+      expect.objectContaining({
+        query: ['SELECT * FROM another_dataview'],
       })
-    ).rejects.toThrow('No data view found for index pattern another_dataview');
+    );
   });
 });

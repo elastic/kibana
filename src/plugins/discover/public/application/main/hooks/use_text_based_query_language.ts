@@ -72,7 +72,7 @@ export function useTextBasedQueryLanguage({
           const firstRow = next.result![0];
           const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
           if (
-            !isEqual(firstRowColumns, prev.current.columns) &&
+            // !isEqual(firstRowColumns, prev.current.columns) &&
             !isEqual(query, prev.current.query)
           ) {
             prev.current = { columns: firstRowColumns, query };
@@ -98,6 +98,33 @@ export function useTextBasedQueryLanguage({
 
           const nextState = {
             ...(addDataViewToState && { index: dataViewObj.id }),
+            ...(addColumnsToState && { columns: nextColumns }),
+          };
+          stateContainer.replaceUrlAppState(nextState);
+        } else {
+          // create an adhoc dataview if a permanent one doesn't exist
+          const dataView = await dataViews.create({
+            title: indexPatternFromQuery,
+          });
+
+          if (dataView.fields.getByName('@timestamp')?.type === 'date') {
+            dataView.timeFieldName = '@timestamp';
+          }
+          const addColumnsToState = Boolean(
+            nextColumns.length && (!initialFetch || !stateColumns?.length)
+          );
+          const addDataViewToState = Boolean(dataView.id !== index);
+
+          if (initialFetch && addDataViewToState) {
+            stateContainer.replaceUrlAppState({ index: dataView.id });
+          }
+
+          if (!addColumnsToState) {
+            return;
+          }
+
+          const nextState = {
+            ...(addDataViewToState && { index: dataView.id }),
             ...(addColumnsToState && { columns: nextColumns }),
           };
           stateContainer.replaceUrlAppState(nextState);

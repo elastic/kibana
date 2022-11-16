@@ -58,7 +58,20 @@ export async function textBasedQueryStateToAstWithValidation({
         timeFieldName,
       });
     } else {
-      throw new Error(`No data view found for index pattern ${idxPattern}`);
+      // no dataview found but user gave an index pattern
+      // const dataView = await dataViewsService.create({
+      //   title: idxPattern,
+      // });
+      // if (dataView.fields.getByName('@timestamp')?.type === 'date') {
+      //   dataView.timeFieldName = '@timestamp';
+      // }
+      // const timeFieldName = dataView.timeFieldName;
+      ast = textBasedQueryStateToExpressionAst({
+        filters,
+        query,
+        inputQuery,
+        time,
+      });
     }
   }
   return ast;

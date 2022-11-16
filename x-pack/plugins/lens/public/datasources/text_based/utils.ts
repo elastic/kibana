@@ -74,14 +74,24 @@ export async function getStateFromAggregateQuery(
   // fetch the pattern from the query
   const indexPattern = getIndexPatternFromTextBasedQuery(query);
   // get the id of the dataview
-  const index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
+  let index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
   let allColumns: TextBasedLayerColumn[] = [];
   let timeFieldName;
   try {
     const table = await fetchDataFromAggregateQuery(query, dataViews, data, expressions);
-    const dataView = await dataViews.get(index);
-    timeFieldName = dataView.timeFieldName;
+    const dataView = index
+      ? await dataViews.get(index)
+      : await dataViews.create({
+          title: indexPattern,
+        });
+    if (!dataView.isPersisted()) {
+      if (dataView.fields.getByName('@timestamp')?.type === 'date') {
+        dataView.timeFieldName = '@timestamp';
+      }
+      index = dataView?.id ?? '';
+    }
+    timeFieldName = dataView?.timeFieldName;
     columnsFromQuery = table?.columns ?? [];
     allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
   } catch (e) {
