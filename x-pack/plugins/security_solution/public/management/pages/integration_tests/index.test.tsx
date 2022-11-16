@@ -103,7 +103,7 @@ describe('when in the Administration tab', () => {
   describe('when the user has permissions', () => {
     it('should display the Management view if user has privileges', async () => {
       useUserPrivilegesMock.mockReturnValue({
-        endpointPrivileges: { loading: false, canReadEndpointList: true },
+        endpointPrivileges: { loading: false, canReadEndpointList: true, canAccessFleet: true },
       });
 
       expect(await render().findByTestId('endpointPage')).toBeTruthy();
