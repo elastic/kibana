@@ -2639,7 +2639,7 @@ export class RulesClient {
     }
   };
 
-  public bulkEnableRules = async (options: BulkCommonOptions) => {
+  public bulkEnableRules = async (options: BulkOptions) => {
     const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
 
     const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
@@ -2808,7 +2808,7 @@ export class RulesClient {
     return { errors, taskIdsToEnable };
   };
 
-  public bulkDisableRules = async (options: BulkCommonOptions) => {
+  public bulkDisableRules = async (options: BulkOptions) => {
     const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
 
     const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
