@@ -20,6 +20,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Serializable } from '@kbn/utility-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
@@ -27,8 +29,6 @@ import {
   FINDINGS_TABLE_CELL_ADD_FILTER,
   FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
 } from '../test_subjects';
-import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-plugin/public/common/constants';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
 
