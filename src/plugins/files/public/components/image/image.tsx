@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useState } from 'react';
 import { EuiImage, EuiImageProps } from '@elastic/eui';
 import type { FileImageMetadata } from '../../../common';
@@ -24,44 +24,26 @@ export type Props = { meta?: FileImageMetadata } & EuiImageProps;
  * ```
  */
 export const Image = ({ src, url, alt, onLoad, onError, meta, ...rest }: Props) => {
-  const [isBlurHashLoaded, setIsBlurHashLoaded] = useState<boolean>(false);
-
   const imageSrc = (src || url)!; // <EuiImage/> allows to use either `src` or `url`
-
-  const { blurhash, width, height } = meta ?? {};
-  const blurhashSrc = useMemo(
-    () =>
-      blurhash && width && height
-        ? getBlurhashSrc({
-            height,
-            width,
-            hash: blurhash,
-          })
-        : null,
-    [blurhash, width, height]
-  );
-
-  const currentSrc = isBlurHashLoaded || !blurhashSrc ? imageSrc : blurhashSrc;
+  const [currentImageSrc, onBlurHashLoaded] = useCurrentImageSrc(imageSrc, meta);
 
   return (
     <EuiImage
       alt=""
       {...rest}
-      src={currentSrc}
-      width={meta?.width}
-      height={meta?.height}
+      src={currentImageSrc}
       onLoad={(ev) => {
-        if (currentSrc === imageSrc) {
+        if (currentImageSrc === imageSrc) {
           onLoad?.(ev);
         } else {
           // @ts-ignore
           if (window?.__image_stories_simulate_slow_load) {
             // hack for storybook blurhash testing
             setTimeout(() => {
-              setIsBlurHashLoaded(true);
+              onBlurHashLoaded();
             }, 3000);
           } else {
-            setIsBlurHashLoaded(true);
+            onBlurHashLoaded();
           }
         }
       }}
@@ -71,3 +53,35 @@ export const Image = ({ src, url, alt, onLoad, onError, meta, ...rest }: Props) 
     />
   );
 };
+
+function useCurrentImageSrc(
+  imageSrc: string,
+  meta: FileImageMetadata | undefined
+): [string, () => void] {
+  const [isBlurHashLoaded, setIsBlurHashLoaded] = useState<boolean>(false);
+  const [blurhashSrc, setBlurHash] = useState<string | null>(null);
+  const { blurhash, width, height } = meta ?? {};
+  const hasBlurHash = blurhash && width && height;
+  React.useEffect(() => {
+    if (blurhash && width && height) {
+      getBlurhashSrc({
+        height,
+        width,
+        hash: blurhash,
+      }).then((hash) => {
+        setBlurHash(hash);
+      });
+    } else {
+      setBlurHash(null);
+    }
+  }, [blurhash, width, height]);
+
+  const currentSrc = isBlurHashLoaded || !hasBlurHash ? imageSrc : blurhashSrc ? blurhashSrc : null;
+
+  return [
+    currentSrc as string,
+    () => {
+      setIsBlurHashLoaded(true);
+    },
+  ];
+}

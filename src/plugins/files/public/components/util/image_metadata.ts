@@ -87,14 +87,28 @@ export function getBlurhashSrc({
   width: number;
   height: number;
   hash: string;
-}) {
+}): Promise<string> {
   const canvas = document.createElement('canvas');
   const { width: blurWidth, height: blurHeight } = fitToBox(width, height);
   canvas.width = blurWidth;
   canvas.height = blurHeight;
+
   const ctx = canvas.getContext('2d')!;
   const imageData = ctx.createImageData(blurWidth, blurHeight);
   imageData.data.set(bh.decode(hash, blurWidth, blurHeight));
   ctx.putImageData(imageData, 0, 0);
-  return canvas.toDataURL();
+
+  return new Promise((resolve) => {
+    // On this point canvas contains a downsized blurred image
+    // Now we have to stretch it to the size of the original image
+    const image = new Image();
+    image.src = canvas.toDataURL();
+    image.onload = () => {
+      canvas.width = width;
+      canvas.height = height;
+      ctx.clearRect(0, 0, width, height);
+      ctx.drawImage(image, 0, 0, width, height);
+      resolve(canvas.toDataURL());
+    };
+  });
 }
