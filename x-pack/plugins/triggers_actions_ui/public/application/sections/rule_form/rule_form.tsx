@@ -872,7 +872,7 @@ const NoAuthorizedRuleTypes = ({ operation }: { operation: string }) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.ruleForm.error.noAuthorizedRuleTypesTitle"
-          defaultMessage="You have not been authorized to {operation} any Rule types"
+          defaultMessage="You have not been authorized to {operation} any rule types"
           values={{ operation }}
         />
       </h2>
