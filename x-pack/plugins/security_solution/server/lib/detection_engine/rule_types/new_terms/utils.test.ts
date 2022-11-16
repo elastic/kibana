@@ -12,6 +12,7 @@ import {
   getAggregationField,
   decodeMatchedValues,
   getNewTermsRuntimeMappings,
+  createFieldValuesMap,
   AGG_FIELD_NAME,
 } from './utils';
 
@@ -206,6 +207,140 @@ describe('new terms utils', () => {
           source: expect.any(String),
         },
       });
+    });
+  });
+});
+
+describe('createFieldValuesMap', () => {
+  it('should return undefined if new terms fields has only one field', () => {
+    expect(
+      createFieldValuesMap(
+        ['host.name'],
+        [
+          {
+            key: {
+              'source.host': 'host-0',
+            },
+            doc_count: 1,
+          },
+          {
+            key: {
+              'source.host': 'host-1',
+            },
+            doc_count: 3,
+          },
+        ]
+      )
+    ).toBeUndefined();
+  });
+
+  it('should return values map if new terms fields has more than one field', () => {
+    expect(
+      createFieldValuesMap(
+        ['source.host', 'source.ip'],
+        [
+          {
+            key: {
+              'source.host': 'host-0',
+              'source.ip': '127.0.0.1',
+            },
+            doc_count: 1,
+          },
+          {
+            key: {
+              'source.host': 'host-1',
+              'source.ip': '127.0.0.1',
+            },
+            doc_count: 1,
+          },
+        ]
+      )
+    ).toEqual({
+      'source.host': {
+        'host-0': true,
+        'host-1': true,
+      },
+      'source.ip': {
+        '127.0.0.1': true,
+      },
+    });
+  });
+
+  it('should not put value in map if it is null', () => {
+    expect(
+      createFieldValuesMap(
+        ['source.host', 'source.ip'],
+        [
+          {
+            key: {
+              'source.host': 'host-1',
+              'source.ip': null,
+            },
+            doc_count: 1,
+          },
+        ]
+      )
+    ).toEqual({
+      'source.host': {
+        'host-1': true,
+      },
+      'source.ip': {},
+    });
+  });
+
+  it('should not put value in map if it is a number', () => {
+    expect(
+      createFieldValuesMap(
+        ['source.host', 'source.id'],
+        [
+          {
+            key: {
+              'source.host': 'host-1',
+              'source.id': 100,
+            },
+            doc_count: 1,
+          },
+        ]
+      )
+    ).toEqual({
+      'source.host': {
+        'host-1': true,
+      },
+      'source.id': {
+        '100': true,
+      },
+    });
+  });
+
+  it('should not put value in map if it is a boolean', () => {
+    expect(
+      createFieldValuesMap(
+        ['source.host', 'user.enabled'],
+        [
+          {
+            key: {
+              'source.host': 'host-1',
+              'user.enabled': true,
+            },
+            doc_count: 1,
+          },
+          {
+            key: {
+              'source.host': 'host-1',
+              'user.enabled': false,
+            },
+            doc_count: 1,
+          },
+        ]
+      )
+    ).toEqual({
+      'source.host': {
+        'host-1': true,
+      },
+      'user.enabled': {
+        true: true,
+        false: true,
+      },
     });
   });
 });

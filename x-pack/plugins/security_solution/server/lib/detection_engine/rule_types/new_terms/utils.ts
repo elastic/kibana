@@ -80,6 +80,12 @@ export const transformBucketsToValues = (
     );
 };
 
+/**
+ * transforms arrays of new terms fields and its values in object
+ * [new_terms_field]: { [value1]: true, [value1]: true  }
+ * It's needed to have constant time complexity of accessing whether value is present in new terms
+ * It will be passed to Painless script used in runtime field
+ */
 export const createFieldValuesMap = (
   newTermsFields: string[],
   buckets: estypes.AggregationsCompositeBucket[]
@@ -97,10 +103,11 @@ export const createFieldValuesMap = (
     .map((bucket) => bucket.key)
     .forEach((bucket) => {
       Object.entries(bucket).forEach(([key, value]) => {
-        const strValue = typeof value !== 'string' ? value.toString() : value;
-        if (strValue != null) {
-          valuesMap[key][strValue] = true;
+        if (value == null) {
+          return;
         }
+        const strValue = typeof value !== 'string' ? value.toString() : value;
+        valuesMap[key][strValue] = true;
       });
     });
 
