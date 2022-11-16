@@ -330,8 +330,6 @@ export const serviceDetail = {
           element: <InfraOverview />,
           searchBarOptions: {
             showKueryBar: false,
-            showTimeComparison: false,
-            showTransactionTypeSelector: false,
           },
         }),
         params: t.partial({
