@@ -256,7 +256,9 @@ export const MonitorListComponent: ({
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}
-        noItemsMessage={<NoItemsMessage loading={loading || isPending} filters={filters} />}
+        noItemsMessage={
+          <NoItemsMessage loading={Boolean(loading || isPending)} filters={filters} />
+        }
         columns={columns}
         tableLayout={'auto'}
         rowProps={
