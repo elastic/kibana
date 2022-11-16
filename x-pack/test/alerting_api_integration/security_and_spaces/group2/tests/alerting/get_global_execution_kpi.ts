@@ -156,8 +156,8 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
         'erroredActions',
         'triggeredActions',
       ]);
-      expect(kpiLogs.success).to.be(2);
-      expect(kpiLogs.failure).to.be(1);
+      expect(kpiLogs.success).to.be.above(1);
+      expect(kpiLogs.failure).to.be.above(0);
     });
 
     it('should return KPI from all spaces in the namespaces param', async () => {
@@ -296,8 +296,8 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
         'erroredActions',
         'triggeredActions',
       ]);
-      expect(kpiLogs.success).to.be(2);
-      expect(kpiLogs.failure).to.be(3);
+      expect(kpiLogs.success).to.be.above(1);
+      expect(kpiLogs.failure).to.be.above(2);
     });
   });
 }
