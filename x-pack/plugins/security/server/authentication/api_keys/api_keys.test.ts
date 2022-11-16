@@ -293,6 +293,7 @@ describe('API Keys', () => {
         id: '123',
         name: 'key-name',
         api_key: 'abc123',
+        encoded: 'utf8',
       });
       const result = await apiKeys.grantAsInternalUser(
         httpServerMock.createKibanaRequest({

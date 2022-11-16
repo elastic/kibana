@@ -112,7 +112,6 @@ describe('experimental_datastream_features', () => {
                 settings: {},
                 mappings: {
                   _source: {
-                    // @ts-expect-error
                     mode: 'stored',
                   },
                 },
@@ -184,7 +183,6 @@ describe('experimental_datastream_features', () => {
                   settings: {},
                   mappings: {
                     _source: {
-                      // @ts-expect-error
                       mode: 'stored',
                     },
                   },

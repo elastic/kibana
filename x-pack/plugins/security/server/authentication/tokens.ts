@@ -70,8 +70,9 @@ export class Tokens {
 
       return {
         accessToken,
+        // @ts-expect-error @elastic/elasticsearch `refresh_token` might be undefined
         refreshToken,
-        // @ts-expect-error @elastic/elasticsearch user metadata defined as Record<string, any>
+        // @ts-expect-error many optional properties are string | null | undefined while we declare them as string | undefined
         authenticationInfo: authenticationInfo as AuthenticationInfo,
       };
     } catch (err) {

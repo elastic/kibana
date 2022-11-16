@@ -226,7 +226,6 @@ export function mergeTimeShifts(
               const bucketKey = bucketAgg.type.getShiftedKey(bucketAgg, bucket.key, shift);
               // if a bucket is missing in the map, create an empty one
               if (!baseBucketMap[bucketKey]) {
-                // @ts-expect-error 'number' is not comparable to type 'AggregationsAggregate'.
                 baseBucketMap[String(bucketKey)] = {
                   key: bucketKey,
                 } as GenericBucket;

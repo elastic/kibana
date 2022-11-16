@@ -47,7 +47,7 @@ const isEsAggError = (e: Error | EsAggError): e is EsAggError => {
 
 function getNestedErrorClauseWithContext({
   type,
-  reason,
+  reason = '',
   caused_by: causedBy,
   lang,
   script,
@@ -73,7 +73,7 @@ function getNestedErrorClauseWithContext({
 }
 
 function getNestedErrorClause(e: ErrorCause | Reason): ReasonDescription[] {
-  const { type, reason, caused_by: causedBy } = e;
+  const { type, reason = '', caused_by: causedBy } = e;
   // Painless scripts errors are nested within the failed_shards property
   if ('failed_shards' in e) {
     if (e.failed_shards) {
