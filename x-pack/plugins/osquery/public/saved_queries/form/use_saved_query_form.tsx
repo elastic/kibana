@@ -96,6 +96,7 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
             query: '',
             interval: 3600,
             ecs_mapping: {},
+            snapshot: true,
           },
     }),
   };

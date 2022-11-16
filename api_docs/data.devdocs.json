@@ -3909,7 +3909,7 @@
             "references": [
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/lib/fetch_search_source_query.ts"
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.ts"
               },
               {
                 "plugin": "alerting",
@@ -3941,11 +3941,11 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/rule_type.test.ts"
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/rule_type.test.ts"
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -4109,7 +4109,7 @@
               "\nserializes search source fields (which can later be passed to {@link ISearchStartSearchSource})"
             ],
             "signature": [
-              "(recurse?: boolean) => ",
+              "(recurse?: boolean, includeFields?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -4128,6 +4128,21 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "recurse",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data/common/search/search_source/search_source.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.SearchSource.getSerializedFields.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeFields",
                 "description": [],
                 "signature": [
                   "boolean"
@@ -9020,27 +9035,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.SearchSourceFields.searchAfter",
-            "type": "Object",
-            "tags": [],
-            "label": "searchAfter",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.EsQuerySearchAfter",
-                "text": "EsQuerySearchAfter"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-public.SearchSourceFields.timeout",
             "type": "string",
             "tags": [],
@@ -9062,6 +9056,38 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchSourceFields.searchAfter",
+            "type": "Array",
+            "tags": [],
+            "label": "searchAfter",
+            "description": [],
+            "signature": [
+              "SortResults",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchSourceFields.pit",
+            "type": "Object",
+            "tags": [],
+            "label": "pit",
+            "description": [
+              "\nAllow querying to use a point-in-time ID for paging results"
+            ],
+            "signature": [
+              "SearchPointInTimeReference",
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
@@ -9315,7 +9341,7 @@
         "label": "AggGroupName",
         "description": [],
         "signature": [
-          "\"none\" | \"buckets\" | \"metrics\""
+          "\"none\" | \"metrics\" | \"buckets\""
         ],
         "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
         "deprecated": false,
@@ -10410,7 +10436,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean, includeFields?: boolean) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10665,13 +10691,7 @@
             "text": "DataViewSpec"
           },
           " | undefined; searchAfter?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.EsQuerySearchAfter",
-            "text": "EsQuerySearchAfter"
-          },
+          "SortResults",
           " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
           {
             "pluginId": "data",
@@ -12329,23 +12349,23 @@
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
             },
             {
               "plugin": "inputControlVis",
@@ -12441,7 +12461,7 @@
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/alert_types/threshold/expression.tsx"
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
             },
             {
               "plugin": "expressionPartitionVis",
@@ -13400,10 +13420,6 @@
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
@@ -13430,10 +13446,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
               },
               {
                 "plugin": "graph",
@@ -13465,39 +13477,39 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression_form.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -13757,15 +13769,15 @@
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -14752,16 +14764,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               ") => ",
               {
@@ -14790,16 +14802,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -21102,10 +21114,6 @@
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
@@ -21132,10 +21140,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
               },
               {
                 "plugin": "graph",
@@ -21167,39 +21171,39 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression_form.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -21459,15 +21463,15 @@
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -22454,16 +22458,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               ") => ",
               {
@@ -22492,16 +22496,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",

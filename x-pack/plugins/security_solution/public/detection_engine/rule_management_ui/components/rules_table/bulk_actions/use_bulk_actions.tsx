@@ -12,6 +12,7 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
+import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import {
   BulkActionType,
@@ -24,11 +25,9 @@ import { useStartTransaction } from '../../../../../common/lib/apm/use_start_tra
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import * as detectionI18n from '../../../../../detections/pages/detection_engine/translations';
-import {
-  downloadExportedRules,
-  useBulkExport,
-} from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
+import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
 import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
+import { useDownloadExportedRules } from '../../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import type { FilterOptions } from '../../../../rule_management/logic/types';
 import { convertRulesFilterToKQL } from '../../../../rule_management/logic/utils';
 import { getExportedRulesDetails } from '../helpers';
@@ -48,6 +47,7 @@ interface UseBulkActionsArgs {
     result: DryRunResult | undefined,
     action: BulkActionForConfirmation
   ) => Promise<boolean>;
+  showBulkDuplicateConfirmation: () => Promise<string | null>;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
@@ -58,6 +58,7 @@ export const useBulkActions = ({
   filterOptions,
   confirmDeletion,
   showBulkActionConfirmation,
+  showBulkDuplicateConfirmation,
   completeBulkEditForm,
   executeBulkActionsDryRun,
 }: UseBulkActionsArgs) => {
@@ -69,6 +70,7 @@ export const useBulkActions = ({
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
+  const downloadExportedRules = useDownloadExportedRules();
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
@@ -126,8 +128,16 @@ export const useBulkActions = ({
         startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
         closePopover();
 
+        const modalDuplicationConfirmationResult = await showBulkDuplicateConfirmation();
+        if (modalDuplicationConfirmationResult === null) {
+          return;
+        }
         await executeBulkAction({
           type: BulkActionType.duplicate,
+          duplicatePayload: {
+            include_exceptions:
+              modalDuplicationConfirmationResult === DuplicateOptions.withExceptions,
+          },
           ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
         clearRulesSelection();
@@ -176,7 +186,7 @@ export const useBulkActions = ({
           return;
         }
 
-        await downloadExportedRules({ response, toasts });
+        await downloadExportedRules(response);
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -461,6 +471,8 @@ export const useBulkActions = ({
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
+      downloadExportedRules,
+      showBulkDuplicateConfirmation,
     ]
   );
 

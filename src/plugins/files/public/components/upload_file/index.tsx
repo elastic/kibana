@@ -6,17 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, ReactNode } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Props } from './upload_file';
 
 export type { DoneNotification } from './upload_state';
-export type { Props as UploadFileProps };
+
+export type UploadFileProps = Props & {
+  /**
+   * A custom fallback for when component is lazy loading,
+   * If not provided, <EuiLoadingSpinner /> is used
+   */
+  lazyLoadFallback?: ReactNode;
+};
 
 const UploadFileContainer = lazy(() => import('./upload_file'));
 
-export const UploadFile = (props: Props) => (
-  <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+export const UploadFile = (props: UploadFileProps) => (
+  <Suspense fallback={props.lazyLoadFallback ?? <EuiLoadingSpinner size="xl" />}>
     <UploadFileContainer {...props} />
   </Suspense>
 );

@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 
@@ -60,7 +59,7 @@ describe('FilePicker', () => {
       actions: {
         select: (n: number) =>
           act(() => {
-            const file = testBed.find(testSubjects.fileGrid).childAt(n).find(EuiButtonEmpty);
+            const file = testBed.find(testSubjects.fileGrid).childAt(n).find('button').first();
             file.simulate('click');
             testBed.component.update();
           }),
@@ -127,7 +126,7 @@ describe('FilePicker', () => {
     expect(find(testSubjects.selectButton).props().disabled).toBe(false);
     actions.done();
     expect(onDone).toHaveBeenCalledTimes(1);
-    expect(onDone).toHaveBeenNthCalledWith(1, ['a', 'b']);
+    expect(onDone).toHaveBeenNthCalledWith(1, [{ id: 'a' }, { id: 'b' }]);
   });
   it('hides pagination if there are no files', async () => {
     client.list.mockImplementation(() => Promise.resolve({ files: [] as FileJSON[], total: 2 }));
