@@ -55,7 +55,7 @@ const getExplainLogRateSpikesBreadcrumbs = (navigateToPath: NavigateToPath, base
   getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
   getBreadcrumbWithUrlForApp('EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
   {
-    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDateViewLabel', {
+    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDataViewLabel', {
       defaultMessage: 'Select Data View',
     }),
   },
@@ -66,7 +66,18 @@ const getLogCategorizationBreadcrumbs = (navigateToPath: NavigateToPath, basePat
   getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
   getBreadcrumbWithUrlForApp('LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
   {
-    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDateViewLabel', {
+    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDataViewLabel', {
+      defaultMessage: 'Select Data View',
+    }),
+  },
+];
+
+const getChangePointDetectionBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('CHANGE_POINT_DETECTION', navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDataViewLabel', {
       defaultMessage: 'Select Data View',
     }),
   },
@@ -146,6 +157,26 @@ export const logCategorizationIndexOrSearchRouteFactory = (
     />
   ),
   breadcrumbs: getLogCategorizationBreadcrumbs(navigateToPath, basePath),
+});
+
+export const changePointDetectionIndexOrSearchRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
+  id: 'data_view_change_point_detection',
+  path: '/aiops/change_point_detection_index_select',
+  title: i18n.translate('xpack.ml.selectDataViewLabel', {
+    defaultMessage: 'Select Data View',
+  }),
+  render: (props, deps) => (
+    <PageWrapper
+      {...props}
+      nextStepPath="aiops/change_point_detection"
+      deps={deps}
+      mode={MODE.DATAVISUALIZER}
+    />
+  ),
+  breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {

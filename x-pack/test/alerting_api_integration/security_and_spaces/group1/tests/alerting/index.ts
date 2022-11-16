@@ -34,6 +34,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./bulk_delete'));
       loadTestFile(require.resolve('./bulk_enable'));
       loadTestFile(require.resolve('./retain_api_key'));
+      loadTestFile(require.resolve('./clone'));
     });
   });
 }
