@@ -65,6 +65,7 @@ import {
   RuleTaskState,
   AlertSummary,
   RuleExecutionStatusValues,
+  RuleLastRunOutcomeValues,
   RuleNotifyWhenType,
   RuleTypeParams,
   ResolvedSanitizedRule,
@@ -83,6 +84,10 @@ import {
   convertRuleIdsToKueryNode,
   getRuleSnoozeEndTime,
   convertEsSortToEventLogSort,
+  getDefaultMonitoring,
+  updateMonitoring,
+  convertMonitoringFromRawAndVerify,
+  getNextRun,
 } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -106,6 +111,7 @@ import {
   validateOperationOnAttributes,
   retryIfBulkEditConflicts,
   retryIfBulkDeleteConflicts,
+  retryIfBulkEnableConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
 } from './lib';
@@ -113,7 +119,6 @@ import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
-import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
 import {
   getMappedParams,
   getModifiedField,
@@ -134,6 +139,7 @@ import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 import { getActiveScheduledSnoozes } from '../lib/is_rule_snoozed';
 import { isSnoozeExpired } from '../lib';
+import { isDetectionEngineAADRuleType } from '../saved_objects/migrations/utils';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -148,6 +154,12 @@ export type InvalidateAPIKeyResult =
 
 export interface RuleAggregation {
   status: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+  outcome: {
     buckets: Array<{
       key: string;
       doc_count: number;
@@ -299,15 +311,15 @@ export type BulkEditOptions<Params extends RuleTypeParams> =
   | BulkEditOptionsFilter<Params>
   | BulkEditOptionsIds<Params>;
 
-export interface BulkDeleteOptionsFilter {
+interface BulkOptionsFilter {
   filter?: string | KueryNode;
 }
 
-export interface BulkDeleteOptionsIds {
+interface BulkOptionsIds {
   ids?: string[];
 }
 
-export type BulkDeleteOptions = BulkDeleteOptionsFilter | BulkDeleteOptionsIds;
+export type BulkOptions = BulkOptionsFilter | BulkOptionsIds;
 
 export interface BulkOperationError {
   message: string;
@@ -335,6 +347,7 @@ interface IndexType {
 
 export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
+  ruleLastRunOutcome: { [status: string]: number };
   ruleEnabledStatus?: { enabled: number; disabled: number };
   ruleMutedStatus?: { muted: number; unmuted: number };
   ruleSnoozedStatus?: { snoozed: number };
@@ -346,6 +359,11 @@ export interface FindResult<Params extends RuleTypeParams> {
   perPage: number;
   total: number;
   data: Array<SanitizedRule<Params>>;
+}
+
+interface SavedObjectOptions {
+  id?: string;
+  migrationVersion?: Record<string, string>;
 }
 
 export interface CreateOptions<Params extends RuleTypeParams> {
@@ -364,11 +382,10 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'executionStatus'
     | 'snoozeSchedule'
     | 'isSnoozedUntil'
+    | 'lastRun'
+    | 'nextRun'
   > & { actions: NormalizedAlertAction[] };
-  options?: {
-    id?: string;
-    migrationVersion?: Record<string, string>;
-  };
+  options?: SavedObjectOptions;
 }
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -442,6 +459,8 @@ interface ScheduleTaskOptions {
   schedule: IntervalSchedule;
   throwOnConflict: boolean; // whether to throw conflict errors or swallow them
 }
+
+type BulkAction = 'DELETE' | 'ENABLE';
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
@@ -525,6 +544,112 @@ export class RulesClient {
     this.eventLogger = eventLogger;
   }
 
+  public async clone<Params extends RuleTypeParams = never>(
+    id: string,
+    { newId }: { newId?: string }
+  ): Promise<SanitizedRule<Params>> {
+    let ruleSavedObject: SavedObject<RawRule>;
+
+    try {
+      ruleSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        'alert',
+        id,
+        {
+          namespace: this.namespace,
+        }
+      );
+    } catch (e) {
+      // We'll skip invalidating the API key since we failed to load the decrypted saved object
+      this.logger.error(
+        `update(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
+      );
+      // Still attempt to load the object using SOC
+      ruleSavedObject = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+    }
+
+    /*
+     * As the time of the creation of this PR, security solution already have a clone/duplicate API
+     * with some specific business logic so to avoid weird bugs, I prefer to exclude them from this
+     * functionality until we resolve our difference
+     */
+    if (
+      isDetectionEngineAADRuleType(ruleSavedObject) ||
+      ruleSavedObject.attributes.consumer === AlertConsumers.SIEM
+    ) {
+      throw Boom.badRequest(
+        'The clone functionality is not enable for rule who belongs to security solution'
+      );
+    }
+    const ruleName =
+      ruleSavedObject.attributes.name.indexOf('[Clone]') > 0
+        ? ruleSavedObject.attributes.name
+        : `${ruleSavedObject.attributes.name} [Clone]`;
+    const ruleId = newId ?? SavedObjectsUtils.generateId();
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: ruleSavedObject.attributes.alertTypeId,
+        consumer: ruleSavedObject.attributes.consumer,
+        operation: WriteOperations.Create,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.CREATE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleSavedObject.attributes.alertTypeId);
+    // Throws an error if alert type isn't registered
+    const ruleType = this.ruleTypeRegistry.get(ruleSavedObject.attributes.alertTypeId);
+    const username = await this.getUserName();
+    const createTime = Date.now();
+    const lastRunTimestamp = new Date();
+    const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = ruleSavedObject.attributes.enabled
+        ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, ruleName))
+        : null;
+    } catch (error) {
+      throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
+    }
+    const rawRule: RawRule = {
+      ...ruleSavedObject.attributes,
+      name: ruleName,
+      ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
+      legacyId,
+      createdBy: username,
+      updatedBy: username,
+      createdAt: new Date(createTime).toISOString(),
+      updatedAt: new Date(createTime).toISOString(),
+      snoozeSchedule: [],
+      muteAll: false,
+      mutedInstanceIds: [],
+      executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
+      monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+    };
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.CREATE,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    return await this.createRuleSavedObject({
+      intervalInMs: parseDuration(rawRule.schedule.interval),
+      rawRule,
+      references: ruleSavedObject.references,
+      ruleId,
+    });
+  }
+
   public async create<Params extends RuleTypeParams = never>({
     data,
     options,
@@ -584,6 +709,7 @@ export class RulesClient {
     } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
 
     const createTime = Date.now();
+    const lastRunTimestamp = new Date();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
@@ -601,8 +727,8 @@ export class RulesClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
-      executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
-      monitoring: getDefaultRuleMonitoring(),
+      executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
+      monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
     };
 
     const mappedParams = getMappedParams(updatedParams);
@@ -611,11 +737,33 @@ export class RulesClient {
       rawRule.mapped_params = mappedParams;
     }
 
+    return await this.createRuleSavedObject({
+      intervalInMs,
+      rawRule,
+      references,
+      ruleId: id,
+      options,
+    });
+  }
+
+  private async createRuleSavedObject<Params extends RuleTypeParams = never>({
+    intervalInMs,
+    rawRule,
+    references,
+    ruleId,
+    options,
+  }: {
+    intervalInMs: number;
+    rawRule: RawRule;
+    references: SavedObjectReference[];
+    ruleId: string;
+    options?: SavedObjectOptions;
+  }) {
     this.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.CREATE,
         outcome: 'unknown',
-        savedObject: { type: 'alert', id },
+        savedObject: { type: 'alert', id: ruleId },
       })
     );
 
@@ -627,7 +775,7 @@ export class RulesClient {
         {
           ...options,
           references,
-          id,
+          id: ruleId,
         }
       );
     } catch (e) {
@@ -640,14 +788,14 @@ export class RulesClient {
 
       throw e;
     }
-    if (data.enabled) {
+    if (rawRule.enabled) {
       let scheduledTask;
       try {
         scheduledTask = await this.scheduleTask({
           id: createdAlert.id,
-          consumer: data.consumer,
+          consumer: rawRule.consumer,
           ruleTypeId: rawRule.alertTypeId,
-          schedule: data.schedule,
+          schedule: rawRule.schedule,
           throwOnConflict: true,
         });
       } catch (e) {
@@ -671,7 +819,7 @@ export class RulesClient {
     // Log warning if schedule interval is less than the minimum but we're not enforcing it
     if (intervalInMs < this.minimumScheduleIntervalInMs && !this.minimumScheduleInterval.enforce) {
       this.logger.warn(
-        `Rule schedule interval (${data.schedule.interval}) for "${createdAlert.attributes.alertTypeId}" rule type with ID "${createdAlert.id}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+        `Rule schedule interval (${rawRule.schedule.interval}) for "${createdAlert.attributes.alertTypeId}" rule type with ID "${createdAlert.id}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
       );
     }
 
@@ -1433,6 +1581,9 @@ export class RulesClient {
         status: {
           terms: { field: 'alert.attributes.executionStatus.status' },
         },
+        outcome: {
+          terms: { field: 'alert.attributes.lastRun.outcome' },
+        },
         enabled: {
           terms: { field: 'alert.attributes.enabled' },
         },
@@ -1463,6 +1614,7 @@ export class RulesClient {
       // Return a placeholder with all zeroes
       const placeholder: AggregateResult = {
         alertExecutionStatus: {},
+        ruleLastRunOutcome: {},
         ruleEnabledStatus: {
           enabled: 0,
           disabled: 0,
@@ -1487,8 +1639,18 @@ export class RulesClient {
       })
     );
 
+    const ruleLastRunOutcome = resp.aggregations.outcome.buckets.map(
+      ({ key, doc_count: docCount }) => ({
+        [key]: docCount,
+      })
+    );
+
     const ret: AggregateResult = {
       alertExecutionStatus: alertExecutionStatus.reduce(
+        (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
+        {}
+      ),
+      ruleLastRunOutcome: ruleLastRunOutcome.reduce(
         (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
         {}
       ),
@@ -1498,6 +1660,11 @@ export class RulesClient {
     for (const key of RuleExecutionStatusValues) {
       if (!ret.alertExecutionStatus.hasOwnProperty(key)) {
         ret.alertExecutionStatus[key] = 0;
+      }
+    }
+    for (const key of RuleLastRunOutcomeValues) {
+      if (!ret.ruleLastRunOutcome.hasOwnProperty(key)) {
+        ret.ruleLastRunOutcome[key] = 0;
       }
     }
 
@@ -1791,7 +1958,7 @@ export class RulesClient {
     );
   }
 
-  private getAuthorizationFilter = async () => {
+  private getAuthorizationFilter = async ({ action }: { action: BulkAction }) => {
     try {
       const authorizationTuple = await this.authorization.getFindAuthorizationFilter(
         AlertingAuthorizationEntity.Rule,
@@ -1801,7 +1968,7 @@ export class RulesClient {
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.DELETE,
+          action: RuleAuditAction[action],
           error,
         })
       );
@@ -1809,9 +1976,9 @@ export class RulesClient {
     }
   };
 
-  public bulkDeleteRules = async (options: BulkDeleteOptions) => {
-    const filter = (options as BulkDeleteOptionsFilter).filter;
-    const ids = (options as BulkDeleteOptionsIds).ids;
+  private getAndValidateCommonBulkOptions = (options: BulkOptions) => {
+    const filter = (options as BulkOptionsFilter).filter;
+    const ids = (options as BulkOptionsIds).ids;
 
     if (!ids && !filter) {
       throw Boom.badRequest(
@@ -1828,20 +1995,34 @@ export class RulesClient {
         "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
       );
     }
+    return { ids, filter };
+  };
 
-    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
-    const authorizationFilter = await this.getAuthorizationFilter();
-
-    const kueryNodeFilterWithAuth =
-      authorizationFilter && kueryNodeFilter
-        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
-        : kueryNodeFilter;
-
+  private checkAuthorizationAndGetTotal = async ({
+    filter,
+    action,
+  }: {
+    filter: KueryNode | null;
+    action: BulkAction;
+  }) => {
+    const actionToConstantsMapping: Record<
+      BulkAction,
+      { WriteOperation: WriteOperations | ReadOperations; RuleAuditAction: RuleAuditAction }
+    > = {
+      DELETE: {
+        WriteOperation: WriteOperations.BulkDelete,
+        RuleAuditAction: RuleAuditAction.DELETE,
+      },
+      ENABLE: {
+        WriteOperation: WriteOperations.BulkEnable,
+        RuleAuditAction: RuleAuditAction.ENABLE,
+      },
+    };
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
       RawRule,
       RuleBulkOperationAggregation
     >({
-      filter: kueryNodeFilterWithAuth,
+      filter,
       page: 1,
       perPage: 0,
       type: 'alert',
@@ -1859,31 +2040,31 @@ export class RulesClient {
 
     if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
       throw Boom.badRequest(
-        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk delete`
+        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk ${action.toLocaleLowerCase()}`
       );
     }
 
     const buckets = aggregations?.alertTypeId.buckets;
 
     if (buckets === undefined || buckets?.length === 0) {
-      throw Boom.badRequest('No rules found for bulk delete');
+      throw Boom.badRequest(`No rules found for bulk ${action.toLocaleLowerCase()}`);
     }
 
     await pMap(
       buckets,
-      async ({ key: [ruleType, consumer] }) => {
+      async ({ key: [ruleType, consumer, actions] }) => {
         this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
         try {
           await this.authorization.ensureAuthorized({
             ruleTypeId: ruleType,
             consumer,
-            operation: WriteOperations.BulkDelete,
+            operation: actionToConstantsMapping[action].WriteOperation,
             entity: AlertingAuthorizationEntity.Rule,
           });
         } catch (error) {
           this.auditLogger?.log(
             ruleAuditEvent({
-              action: RuleAuditAction.DELETE,
+              action: actionToConstantsMapping[action].RuleAuditAction,
               error,
             })
           );
@@ -1892,6 +2073,24 @@ export class RulesClient {
       },
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
+    return { total };
+  };
+
+  public bulkDeleteRules = async (options: BulkOptions) => {
+    const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
+
+    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
+    const authorizationFilter = await this.getAuthorizationFilter({ action: 'DELETE' });
+
+    const kueryNodeFilterWithAuth =
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+        : kueryNodeFilter;
+
+    const { total } = await this.checkAuthorizationAndGetTotal({
+      filter: kueryNodeFilterWithAuth,
+      action: 'DELETE',
+    });
 
     const { apiKeysToInvalidate, errors, taskIdsToDelete } = await retryIfBulkDeleteConflicts(
       this.logger,
@@ -2424,6 +2623,190 @@ export class RulesClient {
     return { apiKeysToInvalidate, resultSavedObjects: result.saved_objects, errors, rules };
   }
 
+  private getShouldScheduleTask = async (scheduledTaskId: string | null | undefined) => {
+    if (!scheduledTaskId) return true;
+    try {
+      // make sure scheduledTaskId exist
+      await this.taskManager.get(scheduledTaskId);
+      return false;
+    } catch (err) {
+      return true;
+    }
+  };
+
+  public bulkEnableRules = async (options: BulkOptions) => {
+    const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
+
+    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
+    const authorizationFilter = await this.getAuthorizationFilter({ action: 'ENABLE' });
+
+    const kueryNodeFilterWithAuth =
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+        : kueryNodeFilter;
+
+    const { total } = await this.checkAuthorizationAndGetTotal({
+      filter: kueryNodeFilterWithAuth,
+      action: 'ENABLE',
+    });
+
+    const { errors, taskIdsToEnable } = await retryIfBulkEnableConflicts(
+      this.logger,
+      (filterKueryNode: KueryNode | null) =>
+        this.bulkEnableRulesWithOCC({ filter: filterKueryNode }),
+      kueryNodeFilterWithAuth
+    );
+
+    const taskIdsFailedToBeEnabled: string[] = [];
+    if (taskIdsToEnable.length > 0) {
+      try {
+        const resultFromEnablingTasks = await this.taskManager.bulkEnable(taskIdsToEnable);
+        resultFromEnablingTasks?.errors?.forEach((error) => {
+          taskIdsFailedToBeEnabled.push(error.task.id);
+        });
+        this.logger.debug(
+          `Successfully enabled schedules for underlying tasks: ${taskIdsToEnable
+            .filter((id) => !taskIdsFailedToBeEnabled.includes(id))
+            .join(', ')}`
+        );
+      } catch (error) {
+        taskIdsFailedToBeEnabled.push(...taskIdsToEnable);
+        this.logger.error(
+          `Failure to enable schedules for underlying tasks: ${taskIdsToEnable.join(
+            ', '
+          )}. TaskManager bulkEnable failed with Error: ${error.message}`
+        );
+      }
+    }
+
+    return { errors, total, taskIdsFailedToBeEnabled };
+  };
+
+  private bulkEnableRulesWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
+    const rulesFinder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+        {
+          filter,
+          type: 'alert',
+          perPage: 100,
+          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
+        }
+      );
+
+    const rulesToEnable: SavedObjectsBulkUpdateObject[] = [];
+    const taskIdsToEnable: string[] = [];
+    const errors: BulkOperationError[] = [];
+    const taskIdToRuleIdMapping: Record<string, string> = {};
+    const ruleNameToRuleIdMapping: Record<string, string> = {};
+
+    for await (const response of rulesFinder.find()) {
+      await pMap(response.saved_objects, async (rule) => {
+        try {
+          if (rule.attributes.actions.length) {
+            try {
+              await this.actionsAuthorization.ensureAuthorized('execute');
+            } catch (error) {
+              throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+            }
+          }
+          if (rule.attributes.enabled === true) return;
+          if (rule.attributes.name) {
+            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+          }
+          if (rule.attributes.scheduledTaskId) {
+            taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
+          }
+
+          const username = await this.getUserName();
+
+          const updatedAttributes = this.updateMeta({
+            ...rule.attributes,
+            ...(!rule.attributes.apiKey &&
+              (await this.createNewAPIKeySet({ attributes: rule.attributes, username }))),
+            enabled: true,
+            updatedBy: username,
+            updatedAt: new Date().toISOString(),
+            executionStatus: {
+              status: 'pending',
+              lastDuration: 0,
+              lastExecutionDate: new Date().toISOString(),
+              error: null,
+              warning: null,
+            },
+          });
+
+          const shouldScheduleTask = await this.getShouldScheduleTask(
+            rule.attributes.scheduledTaskId
+          );
+
+          let scheduledTaskId;
+          if (shouldScheduleTask) {
+            const scheduledTask = await this.scheduleTask({
+              id: rule.id,
+              consumer: rule.attributes.consumer,
+              ruleTypeId: rule.attributes.alertTypeId,
+              schedule: rule.attributes.schedule as IntervalSchedule,
+              throwOnConflict: false,
+            });
+            scheduledTaskId = scheduledTask.id;
+          }
+
+          rulesToEnable.push({
+            ...rule,
+            attributes: {
+              ...updatedAttributes,
+              ...(scheduledTaskId ? { scheduledTaskId } : undefined),
+            },
+          });
+
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.ENABLE,
+              outcome: 'unknown',
+              savedObject: { type: 'alert', id: rule.id },
+            })
+          );
+        } catch (error) {
+          errors.push({
+            message: error.message,
+            rule: {
+              id: rule.id,
+              name: rule.attributes?.name,
+            },
+          });
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.ENABLE,
+              error,
+            })
+          );
+        }
+      });
+    }
+
+    const result = await this.unsecuredSavedObjectsClient.bulkCreate(rulesToEnable, {
+      overwrite: true,
+    });
+
+    result.saved_objects.forEach((rule) => {
+      if (rule.error === undefined) {
+        if (taskIdToRuleIdMapping[rule.id]) {
+          taskIdsToEnable.push(taskIdToRuleIdMapping[rule.id]);
+        }
+      } else {
+        errors.push({
+          message: rule.error.message ?? 'n/a',
+          status: rule.error.statusCode,
+          rule: {
+            id: rule.id,
+            name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
+          },
+        });
+      }
+    });
+    return { errors, taskIdsToEnable };
+  };
+
   private apiKeyAsAlertAttributes(
     apiKey: CreateAPIKeyResult | null,
     username: string | null
@@ -2606,17 +2989,28 @@ export class RulesClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
+      const now = new Date();
+
+      const schedule = attributes.schedule as IntervalSchedule;
 
       const updateAttributes = this.updateMeta({
         ...attributes,
         ...(!existingApiKey && (await this.createNewAPIKeySet({ attributes, username }))),
+        ...(attributes.monitoring && {
+          monitoring: updateMonitoring({
+            monitoring: attributes.monitoring,
+            timestamp: now.toISOString(),
+            duration: 0,
+          }),
+        }),
+        nextRun: getNextRun({ interval: schedule.interval }),
         enabled: true,
         updatedBy: username,
-        updatedAt: new Date().toISOString(),
+        updatedAt: now.toISOString(),
         executionStatus: {
           status: 'pending',
           lastDuration: 0,
-          lastExecutionDate: new Date().toISOString(),
+          lastExecutionDate: now.toISOString(),
           error: null,
           warning: null,
         },
@@ -2793,6 +3187,7 @@ export class RulesClient {
           scheduledTaskId: attributes.scheduledTaskId === id ? attributes.scheduledTaskId : null,
           updatedBy: await this.getUserName(),
           updatedAt: new Date().toISOString(),
+          nextRun: null,
         }),
         { version }
       );
@@ -3442,6 +3837,8 @@ export class RulesClient {
       scheduledTaskId,
       params,
       executionStatus,
+      monitoring,
+      nextRun,
       schedule,
       actions,
       snoozeSchedule,
@@ -3468,6 +3865,7 @@ export class RulesClient {
           snoozeSchedule,
         })
       : null;
+    const includeMonitoring = monitoring && !excludeFromPublicApi;
     const rule = {
       id,
       notifyWhen,
@@ -3493,6 +3891,10 @@ export class RulesClient {
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
+      ...(includeMonitoring
+        ? { monitoring: convertMonitoringFromRawAndVerify(this.logger, id, monitoring) }
+        : {}),
+      ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
     };
 
     return includeLegacyId
