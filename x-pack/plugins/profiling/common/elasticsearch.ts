@@ -74,7 +74,6 @@ export type ProfilingESEvent = DedotObject<{
 }>;
 
 export type ProfilingStackTrace = DedotObject<{
-  [ProfilingESField.Timestamp]: number;
   [ProfilingESField.StacktraceFrameIDs]: string;
   [ProfilingESField.StacktraceFrameTypes]: string;
 }>;
@@ -90,5 +89,4 @@ export type ProfilingStackFrame = DedotObject<{
 export type ProfilingExecutable = DedotObject<{
   [ProfilingESField.ExecutableBuildID]: string;
   [ProfilingESField.ExecutableFileName]: string;
-  [ProfilingESField.Timestamp]: string;
 }>;
