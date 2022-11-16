@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('search by title', function () {
       it('loads a dashboard if title matches', async function () {
         const currentUrl = await browser.getCurrentUrl();
-        const newUrl = currentUrl + '&title=Two%20Words';
+        const newUrl = currentUrl + '&s=Two%20Words';
         // Only works on a hard refresh.
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('title match is case insensitive', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
-        const newUrl = currentUrl + '&title=two%20words';
+        const newUrl = currentUrl + '&s=two%20words';
         // Only works on a hard refresh.
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('stays on listing page if title matches no dashboards', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
-        const newUrl = currentUrl + '&title=nodashboardsnamedme';
+        const newUrl = currentUrl + '&s=nodashboardsnamedme';
         // Only works on a hard refresh.
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('preloads search filter bar when there is no match', async function () {
         const searchFilter = await listingTable.getSearchFilterValue();
-        expect(searchFilter).to.equal('"nodashboardsnamedme"');
+        expect(searchFilter).to.equal('nodashboardsnamedme');
       });
 
       it('stays on listing page if title matches two dashboards', async function () {
@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.saveDashboard('two words', { needsConfirm: true });
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
-        const newUrl = currentUrl + '&title=two%20words';
+        const newUrl = currentUrl + '&s=two%20words';
         // Only works on a hard refresh.
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('preloads search filter bar when there is more than one match', async function () {
         const searchFilter = await listingTable.getSearchFilterValue();
-        expect(searchFilter).to.equal('"two words"');
+        expect(searchFilter).to.equal('two words');
       });
 
       it('matches a title with many special characters', async function () {
