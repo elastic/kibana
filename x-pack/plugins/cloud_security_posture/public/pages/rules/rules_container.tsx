@@ -95,7 +95,7 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <EuiPanel hasBorder hasShadow={false}>
+      <EuiPanel hasBorder={false} hasShadow={false}>
         <RulesTableHeader
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
           searchValue={rulesQuery.search}

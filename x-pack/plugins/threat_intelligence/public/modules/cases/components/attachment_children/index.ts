@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-import { CSSObject } from '@emotion/react';
-
-export const useStyles = () => {
-  const button: CSSObject = {
-    display: 'inline-flex',
-  };
-
-  return {
-    button,
-  };
-};
+export * from './attachment_children';
