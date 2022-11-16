@@ -52,7 +52,7 @@ export const useAdHocDataViews = ({
         const existing = prev.find((prevDataView) => prevDataView.id === dataView.id);
         return existing ? prev : [...prev, dataView];
       });
-      trackUiMetric?.(METRIC_TYPE.CLICK, ADHOC_DATA_VIEW_RENDER_EVENT);
+      trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
   }, [dataView, trackUiMetric]);
 

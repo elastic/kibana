@@ -306,7 +306,7 @@ export class SavedSearchEmbeddable
 
     if (!dataView.isPersisted()) {
       // one used adhoc data view
-      this.services.trackUiMetric?.(METRIC_TYPE.CLICK, ADHOC_DATA_VIEW_RENDER_EVENT);
+      this.services.trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
 
     const props: SearchProps = {
