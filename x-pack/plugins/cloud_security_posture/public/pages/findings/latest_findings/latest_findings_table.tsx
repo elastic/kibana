@@ -14,7 +14,6 @@ import {
   type CriteriaWithPagination,
   type EuiTableActionsColumnType,
   type EuiTableFieldDataColumnType,
-  EuiThemeComputed,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
