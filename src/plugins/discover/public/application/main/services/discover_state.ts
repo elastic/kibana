@@ -451,5 +451,6 @@ function createUrlGeneratorState({
     useHash: false,
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
+    breakdownField: appState.breakdownField,
   };
 }
