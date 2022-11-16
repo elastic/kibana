@@ -53,7 +53,6 @@ const ResourceFindingsTableComponent = ({
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['rule.benchmark.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
-      baseFindingsColumns['rule.tags'],
       baseFindingsColumns['@timestamp'],
     ],
     [onAddFilter]

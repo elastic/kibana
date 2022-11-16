@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiSpacer,
   EuiTableActionsColumnType,
@@ -19,7 +18,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Serializable } from '@kbn/utility-types';
-import { getPrimaryRuleTags } from '../../../common/utils/get_primary_rule_tags';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
@@ -155,20 +153,6 @@ const baseColumns = [
         <>{section}</>
       </EuiToolTip>
     ),
-  },
-  {
-    field: 'rule.tags',
-    name: i18n.translate(
-      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleTagsColumnLabel',
-      { defaultMessage: 'Rule Tags' }
-    ),
-    width: '15%',
-    sortable: false,
-    truncateText: true,
-    render: (tags: string[]) => {
-      const primaryTags = getPrimaryRuleTags(tags);
-      return primaryTags.map((tag) => <EuiBadge key={tag}>{tag}</EuiBadge>);
-    },
   },
   {
     field: 'cluster_id',
