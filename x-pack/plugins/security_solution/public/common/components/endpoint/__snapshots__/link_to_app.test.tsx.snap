@@ -20,7 +20,7 @@ exports[`LinkToApp component should render with href 1`] = `
           Object {
             "insert": [Function],
             "inserted": Object {
-              "102pf9n-euiLink-primary": true,
+              "zxmf4e-euiLink-primary": true,
             },
             "key": "css",
             "nonce": undefined,
@@ -35,7 +35,7 @@ exports[`LinkToApp component should render with href 1`] = `
                   data-s=""
                 >
                   
-                  .emotion-euiLink-primary{font-weight:500;text-align:left;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
+                  .emotion-euiLink-primary{font-weight:500;text-align:start;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
                 </style>
                 <style
                   data-emotion="css"
@@ -107,7 +107,7 @@ exports[`LinkToApp component should render with href 1`] = `
                   data-s=""
                 >
                   
-                  .emotion-euiLink-primary{font-weight:500;text-align:left;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
+                  .emotion-euiLink-primary{font-weight:500;text-align:start;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
                 </style>,
                 <style
                   data-emotion="css"
@@ -166,11 +166,11 @@ exports[`LinkToApp component should render with href 1`] = `
         serialized={
           Object {
             "map": undefined,
-            "name": "102pf9n-euiLink-primary",
+            "name": "zxmf4e-euiLink-primary",
             "next": undefined,
             "styles": "
     font-weight: 500;
-    text-align: left;
+    text-align: start;
 
     &:hover {
       
@@ -246,7 +246,7 @@ exports[`LinkToApp component should render with minimum input 1`] = `
           Object {
             "insert": [Function],
             "inserted": Object {
-              "102pf9n-euiLink-primary": true,
+              "zxmf4e-euiLink-primary": true,
             },
             "key": "css",
             "nonce": undefined,
@@ -261,7 +261,7 @@ exports[`LinkToApp component should render with minimum input 1`] = `
                   data-s=""
                 >
                   
-                  .emotion-euiLink-primary{font-weight:500;text-align:left;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
+                  .emotion-euiLink-primary{font-weight:500;text-align:start;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
                 </style>
                 <style
                   data-emotion="css"
@@ -329,7 +329,7 @@ exports[`LinkToApp component should render with minimum input 1`] = `
                   data-s=""
                 >
                   
-                  .emotion-euiLink-primary{font-weight:500;text-align:left;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
+                  .emotion-euiLink-primary{font-weight:500;text-align:start;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
                 </style>,
                 <style
                   data-emotion="css"
@@ -388,11 +388,11 @@ exports[`LinkToApp component should render with minimum input 1`] = `
         serialized={
           Object {
             "map": undefined,
-            "name": "102pf9n-euiLink-primary",
+            "name": "zxmf4e-euiLink-primary",
             "next": undefined,
             "styles": "
     font-weight: 500;
-    text-align: left;
+    text-align: start;
 
     &:hover {
       

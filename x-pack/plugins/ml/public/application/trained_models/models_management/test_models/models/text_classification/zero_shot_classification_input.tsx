@@ -13,7 +13,7 @@ import { EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { TextInput } from '../text_input';
 import { ZeroShotClassificationInference } from './zero_shot_classification_inference';
-import { RUNNING_STATE } from '../inference_base';
+import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 
 const ClassNameInput: FC<{
   inferrer: ZeroShotClassificationInference;
@@ -22,10 +22,9 @@ const ClassNameInput: FC<{
 
   useEffect(() => {
     inferrer.labelsText$.next(labelsText);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [labelsText]);
+  }, [labelsText, inferrer]);
 
-  const runningState = useObservable(inferrer.runningState$);
+  const runningState = useObservable(inferrer.getRunningState$());
   return (
     <EuiFormRow
       fullWidth
@@ -54,8 +53,12 @@ export const getZeroShotClassificationInput = (
   placeholder?: string
 ) => (
   <>
-    <TextInput placeholder={placeholder} inferrer={inferrer} />
-    <EuiSpacer />
+    {inferrer.getInputType() === INPUT_TYPE.TEXT ? (
+      <>
+        <TextInput placeholder={placeholder} inferrer={inferrer} />
+        <EuiSpacer />
+      </>
+    ) : null}
     <ClassNameInput inferrer={inferrer} />
   </>
 );

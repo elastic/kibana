@@ -4109,7 +4109,7 @@
               "\nserializes search source fields (which can later be passed to {@link ISearchStartSearchSource})"
             ],
             "signature": [
-              "(recurse?: boolean) => ",
+              "(recurse?: boolean, includeFields?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -4128,6 +4128,21 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "recurse",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data/common/search/search_source/search_source.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.SearchSource.getSerializedFields.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeFields",
                 "description": [],
                 "signature": [
                   "boolean"
@@ -9020,27 +9035,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.SearchSourceFields.searchAfter",
-            "type": "Object",
-            "tags": [],
-            "label": "searchAfter",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.EsQuerySearchAfter",
-                "text": "EsQuerySearchAfter"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/search_source/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-public.SearchSourceFields.timeout",
             "type": "string",
             "tags": [],
@@ -9062,6 +9056,38 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchSourceFields.searchAfter",
+            "type": "Array",
+            "tags": [],
+            "label": "searchAfter",
+            "description": [],
+            "signature": [
+              "SortResults",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchSourceFields.pit",
+            "type": "Object",
+            "tags": [],
+            "label": "pit",
+            "description": [
+              "\nAllow querying to use a point-in-time ID for paging results"
+            ],
+            "signature": [
+              "SearchPointInTimeReference",
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false,
@@ -9315,7 +9341,7 @@
         "label": "AggGroupName",
         "description": [],
         "signature": [
-          "\"none\" | \"buckets\" | \"metrics\""
+          "\"none\" | \"metrics\" | \"buckets\""
         ],
         "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
         "deprecated": false,
@@ -10410,7 +10436,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean, includeFields?: boolean) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10665,13 +10691,7 @@
             "text": "DataViewSpec"
           },
           " | undefined; searchAfter?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.EsQuerySearchAfter",
-            "text": "EsQuerySearchAfter"
-          },
+          "SortResults",
           " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
           {
             "pluginId": "data",
@@ -13128,6 +13148,26 @@
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -13166,26 +13206,6 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
                 "plugin": "observability",
@@ -13428,10 +13448,6 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -13493,7 +13509,7 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/expression/search_source_expression_form.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -13753,15 +13769,15 @@
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -14748,16 +14764,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               ") => ",
               {
@@ -14786,16 +14802,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -20826,6 +20842,26 @@
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -20864,26 +20900,6 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
                 "plugin": "observability",
@@ -21126,10 +21142,6 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -21191,7 +21203,7 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/expression/search_source_expression_form.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -21451,15 +21463,15 @@
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/datasource_info.test.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -22446,16 +22458,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               ") => ",
               {
@@ -22484,16 +22496,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",

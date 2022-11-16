@@ -10,7 +10,7 @@ import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { Root } from '../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { LogRecord } from '@kbn/logging';
 import { getDocVersion } from './test_utils';

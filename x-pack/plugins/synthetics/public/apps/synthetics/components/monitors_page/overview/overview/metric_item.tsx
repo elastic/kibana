@@ -30,11 +30,13 @@ export const MetricItem = ({
   averageDuration,
   data,
   loaded,
+  onClick,
 }: {
   monitor: MonitorOverviewItem;
   data: Array<{ x: number; y: number }>;
   averageDuration: number;
   loaded: boolean;
+  onClick: (id: string, location: string) => void;
 }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -44,13 +46,10 @@ export const MetricItem = ({
   const theme = useTheme();
 
   return (
-    <div
-      style={{
-        height: '160px',
-      }}
-    >
+    <div data-test-subj={`${monitor.name}-metric-item`} style={{ height: '160px' }}>
       {loaded ? (
         <EuiPanel
+          paddingSize="none"
           onMouseOver={() => {
             if (!isMouseOver) {
               setIsMouseOver(true);
@@ -62,13 +61,15 @@ export const MetricItem = ({
             }
           }}
           style={{
-            padding: '0px',
             height: '100%',
             overflow: 'hidden',
           }}
         >
           <Chart>
-            <Settings baseTheme={DARK_THEME} />
+            <Settings
+              onElementClick={() => monitor.id && locationName && onClick(monitor.id, locationName)}
+              baseTheme={DARK_THEME}
+            />
             <Metric
               id={`${monitor.id}-${monitor.location?.id}`}
               data={[
@@ -82,7 +83,7 @@ export const MetricItem = ({
                     extra: (
                       <span>
                         {i18n.translate('xpack.synthetics.overview.duration.label', {
-                          defaultMessage: 'Duration',
+                          defaultMessage: 'Duration Avg.',
                         })}
                       </span>
                     ),
@@ -98,6 +99,7 @@ export const MetricItem = ({
               monitor={monitor}
               isPopoverOpen={isPopoverOpen}
               setIsPopoverOpen={setIsPopoverOpen}
+              position="relative"
             />
           )}
         </EuiPanel>
