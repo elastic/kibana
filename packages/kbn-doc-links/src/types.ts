@@ -283,6 +283,7 @@ export interface DocLinks {
     readonly exceptions: {
       value_lists: string;
     };
+    readonly privileges: string;
   };
   readonly query: {
     readonly eql: string;
