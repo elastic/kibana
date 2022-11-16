@@ -18,7 +18,6 @@ import {
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -99,7 +98,9 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     availableFields$,
     dataView,
     savedSearch,
+    query,
     columns,
+    filters,
     stateContainer,
     onAddFilter,
     trackUiMetric,
@@ -114,13 +115,6 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     | undefined
   >();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
-  const hasCustomQueryParams = 'query' in props && 'filters' in props;
-  const querySubscriberResult = useQuerySubscriber({
-    data: services.data,
-    disabled: hasCustomQueryParams,
-  });
-  const query = hasCustomQueryParams ? props.query : querySubscriberResult.query;
-  const filters = hasCustomQueryParams ? props.filters : querySubscriberResult.filters;
 
   const showPreviewByDefault = useMemo(
     () =>

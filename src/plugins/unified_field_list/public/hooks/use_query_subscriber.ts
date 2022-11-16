@@ -15,7 +15,6 @@ import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
  */
 export interface QuerySubscriberParams {
   data: DataPublicPluginStart;
-  disabled?: boolean;
 }
 
 /**
@@ -30,7 +29,7 @@ export interface QuerySubscriberResult {
  * Memorizes current query and filters
  * @param data
  */
-export const useQuerySubscriber = ({ data, disabled }: QuerySubscriberParams) => {
+export const useQuerySubscriber = ({ data }: QuerySubscriberParams) => {
   const [result, setResult] = useState<QuerySubscriberResult>(() => {
     const state = data.query.getState();
     return {
@@ -40,10 +39,6 @@ export const useQuerySubscriber = ({ data, disabled }: QuerySubscriberParams) =>
   });
 
   useEffect(() => {
-    if (disabled) {
-      return;
-    }
-
     const subscription = data.query.state$.subscribe(({ state }) => {
       setResult((prevState) => ({
         ...prevState,
@@ -53,7 +48,7 @@ export const useQuerySubscriber = ({ data, disabled }: QuerySubscriberParams) =>
     });
 
     return () => subscription.unsubscribe();
-  }, [setResult, data.query.state$, disabled]);
+  }, [setResult, data.query.state$]);
 
   return result;
 };

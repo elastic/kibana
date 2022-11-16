@@ -16,13 +16,12 @@ import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
-  FieldStats,
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
-  useQuerySubscriber,
 } from '@kbn/unified-field-list-plugin/public';
+import { DiscoverFieldStats } from './discover_field_stats';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
@@ -284,10 +283,8 @@ function DiscoverFieldComponent({
   contextualFields,
 }: DiscoverFieldProps) {
   const services = useDiscoverServices();
-  const { data } = services;
   const [infoIsOpen, setOpen] = useState(false);
   const isDocumentRecord = !!onAddFilter;
-  const querySubscriberResult = useQuerySubscriber({ data });
 
   const addFilterAndClosePopover: typeof onAddFilter | undefined = useMemo(
     () =>
@@ -388,12 +385,6 @@ function DiscoverFieldComponent({
   }
 
   const renderPopover = () => {
-    const dateRange = data?.query?.timefilter.timefilter.getAbsoluteTime();
-    // prioritize an aggregatable multi field if available or take the parent field
-    const fieldForStats =
-      (multiFields?.length &&
-        multiFields.find((multiField) => multiField.field.aggregatable)?.field) ||
-      field;
     const showLegacyFieldStats = services.uiSettings.get(SHOW_LEGACY_FIELD_TOP_VALUES);
 
     return (
@@ -419,21 +410,12 @@ function DiscoverFieldComponent({
             )}
           </>
         ) : (
-          <>
-            {Boolean(dateRange && querySubscriberResult.query && querySubscriberResult.filters) && (
-              <FieldStats
-                services={services}
-                query={querySubscriberResult.query!}
-                filters={querySubscriberResult.filters!}
-                fromDate={dateRange.from}
-                toDate={dateRange.to}
-                dataViewOrDataViewId={dataView}
-                field={fieldForStats}
-                data-test-subj="dscFieldStats"
-                onAddFilter={addFilterAndClosePopover}
-              />
-            )}
-          </>
+          <DiscoverFieldStats
+            field={field}
+            multiFields={multiFields}
+            dataView={dataView}
+            onAddFilter={addFilterAndClosePopover}
+          />
         )}
 
         {multiFields && (
