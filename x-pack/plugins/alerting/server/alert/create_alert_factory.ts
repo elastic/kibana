@@ -136,6 +136,7 @@ export function createAlertFactory<
               previouslyRecoveredAlerts: {},
               hasReachedAlertLimit,
               alertLimit: maxAlerts,
+              // setFlapping is false, as we only want to use this function to get the recovered alerts
               setFlapping: false,
             }
           );

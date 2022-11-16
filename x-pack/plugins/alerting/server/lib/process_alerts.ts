@@ -21,6 +21,7 @@ interface ProcessAlertsOpts<
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>;
   hasReachedAlertLimit: boolean;
   alertLimit: number;
+  // flag used to determine whether or not we want to push the flapping state on to the flappingHistory array
   setFlapping: boolean;
 }
 interface ProcessAlertsResult<
