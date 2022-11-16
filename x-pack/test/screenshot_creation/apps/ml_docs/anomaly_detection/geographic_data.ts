@@ -103,11 +103,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('set data visualizer options');
       await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
       await ml.dataVisualizerIndexBased.clickUseFullDataButton('14,074');
-      await ml.dataVisualizerTable.setSampleSizeInputValue(
-        'all',
-        'geo.coordinates',
-        '14074 (100%)'
-      );
       await ml.dataVisualizerTable.setFieldTypeFilter([ML_JOB_FIELD_TYPES.GEO_POINT]);
 
       await ml.testExecution.logTestStep('set maps options and take screenshot');

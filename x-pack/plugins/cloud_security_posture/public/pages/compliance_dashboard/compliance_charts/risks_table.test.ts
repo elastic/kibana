@@ -12,6 +12,7 @@ const podsAgg = {
   totalFindings: 2,
   totalPassed: 1,
   totalFailed: 1,
+  postureScore: 50.0,
 };
 
 const etcdAgg = {
@@ -19,6 +20,7 @@ const etcdAgg = {
   totalFindings: 5,
   totalPassed: 0,
   totalFailed: 5,
+  postureScore: 0,
 };
 
 const clusterAgg = {
@@ -26,6 +28,7 @@ const clusterAgg = {
   totalFindings: 2,
   totalPassed: 2,
   totalFailed: 0,
+  postureScore: 100.0,
 };
 
 const systemAgg = {
@@ -33,6 +36,7 @@ const systemAgg = {
   totalFindings: 10,
   totalPassed: 6,
   totalFailed: 4,
+  postureScore: 60.0,
 };
 
 const apiAgg = {
@@ -40,6 +44,7 @@ const apiAgg = {
   totalFindings: 19100,
   totalPassed: 2100,
   totalFailed: 17000,
+  postureScore: 10.9,
 };
 
 const serverAgg = {
@@ -47,6 +52,7 @@ const serverAgg = {
   totalFindings: 7,
   totalPassed: 4,
   totalFailed: 3,
+  postureScore: 57.1,
 };
 
 const mockData: RisksTableProps['data'] = [
@@ -59,15 +65,11 @@ const mockData: RisksTableProps['data'] = [
 ];
 
 describe('getTopRisks', () => {
-  it('returns sorted by failed findings', () => {
-    expect(getTopRisks([systemAgg, etcdAgg, apiAgg], 3)).toEqual([apiAgg, etcdAgg, systemAgg]);
+  it('returns sorted by posture score', () => {
+    expect(getTopRisks([systemAgg, etcdAgg, apiAgg], 3)).toEqual([etcdAgg, apiAgg, systemAgg]);
   });
 
-  it('return array filtered with failed findings only', () => {
-    expect(getTopRisks([systemAgg, clusterAgg, apiAgg], 3)).toEqual([apiAgg, systemAgg]);
-  });
-
-  it('return sorted and filtered array with the correct number of elements', () => {
-    expect(getTopRisks(mockData, 5)).toEqual([apiAgg, etcdAgg, systemAgg, serverAgg, podsAgg]);
+  it('return sorted array with the correct number of elements', () => {
+    expect(getTopRisks(mockData, 5)).toEqual([etcdAgg, apiAgg, podsAgg, serverAgg, systemAgg]);
   });
 });
