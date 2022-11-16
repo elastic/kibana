@@ -265,7 +265,9 @@ export const getPolicyDetailsArtifactsListPath = (
   )}`;
 };
 
-export const getEventFiltersListPath = (location?: Partial<EventFiltersPageLocation>): string => {
+export const getEventFiltersListPath = (
+  location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
+): string => {
   const path = generatePath(MANAGEMENT_ROUTING_EVENT_FILTERS_PATH, {
     tabName: AdministrationSubTab.eventFilters,
   });

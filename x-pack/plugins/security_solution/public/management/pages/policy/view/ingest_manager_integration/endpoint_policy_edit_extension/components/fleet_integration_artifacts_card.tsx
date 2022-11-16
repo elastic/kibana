@@ -42,7 +42,7 @@ const ARTIFACTS_LABELS = {
 
 export type ARTIFACTS_LABELS_TYPE = typeof ARTIFACTS_LABELS;
 
-export const FleetIntegrationArtifactsCard = memo<{
+export interface FleetIntegrationArtifactCardProps {
   policyId: string;
   artifactApiClientInstance: ExceptionsListApiClient;
   getArtifactsPath: (policyId: string) => string;
@@ -50,7 +50,9 @@ export const FleetIntegrationArtifactsCard = memo<{
   labels?: ARTIFACTS_LABELS_TYPE;
   privileges?: boolean;
   'data-test-subj': string;
-}>(
+}
+
+export const FleetIntegrationArtifactsCard = memo<FleetIntegrationArtifactCardProps>(
   ({
     policyId,
     artifactApiClientInstance,

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+/**
+ * TODO: need to remove this and use instead `ArtifactListPageUrlParams`
+ *
+ * @deprecated
+ */
 export interface EventFiltersPageLocation {
   page_index: number;
   page_size: number;

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
+import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import {
   BLOCKLISTS_LABELS,
   EVENT_FILTERS_LABELS,
@@ -21,12 +22,17 @@ import { HostIsolationExceptionsApiClient } from '../../../../../host_isolation_
 import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
 import { TrustedAppsApiClient } from '../../../../../trusted_apps/service';
 import {
+  getBlocklistsListPath,
+  getEventFiltersListPath,
+  getHostIsolationExceptionsListPath,
   getPolicyBlocklistsPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
+  getTrustedAppsListPath,
 } from '../../../../../../common/routing';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../../../trusted_apps/constants';
+import type { FleetIntegrationArtifactCardProps } from './fleet_integration_artifacts_card';
 import { FleetIntegrationArtifactsCard } from './fleet_integration_artifacts_card';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../../host_isolation_exceptions/constants';
@@ -44,12 +50,22 @@ const TrustedAppsPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
     () => TrustedAppsApiClient.getInstance(http),
     [http]
   );
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
+
+  const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
+    useCallback(() => {
+      if (canReadPolicyManagement) {
+        return getPolicyTrustedAppsPath(policyId);
+      }
+
+      return getTrustedAppsListPath({ includedPolicies: `${policyId},global` });
+    }, [canReadPolicyManagement, policyId]);
 
   return (
     <FleetIntegrationArtifactsCard
       policyId={policyId}
       artifactApiClientInstance={trustedAppsApiClientInstance}
-      getArtifactsPath={getPolicyTrustedAppsPath}
+      getArtifactsPath={getArtifactPathHandler}
       searchableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
       labels={TRUSTED_APPS_LABELS}
       data-test-subj="trustedApps"
@@ -64,12 +80,22 @@ const EventFiltersPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
     () => EventFiltersApiClient.getInstance(http),
     [http]
   );
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
+
+  const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
+    useCallback(() => {
+      if (canReadPolicyManagement) {
+        return getPolicyEventFiltersPath(policyId);
+      }
+
+      return getEventFiltersListPath({ includedPolicies: `${policyId},global` });
+    }, [canReadPolicyManagement, policyId]);
 
   return (
     <FleetIntegrationArtifactsCard
       policyId={policyId}
       artifactApiClientInstance={eventFiltersApiClientInstance}
-      getArtifactsPath={getPolicyEventFiltersPath}
+      getArtifactsPath={getArtifactPathHandler}
       searchableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
       labels={EVENT_FILTERS_LABELS}
       data-test-subj="eventFilters"
@@ -84,12 +110,22 @@ const HostIsolationExceptionsPolicyCard = memo<PolicyArtifactCardProps>(({ polic
     () => HostIsolationExceptionsApiClient.getInstance(http),
     [http]
   );
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
+
+  const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
+    useCallback(() => {
+      if (canReadPolicyManagement) {
+        return getPolicyHostIsolationExceptionsPath(policyId);
+      }
+
+      return getHostIsolationExceptionsListPath({ includedPolicies: `${policyId},global` });
+    }, [canReadPolicyManagement, policyId]);
 
   return (
     <FleetIntegrationArtifactsCard
       policyId={policyId}
       artifactApiClientInstance={hostIsolationExceptionsApiClientInstance}
-      getArtifactsPath={getPolicyHostIsolationExceptionsPath}
+      getArtifactsPath={getArtifactPathHandler}
       searchableFields={HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS}
       labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
       data-test-subj="hostIsolationExceptions"
@@ -101,12 +137,21 @@ HostIsolationExceptionsPolicyCard.displayName = 'HostIsolationExceptionsPolicyCa
 const BlocklistPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
   const http = useHttp();
   const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
+  const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
+    useCallback(() => {
+      if (canReadPolicyManagement) {
+        return getPolicyBlocklistsPath(policyId);
+      }
+
+      return getBlocklistsListPath({ includedPolicies: `${policyId},global` });
+    }, [canReadPolicyManagement, policyId]);
   return (
     <FleetIntegrationArtifactsCard
       policyId={policyId}
       artifactApiClientInstance={blocklistsApiClientInstance}
-      getArtifactsPath={getPolicyBlocklistsPath}
+      getArtifactsPath={getArtifactPathHandler}
       searchableFields={BLOCKLIST_SEARCHABLE_FIELDS}
       labels={BLOCKLISTS_LABELS}
       data-test-subj="blocklists"
