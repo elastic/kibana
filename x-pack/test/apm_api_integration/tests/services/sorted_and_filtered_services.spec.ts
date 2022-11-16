@@ -50,7 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   type ServiceListItem = ValuesType<Awaited<ReturnType<typeof getSortedAndFilteredServices>>>;
 
-  registry.when.skip('Sorted and filtered services', { config: 'trial', archives: [] }, () => {
+  registry.when('Sorted and filtered services', { config: 'trial', archives: [] }, () => {
     before(async () => {
       const serviceA = apm
         .service({ name: SERVICE_NAME_PREFIX + 'a', environment: 'production', agentName: 'java' })
@@ -99,10 +99,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await synthtraceClient.index(eventsWithinTimerange.merge(eventsOutsideOfTimerange));
 
-      await Promise.all([
-        createAndRunApmMlJob({ environment: 'production', ml }),
-        createAndRunApmMlJob({ environment: 'development', ml }),
-      ]);
+      // Creating multiple ml jobs in parallel is causing this tests to be flaky
+      // https://github.com/elastic/elasticsearch/issues/36271
+      await createAndRunApmMlJob({ environment: 'production', ml });
+      await createAndRunApmMlJob({ environment: 'development', ml });
     });
 
     after(() => {
