@@ -142,7 +142,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       distinctUntilChanged(diffDataFetchProps)
     );
 
-    // debounce pipes to slow down search string + sorting related queries
+    // debounce typeahead pipe to slow down search string related queries
     const typeaheadPipe = this.typeaheadSubject.pipe(debounceTime(100));
 
     // fetch available options when input changes or when search string has changed

@@ -12,7 +12,7 @@ import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
 import {
   DEFAULT_SORT,
-  OptionsListSortingOptions,
+  OptionsListSortingTypes,
   SortingType,
 } from '../../common/options_list/suggestions_sorting';
 import { OptionsListRequestBody } from '../../common/options_list/types';
@@ -28,7 +28,7 @@ interface EsBucket {
 }
 
 const getSortType = (sortKey?: SortingType) => {
-  return OptionsListSortingOptions[sortKey ?? DEFAULT_SORT];
+  return OptionsListSortingTypes[sortKey ?? DEFAULT_SORT];
 };
 
 /**

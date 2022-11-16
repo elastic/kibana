@@ -54,11 +54,11 @@ class OptionsListService implements ControlsOptionsListService {
       selectedOptions?.join(','),
       JSON.stringify(filters),
       JSON.stringify(query),
-      JSON.stringify(sort),
       runPastTimeout,
       dataViewTitle,
       searchString,
       fieldName,
+      sort,
     ].join('|');
   };
 

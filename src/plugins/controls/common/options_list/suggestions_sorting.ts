@@ -19,7 +19,7 @@ interface AlphabeticalSort {
   _key: Direction;
 }
 
-export const OptionsListSortingOptions: {
+export const OptionsListSortingTypes: {
   [key in SortingType]: DocumentCountSort | AlphabeticalSort;
 } = {
   docDescending: { _count: 'desc' },

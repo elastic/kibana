@@ -40,11 +40,11 @@ export const setupOptionsListSuggestionsRoute = (
         body: schema.object(
           {
             fieldName: schema.string(),
+            sort: schema.maybe(schema.any()),
             filters: schema.maybe(schema.any()),
             fieldSpec: schema.maybe(schema.any()),
             searchString: schema.maybe(schema.string()),
             selectedOptions: schema.maybe(schema.arrayOf(schema.string())),
-            sort: schema.maybe(schema.any()),
           },
           { unknowns: 'allow' }
         ),

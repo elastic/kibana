@@ -235,26 +235,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         controlId = (await dashboardControls.getAllControlIds())[0];
         await dashboard.clickQuickSave();
-        await dashboardControls.optionsListOpenPopover(controlId);
-      });
+        await header.waitUntilLoadingHasFinished();
 
-      it('sort alphabetically - ascending', async () => {
-        await dashboardControls.optionsListPopoverSetSort('keyAscending');
-        await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort(), true);
+        await dashboardControls.optionsListOpenPopover(controlId);
       });
 
       it('sort alphabetically - descending', async () => {
         await dashboardControls.optionsListPopoverSetSort('keyDescending');
+        await dashboardControls.optionsListWaitForLoading(controlId);
         await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort().reverse(), true);
+      });
+
+      it('sort alphabetically - ascending', async () => {
+        await dashboardControls.optionsListPopoverSetSort('keyAscending');
+        await dashboardControls.optionsListWaitForLoading(controlId);
+        await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort(), true);
       });
 
       it('sort by document count - descending', async () => {
         await dashboardControls.optionsListPopoverSetSort('docDescending');
+        await dashboardControls.optionsListWaitForLoading(controlId);
         await ensureAvailableOptionsEql(animalSoundAvailableOptions, true);
       });
 
       it('sort by document count - ascending', async () => {
         await dashboardControls.optionsListPopoverSetSort('docAscending');
+        await dashboardControls.optionsListWaitForLoading(controlId);
         // ties are broken alphabetically, so can't just reverse `animalSoundAvailableOptions` for this check
         await ensureAvailableOptionsEql(
           ['bow ow ow', 'growl', 'grr', 'bark', 'grrr', 'meow', 'ruff', 'hiss'],
@@ -268,9 +274,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('returning to default value should remove unsaved changes', async () => {
         await dashboardControls.optionsListPopoverSetSort('docDescending');
-        await retry.try(async () => {
-          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
-        });
+        await dashboardControls.optionsListWaitForLoading(controlId);
+        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });
 
       after(async () => {

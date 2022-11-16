@@ -402,6 +402,10 @@ export class DashboardPageControls extends FtrService {
     ).click();
   }
 
+  public async optionsListWaitForLoading(controlId: string) {
+    await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
+  }
+
   /* -----------------------------------------------------------
      Control editor flyout
      ----------------------------------------------------------- */
