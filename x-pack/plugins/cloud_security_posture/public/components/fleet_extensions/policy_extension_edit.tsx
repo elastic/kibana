@@ -20,7 +20,7 @@ export const CspEditPolicyExtension = memo<PackagePolicyEditExtensionComponentPr
       onChange(getUpdatedEksVar(newPolicy, key, value));
 
     return (
-      <EuiForm>
+      <EuiForm style={{ marginTop: 0 }}>
         <DeploymentTypeSelect type={selectedDeploymentType} isDisabled />
         {selectedDeploymentType === CLOUDBEAT_EKS && (
           <EksFormWrapper inputs={newPolicy.inputs} onChange={updateEksVar} />
