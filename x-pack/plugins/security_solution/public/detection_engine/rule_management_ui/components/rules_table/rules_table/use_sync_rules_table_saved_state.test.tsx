@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { RULE_TABLE_STATE_STORAGE_KEY } from '../../../../../../common/constants';
+import { RULES_TABLE_STATE_STORAGE_KEY } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useUpdateUrlParam } from '../../../../../common/utils/global_query_string';
 import { AllRulesTabs } from '../rules_table_toolbar';
@@ -79,7 +79,7 @@ describe('useSyncRulesTableSavedState', () => {
   it('syncs the state with the storage', () => {
     renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.monitoring));
 
-    expect(setStorage).toHaveBeenCalledWith(RULE_TABLE_STATE_STORAGE_KEY, {
+    expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, {
       ...expectedSavedState,
       tab: 'monitoring',
     });
@@ -94,6 +94,6 @@ describe('useSyncRulesTableSavedState', () => {
   it('does not sync the default active tab with the storage', () => {
     renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.rules));
 
-    expect(setStorage).toHaveBeenCalledWith(RULE_TABLE_STATE_STORAGE_KEY, expectedSavedState);
+    expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expectedSavedState);
   });
 });

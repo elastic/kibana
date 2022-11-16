@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import {
   RULES_TABLE_MAX_PAGE_SIZE,
-  RULE_TABLE_STATE_STORAGE_KEY,
+  RULES_TABLE_STATE_STORAGE_KEY,
 } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -26,7 +26,7 @@ export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTa
   const onInitializeRulesTableContextFromUrlParam = useCallback(
     (params: RulesTableSavedState | null) => {
       const savedState: Partial<RulesTableSavedState> | null = storage.get(
-        RULE_TABLE_STATE_STORAGE_KEY
+        RULES_TABLE_STATE_STORAGE_KEY
       );
 
       if (!params && !savedState) {

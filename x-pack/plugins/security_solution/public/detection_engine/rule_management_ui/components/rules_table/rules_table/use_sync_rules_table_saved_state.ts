@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { RULE_TABLE_STATE_STORAGE_KEY } from '../../../../../../common/constants';
+import { RULES_TABLE_STATE_STORAGE_KEY } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useUpdateUrlParam } from '../../../../../common/utils/global_query_string';
@@ -36,6 +36,6 @@ export function useSyncRulesTableSavedState(activeTab: AllRulesTabs): void {
     }
 
     updateUrlParam(savedState);
-    storage.set(RULE_TABLE_STATE_STORAGE_KEY, savedState);
+    storage.set(RULES_TABLE_STATE_STORAGE_KEY, savedState);
   }, [updateUrlParam, storage, state, activeTab]);
 }

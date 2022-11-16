@@ -454,7 +454,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
 
-export const RULE_TABLE_STATE_STORAGE_KEY = 'securitySolution.rulesTable';
+export const RULES_TABLE_STATE_STORAGE_KEY = 'securitySolution.rulesTable';
 
 // TODO: https://github.com/elastic/kibana/pull/142950
 /**
