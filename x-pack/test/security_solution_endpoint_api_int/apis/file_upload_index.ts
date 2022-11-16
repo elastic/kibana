@@ -6,6 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  FILE_STORAGE_DATA_INDEX,
+  FILE_STORAGE_METADATA_INDEX,
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -14,14 +18,14 @@ export default function ({ getService }: FtrProviderContext) {
   describe('File upload indices', () => {
     it('should have created the file data index on install', async () => {
       const endpointFileUploadIndexExists = await esClient.indices.exists({
-        index: '.fleet-file-data-endpoint',
+        index: FILE_STORAGE_METADATA_INDEX,
       });
 
       expect(endpointFileUploadIndexExists).equal(true);
     });
     it('should have created the files index on install', async () => {
       const endpointFileUploadIndexExists = await esClient.indices.exists({
-        index: '.fleet-files-endpoint',
+        index: FILE_STORAGE_DATA_INDEX,
       });
 
       expect(endpointFileUploadIndexExists).equal(true);
