@@ -76,8 +76,8 @@ export abstract class InferenceBase<TInferResponse> {
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
     this.inputField = this.modelInputField;
 
-    this.inputText$.subscribe(() => {
-      const inputTextPopulated = this.inputText$.getValue().some((t) => t !== '');
+    this.inputText$.subscribe((inputText) => {
+      const inputTextPopulated = inputText.some((t) => t !== '');
       this.inputTextValid$.next(inputTextPopulated);
     });
   }
