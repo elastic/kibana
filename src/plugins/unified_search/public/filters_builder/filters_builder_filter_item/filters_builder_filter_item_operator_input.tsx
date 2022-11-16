@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Operator } from '../../filter_bar/filter_editor';
 import { getOperatorOptions, GenericComboBox } from '../../filter_bar/filter_editor';
+import { FiltersBuilderContextType } from '../filters_builder_context';
 
 interface OperatorInputProps<TParams = unknown> {
   field: DataViewField | undefined;
@@ -25,6 +26,7 @@ export function OperatorInput<TParams = unknown>({
   params,
   onHandleOperator,
 }: OperatorInputProps<TParams>) {
+  const { isDisabled } = useContext(FiltersBuilderContextType);
   const operators = field ? getOperatorOptions(field) : [];
 
   const onOperatorChange = useCallback(
@@ -40,7 +42,7 @@ export function OperatorInput<TParams = unknown>({
     <GenericComboBox
       fullWidth
       compressed
-      isDisabled={!field}
+      isDisabled={!field || isDisabled}
       placeholder={i18n.translate(
         'unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderSelect',
         {

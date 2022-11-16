@@ -101,6 +101,13 @@ const disableToggleModeTooltip = i18n.translate(
   }
 );
 
+const selectDataViewToolTip = i18n.translate(
+  'unifiedSearch.filter.filterEditor.chooseDataViewFirstToolTip',
+  {
+    defaultMessage: 'You need to select a data view first',
+  }
+);
+
 export class FilterEditor extends Component<FilterEditorProps, State> {
   constructor(props: FilterEditorProps) {
     super(props);
@@ -108,10 +115,14 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
     this.state = {
       selectedDataView: dataView,
       customLabel: props.filter.meta.alias || '',
-      queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
+      queryDsl: this.parseFilterToQueryDsl(props.filter),
       isCustomEditorOpen: this.isUnknownFilterType(),
       localFilter: dataView ? props.filter : buildEmptyFilter(false),
     };
+  }
+
+  private parseFilterToQueryDsl(filter: Filter) {
+    return JSON.stringify(cleanFilter(filter), null, 2);
   }
 
   public render() {
@@ -197,7 +208,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
                 <EuiButton
                   fill
                   onClick={this.onSubmit}
-                  isDisabled={!this.isFiltersValid()}
+                  isDisabled={!this.isFilterValid()}
                   data-test-subj="saveFilter"
                 >
                   {this.props.mode === 'add' ? addButtonLabel : updateButtonLabel}
@@ -286,12 +297,19 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
     return (
       <>
         <div role="region" aria-label="" className={cx(filtersBuilderMaxHeight, 'eui-yScroll')}>
-          <FiltersBuilder
-            filters={[localFilter]}
-            timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
-            dataView={selectedDataView!}
-            onChange={this.onLocalFilterChange}
-          />
+          <EuiToolTip
+            position="top"
+            content={selectedDataView ? '' : selectDataViewToolTip}
+            display="block"
+          >
+            <FiltersBuilder
+              filters={[localFilter]}
+              timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
+              dataView={selectedDataView!}
+              onChange={this.onLocalFilterChange}
+              isDisabled={!selectedDataView}
+            />
+          </EuiToolTip>
         </div>
 
         {shouldShowPreview ? (
@@ -360,7 +378,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
     return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
-  private isFiltersValid() {
+  private isFilterValid() {
     const { isCustomEditorOpen, queryDsl, selectedDataView, localFilter } = this.state;
 
     if (isCustomEditorOpen) {
@@ -426,7 +444,6 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
         meta: {
           ...f.meta,
           disabled,
-          negate,
           alias,
         },
       };

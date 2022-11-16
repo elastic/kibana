@@ -19,25 +19,23 @@ export const updateFilter = (
   operator?: Operator,
   params?: Filter['meta']['params']
 ) => {
-  if (field && operator && params !== undefined) {
+  if (field && operator) {
+    if (operator.type === 'exists') {
+      return updateWithExistsOperator(filter, operator);
+    }
     if (operator.type === 'range') {
       return updateWithRangeOperator(filter, operator, params, field);
     } else if (Array.isArray(params)) {
       return updateWithIsOneOfOperator(filter, operator, params);
     } else {
-      filter = updateWithIsOperator(filter, operator, params);
-    }
-  } else if (field && operator) {
-    if (operator.type === 'exists') {
-      return updateWithExistsOperator(filter, operator);
-    } else {
-      return updateOperator(filter, operator);
+      return updateWithIsOperator(filter, operator, params);
     }
   } else {
     return updateField(filter, field);
   }
   return filter;
 };
+
 function updateField(filter: Filter, field?: DataViewField) {
   return {
     ...filter,
@@ -51,20 +49,6 @@ function updateField(filter: Filter, field?: DataViewField) {
       type: undefined,
     },
     query: undefined,
-  };
-}
-
-function updateOperator(filter: Filter, operator?: Operator) {
-  return {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      negate: operator?.negate,
-      type: operator?.type,
-      params: { ...filter.meta.params, query: undefined },
-      value: undefined,
-    },
-    query: { match_phrase: {} },
   };
 }
 
@@ -95,7 +79,7 @@ function updateWithIsOperator(
       type: operator?.type,
       params: { ...filter.meta.params, query: params },
     },
-    query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: params } },
+    query: { match_phrase: { [filter.meta.key!]: params ?? '' } },
   };
 }
 
