@@ -20,7 +20,6 @@ jest.mock('./rules_table_context');
 
 describe('useSyncRulesTableSavedState', () => {
   const state: Partial<RulesTableState> = {
-    isInMemorySorting: false,
     filterOptions: {
       filter: '',
       showCustomRules: false,
@@ -38,7 +37,6 @@ describe('useSyncRulesTableSavedState', () => {
     },
   };
   const expectedSavedState = {
-    inMemory: false,
     filter: {
       filter: '',
       showCustomRules: false,

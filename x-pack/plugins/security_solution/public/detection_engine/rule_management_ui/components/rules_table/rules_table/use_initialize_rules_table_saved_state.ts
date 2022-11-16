@@ -34,7 +34,6 @@ export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTa
       }
 
       const activeTab = params?.tab ?? savedState?.tab;
-      const isInMemorySorting = params?.inMemory ?? savedState?.inMemory;
       const filterOptions = params?.filter ?? savedState?.filter;
       const sorting = params?.sort ?? savedState?.sort;
       const page = params?.page ?? savedState?.page;
@@ -42,10 +41,6 @@ export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTa
 
       if (activeTab === AllRulesTabs.monitoring) {
         setActiveTab(activeTab);
-      }
-
-      if (isInMemorySorting !== undefined) {
-        actions.setIsInMemorySorting(isInMemorySorting);
       }
 
       if (filterOptions !== undefined) {

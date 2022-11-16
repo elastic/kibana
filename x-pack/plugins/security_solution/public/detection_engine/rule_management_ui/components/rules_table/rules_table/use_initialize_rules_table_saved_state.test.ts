@@ -36,7 +36,6 @@ function mockState({
 describe('useInitializeRulesTableSavedState', () => {
   const urlSavedState: RulesTableSavedState = {
     tab: 'monitoring',
-    inMemory: false,
     filter: {
       filter: '',
       showCustomRules: false,
@@ -51,7 +50,6 @@ describe('useInitializeRulesTableSavedState', () => {
     perPage: 10,
   };
   const storageSavedState: RulesTableSavedState = {
-    inMemory: true,
     filter: {
       filter: 'test',
       showCustomRules: false,
@@ -109,7 +107,6 @@ describe('useInitializeRulesTableSavedState', () => {
       renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
       expect(setActiveTab).toHaveBeenCalledWith('monitoring');
-      expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(urlSavedState.inMemory);
       expect(actions.setFilterOptions).toHaveBeenCalledWith(urlSavedState.filter);
       expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sort);
       expect(actions.setPage).toHaveBeenCalledWith(urlSavedState.page);
@@ -145,7 +142,6 @@ describe('useInitializeRulesTableSavedState', () => {
       renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
       expect(setActiveTab).not.toHaveBeenCalled();
-      expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(storageSavedState.inMemory);
       expect(actions.setFilterOptions).toHaveBeenCalledWith(storageSavedState.filter);
       expect(actions.setSortingOptions).toHaveBeenCalledWith(storageSavedState.sort);
       expect(actions.setPage).toHaveBeenCalledWith(storageSavedState.page);
@@ -181,7 +177,6 @@ describe('useInitializeRulesTableSavedState', () => {
       renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
       expect(setActiveTab).toHaveBeenCalledWith('monitoring');
-      expect(actions.setIsInMemorySorting).toHaveBeenCalledWith(urlSavedState.inMemory);
       expect(actions.setFilterOptions).toHaveBeenCalledWith(urlSavedState.filter);
       expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sort);
       expect(actions.setPage).toHaveBeenCalledWith(urlSavedState.page);
