@@ -16,7 +16,6 @@ import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import type { POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS } from './translations';
-import type { EventFiltersPageLocation } from '../../../../event_filters/types';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 interface CommonProps {
   policyId: string;
@@ -24,9 +23,7 @@ interface CommonProps {
   listId: string;
   labels: typeof POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS;
   getPolicyArtifactsPath: (policyId: string) => string;
-  getArtifactPath: (
-    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
-  ) => string;
+  getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
 }
 
 export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
