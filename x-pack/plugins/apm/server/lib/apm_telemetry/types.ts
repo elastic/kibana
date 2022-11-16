@@ -159,6 +159,36 @@ export interface APMUsage {
     }
   >;
   indices: {
+    traces: {
+      shards: {
+        total: number;
+      };
+      all: {
+        total: {
+          docs: {
+            count: number;
+          };
+          store: {
+            size_in_bytes: number;
+          };
+        };
+      };
+    };
+    metric: {
+      shards: {
+        total: number;
+      };
+      all: {
+        total: {
+          docs: {
+            count: number;
+          };
+          store: {
+            size_in_bytes: number;
+          };
+        };
+      };
+    };
     shards: {
       total: number;
     };

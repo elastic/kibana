@@ -227,6 +227,24 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
   integrations: { ml: { all_jobs_count: long } },
 
   indices: {
+    metric: {
+      shards: { total: long },
+      all: {
+        total: {
+          docs: { count: long },
+          store: { size_in_bytes: long },
+        },
+      },
+    },
+    traces: {
+      shards: { total: long },
+      all: {
+        total: {
+          docs: { count: long },
+          store: { size_in_bytes: long },
+        },
+      },
+    },
     shards: { total: long },
     all: {
       total: {
