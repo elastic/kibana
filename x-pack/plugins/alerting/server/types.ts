@@ -43,6 +43,7 @@ import {
   RuleMonitoring,
   MappedParams,
   RuleSnooze,
+  IntervalSchedule,
   RuleLastRun,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
@@ -261,7 +262,7 @@ export interface RawRule extends SavedObjectAttributes {
   alertTypeId: string; // this cannot be renamed since it is in the saved object
   consumer: string;
   legacyId: string | null;
-  schedule: SavedObjectAttributes;
+  schedule: IntervalSchedule;
   actions: RawRuleAction[];
   params: SavedObjectAttributes;
   mapped_params?: MappedParams;
