@@ -51,31 +51,38 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .expect(200);
       objectRemover.add(Spaces[1].id, createdConnector.id, 'action', 'actions');
 
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces[1].id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            rule_type_id: 'test.cumulative-firing',
-            actions: [
-              {
-                id: createdConnector.id,
-                group: 'default',
-                params: {},
-              },
-            ],
-          })
-        )
-        .expect(200);
-      objectRemover.add(Spaces[1].id, createdRule.id, 'rule', 'alerting');
+      // Create 2 rules, and then only pull the logs for one of them
+      let watchedRuleId;
+      for (let i = 0; i < 2; i++) {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces[1].id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.cumulative-firing',
+              actions: [
+                {
+                  id: createdConnector.id,
+                  group: 'default',
+                  params: {},
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces[1].id, createdRule.id, 'rule', 'alerting');
+        await waitForEvents(createdRule.id, 'alerting', new Map([['execute', { gte: 1 }]]));
+        await waitForEvents(createdRule.id, 'actions', new Map([['execute', { gte: 1 }]]));
 
-      await waitForEvents(createdRule.id, 'alerting', new Map([['execute', { gte: 1 }]]));
-      await waitForEvents(createdRule.id, 'actions', new Map([['execute', { gte: 1 }]]));
+        if (i === 0) watchedRuleId = createdRule.id;
+      }
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces[0].id)}/internal/alerting/rule/${
-          createdRule.id
-        }/_action_error_log?date_start=${dateStart}&with_auth=true&namespace=${Spaces[1].id}`
+        `${getUrlPrefix(
+          Spaces[0].id
+        )}/internal/alerting/rule/${watchedRuleId}/_action_error_log?date_start=${dateStart}&with_auth=true&namespace=${
+          Spaces[1].id
+        }`
       );
       expect(response.body.totalErrors).to.eql(1);
       expect(response.body.errors.length).to.eql(1);
