@@ -90,7 +90,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fileShare": "3f88784b041bb8728a7f40763a08981828799a75",
         "fleet-fleet-server-host": "643d15dbf56edb96f7ca65f98409d83ac5792fb6",
         "fleet-preconfiguration-deletion-record": "7b28f200513c28ae774f1b7d7d7906954e3c6e16",
-        "fleet-proxy": "b7f31c3341012009c5194d74b36dce56db388fad",
+        "fleet-proxy": "2bbcd9e6d5e30ac07b275c8d489af07a0d550df5",
         "graph-workspace": "3342f2cd561afdde8f42f5fb284bf550dee8ebb5",
         "guided-onboarding-guide-state": "561db8d481b131a2bbf46b1e534d6ce960255135",
         "guided-onboarding-plugin-state": "a802ed58e9d0076b9632c59d7943861ba476f99c",
