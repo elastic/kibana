@@ -281,15 +281,22 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
         output: {
           type: 'json',
           content: {
-            code: 'ra_get-file-success',
-            path: (
-              action as ActionDetails<
-                ResponseActionGetFileOutputContent,
-                ResponseActionGetFileParameters
-              >
-            ).parameters?.path,
-            size: 1234,
+            code: 'ra_get-file_success_done',
             zip_size: 123,
+            contents: [
+              {
+                type: 'file',
+                path: (
+                  action as ActionDetails<
+                    ResponseActionGetFileOutputContent,
+                    ResponseActionGetFileParameters
+                  >
+                ).parameters?.path,
+                size: 1234,
+                file_name: 'bad_file.txt',
+                sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
+              },
+            ],
           },
         },
       } as ResponseOutput<ResponseActionGetFileOutputContent>;

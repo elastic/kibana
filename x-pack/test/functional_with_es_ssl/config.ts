@@ -10,6 +10,7 @@ import { resolve, join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
+import { getAllExternalServiceSimulatorPaths } from '../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 // .server-log is specifically not enabled
 const enabledActionTypes = [
@@ -23,6 +24,7 @@ const enabledActionTypes = [
   '.servicenow',
   '.servicenow-sir',
   '.slack',
+  '.tines',
   '.webhook',
   'test.authorization',
   'test.failing',
@@ -91,6 +93,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'internalAlertsTable',
           'ruleTagFilter',
           'ruleStatusFilter',
+          'ruleLastRunOutcome',
         ])}`,
         `--xpack.alerting.rules.minimumScheduleInterval.value="2s"`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
@@ -117,6 +120,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             },
           },
         })}`,
+        `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
       ],
     },
     security: {
