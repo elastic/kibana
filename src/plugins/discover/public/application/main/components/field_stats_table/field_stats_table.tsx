@@ -177,7 +177,6 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     searchSessionId,
     availableFields$,
     savedSearchDataTotalHits$,
-    services.data,
   ]);
 
   useEffect(() => {
