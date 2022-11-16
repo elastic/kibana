@@ -50,7 +50,7 @@ import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
-import { packagePolicyService } from '../..';
+import { appContextService, packagePolicyService } from '../..';
 
 import { createInstallation, updateEsAssetReferences, restartInstallation } from './install';
 import { withPackageSpan } from './utils';
@@ -217,11 +217,14 @@ export async function _installPackage({
       logger.warn(`Error removing legacy templates: ${e.message}`);
     }
 
-    await ensureFileUploadWriteIndices({
-      integrationNames: [packageInfo.name],
-      esClient,
-      logger,
-    });
+    const { diagnosticFileUploadEnabled } = appContextService.getExperimentalFeatures();
+    if (diagnosticFileUploadEnabled) {
+      await ensureFileUploadWriteIndices({
+        integrationNames: [packageInfo.name],
+        esClient,
+        logger,
+      });
+    }
 
     // update current backing indices of each data stream
     await withPackageSpan('Update write indices', () =>

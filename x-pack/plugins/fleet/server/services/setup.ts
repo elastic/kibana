@@ -180,8 +180,9 @@ export async function ensureFleetFileUploadIndices(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
+  const { diagnosticFileUploadEnabled } = appContextService.getExperimentalFeatures();
+  if (!diagnosticFileUploadEnabled) return;
   const logger = appContextService.getLogger();
-
   const installedFileUploadIntegrations = await getInstallationsByName({
     savedObjectsClient: soClient,
     pkgNames: [...FILE_STORAGE_INTEGRATION_NAMES],
