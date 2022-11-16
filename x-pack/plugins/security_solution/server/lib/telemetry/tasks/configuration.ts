@@ -38,8 +38,8 @@ export function createTelemetryConfigurationTaskConfig() {
       try {
         const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
         const { artifact, etag }: { artifact?: TelemetryConfiguration; etag: string } =
-          await artifactService.getArtifact(artifactName, taskState.etag ?? '');
-        state.etag = etag;
+          await artifactService.getArtifact(artifactName, taskState.artifact?.etag ?? '');
+        state.artifact = { etag };
         if (!artifact) {
           tlog(logger, 'Latest telemetry configuration artifact already applied...skipping');
           return state;

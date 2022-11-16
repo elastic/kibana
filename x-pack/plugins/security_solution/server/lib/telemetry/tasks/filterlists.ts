@@ -38,8 +38,8 @@ export function createTelemetryFilterListArtifactTaskConfig() {
       try {
         const artifactName = 'telemetry-filterlists-v1';
         const { artifact, etag }: { artifact?: TelemetryFilterListArtifact; etag: string } =
-          await artifactService.getArtifact(artifactName, taskState.etag ?? '');
-        state.etag = etag;
+          await artifactService.getArtifact(artifactName, taskState.artifact?.etag ?? '');
+        state.artifact = { etag };
         if (!artifact) {
           tlog(logger, 'Latest filterlist artifact already applied...skipping');
           return state;

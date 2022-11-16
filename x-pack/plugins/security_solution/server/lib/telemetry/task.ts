@@ -47,7 +47,9 @@ export type LastExecutionTimestampCalculator = (
 
 export interface CustomTaskState {
   hits: number;
-  etag?: string;
+  artifact?: {
+    etag?: string;
+  };
 }
 export type TaskState = ConcreteTaskInstance['state'];
 
