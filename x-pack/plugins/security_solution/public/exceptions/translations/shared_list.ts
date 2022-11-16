@@ -133,6 +133,12 @@ export const REFERENCE_MODAL_TITLE = i18n.translate(
   }
 );
 
+export const defaultDeleteListMessage = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.referenceModalDefaultDescription', {
+    defaultMessage: 'Are you sure you wish to DELETE exception list with the name {listName}?',
+    values: { listName },
+  });
+
 export const REFERENCE_MODAL_CANCEL_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.referenceModalCancelButton',
   {
@@ -339,5 +345,16 @@ export const SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.createSharedExceptionListSuccessTitle',
   {
     defaultMessage: 'created list',
+  }
+);
+
+export const SORT_BY = i18n.translate('xpack.securitySolution.exceptions.sortBy', {
+  defaultMessage: 'Sort by:',
+});
+
+export const SORT_BY_CREATE_AT = i18n.translate(
+  'xpack.securitySolution.exceptions.sortByCreateAt',
+  {
+    defaultMessage: 'Created At',
   }
 );

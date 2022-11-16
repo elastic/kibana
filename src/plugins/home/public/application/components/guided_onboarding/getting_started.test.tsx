@@ -12,6 +12,7 @@ import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { GettingStarted } from './getting_started';
 import { KEY_ENABLE_WELCOME } from '../home';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../../kibana_services', () => {
   const { chromeServiceMock, applicationServiceMock } =
@@ -35,6 +36,7 @@ jest.mock('../../kibana_services', () => {
       },
       guidedOnboardingService: {
         fetchAllGuidesState: jest.fn(),
+        skipGuidedOnboarding: jest.fn(),
       },
     }),
   };
@@ -59,7 +61,12 @@ describe('getting started', () => {
   test('skip button should disable home welcome screen', async () => {
     const component = mountWithIntl(<GettingStarted />);
     const skipButton = findTestSubject(component, 'onboarding--skipGuideLink');
-    skipButton.simulate('click');
+
+    await act(async () => {
+      await skipButton.simulate('click');
+    });
+
+    component.update();
 
     expect(localStorage.getItem(KEY_ENABLE_WELCOME)).toBe('false');
   });

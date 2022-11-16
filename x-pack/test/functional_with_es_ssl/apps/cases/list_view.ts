@@ -376,7 +376,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('pagination', () => {
       before(async () => {
-        await cases.api.createNthRandomCases(8);
+        await cases.api.createNthRandomCases(12);
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -388,7 +388,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('paginates cases correctly', async () => {
         await testSubjects.click('tablePaginationPopoverButton');
-        await testSubjects.click('tablePagination-5-rows');
+        await testSubjects.click('tablePagination-25-rows');
+        await testSubjects.missingOrFail('pagination-button-1');
+        await testSubjects.click('tablePaginationPopoverButton');
+        await testSubjects.click('tablePagination-10-rows');
         await testSubjects.isEnabled('pagination-button-1');
         await testSubjects.click('pagination-button-1');
         await testSubjects.isEnabled('pagination-button-0');
