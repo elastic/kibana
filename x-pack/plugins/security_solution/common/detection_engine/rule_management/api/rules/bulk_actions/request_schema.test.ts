@@ -133,6 +133,7 @@ describe('Perform bulk action request schema', () => {
       const payload: PerformBulkActionRequestBody = {
         query: 'name: test',
         action: BulkActionType.duplicate,
+        [BulkActionType.duplicate]: { include_exceptions: false },
       };
       const message = retrieveValidationMessage(payload);
       expect(getPaths(left(message.errors))).toEqual([]);
