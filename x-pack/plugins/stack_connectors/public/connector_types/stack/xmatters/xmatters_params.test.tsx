@@ -13,7 +13,7 @@ import XmattersParamsFields from './xmatters_params';
 describe('XmattersParamsFields renders', () => {
   beforeAll(() => {
     jest.useFakeTimers('modern');
-    jest.setSystemTime(new Date(2022, 11, 11));
+    jest.setSystemTime(new Date('2022-01-01T12:00:00.000Z'));
   });
 
   afterAll(() => {
@@ -96,7 +96,7 @@ describe('XmattersParamsFields renders', () => {
       0
     );
     expect(editAction).toHaveBeenNthCalledWith(3, 'ruleName', 'Test Rule', 0);
-    expect(editAction).toHaveBeenNthCalledWith(4, 'date', '2022-12-10T23:00:00.000Z', 0);
+    expect(editAction).toHaveBeenNthCalledWith(4, 'date', '2022-01-01T12:00:00.000Z', 0);
     expect(editAction).toHaveBeenNthCalledWith(5, 'spaceId', 'test-space', 0);
   });
 });
