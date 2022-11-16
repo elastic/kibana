@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSelectedMonitor } from './use_selected_monitor';
 import { useSelectedLocation } from './use_selected_location';
 import { getMonitorRecentPingsAction, selectMonitorPingsMetadata } from '../../../state';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 
 interface UseMonitorPingsProps {
   pageSize?: number;
@@ -21,6 +22,7 @@ interface UseMonitorPingsProps {
 
 export const useMonitorPings = (props?: UseMonitorPingsProps) => {
   const dispatch = useDispatch();
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { monitor } = useSelectedMonitor();
   const location = useSelectedLocation();
@@ -44,6 +46,7 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
   }, [
     dispatch,
     monitorId,
+    lastRefresh,
     locationLabel,
     props?.pageSize,
     props?.pageIndex,

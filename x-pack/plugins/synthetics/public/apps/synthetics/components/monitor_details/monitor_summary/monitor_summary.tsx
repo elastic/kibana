@@ -32,10 +32,12 @@ import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
 import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorErrorsCount } from './monitor_errors_count';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export const MonitorSummary = () => {
   const { from, loading } = useEarliestStartDate();
   const to = 'now';
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const monitorId = useMonitorQueryId();
 
@@ -105,7 +107,7 @@ export const MonitorSummary = () => {
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <MonitorDurationTrend from={from} to={to} />
+                <MonitorDurationTrend from={from} to={to} lastRefresh={lastRefresh} />
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -124,7 +126,7 @@ export const MonitorSummary = () => {
           <LastTestRun />
         </EuiFlexItem>
         <EuiFlexItem>
-          <StepDurationPanel />
+          <StepDurationPanel lastRefresh={lastRefresh} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

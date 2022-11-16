@@ -17,66 +17,71 @@ import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 
-export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Position }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
+export const StepDurationPanel = React.memo(
+  ({ legendPosition, lastRefresh }: { legendPosition?: Position; lastRefresh: number }) => {
+    const { observability } = useKibana<ClientPluginsStart>().services;
 
-  const { ExploratoryViewEmbeddable } = observability;
+    const { ExploratoryViewEmbeddable } = observability;
 
-  const { monitor } = useSelectedMonitor();
+    const { monitor } = useSelectedMonitor();
 
-  const monitorId = useMonitorQueryId();
+    const monitorId = useMonitorQueryId();
 
-  const selectedLocation = useSelectedLocation();
+    const selectedLocation = useSelectedLocation();
 
-  const isBrowser = monitor?.type === 'browser';
+    const isBrowser = monitor?.type === 'browser';
 
-  if (!selectedLocation) {
-    return null;
-  }
+    if (!selectedLocation) {
+      return null;
+    }
 
-  if (!monitorId) {
-    return null;
-  }
+    if (!monitorId) {
+      return null;
+    }
 
-  return (
-    <EuiPanel hasShadow={false} hasBorder>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{isBrowser ? DURATION_BY_STEP_LABEL : DURATION_BY_LOCATION}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            {LAST_24H_LABEL}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    return (
+      <EuiPanel hasShadow={false} hasBorder>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>{isBrowser ? DURATION_BY_STEP_LABEL : DURATION_BY_LOCATION}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s" color="subdued">
+              {LAST_24H_LABEL}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-      <ExploratoryViewEmbeddable
-        axisTitlesVisibility={{ yLeft: false, yRight: false, x: false }}
-        customHeight={'300px'}
-        reportType={ReportTypes.KPI}
-        legendPosition={legendPosition}
-        attributes={[
-          {
-            name: DURATION_BY_STEP_LABEL,
-            reportDefinitions: {
-              'monitor.id': [monitorId],
-              'observer.geo.name': [selectedLocation?.label],
+        <ExploratoryViewEmbeddable
+          axisTitlesVisibility={{ yLeft: false, yRight: false, x: false }}
+          customHeight={'300px'}
+          reportType={ReportTypes.KPI}
+          legendPosition={legendPosition}
+          attributes={[
+            {
+              name: DURATION_BY_STEP_LABEL,
+              reportDefinitions: {
+                'monitor.id': [monitorId],
+                'observer.geo.name': [selectedLocation?.label],
+              },
+              selectedMetricField: isBrowser
+                ? 'synthetics.step.duration.us'
+                : 'monitor.duration.us',
+              dataType: 'synthetics',
+              time: { from: 'now-24h/h', to: 'now' },
+              breakdown: isBrowser ? 'synthetics.step.name.keyword' : 'observer.geo.name',
+              operationType: 'last_value',
+              seriesType: 'area_stacked',
             },
-            selectedMetricField: isBrowser ? 'synthetics.step.duration.us' : 'monitor.duration.us',
-            dataType: 'synthetics',
-            time: { from: 'now-24h/h', to: 'now' },
-            breakdown: isBrowser ? 'synthetics.step.name.keyword' : 'observer.geo.name',
-            operationType: 'last_value',
-            seriesType: 'area_stacked',
-          },
-        ]}
-      />
-    </EuiPanel>
-  );
-};
+          ]}
+        />
+      </EuiPanel>
+    );
+  },
+  ({ lastRefresh }, { lastRefresh: next }) => lastRefresh === next
+);
 
 const DURATION_BY_STEP_LABEL = i18n.translate('xpack.synthetics.detailsPanel.durationByStep', {
   defaultMessage: 'Duration by step',
