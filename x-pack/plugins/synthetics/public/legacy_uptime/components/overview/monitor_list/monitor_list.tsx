@@ -44,7 +44,7 @@ interface Props extends MonitorListProps {
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
   refreshedMonitorIds: string[];
-  isPending: boolean;
+  isPending?: boolean;
 }
 
 export const MonitorListComponent: ({
