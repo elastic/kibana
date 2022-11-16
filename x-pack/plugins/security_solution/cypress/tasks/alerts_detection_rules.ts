@@ -31,6 +31,7 @@ import {
   DUPLICATE_RULE_ACTION_BTN,
   DUPLICATE_RULE_MENU_PANEL_BTN,
   DUPLICATE_RULE_BULK_BTN,
+  CONFIRM_DUPLICATE_RULE,
   RULES_ROW,
   SELECT_ALL_RULES_BTN,
   MODAL_CONFIRMATION_BTN,
@@ -80,6 +81,7 @@ export const duplicateFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(DUPLICATE_RULE_ACTION_BTN).should('be.visible');
   cy.get(DUPLICATE_RULE_ACTION_BTN).click();
+  cy.get(CONFIRM_DUPLICATE_RULE).click();
 };
 
 /**
@@ -96,6 +98,7 @@ export const duplicateRuleFromMenu = () => {
 
   // Because of a fade effect and fast clicking this can produce more than one click
   cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).pipe(click);
+  cy.get(CONFIRM_DUPLICATE_RULE).click();
 };
 
 /**
@@ -138,6 +141,7 @@ export const duplicateSelectedRules = () => {
   cy.log('Duplicate selected rules');
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DUPLICATE_RULE_BULK_BTN).click();
+  cy.get(CONFIRM_DUPLICATE_RULE).click();
 };
 
 export const enableSelectedRules = () => {
