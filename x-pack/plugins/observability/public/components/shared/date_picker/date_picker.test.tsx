@@ -116,7 +116,7 @@ describe('DatePicker', () => {
     });
 
     // It updates the URL when it doesn't contain the range.
-    expect(mockHistoryPush).toHaveBeenCalledTimes(1);
+    expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
 
     wrapper.find(EuiSuperDatePicker).props().onTimeChange({
       start: 'now-90m',
