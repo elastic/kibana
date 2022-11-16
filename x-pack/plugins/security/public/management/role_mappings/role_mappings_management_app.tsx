@@ -96,9 +96,12 @@ export const roleMappingsManagementApp = Object.freeze({
                 <Router history={history}>
                   <ReadonlyBadge
                     featureId="role_mappings"
-                    tooltip={i18n.translate('xpack.security.management.roles.readonlyTooltip', {
-                      defaultMessage: 'Unable to create or edit role mappings',
-                    })}
+                    tooltip={i18n.translate(
+                      'xpack.security.management.roleMappings.readonlyTooltip',
+                      {
+                        defaultMessage: 'Unable to create or edit role mappings',
+                      }
+                    )}
                   />
                   <BreadcrumbsProvider
                     onChange={createBreadcrumbsChangeHandler(core.chrome, setBreadcrumbs)}
