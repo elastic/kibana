@@ -52,6 +52,7 @@ export enum WriteOperations {
   Snooze = 'snooze',
   BulkEdit = 'bulkEdit',
   BulkDelete = 'bulkDelete',
+  BulkEnable = 'bulkEnable',
   Unsnooze = 'unsnooze',
 }
 
