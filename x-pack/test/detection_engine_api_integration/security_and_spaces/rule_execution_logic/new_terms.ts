@@ -735,7 +735,7 @@ export default ({ getService }: FtrProviderContext) => {
           fields: [AGG_FIELD_NAME, 'possibly_null_field', 'host.name'],
           runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'possibly_null_field'], {
             'host.name': { 'host-0': true },
-            tags: { ['null']: true },
+            tags: {},
           }),
         });
 
