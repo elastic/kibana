@@ -338,9 +338,7 @@ export const MetricVis = ({
 
   const baseTheme = getThemeService().useChartsBaseTheme();
 
-  const {
-    metric: { minHeight },
-  } = baseTheme;
+  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
 
   useEffect(() => {
     const minimumRequiredVerticalSpace = minHeight * grid.length;
