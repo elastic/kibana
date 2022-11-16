@@ -16,7 +16,7 @@ import type { AgentUsage } from './agent_collectors';
 import { getInternalClients } from './helpers';
 import { getPackageUsage } from './package_collectors';
 import type { PackageUsage } from './package_collectors';
-import { getFleetServerUsage } from './fleet_server_collector';
+import { getFleetServerUsage, getFleetServerConfig } from './fleet_server_collector';
 import type { FleetServerUsage } from './fleet_server_collector';
 
 export interface Usage {
@@ -34,6 +34,7 @@ export const fetchFleetUsage = async (core: CoreSetup, config: FleetConfigType) 
     fleet_server: await getFleetServerUsage(soClient, esClient),
     packages: await getPackageUsage(soClient),
     agent_versions: await getAgentVersions(esClient),
+    fleet_server_config: await getFleetServerConfig(soClient, esClient),
   };
   return usage;
 };

@@ -222,6 +222,40 @@ export class FleetUsageSender {
             _meta: { description: 'The agent versions enrolled in this deployment.' },
           },
         },
+        fleet_server_config: {
+          properties: {
+            hosts: {
+              type: 'array',
+              items: {
+                properties: {
+                  id: { type: 'keyword' },
+                  name: { type: 'keyword' },
+                  host_urls: {
+                    type: 'array',
+                    items: {
+                      type: 'keyword',
+                    },
+                  },
+                  is_default: { type: 'boolean' },
+                  is_preconfigured: { type: 'boolean' },
+                  proxy_id: { type: 'keyword' },
+                },
+              },
+            },
+            policies: {
+              type: 'array',
+              items: {
+                properties: {
+                  id: { type: 'keyword' },
+                  name: { type: 'keyword' },
+                  enabled: { type: 'boolean' },
+                  policy_id: { type: 'keyword' },
+                  input_config: { type: 'pass_through' },
+                },
+              },
+            },
+          },
+        },
       },
     });
   }

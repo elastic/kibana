@@ -7,6 +7,8 @@
 
 import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
 
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
+
 import { packagePolicyService } from '../services';
 import { getAgentStatusForAgentPolicy } from '../services/agents';
 import { listFleetServerHosts } from '../services/fleet_server_host';
@@ -83,4 +85,33 @@ export const getFleetServerUsage = async (
     total_all_statuses: total + inactive,
     num_host_urls: numHostsUrls,
   };
+};
+
+export const getFleetServerConfig = async (
+  soClient?: SavedObjectsClient,
+  esClient?: ElasticsearchClient
+): Promise<any> => {
+  if (!soClient || !esClient) {
+    return {};
+  }
+  const fleetServerHosts = await listFleetServerHosts(soClient);
+  const hosts = fleetServerHosts.items.map((item) => ({
+    ...item,
+    proxy_id: (item as any).proxy_id ?? '',
+  }));
+
+  const res = await packagePolicyService.list(soClient, {
+    page: 1,
+    perPage: SO_SEARCH_LIMIT,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:fleet_server`,
+  });
+  const policies = res.items.map((item) => ({
+    id: item.id,
+    name: item.name,
+    enabled: item.enabled,
+    policy_id: item.policy_id,
+    input_config: (item.inputs[0] ?? {}).compiled_input,
+  }));
+
+  return { hosts, policies };
 };
