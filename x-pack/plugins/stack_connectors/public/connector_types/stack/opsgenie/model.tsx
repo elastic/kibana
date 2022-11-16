@@ -11,6 +11,7 @@ import {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { isEmpty } from 'lodash';
 import { RULE_TAGS_TEMPLATE } from '../../../../common/opsgenie';
 import { OpsgenieSubActions } from '../../../../common';
 import type {
@@ -74,13 +75,13 @@ const validateParams = async (
     errors,
   };
 
-  if (
-    actionParams.subAction === OpsgenieSubActions.CreateAlert &&
-    !actionParams?.subActionParams?.message?.length
-  ) {
-    errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
+  if (actionParams.subAction === OpsgenieSubActions.CreateAlert) {
+    if (!actionParams?.subActionParams?.message?.length) {
+      errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
+    } else if (isEmpty(actionParams?.subActionParams?.message?.trim())) {
+      errors['subActionParams.message'].push(translations.MESSAGE_NON_WHITESPACE);
+    }
   }
-
   if (
     actionParams.subAction === OpsgenieSubActions.CloseAlert &&
     !actionParams?.subActionParams?.alias?.length
