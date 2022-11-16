@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { isNil } from 'lodash';
+import { APMChartSpec, Coordinate } from '../../../../../typings/timeseries';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -37,10 +39,6 @@ const options: Array<{ value: LatencyAggregationType; text: string }> = [
   { value: LatencyAggregationType.p95, text: '95th percentile' },
   { value: LatencyAggregationType.p99, text: '99th percentile' },
 ];
-
-export function filterNil<T>(value: T | null | undefined): value is T {
-  return value != null;
-}
 
 export function LatencyChart({ height, kuery }: Props) {
   const history = useHistory();
@@ -74,7 +72,7 @@ export function LatencyChart({ height, kuery }: Props) {
   const timeseries = [
     currentPeriod,
     comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
-  ].filter(filterNil);
+  ].filter((timeserie) => !isNil(timeserie)) as Array<APMChartSpec<Coordinate>>;
 
   const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
