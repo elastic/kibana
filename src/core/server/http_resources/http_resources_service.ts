@@ -90,7 +90,6 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     request: KibanaRequest,
     response: KibanaResponseFactory
   ): HttpResourcesServiceToolkit {
-    const cspHeader = deps.http.csp.header;
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const apmConfig = getApmConfig(request.url.pathname);
@@ -105,7 +104,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
         return response.ok({
           body,
-          headers: { ...options.headers, 'content-security-policy': cspHeader },
+          headers: options.headers,
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
@@ -121,7 +120,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
         return response.ok({
           body,
-          headers: { ...options.headers, 'content-security-policy': cspHeader },
+          headers: options.headers,
         });
       },
       renderHtml(options: HttpResourcesResponseOptions) {
@@ -130,7 +129,6 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           headers: {
             ...options.headers,
             'content-type': 'text/html',
-            'content-security-policy': cspHeader,
           },
         });
       },
@@ -140,7 +138,6 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           headers: {
             ...options.headers,
             'content-type': 'text/javascript',
-            'content-security-policy': cspHeader,
           },
         });
       },

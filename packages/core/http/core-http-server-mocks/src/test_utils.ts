@@ -26,6 +26,7 @@ const createConfigService = () => {
   configService.atPath.mockImplementation((path) => {
     if (path === 'server') {
       return new BehaviorSubject({
+        name: 'kibana',
         hosts: ['localhost'],
         maxPayload: new ByteSizeValue(1024),
         autoListen: true,
