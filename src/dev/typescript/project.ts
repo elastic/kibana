@@ -174,4 +174,8 @@ export class Project {
       ? [this.tsConfigPath, ...this.baseProject.getConfigPaths()]
       : [this.tsConfigPath];
   }
+
+  public getProjectsDeep(): Project[] {
+    return this.baseProject ? [this, ...this.baseProject.getProjectsDeep()] : [this];
+  }
 }

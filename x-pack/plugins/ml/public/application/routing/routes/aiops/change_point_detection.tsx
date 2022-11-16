@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
+import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { parse } from 'query-string';
@@ -37,7 +37,7 @@ export const changePointDetectionRouteFactory = (
       }),
     },
   ],
-  disabled: !AIOPS_ENABLED,
+  disabled: !CHANGE_POINT_DETECTION_ENABLED,
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
