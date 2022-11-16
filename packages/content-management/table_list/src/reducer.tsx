@@ -65,21 +65,18 @@ export function getReducer<T extends UserContentCommonSchema>() {
         };
       }
       case 'onTableChange': {
-        const tableSort = (action.data.sort as State['tableSort']) ?? state.tableSort;
+        const tableSort = action.data.sort ?? state.tableSort;
+        const pageIndex = action.data.page?.pageIndex ?? state.pagination.pageIndex;
+        const pageSize = action.data.page?.pageSize ?? state.pagination.pageSize;
+
         return {
           ...state,
           pagination: {
             ...state.pagination,
-            pageIndex: action.data.page.index,
-            pageSize: action.data.page.size,
+            pageIndex,
+            pageSize,
           },
           tableSort,
-        };
-      }
-      case 'onTableSortChange': {
-        return {
-          ...state,
-          tableSort: action.data,
         };
       }
       case 'showConfirmDeleteItemsModal': {
