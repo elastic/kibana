@@ -6,7 +6,7 @@
  */
 
 import React, { VFC } from 'react';
-import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useInvestigateInTimeline } from '../../hooks';
@@ -19,11 +19,15 @@ const BUTTON_ICON_LABEL: string = i18n.translate(
   }
 );
 
-export interface InvestigateInTimelineButtonProps {
+export interface InvestigateInTimelineProps {
   /**
    * Value passed to the timeline. Used in combination with field if is type of {@link Indicator}.
    */
   data: Indicator;
+  /**
+   * Click event to close the popover in the parent component
+   */
+  onClick?: () => void;
   /**
    * Used for unit and e2e tests.
    */
@@ -34,12 +38,13 @@ export interface InvestigateInTimelineButtonProps {
  * Investigate in timeline button, uses the InvestigateInTimelineAction component (x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_actions/investigate_in_timeline_action.tsx)
  * retrieved from the SecuritySolutionContext.
  *
- * This component renders an {@link EuiButton}.
+ * This component renders an {@link EuiContextMenu}.
  *
- * @returns add to timeline button
+ * @returns investigate in timeline for a context menu
  */
-export const InvestigateInTimelineButton: VFC<InvestigateInTimelineButtonProps> = ({
+export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> = ({
   data,
+  onClick,
   'data-test-subj': dataTestSub,
 }) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
@@ -47,13 +52,22 @@ export const InvestigateInTimelineButton: VFC<InvestigateInTimelineButtonProps> 
     return <></>;
   }
 
+  const menuItemClicked = () => {
+    if (onClick) onClick();
+    investigateInTimelineFn();
+  };
+
   return (
-    <EuiButton onClick={investigateInTimelineFn} fill data-test-subj={dataTestSub}>
+    <EuiContextMenuItem
+      key="investigateInTime"
+      onClick={() => menuItemClicked()}
+      data-test-subj={dataTestSub}
+    >
       <FormattedMessage
         defaultMessage="Investigate in Timeline"
         id="xpack.threatIntelligence.investigateInTimelineButton"
       />
-    </EuiButton>
+    </EuiContextMenuItem>
   );
 };
 
@@ -65,7 +79,7 @@ export const InvestigateInTimelineButton: VFC<InvestigateInTimelineButtonProps> 
  *
  * @returns add to timeline button icon
  */
-export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineButtonProps> = ({
+export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = ({
   data,
   'data-test-subj': dataTestSub,
 }) => {
