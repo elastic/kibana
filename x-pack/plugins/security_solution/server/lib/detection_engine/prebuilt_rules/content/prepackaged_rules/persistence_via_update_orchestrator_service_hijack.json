@@ -54,7 +54,8 @@
     "Windows",
     "Threat Detection",
     "Persistence",
-    "CVE-2020-1313"
+    "CVE-2020-1313",
+    "has_guide"
   ],
   "threat": [
     {
@@ -82,5 +83,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 101
+  "version": 102
 }
