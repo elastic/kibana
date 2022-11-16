@@ -176,10 +176,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with ml jobs', () => {
         before(async () => {
-          await Promise.all([
-            createAndRunApmMlJob({ environment: 'production', ml }),
-            createAndRunApmMlJob({ environment: 'development', ml }),
-          ]);
+          // Creating multiple ml jobs in parallel is causing this tests to be flaky
+          // https://github.com/elastic/elasticsearch/issues/36271
+          await createAndRunApmMlJob({ environment: 'production', ml });
+          await createAndRunApmMlJob({ environment: 'development', ml });
         });
 
         after(async () => {
