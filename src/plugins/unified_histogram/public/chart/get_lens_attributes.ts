@@ -151,6 +151,7 @@ export const getLensAttributes = ({
         preferredSeriesType: 'bar_stacked',
         valueLabels: 'hide',
         fittingFunction: 'None',
+        showCurrentTimeMarker: true,
         axisTitlesVisibilitySettings: {
           x: false,
           yLeft: false,
