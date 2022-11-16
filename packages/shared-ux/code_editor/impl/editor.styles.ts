@@ -7,7 +7,8 @@
  */
 
 import { UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { ComponentSelector, css, CSSObject, SerializedStyles } from '@emotion/react';
+import { ArrayCSSInterpolation } from '@emotion/serialize';
 import { Property } from 'csstype';
 
 export const codeEditorMonacoStyles = () => css`
@@ -23,10 +24,33 @@ export const codeEditorStyles = () => css`
   }
 `;
 
-export const codeEditorControlsStyles = ({ euiTheme }: UseEuiTheme) => css`
+export const codeEditorControlsStyles = (
+  size: {
+    base: string;
+    xxs: string;
+    xs: string;
+    s: string;
+    m: string;
+    l: string;
+    xl: string;
+    xxl: string;
+    xxxl: string;
+    xxxxl: string;
+  },
+  base:
+    | string
+    | number
+    | boolean
+    | ComponentSelector
+    | SerializedStyles
+    | CSSObject
+    | ArrayCSSInterpolation
+    | null
+    | undefined
+) => css`
    {
-    top: ${euiTheme.size.xs};
-    right: ${euiTheme.base};
+    top: ${size.xs};
+    right: ${base};
     position: absolute;
     z-index: 1000;
   }

@@ -423,10 +423,7 @@ export const CodeEditor: React.FC<Props> = ({
   const { CopyButton } = useCopy({ isCopyable, value });
 
   const controlStyles = useMemo(() => {
-    const copyableStyles = [
-      defaultStyles,
-      codeEditorControlsStyles(euiTheme as unknown as UseEuiTheme<{}>),
-    ];
+    const copyableStyles = [defaultStyles, codeEditorControlsStyles(euiTheme.size, euiTheme.base)];
     return allowFullScreen || isCopyable ? copyableStyles : defaultStyles;
   }, [allowFullScreen, isCopyable, defaultStyles, euiTheme]);
 
