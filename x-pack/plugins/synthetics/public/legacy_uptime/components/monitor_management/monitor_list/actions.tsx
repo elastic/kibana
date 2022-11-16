@@ -74,23 +74,13 @@ export const Actions = ({
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
-            isProjectMonitor
-              ? i18n.translate('xpack.synthetics.monitorManagement.monitorList.enabled.tooltip', {
-                  defaultMessage:
-                    'This monitor was added from an external project. To delete the monitor, remove it from the project and push the configuration again.',
-                })
-              : ''
-          }
-        >
-          <DeleteMonitor
-            onUpdate={onUpdate}
-            name={name}
-            configId={configId}
-            isDisabled={isDisabled || isProjectMonitor || !canUpdatePrivateMonitor}
-          />
-        </EuiToolTip>
+        <DeleteMonitor
+          onUpdate={onUpdate}
+          name={name}
+          configId={configId}
+          isProjectMonitor={isProjectMonitor}
+          isDisabled={isDisabled || !canUpdatePrivateMonitor}
+        />
       </EuiFlexItem>
       {errorSummary && (
         <EuiFlexItem>
