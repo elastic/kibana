@@ -21,6 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { IndicatorsFlyoutContext } from './context';
 import { TakeAction } from './take_action/take_action';
 import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
@@ -49,12 +50,21 @@ export interface IndicatorsFlyoutProps {
    * Event to close flyout (used by {@link EuiFlyout}).
    */
   closeFlyout: () => void;
+  /**
+   * Boolean deciding if we show or hide the filter in/out feature in the flyout.
+   * We should be showing the filter in and out buttons when the flyout is used in the cases view.
+   */
+  readOnly?: boolean;
 }
 
 /**
  * Leverages the {@link EuiFlyout} from the @elastic/eui library to dhow the details of a specific {@link Indicator}.
  */
-export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({ indicator, closeFlyout }) => {
+export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
+  indicator,
+  closeFlyout,
+  readOnly = false,
+}) => {
   const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.overview);
 
   const tabs = useMemo(
@@ -146,7 +156,11 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({ indicator, closeF
           {renderTabs}
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{selectedTabContent}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        <IndicatorsFlyoutContext.Provider value={{ readOnly }}>
+          {selectedTabContent}
+        </IndicatorsFlyoutContext.Provider>
+      </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>

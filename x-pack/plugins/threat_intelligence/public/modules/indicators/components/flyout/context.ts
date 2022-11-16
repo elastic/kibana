@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export * from './json';
+import { createContext } from 'react';
+
+export interface IndicatorsFlyoutContextValue {
+  readOnly: boolean;
+}
+
+export const IndicatorsFlyoutContext = createContext<IndicatorsFlyoutContextValue | undefined>(
+  undefined
+);
