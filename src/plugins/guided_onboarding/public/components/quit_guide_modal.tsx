@@ -19,25 +19,38 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GuideState } from '@kbn/guided-onboarding';
+import { NotificationsStart } from '@kbn/core/public';
 import { apiService } from '../services/api';
 
 interface QuitGuideModalProps {
   closeModal: () => void;
   currentGuide: GuideState;
   telemetryGuideId: string;
+  notifications: NotificationsStart;
 }
 
 export const QuitGuideModal = ({
   closeModal,
   currentGuide,
   telemetryGuideId,
+  notifications,
 }: QuitGuideModalProps) => {
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const deleteGuide = async () => {
-    setIsDeleting(true);
-    await apiService.deactivateGuide(currentGuide);
-    closeModal();
+  const deactivateGuide = async () => {
+    try {
+      setIsLoading(true);
+      await apiService.deactivateGuide(currentGuide);
+      closeModal();
+    } catch (error) {
+      setIsLoading(false);
+      notifications.toasts.addDanger({
+        title: i18n.translate('guidedOnboarding.quitGuideModal.deactivateGuideError', {
+          defaultMessage: 'Unable to update the guide. Please try again later.',
+        }),
+        text: error.message,
+      });
+    }
   };
 
   return (
@@ -77,8 +90,8 @@ export const QuitGuideModal = ({
         <EuiButton
           // Used for FS tracking and tests
           data-test-subj={`onboarding--quitGuideButton--${telemetryGuideId}`}
-          onClick={deleteGuide}
-          isLoading={isDeleting}
+          onClick={deactivateGuide}
+          isLoading={isLoading}
           fill
           color="warning"
         >
