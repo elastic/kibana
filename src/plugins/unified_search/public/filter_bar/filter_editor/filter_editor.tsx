@@ -18,6 +18,7 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSpacer,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -59,7 +60,6 @@ const filtersBuilderMaxHeight = css`
 /** @todo: should be removed, no hardcoded sizes **/
 const filterBadgeStyle = css`
   .euiFormRow__fieldWrapper {
-    font-size: 12px;
     line-height: 1.5;
   }
 `;
@@ -329,12 +329,14 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
               </strong>
             }
           >
-            <FilterBadgeGroup
-              filters={[localFilter]}
-              dataViews={this.props.indexPatterns}
-              booleanRelation={BooleanRelation.AND}
-              shouldShowBrackets={false}
-            />
+            <EuiText size="xs">
+              <FilterBadgeGroup
+                filters={[localFilter]}
+                dataViews={this.props.indexPatterns}
+                booleanRelation={BooleanRelation.AND}
+                shouldShowBrackets={false}
+              />
+            </EuiText>
           </EuiFormRow>
         ) : null}
       </>
