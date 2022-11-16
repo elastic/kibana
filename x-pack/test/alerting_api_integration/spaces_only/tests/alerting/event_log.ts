@@ -741,7 +741,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          expect(flapping).to.eql([false, false, false, false, true, true]);
+          expect(flapping).to.eql([false, false, false, false, true, false]);
         });
       });
     }

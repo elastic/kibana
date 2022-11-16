@@ -401,7 +401,7 @@ export class TaskRunner<
         };
       });
 
-    const { activeAlerts, recoveredAlerts, flappingAlertIds } = await this.timer.runWithTimer(
+    const { activeAlerts, recoveredAlerts } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.ProcessAlerts,
       async () => {
         const {
@@ -418,12 +418,11 @@ export class TaskRunner<
           setFlapping: true,
         });
 
-        const processedFlappingAlertIds = determineFlapping<
-          State,
-          Context,
-          ActionGroupIds,
-          RecoveryActionGroupId
-        >(processedAlertsActive, processedAlertsRecovered);
+        // the flapping flag will only be determined for active alerts
+        // flapping for recovered alerts will always be set to false
+        const processedFlappingAlertIds = determineFlapping<State, Context, ActionGroupIds>(
+          processedAlertsActive
+        );
 
         logAlerts({
           logger: this.logger,
@@ -442,7 +441,6 @@ export class TaskRunner<
           newAlerts: processedAlertsNew,
           activeAlerts: processedAlertsActive,
           recoveredAlerts: processedAlertsRecovered,
-          flappingAlertIds: processedFlappingAlertIds,
         };
       }
     );
@@ -483,7 +481,7 @@ export class TaskRunner<
       Context,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(flappingAlertIds, activeAlerts, recoveredAlerts);
+    >(activeAlerts, recoveredAlerts);
 
     return {
       metrics: ruleRunMetricsStore.getMetrics(),

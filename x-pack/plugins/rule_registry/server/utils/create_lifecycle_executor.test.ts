@@ -1096,7 +1096,7 @@ describe('createLifecycleExecutor', () => {
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' },
               [EVENT_ACTION]: 'close',
               [EVENT_KIND]: 'signal',
-              [ALERT_FLAPPING]: true,
+              [ALERT_FLAPPING]: false,
             }),
             { index: { _id: 'TEST_ALERT_1_UUID' } },
             expect.objectContaining({

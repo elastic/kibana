@@ -175,6 +175,7 @@ export class Alert<
   toRaw(recovered: boolean = false): RawAlertInstance {
     return recovered
       ? {
+          // for a recovered alert, we only care to track the flappingHistory
           meta: {
             flappingHistory: this.meta.flappingHistory,
           },

@@ -270,7 +270,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      flappingAlertIds: ['2', '8', '9'],
+      flappingAlertIds: ['2', '1'],
     });
 
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {
@@ -285,14 +285,14 @@ describe('logAlerts', () => {
       id: '8',
       message: "test-rule-type-id:123: 'test rule' alert '8' has recovered",
       state: {},
-      flapping: true,
+      flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
       action: 'recovered-instance',
       id: '9',
       message: "test-rule-type-id:123: 'test rule' alert '9' has recovered",
       state: {},
-      flapping: true,
+      flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
       action: 'recovered-instance',
@@ -313,7 +313,7 @@ describe('logAlerts', () => {
       id: '1',
       message: "test-rule-type-id:123: 'test rule' active alert: '1' in actionGroup: 'undefined'",
       state: {},
-      flapping: false,
+      flapping: true,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(7, {
       action: 'active-instance',

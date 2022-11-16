@@ -265,6 +265,7 @@ export function updateFlappingHistory<
   let flappingHistory: boolean[] = alert.getFlappingHistory() || [];
   const { atCapacity, diff } = determineAtCapacity(flappingHistory);
   if (atCapacity) {
+    // drop old flapping states to make space for the next state
     flappingHistory = drop(flappingHistory, diff);
   }
   flappingHistory.push(state);
@@ -275,6 +276,7 @@ export function determineAtCapacity(flappingHistory: boolean[] = []) {
   const len = flappingHistory.length;
   return {
     atCapacity: len >= MAX_CAPACITY,
+    // adding + 1 to make space for next the flapping state
     diff: len + 1 - MAX_CAPACITY,
   };
 }

@@ -15,12 +15,8 @@ const MAX_FLAP_COUNT = 4;
 export function determineFlapping<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
->(
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
-): string[] {
+  ActionGroupIds extends string
+>(activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {}): string[] {
   const flappingAlertIds: string[] = [];
 
   for (const id of keys(activeAlerts)) {
@@ -30,12 +26,6 @@ export function determineFlapping<
     }
   }
 
-  for (const id of keys(recoveredAlerts)) {
-    const alert = recoveredAlerts[id];
-    if (isFlapping(alert)) {
-      flappingAlertIds.push(id);
-    }
-  }
   return flappingAlertIds;
 }
 
@@ -45,7 +35,6 @@ export function determineAlertsToReturn<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(
-  flappingAlertIds: string[],
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
 ): {
@@ -61,7 +50,8 @@ export function determineAlertsToReturn<
 
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    if (flappingAlertIds.includes(id)) {
+    // return recovered alerts if they are flapping or if the flapping array is not at capacity
+    if (isFlapping(alert)) {
       recoveredAlertsToReturn[id] = alert.toRaw(true);
     } else if (!atCapacity(alert.getFlappingHistory())) {
       recoveredAlertsToReturn[id] = alert.toRaw(true);
@@ -77,6 +67,8 @@ export function isFlapping<
   RecoveryActionGroupId extends string
 >(alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>): boolean {
   const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
+  // an alert is determined flapping if the flappingHistory array is at capacity, meaning the alert has been executed at least that many times,
+  // and the number of state changes is >= the max flapping count
   if (atCapacity(flappingHistory)) {
     const numStateChanges = flappingHistory.filter((f) => f).length;
     return numStateChanges >= MAX_FLAP_COUNT;

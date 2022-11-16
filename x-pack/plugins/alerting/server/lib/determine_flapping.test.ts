@@ -24,7 +24,7 @@ describe('determineFlapping', () => {
       '1': new Alert('1', { meta: { flappingHistory: flapping } }),
       '2': new Alert('2', { meta: { flappingHistory: [false, false] } }),
     };
-    const { alertsToReturn } = determineAlertsToReturn(['1'], activeAlerts, {});
+    const { alertsToReturn } = determineAlertsToReturn(activeAlerts, {});
     expect(size(alertsToReturn)).toEqual(2);
   });
 
@@ -33,7 +33,7 @@ describe('determineFlapping', () => {
       '1': new Alert('1', { meta: { flappingHistory: flapping } }),
       '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
     };
-    const { recoveredAlertsToReturn } = determineAlertsToReturn(['1'], {}, recoveredAlerts);
+    const { recoveredAlertsToReturn } = determineAlertsToReturn({}, recoveredAlerts);
     expect(keys(recoveredAlertsToReturn)).toEqual(['1']);
   });
 
@@ -42,7 +42,7 @@ describe('determineFlapping', () => {
       '1': new Alert('1', { meta: { flappingHistory: [false, false, false] } }),
       '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
     };
-    const { recoveredAlertsToReturn } = determineAlertsToReturn([], {}, recoveredAlerts);
+    const { recoveredAlertsToReturn } = determineAlertsToReturn({}, recoveredAlerts);
     expect(keys(recoveredAlertsToReturn)).toEqual(['1']);
   });
 
@@ -52,13 +52,9 @@ describe('determineFlapping', () => {
       '2': new Alert('2', { meta: { flappingHistory: [false, false] } }),
     };
 
-    const recoveredAlerts = {
-      '3': new Alert('3', { meta: { flappingHistory: flapping } }),
-      '4': new Alert('4', { meta: { flappingHistory: notFlapping } }),
-    };
-    const flappingAlertIds = determineFlapping(activeAlerts, recoveredAlerts);
+    const flappingAlertIds = determineFlapping(activeAlerts);
 
-    expect(flappingAlertIds).toEqual(['1', '3']);
+    expect(flappingAlertIds).toEqual(['1']);
   });
 
   describe('isFlapping', () => {

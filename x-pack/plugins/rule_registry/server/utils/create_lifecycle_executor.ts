@@ -97,6 +97,9 @@ const trackedAlertStateRt = rt.type({
   alertId: rt.string,
   alertUuid: rt.string,
   started: rt.string,
+  // an array used to track changes in alert state
+  // true - alert has changed from active/recovered
+  // false - alert is new or the status has remained either active or recovered
   flappingHistory: rt.array(rt.boolean),
 });
 
@@ -108,7 +111,9 @@ const alertTypeStateRt = <State extends RuleTypeState>() =>
 const wrappedStateRt = <State extends RuleTypeState>() =>
   rt.type({
     wrapped: alertTypeStateRt<State>(),
+    // tracks the active alerts
     trackedAlerts: rt.record(rt.string, trackedAlertStateRt),
+    // tracks the recovered alerts
     trackedAlertsRecovered: rt.record(rt.string, trackedAlertStateRt),
   });
 
@@ -319,7 +324,8 @@ export const createLifecycleExecutor =
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
           [TAGS]: options.rule.tags,
           [VERSION]: ruleDataClient.kibanaVersion,
-          [ALERT_FLAPPING]: isFlapping(flappingHistory),
+          // set ALERT_FLAPPING to false for all recovered alerts
+          [ALERT_FLAPPING]: isFlapping(flappingHistory) && !isRecovered,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };
 
@@ -375,6 +381,7 @@ export const createLifecycleExecutor =
       [...allEventsToIndex, ...trackedRecoveredEventsToIndex]
         .filter(
           ({ event, flappingHistory }) =>
+            // return recovered alerts if they are flapping or if the flapping array is not at capacity
             event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
             (isFlapping(flappingHistory) || !atCapacity(flappingHistory))
         )
