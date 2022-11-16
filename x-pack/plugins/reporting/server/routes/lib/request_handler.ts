@@ -159,10 +159,14 @@ export class RequestHandler {
    * This method does not log the error, as it assumes the error has already
    * been caught and logged for stack trace context, and then rethrown
    */
-  public handleError(err: Error | Boom.Boom) {
+  public handleError(err: Error | Boom.Boom, counters?: Counters) {
     if (err instanceof Boom.Boom) {
+      const statusCode = err.output.statusCode;
+
+      counters?.errorCounter(statusCode);
+
       return this.res.customError({
-        statusCode: err.output.statusCode,
+        statusCode,
         body: err.output.payload.message,
       });
     }

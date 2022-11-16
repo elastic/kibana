@@ -6,7 +6,7 @@
  */
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { API_USAGE_COUNTER_TYPE } from '../../../common/constants';
+import { API_USAGE_COUNTER_TYPE, API_USAGE_ERROR_TYPE } from '../../../common/constants';
 
 export type Counters = ReturnType<typeof getCounters>;
 
@@ -18,8 +18,11 @@ export function getCounters(method: string, path: string, usageCounter: UsageCou
         counterType: API_USAGE_COUNTER_TYPE,
       });
     },
-    handleError() {
-      // TODO call from RequestHandler.handleError
+    errorCounter(statusCode: number) {
+      usageCounter?.incrementCounter({
+        counterName: `${method} ${path}:${statusCode}`,
+        counterType: API_USAGE_ERROR_TYPE,
+      });
     },
   };
 }

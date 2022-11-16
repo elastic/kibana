@@ -92,7 +92,7 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
             counters
           );
         } catch (err) {
-          return requestHandler.handleError(err);
+          return requestHandler.handleError(err, counters);
         }
       })
     );

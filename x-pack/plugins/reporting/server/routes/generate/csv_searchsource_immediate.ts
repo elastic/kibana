@@ -118,7 +118,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         } catch (error) {
           logError(error);
 
-          return requestHandler.handleError(error);
+          return requestHandler.handleError(error, counters);
         }
       }
     )
