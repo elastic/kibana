@@ -182,17 +182,7 @@ describe('bulkDisableRules', () => {
         saved_objects: [savedObjectWith409Error],
       })
       .mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: 'id2',
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-            version: '1',
-          } as SavedObject,
-        ],
+        saved_objects: [savedObjectWith409Error],
       });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
