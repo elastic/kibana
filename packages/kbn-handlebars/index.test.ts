@@ -88,6 +88,7 @@ it('Only provide options.fn/inverse to block helpers', () => {
     expectTemplate(template).withHelper('foo', toHaveProperties).toCompileTo('42');
   }
 
-  expect(toNotHaveProperties.calls).toEqual(nonBlockTemplates.length * 2 * 2);
-  expect(toHaveProperties.calls).toEqual(blockTemplates.length * 2 * 2);
+  const factor = process.env.AST || process.env.EVAL ? 1 : 2;
+  expect(toNotHaveProperties.calls).toEqual(nonBlockTemplates.length * 2 * factor);
+  expect(toHaveProperties.calls).toEqual(blockTemplates.length * 2 * factor);
 });
