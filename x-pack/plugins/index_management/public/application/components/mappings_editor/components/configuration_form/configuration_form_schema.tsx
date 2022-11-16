@@ -168,20 +168,6 @@ export const configurationFormSchema: FormSchema = {
       ),
       type: FIELD_TYPES.COMBO_BOX,
       defaultValue: ['strict_date_optional_time', 'yyyy/MM/dd HH:mm:ss Z||yyyy/MM/dd Z'],
-      validations: [
-        {
-          validator: containsCharsField({
-            message: i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldValidationErrorMessage',
-              {
-                defaultMessage: 'Spaces are not allowed.',
-              }
-            ),
-            chars: ' ',
-          }),
-          type: VALIDATION_TYPES.ARRAY_ITEM,
-        },
-      ],
     },
   },
   _routing: {
