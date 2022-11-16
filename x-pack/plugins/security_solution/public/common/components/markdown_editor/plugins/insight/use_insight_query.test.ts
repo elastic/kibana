@@ -28,8 +28,6 @@ const mockProvider = {
 };
 
 describe('useInsightQuery', () => {
-  beforeEach(() => {});
-
   it('should return renderable defaults', () => {
     const { result } = renderHook<UseInsightQuery, UseInsightQueryResult>(
       () =>
