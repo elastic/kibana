@@ -67,6 +67,14 @@ export interface FieldStatisticsTableProps {
    */
   savedSearch?: SavedSearch;
   /**
+   * Optional query to update the table content
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * Filters query to update the table content
+   */
+  filters?: Filter[];
+  /**
    * State container with persisted settings
    */
   stateContainer?: GetStateReturn;
@@ -106,9 +114,13 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     | undefined
   >();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
-  const querySubscriberResult = useQuerySubscriber({ data: services.data });
-  const query = querySubscriberResult.query;
-  const filters = querySubscriberResult.filters;
+  const hasCustomQueryParams = 'query' in props && 'filters' in props;
+  const querySubscriberResult = useQuerySubscriber({
+    data: services.data,
+    disabled: hasCustomQueryParams,
+  });
+  const query = hasCustomQueryParams ? props.query : querySubscriberResult.query;
+  const filters = hasCustomQueryParams ? props.filters : querySubscriberResult.filters;
 
   const showPreviewByDefault = useMemo(
     () =>
