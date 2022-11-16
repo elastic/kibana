@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { Rule } from '@kbn/alerting-plugin/common';
 import { TopAlert } from '@kbn/observability-plugin/public/pages/alerts';
+import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 
 export interface AlertDetailsAppSectionProps {
-  rule: Rule<RuleTypeParams>;
+  rule: Rule<{
+    environment: string;
+    aggregationType: LatencyAggregationType;
+    windowSize: number;
+    windowUnit: TIME_UNITS;
+  }>;
   alert: TopAlert;
   timeZone: string;
 }
