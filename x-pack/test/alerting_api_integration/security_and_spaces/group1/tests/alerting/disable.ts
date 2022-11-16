@@ -371,6 +371,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               .send({
                 attributes: {
                   name: 'bar',
+                  enabled: true,
                 },
               })
               .expect(200);
