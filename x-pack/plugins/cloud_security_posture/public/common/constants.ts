@@ -15,6 +15,12 @@ export const statusColors = {
 };
 
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
+export const MAX_FINDINGS_TO_LOAD = 500;
+export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
+
+export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY = 'cloudPosture:findings:pageSize';
+export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
+export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 
 export type CloudPostureIntegrations = typeof cloudPostureIntegrations;
 
