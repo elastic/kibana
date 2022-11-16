@@ -9917,7 +9917,6 @@
     "xpack.csp.rules.ruleFlyout.remediationTabLabel": "修正",
     "xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel": "ベンチマーク統合",
     "xpack.csp.rules.rulesTable.cisSectionColumnLabel": "CISセクション",
-    "xpack.csp.rules.rulesTable.lastModifiedColumnLabel": "最終更新：",
     "xpack.csp.rules.rulesTable.nameColumnLabel": "名前",
     "xpack.csp.rules.rulesTable.searchPlaceholder": "検索",
     "xpack.dataVisualizer.choroplethMap.topValuesCount": "{fieldName}の上位の値件数",
