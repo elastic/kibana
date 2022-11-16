@@ -129,38 +129,38 @@ describe('useDiscoverHistogram', () => {
   describe('contexts', () => {
     it('should output the correct hits context', async () => {
       const { result } = await renderUseDiscoverHistogram();
-      expect(result.current.hits?.status).toBe(FetchStatus.COMPLETE);
-      expect(result.current.hits?.total).toEqual(esHits.length);
+      expect(result.current?.hits?.status).toBe(FetchStatus.COMPLETE);
+      expect(result.current?.hits?.total).toEqual(esHits.length);
     });
 
     it('should output the correct chart context', async () => {
       const { result } = await renderUseDiscoverHistogram();
-      expect(result.current.chart?.hidden).toBe(false);
-      expect(result.current.chart?.timeInterval).toBe('auto');
+      expect(result.current?.chart?.hidden).toBe(false);
+      expect(result.current?.chart?.timeInterval).toBe('auto');
     });
 
     it('should output undefined for hits and chart if isPlainRecord is true', async () => {
       const { result } = await renderUseDiscoverHistogram({ isPlainRecord: true });
-      expect(result.current.hits).toBeUndefined();
-      expect(result.current.chart).toBeUndefined();
+      expect(result.current?.hits).toBeUndefined();
+      expect(result.current?.chart).toBeUndefined();
     });
 
     it('should output undefined for chart if isTimeBased is false', async () => {
       const { result } = await renderUseDiscoverHistogram({ isTimeBased: false });
-      expect(result.current.hits).not.toBeUndefined();
-      expect(result.current.chart).toBeUndefined();
+      expect(result.current?.hits).not.toBeUndefined();
+      expect(result.current?.chart).toBeUndefined();
     });
   });
 
   describe('onEditVisualization', () => {
     it('returns a callback for onEditVisualization when the data view can be visualized', async () => {
       const { result } = await renderUseDiscoverHistogram();
-      expect(result.current.onEditVisualization).toBeDefined();
+      expect(result.current?.onEditVisualization).toBeDefined();
     });
 
     it('returns undefined for onEditVisualization when the data view cannot be visualized', async () => {
       const { result } = await renderUseDiscoverHistogram({ canVisualize: false });
-      expect(result.current.onEditVisualization).toBeUndefined();
+      expect(result.current?.onEditVisualization).toBeUndefined();
     });
   });
 
@@ -170,7 +170,7 @@ describe('useDiscoverHistogram', () => {
       storage.get = jest.fn(() => 100);
       const { result } = await renderUseDiscoverHistogram({ storage });
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
-      expect(result.current.topPanelHeight).toBe(100);
+      expect(result.current?.topPanelHeight).toBe(100);
     });
 
     it('should update topPanelHeight when onTopPanelHeightChange is called', async () => {
@@ -178,12 +178,12 @@ describe('useDiscoverHistogram', () => {
       storage.get = jest.fn(() => 100);
       storage.set = jest.fn();
       const { result } = await renderUseDiscoverHistogram({ storage });
-      expect(result.current.topPanelHeight).toBe(100);
+      expect(result.current?.topPanelHeight).toBe(100);
       act(() => {
-        result.current.onTopPanelHeightChange(200);
+        result.current?.onTopPanelHeightChange(200);
       });
       expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, 200);
-      expect(result.current.topPanelHeight).toBe(200);
+      expect(result.current?.topPanelHeight).toBe(200);
     });
   });
 
@@ -199,7 +199,7 @@ describe('useDiscoverHistogram', () => {
         stateContainer,
       });
       act(() => {
-        result.current.onChartHiddenChange(true);
+        result.current?.onChartHiddenChange(true);
       });
       expect(storage.set).toHaveBeenCalledWith(CHART_HIDDEN_KEY, true);
       expect(stateContainer.setAppState).toHaveBeenCalledWith({ hideChart: true });
@@ -213,7 +213,7 @@ describe('useDiscoverHistogram', () => {
         stateContainer,
       });
       act(() => {
-        result.current.onTimeIntervalChange('auto');
+        result.current?.onTimeIntervalChange('auto');
       });
       expect(stateContainer.setAppState).toHaveBeenCalledWith({ interval: 'auto' });
     });
