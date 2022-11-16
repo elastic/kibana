@@ -2650,7 +2650,7 @@ export class RulesClient {
       action: 'ENABLE',
     });
 
-    const { errors, taskIdsToEnable } = await retryIfBulkEnableConflicts(
+    const { errors, rules, taskIdsToEnable } = await retryIfBulkEnableConflicts(
       this.logger,
       (filterKueryNode: KueryNode | null) =>
         this.bulkEnableRulesWithOCC({ filter: filterKueryNode }),
@@ -2679,7 +2679,17 @@ export class RulesClient {
       }
     }
 
-    return { errors, total, taskIdsFailedToBeEnabled };
+    const updatedRules = rules.map(({ id, attributes, references }) => {
+      return this.getAlertFromRaw(
+        id,
+        attributes.alertTypeId as string,
+        attributes as RawRule,
+        references,
+        false
+      );
+    });
+
+    return { errors, rules: updatedRules, total, taskIdsFailedToBeEnabled };
   };
 
   private bulkEnableRulesWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
@@ -2693,7 +2703,7 @@ export class RulesClient {
         }
       );
 
-    const rulesToEnable: SavedObjectsBulkUpdateObject[] = [];
+    const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const taskIdsToEnable: string[] = [];
     const errors: BulkOperationError[] = [];
     const taskIdToRuleIdMapping: Record<string, string> = {};
@@ -2788,11 +2798,14 @@ export class RulesClient {
       overwrite: true,
     });
 
+    const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+
     result.saved_objects.forEach((rule) => {
       if (rule.error === undefined) {
         if (taskIdToRuleIdMapping[rule.id]) {
           taskIdsToEnable.push(taskIdToRuleIdMapping[rule.id]);
         }
+        rules.push(rule);
       } else {
         errors.push({
           message: rule.error.message ?? 'n/a',
@@ -2804,7 +2817,7 @@ export class RulesClient {
         });
       }
     });
-    return { errors, taskIdsToEnable };
+    return { errors, rules, taskIdsToEnable };
   };
 
   private apiKeyAsAlertAttributes(
