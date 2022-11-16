@@ -56,7 +56,6 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
               alt={file.alt ?? ''}
               css={css`
                 max-height: ${imageHeight};
-                object-fit: contain;
               `}
               meta={file.meta as FileImageMetadata}
               src={client.getDownloadHref({ id: file.id, fileKind: kind })}
