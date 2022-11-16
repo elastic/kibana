@@ -25,6 +25,11 @@ import {
   getRuleStatusMessage,
 } from '../../../../common/lib/rule_status_helpers';
 import RuleStatusPanelWithApi from './rule_status_panel';
+import {
+  ALERT_STATUS_LICENSE_ERROR,
+  rulesLastRunOutcomeTranslationMapping,
+  rulesStatusesTranslationsMapping,
+} from '../../rules_list/translations';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
@@ -74,7 +79,12 @@ export function RuleComponent({
   };
 
   const healthColor = getRuleHealthColor(rule);
-  const statusMessage = getRuleStatusMessage(rule);
+  const statusMessage = getRuleStatusMessage({
+    rule,
+    licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
+    lastOutcomeTranslations: rulesLastRunOutcomeTranslationMapping,
+    executionStatusTranslations: rulesStatusesTranslationsMapping,
+  });
 
   const renderRuleAlertList = () => {
     return suspendedComponentWithProps(
