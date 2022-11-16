@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { pagePathGetters, pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
 import { useCisKubernetesIntegration } from '../api/use_cis_kubernetes_integration';
 import { useKibana } from '../hooks/use_kibana';
 
