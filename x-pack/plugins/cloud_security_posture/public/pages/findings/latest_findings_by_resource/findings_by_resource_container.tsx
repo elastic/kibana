@@ -8,20 +8,20 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
+import { usePageSlice } from '../../../common/hooks/use_page_slice';
+import { usePageSize } from '../../../common/hooks/use_page_size';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from '../types';
 import { FindingsByResourceQuery, useFindingsByResource } from './use_findings_by_resource';
 import { FindingsByResourceTable } from './findings_by_resource_table';
 import {
   getFindingsPageSizeInfo,
   getFilters,
-  getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
   usePersistedQuery,
@@ -32,7 +32,7 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
-import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY } from '../../../../common/constants';
+import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
 
 const getDefaultQuery = ({
   query,
@@ -41,7 +41,6 @@ const getDefaultQuery = ({
   query,
   filters,
   pageIndex: 0,
-  pageSize: 10,
   sortDirection: 'desc',
 });
 
@@ -70,10 +69,7 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const [pageSize, setPageSize] = useLocalStorage(
-    LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY,
-    urlQuery.pageSize
-  );
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
 
   /**
    * Page URL query to ES query
@@ -88,16 +84,14 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
    * Page ES query result
    */
   const findingsGroupByResource = useFindingsByResource({
-    ...getPaginationQuery({
-      pageIndex: urlQuery.pageIndex,
-      pageSize: pageSize || urlQuery.pageSize,
-    }),
     sortDirection: urlQuery.sortDirection,
     query: baseEsQuery.query,
     enabled: !baseEsQuery.error,
   });
 
   const error = findingsGroupByResource.error || baseEsQuery.error;
+
+  const slicedPage = usePageSlice(findingsGroupByResource.data?.page, urlQuery.pageIndex, pageSize);
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
@@ -155,8 +149,8 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
                 failed: findingsGroupByResource.data.count.failed,
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
-                  pageSize: urlQuery.pageSize,
-                  currentPageSize: findingsGroupByResource.data.page.length,
+                  pageSize,
+                  currentPageSize: slicedPage.length,
                 }),
               }}
             />
@@ -164,9 +158,9 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
           <EuiSpacer />
           <FindingsByResourceTable
             loading={findingsGroupByResource.isFetching}
-            items={findingsGroupByResource.data?.page || []}
+            items={slicedPage}
             pagination={getPaginationTableParams({
-              pageSize: pageSize || urlQuery.pageSize,
+              pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: findingsGroupByResource.data?.total || 0,
             })}
@@ -175,7 +169,6 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
               setUrlQuery({
                 sortDirection: sort?.direction,
                 pageIndex: page.index,
-                pageSize: page.size,
               });
             }}
             sorting={{
