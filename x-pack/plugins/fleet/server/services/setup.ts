@@ -184,7 +184,7 @@ export async function ensureFleetFileUploadIndices(
 
   const installedFileUploadIntegrations = await getInstallationsByName({
     savedObjectsClient: soClient,
-    pkgNames: FILE_STORAGE_INTEGRATION_NAMES,
+    pkgNames: [...FILE_STORAGE_INTEGRATION_NAMES],
   });
 
   if (!installedFileUploadIntegrations.length) return [];
