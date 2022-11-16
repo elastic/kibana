@@ -11,11 +11,6 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
 import { Rule } from '../../types';
-import {
-  rulesLastRunOutcomeTranslationMapping,
-  rulesStatusesTranslationsMapping,
-  ALERT_STATUS_LICENSE_ERROR,
-} from '../../application/sections/rules_list/translations';
 
 export const getOutcomeHealthColor = (status: RuleLastRunOutcomes) => {
   switch (status) {
@@ -62,15 +57,25 @@ export const getIsLicenseError = (rule: Rule) => {
   );
 };
 
-export const getRuleStatusMessage = (rule: Rule) => {
+export const getRuleStatusMessage = ({
+  rule,
+  licenseErrorText,
+  lastOutcomeTranslations,
+  executionStatusTranslations,
+}: {
+  rule: Rule;
+  licenseErrorText: string;
+  lastOutcomeTranslations: Record<string, string>;
+  executionStatusTranslations: Record<string, string>;
+}) => {
   const isLicenseError = getIsLicenseError(rule);
   const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
 
   if (isLicenseError) {
-    return ALERT_STATUS_LICENSE_ERROR;
+    return licenseErrorText;
   }
   if (isRuleLastRunOutcomeEnabled) {
-    return rule.lastRun && rulesLastRunOutcomeTranslationMapping[rule.lastRun.outcome];
+    return rule.lastRun && lastOutcomeTranslations[rule.lastRun.outcome];
   }
-  return rulesStatusesTranslationsMapping[rule.executionStatus.status];
+  return executionStatusTranslations[rule.executionStatus.status];
 };
