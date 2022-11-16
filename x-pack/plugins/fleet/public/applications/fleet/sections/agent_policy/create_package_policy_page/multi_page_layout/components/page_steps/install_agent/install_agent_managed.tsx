@@ -11,6 +11,7 @@ import { EuiText, EuiLink, EuiSteps, EuiSpacer } from '@elastic/eui';
 
 import { Error } from '../../../../../../../components';
 import { useKibanaVersion, useStartServices } from '../../../../../../../../../hooks';
+
 import { CreatePackagePolicyBottomBar, NotObscuredByBottomBar } from '../..';
 import {
   InstallManagedAgentStep,
@@ -19,6 +20,7 @@ import {
 import { ManualInstructions } from '../../../../../../../../../components/enrollment_instructions';
 
 import type { InstallAgentPageProps } from './types';
+import { KubernetesManifestApplyStep } from '../../../../../../../../../components/agent_enrollment_flyout/steps/run_k8s_apply_command_step';
 
 export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps> = (props) => {
   const {
@@ -39,6 +41,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const kibanaVersion = useKibanaVersion();
 
   const [commandCopied, setCommandCopied] = useState(false);
+  const [applyCommandCopied, setApplyCommandCopied] = useState(false);
 
   if (!enrollmentAPIKey) {
     return (
@@ -54,6 +57,9 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     );
   }
 
+  const isK8s =
+    props.packageInfo.name === 'kubernetes' ? 'IS_KUBERNETES_MULTIPAGE' : 'IS_NOT_KUBERNETES';
+
   const installManagedCommands = ManualInstructions(
     enrollmentAPIKey.api_key,
     fleetServerHosts,
@@ -64,19 +70,34 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     InstallManagedAgentStep({
       installCommand: installManagedCommands,
       apiKeyData: { item: enrollmentAPIKey },
+      enrollToken: enrollmentAPIKey.api_key,
+      isK8s,
       selectedApiKeyId: enrollmentAPIKey.id,
       isComplete: commandCopied || !!enrolledAgentIds.length,
       fullCopyButton: true,
       onCopy: () => setCommandCopied(true),
     }),
+  ];
+
+  if (isK8s === 'IS_KUBERNETES_MULTIPAGE') {
+    steps.push(
+      KubernetesManifestApplyStep({
+        isComplete: applyCommandCopied || !!enrolledAgentIds.length,
+        fullCopyButton: true,
+        onCopy: () => setApplyCommandCopied(true),
+      })
+    );
+  }
+
+  steps.push(
     AgentEnrollmentConfirmationStep({
       selectedPolicyId: agentPolicy?.id,
       troubleshootLink: link,
       agentCount: enrolledAgentIds.length,
       showLoading: true,
       poll: commandCopied,
-    }),
-  ];
+    })
+  );
 
   return (
     <>
