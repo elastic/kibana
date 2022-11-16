@@ -24,10 +24,7 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
-import {
-  DiscoverHistogramContent,
-  DiscoverHistogramContentProps,
-} from './discover_histogram_content';
+import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { CoreTheme } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
@@ -81,7 +78,7 @@ const mountComponent = async ({
     availableFields$,
   };
 
-  const props: DiscoverHistogramContentProps = {
+  const props: DiscoverMainContentProps = {
     isPlainRecord,
     dataView: dataViewMock,
     navigateTo: jest.fn(),
@@ -109,7 +106,7 @@ const mountComponent = async ({
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
       <KibanaThemeProvider theme$={coreTheme$}>
-        <DiscoverHistogramContent {...props} />
+        <DiscoverMainContent {...props} />
       </KibanaThemeProvider>
     </KibanaContextProvider>
   );
@@ -122,7 +119,7 @@ const mountComponent = async ({
   return component;
 };
 
-describe('Discover histogram content component', () => {
+describe('Discover main content component', () => {
   describe('DocumentViewModeToggle', () => {
     it('should show DocumentViewModeToggle when isPlainRecord is false', async () => {
       const component = await mountComponent();

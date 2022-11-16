@@ -12,13 +12,10 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
-import {
-  type CommonDiscoverHistogramProps,
-  DiscoverHistogramContent,
-} from './discover_histogram_content';
+import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { ResetSearchButton } from './reset_search_button';
 
-export interface DiscoverHistogramLayoutProps extends CommonDiscoverHistogramProps {
+export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resetSavedSearch: () => void;
   isTimeBased: boolean;
   resizeRef: RefObject<HTMLDivElement>;
@@ -38,11 +35,11 @@ export const DiscoverHistogramLayout = ({
   resizeRef,
   inspectorAdapters,
   searchSessionManager,
-  ...histogramContentProps
+  ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
   const services = useDiscoverServices();
 
-  const commonInputProps = {
+  const commonProps = {
     dataView,
     isPlainRecord,
     stateContainer,
@@ -51,14 +48,14 @@ export const DiscoverHistogramLayout = ({
     savedSearchData$,
   };
 
-  const { shouldRender, ...histogramProps } = useDiscoverHistogram({
+  const histogramProps = useDiscoverHistogram({
     isTimeBased,
     inspectorAdapters,
     searchSessionManager,
-    ...commonInputProps,
+    ...commonProps,
   });
 
-  if (!shouldRender) {
+  if (!histogramProps) {
     return null;
   }
 
@@ -73,10 +70,12 @@ export const DiscoverHistogramLayout = ({
       }
       {...histogramProps}
     >
-      <DiscoverHistogramContent
-        {...commonInputProps}
-        {...histogramContentProps}
-        chartHidden={histogramProps.chart?.hidden}
+      <DiscoverMainContent
+        {...commonProps}
+        {...mainContentProps}
+        // The documents grid doesn't rerender when the chart visibility changes
+        // which causes it to render blank space, so we need to force a rerender
+        key={`docKey${histogramProps.chart?.hidden}`}
       />
     </UnifiedHistogramLayout>
   );

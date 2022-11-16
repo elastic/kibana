@@ -129,7 +129,7 @@ export const useDiscoverHistogram = ({
   );
 
   /**
-   * Other callbacks
+   * Time interval
    */
 
   const onTimeIntervalChange = useCallback(
@@ -227,33 +227,40 @@ export const useDiscoverHistogram = ({
     [inspectorAdapters]
   );
 
+  const [chartHidden, setChartHidden] = useState(state.hideChart);
   const chart = useMemo(
     () =>
       isPlainRecord || !isTimeBased
         ? undefined
         : {
-            hidden: state.hideChart,
+            hidden: chartHidden,
             timeInterval: state.interval,
           },
-    [isPlainRecord, isTimeBased, state.hideChart, state.interval]
+    [chartHidden, isPlainRecord, isTimeBased, state.interval]
   );
 
-  return {
-    // The histogram layout shouldn't render until the first search
-    // request has started, or an immediate refetch of the histogram
-    // will be triggered when the searchSessionId is set
-    shouldRender: Boolean(searchSessionId),
-    topPanelHeight,
-    request,
-    hits,
-    chart,
-    breakdown,
-    onEditVisualization: canVisualize ? onEditVisualization : undefined,
-    onTopPanelHeightChange,
-    onChartHiddenChange,
-    onTimeIntervalChange,
-    onBreakdownFieldChange,
-    onTotalHitsChange,
-    onChartLoad,
-  };
+  // state.chartHidden is updated before searchSessionId, which can trigger duplicate
+  // requests, so instead of using state.chartHidden directly, we update chartHidden
+  // when searchSessionId changes
+  useEffect(() => {
+    setChartHidden(state.hideChart);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchSessionId]);
+
+  return searchSessionId
+    ? {
+        topPanelHeight,
+        request,
+        hits,
+        chart,
+        breakdown,
+        onEditVisualization: canVisualize ? onEditVisualization : undefined,
+        onTopPanelHeightChange,
+        onChartHiddenChange,
+        onTimeIntervalChange,
+        onBreakdownFieldChange,
+        onTotalHitsChange,
+        onChartLoad,
+      }
+    : undefined;
 };

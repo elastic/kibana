@@ -23,7 +23,7 @@ import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stat
 
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
-export interface CommonDiscoverHistogramProps {
+export interface DiscoverMainContentProps {
   dataView: DataView;
   savedSearch: SavedSearch;
   isPlainRecord: boolean;
@@ -40,11 +40,7 @@ export interface CommonDiscoverHistogramProps {
   stateContainer: GetStateReturn;
 }
 
-export interface DiscoverHistogramContentProps extends CommonDiscoverHistogramProps {
-  chartHidden?: boolean;
-}
-
-export const DiscoverHistogramContent = ({
+export const DiscoverMainContent = ({
   dataView,
   isPlainRecord,
   navigateTo,
@@ -59,8 +55,7 @@ export const DiscoverHistogramContent = ({
   state,
   stateContainer,
   savedSearch,
-  chartHidden,
-}: DiscoverHistogramContentProps) => {
+}: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
 
   const setDiscoverViewMode = useCallback(
@@ -93,9 +88,6 @@ export const DiscoverHistogramContent = ({
       )}
       {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
         <DiscoverDocuments
-          // The documents grid doesn't rerender when the chart visibility changes
-          // which causes it to render blank space, so we need to force a rerender
-          key={`docKey${chartHidden}`}
           documents$={savedSearchData$.documents$}
           expandedDoc={expandedDoc}
           dataView={dataView}
