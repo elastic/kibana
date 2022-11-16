@@ -6103,8 +6103,6 @@
     "visualizations.byValue_pageHeading": "Visualisation de type {chartType} intégrée à l'application {originatingApp}",
     "visualizations.confirmModal.overwriteConfirmationMessage": "Êtes-vous sûr de vouloir écraser {title} ?",
     "visualizations.confirmModal.overwriteTitle": "Écraser {name} ?",
-    "visualizations.confirmModal.saveDuplicateButtonLabel": "Enregistrer {name}",
-    "visualizations.confirmModal.saveDuplicateConfirmationMessage": "Il y a déjà une occurrence de {name} avec le titre \"{title}\". Voulez-vous tout de même enregistrer ?",
     "visualizations.disabledLabVisualizationTitle": "{title} est une visualisation lab.",
     "visualizations.embeddable.legacyURLConflict.errorMessage": "Cette visualisation a la même URL qu'un alias hérité. Désactiver l'alias pour résoudre cette erreur : {json}",
     "visualizations.experimentalVisInfoText": "Elle pourra être modifiée ou supprimée totalement dans une prochaine version. Elastic s'efforcera au maximum de corriger tout problème, mais les fonctionnalités en version d'évaluation technique ne sont pas soumises aux accords de niveau de service d'assistance des fonctionnalités officielles en disponibilité générale. Pour apporter des commentaires, veuillez créer une entrée dans {githubLink}.",

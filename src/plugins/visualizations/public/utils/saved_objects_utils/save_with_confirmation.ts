@@ -33,7 +33,7 @@ import type { VisSavedObject } from '../../types';
  */
 export async function saveWithConfirmation(
   source: SavedObjectAttributes,
-  savedObject: VisSavedObject,
+  savedObject: Pick<VisSavedObject, 'title' | 'getEsType' | 'displayName'>,
   options: SavedObjectsCreateOptions,
   services: { savedObjectsClient: SavedObjectsClientContract; overlays: OverlayStart }
 ) {

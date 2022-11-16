@@ -17,11 +17,12 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation } from 'react-router-dom';
 
-import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { TableListView } from '@kbn/content-management-table-list';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { findListItems } from '../../utils/saved_visualize_utils';
+import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import {
@@ -30,11 +31,11 @@ import {
   SAVED_OBJECTS_PER_PAGE_SETTING,
 } from '../..';
 import type { VisualizationListItem } from '../..';
-import { VisualizeServices } from '../types';
+import type { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
 import { getNoItemsMessage, getCustomColumn } from '../utils';
 import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
-import { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
+import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
 
 interface VisualizeUserContent extends VisualizationListItem, UserContentCommonSchema {
   type: string;
@@ -86,10 +87,13 @@ export const VisualizeListing = () => {
       visualizeCapabilities,
       dashboardCapabilities,
       kbnUrlStateStorage,
+      overlays,
+      savedObjectsTagging,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
   const closeNewVisModal = useRef(() => {});
+  const visualizedUserContent = useRef<VisualizeUserContent[]>();
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
@@ -166,14 +170,40 @@ export const VisualizeListing = () => {
         listingLimit,
         references,
         referencesToExclude
-      ).then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => ({
-        total,
-        hits: hits
+      ).then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => {
+        const content = hits
           .filter((result: any) => isLabsEnabled || result.type?.stage !== 'experimental')
-          .map(toTableListViewSavedObject),
-      }));
+          .map(toTableListViewSavedObject);
+
+        visualizedUserContent.current = content;
+
+        return {
+          total,
+          hits: content,
+        };
+      });
     },
     [listingLimit, uiSettings, savedObjects.client]
+  );
+
+  const onInspectorSave = useCallback(
+    async (args: { id: string; title: string; description?: string; tags: string[] }) => {
+      const content = visualizedUserContent.current?.find(({ id }) => id === args.id);
+
+      if (content) {
+        await updateBasicSoAttributes(
+          content.id,
+          content.type,
+          {
+            title: args.title,
+            description: args.description ?? '',
+            tags: args.tags,
+          },
+          { savedObjectsClient: savedObjects.client, overlays, savedObjectsTagging }
+        );
+      }
+    },
+    [overlays, savedObjects.client, savedObjectsTagging]
   );
 
   const deleteItems = useCallback(
@@ -229,6 +259,10 @@ export const VisualizeListing = () => {
       listingLimit={listingLimit}
       initialPageSize={initialPageSize}
       initialFilter={''}
+      inspector={{
+        isReadonly: !visualizeCapabilities.save,
+        onSave: onInspectorSave,
+      }}
       emptyPrompt={noItemsFragment}
       entityName={i18n.translate('visualizations.listing.table.entityName', {
         defaultMessage: 'visualization',
