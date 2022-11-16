@@ -336,9 +336,11 @@ export const MetricVis = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollDimensions = useResizeObserver(scrollContainerRef.current);
 
+  const baseTheme = getThemeService().useChartsBaseTheme();
+
   const {
     metric: { minHeight },
-  } = getThemeService().useChartsBaseTheme();
+  } = baseTheme;
 
   useEffect(() => {
     const minimumRequiredVerticalSpace = minHeight * grid.length;
@@ -377,6 +379,7 @@ export const MetricVis = ({
               },
               chartTheme,
             ]}
+            baseTheme={baseTheme}
             onRenderChange={onRenderChange}
             onElementClick={(events) => {
               if (!filterable) {
