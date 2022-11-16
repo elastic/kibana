@@ -99,6 +99,9 @@ async function createRoot({ logFileName }: CreateRootConfig) {
   return root;
 }
 
+// suite is very long, the 10mins default can cause timeouts
+jest.setTimeout(15 * 60 * 1000);
+
 describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let rootA: Root;
@@ -121,9 +124,7 @@ describe('migration v2', () => {
     },
   };
 
-  afterAll(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-  });
+  const delay = (timeInMs: number) => new Promise((resolve) => setTimeout(resolve, timeInMs));
 
   beforeEach(async () => {
     await removeLogFiles();
@@ -161,10 +162,10 @@ describe('migration v2', () => {
 
     if (esServer) {
       await esServer.stop();
+      await delay(10000);
     }
   });
 
-  const delay = (timeInMs: number) => new Promise((resolve) => setTimeout(resolve, timeInMs));
   const startWithDelay = async (instances: Root[], delayInSec: number) => {
     const promises: Array<Promise<unknown>> = [];
     for (let i = 0; i < instances.length; i++) {
