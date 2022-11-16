@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { InferenceBase } from '../inference_base';
+import { estypes } from '@elastic/elasticsearch';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
 import { getQuestionAnsweringInput } from './question_answering_input';
 import { getQuestionAnsweringOutputComponent } from './question_answering_output';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 
 export interface RawQuestionAnsweringResponse {
   inference_results: Array<{
@@ -54,8 +56,22 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
         'Provide a question and test how well the model extracts an answer from your input text.',
     }),
   ];
-
   public questionText$ = new BehaviorSubject<string>('');
+
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
+
+    combineLatest([this.inputTextValid$, this.questionText$]).subscribe(
+      ([inputTextValid, questionText]) => {
+        const valid = inputTextValid && questionText !== '';
+        this.isValid$.next(valid);
+      }
+    );
+  }
 
   public async inferText() {
     return this.runInfer<RawQuestionAnsweringResponse>(
@@ -87,6 +103,14 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
   protected getProcessors() {
     const question = this.questionText$.value;
     return this.getBasicProcessors({ ...this.getNumTopClassesConfig(), question });
+  }
+
+  public setQuestionText(text: string) {
+    this.questionText$.next(text);
+  }
+
+  public getQuestionText$() {
+    return this.questionText$.asObservable();
   }
 
   public getInputComponent(): JSX.Element {

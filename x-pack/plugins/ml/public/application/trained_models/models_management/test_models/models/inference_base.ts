@@ -60,10 +60,12 @@ export abstract class InferenceBase<TInferResponse> {
   protected abstract readonly inferenceTypeLabel: string;
   protected inputField: string;
   protected readonly modelInputField: string;
-  private inputText$ = new BehaviorSubject<string[]>([]);
+  protected inputText$ = new BehaviorSubject<string[]>([]);
   private inferenceResult$ = new BehaviorSubject<TInferResponse[] | null>(null);
   private inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
   private runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
+  protected inputTextValid$ = new BehaviorSubject<boolean>(false);
+  protected isValid$ = new BehaviorSubject<boolean>(false);
   protected readonly info: string[] = [];
 
   constructor(
@@ -73,6 +75,11 @@ export abstract class InferenceBase<TInferResponse> {
   ) {
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
     this.inputField = this.modelInputField;
+
+    this.inputText$.subscribe(() => {
+      const inputTextPopulated = this.inputText$.getValue().some((t) => t !== '');
+      this.inputTextValid$.next(inputTextPopulated);
+    });
   }
 
   public setStopped() {
@@ -131,6 +138,10 @@ export abstract class InferenceBase<TInferResponse> {
 
   public getRunningState$() {
     return this.runningState$.asObservable();
+  }
+
+  public getIsValid$() {
+    return this.isValid$.asObservable();
   }
 
   protected abstract getInputComponent(): JSX.Element | null;

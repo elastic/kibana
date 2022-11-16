@@ -6,12 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { estypes } from '@elastic/elasticsearch';
+import { combineLatest } from 'rxjs';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getTextClassificationOutputComponent } from './text_classification_output';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 
 export class TextClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
@@ -24,6 +27,18 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
       defaultMessage: 'Test how well the model classifies your input text.',
     }),
   ];
+
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
+
+    combineLatest([this.inputTextValid$]).subscribe(([inputTextValid]) => {
+      this.isValid$.next(inputTextValid);
+    });
+  }
 
   public async inferText() {
     return this.runInfer<RawTextClassificationResponse>(

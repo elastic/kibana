@@ -8,7 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
-import { InferenceBase } from '../inference_base';
+import { combineLatest } from 'rxjs';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 
@@ -30,17 +32,34 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
   ];
 
   public labelsText$ = new BehaviorSubject<string>('');
+  public multiLabel$ = new BehaviorSubject<boolean>(false);
+
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
+
+    combineLatest([this.inputTextValid$, this.labelsText$]).subscribe(
+      ([inputTextValid, labelsText]) => {
+        const isValid = inputTextValid && labelsText !== '';
+        this.isValid$.next(isValid);
+      }
+    );
+  }
 
   public async inferText() {
     return this.runInfer<RawTextClassificationResponse>(
       (inputText: string) => {
         const labelsText = this.labelsText$.getValue();
+        const multiLabel = this.multiLabel$.getValue();
         const inputLabels = labelsText?.split(',').map((l) => l.trim());
         return {
           docs: [{ [this.inputField]: inputText }],
           inference_config: this.getInferenceConfig({
             labels: inputLabels,
-            multi_label: false,
+            multi_label: multiLabel,
           } as estypes.MlZeroShotClassificationInferenceUpdateOptions),
         };
       },
@@ -67,10 +86,27 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
 
   protected getProcessors() {
     const inputLabels = this.getInputLabels();
+    const multiLabel = this.multiLabel$.getValue();
     return this.getBasicProcessors({
       labels: inputLabels,
-      multi_label: false,
+      multi_label: multiLabel,
     } as estypes.MlZeroShotClassificationInferenceUpdateOptions);
+  }
+
+  public setLabelsText(text: string) {
+    this.labelsText$.next(text);
+  }
+
+  public getLabelsText$() {
+    return this.labelsText$.asObservable();
+  }
+
+  public setMultiLabel(multiLabel: boolean) {
+    this.multiLabel$.next(multiLabel);
+  }
+
+  public getMultiLabel$() {
+    return this.multiLabel$.asObservable();
   }
 
   public getInputComponent(): JSX.Element {

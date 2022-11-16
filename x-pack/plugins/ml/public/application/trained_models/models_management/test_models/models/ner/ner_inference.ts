@@ -7,6 +7,8 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import { combineLatest } from 'rxjs';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
@@ -31,6 +33,18 @@ export class NerInference extends InferenceBase<NerResponse> {
       defaultMessage: 'Test how well the model identifies named entities in your input text.',
     }),
   ];
+
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
+
+    combineLatest([this.inputTextValid$]).subscribe(([inputTextValid]) => {
+      this.isValid$.next(inputTextValid);
+    });
+  }
 
   protected async inferText() {
     return this.runInfer<estypes.MlInferTrainedModelResponse>(
