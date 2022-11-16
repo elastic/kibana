@@ -28,7 +28,7 @@ export const useLimitProperties = ({
   pageIndex,
   pageSize,
 }: {
-  total: number;
+  total?: number;
   pageSize: number;
   pageIndex: number;
 }) =>
