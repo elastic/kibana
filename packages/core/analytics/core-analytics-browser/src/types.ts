@@ -26,7 +26,7 @@ export type AnalyticsServiceStart = Pick<
 >;
 
 /**
- * API exposed through `window.KbnAnalytics`
+ * API exposed through `window.__kbnAnalytics`
  */
 export interface KbnAnalyticsWindowApi {
   /**
@@ -37,6 +37,6 @@ export interface KbnAnalyticsWindowApi {
 
 declare global {
   interface Window {
-    KbnAnalytics: KbnAnalyticsWindowApi;
+    __kbnAnalytics: KbnAnalyticsWindowApi;
   }
 }

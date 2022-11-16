@@ -47,7 +47,7 @@ export class AnalyticsService {
     this.subscriptionsHandler.add(trackViewportSize(this.analyticsClient));
 
     // Register a flush method in the browser so CI can explicitly call it before closing the browser.
-    window.KbnAnalytics = { flush: this.analyticsClient.flush };
+    window.__kbnAnalytics = { flush: () => this.analyticsClient.flush() };
   }
 
   public setup({ injectedMetadata }: AnalyticsServiceSetupDeps): AnalyticsServiceSetup {
