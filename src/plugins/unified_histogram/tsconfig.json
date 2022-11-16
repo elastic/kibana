@@ -5,7 +5,7 @@
     "emitDeclarationOnly": true,
     "declaration": true,
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": [ "../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../charts/tsconfig.json" },

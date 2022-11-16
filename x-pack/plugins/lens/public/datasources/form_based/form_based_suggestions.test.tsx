@@ -2150,6 +2150,58 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
       });
+
+      it('should apply a bucketed aggregation for a date field, using breakdown', () => {
+        const suggestions = getDatasourceSuggestionsForVisualizeField(
+          stateWithoutLayer(),
+          '1',
+          'timestamp',
+          expectedIndexPatterns,
+          'dest'
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                id1: expect.objectContaining({
+                  columnOrder: ['id7', 'id8', 'id6'],
+                  columns: {
+                    id6: expect.objectContaining({
+                      operationType: 'count',
+                      sourceField: '___records___',
+                    }),
+                    id7: expect.objectContaining({
+                      operationType: 'terms',
+                      label: 'Top 5 values of dest',
+                    }),
+                    id8: expect.objectContaining({
+                      operationType: 'date_histogram',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'id7',
+                }),
+                expect.objectContaining({
+                  columnId: 'id8',
+                }),
+                expect.objectContaining({
+                  columnId: 'id6',
+                }),
+              ],
+              layerId: 'id1',
+            },
+          })
+        );
+      });
     });
   });
 

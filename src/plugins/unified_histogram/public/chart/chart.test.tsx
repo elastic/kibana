@@ -9,6 +9,7 @@
 import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { UnifiedHistogramFetchStatus } from '../types';
 import { Chart } from './chart';
 import type { ReactWrapper } from 'enzyme';
@@ -17,6 +18,7 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { of } from 'rxjs';
 import { HitsCounter } from '../hits_counter';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { dataViewMock } from '../__mocks__/data_view';
 
 async function mountComponent({
   noChart,
@@ -24,11 +26,13 @@ async function mountComponent({
   chartHidden = false,
   appendHistogram,
   onEditVisualization = jest.fn(),
+  dataView = dataViewWithTimefieldMock,
 }: {
   noChart?: boolean;
   noHits?: boolean;
   chartHidden?: boolean;
   appendHistogram?: ReactElement;
+  dataView?: DataView;
   onEditVisualization?: null | (() => void);
 } = {}) {
   const services = unifiedHistogramServicesMock;
@@ -44,7 +48,7 @@ async function mountComponent({
   );
 
   const props = {
-    dataView: dataViewWithTimefieldMock,
+    dataView,
     services: unifiedHistogramServicesMock,
     hits: noHits
       ? undefined
@@ -152,5 +156,15 @@ describe('Chart', () => {
     const appendHistogram = <div data-test-subj="appendHistogram" />;
     const component = await mountComponent({ appendHistogram });
     expect(component.find('[data-test-subj="appendHistogram"]').exists()).toBeTruthy();
+  });
+
+  it('should not render chart if data view is not time based', async () => {
+    const component = await mountComponent({ dataView: dataViewMock });
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeFalsy();
+  });
+
+  it('should render chart if data view is not time based', async () => {
+    const component = await mountComponent();
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
   });
 });

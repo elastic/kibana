@@ -55,6 +55,27 @@ export const useDiscoverHistogram = ({
   const { storage, data } = useDiscoverServices();
 
   /**
+   * Breakdown
+   */
+
+  const onBreakdownFieldChange = useCallback(
+    (breakdownField: DataViewField | undefined) => {
+      stateContainer.setAppState({ breakdownField: breakdownField?.name });
+    },
+    [stateContainer]
+  );
+
+  const field = useMemo(
+    () => (state.breakdownField ? dataView.getFieldByName(state.breakdownField) : undefined),
+    [dataView, state.breakdownField]
+  );
+
+  const breakdown = useMemo(
+    () => (isPlainRecord || !isTimeBased ? undefined : { field }),
+    [field, isPlainRecord, isTimeBased]
+  );
+
+  /**
    * Visualize
    */
 
@@ -85,9 +106,10 @@ export const useDiscoverHistogram = ({
       timeField,
       savedSearch.columns || [],
       PLUGIN_ID,
-      dataView
+      dataView,
+      breakdown?.field
     );
-  }, [dataView, savedSearch.columns, timeField]);
+  }, [breakdown?.field, dataView, savedSearch.columns, timeField]);
 
   /**
    * Height
@@ -214,27 +236,6 @@ export const useDiscoverHistogram = ({
             timeInterval: state.interval,
           },
     [isPlainRecord, isTimeBased, state.hideChart, state.interval]
-  );
-
-  /**
-   * Breakdown
-   */
-
-  const onBreakdownFieldChange = useCallback(
-    (breakdownField: DataViewField | undefined) => {
-      stateContainer.setAppState({ breakdownField: breakdownField?.name });
-    },
-    [stateContainer]
-  );
-
-  const field = useMemo(
-    () => (state.breakdownField ? dataView.getFieldByName(state.breakdownField) : undefined),
-    [dataView, state.breakdownField]
-  );
-
-  const breakdown = useMemo(
-    () => (isPlainRecord || !isTimeBased ? undefined : { field }),
-    [field, isPlainRecord, isTimeBased]
   );
 
   return {

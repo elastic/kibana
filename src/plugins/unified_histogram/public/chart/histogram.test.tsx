@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { UnifiedHistogramFetchStatus } from '../types';
 import { Histogram } from './histogram';
 import React from 'react';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 
-function mountComponent(status: UnifiedHistogramFetchStatus, error?: Error) {
+function mountComponent() {
   const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -37,6 +36,7 @@ function mountComponent(status: UnifiedHistogramFetchStatus, error?: Error) {
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
     },
+    lastReloadRequestTime: 0,
   };
 
   return mountWithIntl(<Histogram {...props} />);
@@ -44,7 +44,7 @@ function mountComponent(status: UnifiedHistogramFetchStatus, error?: Error) {
 
 describe('Histogram', () => {
   it('renders correctly', () => {
-    const component = mountComponent('complete');
+    const component = mountComponent();
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(true);
   });
 });

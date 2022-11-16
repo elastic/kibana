@@ -13,7 +13,6 @@ import type { Query, AggregateQuery } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
-import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import {
   createSearchSourceMock,
@@ -158,36 +157,6 @@ async function mountComponent(
 }
 
 describe('Discover component', () => {
-  test('selected data view without time field displays no chart toggle', async () => {
-    const container = document.createElement('div');
-    await mountComponent(dataViewMock, undefined, { attachTo: container });
-    expect(
-      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
-    ).toBeNull();
-  });
-
-  test('selected data view with time field displays chart toggle', async () => {
-    const container = document.createElement('div');
-    await mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
-    expect(
-      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
-    ).not.toBeNull();
-  });
-
-  test('sql query displays no chart toggle', async () => {
-    const container = document.createElement('div');
-    await mountComponent(
-      dataViewWithTimefieldMock,
-      false,
-      { attachTo: container },
-      { sql: 'SELECT * FROM test' },
-      true
-    );
-    expect(
-      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
-    ).toBeNull();
-  });
-
   test('the saved search title h1 gains focus on navigate', async () => {
     const container = document.createElement('div');
     document.body.appendChild(container);

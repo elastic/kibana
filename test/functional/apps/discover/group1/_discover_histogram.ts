@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // this is the number of renderings of the histogram needed when new data is fetched
-      const renderingCountInc = 1;
+      let renderingCountInc = 1;
       const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -79,11 +79,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.brushHistogram();
       await PageObjects.discover.waitUntilSearchingHasFinished();
+      renderingCountInc = 2;
       await retry.waitFor('chart rendering complete after being brushed', async () => {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc * 2;
         log.debug(`renderings after brushing - actual: ${actualCount} expected: ${expectedCount}`);
-        return actualCount === expectedCount;
+        return actualCount <= expectedCount;
       });
       const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
       expect(Math.round(newDurationHours)).to.be(26);
@@ -102,10 +103,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.awaitKibanaChrome();
       const initialTimeString = await PageObjects.discover.getChartTimespan();
-      await queryBar.submitQuery();
+      await queryBar.clickQuerySubmitButton();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await retry.waitFor('chart timespan to have changed', async () => {
         const refreshedTimeString = await PageObjects.discover.getChartTimespan();
+        await queryBar.clickQuerySubmitButton();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         log.debug(
           `Timestamp before: ${initialTimeString}, Timestamp after: ${refreshedTimeString}`
         );

@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
-  describe('discover histogram breakdown', function describeIndexTests() {
+  describe('discover unified histogram breakdown', function describeIndexTests() {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.chooseBreakdownField('extension.raw');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const list = await PageObjects.discover.getHistogramLegendList();
-      expect(list).to.eql(['png', 'css', 'jpg']);
+      expect(list).to.eql(['Other', 'png', 'css', 'jpg']);
     });
 
     it('should add filter using histogram legend values', async () => {
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.loadSavedSearch('with breakdown');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const list = await PageObjects.discover.getHistogramLegendList();
-      expect(list).to.eql(['png', 'css', 'jpg']);
+      expect(list).to.eql(['Other', 'png', 'css', 'jpg']);
     });
   });
 }
