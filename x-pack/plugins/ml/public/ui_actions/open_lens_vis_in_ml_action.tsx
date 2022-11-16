@@ -44,7 +44,7 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
         return false;
       }
 
-      const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }, [coreStart]] =
+      const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }, [coreStart, { lens }]] =
         await Promise.all([
           import('../application/jobs/new_job/job_from_lens'),
           getStartServices(),
@@ -58,7 +58,7 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
       }
 
       try {
-        const { chartInfo } = await getJobsItemsFromEmbeddable(context.embeddable);
+        const { chartInfo } = await getJobsItemsFromEmbeddable(context.embeddable, lens);
         return isCompatibleVisualizationType(chartInfo);
       } catch (error) {
         // eslint-disable-next-line no-console

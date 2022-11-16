@@ -42,7 +42,7 @@ export class VisualizationExtractor {
     embeddable: Embeddable,
     lens: LensPublicStart
   ): Promise<LayerResult[]> {
-    const { chartInfo } = await getJobsItemsFromEmbeddable(embeddable);
+    const { chartInfo } = await getJobsItemsFromEmbeddable(embeddable, lens);
     return this.getLayers(chartInfo!, lens);
   }
 

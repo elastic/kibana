@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { mergeWith, uniqBy, isEqual } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ChartInfo, Embeddable, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import type {
+  ChartInfo,
+  Embeddable,
+  LensPublicStart,
+  LensSavedObjectAttributes,
+} from '@kbn/lens-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -32,7 +37,6 @@ import {
 import { createQueries } from '../utils/new_job_utils';
 import { isCompatibleLayer, createDetectors, getJobsItemsFromEmbeddable } from './utils';
 import { VisualizationExtractor } from './visualization_extractor';
-import { getLens } from '../../../util/dependency_cache';
 
 type Dashboard = Embeddable['parent'];
 
@@ -50,6 +54,7 @@ interface CreateState {
 
 export class QuickJobCreator {
   constructor(
+    private readonly lens: LensPublicStart,
     private readonly kibanaConfig: IUiSettingsClient,
     private readonly timeFilter: TimefilterContract,
     private readonly share: SharePluginStart,
@@ -65,7 +70,8 @@ export class QuickJobCreator {
     layerIndex: number
   ): Promise<CreateState> {
     const { query, filters, to, from, dashboard, chartInfo } = await getJobsItemsFromEmbeddable(
-      embeddable
+      embeddable,
+      this.lens
     );
     if (query === undefined || filters === undefined) {
       throw new Error('Cannot create job, query and filters are undefined');
@@ -192,8 +198,7 @@ export class QuickJobCreator {
     filters: Filter[],
     layerIndex: number | undefined
   ) {
-    const lens = getLens();
-    const chartInfo = await (await (await lens.stateHelperApi()).chartInfo).getChartInfo(vis);
+    const chartInfo = await (await (await this.lens.stateHelperApi()).chartInfo).getChartInfo(vis);
     if (!chartInfo) {
       throw new Error('Cannot create job, chart info is undefined');
     }

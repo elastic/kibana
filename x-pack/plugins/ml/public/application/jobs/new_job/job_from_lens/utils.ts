@@ -14,7 +14,6 @@ import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
-import { getLens } from '../../../util/dependency_cache';
 
 export const COMPATIBLE_SERIES_TYPES = [
   'line',
@@ -40,9 +39,10 @@ export const COMPATIBLE_SPLIT_FIELD_TYPES: DataType[] = [
 export async function redirectToADJobWizards(
   embeddable: Embeddable,
   layerIndex: number,
-  share: SharePluginStart
+  share: SharePluginStart,
+  lens: LensPublicStart
 ) {
-  const { query, filters, to, from, vis } = await getJobsItemsFromEmbeddable(embeddable);
+  const { query, filters, to, from, vis } = await getJobsItemsFromEmbeddable(embeddable, lens);
   const locator = share.url.locators.get(ML_APP_LOCATOR);
 
   const url = await locator?.getUrl({
@@ -60,10 +60,9 @@ export async function redirectToADJobWizards(
   window.open(url, '_blank');
 }
 
-export async function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
+export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: LensPublicStart) {
   const { filters, timeRange, ...input } = embeddable.getInput();
   const query = input.query === undefined ? { query: '', language: 'kuery' } : input.query;
-  const lens = getLens();
 
   if (timeRange === undefined) {
     throw Error(
@@ -80,6 +79,14 @@ export async function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.visNotFound', {
         defaultMessage: 'Visualization cannot be found.',
+      })
+    );
+  }
+
+  if (!lens) {
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.lensNotFound', {
+        defaultMessage: 'Lens is not intialized',
       })
     );
   }
