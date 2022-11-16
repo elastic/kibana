@@ -378,10 +378,7 @@ const getSavedObjectTypes = (
       properties: {
         name: { type: 'keyword' },
         url: { type: 'keyword', index: false },
-        proxy_headers: {
-          enabled: false,
-          type: 'object',
-        },
+        proxy_headers: { type: 'text', index: false },
         certificate_authorities: { type: 'keyword', index: false },
         certificate: { type: 'keyword', index: false },
         certificate_key: { type: 'keyword', index: false },

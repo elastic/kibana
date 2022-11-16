@@ -55,6 +55,25 @@ function validateUrl(value: string) {
   }
 }
 
+function validateProxyHeaders(value: string) {
+  if (value && value !== '') {
+    const res = safeLoad(value);
+    if (
+      typeof res !== 'object' ||
+      Object.values(res).some((val) => {
+        const valType = typeof val;
+        return valType !== 'string' && valType !== 'number' && valType !== 'boolean';
+      })
+    ) {
+      return [
+        i18n.translate('xpack.fleet.settings.fleetProxy.proxyHeadersErrorMessage', {
+          defaultMessage: 'Proxy headers is not a valid key: value object.',
+        }),
+      ];
+    }
+  }
+}
+
 export function validateName(value: string) {
   if (!value || value === '') {
     return [
@@ -75,7 +94,7 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
   const urlInput = useInput(fleetProxy?.url ?? '', validateUrl, isPreconfigured);
   const proxyHeadersInput = useInput(
     fleetProxy?.proxy_headers ? safeDump(fleetProxy.proxy_headers) : '',
-    () => undefined,
+    validateProxyHeaders,
     isPreconfigured
   );
   const certificateAuthoritiesInput = useInput(

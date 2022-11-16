@@ -5,11 +5,34 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 
 import { FLEET_PROXY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 import { FleetProxyUnauthorizedError } from '../errors';
 import type { FleetProxy, FleetProxySOAttributes, NewFleetProxy } from '../types';
+
+function savedObjectToFleetProxy(so: SavedObject<FleetProxySOAttributes>): FleetProxy {
+  const { proxy_headers: proxyHeaders, ...rest } = so.attributes;
+
+  return {
+    id: so.id,
+    proxy_headers: proxyHeaders && proxyHeaders !== '' ? JSON.parse(proxyHeaders) : undefined,
+    ...rest,
+  };
+}
+
+function fleetProxyDataToSOAttribute(data: NewFleetProxy): FleetProxySOAttributes;
+function fleetProxyDataToSOAttribute(data: Partial<NewFleetProxy>): Partial<FleetProxySOAttributes>;
+function fleetProxyDataToSOAttribute(
+  data: Partial<NewFleetProxy> | NewFleetProxy
+): Partial<FleetProxySOAttributes> | Partial<FleetProxySOAttributes> {
+  const { proxy_headers: proxyHeaders, ...rest } = data;
+
+  return {
+    proxy_headers: proxyHeaders ? JSON.stringify(proxyHeaders) : null,
+    ...rest,
+  };
+}
 
 export async function listFleetProxies(soClient: SavedObjectsClientContract) {
   const res = await soClient.find<FleetProxySOAttributes>({
@@ -18,10 +41,7 @@ export async function listFleetProxies(soClient: SavedObjectsClientContract) {
   });
 
   return {
-    items: res.saved_objects.map<FleetProxy>((so) => ({
-      id: so.id,
-      ...so.attributes,
-    })),
+    items: res.saved_objects.map<FleetProxy>(savedObjectToFleetProxy),
     total: res.total,
     page: res.page,
     perPage: res.per_page,
@@ -33,15 +53,16 @@ export async function createFleetProxy(
   data: NewFleetProxy,
   options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean }
 ): Promise<FleetProxy> {
-  const res = await soClient.create<FleetProxySOAttributes>(FLEET_PROXY_SAVED_OBJECT_TYPE, data, {
-    id: options?.id,
-    overwrite: options?.overwrite,
-  });
+  const res = await soClient.create<FleetProxySOAttributes>(
+    FLEET_PROXY_SAVED_OBJECT_TYPE,
+    fleetProxyDataToSOAttribute(data),
+    {
+      id: options?.id,
+      overwrite: options?.overwrite,
+    }
+  );
 
-  return {
-    id: res.id,
-    ...res.attributes,
-  };
+  return savedObjectToFleetProxy(res);
 }
 
 export async function getFleetProxy(
@@ -50,10 +71,7 @@ export async function getFleetProxy(
 ): Promise<FleetProxy> {
   const res = await soClient.get<FleetProxySOAttributes>(FLEET_PROXY_SAVED_OBJECT_TYPE, id);
 
-  return {
-    id: res.id,
-    ...res.attributes,
-  };
+  return savedObjectToFleetProxy(res);
 }
 
 export async function deleteFleetProxy(
@@ -85,10 +103,47 @@ export async function updateFleetProxy(
     throw new FleetProxyUnauthorizedError(`Cannot update ${id} preconfigured proxy`);
   }
 
-  await soClient.update<FleetProxySOAttributes>(FLEET_PROXY_SAVED_OBJECT_TYPE, id, data);
+  await soClient.update<FleetProxySOAttributes>(
+    FLEET_PROXY_SAVED_OBJECT_TYPE,
+    id,
+    fleetProxyDataToSOAttribute(data)
+  );
 
   return {
     ...originalItem,
     ...data,
   };
+}
+
+export async function bulkGetFleetProxies(
+  soClient: SavedObjectsClientContract,
+  ids: string[],
+  { ignoreNotFound = false } = { ignoreNotFound: true }
+) {
+  if (ids.length === 0) {
+    return [];
+  }
+
+  const res = await soClient.bulkGet<FleetProxySOAttributes>(
+    ids.map((id) => ({
+      id,
+      type: FLEET_PROXY_SAVED_OBJECT_TYPE,
+    }))
+  );
+
+  return res.saved_objects
+    .map((so) => {
+      if (so.error) {
+        if (!ignoreNotFound || so.error.statusCode !== 404) {
+          throw so.error;
+        }
+        return undefined;
+      }
+
+      return savedObjectToFleetProxy(so);
+    })
+    .filter(
+      (fleetProxyOrUndefined): fleetProxyOrUndefined is FleetProxy =>
+        typeof fleetProxyOrUndefined !== 'undefined'
+    );
 }

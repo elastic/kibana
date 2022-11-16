@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-export interface NewFleetProxy {
+interface BaseFleetProxy {
   name: string;
   url: string;
-  proxy_headers?: Record<string, string | number | boolean> | null;
   certificate_authorities?: string | null;
   certificate?: string | null;
   certificate_key?: string | null;
   is_preconfigured: boolean;
 }
 
+export interface NewFleetProxy extends BaseFleetProxy {
+  proxy_headers?: Record<string, string | number | boolean> | null;
+}
+
 export interface FleetProxy extends NewFleetProxy {
   id: string;
 }
 
-export type FleetProxySOAttributes = NewFleetProxy;
+export interface FleetProxySOAttributes extends BaseFleetProxy {
+  proxy_headers?: string | null;
+}

@@ -30,7 +30,6 @@ export const postFleetProxyHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
-  // const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     const { id, ...data } = request.body;
     const proxy = await createFleetProxy(soClient, { ...data, is_preconfigured: false }, { id });
@@ -52,7 +51,6 @@ export const putFleetProxyHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const coreContext = await await context.core;
-    // const esClient = coreContext.elasticsearch.client.asInternalUser;
     const soClient = coreContext.savedObjects.client;
 
     const item = await updateFleetProxy(soClient, request.params.itemId, request.body);
@@ -97,7 +95,6 @@ export const deleteFleetProxyHandler: RequestHandler<
   try {
     const coreContext = await context.core;
     const soClient = coreContext.savedObjects.client;
-    // const esClient = coreContext.elasticsearch.client.asInternalUser;
     await deleteFleetProxy(soClient, request.params.itemId);
     const body = {
       id: request.params.itemId,
