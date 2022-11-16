@@ -22,6 +22,7 @@ export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
 
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
+export const CONFIRM_DUPLICATE_RULE = '[data-test-subj="confirmModalConfirmButton"]';
 
 export const ENABLE_RULE_BULK_BTN = '[data-test-subj="enableRuleBulk"]';
 
