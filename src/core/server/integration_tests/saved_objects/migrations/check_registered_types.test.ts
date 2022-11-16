@@ -8,7 +8,7 @@
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
-import { Root } from '../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 describe('checking migration metadata changes on all registered SO types', () => {
@@ -53,7 +53,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "7858e6d5a9f231bf23f6f2e57328eb0095b26735",
         "action_task_params": "bbd38cbfd74bf6713586fe078e3fa92db2234299",
-        "alert": "48461f3375d9ba22882ea23a318b62a5b0921a9b",
+        "alert": "eefada4a02ce05962387c0679d7b292771a931c4",
         "api_key_pending_invalidation": "9b4bc1235337da9a87ef05a1d1f4858b2a3b77c6",
         "apm-indices": "ceb0870f3a74e2ffc3a1cd3a3c73af76baca0999",
         "apm-server-schema": "2bfd2998d3873872e1366458ce553def85418f91",
@@ -92,6 +92,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fleet-preconfiguration-deletion-record": "7b28f200513c28ae774f1b7d7d7906954e3c6e16",
         "graph-workspace": "3342f2cd561afdde8f42f5fb284bf550dee8ebb5",
         "guided-onboarding-guide-state": "561db8d481b131a2bbf46b1e534d6ce960255135",
+        "guided-onboarding-plugin-state": "a802ed58e9d0076b9632c59d7943861ba476f99c",
         "index-pattern": "48e77ca393c254e93256f11a7cdc0232dd754c08",
         "infrastructure-monitoring-log-view": "e2c78c1076bd35e57d7c5fa1b410e5c126d12327",
         "infrastructure-ui-source": "7c8dbbc0a608911f1b683a944f4a65383f6153ed",
@@ -113,8 +114,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ml-trained-model": "e39dd10b2da827e194ddcaaf3db141ad1daf0201",
         "monitoring-telemetry": "af508cea8e22edaa909e462069390650fbbf01b7",
         "osquery-manager-usage-metric": "fbe3cbea25a96e2ca522ca436878e0162c94dcc2",
-        "osquery-pack": "afb3b46c5e23fc24ad438e9c4317ff37e4e5164a",
-        "osquery-pack-asset": "32421669c87c49dfabd4d3957f044e5eb7f7fb20",
+        "osquery-pack": "a2d675c7af4208e54a5b28d23d324d7c599a5491",
+        "osquery-pack-asset": "de8783298eb33a577bf1fa0caacd42121dcfae91",
         "osquery-saved-query": "7b213b4b7a3e59350e99c50e8df9948662ed493a",
         "query": "4640ef356321500a678869f24117b7091a911cb6",
         "sample-data-telemetry": "8b10336d9efae6f3d5593c4cc89fb4abcdf84e04",
@@ -130,7 +131,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "siem-ui-timeline-pinned-event": "e2697b38751506c7fce6e8b7207a830483dc4283",
         "space": "c4a0acce1bd4b9cce85154f2a350624a53111c59",
         "spaces-usage-stats": "922d3235bbf519e3fb3b260e27248b1df8249b79",
-        "synthetics-monitor": "30f1cd04016a37095de60554cbf7fff89aaad177",
+        "synthetics-monitor": "111811218f7e34f40980665a4eb99976f457bb23",
         "synthetics-privates-locations": "dd00385f4a27ef062c3e57312eeb3799872fa4af",
         "tag": "39413f4578cc2128c9a0fda97d0acd1c8862c47a",
         "task": "ef53d0f070bd54957b8fe22fae3b1ff208913f76",
