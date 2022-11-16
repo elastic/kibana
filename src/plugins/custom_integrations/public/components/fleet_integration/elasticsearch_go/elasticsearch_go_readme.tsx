@@ -76,7 +76,7 @@ export const ElasticsearchGoClientReadme = () => {
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
-                  id="customIntegrations.languageClients.GothonElasticsearch.readme.title"
+                  id="customIntegrations.languageClients.GoElasticsearch.readme.title"
                   defaultMessage="Elasticsearch Go Client"
                 />
               </h1>
@@ -94,7 +94,7 @@ export const ElasticsearchGoClientReadme = () => {
                   description={
                     <EuiText>
                       <FormattedMessage
-                        id="customIntegrations.languageClients.GothonElasticsearch.readme.intro"
+                        id="customIntegrations.languageClients.GoElasticsearch.readme.intro"
                         defaultMessage="Getting started with the Elasticsearch Go Client requires a few steps."
                       />
                     </EuiText>
@@ -106,7 +106,7 @@ export const ElasticsearchGoClientReadme = () => {
                 <EuiTitle>
                   <h2>
                     <FormattedMessage
-                      id="customIntegrations.languageClients.GothonElasticsearch.readme.install"
+                      id="customIntegrations.languageClients.GoElasticsearch.readme.install"
                       defaultMessage="Install the Elasticsearch Go Client"
                     />
                   </h2>
@@ -116,24 +116,33 @@ export const ElasticsearchGoClientReadme = () => {
 
                 <EuiText>
                   <FormattedMessage
-                    id="customIntegrations.languageClients.GothonElasticsearch.readme.install7.X"
-                    defaultMessage="To install the 7.x version of the client, add the package to your go.mod file:"
+                    id="customIntegrations.languageClients.GoElasticsearch.readme.install"
+                    defaultMessage="Add the package to your {go_file} file:"
+                    values={{
+                      go_file: <EuiCode>go.mod</EuiCode>,
+                    }}
                   />
                 </EuiText>
 
+                <EuiSpacer size="s" />
+
                 <EuiCodeBlock language="shell" isCopyable>
-                  {`$ require github.com/elastic/go-elasticsearch/v7 7.16`}
+                  {`$ require github.com/elastic/go-elasticsearch/v8 main`}
                 </EuiCodeBlock>
+
+                <EuiSpacer size="s" />
 
                 <EuiText>
                   <FormattedMessage
-                    id="customIntegrations.languageClients.GothonElasticsearch.readme.clone"
+                    id="customIntegrations.languageClients.GoElasticsearch.readme.clone"
                     defaultMessage="Or, clone the repository:"
                   />
                 </EuiText>
 
+                <EuiSpacer size="s" />
+                
                 <EuiCodeBlock language="shell" isCopyable>
-                  {`$ git clone --branch 7.16 https://github.com/elastic/go-elasticsearch.git $GOPATH/src/github`}
+                  {`$ git clone --branch main https://github.com/elastic/go-elasticsearch.git $GOPATH/src/github.com/elastic/go-elasticsearch`}
                 </EuiCodeBlock>
               </EuiPageSection>
 
@@ -141,7 +150,7 @@ export const ElasticsearchGoClientReadme = () => {
                 <EuiTitle>
                   <h2>
                     <FormattedMessage
-                      id="customIntegrations.languageClients.GothonElasticsearch.readme.connecting"
+                      id="customIntegrations.languageClients.GoElasticsearch.readme.connecting"
                       defaultMessage="Connecting to Elastic cloud"
                     />
                   </h2>
@@ -149,7 +158,7 @@ export const ElasticsearchGoClientReadme = () => {
 
                 <EuiText>
                   <FormattedMessage
-                    id="customIntegrations.languageClients.GothonElasticsearch.readme.connectingText"
+                    id="customIntegrations.languageClients.GoElasticsearch.readme.connectingText"
                     defaultMessage="You can connect to Elastic Cloud using an {api_key} and a {cloud_id}:"
                     values={{
                       api_key: <EuiCode>API key</EuiCode>,
