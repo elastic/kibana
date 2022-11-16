@@ -168,3 +168,64 @@ export function useComboInput(
     hasChanged,
   };
 }
+
+export function useNumberInput(
+  defaultValue = 0,
+  validate?: (value: number) => number[] | undefined,
+  disabled: boolean = false
+) {
+  const [value, setValue] = useState<number>(defaultValue);
+  const [errors, setErrors] = useState<number[] | undefined>();
+  const [hasChanged, setHasChanged] = useState(false);
+
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const newValue = e.target.value ? Number(e.target.value) : 0;
+      setValue(newValue);
+      if (errors && validate && validate(newValue) === undefined) {
+        setErrors(undefined);
+      }
+    },
+    [errors, validate]
+  );
+
+  useEffect(() => {
+    if (hasChanged) {
+      return;
+    }
+    if (value !== defaultValue) {
+      setHasChanged(true);
+    }
+  }, [hasChanged, value, defaultValue]);
+
+  const isInvalid = errors !== undefined;
+
+  return {
+    value,
+    errors,
+    props: {
+      onChange,
+      value,
+      isInvalid,
+      disabled,
+    },
+    formRowProps: {
+      error: errors,
+      isInvalid,
+    },
+    clear: () => {
+      setValue(0);
+    },
+    validate: () => {
+      if (validate) {
+        const newErrors = validate(value);
+        setErrors(newErrors);
+        return newErrors === undefined;
+      }
+
+      return true;
+    },
+    setValue,
+    hasChanged,
+  };
+}

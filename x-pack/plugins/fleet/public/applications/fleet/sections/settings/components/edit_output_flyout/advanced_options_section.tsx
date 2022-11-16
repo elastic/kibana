@@ -17,23 +17,26 @@ import {
   EuiText,
   EuiSpacer,
   EuiFieldText,
+  EuiFieldNumber,
   // EuiSelect,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import type { useSwitchInput, useInput } from '../../../../hooks';
+import type { useSwitchInput, useInput, useNumberInput } from '../../../../hooks';
 
 export interface AdvancedOptionsSectionProps {
   enabled: boolean;
   diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
   diskQueuePathInput: ReturnType<typeof useInput>;
+  diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
 }
 
 export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSectionProps> = ({
   enabled,
   diskQueueEnabledInput,
   diskQueuePathInput,
+  diskQueueMaxSizeInput,
 }) => {
   return enabled ? (
     <EuiAccordion
@@ -48,7 +51,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
     >
       <>
         <EuiSpacer size="m" />
-        <EuiFormRow fullWidth>
+        <EuiFormRow fullWidth {...diskQueueEnabledInput.formRowProps}>
           <EuiFlexGroup alignItems="flexStart">
             <EuiFlexItem>
               <EuiSwitch
@@ -93,6 +96,31 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               }
             )}
           />
+        </EuiFormRow>
+
+        <EuiFormRow
+          fullWidth
+          {...diskQueueMaxSizeInput.formRowProps}
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.diskQueueMaxSize"
+              defaultMessage="Maximum Disk Size"
+            />
+          }
+        >
+          <EuiFlexGroup alignItems="flexStart">
+            <EuiFlexItem>
+              <EuiFieldNumber {...diskQueueMaxSizeInput.props} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.diskQueueMaxSizeDescription"
+                  defaultMessage="Limits the disk size for spooling of data. If set too low, data may be lost when agent can't write data to the destination."
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFormRow>
 
         <EuiHorizontalRule />

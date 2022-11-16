@@ -27,6 +27,7 @@ export interface NewOutput {
   } | null;
   disk_queue_enabled?: boolean;
   disk_queue_path?: string;
+  disk_queue_max_size?: number;
 }
 
 export type OutputSOAttributes = NewOutput & {

@@ -369,6 +369,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             enabled={form.isShipperEnabled}
             diskQueueEnabledInput={inputs.diskQueueEnabledInput}
             diskQueuePathInput={inputs.diskQueuePathInput}
+            diskQueueMaxSizeInput={inputs.diskQueueMaxSizeInput}
           />
         </EuiForm>
       </EuiFlyoutBody>

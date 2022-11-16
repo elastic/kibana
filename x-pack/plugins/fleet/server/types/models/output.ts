@@ -56,6 +56,7 @@ const OutputBaseSchema = {
   ),
   disk_queue_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
   disk_queue_path: schema.maybe(schema.string()),
+  disk_queue_max_size: schema.maybe(schema.number()),
 };
 
 export const NewOutputSchema = schema.object({ ...OutputBaseSchema });
@@ -85,6 +86,7 @@ export const UpdateOutputSchema = schema.object({
   config_yaml: schema.maybe(schema.string()),
   disk_queue_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
   disk_queue_path: schema.maybe(schema.string()),
+  disk_queue_max_size: schema.maybe(schema.number()),
 });
 
 export const OutputSchema = schema.object({

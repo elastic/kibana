@@ -13,6 +13,7 @@ import {
   sendPostOutput,
   useComboInput,
   useInput,
+  useNumberInput,
   useSwitchInput,
   useStartServices,
   sendPutOutput,
@@ -32,12 +33,15 @@ import {
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
+const DEFAULT_QUEUE_MAX_SIZE = 4096;
+
 export interface OutputFormInputs {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
   diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
   diskQueuePathInput: ReturnType<typeof useInput>;
+  diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
   logstashHostsInput: ReturnType<typeof useComboInput>;
   additionalYamlConfigInput: ReturnType<typeof useInput>;
   defaultOutputInput: ReturnType<typeof useSwitchInput>;
@@ -99,6 +103,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
   const diskQueueEnabledInput = useSwitchInput(output?.disk_queue_enabled ?? false);
   const diskQueuePathInput = useInput(output?.disk_queue_path ?? '');
+  const diskQueueMaxSizeInput = useNumberInput(
+    output?.disk_queue_max_size ?? DEFAULT_QUEUE_MAX_SIZE
+  );
 
   // Logstash inputs
   const logstashHostsInput = useComboInput(
@@ -129,6 +136,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     elasticsearchUrlInput,
     diskQueueEnabledInput,
     diskQueuePathInput,
+    diskQueueMaxSizeInput,
     logstashHostsInput,
     additionalYamlConfigInput,
     defaultOutputInput,
@@ -215,6 +223,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
             ca_trusted_fingerprint: caTrustedFingerprintInput.value,
             disk_queue_enabled: diskQueueEnabledInput.value,
             disk_queue_path: diskQueuePathInput.value,
+            disk_queue_max_size: diskQueueMaxSizeInput.value,
           };
 
       if (output) {
@@ -262,6 +271,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     caTrustedFingerprintInput.value,
     diskQueueEnabledInput.value,
     diskQueuePathInput.value,
+    diskQueueMaxSizeInput.value,
     output,
     onSucess,
     confirm,
