@@ -169,6 +169,7 @@ export const RuleForm = ({
     ruleTypes,
     error: loadRuleTypesError,
     ruleTypeIndex,
+    ruleTypesIsLoading,
   } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
 
   // load rule types
@@ -848,7 +849,7 @@ export const RuleForm = ({
           ) : null}
           {ruleTypeNodes}
         </>
-      ) : ruleTypeIndex ? (
+      ) : ruleTypeIndex && !ruleTypesIsLoading ? (
         <NoAuthorizedRuleTypes operation={operation} />
       ) : (
         <SectionLoading>
