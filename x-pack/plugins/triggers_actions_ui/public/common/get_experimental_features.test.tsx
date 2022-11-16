@@ -21,6 +21,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
         rulesDetailLogs: true,
         ruleTagFilter: true,
         ruleStatusFilter: true,
+        ruleLastRunOutcome: true,
       },
     });
 
@@ -41,6 +42,10 @@ describe('getIsExperimentalFeatureEnabled', () => {
     expect(result).toEqual(true);
 
     result = getIsExperimentalFeatureEnabled('ruleStatusFilter');
+
+    expect(result).toEqual(true);
+
+    result = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
 
     expect(result).toEqual(true);
 

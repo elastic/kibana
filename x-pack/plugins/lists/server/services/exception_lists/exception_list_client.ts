@@ -39,6 +39,7 @@ import type {
   DeleteExceptionListItemByIdOptions,
   DeleteExceptionListItemOptions,
   DeleteExceptionListOptions,
+  DuplicateExceptionListOptions,
   ExportExceptionListAndItemsOptions,
   FindEndpointListItemOptions,
   FindExceptionListItemOptions,
@@ -95,6 +96,7 @@ import { findValueListExceptionListItems } from './find_value_list_exception_lis
 import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
 import { findValueListExceptionListItemsPointInTimeFinder } from './find_value_list_exception_list_items_point_in_time_finder';
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
+import { duplicateExceptionListAndItems } from './duplicate_exception_list';
 
 /**
  * Class for use for exceptions that are with trusted applications or
@@ -307,6 +309,25 @@ export class ExceptionListClient {
       savedObjectsClient,
       tags,
       type,
+      user,
+    });
+  };
+
+  /**
+   * Create the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)
+   * @param options.listId the "list_id" of the exception list
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @returns The exception list schema or null if it does not exist
+   */
+  public duplicateExceptionListAndItems = async ({
+    listId,
+    namespaceType,
+  }: DuplicateExceptionListOptions): Promise<ExceptionListSchema | null> => {
+    const { savedObjectsClient, user } = this;
+    return duplicateExceptionListAndItems({
+      listId,
+      namespaceType,
+      savedObjectsClient,
       user,
     });
   };

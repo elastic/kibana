@@ -13010,6 +13010,14 @@
               }
             }
           }
+        },
+        "endpointMetrics": {
+          "properties": {
+            "unique_endpoint_count": {
+              "type": "long",
+              "_meta": { "description": "Number of active unique endpoints in last 24 hours" }
+            }
+          }
         }
       }
     },

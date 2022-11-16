@@ -43,12 +43,15 @@ import {
   buildThreatMappingDescription,
   buildEqlOptionsDescription,
   buildRequiredFieldsDescription,
+  buildAlertSuppressionDescription,
 } from './helpers';
 import { buildMlJobsDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
 import { THREAT_QUERY_LABEL } from './translations';
 import { filterEmptyThreats } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
+import { useLicense } from '../../../../common/hooks/use_license';
+import type { LicenseService } from '../../../../../common/license';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -75,6 +78,7 @@ export const StepRuleDescriptionComponent = <T,>({
   schema,
 }: StepRuleDescriptionProps<T>) => {
   const kibana = useKibana();
+  const license = useLicense();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
 
   const keys = Object.keys(schema);
@@ -97,7 +101,10 @@ export const StepRuleDescriptionComponent = <T,>({
       return [...acc, buildActionsDescription(get(key, data), get([key, 'label'], schema))];
     }
 
-    return [...acc, ...buildListItems(data, pick(key, schema), filterManager, indexPatterns)];
+    return [
+      ...acc,
+      ...buildListItems(data, pick(key, schema), filterManager, license, indexPatterns),
+    ];
   }, []);
 
   if (columns === 'multi') {
@@ -139,6 +146,7 @@ export const buildListItems = <T,>(
   // @ts-expect-error
   schema: FormSchema<T>,
   filterManager: FilterManager,
+  license: LicenseService,
   indexPatterns?: DataViewBase
 ): ListItems[] =>
   Object.keys(schema).reduce<ListItems[]>(
@@ -149,6 +157,7 @@ export const buildListItems = <T,>(
         get([field, 'label'], schema),
         data,
         filterManager,
+        license,
         indexPatterns
       ),
     ],
@@ -172,6 +181,7 @@ export const getDescriptionItem = (
   label: string,
   data: unknown,
   filterManager: FilterManager,
+  license: LicenseService,
   indexPatterns?: DataViewBase
 ): ListItems[] => {
   if (field === 'queryBar') {
@@ -188,6 +198,9 @@ export const getDescriptionItem = (
       savedQueryName,
       indexPatterns,
     });
+  } else if (field === 'groupByFields') {
+    const values: string[] = get(field, data);
+    return buildAlertSuppressionDescription(label, values, license);
   } else if (field === 'eqlOptions') {
     const eqlOptions: EqlOptionsSelected = get(field, data);
     return buildEqlOptionsDescription(eqlOptions);

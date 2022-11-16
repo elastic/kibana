@@ -89,6 +89,7 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
       ruleTagFilter: true,
       ruleStatusFilter: true,
       rulesDetailLogs: true,
+      ruleLastRunOutcome: true,
     },
   });
   return (
