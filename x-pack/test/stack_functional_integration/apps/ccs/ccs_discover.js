@@ -124,7 +124,9 @@ export default ({ getService, getPageObjects }) => {
       log.debug(
         'create comma separated index patterns for ftr-remote and local makelogs工程 index pattern'
       );
-      await PageObjects.settings.createIndexPattern('ftr-remote:makelogs工程-*,local:makelogs工程-*');
+      await PageObjects.settings.createIndexPattern(
+        'ftr-remote:makelogs工程-*,local:makelogs工程-*'
+      );
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('ftr-remote:makelogs工程-*,local:makelogs工程-*');
     });
@@ -167,7 +169,9 @@ export default ({ getService, getPageObjects }) => {
     });
 
     it('ftr-remote:makelogs-star,local:makelogs-star should discover data from both clusters', async function () {
-      await PageObjects.discover.selectIndexPattern('ftr-remote:makelogs工程-*,local:makelogs工程-*');
+      await PageObjects.discover.selectIndexPattern(
+        'ftr-remote:makelogs工程-*,local:makelogs工程-*'
+      );
       await retry.tryForTime(40000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         log.debug('### hit count = ' + hitCount);
@@ -176,7 +180,9 @@ export default ({ getService, getPageObjects }) => {
     });
 
     it('should reload the saved search with persisted query to show the initial hit count', async function () {
-      await PageObjects.discover.selectIndexPattern('ftr-remote:makelogs工程-*,local:makelogs工程-*');
+      await PageObjects.discover.selectIndexPattern(
+        'ftr-remote:makelogs工程-*,local:makelogs工程-*'
+      );
       // apply query some changes
       await queryBar.setQuery('success');
       await queryBar.submitQuery();
@@ -190,7 +196,9 @@ export default ({ getService, getPageObjects }) => {
     });
 
     it('should add a phrases filter', async function () {
-      await PageObjects.discover.selectIndexPattern('ftr-remote:makelogs工程-*,local:makelogs工程-*');
+      await PageObjects.discover.selectIndexPattern(
+        'ftr-remote:makelogs工程-*,local:makelogs工程-*'
+      );
       const hitCountNumber = await PageObjects.discover.getHitCount();
       const originalHitCount = parseInt(hitCountNumber.replace(/\,/g, ''));
       await filterBar.addFilter('extension.keyword', 'is', 'jpg');
