@@ -54,8 +54,11 @@ describe('ObservabilityAlertSearchBar', () => {
     return render(<ObservabilityAlertSearchBar {...alertSearchBarProps} />);
   };
 
-  beforeEach(() => {
+  beforeAll(() => {
     mockKibana();
+  });
+
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
