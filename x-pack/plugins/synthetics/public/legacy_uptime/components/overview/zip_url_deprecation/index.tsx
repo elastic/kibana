@@ -19,7 +19,10 @@ export const ZipUrlDeprecation = () => {
   const noticeHasBeenDismissed =
     window.sessionStorage.getItem(ZIP_URL_DEPRECATION_SESSION_STORAGE_KEY) === 'true';
   const { data, loading } = useFetcher(() => {
-    return getHasZipUrlMonitors();
+    if (!noticeHasBeenDismissed) {
+      return getHasZipUrlMonitors();
+    }
+    return undefined;
   }, []);
   const hasZipUrlMonitors = !loading && data && data.hasZipUrlMonitors;
   const [shouldShowNotice, setShouldShowNotice] = useState(

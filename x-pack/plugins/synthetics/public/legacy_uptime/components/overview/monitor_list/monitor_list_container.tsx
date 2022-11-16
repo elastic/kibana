@@ -33,7 +33,7 @@ const getPageSizeValue = () => {
 
 export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const filters = useSelector(esKuerySelector);
-  const filterCheck = useOverviewFilterCheck();
+  const { filterCheck, pending } = useOverviewFilterCheck();
 
   const [pageSize, setPageSize] = useState<number>(getPageSizeValue);
 
@@ -101,6 +101,7 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
       pageSize={pageSize}
       setPageSize={setPageSize}
       refreshedMonitorIds={refreshedMonitorIds}
+      isPending={pending}
     />
   );
 };

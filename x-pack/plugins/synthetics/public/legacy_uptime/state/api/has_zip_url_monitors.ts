@@ -10,5 +10,7 @@ import { SyntheticsHasZipUrlMonitorsResponse } from '../../../../common/types/zi
 import { apiService } from './utils';
 
 export const getHasZipUrlMonitors = async (): Promise<SyntheticsHasZipUrlMonitorsResponse> => {
+  // delay the request to allow the page to render
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   return await apiService.get(API_URLS.SYNTHETICS_HAS_ZIP_URL_MONITORS);
 };
