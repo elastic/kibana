@@ -42,6 +42,7 @@ import type { Action } from './actions';
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
+import { useUrlState } from './use_url_state';
 
 interface InspectorConfig extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave'> {
   enabled?: boolean;
@@ -57,6 +58,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   emptyPrompt?: JSX.Element;
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
+  urlStateEnabled?: boolean;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -114,7 +116,71 @@ export interface UserContentCommonSchema {
   };
 }
 
-const ast = Ast.create([]);
+export interface URLState {
+  s?: string;
+  sort?: {
+    field: SortColumnField;
+    direction: Direction;
+  };
+  [key: string]: unknown;
+}
+
+interface URLQueryParams {
+  s?: string;
+  title?: string;
+  sort?: string;
+  sortdir?: string;
+  [key: string]: unknown;
+}
+
+const urlStateDeserializer = (params: URLQueryParams): URLState => {
+  const stateFromURL: URLState = {};
+  const sanitizedParams = { ...params };
+
+  // If we declare 2 or more query params with the same key in the URL
+  // we will receive an array of value back when parsed. It is probably
+  // a mistake from the user so we'll sanitize the data before continuing.
+  ['s', 'title', 'sort', 'sortdir'].forEach((key: string) => {
+    if (Array.isArray(sanitizedParams[key])) {
+      sanitizedParams[key] = (sanitizedParams[key] as string[])[0];
+    }
+  });
+
+  stateFromURL.s = sanitizedParams.s ?? sanitizedParams.title;
+
+  if (sanitizedParams.sort === 'title' || sanitizedParams.sort === 'updatedAt') {
+    const field = sanitizedParams.sort === 'title' ? 'attributes.title' : 'updatedAt';
+
+    stateFromURL.sort = { field, direction: 'asc' };
+
+    if (sanitizedParams.sortdir === 'desc' || sanitizedParams.sortdir === 'asc') {
+      stateFromURL.sort.direction = sanitizedParams.sortdir;
+    }
+  }
+
+  return stateFromURL;
+};
+
+const urlStateSerializer = (updated: Partial<URLState>) => {
+  const updatedQueryParams: Partial<URLQueryParams> = {};
+
+  if (updated.sort) {
+    updatedQueryParams.sort = updated.sort.field;
+    updatedQueryParams.sortdir = updated.sort.direction;
+  }
+
+  if (updated.s !== undefined) {
+    updatedQueryParams.s = updated.s;
+    updatedQueryParams.title = undefined;
+  }
+
+  if (typeof updatedQueryParams.s === 'string' && updatedQueryParams.s.trim() === '') {
+    updatedQueryParams.s = undefined;
+    updatedQueryParams.title = undefined;
+  }
+
+  return updatedQueryParams;
+};
 
 function TableListViewComp<T extends UserContentCommonSchema>({
   tableListTitle,
@@ -124,6 +190,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   headingId,
   initialPageSize,
   listingLimit,
+  urlStateEnabled = true,
   customTableColumn,
   emptyPrompt,
   findItems,
@@ -132,7 +199,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   deleteItems,
   getDetailViewLink,
   onClickTitle,
-  id = 'userContent',
+  id: listingId = 'userContent',
   inspector = { enabled: false },
   children,
 }: Props<T>) {
@@ -164,9 +231,15 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     searchQueryParser,
     notifyError,
     DateFormatterComp,
+    getTagList,
   } = useServices();
 
   const openInspector = useOpenInspector();
+
+  const [urlState, setUrlState] = useUrlState<URLState, URLQueryParams>({
+    queryParamsDeserializer: urlStateDeserializer,
+    queryParamsSerializer: urlStateSerializer,
+  });
 
   const reducer = useMemo(() => {
     return getReducer<T>();
@@ -183,8 +256,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     selectedIds: [],
     searchQuery:
       initialQuery !== undefined
-        ? { text: initialQuery, query: new Query(ast, undefined, initialQuery) }
-        : { text: '', query: new Query(ast, undefined, '') },
+        ? { text: initialQuery, query: new Query(Ast.create([]), undefined, initialQuery) }
+        : { text: '', query: new Query(Ast.create([]), undefined, '') },
     pagination: {
       pageIndex: 0,
       totalItemCount: 0,
@@ -218,12 +291,20 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
-  const updateQuery = useCallback((query: Query) => {
-    dispatch({
-      type: 'onSearchQueryChange',
-      data: { query, text: query.text },
-    });
-  }, []);
+  const updateQuery = useCallback(
+    (query: Query) => {
+      if (urlStateEnabled) {
+        setUrlState({ s: query.text });
+        return;
+      }
+
+      dispatch({
+        type: 'onSearchQueryChange',
+        data: { query, text: query.text },
+      });
+    },
+    [urlStateEnabled, setUrlState]
+  );
 
   const {
     addOrRemoveIncludeTagFilter,
@@ -267,7 +348,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         render: (field: keyof T, record: T) => {
           return (
             <ItemDetails<T>
-              id={id}
+              id={listingId}
               item={record}
               getDetailViewLink={getDetailViewLink}
               onClickTitle={onClickTitle}
@@ -366,7 +447,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     customTableColumn,
     hasUpdatedAtMetadata,
     editItem,
-    id,
+    listingId,
     getDetailViewLink,
     onClickTitle,
     searchQuery.text,
@@ -399,7 +480,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         references,
         referencesToExclude,
       } = searchQueryParser
-        ? searchQueryParser(searchQuery.text)
+        ? await searchQueryParser(searchQuery.text)
         : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
 
       const response = await findItems(searchQueryParsed, { references, referencesToExclude });
@@ -426,13 +507,46 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
   const onSortChange = useCallback((field: SortColumnField, direction: Direction) => {
     dispatch({
-      type: 'onTableSortChange',
-      data: { field, direction },
+      type: 'onTableChange',
+      data: {
+        sort: {
+          field,
+          direction,
+        },
+      },
     });
   }, []);
 
+  const onTableSearchChange = useCallback(
+    (arg: { query: Query | null; queryText: string }) => {
+      const query = arg.query ?? new Query(Ast.create([]), undefined, arg.queryText);
+      updateQuery(query);
+    },
+    [updateQuery]
+  );
+
   const onTableChange = useCallback((criteria: CriteriaWithPagination<T>) => {
-    dispatch({ type: 'onTableChange', data: criteria });
+    const data: {
+      sort?: State<T>['tableSort'];
+      page?: {
+        pageIndex: number;
+        pageSize: number;
+      };
+    } = {};
+
+    if (criteria.sort) {
+      data.sort = {
+        field: criteria.sort.field as SortColumnField,
+        direction: criteria.sort.direction,
+      };
+    }
+
+    data.page = {
+      pageIndex: criteria.page.index,
+      pageSize: criteria.page.size,
+    };
+
+    dispatch({ type: 'onTableChange', data });
   }, []);
 
   const deleteSelectedItems = useCallback(async () => {
@@ -537,6 +651,59 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   useDebounce(fetchItems, 300, [fetchItems]);
 
   useEffect(() => {
+    if (!urlStateEnabled) {
+      return;
+    }
+
+    const updateQueryFromURL = async (text: string) => {
+      let ast = Ast.create([]);
+
+      if (searchQueryParser) {
+        // Parse possible tags in the search text
+        const { references, referencesToExclude } = await searchQueryParser(text);
+
+        if (references?.length || referencesToExclude?.length) {
+          const allTags = getTagList();
+
+          if (references?.length) {
+            references.forEach(({ id: refId }) => {
+              const tag = allTags.find(({ id }) => id === refId);
+              if (tag) {
+                ast = ast.addOrFieldValue('tag', tag.name, true, 'eq');
+              }
+            });
+          }
+
+          if (referencesToExclude?.length) {
+            referencesToExclude.forEach(({ id: refId }) => {
+              const tag = allTags.find(({ id }) => id === refId);
+              if (tag) {
+                ast = ast.addOrFieldValue('tag', tag.name, false, 'eq');
+              }
+            });
+          }
+        }
+      }
+
+      const updatedQuery = new Query(ast, undefined, text);
+
+      dispatch({
+        type: 'onSearchQueryChange',
+        data: {
+          query: updatedQuery,
+          text,
+        },
+      });
+    };
+
+    updateQueryFromURL(urlState.s ?? '');
+
+    if (urlState.sort !== undefined) {
+      // TODO
+    }
+  }, [urlState, searchQueryParser, getTagList, urlStateEnabled]);
+
+  useEffect(() => {
     isMounted.current = true;
 
     return () => {
@@ -605,6 +772,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           deleteItems={deleteItems}
           tableCaption={tableListTitle}
           onTableChange={onTableChange}
+          onTableSearchChange={onTableSearchChange}
           onSortChange={onSortChange}
           addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}

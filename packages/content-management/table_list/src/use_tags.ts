@@ -128,7 +128,7 @@ export function useTags({
       }
 
       if (hasTagInExclude(tag, q)) {
-        // Already selected, remove the filter
+        // Already excluded, remove the filter
         removeTagFromExcludeClause(tag, q);
         return;
       }
