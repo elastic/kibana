@@ -17,7 +17,7 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 
 import type { BrowserFields } from '../../../common/containers/source';
@@ -96,19 +96,28 @@ export const StatefulEditDataProvider = React.memo<Props>(
       value
     );
 
-    const showComboBoxInput =
-      updatedOperator.length > 0 &&
-      (updatedOperator[0].label === i18n.IS_ONE_OF ||
-        updatedOperator[0].label === i18n.IS_NOT_ONE_OF);
+    const showComboBoxInput = useMemo(
+      () =>
+        updatedOperator.length > 0 &&
+        (updatedOperator[0].label === i18n.IS_ONE_OF ||
+          updatedOperator[0].label === i18n.IS_NOT_ONE_OF),
+      [updatedOperator]
+    );
 
-    const showValueInput =
-      type !== DataProviderType.template &&
-      updatedOperator.length > 0 &&
-      updatedOperator[0].label !== i18n.EXISTS &&
-      updatedOperator[0].label !== i18n.DOES_NOT_EXIST &&
-      !showComboBoxInput;
+    const showValueInput = useMemo(
+      () =>
+        type !== DataProviderType.template &&
+        updatedOperator.length > 0 &&
+        updatedOperator[0].label !== i18n.EXISTS &&
+        updatedOperator[0].label !== i18n.DOES_NOT_EXIST &&
+        !showComboBoxInput,
+      [showComboBoxInput, type, updatedOperator]
+    );
 
-    const disableSave = showComboBoxInput && Array.isArray(updatedValue) && !updatedValue.length;
+    const disableSave = useMemo(
+      () => showComboBoxInput && Array.isArray(updatedValue) && !updatedValue.length,
+      [showComboBoxInput, updatedValue]
+    );
 
     /** Focuses the Value input if it is visible, falling back to the Save button if it's not */
     const focusInput = () => {
