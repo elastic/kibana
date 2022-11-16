@@ -8,7 +8,7 @@
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObject } from '@kbn/core/server';
 
-import { StoredSLO } from '../types/models';
+import { StoredSLO } from '../domain/models';
 
 export const SO_SLO_TYPE = 'slo';
 

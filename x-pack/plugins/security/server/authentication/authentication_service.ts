@@ -63,6 +63,7 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'areAPIKeysEnabled'
     | 'create'
     | 'invalidate'
+    | 'validate'
     | 'grantAsInternalUser'
     | 'invalidateAsInternalUser'
   >;
@@ -81,6 +82,7 @@ export interface AuthenticationServiceStart {
     | 'areAPIKeysEnabled'
     | 'create'
     | 'invalidate'
+    | 'validate'
     | 'grantAsInternalUser'
     | 'invalidateAsInternalUser'
   >;
@@ -354,6 +356,7 @@ export class AuthenticationService {
         create: apiKeys.create.bind(apiKeys),
         grantAsInternalUser: apiKeys.grantAsInternalUser.bind(apiKeys),
         invalidate: apiKeys.invalidate.bind(apiKeys),
+        validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
       },
 

@@ -9,9 +9,14 @@ import {
   IngestPipeline,
   IngestSetProcessor,
   MlTrainedModelConfig,
+  MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { MlInferencePipeline, CreateMlInferencePipelineParameters } from '../types/pipelines';
+import {
+  MlInferencePipeline,
+  CreateMlInferencePipelineParameters,
+  TrainedModelState,
+} from '../types/pipelines';
 
 // Getting an error importing this from @kbn/ml-plugin/common/constants/data_frame_analytics'
 // So defining it locally for now with a test to make sure it matches.
@@ -118,7 +123,7 @@ export const getSetProcessorForInferenceType = (
       copy_from: `${prefixedDestinationField}.predicted_value`,
       description: `Copy the predicted_value to '${destinationField}' if the prediction_probability is greater than 0.5`,
       field: destinationField,
-      if: `${prefixedDestinationField}.prediction_probability > 0.5`,
+      if: `ctx.${prefixedDestinationField}.prediction_probability > 0.5`,
       value: undefined,
     };
   } else if (inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING) {
@@ -177,3 +182,22 @@ export const parseMlInferenceParametersFromPipeline = (
     source_field: sourceField,
   };
 };
+
+export const parseModelStateFromStats = (trainedModelStats?: Partial<MlTrainedModelStats>) => {
+  switch (trainedModelStats?.deployment_stats?.state) {
+    case 'started':
+      return TrainedModelState.Started;
+    case 'starting':
+      return TrainedModelState.Starting;
+    case 'stopping':
+      return TrainedModelState.Stopping;
+    // @ts-ignore: type is wrong, "failed" is a possible state
+    case 'failed':
+      return TrainedModelState.Failed;
+    default:
+      return TrainedModelState.NotDeployed;
+  }
+};
+
+export const parseModelStateReasonFromStats = (trainedModelStats?: Partial<MlTrainedModelStats>) =>
+  trainedModelStats?.deployment_stats?.reason;

@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { IngestSetProcessor, MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IngestSetProcessor,
+  MlTrainedModelConfig,
+  MlTrainedModelStats,
+} from '@elastic/elasticsearch/lib/api/types';
 import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-plugin/common/constants/trained_models';
 
-import { MlInferencePipeline } from '../types/pipelines';
+import { MlInferencePipeline, TrainedModelState } from '../types/pipelines';
 
 import {
   BUILT_IN_MODEL_TAG as LOCAL_BUILT_IN_MODEL_TAG,
@@ -18,6 +22,8 @@ import {
   getSetProcessorForInferenceType,
   SUPPORTED_PYTORCH_TASKS as LOCAL_SUPPORTED_PYTORCH_TASKS,
   parseMlInferenceParametersFromPipeline,
+  parseModelStateFromStats,
+  parseModelStateReasonFromStats,
 } from '.';
 
 const mockModel: MlTrainedModelConfig = {
@@ -78,7 +84,7 @@ describe('getSetProcessorForInferenceType lib function', () => {
       description:
         "Copy the predicted_value to 'dest' if the prediction_probability is greater than 0.5",
       field: destinationField,
-      if: 'ml.inference.dest.prediction_probability > 0.5',
+      if: 'ctx.ml.inference.dest.prediction_probability > 0.5',
       value: undefined,
     };
 
@@ -191,7 +197,7 @@ describe('generateMlInferencePipelineBody lib function', () => {
               description:
                 "Copy the predicted_value to 'my-destination-field' if the prediction_probability is greater than 0.5",
               field: 'my-destination-field',
-              if: 'ml.inference.my-destination-field.prediction_probability > 0.5',
+              if: 'ctx.ml.inference.my-destination-field.prediction_probability > 0.5',
             },
           }),
         ]),
@@ -239,5 +245,82 @@ describe('parseMlInferenceParametersFromPipeline', () => {
         ],
       })
     ).toBeNull();
+  });
+});
+
+describe('parseModelStateFromStats', () => {
+  it('returns not deployed for undefined stats', () => {
+    expect(parseModelStateFromStats()).toEqual(TrainedModelState.NotDeployed);
+  });
+  it('returns Started', () => {
+    expect(
+      parseModelStateFromStats({
+        deployment_stats: {
+          state: 'started',
+        },
+      } as unknown as MlTrainedModelStats)
+    ).toEqual(TrainedModelState.Started);
+  });
+  it('returns Starting', () => {
+    expect(
+      parseModelStateFromStats({
+        deployment_stats: {
+          state: 'starting',
+        },
+      } as unknown as MlTrainedModelStats)
+    ).toEqual(TrainedModelState.Starting);
+  });
+  it('returns Stopping', () => {
+    expect(
+      parseModelStateFromStats({
+        deployment_stats: {
+          state: 'stopping',
+        },
+      } as unknown as MlTrainedModelStats)
+    ).toEqual(TrainedModelState.Stopping);
+  });
+  it('returns Failed', () => {
+    expect(
+      parseModelStateFromStats({
+        deployment_stats: {
+          state: 'failed',
+        },
+      } as unknown as MlTrainedModelStats)
+    ).toEqual(TrainedModelState.Failed);
+  });
+  it('returns not deployed if an unknown state is received', () => {
+    expect(
+      parseModelStateFromStats({
+        deployment_stats: {
+          state: 'other thing',
+        },
+      } as unknown as MlTrainedModelStats)
+    ).toEqual(TrainedModelState.NotDeployed);
+  });
+});
+
+describe('parseModelStateReasonFromStats', () => {
+  it('returns reason from deployment_stats', () => {
+    const reason = 'This is the reason the model is in a failed state';
+    expect(
+      parseModelStateReasonFromStats({
+        deployment_stats: {
+          reason,
+          state: 'failed',
+        },
+      } as unknown as MlTrainedModelStats)
+    ).toEqual(reason);
+  });
+  it('returns undefined if reason not found from deployment_stats', () => {
+    expect(
+      parseModelStateReasonFromStats({
+        deployment_stats: {
+          state: 'failed',
+        },
+      } as unknown as MlTrainedModelStats)
+    ).toBeUndefined();
+  });
+  it('returns undefined stats is undefined', () => {
+    expect(parseModelStateReasonFromStats(undefined)).toBeUndefined();
   });
 });
