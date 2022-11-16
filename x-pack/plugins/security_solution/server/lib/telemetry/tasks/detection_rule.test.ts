@@ -21,6 +21,11 @@ describe('security detection rule task test', () => {
       last: undefined,
       current: new Date().toISOString(),
     };
+    const testTaskState = {
+      lastExecutionTimestamp: new Date().toISOString(),
+      runs: 0,
+      hits: 0,
+    };
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const telemetryDetectionRuleListsTaskConfig = createTelemetryDetectionRuleListsTaskConfig(1);
@@ -30,7 +35,8 @@ describe('security detection rule task test', () => {
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
-      testTaskExecutionPeriod
+      testTaskExecutionPeriod,
+      testTaskState
     );
 
     expect(mockTelemetryReceiver.fetchDetectionRules).toHaveBeenCalled();

@@ -12,7 +12,7 @@ import type { ESClusterInfo } from './types';
 
 export interface IArtifact {
   start(receiver: ITelemetryReceiver): Promise<void>;
-  getArtifact(name: string): Promise<unknown>;
+  getArtifact(name: string, etag: string): Promise<{ artifact?: unknown; etag: string }>;
 }
 
 export class Artifact implements IArtifact {
@@ -25,16 +25,28 @@ export class Artifact implements IArtifact {
   public async start(receiver: ITelemetryReceiver) {
     this.receiver = receiver;
     this.esClusterInfo = await this.receiver.fetchClusterInfo();
-    const version = this.esClusterInfo?.version?.number;
-    this.manifestUrl = `${this.CDN_URL}/downloads/kibana/manifest/artifacts-${version}.zip`;
+    if (this.esClusterInfo.version) {
+      const version = this.esClusterInfo.version.number.substring(
+        0,
+        this.esClusterInfo.version.number.indexOf('-')
+      );
+      this.manifestUrl = `${this.CDN_URL}/downloads/kibana/manifest/artifacts-${version}.zip`;
+    }
   }
 
-  public async getArtifact(name: string): Promise<unknown> {
+  public async getArtifact(name: string, etag: string) {
     if (this.manifestUrl) {
       const response = await axios.get(this.manifestUrl, {
         timeout: this.AXIOS_TIMEOUT_MS,
         responseType: 'arraybuffer',
+        headers: {
+          'If-None-Match': etag,
+        },
       });
+      if (response.status === 304) {
+        return { etag };
+      }
+      const responseEtag = response.headers.ETag;
       const zip = new AdmZip(response.data);
       const entries = zip.getEntries();
       const manifest = JSON.parse(entries[0].getData().toString());
@@ -42,12 +54,12 @@ export class Artifact implements IArtifact {
       if (relativeUrl) {
         const url = `${this.CDN_URL}${relativeUrl}`;
         const artifactResponse = await axios.get(url, { timeout: this.AXIOS_TIMEOUT_MS });
-        return artifactResponse.data;
+        return { artifact: artifactResponse.data, etag: responseEtag };
       } else {
         throw Error(`No artifact for name ${name}`);
       }
     } else {
-      throw Error('No manifest url');
+      throw Error(`No manifest url for version ${this.esClusterInfo?.version?.number}`);
     }
   }
 }

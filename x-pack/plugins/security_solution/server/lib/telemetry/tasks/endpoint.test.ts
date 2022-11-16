@@ -27,6 +27,11 @@ describe('endpoint telemetry task test', () => {
       last: new Date().toISOString(),
       current: new Date().toISOString(),
     };
+    const testTaskState = {
+      lastExecutionTimestamp: new Date().toISOString(),
+      runs: 0,
+      hits: 0,
+    };
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     mockTelemetryEventsSender.getTelemetryUsageCluster = jest
       .fn()
@@ -39,7 +44,8 @@ describe('endpoint telemetry task test', () => {
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
-      testTaskExecutionPeriod
+      testTaskExecutionPeriod,
+      testTaskState
     );
 
     expect(mockTelemetryReceiver.fetchFleetAgents).toHaveBeenCalled();

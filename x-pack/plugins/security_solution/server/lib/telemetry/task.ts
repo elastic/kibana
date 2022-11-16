@@ -31,8 +31,9 @@ export type SecurityTelemetryTaskRunner = (
   logger: Logger,
   receiver: ITelemetryReceiver,
   sender: ITelemetryEventsSender,
-  taskExecutionPeriod: TaskExecutionPeriod
-) => Promise<number>;
+  taskExecutionPeriod: TaskExecutionPeriod,
+  state: TaskState
+) => Promise<CustomTaskState>;
 
 export interface TaskExecutionPeriod {
   last?: string;
@@ -43,6 +44,12 @@ export type LastExecutionTimestampCalculator = (
   executeTo: string,
   lastExecutionTimestamp?: string
 ) => string;
+
+export interface CustomTaskState {
+  hits: number;
+  etag?: string;
+}
+export type TaskState = ConcreteTaskInstance['state'];
 
 export class SecurityTelemetryTask {
   private readonly config: SecurityTelemetryTaskConfig;
@@ -94,13 +101,13 @@ export class SecurityTelemetryTask {
                 current: taskExecutionTime,
               };
 
-              const hits = await this.runTask(taskInstance.id, executionPeriod);
+              const customState = await this.runTask(taskInstance.id, executionPeriod, state);
 
               return {
                 state: {
                   lastExecutionTimestamp: taskExecutionTime,
                   runs: (state.runs || 0) + 1,
-                  hits,
+                  ...customState,
                 },
               };
             },
@@ -130,26 +137,40 @@ export class SecurityTelemetryTask {
     }
   };
 
-  public runTask = async (taskId: string, executionPeriod: TaskExecutionPeriod) => {
+  public runTask = async (
+    taskId: string,
+    executionPeriod: TaskExecutionPeriod,
+    taskState: TaskState
+  ) => {
+    const state: CustomTaskState = {
+      hits: 0,
+    };
     tlog(this.logger, `[task ${taskId}]: attempting to run`);
     if (taskId !== this.getTaskId()) {
       tlog(this.logger, `[task ${taskId}]: outdated task`);
-      return 0;
+      return state;
     }
 
     const isOptedIn = await this.sender.isTelemetryOptedIn();
     if (!isOptedIn) {
       tlog(this.logger, `[task ${taskId}]: telemetry is not opted-in`);
-      return 0;
+      return state;
     }
 
     const isTelemetryServicesReachable = await this.sender.isTelemetryServicesReachable();
     if (!isTelemetryServicesReachable) {
       tlog(this.logger, `[task ${taskId}]: cannot reach telemetry services`);
-      return 0;
+      return state;
     }
 
     tlog(this.logger, `[task ${taskId}]: running task`);
-    return this.config.runTask(taskId, this.logger, this.receiver, this.sender, executionPeriod);
+    return this.config.runTask(
+      taskId,
+      this.logger,
+      this.receiver,
+      this.sender,
+      executionPeriod,
+      taskState
+    );
   };
 }

@@ -21,7 +21,7 @@ import type { ESClusterInfo, ESLicense } from '../types';
 import { batchTelemetryRecords, templateExceptionList, tlog, createTaskMetric } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { TaskExecutionPeriod } from '../task';
+import type { CustomTaskState, TaskExecutionPeriod, TaskState } from '../task';
 
 export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number) {
   return {
@@ -35,10 +35,14 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
-      taskExecutionPeriod: TaskExecutionPeriod
+      taskExecutionPeriod: TaskExecutionPeriod,
+      taskState: TaskState
     ) => {
       const startTime = Date.now();
       const taskName = 'Security Solution Lists Telemetry';
+      const state: CustomTaskState = {
+        hits: 0,
+      };
       try {
         let count = 0;
 
@@ -124,12 +128,13 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return count;
+        state.hits = count;
+        return state;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),
         ]);
-        return 0;
+        return state;
       }
     },
   };

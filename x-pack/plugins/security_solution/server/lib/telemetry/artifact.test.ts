@@ -16,33 +16,33 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 describe('telemetry artifact test', () => {
   test('start should retrieve cluster information', async () => {
     const mockTelemetryReceiver = createMockTelemetryReceiver();
-    const artifact = new Artifact();
-    await artifact.start(mockTelemetryReceiver);
+    const artifactService = new Artifact();
+    await artifactService.start(mockTelemetryReceiver);
     expect(mockTelemetryReceiver.fetchClusterInfo).toHaveBeenCalled();
   });
 
   test('getArtifact should throw an error if manifest url is null', async () => {
     const artifact = new Artifact();
-    await expect(async () => artifact.getArtifact('test')).rejects.toThrow('No manifest url');
+    await expect(async () => artifact.getArtifact('test', '')).rejects.toThrow('No manifest url');
   });
 
   test('getArtifact should throw an error if relative url is null', async () => {
     const mockTelemetryReceiver = createMockTelemetryReceiver();
-    const artifact = new Artifact();
-    await artifact.start(mockTelemetryReceiver);
+    const artifactService = new Artifact();
+    await artifactService.start(mockTelemetryReceiver);
     const axiosResponse = {
       data: 'x-pack/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
     };
     mockedAxios.get.mockImplementationOnce(() => Promise.resolve(axiosResponse));
-    await expect(async () => artifact.getArtifact('artifactThatDoesNotExist')).rejects.toThrow(
-      'No artifact for name artifactThatDoesNotExist'
-    );
+    await expect(async () =>
+      artifactService.getArtifact('artifactThatDoesNotExist', '')
+    ).rejects.toThrow('No artifact for name artifactThatDoesNotExist');
   });
 
   test('getArtifact should return respective artifact', async () => {
     const mockTelemetryReceiver = createMockTelemetryReceiver();
-    const artifact = new Artifact();
-    await artifact.start(mockTelemetryReceiver);
+    const artifactService = new Artifact();
+    await artifactService.start(mockTelemetryReceiver);
     const axiosResponse = {
       data: 'x-pack/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
     };
@@ -59,13 +59,14 @@ describe('telemetry artifact test', () => {
           },
         })
       );
-    const artifactObject: TelemetryConfiguration = (await artifact.getArtifact(
-      'telemetry-buffer-and-batch-sizes-v1'
-    )) as unknown as TelemetryConfiguration;
-    expect(artifactObject.telemetry_max_buffer_size).toEqual(100);
-    expect(artifactObject.max_security_list_telemetry_batch).toEqual(100);
-    expect(artifactObject.max_endpoint_telemetry_batch).toEqual(300);
-    expect(artifactObject.max_detection_rule_telemetry_batch).toEqual(1_000);
-    expect(artifactObject.max_detection_alerts_batch).toEqual(50);
+    const { artifact }: { artifact?: TelemetryConfiguration } = await artifactService.getArtifact(
+      'telemetry-buffer-and-batch-sizes-v1',
+      ''
+    );
+    expect(artifact?.telemetry_max_buffer_size).toEqual(100);
+    expect(artifact?.max_security_list_telemetry_batch).toEqual(100);
+    expect(artifact?.max_endpoint_telemetry_batch).toEqual(300);
+    expect(artifact?.max_detection_rule_telemetry_batch).toEqual(1_000);
+    expect(artifact?.max_detection_alerts_batch).toEqual(50);
   });
 });

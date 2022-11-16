@@ -15,7 +15,7 @@ import { batchTelemetryRecords, templateExceptionList, tlog, createTaskMetric } 
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
-import type { TaskExecutionPeriod } from '../task';
+import type { CustomTaskState, TaskExecutionPeriod, TaskState } from '../task';
 
 export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: number) {
   return {
@@ -29,10 +29,14 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
-      taskExecutionPeriod: TaskExecutionPeriod
+      taskExecutionPeriod: TaskExecutionPeriod,
+      taskState: TaskState
     ) => {
       const startTime = Date.now();
       const taskName = 'Security Solution Detection Rule Lists Telemetry';
+      const state: CustomTaskState = {
+        hits: 0,
+      };
       try {
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
@@ -57,7 +61,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, true, startTime),
           ]);
-          return 0;
+          return state;
         }
 
         const cacheArray = prebuiltRules.hits.hits.reduce((cache, searchHit) => {
@@ -105,12 +109,13 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return detectionRuleExceptions.length;
+        state.hits = detectionRuleExceptions.length;
+        return state;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),
         ]);
-        return 0;
+        return state;
       }
     },
   };

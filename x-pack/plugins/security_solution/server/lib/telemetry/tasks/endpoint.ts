@@ -18,7 +18,7 @@ import type {
   ESLicense,
 } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
-import type { TaskExecutionPeriod } from '../task';
+import type { CustomTaskState, TaskExecutionPeriod, TaskState } from '../task';
 import {
   addDefaultAdvancedPolicyConfigSettings,
   batchTelemetryRecords,
@@ -57,10 +57,14 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
-      taskExecutionPeriod: TaskExecutionPeriod
+      taskExecutionPeriod: TaskExecutionPeriod,
+      taskState: TaskState
     ) => {
       const startTime = Date.now();
       const taskName = 'Security Solution Telemetry Endpoint Metrics and Info task';
+      const state: CustomTaskState = {
+        hits: 0,
+      };
       try {
         if (!taskExecutionPeriod.last) {
           throw new Error('last execution timestamp is required');
@@ -97,7 +101,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, true, startTime),
           ]);
-          return 0;
+          return state;
         }
 
         const { body: endpointMetricsResponse } = endpointData.endpointMetrics as unknown as {
@@ -109,7 +113,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, true, startTime),
           ]);
-          return 0;
+          return state;
         }
 
         const telemetryUsageCounter = sender.getTelemetryUsageCluster();
@@ -145,7 +149,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, true, startTime),
           ]);
-          return 0;
+          return state;
         }
 
         const fleetAgents = agentsResponse.agents.reduce((cache, agent) => {
@@ -361,19 +365,20 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, true, startTime),
           ]);
-          return telemetryPayloads.length;
+          state.hits = telemetryPayloads.length;
+          return state;
         } catch (err) {
           logger.warn(`could not complete endpoint alert telemetry task due to ${err?.message}`);
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, false, startTime, err.message),
           ]);
-          return 0;
+          return state;
         }
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),
         ]);
-        return 0;
+        return state;
       }
     },
   };

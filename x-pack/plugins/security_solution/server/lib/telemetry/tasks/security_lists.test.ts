@@ -25,6 +25,11 @@ describe('security list telemetry task test', () => {
       last: undefined,
       current: new Date().toISOString(),
     };
+    const testTaskState = {
+      lastExecutionTimestamp: new Date().toISOString(),
+      runs: 0,
+      hits: 0,
+    };
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const telemetrySecurityListTaskConfig = createTelemetrySecurityListTaskConfig(1);
@@ -34,7 +39,8 @@ describe('security list telemetry task test', () => {
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
-      testTaskExecutionPeriod
+      testTaskExecutionPeriod,
+      testTaskState
     );
 
     expect(mockTelemetryReceiver.fetchTrustedApplications).toHaveBeenCalled();

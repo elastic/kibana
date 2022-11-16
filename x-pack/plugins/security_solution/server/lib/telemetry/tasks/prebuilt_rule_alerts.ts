@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ESClusterInfo, ESLicense, TelemetryEvent } from '../types';
-import type { TaskExecutionPeriod } from '../task';
+import type { CustomTaskState, TaskExecutionPeriod, TaskState } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS, TASK_METRICS_CHANNEL } from '../constants';
 import { batchTelemetryRecords, tlog, createTaskMetric } from '../helpers';
 import { copyAllowlistedFields, filterList } from '../filterlists';
@@ -26,10 +26,14 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
-      taskExecutionPeriod: TaskExecutionPeriod
+      taskExecutionPeriod: TaskExecutionPeriod,
+      taskState: TaskState
     ) => {
       const startTime = Date.now();
       const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
+      const state: CustomTaskState = {
+        hits: 0,
+      };
       try {
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
@@ -59,7 +63,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, true, startTime),
           ]);
-          return 0;
+          return state;
         }
 
         const processedAlerts = telemetryEvents.map(
@@ -84,13 +88,14 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return enrichedAlerts.length;
+        state.hits = enrichedAlerts.length;
+        return state;
       } catch (err) {
         logger.error('could not complete prebuilt alerts telemetry task');
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),
         ]);
-        return 0;
+        return state;
       }
     },
   };

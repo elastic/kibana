@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SafeEndpointEvent } from '../../../../common/endpoint/types';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { TaskExecutionPeriod } from '../task';
+import type { CustomTaskState, TaskExecutionPeriod, TaskState } from '../task';
 import type {
   ESClusterInfo,
   ESLicense,
@@ -33,10 +33,14 @@ export function createTelemetryTimelineTaskConfig() {
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
-      taskExecutionPeriod: TaskExecutionPeriod
+      taskExecutionPeriod: TaskExecutionPeriod,
+      taskState: TaskState
     ) => {
       const startTime = Date.now();
       const taskName = 'Security Solution Timeline telemetry';
+      const state: CustomTaskState = {
+        hits: 0,
+      };
       try {
         let counter = 0;
 
@@ -91,7 +95,7 @@ export function createTelemetryTimelineTaskConfig() {
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, true, startTime),
           ]);
-          return counter;
+          return state;
         }
 
         // Build process tree for each EP Alert recieved
@@ -181,12 +185,13 @@ export function createTelemetryTimelineTaskConfig() {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return counter;
+        state.hits = counter;
+        return state;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),
         ]);
-        return 0;
+        return state;
       }
     },
   };

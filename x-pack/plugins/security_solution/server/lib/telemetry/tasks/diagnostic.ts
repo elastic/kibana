@@ -10,7 +10,7 @@ import { tlog, getPreviousDiagTaskTimestamp, createTaskMetric } from '../helpers
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryEvent } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
-import type { TaskExecutionPeriod } from '../task';
+import type { CustomTaskState, TaskExecutionPeriod, TaskState } from '../task';
 import { TASK_METRICS_CHANNEL } from '../constants';
 
 export function createTelemetryDiagnosticsTaskConfig() {
@@ -26,10 +26,14 @@ export function createTelemetryDiagnosticsTaskConfig() {
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
-      taskExecutionPeriod: TaskExecutionPeriod
+      taskExecutionPeriod: TaskExecutionPeriod,
+      taskState: TaskState
     ) => {
       const startTime = Date.now();
       const taskName = 'Security Solution Telemetry Diagnostics task';
+      const state: CustomTaskState = {
+        hits: 0,
+      };
       try {
         if (!taskExecutionPeriod.last) {
           throw new Error('last execution timestamp is required');
@@ -46,7 +50,7 @@ export function createTelemetryDiagnosticsTaskConfig() {
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, true, startTime),
           ]);
-          return 0;
+          return state;
         }
         tlog(logger, `Received ${hits.length} diagnostic alerts`);
         const diagAlerts: TelemetryEvent[] = hits.flatMap((h) =>
@@ -56,12 +60,13 @@ export function createTelemetryDiagnosticsTaskConfig() {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return diagAlerts.length;
+        state.hits = diagAlerts.length;
+        return state;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),
         ]);
-        return 0;
+        return state;
       }
     },
   };

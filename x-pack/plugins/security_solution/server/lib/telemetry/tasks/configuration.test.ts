@@ -21,6 +21,11 @@ describe('telemetry configuration task test', () => {
       last: new Date().toISOString(),
       current: new Date().toISOString(),
     };
+    const testTaskState = {
+      lastExecutionTimestamp: new Date().toISOString(),
+      runs: 0,
+      hits: 0,
+    };
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const telemetryDiagnoticsTaskConfig = createTelemetryConfigurationTaskConfig();
@@ -30,7 +35,8 @@ describe('telemetry configuration task test', () => {
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
-      testTaskExecutionPeriod
+      testTaskExecutionPeriod,
+      testTaskState
     );
 
     // TODO: Add tests

@@ -10,7 +10,7 @@ import { TASK_METRICS_CHANNEL } from '../constants';
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryConfiguration } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
-import type { TaskExecutionPeriod } from '../task';
+import type { CustomTaskState, TaskExecutionPeriod, TaskState } from '../task';
 import { artifactService } from '../artifact';
 import { telemetryConfiguration } from '../configuration';
 import { createTaskMetric, tlog } from '../helpers';
@@ -27,35 +27,42 @@ export function createTelemetryConfigurationTaskConfig() {
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
-      taskExecutionPeriod: TaskExecutionPeriod
+      taskExecutionPeriod: TaskExecutionPeriod,
+      taskState: TaskState
     ) => {
       const startTime = Date.now();
       const taskName = 'Security Solution Telemetry Configuration Task';
+      const state: CustomTaskState = {
+        hits: 0,
+      };
       try {
         const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
-        const configArtifact = (await artifactService.getArtifact(
-          artifactName
-        )) as unknown as TelemetryConfiguration;
-        telemetryConfiguration.max_detection_alerts_batch =
-          configArtifact.max_detection_alerts_batch;
-        telemetryConfiguration.telemetry_max_buffer_size = configArtifact.telemetry_max_buffer_size;
+        const { artifact, etag }: { artifact?: TelemetryConfiguration; etag: string } =
+          await artifactService.getArtifact(artifactName, taskState.etag ?? '');
+        state.etag = etag;
+        if (!artifact) {
+          tlog(logger, 'Latest telemetry configuration artifact already applied...skipping');
+          return state;
+        }
+        telemetryConfiguration.max_detection_alerts_batch = artifact.max_detection_alerts_batch;
+        telemetryConfiguration.telemetry_max_buffer_size = artifact.telemetry_max_buffer_size;
         telemetryConfiguration.max_detection_rule_telemetry_batch =
-          configArtifact.max_detection_rule_telemetry_batch;
-        telemetryConfiguration.max_endpoint_telemetry_batch =
-          configArtifact.max_endpoint_telemetry_batch;
+          artifact.max_detection_rule_telemetry_batch;
+        telemetryConfiguration.max_endpoint_telemetry_batch = artifact.max_endpoint_telemetry_batch;
         telemetryConfiguration.max_security_list_telemetry_batch =
-          configArtifact.max_security_list_telemetry_batch;
+          artifact.max_security_list_telemetry_batch;
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return 0;
+        state.hits = 1;
+        return state;
       } catch (err) {
         tlog(logger, `Failed to set telemetry configuration due to ${err.message}`);
         telemetryConfiguration.resetAllToDefault();
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),
         ]);
-        return 0;
+        return state;
       }
     },
   };
