@@ -6,104 +6,68 @@
  * Side Public License, v 1.
  */
 
-import React, { HTMLAttributes } from 'react';
-import { type ImgHTMLAttributes, useState, useEffect } from 'react';
-import { css } from '@emotion/react';
+import React, { useMemo } from 'react';
+import { useState } from 'react';
+import { EuiImage, EuiImageProps } from '@elastic/eui';
 import type { FileImageMetadata } from '../../../common';
-import { useViewportObserver } from './use_viewport_observer';
-import { Img, type ImgProps, Blurhash } from './components';
-import { sizes } from './styles';
+import { getBlurhashSrc } from '../util';
 
-export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
-  src: string;
-  alt: string;
-  /**
-   * Image metadata
-   */
-  meta?: FileImageMetadata;
-
-  /**
-   * @default original
-   */
-  size?: ImgProps['size'];
-  /**
-   * Props to pass to the wrapper element
-   */
-  wrapperProps?: HTMLAttributes<HTMLDivElement>;
-  /**
-   * Emits when the image first becomes visible
-   */
-  onFirstVisible?: () => void;
-}
+export type Props = { meta?: FileImageMetadata } & EuiImageProps;
 
 /**
- * A viewport-aware component that displays an image. This component is a very
- * thin wrapper around the img tag.
+ * A wrapper around the <EuiImage/> that can renders blurhash by the file service while the image is loading
  *
  * @note Intended to be used with files like:
  *
  * ```ts
- * <Image src={file.getDownloadSrc(file)} ... />
+ * <Image src={file.getDownloadSrc(file)} meta={file.meta} ... />
  * ```
  */
-export const Image = React.forwardRef<HTMLImageElement, Props>(
-  (
-    { src, alt, onFirstVisible, onLoad, onError, meta, wrapperProps, size = 'original', ...rest },
-    ref
-  ) => {
-    const [isLoaded, setIsLoaded] = useState<boolean>(false);
-    const [blurDelayExpired, setBlurDelayExpired] = useState(false);
-    const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
+export const Image = ({ src, url, alt, onLoad, onError, meta, ...rest }: Props) => {
+  const [isBlurHashLoaded, setIsBlurHashLoaded] = useState<boolean>(false);
 
-    useEffect(() => {
-      const id = window.setTimeout(() => {
-        setBlurDelayExpired(true);
-      }, 200);
-      return () => {
-        window.clearTimeout(id);
-      };
-    }, []);
+  const imageSrc = (src || url)!; // <EuiImage/> allows to use either `src` or `url`
 
-    const knownSize = size ? sizes[size] : undefined;
+  const { blurhash, width, height } = meta ?? {};
+  const blurhashSrc = useMemo(
+    () =>
+      blurhash && width && height
+        ? getBlurhashSrc({
+            height,
+            width,
+            hash: blurhash,
+          })
+        : null,
+    [blurhash, width, height]
+  );
 
-    return (
-      <div
-        css={[
-          css`
-            position: relative;
-            display: inline-block;
-          `,
-          knownSize,
-        ]}
-        {...wrapperProps}
-      >
-        {blurDelayExpired && meta?.blurhash && (
-          <Blurhash
-            visible={!isLoaded}
-            hash={meta.blurhash}
-            isContainerWidth={size !== 'original' && size !== undefined}
-            width={meta.width}
-            height={meta.height}
-          />
-        )}
-        <Img
-          observerRef={observerRef}
-          ref={ref}
-          size={size}
-          src={isVisible ? src : undefined}
-          alt={alt}
-          hidden={!isLoaded}
-          onLoad={(ev) => {
-            setIsLoaded(true);
-            onLoad?.(ev);
-          }}
-          onError={(ev) => {
-            setIsLoaded(true);
-            onError?.(ev);
-          }}
-          {...rest}
-        />
-      </div>
-    );
-  }
-);
+  const currentSrc = isBlurHashLoaded || !blurhashSrc ? imageSrc : blurhashSrc;
+
+  return (
+    <EuiImage
+      alt=""
+      {...rest}
+      src={currentSrc}
+      width={meta?.width}
+      height={meta?.height}
+      onLoad={(ev) => {
+        if (currentSrc === imageSrc) {
+          onLoad?.(ev);
+        } else {
+          // @ts-ignore
+          if (window?.__image_stories_simulate_slow_load) {
+            // hack for storybook blurhash testing
+            setTimeout(() => {
+              setIsBlurHashLoaded(true);
+            }, 3000);
+          } else {
+            setIsBlurHashLoaded(true);
+          }
+        }
+      }}
+      onError={(ev) => {
+        onError?.(ev);
+      }}
+    />
+  );
+};

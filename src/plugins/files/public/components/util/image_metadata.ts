@@ -14,8 +14,8 @@ export function isImage(file: { type?: string }): boolean {
 }
 
 export const boxDimensions = {
-  width: 300,
-  height: 300,
+  width: 120,
+  height: 120,
 };
 
 /**
@@ -78,3 +78,23 @@ export async function getImageMetadata(file: File | Blob): Promise<undefined | F
 }
 
 export type ImageMetadataFactory = typeof getImageMetadata;
+
+export function getBlurhashSrc({
+  width,
+  height,
+  hash,
+}: {
+  width: number;
+  height: number;
+  hash: string;
+}) {
+  const canvas = document.createElement('canvas');
+  const { width: blurWidth, height: blurHeight } = fitToBox(width, height);
+  canvas.width = blurWidth;
+  canvas.height = blurHeight;
+  const ctx = canvas.getContext('2d')!;
+  const imageData = ctx.createImageData(blurWidth, blurHeight);
+  imageData.data.set(bh.decode(hash, blurWidth, blurHeight));
+  ctx.putImageData(imageData, 0, 0);
+  return canvas.toDataURL();
+}
