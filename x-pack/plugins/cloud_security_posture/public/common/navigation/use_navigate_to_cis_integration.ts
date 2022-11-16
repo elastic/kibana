@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { pagePathGetters, pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public';
 import { useCisKubernetesIntegration } from '../api/use_cis_kubernetes_integration';
 import { useKibana } from '../hooks/use_kibana';
@@ -16,7 +17,8 @@ export const useCISIntegrationLink = (): string | undefined => {
   if (!cisIntegration.isSuccess) return;
 
   const path = pagePathGetters
-    .integration_details_overview({
+    .add_integration_to_policy({
+      integration: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
       pkgkey: pkgKeyFromPackageInfo({
         name: cisIntegration.data.item.name,
         version: cisIntegration.data.item.version,
