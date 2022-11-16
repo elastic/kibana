@@ -18,7 +18,7 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {

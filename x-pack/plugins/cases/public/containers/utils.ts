@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { isObject, transform, snakeCase } from 'lodash';
+import { isObject, transform, snakeCase, isEmpty } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type {
   CaseResponse,
   CasesResponse,
@@ -20,6 +21,7 @@ import type {
   CasePatchRequest,
   CaseResolveResponse,
   SingleCaseMetricsResponse,
+  User,
 } from '../../common/api';
 import {
   CaseResponseRt,
@@ -32,7 +34,7 @@ import {
   CaseResolveResponseRt,
   SingleCaseMetricsResponseRt,
 } from '../../common/api';
-import type { Case, UpdateByKey } from './types';
+import type { Case, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
@@ -130,4 +132,32 @@ export const createUpdateSuccessToaster = (
   }
 
   return toast;
+};
+
+export const constructAssigneesFilter = (
+  assignees: FilterOptions['assignees']
+): { assignees?: string | string[] } =>
+  assignees === null || assignees.length > 0
+    ? {
+        assignees:
+          assignees?.map((assignee) =>
+            assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
+          ) ?? NO_ASSIGNEES_FILTERING_KEYWORD,
+      }
+    : {};
+
+export const constructReportersFilter = (reporters: User[]) => {
+  return reporters.length > 0
+    ? {
+        reporters: reporters
+          .map((reporter) => {
+            if (reporter.profile_uid != null) {
+              return reporter.profile_uid;
+            }
+
+            return reporter.username ?? '';
+          })
+          .filter((reporterID) => !isEmpty(reporterID)),
+      }
+    : {};
 };

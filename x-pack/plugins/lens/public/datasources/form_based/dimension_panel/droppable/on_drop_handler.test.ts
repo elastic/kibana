@@ -88,7 +88,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       target: mockedDndOperations.notFiltering,
       state,
       setState,
-      dimensionGroups: [],
+      targetLayerDimensionGroups: [],
       indexPatterns: mockDataViews(),
     };
 
@@ -285,7 +285,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       onDrop({
         ...defaultProps,
         source: mockedDraggedField,
-        dimensionGroups,
+        targetLayerDimensionGroups: dimensionGroups,
         dropType: 'field_add',
         target: {
           ...defaultProps.target,
@@ -768,8 +768,9 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           ...state.layers,
           first: {
             ...state.layers.first,
-            columnOrder: ['col2'],
+            columnOrder: ['col1', 'col2'],
             columns: {
+              col1: state.layers.first.columns.col1,
               col2: state.layers.first.columns.col1,
             },
           },
@@ -803,10 +804,10 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           ...testState.layers,
           first: {
             ...testState.layers.first,
-            incompleteColumns: {},
-            columnOrder: ['col1', 'col3'],
+            columnOrder: ['col1', 'col2', 'col3'],
             columns: {
               col1: testState.layers.first.columns.col2,
+              col2: testState.layers.first.columns.col2,
               col3: testState.layers.first.columns.col3,
             },
           },
@@ -879,7 +880,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           },
           source: mockedDndOperations.bucket,
           state: testState,
-          dimensionGroups,
+          targetLayerDimensionGroups: dimensionGroups,
           dropType: 'move_compatible',
         });
 
@@ -890,11 +891,11 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              incompleteColumns: {},
-              columnOrder: ['newCol', 'col1', 'col3', 'col4'],
+              columnOrder: ['newCol', 'col1', 'col2', 'col3', 'col4'],
               columns: {
                 newCol: testState.layers.first.columns.col2,
                 col1: testState.layers.first.columns.col1,
+                col2: testState.layers.first.columns.col2,
                 col3: testState.layers.first.columns.col3,
                 col4: testState.layers.first.columns.col4,
               },
@@ -918,7 +919,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           },
           source: mockedDndOperations.bucket,
           state: testState,
-          dimensionGroups,
+          targetLayerDimensionGroups: dimensionGroups,
           dropType: 'duplicate_compatible',
         });
 
@@ -957,7 +958,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           },
           source: mockedDndOperations.bucket2,
           state: testState,
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -972,11 +973,11 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              incompleteColumns: {},
-              columnOrder: ['col1', 'col2', 'col4'],
+              columnOrder: ['col1', 'col2', 'col3', 'col4'],
               columns: {
                 col1: testState.layers.first.columns.col3,
                 col2: testState.layers.first.columns.col2,
+                col3: testState.layers.first.columns.col3,
                 col4: testState.layers.first.columns.col4,
               },
             },
@@ -1028,7 +1029,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
               },
             },
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1043,11 +1044,11 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              incompleteColumns: {},
-              columnOrder: ['col1', 'col2', 'col4', 'col5', 'col6'],
+              columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
               columns: {
                 col1: testState.layers.first.columns.col3,
                 col2: testState.layers.first.columns.col2,
+                col3: testState.layers.first.columns.col3,
                 col4: testState.layers.first.columns.col4,
                 col5: expect.objectContaining({
                   dataType: 'number',
@@ -1085,7 +1086,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             columnId: 'col1',
             groupId: 'a',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1128,7 +1129,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             columnId: 'newCol',
             groupId: 'b',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1142,9 +1143,9 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              incompleteColumns: {},
-              columnOrder: ['col2', 'col3', 'newCol', 'col4'],
+              columnOrder: ['col1', 'col2', 'col3', 'newCol', 'col4'],
               columns: {
+                col1: testState.layers.first.columns.col1,
                 newCol: testState.layers.first.columns.col1,
                 col2: testState.layers.first.columns.col2,
                 col3: testState.layers.first.columns.col3,
@@ -1171,7 +1172,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           },
           source: mockedDndOperations.metric,
           state: testState,
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1214,7 +1215,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             groupId: 'a',
             filterOperations: (op: OperationMetadata) => op.dataType === 'number',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             // a and b are ordered in reverse visually, but nesting order keeps them in place for column order
             { ...dimensionGroups[1], nestingOrder: 1 },
             { ...dimensionGroups[0], nestingOrder: 0 },
@@ -1264,7 +1265,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             columnId: 'newCol',
             groupId: 'a',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1278,7 +1279,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              columnOrder: ['col1', 'newCol', 'col2', 'col3'],
+              columnOrder: ['col1', 'newCol', 'col2', 'col3', 'col4'],
               columns: {
                 col1: testState.layers.first.columns.col1,
                 newCol: expect.objectContaining({
@@ -1287,6 +1288,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                 }),
                 col2: testState.layers.first.columns.col2,
                 col3: testState.layers.first.columns.col3,
+                col4: testState.layers.first.columns.col4,
               },
               incompleteColumns: {},
             },
@@ -1311,7 +1313,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             columnId: 'newCol',
             groupId: 'a',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1359,7 +1361,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             columnId: 'col2',
             groupId: 'b',
           },
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1373,7 +1375,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...testState.layers,
             first: {
               ...testState.layers.first,
-              columnOrder: ['col1', 'col2', 'col3'],
+              columnOrder: ['col1', 'col2', 'col3', 'col4'],
               columns: {
                 col1: testState.layers.first.columns.col1,
                 col2: {
@@ -1392,6 +1394,13 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   },
                 },
                 col3: testState.layers.first.columns.col3,
+                col4: {
+                  dataType: 'number',
+                  isBucketed: false,
+                  label: 'Median of bytes',
+                  operationType: 'median',
+                  sourceField: 'bytes',
+                },
               },
               incompleteColumns: {},
             },
@@ -1416,7 +1425,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           source: mockedDndOperations.metricC,
           dropType: 'swap_compatible',
           state: testState,
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1459,7 +1468,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           dropType: 'swap_incompatible',
           source: mockedDndOperations.metricC,
           state: testState,
-          dimensionGroups: [
+          targetLayerDimensionGroups: [
             { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
             { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
             { ...dimensionGroups[2] },
@@ -1575,7 +1584,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
               layerId: 'second',
               indexPatternId: 'indexPattern1',
             },
-            dimensionGroups: defaultDimensionGroups,
+            targetLayerDimensionGroups: defaultDimensionGroups,
             dropType: 'move_compatible',
           };
           jest.clearAllMocks();
@@ -1592,10 +1601,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'newCol', 'col5'],
                 columns: {
@@ -1677,10 +1682,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'col5'],
                 columns: {
@@ -1781,10 +1782,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'col5'],
                 columns: {
@@ -1826,10 +1823,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['col2', 'col3', 'col4', 'col5', 'newCol'],
                 columns: {
@@ -1993,9 +1986,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           expect(props.setState).toBeCalledTimes(1);
           expect(props.setState).toHaveBeenCalledWith({
             ...props.state,
-            layers: {
-              ...props.state.layers,
-              first: { ...mockedLayers.emptyLayer(), incompleteColumns: {} },
+            layers: expect.objectContaining({
               second: {
                 ...props.state.layers.second,
                 incompleteColumns: {},
@@ -2021,7 +2012,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   },
                 },
               },
-            },
+            }),
           });
         });
         it('combine_incompatible: allows dropping to combine to multiterms', () => {
@@ -2058,9 +2049,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           expect(props.setState).toBeCalledTimes(1);
           expect(props.setState).toHaveBeenCalledWith({
             ...props.state,
-            layers: {
-              ...props.state.layers,
-              first: { ...mockedLayers.emptyLayer(), incompleteColumns: {} },
+            layers: expect.objectContaining({
               second: {
                 ...props.state.layers.second,
                 incompleteColumns: {},
@@ -2086,7 +2075,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   },
                 },
               },
-            },
+            }),
           });
         });
       });
@@ -2094,7 +2083,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         let props: DatasourceDimensionDropHandlerProps<FormBasedPrivateState>;
         beforeEach(() => {
           props = {
-            dimensionGroups: defaultDimensionGroups,
+            targetLayerDimensionGroups: defaultDimensionGroups,
             setState: jest.fn(),
             dropType: 'move_compatible',
 
@@ -2181,10 +2170,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['second', 'secondX0', 'newColumnX0', 'newColumn'],
                 columns: {
@@ -2240,10 +2225,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...props.state,
             layers: {
               ...props.state.layers,
-              first: {
-                ...mockedLayers.emptyLayer(),
-                incompleteColumns: {},
-              },
               second: {
                 columnOrder: ['second', 'secondX0'],
                 columns: {

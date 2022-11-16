@@ -6,8 +6,11 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import type {
+  FieldConfig,
+  ValidationConfig,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConnectorTypes } from '../../common/api';
-import type { FieldConfig, ValidationConfig } from '../common/shared_imports';
 import type { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import type { CaseActionConnector } from './types';

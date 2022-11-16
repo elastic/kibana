@@ -89,3 +89,19 @@ export async function generateAgent(
     refresh: 'wait_for',
   });
 }
+
+export function setPrereleaseSetting(supertest: any) {
+  before(async () => {
+    await supertest
+      .put('/api/fleet/settings')
+      .set('kbn-xsrf', 'xxxx')
+      .send({ prerelease_integrations_enabled: true });
+  });
+
+  after(async () => {
+    await supertest
+      .put('/api/fleet/settings')
+      .set('kbn-xsrf', 'xxxx')
+      .send({ prerelease_integrations_enabled: false });
+  });
+}

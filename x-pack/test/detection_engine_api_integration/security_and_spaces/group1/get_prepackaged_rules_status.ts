@@ -7,10 +7,12 @@
 
 import expect from '@kbn/expect';
 
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  DETECTION_ENGINE_PREPACKAGED_URL,
-  DETECTION_ENGINE_RULES_URL,
-} from '@kbn/security-solution-plugin/common/constants';
+  PREBUILT_RULES_STATUS_URL,
+  PREBUILT_RULES_URL,
+} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -40,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return expected JSON keys of the pre-packaged rules and pre-packaged timelines status', async () => {
         const { body } = await supertest
-          .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+          .get(PREBUILT_RULES_STATUS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -58,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return that rules_not_installed are greater than zero', async () => {
         const { body } = await supertest
-          .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+          .get(PREBUILT_RULES_STATUS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -67,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return that timelines_not_installed are greater than zero', async () => {
         const { body } = await supertest
-          .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+          .get(PREBUILT_RULES_STATUS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -76,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return that rules_custom_installed, rules_installed, and rules_not_updated are zero', async () => {
         const { body } = await supertest
-          .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+          .get(PREBUILT_RULES_STATUS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -87,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return that timelines_installed, and timelines_not_updated are zero', async () => {
         const { body } = await supertest
-          .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+          .get(PREBUILT_RULES_STATUS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -103,7 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const { body } = await supertest
-          .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+          .get(PREBUILT_RULES_STATUS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -115,14 +117,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should show rules and timelines are installed when adding pre-packaged rules', async () => {
-        await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
+        await supertest.put(PREBUILT_RULES_URL).set('kbn-xsrf', 'true').send().expect(200);
 
         const { body } = await supertest
-          .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+          .get(PREBUILT_RULES_STATUS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);

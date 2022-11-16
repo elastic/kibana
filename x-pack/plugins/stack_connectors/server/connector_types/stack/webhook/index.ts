@@ -6,12 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { curry, isString } from 'lodash';
+import { isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -84,7 +83,7 @@ const ParamsSchema = schema.object({
 
 export const ConnectorTypeId = '.webhook';
 // connector type definition
-export function getConnectorType({ logger }: { logger: Logger }): WebhookConnectorType {
+export function getConnectorType(): WebhookConnectorType {
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
@@ -109,7 +108,7 @@ export function getConnectorType({ logger }: { logger: Logger }): WebhookConnect
       },
     },
     renderParameterTemplates,
-    executor: curry(executor)({ logger }),
+    executor,
   };
 }
 
@@ -158,13 +157,11 @@ function validateConnectorTypeConfig(
 
 // action executor
 export async function executor(
-  { logger }: { logger: Logger },
   execOptions: WebhookConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const actionId = execOptions.actionId;
-  const { method, url, headers = {}, hasAuth } = execOptions.config;
-  const { body: data } = execOptions.params;
-  const configurationUtilities = execOptions.configurationUtilities;
+  const { actionId, config, params, configurationUtilities, logger } = execOptions;
+  const { method, url, headers = {}, hasAuth } = config;
+  const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
   const basicAuth =
@@ -186,6 +183,10 @@ export async function executor(
       configurationUtilities,
     })
   );
+
+  if (result == null) {
+    return errorResultUnexpectedNullResponse(actionId);
+  }
 
   if (isOk(result)) {
     const {
@@ -280,6 +281,20 @@ function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResu
     status: 'error',
     message: errMessage,
     actionId,
+  };
+}
+
+function errorResultUnexpectedNullResponse(actionId: string): ConnectorTypeExecutorResult<void> {
+  const message = i18n.translate(
+    'xpack.stackConnectors.webhook.unexpectedNullResponseErrorMessage',
+    {
+      defaultMessage: 'unexpected null response from webhook',
+    }
+  );
+  return {
+    status: 'error',
+    actionId,
+    message,
   };
 }
 

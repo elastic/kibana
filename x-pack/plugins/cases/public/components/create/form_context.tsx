@@ -6,14 +6,15 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { FormProps } from './schema';
 import { schema } from './schema';
-import { Form, useForm } from '../../common/shared_imports';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
 import type { Case } from '../../containers/types';
+import type { CasePostRequest } from '../../../common/api';
 import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
@@ -44,6 +45,7 @@ interface Props {
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachmentsWithoutOwner;
+  initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -51,6 +53,7 @@ export const FormContext: React.FC<Props> = ({
   children,
   onSuccess,
   attachments,
+  initialValue,
 }) => {
   const { data: connectors = [], isLoading: isLoadingConnectors } = useGetConnectors();
   const { owner, appId } = useCasesContext();
@@ -128,7 +131,7 @@ export const FormContext: React.FC<Props> = ({
   );
 
   const { form } = useForm<FormProps>({
-    defaultValue: initialCaseValue,
+    defaultValue: { ...initialCaseValue, ...initialValue },
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitCase,

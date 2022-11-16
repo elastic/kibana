@@ -34,5 +34,6 @@
   "namespace": "testnamespace",
   "origin": "ui",
   "form_monitor_type": "tcp",
-  "id": ""
+  "id": "",
+  "hash": ""
 }

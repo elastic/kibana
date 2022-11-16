@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CaseConnector } from '../../../common/api';
-import { IndexRefresh } from '../../services/types';
+import type { CaseConnector } from '../../../common/api';
+import type { IndexRefresh } from '../../services/types';
 
 export interface MappingsArgs {
   connector: CaseConnector;

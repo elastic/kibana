@@ -40,7 +40,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
           output: undefined,
         },
       },
-      overrides
+      overrides as EndpointAction
     );
   }
 

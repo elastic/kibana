@@ -30,8 +30,9 @@ import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
-import { NoPermissions } from '../components/no_permissons';
 import { ResponseActionsContainer } from './response_actions';
+import { useCanSeeHostIsolationExceptionsMenu } from './host_isolation_exceptions/view/hooks';
+import { PrivilegedRoute } from '../components/privileged_route';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -76,43 +77,66 @@ const ResponseActionsTelemetry = () => (
 );
 
 export const ManagementContainer = memo(() => {
-  const { loading, canAccessEndpointManagement, canReadActionsLogManagement } =
-    useUserPrivileges().endpointPrivileges;
+  const {
+    loading,
+    canReadPolicyManagement,
+    canReadBlocklist,
+    canReadTrustedApplications,
+    canReadEventFilters,
+    canReadActionsLogManagement,
+    canReadEndpointList,
+  } = useUserPrivileges().endpointPrivileges;
+
+  const canSeeHostIsolationExceptionsPage = useCanSeeHostIsolationExceptionsMenu();
 
   // Lets wait until we can verify permissions
   if (loading) {
     return <EuiLoadingSpinner />;
   }
 
-  if (!canAccessEndpointManagement) {
-    return (
-      <>
-        <Route path="*" component={NoPermissions} />
-        <SpyRoute pageName={SecurityPageName.administration} />
-      </>
-    );
-  }
-
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFilterTelemetry} />
-      <Route
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
+        component={EndpointTelemetry}
+        hasPrivilege={canReadEndpointList}
+      />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_POLICIES_PATH}
+        component={PolicyTelemetry}
+        hasPrivilege={canReadPolicyManagement}
+      />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
+        component={TrustedAppTelemetry}
+        hasPrivilege={canReadTrustedApplications}
+      />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}
+        component={EventFilterTelemetry}
+        hasPrivilege={canReadEventFilters}
+      />
+      <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
+        hasPrivilege={canSeeHostIsolationExceptionsPage}
       />
-      <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} component={BlocklistContainer} />
-      {canReadActionsLogManagement && (
-        <Route
-          path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
-          component={ResponseActionsTelemetry}
-        />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
+        component={BlocklistContainer}
+        hasPrivilege={canReadBlocklist}
+      />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
+        component={ResponseActionsTelemetry}
+        hasPrivilege={canReadActionsLogManagement}
+      />
+
+      {canReadEndpointList && (
+        <Route path={MANAGEMENT_PATH} exact>
+          <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
+        </Route>
       )}
-      <Route path={MANAGEMENT_PATH} exact>
-        <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
-      </Route>
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );

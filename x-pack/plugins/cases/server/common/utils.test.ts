@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import {
+import type {
   CaseConnector,
   CaseResponse,
-  CaseSeverity,
   CommentAttributes,
   CommentRequest,
   CommentRequestUserType,
-  CommentType,
-  ConnectorTypes,
 } from '../../common/api';
-import { mockCaseComments, mockCases } from '../routes/api/__fixtures__/mock_saved_objects';
+import { CaseSeverity, CommentType, ConnectorTypes } from '../../common/api';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -38,6 +35,7 @@ import {
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
+import { mockCases, mockCaseComments } from '../mocks';
 
 interface CommentReference {
   ids: string[];
@@ -1215,15 +1213,21 @@ describe('common utils', () => {
     const commentId = 'my-comment-id';
 
     it('returns the case view path correctly', () => {
-      expect(getCaseViewPath({ publicBaseUrl, caseId, owner: SECURITY_SOLUTION_OWNER })).toBe(
-        'https://example.com/app/security/cases/my-case-id'
-      );
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id');
     });
 
     it('removes the ending slash from the publicBaseUrl correctly', () => {
       expect(
         getCaseViewPath({
           publicBaseUrl: 'https://example.com/',
+          spaceId: 'default',
           caseId,
           owner: SECURITY_SOLUTION_OWNER,
         })
@@ -1232,19 +1236,30 @@ describe('common utils', () => {
 
     it('remove the extra trailing slashes from case view path correctly', () => {
       expect(
-        getCaseViewPath({ publicBaseUrl, caseId: '/my-case-id', owner: SECURITY_SOLUTION_OWNER })
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId: '/my-case-id',
+          owner: SECURITY_SOLUTION_OWNER,
+        })
       ).toBe('https://example.com/app/security/cases/my-case-id');
     });
 
     it('returns the case view path correctly with invalid owner', () => {
-      expect(getCaseViewPath({ publicBaseUrl, caseId, owner: 'invalid' })).toBe(
+      expect(getCaseViewPath({ publicBaseUrl, spaceId: 'default', caseId, owner: 'invalid' })).toBe(
         'https://example.com/app/management/insightsAndAlerting/cases/my-case-id'
       );
     });
 
     it('returns the case comment path correctly', () => {
       expect(
-        getCaseViewPath({ publicBaseUrl, caseId, owner: SECURITY_SOLUTION_OWNER, commentId })
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+          commentId,
+        })
       ).toBe('https://example.com/app/security/cases/my-case-id/my-comment-id');
     });
 
@@ -1252,6 +1267,7 @@ describe('common utils', () => {
       expect(
         getCaseViewPath({
           publicBaseUrl,
+          spaceId: 'default',
           caseId: '/my-case-id',
           owner: SECURITY_SOLUTION_OWNER,
           commentId: '/my-comment-id',
@@ -1263,6 +1279,7 @@ describe('common utils', () => {
       expect(
         getCaseViewPath({
           publicBaseUrl,
+          spaceId: 'default',
           caseId,
           owner: SECURITY_SOLUTION_OWNER,
           tabId: CASE_VIEW_PAGE_TABS.ALERTS,
@@ -1274,11 +1291,23 @@ describe('common utils', () => {
       expect(
         getCaseViewPath({
           publicBaseUrl,
+          spaceId: 'default',
           caseId: '/my-case-id',
           owner: SECURITY_SOLUTION_OWNER,
           tabId: CASE_VIEW_PAGE_TABS.ALERTS,
         })
       ).toBe('https://example.com/app/security/cases/my-case-id/?tabId=alerts');
+    });
+
+    it('adds the space correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'test-space',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).toBe('https://example.com/s/test-space/app/security/cases/my-case-id');
     });
   });
 });

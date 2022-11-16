@@ -9,13 +9,12 @@ import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { ISearchStart, QueryStart } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates';
+import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../../../../common/constants';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { getIndicatorQueryParams, search } from '../utils';
+import { search } from '../utils/search';
+import { getIndicatorQueryParams } from '../utils/get_indicator_query_params';
 
 const TIMESTAMP_FIELD = RawIndicatorFieldId.TimeStamp;
-
-export const AGGREGATION_NAME = 'barchartAggregation';
 
 export interface AggregationValue {
   doc_count: number;
@@ -33,7 +32,7 @@ export interface Aggregation {
 
 export interface RawAggregatedIndicatorsResponse {
   aggregations: {
-    [AGGREGATION_NAME]: {
+    [BARCHART_AGGREGATION_NAME]: {
       buckets: Aggregation[];
     };
   };
@@ -90,45 +89,33 @@ export const createFetchAggregatedIndicators =
 
     const dateFrom: number = (dateRange.min as moment.Moment).toDate().getTime();
     const dateTo: number = (dateRange.max as moment.Moment).toDate().getTime();
-    const interval = calculateBarchartColumnTimeInterval(dateFrom, dateTo);
 
     const sharedParams = getIndicatorQueryParams({ timeRange, filters, filterQuery });
 
     const searchRequestBody = {
-      aggregations: {
-        [AGGREGATION_NAME]: {
-          terms: {
-            field,
-          },
-          aggs: {
-            events: {
-              date_histogram: {
-                field: TIMESTAMP_FIELD,
-                fixed_interval: interval,
-                min_doc_count: 0,
-                extended_bounds: {
-                  min: dateFrom,
-                  max: dateTo,
-                },
-              },
-            },
-          },
-        },
-      },
       fields: [TIMESTAMP_FIELD, field],
       size: 0,
       ...sharedParams,
     };
 
     const {
-      aggregations: { [AGGREGATION_NAME]: aggregation },
-    } = await search<RawAggregatedIndicatorsResponse>(
+      aggregations: { [BARCHART_AGGREGATION_NAME]: aggregation },
+    } = await search<
+      RawAggregatedIndicatorsResponse,
+      { dateRange: { from: number; to: number }; field: string }
+    >(
       searchService,
       {
         params: {
           index: selectedPatterns,
           body: searchRequestBody,
         },
+        factoryQueryType: FactoryQueryType.Barchart,
+        dateRange: {
+          from: dateFrom,
+          to: dateTo,
+        },
+        field,
       },
       { signal, inspectorAdapter, requestName: 'Indicators barchart' }
     );

@@ -7,7 +7,6 @@
 
 import { curry } from 'lodash';
 
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -47,10 +46,6 @@ import { createServiceWrapper } from '../../lib/servicenow/create_service_wrappe
 
 export { ServiceNowITOMConnectorTypeId };
 
-interface GetConnectorTypeParams {
-  logger: Logger;
-}
-
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
   T extends Record<string, unknown> = ExecutorParamsITOM
@@ -62,10 +57,10 @@ export type ServiceNowConnectorTypeExecutorOptions<
 > = ConnectorTypeExecutorOptions<C, ServiceNowSecretConfigurationType, T>;
 
 // connector type definition
-export function getServiceNowITOMConnectorType(
-  params: GetConnectorTypeParams
-): ServiceNowConnectorType<ServiceNowPublicConfigurationBaseType, ExecutorParamsITOM> {
-  const { logger } = params;
+export function getServiceNowITOMConnectorType(): ServiceNowConnectorType<
+  ServiceNowPublicConfigurationBaseType,
+  ExecutorParamsITOM
+> {
   return {
     id: ServiceNowITOMConnectorTypeId,
     minimumLicenseRequired: 'platinum',
@@ -86,7 +81,6 @@ export function getServiceNowITOMConnectorType(
       },
     },
     executor: curry(executorITOM)({
-      logger,
       actionTypeId: ServiceNowITOMConnectorTypeId,
       createService: createExternalService,
       api: apiITOM,
@@ -98,12 +92,10 @@ export function getServiceNowITOMConnectorType(
 const supportedSubActionsITOM = ['addEvent', 'getChoices'];
 async function executorITOM(
   {
-    logger,
     actionTypeId,
     createService,
     api,
   }: {
-    logger: Logger;
     actionTypeId: string;
     createService: ServiceFactory<ExternalServiceITOM>;
     api: ExternalServiceApiITOM;
@@ -113,7 +105,7 @@ async function executorITOM(
     ExecutorParamsITOM
   >
 ): Promise<ConnectorTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
-  const { actionId, config, params, secrets, configurationUtilities } = execOptions;
+  const { actionId, config, params, secrets, configurationUtilities, logger } = execOptions;
   const { subAction, subActionParams } = params;
   const connectorTokenClient = execOptions.services.connectorTokenClient;
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];

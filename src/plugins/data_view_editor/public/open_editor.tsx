@@ -9,7 +9,7 @@
 import React from 'react';
 import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { createKibanaReactContext, toMountPoint, DataPublicPluginStart } from './shared_imports';
@@ -20,7 +20,7 @@ import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 interface Dependencies {
   core: CoreStart;
   searchClient: DataPublicPluginStart['search']['search'];
-  dataViews: DataViewsPublicPluginStart;
+  dataViews: DataViewsServicePublic;
 }
 
 export const getEditorOpener =

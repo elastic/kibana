@@ -339,8 +339,11 @@ export type MetricsUIAggregation = rt.TypeOf<typeof MetricsUIAggregationRT>;
 export const SnapshotMetricTypeKeys = {
   count: null,
   cpu: null,
+  cpuCores: null,
+  diskLatency: null,
   load: null,
   memory: null,
+  memoryTotal: null,
   tx: null,
   rx: null,
   logRate: null,
@@ -382,6 +385,7 @@ export interface InventoryModel {
   fields: {
     id: string;
     name: string;
+    os?: string;
     ip?: string;
   };
   crosslinkSupport: {

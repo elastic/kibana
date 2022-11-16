@@ -15,7 +15,7 @@ export const THUMBNAIL_HEIGHT = 64;
 
 export const thumbnailStyle = css`
   padding: 0;
-  margin: 0;
+  margin: auto;
   width: ${THUMBNAIL_WIDTH}px;
   height: ${THUMBNAIL_HEIGHT}px;
   object-fit: contain;

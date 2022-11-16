@@ -125,6 +125,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   renderMode: RenderMode;
   syncColors: boolean;
   syncTooltips: boolean;
+  syncCursor: boolean;
   eventAnnotationService: EventAnnotationServiceType;
   renderComplete: () => void;
   uiState?: PersistedState;
@@ -199,6 +200,7 @@ export function XYChart({
   interactive = true,
   syncColors,
   syncTooltips,
+  syncCursor,
   useLegacyTimeAxis,
   renderComplete,
   uiState,
@@ -273,8 +275,10 @@ export function XYChart({
     [uiState]
   );
 
+  // Exclude the reference layers from the cursor update
+  const cursorSyncLayers = filteredLayers.filter(isDataLayer);
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
-    datatables: filteredLayers.map(({ table }) => table),
+    datatables: cursorSyncLayers.map(({ table }) => table),
   });
 
   const onRenderChange = useCallback(
@@ -521,12 +525,7 @@ export function XYChart({
     };
   };
 
-  const shouldShowValueLabels = uiState
-    ? valueLabels !== ValueLabelModes.HIDE
-    : // No stacked bar charts
-      dataLayers.every((layer) => !layer.isStacked) &&
-      // No histogram charts
-      !isHistogramViz;
+  const shouldShowValueLabels = !uiState || valueLabels !== ValueLabelModes.HIDE;
 
   const valueLabelsStyling =
     shouldShowValueLabels &&
@@ -753,7 +752,7 @@ export function XYChart({
               />
             }
             onRenderChange={onRenderChange}
-            onPointerUpdate={handleCursorUpdate}
+            onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
             externalPointerEvents={{
               tooltip: { visible: syncTooltips, placement: Placement.Right },
             }}

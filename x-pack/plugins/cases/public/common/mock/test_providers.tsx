@@ -8,6 +8,7 @@
 /* eslint-disable no-console */
 
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
@@ -17,11 +18,11 @@ import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
 import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
-import type { FieldHook } from '../shared_imports';
 import type { StartServices } from '../../types';
 import type { ReleasePhase } from '../../components/types';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
@@ -73,17 +74,19 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
-            <CasesProvider
-              value={{
-                externalReferenceAttachmentTypeRegistry,
-                persistableStateAttachmentTypeRegistry,
-                features,
-                owner,
-                permissions,
-              }}
-            >
-              {children}
-            </CasesProvider>
+            <MemoryRouter>
+              <CasesProvider
+                value={{
+                  externalReferenceAttachmentTypeRegistry,
+                  persistableStateAttachmentTypeRegistry,
+                  features,
+                  owner,
+                  permissions,
+                }}
+              >
+                {children}
+              </CasesProvider>
+            </MemoryRouter>
           </QueryClientProvider>
         </ThemeProvider>
       </KibanaContextProvider>
@@ -149,18 +152,20 @@ export const createAppMockRenderer = ({
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
-            <CasesProvider
-              value={{
-                externalReferenceAttachmentTypeRegistry,
-                persistableStateAttachmentTypeRegistry,
-                features,
-                owner,
-                permissions,
-                releasePhase,
-              }}
-            >
-              {children}
-            </CasesProvider>
+            <MemoryRouter>
+              <CasesProvider
+                value={{
+                  externalReferenceAttachmentTypeRegistry,
+                  persistableStateAttachmentTypeRegistry,
+                  features,
+                  owner,
+                  permissions,
+                  releasePhase,
+                }}
+              >
+                {children}
+              </CasesProvider>
+            </MemoryRouter>
           </QueryClientProvider>
         </ThemeProvider>
       </KibanaContextProvider>

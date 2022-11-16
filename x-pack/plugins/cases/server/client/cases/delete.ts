@@ -7,12 +7,13 @@
 
 import pMap from 'p-map';
 import { Boom } from '@hapi/boom';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
-import { CommentAttributes } from '../../../common/api';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { CommentAttributes } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
-import { Operations, OwnerEntity } from '../../authorization';
+import type { OwnerEntity } from '../../authorization';
+import { Operations } from '../../authorization';
 
 /**
  * Deletes the specified cases and their attachments.

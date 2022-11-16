@@ -12,6 +12,8 @@ import { configSchema, ActionsConfig, CustomHostSettings } from './config';
 import { ActionsClient as ActionsClientClass } from './actions_client';
 import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
 
+export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
+export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export type ActionsClient = PublicMethodsOf<ActionsClientClass>;
 export type ActionsAuthorization = PublicMethodsOf<ActionsAuthorizationClass>;
 

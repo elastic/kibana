@@ -6,7 +6,7 @@
  */
 
 import { useFetcher } from '@kbn/observability-plugin/public';
-import { useUptimeDataView, generateUpdatedKueryString } from '../../../../hooks';
+import { useGenerateUpdatedKueryString } from '../../../../hooks';
 import { fetchSnapshotCount } from '../../../../state/api';
 
 export const useSnapShotCount = ({ query, filters }: { query: string; filters: [] | string }) => {
@@ -15,9 +15,7 @@ export const useSnapShotCount = ({ query, filters }: { query: string; filters: [
       ? ''
       : JSON.stringify(Array.from(Object.entries(filters)));
 
-  const dataView = useUptimeDataView();
-
-  const [esKuery, error] = generateUpdatedKueryString(dataView, query, parsedFilters);
+  const [esKuery, error] = useGenerateUpdatedKueryString(query, parsedFilters, undefined, true);
 
   const { data, loading } = useFetcher(
     () =>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
@@ -26,7 +26,7 @@ interface StateToDashboardContainerInputProps {
 }
 
 interface StateToRawDashboardStateProps {
-  state: DashboardState;
+  state: Partial<DashboardState>;
 }
 
 /**
@@ -102,13 +102,15 @@ const filtersAreEqual = (first: Filter, second: Filter) =>
  */
 export const stateToRawDashboardState = ({
   state,
-}: StateToRawDashboardStateProps): RawDashboardState => {
+}: StateToRawDashboardStateProps): Partial<RawDashboardState> => {
   const {
     initializerContext: { kibanaVersion },
   } = pluginServices.getServices();
 
-  const savedDashboardPanels = Object.values(state.panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, kibanaVersion)
-  );
-  return { ...omit(state, 'panels'), panels: savedDashboardPanels };
+  const savedDashboardPanels = state?.panels
+    ? Object.values(state.panels).map((panel) =>
+        convertPanelStateToSavedDashboardPanel(panel, kibanaVersion)
+      )
+    : undefined;
+  return { ...state, panels: savedDashboardPanels };
 };

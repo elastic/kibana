@@ -18,6 +18,7 @@ import {
   ScopedHistory,
   IUiSettingsClient,
 } from '@kbn/core/public';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { ProductAccess } from '../../../../common/types';
@@ -41,6 +42,7 @@ interface KibanaLogicProps {
   renderHeaderActions(HeaderActions: FC): void;
   // Required plugins
   charts: ChartsPluginStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
   security: SecurityPluginStart;
   uiSettings: IUiSettingsClient;
   // Optional plugins
@@ -59,6 +61,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     config: [props.config || {}, {}],
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
+    guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {

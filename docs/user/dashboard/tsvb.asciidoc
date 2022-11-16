@@ -134,9 +134,9 @@ The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax 
 
 [float]
 [[edit-visualizations-in-lens]]
-==== Edit visualizations in Lens
+==== Open and edit TSVB visualizations in Lens
 
-Open and edit your Time Series *TSVB* visualizations in *Lens*, which is the drag-and-drop visualization editor that provides you with additional visualization types, reference lines, and more.
+Open and edit Time Series and Top N *TSVB* visualizations in *Lens*. When you open *TSVB* visualizations in *Lens*, all configuration options and annotations appear in the *Lens* visualization editor.
 
 To get started, click *Edit visualization in Lens* in the toolbar.
 

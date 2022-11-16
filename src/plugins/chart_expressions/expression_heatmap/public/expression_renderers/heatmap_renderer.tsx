@@ -61,9 +61,14 @@ export const heatmapRenderer: (
       const visualizationType = extractVisualizationType(executionContext);
 
       if (containerType && visualizationType) {
-        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+        const events = [
           `render_${visualizationType}_${EXPRESSION_HEATMAP_NAME}`,
-        ]);
+          config.canNavigateToLens
+            ? `render_${visualizationType}_${EXPRESSION_HEATMAP_NAME}_convertable`
+            : undefined,
+        ].filter<string>((event): event is string => Boolean(event));
+
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, events);
       }
 
       handlers.done();
@@ -90,6 +95,7 @@ export const heatmapRenderer: (
             interactive={isInteractive()}
             chartsActiveCursorService={plugins.charts.activeCursor}
             syncTooltips={config.syncTooltips}
+            syncCursor={config.syncCursor}
           />
         </div>
       </KibanaThemeProvider>,

@@ -17,6 +17,7 @@ import {
   eventCategoryMatches,
   netflowRowRenderer,
 } from './netflow_row_renderer';
+import { TimelineId } from '../../../../../../../common/types';
 
 export const justIdAndTimestamp: Ecs = {
   _id: 'abcd',
@@ -32,7 +33,7 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       data: getMockNetflowData(),
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
 
     const { asFragment } = render(<TestProviders>{children}</TestProviders>);
@@ -101,7 +102,7 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       data: getMockNetflowData(),
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     render(
       <TestProviders>

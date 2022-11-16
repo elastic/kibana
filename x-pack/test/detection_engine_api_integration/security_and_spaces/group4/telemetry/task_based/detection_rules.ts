@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-  // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
+  // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json
   // This rule has an existing exceptions_list that we are going to use.
   const IMMUTABLE_RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
 

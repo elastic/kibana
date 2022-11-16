@@ -36,6 +36,7 @@ import {
 } from '@kbn/chart-icons';
 
 import { DistributiveOmit } from '@elastic/eui';
+import { CollapseFunction } from '../../../common/expressions';
 import type { VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
 
@@ -99,7 +100,7 @@ export interface XYDataLayerConfig {
   yConfig?: YConfig[];
   splitAccessor?: string;
   palette?: PaletteOutput;
-  collapseFn?: string;
+  collapseFn?: CollapseFunction;
   xScaleType?: XScaleType;
   isHistogram?: boolean;
   columnToLabel?: string;

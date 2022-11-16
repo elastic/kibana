@@ -12,11 +12,10 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
+import type { CaseResponse, CasePostRequest } from '../../../common/api';
 import {
   throwErrors,
   CaseResponseRt,
-  CaseResponse,
-  CasePostRequest,
   ActionTypes,
   CasePostRequestRt,
   excess,
@@ -28,7 +27,7 @@ import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/va
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
 /**
@@ -42,7 +41,7 @@ export const create = async (
 ): Promise<CaseResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseService, userActionService, licensingService },
+    services: { caseService, userActionService, licensingService, notificationService },
     user,
     logger,
     authorization: auth,
@@ -117,11 +116,22 @@ export const create = async (
       owner: newCase.attributes.owner,
     });
 
-    return CaseResponseRt.encode(
-      flattenCaseSavedObject({
-        savedObject: newCase,
-      })
-    );
+    const flattenedCase = flattenCaseSavedObject({
+      savedObject: newCase,
+    });
+
+    if (query.assignees && query.assignees.length !== 0) {
+      const assigneesWithoutCurrentUser = query.assignees.filter(
+        (assignee) => assignee.uid !== user.profile_uid
+      );
+
+      await notificationService.notifyAssignees({
+        assignees: assigneesWithoutCurrentUser,
+        theCase: newCase,
+      });
+    }
+
+    return CaseResponseRt.encode(flattenedCase);
   } catch (error) {
     throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
   }

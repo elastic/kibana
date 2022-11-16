@@ -110,5 +110,16 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
 
       await header.waitUntilLoadingHasFinished();
     },
+
+    async selectRowsInAssigneesPopover(indexes: number[]) {
+      const rows = await find.allByCssSelector('.euiSelectableListItem__content');
+      for (const [index, row] of rows.entries()) {
+        if (indexes.includes(index)) {
+          await row.click();
+        }
+      }
+
+      await header.waitUntilLoadingHasFinished();
+    },
   };
 }

@@ -7,7 +7,6 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import { isEmpty } from 'lodash';
 import type {
   Cases,
   CaseUpdateRequest,
@@ -71,6 +70,8 @@ import {
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
+  constructAssigneesFilter,
+  constructReportersFilter,
 } from './utils';
 import { decodeCasesFindResponse } from '../api/decoders';
 
@@ -182,9 +183,9 @@ export const getCases = async ({
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
-    assignees: filterOptions.assignees,
-    reporters: constructReportersFilter(filterOptions.reporters),
-    tags: filterOptions.tags,
+    ...constructAssigneesFilter(filterOptions.assignees),
+    ...constructReportersFilter(filterOptions.reporters),
+    ...(filterOptions.tags.length > 0 ? { tags: filterOptions.tags } : {}),
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
@@ -198,18 +199,6 @@ export const getCases = async ({
   });
 
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
-};
-
-export const constructReportersFilter = (reporters: User[]) => {
-  return reporters
-    .map((reporter) => {
-      if (reporter.profile_uid != null) {
-        return reporter.profile_uid;
-      }
-
-      return reporter.username ?? '';
-    })
-    .filter((reporterID) => !isEmpty(reporterID));
 };
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<Case> => {

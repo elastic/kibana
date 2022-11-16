@@ -37,9 +37,7 @@ let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
-  connectorType = getConnectorType({
-    logger: mockedLogger,
-  });
+  connectorType = getConnectorType();
 });
 
 describe('connector registration', () => {
@@ -168,6 +166,7 @@ describe('execute()', () => {
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
       configurationUtilities,
+      logger: mockedLogger,
     });
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -195,6 +194,7 @@ describe('execute()', () => {
           "fatal": [MockFunction],
           "get": [MockFunction],
           "info": [MockFunction],
+          "isLevelEnabled": [MockFunction],
           "log": [MockFunction],
           "trace": [MockFunction],
           "warn": [MockFunction],
@@ -222,6 +222,7 @@ describe('execute()', () => {
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
       configurationUtilities,
+      logger: mockedLogger,
     });
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -249,6 +250,7 @@ describe('execute()', () => {
           "fatal": [MockFunction],
           "get": [MockFunction],
           "info": [MockFunction],
+          "isLevelEnabled": [MockFunction],
           "log": [MockFunction],
           "trace": [MockFunction],
           "warn": [MockFunction],

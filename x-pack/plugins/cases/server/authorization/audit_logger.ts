@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EcsEventOutcome } from '@kbn/core/server';
-import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
-import { DATABASE_CATEGORY, ECS_OUTCOMES, isWriteOperation, OperationDetails } from '.';
-import { OwnerEntity } from './types';
+import type { EcsEventOutcome } from '@kbn/core/server';
+import type { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
+import type { OperationDetails } from '.';
+import { DATABASE_CATEGORY, ECS_OUTCOMES, isWriteOperation } from '.';
+import type { OwnerEntity } from './types';
 
 interface CreateAuditMsgParams {
   operation: OperationDetails;

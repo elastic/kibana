@@ -526,6 +526,7 @@ describe('Datatable Visualization', () => {
         label: 'label',
         isStaticValue: false,
         hasTimeShift: false,
+        hasReducedTimeRange: false,
       });
 
       const expression = datatableVisualization.toExpression(
@@ -549,22 +550,16 @@ describe('Datatable Visualization', () => {
       expect(columnArgs[0].arguments).toEqual(
         expect.objectContaining({
           columnId: ['c'],
-          hidden: [],
-          width: [],
-          isTransposed: [],
+          palette: [expect.any(Object)],
           transposable: [true],
-          alignment: [],
           colorMode: ['none'],
         })
       );
       expect(columnArgs[1].arguments).toEqual(
         expect.objectContaining({
           columnId: ['b'],
-          hidden: [],
-          width: [],
-          isTransposed: [],
+          palette: [expect.objectContaining({})],
           transposable: [true],
-          alignment: [],
           colorMode: ['none'],
         })
       );
@@ -577,6 +572,7 @@ describe('Datatable Visualization', () => {
         label: 'label',
         isStaticValue: false,
         hasTimeShift: false,
+        hasReducedTimeRange: false,
       });
 
       const expression = datatableVisualization.toExpression(
@@ -590,14 +586,16 @@ describe('Datatable Visualization', () => {
     });
 
     it('sets pagination based on state', () => {
-      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).pageSize).toEqual([]);
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).pageSize).toEqual(
+        undefined
+      );
 
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
           paging: { size: 20, enabled: false },
         }).pageSize
-      ).toEqual([]);
+      ).toEqual(undefined);
 
       expect(
         getDatatableExpressionArgs({
@@ -712,6 +710,7 @@ describe('Datatable Visualization', () => {
         label: 'label',
         isStaticValue: false,
         hasTimeShift: false,
+        hasReducedTimeRange: false,
       });
 
       const error = datatableVisualization.getErrorMessages({
@@ -737,6 +736,7 @@ describe('Datatable Visualization', () => {
         label: 'label',
         isStaticValue: false,
         hasTimeShift: false,
+        hasReducedTimeRange: false,
       });
 
       const error = datatableVisualization.getErrorMessages({

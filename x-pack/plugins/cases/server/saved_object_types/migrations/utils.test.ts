@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsMigrationLogger } from '@kbn/core/server';
+import type { SavedObjectsMigrationLogger } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { logError } from './utils';
 

@@ -15,6 +15,7 @@ import {
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Ecs } from '../../../../common/ecs';
 import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
@@ -22,7 +23,6 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
-import { useHandleAddToTimeline } from './add_to_timeline_button';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -60,11 +60,16 @@ interface ExpandedEventFieldsObject {
   };
 }
 
-export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventData }) => {
+export const useOsqueryTab = ({
+  rawEventData,
+  ecsData,
+}: {
+  rawEventData?: AlertRawEventData;
+  ecsData?: Ecs;
+}) => {
   const {
     services: { osquery, application },
   } = useKibana();
-  const handleAddToTimeline = useHandleAddToTimeline();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
 
   const emptyPrompt = useMemo(
@@ -89,7 +94,7 @@ export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventDa
     []
   );
 
-  if (!osquery || !rawEventData || !responseActionsEnabled) {
+  if (!osquery || !rawEventData || !responseActionsEnabled || !ecsData) {
     return;
   }
 
@@ -143,7 +148,7 @@ export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventDa
               agentIds={agentIds}
               ruleName={ruleName}
               alertId={alertId}
-              addToTimeline={handleAddToTimeline}
+              ecsData={ecsData}
             />
           )}
         </TabContentWrapper>

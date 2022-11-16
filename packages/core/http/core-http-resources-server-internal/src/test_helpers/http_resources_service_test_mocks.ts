@@ -25,6 +25,7 @@ export function createHttpResourcesResponseFactory() {
     renderCoreApp: jest.fn(),
     renderAnonymousCoreApp: jest.fn(),
     renderHtml: jest.fn(),
+    renderCss: jest.fn(),
     renderJs: jest.fn(),
   };
 

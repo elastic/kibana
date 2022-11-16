@@ -17,8 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
-  const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const rules = getService('rules');
 
   async function getAlertsByName(name: string) {
     const {
@@ -62,44 +62,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await nameInput.click();
   }
 
-  async function defineIndexThresholdAlert(alertName: string) {
-    await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('ruleNameInput', alertName);
-    await testSubjects.click(`.index-threshold-SelectOption`);
-    await testSubjects.click('selectIndexExpression');
-    const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-    await indexComboBox.click();
-    await indexComboBox.type('k');
-    const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-    await filterSelectItem.click();
-    await testSubjects.click('thresholdAlertTimeFieldSelect');
-    await retry.try(async () => {
-      const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
-      expect(fieldOptions[1]).not.to.be(undefined);
-      await fieldOptions[1].click();
-    });
-    await testSubjects.click('closePopover');
-    // need this two out of popup clicks to close them
-    const nameInput = await testSubjects.find('ruleNameInput');
-    await nameInput.click();
-
-    await testSubjects.click('whenExpression');
-    await testSubjects.click('whenExpressionSelect');
-    await retry.try(async () => {
-      const aggTypeOptions = await find.allByCssSelector('#aggTypeField option');
-      expect(aggTypeOptions[1]).not.to.be(undefined);
-      await aggTypeOptions[1].click();
-    });
-
-    await testSubjects.click('ofExpressionPopover');
-    const ofComboBox = await find.byCssSelector('#ofField');
-    await ofComboBox.click();
-    const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
-    const ofOptions = ofOptionsString.trim().split('\n');
-    expect(ofOptions.length > 0).to.be(true);
-    await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
-  }
-
   async function defineAlwaysFiringAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('ruleNameInput', alertName);
@@ -107,10 +69,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   async function discardNewRuleCreation() {
-    await testSubjects.click('cancelSaveRuleButton');
-    await testSubjects.existOrFail('confirmRuleCloseModal');
-    await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
-    await testSubjects.missingOrFail('confirmRuleCloseModal');
+    await rules.common.cancelRuleCreation();
   }
 
   describe('create alert', function () {
@@ -128,7 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
-      await defineIndexThresholdAlert(alertName);
+      await rules.common.defineIndexThresholdAlert(alertName);
 
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');

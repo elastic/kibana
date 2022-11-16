@@ -19,6 +19,7 @@ import type {
 } from '@kbn/core/public';
 import type { SavedObjectsStart as SavedObjectsPluginStart } from '@kbn/saved-objects-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -35,6 +36,7 @@ export interface AppDependencies {
   application: ApplicationStart;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   docLinks: DocLinksStart;
   http: HttpSetup;
   i18n: I18nStart;

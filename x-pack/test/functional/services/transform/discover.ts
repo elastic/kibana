@@ -15,9 +15,11 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
 
   return {
     async assertDiscoverQueryHits(expectedDiscoverQueryHits: string) {
-      await testSubjects.existOrFail('discoverQueryHits');
+      await testSubjects.existOrFail('unifiedHistogramQueryHits');
 
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
+        'unifiedHistogramQueryHits'
+      );
 
       expect(actualDiscoverQueryHits).to.eql(
         expectedDiscoverQueryHits,
@@ -59,7 +61,7 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
       expect(actualApplyButtonText).to.be('Apply');
 
       await applyButton.click();
-      await testSubjects.existOrFail('discoverQueryHits');
+      await testSubjects.existOrFail('unifiedHistogramQueryHits');
     },
   };
 }

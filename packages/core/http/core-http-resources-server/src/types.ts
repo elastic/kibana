@@ -53,6 +53,8 @@ export interface HttpResourcesServiceToolkit {
   renderHtml: (options: HttpResourcesResponseOptions) => IKibanaResponse;
   /** To respond with a custom JS script file. */
   renderJs: (options: HttpResourcesResponseOptions) => IKibanaResponse;
+  /** To respond with a custom CSS script file. */
+  renderCss: (options: HttpResourcesResponseOptions) => IKibanaResponse;
 }
 
 /**

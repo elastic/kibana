@@ -17,10 +17,13 @@ import {
 } from '@elastic/eui';
 import type { UserProfileWithAvatar, UserProfile } from '@kbn/user-profile-components';
 import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
+import type { FieldConfig, FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  UseField,
+  getFieldValidityAndErrorMessage,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
 import type { CaseAssignees } from '../../../common/api';
-import type { FieldConfig, FieldHook } from '../../common/shared_imports';
-import { UseField, getFieldValidityAndErrorMessage } from '../../common/shared_imports';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';

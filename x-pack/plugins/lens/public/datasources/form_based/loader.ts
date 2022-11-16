@@ -109,9 +109,7 @@ function getUsedIndexPatterns({
   const indexPatternIds = [];
   if (initialContext) {
     if ('isVisualizeAction' in initialContext) {
-      for (const { indexPatternId } of initialContext.layers) {
-        indexPatternIds.push(indexPatternId);
-      }
+      indexPatternIds.push(...initialContext.indexPatternIds);
     } else {
       indexPatternIds.push(initialContext.dataViewSpec.id!);
     }
@@ -253,25 +251,34 @@ export function triggerActionOnIndexPatternChange({
 export function changeLayerIndexPattern({
   indexPatternId,
   indexPatterns,
-  layerId,
+  layerIds,
   state,
   replaceIfPossible,
   storage,
 }: {
   indexPatternId: string;
-  layerId: string;
+  layerIds: string[];
   state: FormBasedPrivateState;
   replaceIfPossible?: boolean;
   storage: IStorageWrapper;
   indexPatterns: Record<string, IndexPattern>;
 }) {
   setLastUsedIndexPatternId(storage, indexPatternId);
+
+  const newLayers = {
+    ...state.layers,
+  };
+
+  layerIds.forEach((layerId) => {
+    newLayers[layerId] = updateLayerIndexPattern(
+      state.layers[layerId],
+      indexPatterns[indexPatternId]
+    );
+  });
+
   return {
     ...state,
-    layers: {
-      ...state.layers,
-      [layerId]: updateLayerIndexPattern(state.layers[layerId], indexPatterns[indexPatternId]),
-    },
+    layers: newLayers,
     currentIndexPatternId: replaceIfPossible ? indexPatternId : state.currentIndexPatternId,
   };
 }

@@ -37,6 +37,7 @@ import {
   RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
@@ -54,7 +55,20 @@ import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
 export interface ConfigSchema {
   unsafe: {
-    alertDetails: { enabled: boolean };
+    alertDetails: {
+      apm: {
+        enabled: boolean;
+      };
+      metrics: {
+        enabled: boolean;
+      };
+      logs: {
+        enabled: boolean;
+      };
+      uptime: {
+        enabled: boolean;
+      };
+    };
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -79,6 +93,7 @@ export interface ObservabilityPublicPluginsStart {
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   security: SecurityPluginStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -287,6 +302,7 @@ export class Plugin
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
+      guidedOnboardingApi: pluginsStart.guidedOnboarding.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart }),
     });
 

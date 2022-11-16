@@ -32,7 +32,7 @@ export const PreviewRenderCellValue: React.FC<
   colIndex,
   rowRenderers,
   setCellProps,
-  timelineId,
+  scopeId,
   truncate,
 }) => (
   <PreviewTableCellRenderer
@@ -51,7 +51,7 @@ export const PreviewRenderCellValue: React.FC<
     colIndex={colIndex}
     rowRenderers={rowRenderers}
     setCellProps={setCellProps}
-    timelineId={timelineId}
+    scopeId={scopeId}
     truncate={truncate}
   />
 );
@@ -66,8 +66,9 @@ export const PreviewTableCellRenderer: React.FC<CellValueElementProps> = ({
   isTimeline,
   linkValues,
   rowRenderers,
-  timelineId,
+  scopeId,
   truncate,
+  key,
 }) => {
   const asPlainText = useMemo(() => {
     return getLinkColumnDefinition(header.id, header.type, undefined) !== undefined && !isTimeline;
@@ -94,9 +95,10 @@ export const PreviewTableCellRenderer: React.FC<CellValueElementProps> = ({
           isDraggable,
           linkValues,
           rowRenderers,
-          timelineId,
+          scopeId,
           truncate,
           values,
+          key,
         })}
       </StyledContent>
     </>

@@ -127,6 +127,23 @@ export const CLEAR_FILTERS = i18n.translate(
 
 export const TOTAL_ASSIGNEES_FILTERED = (total: number) =>
   i18n.translate('xpack.cases.allCasesView.totalFilteredUsers', {
-    defaultMessage: '{total, plural, one {# assignee} other {# assignees}} filtered',
+    defaultMessage: '{total, plural, one {# filter} other {# filters}} selected',
     values: { total },
+  });
+
+export const NO_ASSIGNEES = i18n.translate(
+  'xpack.cases.allCasesView.filterAssignees.noAssigneesLabel',
+  {
+    defaultMessage: 'No assignees',
+  }
+);
+
+export const SHOW_LESS = i18n.translate('xpack.cases.allCasesView.showLessAvatars', {
+  defaultMessage: 'show less',
+});
+
+export const SHOW_MORE = (count: number) =>
+  i18n.translate('xpack.cases.allCasesView.showMoreAvatars', {
+    defaultMessage: '+{count} more',
+    values: { count },
   });

@@ -7,7 +7,11 @@
  */
 
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { Column, MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
+import {
+  CollapseFunction,
+  Column,
+  MetricVisConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import { VisParams } from '../../types';
 
 export const getConfiguration = (
@@ -26,15 +30,15 @@ export const getConfiguration = (
       customBuckets: Record<string, string>;
     };
     columnsWithoutReferenced: Column[];
-    bucketCollapseFn?: Record<string, string[]>;
+    bucketCollapseFn?: Record<CollapseFunction, string[]>;
   }
 ): MetricVisConfiguration => {
   const [metricAccessor] = metrics;
   const [breakdownByAccessor] = buckets.all;
   const collapseFn = bucketCollapseFn
-    ? Object.keys(bucketCollapseFn).find((key) =>
-        bucketCollapseFn[key].includes(breakdownByAccessor)
-      )
+    ? (Object.keys(bucketCollapseFn).find((key) =>
+        bucketCollapseFn[key as CollapseFunction].includes(breakdownByAccessor)
+      ) as CollapseFunction)
     : undefined;
   return {
     layerId,

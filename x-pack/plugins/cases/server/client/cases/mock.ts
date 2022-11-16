@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   CommentResponse,
-  CommentType,
   CaseUserActionsResponse,
   CommentResponseAlertsType,
+  ConnectorMappingsAttributes,
+} from '../../../common/api';
+import {
+  CommentType,
   ConnectorTypes,
   Actions,
-  ConnectorMappingsAttributes,
   ExternalReferenceStorageType,
 } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';

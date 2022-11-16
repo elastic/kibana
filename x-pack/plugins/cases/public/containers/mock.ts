@@ -775,9 +775,9 @@ export const getJiraConnector = (overrides?: Partial<CaseConnector>): CaseConnec
 
 export const jiraFields = { fields: { issueType: '10006', priority: null, parent: null } };
 
-export const getAlertUserAction = (): SnakeToCamelCase<
-  UserActionWithResponse<CommentUserAction>
-> => ({
+export const getAlertUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'alert-action-id',
   commentId: 'alert-comment-id',
@@ -794,6 +794,29 @@ export const getAlertUserAction = (): SnakeToCamelCase<
       },
     },
   },
+  ...overrides,
+});
+
+export const getMultipleAlertsUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
+  ...getUserAction(ActionTypes.comment, Actions.create),
+  actionId: 'alert-action-id',
+  commentId: 'alert-comment-id',
+  type: ActionTypes.comment,
+  payload: {
+    comment: {
+      type: CommentType.alert,
+      alertId: ['alert-id-1', 'alert-id-2'],
+      index: ['index-id-1', 'index-id-2'],
+      owner: SECURITY_SOLUTION_OWNER,
+      rule: {
+        id: 'rule-id-1',
+        name: 'Awesome rule',
+      },
+    },
+  },
+  ...overrides,
 });
 
 export const getHostIsolationUserAction = (
@@ -860,9 +883,9 @@ export const basicCaseClosed: Case = {
   status: CaseStatuses.closed,
 };
 
-export const getExternalReferenceUserAction = (): SnakeToCamelCase<
-  UserActionWithResponse<CommentUserAction>
-> => ({
+export const getExternalReferenceUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'external-reference-action-id',
   type: ActionTypes.comment,
@@ -877,6 +900,7 @@ export const getExternalReferenceUserAction = (): SnakeToCamelCase<
       owner: SECURITY_SOLUTION_OWNER,
     },
   },
+  ...overrides,
 });
 
 export const getExternalReferenceAttachment = (
@@ -892,9 +916,9 @@ export const getExternalReferenceAttachment = (
   }),
 });
 
-export const getPersistableStateUserAction = (): SnakeToCamelCase<
-  UserActionWithResponse<CommentUserAction>
-> => ({
+export const getPersistableStateUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'persistable-state-action-id',
   type: ActionTypes.comment,
@@ -907,6 +931,7 @@ export const getPersistableStateUserAction = (): SnakeToCamelCase<
       owner: SECURITY_SOLUTION_OWNER,
     },
   },
+  ...overrides,
 });
 
 export const getPersistableStateAttachment = (

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
+import Fs from 'fs/promises';
+import { FtrProviderContext } from '../ftr_provider_context';
+
 export const SPACE_1 = {
   id: 'space_1',
   name: 'Space 1',
@@ -18,6 +22,13 @@ export const SPACE_2 = {
   description: 'This is the second test space',
   disabledFeatures: [],
 };
+
+async function parseLegacyUrlAliases(path: string): Promise<LegacyUrlAlias[]> {
+  return (await Fs.readFile(path, 'utf-8'))
+    .split(/\r?\n\r?\n/)
+    .filter((line) => !!line)
+    .map((line) => JSON.parse(line));
+}
 
 // Objects can only be imported in one space at a time. To have test saved objects
 // that are shared in multiple spaces we should import all objects in the "original"
@@ -62,12 +73,12 @@ const OBJECTS_TO_SHARE: Array<{
   },
 ];
 
-// @ts-ignore
-export function getTestDataLoader({ getService }) {
+export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getService'>) {
   const spacesService = getService('spaces');
   const kbnServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   return {
     createFtrSpaces: async () => {
@@ -111,6 +122,40 @@ export function getTestDataLoader({ getService }) {
       }
     },
 
+    createLegacyUrlAliases: async (
+      spaceData: Array<{ spaceName: string | null; dataUrl: string; disabled?: boolean }>
+    ) => {
+      await Promise.all(
+        spaceData.map(async (data) => {
+          const spaceString = data.spaceName ?? 'default';
+
+          const aliases = await parseLegacyUrlAliases(data.dataUrl);
+          log.info('creating', aliases.length, 'legacy URL aliases', {
+            space: spaceString,
+          });
+
+          await Promise.all(
+            aliases.map(async (alias) => {
+              await es.create({
+                id: `legacy-url-alias:${spaceString}:${alias.targetType}:${alias.sourceId}`,
+                index: '.kibana',
+                refresh: 'wait_for',
+                document: {
+                  type: 'legacy-url-alias',
+                  updated_at: '2017-09-21T18:51:23.794Z',
+                  'legacy-url-alias': {
+                    ...alias,
+                    targetNamespace: spaceString,
+                    ...(data.disabled && { disabled: data.disabled }),
+                  },
+                },
+              });
+            })
+          );
+        })
+      );
+    },
+
     deleteFtrSavedObjectsData: async () => {
       const allSpacesIds = [
         ...(await spacesService.getAll()).map((space: { id: string }) => space.id),
@@ -123,6 +168,30 @@ export function getTestDataLoader({ getService }) {
           kbnServer.savedObjects.clean({ space: spaceId, types: ['sharedtype', 'isolatedtype'] }),
         ])
       );
+    },
+
+    deleteAllSavedObjectsFromKibanaIndex: async () => {
+      await es.deleteByQuery({
+        index: '.kibana',
+        wait_for_completion: true,
+        body: {
+          // @ts-expect-error
+          conflicts: 'proceed',
+          query: {
+            bool: {
+              must_not: [
+                {
+                  term: {
+                    type: {
+                      value: 'space',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
     },
   };
 }

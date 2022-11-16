@@ -235,6 +235,7 @@ export const getXyChartRenderer = ({
               renderMode={handlers.getRenderMode()}
               syncColors={config.syncColors}
               syncTooltips={config.syncTooltips}
+              syncCursor={config.syncCursor}
               uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
             />
