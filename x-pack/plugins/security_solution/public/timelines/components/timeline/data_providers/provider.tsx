@@ -32,7 +32,8 @@ export const Provider = React.memo<OwnProps>(({ dataProvider }) => {
       toggleExcludedProvider={noop}
       toggleEnabledProvider={noop}
       toggleTypeProvider={noop}
-      val={dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value}
+      displayValue={String(dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value)}
+      val={dataProvider.queryMatch.value}
       operator={dataProvider.queryMatch.operator || IS_OPERATOR}
       type={dataProvider.type || DataProviderType.default}
     />
