@@ -14,6 +14,7 @@ import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import { useParams } from 'react-router-dom';
 import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
+import { isEqual } from 'lodash';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { useUserData } from '../../../detections/components/user_info';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
@@ -256,6 +257,13 @@ export const useExceptionListDetails = () => {
 
   // #region Manage Rules
 
+  const resetManageRulesAfterSaving = useCallback(() => {
+    setLinkedRules(newLinkedRules);
+    setNewLinkedRules(newLinkedRules);
+    setShowManageRulesFlyout(false);
+    setShowManageButtonLoader(false);
+    setDisableManageButton(true);
+  }, [newLinkedRules]);
   const onManageRules = useCallback(() => {
     setShowManageRulesFlyout(true);
   }, []);
@@ -280,7 +288,9 @@ export const useExceptionListDetails = () => {
       setShowManageButtonLoader(true);
       const rulesToAdd = getRulesToAdd();
       const rulesToRemove = getRulesToRemove();
-      if (!rulesToAdd.length && !rulesToRemove.length) return;
+
+      if ((!rulesToAdd.length && !rulesToRemove.length) || isEqual(rulesToAdd, rulesToRemove))
+        return resetManageRulesAfterSaving();
 
       Promise.all([
         unlinkListFromRules({ rules: rulesToRemove, listId: exceptionListId }),
@@ -294,17 +304,20 @@ export const useExceptionListDetails = () => {
       ])
         .then(() => {
           setRefreshExceptions(true);
-          setLinkedRules(newLinkedRules);
-          setNewLinkedRules(newLinkedRules);
-          setShowManageRulesFlyout(false);
-          setShowManageButtonLoader(false);
-          setDisableManageButton(true);
+          resetManageRulesAfterSaving();
         })
         .then(() => setRefreshExceptions(false));
     } catch (err) {
       handleErrorStatus(err);
     }
-  }, [list, newLinkedRules, exceptionListId, getRulesToAdd, getRulesToRemove, handleErrorStatus]);
+  }, [
+    list,
+    getRulesToAdd,
+    getRulesToRemove,
+    exceptionListId,
+    resetManageRulesAfterSaving,
+    handleErrorStatus,
+  ]);
   const onCancelManageRules = useCallback(() => {
     setShowManageRulesFlyout(false);
   }, []);
