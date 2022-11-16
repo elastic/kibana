@@ -68,7 +68,7 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
     useLocalStorage<LocalStorageQueryParams>(getQueryParamsLocalStorageKey(appId));
 
   const persistAndUpdateQueryParams = useCallback(
-    (params, isFirstRender = false) => {
+    (params) => {
       if (isModalView) {
         setQueryParams((prevParams) => ({ ...prevParams, ...params }));
         return;
@@ -98,7 +98,7 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
             search: stringify({ ...parsedUrlParams, ...newUrlParams }),
           };
 
-          if (isFirstRender) {
+          if (isFirstRenderRef.current) {
             history.replace(newHistory);
           } else {
             history.push(newHistory);
@@ -122,7 +122,7 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
   );
 
   if (isFirstRenderRef.current) {
-    persistAndUpdateQueryParams(isModalView ? DEFAULT_QUERY_PARAMS : {}, true);
+    persistAndUpdateQueryParams(isModalView ? DEFAULT_QUERY_PARAMS : {});
     isFirstRenderRef.current = false;
   }
 
