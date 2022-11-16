@@ -81,7 +81,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                   >
                     <FormattedMessage
                       id="home.addData.guidedOnboardingLinkLabel"
-                      defaultMessage="Launch setup guide"
+                      defaultMessage="Setup guide"
                     />
                   </EuiButton>
                 </EuiFlexItem>
