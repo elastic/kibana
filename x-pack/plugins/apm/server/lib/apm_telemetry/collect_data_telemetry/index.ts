@@ -7,58 +7,37 @@
 
 import { merge } from 'lodash';
 import { Logger, SavedObjectsClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import { APMDataTelemetry } from '../types';
+import { TelemetryClient } from '../telemetry_client';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 
-type TelemetryTaskExecutor = (params: {
+export interface TelemetryTaskExecutorParams {
+  telemetryClient: TelemetryClient;
   indices: ApmIndicesConfig;
-  search<
-    TSearchRequest extends ESSearchRequest & { index: string | string[] } & {
-      body: { timeout: string };
-    }
-  >(
-    params: TSearchRequest
-  ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
-  indicesStats(
-    params: estypes.IndicesStatsRequest
-    // promise returned by client has an abort property
-    // so we cannot use its ReturnType
-  ): Promise<{
-    _all?: {
-      total?: { store?: { size_in_bytes?: number }; docs?: { count?: number } };
-    };
-    _shards?: {
-      total?: number;
-    };
-  }>;
-  transportRequest: (params: {
-    path: string;
-    method: 'get';
-  }) => Promise<unknown>;
   savedObjectsClient: ISavedObjectsClient;
-}) => Promise<APMDataTelemetry>;
+}
+
+type TelemetryTaskExecutor = (
+  params: TelemetryTaskExecutorParams
+) => Promise<APMDataTelemetry>;
 
 export interface TelemetryTask {
   name: string;
   executor: TelemetryTaskExecutor;
 }
 
-export type CollectTelemetryParams = Parameters<TelemetryTaskExecutor>[0] & {
+export type CollectTelemetryParams = TelemetryTaskExecutorParams & {
   isProd: boolean;
   logger: Logger;
 };
 
 export function collectDataTelemetry({
-  search,
   indices,
   logger,
-  indicesStats,
-  transportRequest,
+  telemetryClient,
   savedObjectsClient,
   isProd,
 }: CollectTelemetryParams) {
@@ -68,10 +47,8 @@ export function collectDataTelemetry({
       try {
         const time = process.hrtime();
         const next = await task.executor({
-          search,
+          telemetryClient,
           indices,
-          indicesStats,
-          transportRequest,
           savedObjectsClient,
         });
         const took = process.hrtime(time);
