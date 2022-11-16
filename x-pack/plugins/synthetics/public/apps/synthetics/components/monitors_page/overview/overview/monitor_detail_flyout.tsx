@@ -58,6 +58,7 @@ import {
 } from '../types';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
 import { fetchSyntheticsMonitor } from '../../../../state/overview/api';
+import { MonitorStatus } from '../../../common/components/monitor_status';
 
 interface Props {
   id: string;
@@ -174,7 +175,8 @@ function LocationSelect({
   setCurrentLocation: (location: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const isDown = !!locations.find((l) => l.observer?.geo?.name === currentLocation)?.summary?.down;
+  const status = locations.find((l) => l.observer?.geo?.name === currentLocation)?.monitor?.status;
+
   return (
     <EuiFlexGroup wrap={true} responsive={false}>
       <EuiFlexItem grow={false}>
@@ -227,14 +229,7 @@ function LocationSelect({
         </EuiDescriptionList>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiDescriptionList align="left" compressed>
-          <EuiDescriptionListTitle>{STATUS_TITLE_TEXT}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            <EuiBadge color={isDown ? 'danger' : 'success'}>
-              {isDown ? MONITOR_STATUS_DOWN_LABEL : MONITOR_STATUS_UP_LABEL}
-            </EuiBadge>
-          </EuiDescriptionListDescription>
-        </EuiDescriptionList>
+        <MonitorStatus status={status} monitor={monitor} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiDescriptionList align="left" compressed>
@@ -514,10 +509,6 @@ const LAST_RUN_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.lastRu
   defaultMessage: 'Last run',
 });
 
-const STATUS_TITLE_TEXT = i18n.translate('xpack.synthetics.monitorList.statusColumnName', {
-  defaultMessage: 'Status',
-});
-
 const LOCATION_TITLE_TEXT = i18n.translate('xpack.synthetics.monitorList.locationColumnName', {
   defaultMessage: 'Location',
 });
@@ -579,22 +570,6 @@ const LOCATION_SELECT_POPOVER_LINK_LABEL = i18n.translate(
   {
     defaultMessage:
       "This button opens a context menu that will allow you to change the monitor's selected location. If you change the location, the flyout will display metrics for the monitor's performance in that location.",
-  }
-);
-
-const MONITOR_STATUS_UP_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.flyout.monitorStatus.up',
-  {
-    defaultMessage: 'Up',
-    description: '"Up" in the sense that a process is running and available.',
-  }
-);
-
-const MONITOR_STATUS_DOWN_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.flyout.monitorStatus.down',
-  {
-    defaultMessage: 'Down',
-    description: '"Down" in the sense that a process is not running or available.',
   }
 );
 
