@@ -6,17 +6,6 @@
  * Side Public License, v 1.
  */
 
-/*
-Disabled during Jest 29 upgrade:
-```
-ReferenceError: Cannot access 'service' before initialization
-
-  77 |   const execute = service.execute;
-  78 |
-> 79 |   jest.spyOn(service, 'execute').mockImplementation((...args) => {
-```
-*/
-
 import { firstValueFrom, of } from 'rxjs';
 import { first, skip, toArray } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
