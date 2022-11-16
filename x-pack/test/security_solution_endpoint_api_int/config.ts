@@ -29,7 +29,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
-        `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`, // this will be removed in 8.7 when the feature is released
+        // this will be removed in 8.7 when the file upload feature is released
+        `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
       ],
     },
   };
