@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import https from 'https';
+import { memoize } from 'lodash';
+import { Agent, AgentOptions } from 'https';
 import { URL } from 'url';
-import type { Request, ResponseToolkit } from '@hapi/hapi';
-import nodeFetch, { RequestInit, Response } from 'node-fetch';
+import type { Request, ResponseObject, ResponseToolkit, ServerRoute } from '@hapi/hapi';
+import nodeFetch, { Response } from 'node-fetch';
 import type { IConfigService } from '@kbn/config';
 import type { Logger } from '@kbn/logging';
 import { KibanaConfig } from '../kibana_config';
 
 const HTTPS = 'https:';
-
-const GATEWAY_ROOT_ROUTE = '/';
 const KIBANA_ROOT_ROUTE = '/';
 
 interface RootRouteDependencies {
@@ -24,146 +23,142 @@ interface RootRouteDependencies {
   config: IConfigService;
 }
 
-type Fetch = (path: string) => Promise<Response>;
-
-export function createRootRoute({ config, logger }: RootRouteDependencies) {
-  const kibanaConfig = new KibanaConfig({ config, logger });
-  const fetch = configureFetch(kibanaConfig);
-
-  return {
-    method: 'GET',
-    path: GATEWAY_ROOT_ROUTE,
-    handler: async (req: Request, h: ResponseToolkit) => {
-      const responses = await fetchKibanaRoots({ fetch, kibanaConfig, logger });
-      const { body, statusCode } = mergeResponses(responses);
-      logger.debug(`Returning ${statusCode} response with body: ${JSON.stringify(body)}`);
-
-      return h.response(body).type('application/json').code(statusCode);
-    },
-  };
-}
-
-async function fetchKibanaRoots({
-  fetch,
-  kibanaConfig,
-  logger,
-}: {
-  fetch: Fetch;
-  kibanaConfig: KibanaConfig;
-  logger: Logger;
-}) {
-  const responses = await Promise.allSettled(
-    kibanaConfig.hosts.map(async (host) => {
-      logger.debug(`Fetching response from ${host}${KIBANA_ROOT_ROUTE}`);
-      return fetch(`${host}${KIBANA_ROOT_ROUTE}`);
-    })
-  );
-
-  responses.forEach((response, index) => {
-    const host = `${kibanaConfig.hosts[index]}${KIBANA_ROOT_ROUTE}`;
-
-    if (response.status !== 'rejected') {
-      logger.debug(`Got response from ${host}: ${JSON.stringify(response.value.status)}`);
-
-      return;
-    }
-
-    if (response.reason instanceof Error) {
-      logger.error(response.reason);
-    }
-
-    if (response.reason instanceof Error && response.reason.name === 'AbortError') {
-      logger.error(`Request timeout for ${host}`);
-
-      return;
-    }
-
-    logger.error(
-      `No response from ${host}: ${
-        response.reason instanceof Error ? response.reason.message : JSON.stringify(response.reason)
-      }`
+export class RootRoute implements ServerRoute {
+  private static isUnhealthyResponse(response: PromiseSettledResult<Response>) {
+    return (
+      response.status === 'rejected' ||
+      !(RootRoute.isSuccess(response.value) || RootRoute.isUnauthorized(response.value))
     );
-  });
-
-  return responses;
-}
-
-function mergeResponses(
-  responses: Array<PromiseFulfilledResult<Response> | PromiseRejectedResult>
-) {
-  const hasUnhealthyResponse = responses.some(isUnhealthyResponse);
-
-  return {
-    body: {}, // The control plane health check ignores the body, so we do the same
-    statusCode: hasUnhealthyResponse ? 503 : 200,
-  };
-}
-
-function isUnhealthyResponse(response: PromiseFulfilledResult<Response> | PromiseRejectedResult) {
-  return (
-    response.status === 'rejected' || !(isSuccess(response.value) || isUnauthorized(response.value))
-  );
-}
-
-function isUnauthorized({ status, headers }: Response): boolean {
-  return status === 401 && headers.has('www-authenticate');
-}
-
-function isSuccess({ status }: Response): boolean {
-  return (status >= 200 && status <= 299) || status === 302;
-}
-
-function generateAgentConfig(sslConfig: KibanaConfig['ssl']) {
-  const options: https.AgentOptions = {
-    ca: sslConfig.certificateAuthorities,
-    cert: sslConfig.certificate,
-  };
-
-  const verificationMode = sslConfig.verificationMode;
-  switch (verificationMode) {
-    case 'none':
-      options.rejectUnauthorized = false;
-      break;
-    case 'certificate':
-      options.rejectUnauthorized = true;
-      // by default, NodeJS is checking the server identify
-      options.checkServerIdentity = () => undefined;
-      break;
-    case 'full':
-      options.rejectUnauthorized = true;
-      break;
-    default:
-      throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  return options;
-}
+  private static isUnauthorized({ status, headers }: Response): boolean {
+    return status === 401 && headers.has('www-authenticate');
+  }
 
-function configureFetch(kibanaConfig: KibanaConfig) {
-  let agent: https.Agent;
+  private static isSuccess({ status }: Response): boolean {
+    return (status >= 200 && status <= 299) || status === 302;
+  }
 
-  return async (url: string) => {
+  readonly method = 'GET';
+  readonly path = '/';
+
+  private kibanaConfig: KibanaConfig;
+  private logger: Logger;
+
+  constructor({ logger, config }: RootRouteDependencies) {
+    this.kibanaConfig = new KibanaConfig({ config, logger });
+    this.logger = logger;
+    this.handler = this.handler.bind(this);
+
+    return {
+      method: this.method,
+      path: this.path,
+      handler: this.handler,
+    } as RootRoute;
+  }
+
+  async handler(request: Request, toolkit: ResponseToolkit): Promise<ResponseObject> {
+    const responses = await this.fetchHosts();
+    const { body, statusCode } = this.mergeResponses(responses);
+    this.logger.debug(`Returning ${statusCode} response with body: ${JSON.stringify(body)}`);
+
+    return toolkit.response(body).type('application/json').code(statusCode);
+  }
+
+  private async fetchHosts() {
+    const responses = await Promise.allSettled(
+      this.kibanaConfig.hosts.map((host) => {
+        this.logger.debug(`Fetching response from ${host}${KIBANA_ROOT_ROUTE}`);
+        return this.fetch(`${host}${KIBANA_ROOT_ROUTE}`);
+      })
+    );
+
+    responses.forEach((response, index) => {
+      const host = `${this.kibanaConfig.hosts[index]}${KIBANA_ROOT_ROUTE}`;
+
+      if (response.status !== 'rejected') {
+        this.logger.debug(`Got response from ${host}: ${JSON.stringify(response.value.status)}`);
+
+        return;
+      }
+
+      if (response.reason instanceof Error) {
+        this.logger.error(response.reason);
+      }
+
+      if (response.reason instanceof Error && response.reason.name === 'AbortError') {
+        this.logger.error(`Request timeout for ${host}`);
+
+        return;
+      }
+
+      this.logger.error(
+        `No response from ${host}: ${
+          response.reason instanceof Error
+            ? response.reason.message
+            : JSON.stringify(response.reason)
+        }`
+      );
+    });
+
+    return responses;
+  }
+
+  private mergeResponses(responses: Array<PromiseSettledResult<Response>>) {
+    const hasUnhealthyResponse = responses.some(RootRoute.isUnhealthyResponse);
+
+    return {
+      body: {}, // The control plane health check ignores the body, so we do the same
+      statusCode: hasUnhealthyResponse ? 503 : 200,
+    };
+  }
+
+  private async fetch(url: string) {
     const { protocol } = new URL(url);
-    if (protocol === HTTPS && !agent) {
-      agent = new https.Agent(generateAgentConfig(kibanaConfig.ssl));
-    }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(
       () => controller.abort(),
-      kibanaConfig.requestTimeout.asMilliseconds()
+      this.kibanaConfig.requestTimeout.asMilliseconds()
     );
 
-    const fetchOptions: RequestInit = {
-      ...(protocol === HTTPS && { agent }),
-      signal: controller.signal,
-      redirect: 'manual',
-    };
-
     try {
-      return await nodeFetch(url, fetchOptions);
+      return await nodeFetch(url, {
+        agent: protocol === HTTPS ? this.getAgent() : undefined,
+        signal: controller.signal,
+        redirect: 'manual',
+      });
     } finally {
       clearTimeout(timeoutId);
     }
-  };
+  }
+
+  private getAgent = memoize(() => new Agent(this.getAgentConfig()));
+
+  private getAgentConfig() {
+    const {
+      certificateAuthorities: ca,
+      certificate: cert,
+      verificationMode,
+    } = this.kibanaConfig.ssl;
+    const options: AgentOptions = { ca, cert };
+
+    switch (verificationMode) {
+      case 'none':
+        options.rejectUnauthorized = false;
+        break;
+      case 'certificate':
+        options.rejectUnauthorized = true;
+        // by default, NodeJS is checking the server identify
+        options.checkServerIdentity = () => undefined;
+        break;
+      case 'full':
+        options.rejectUnauthorized = true;
+        break;
+      default:
+        throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
+    }
+
+    return options;
+  }
 }

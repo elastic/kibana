@@ -9,7 +9,7 @@
 import type { IConfigService } from '@kbn/config';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ServerStart } from '../server';
-import { createRootRoute } from './routes';
+import { RootRoute } from './routes';
 
 interface KibanaServiceStartDependencies {
   server: ServerStart;
@@ -33,7 +33,7 @@ export class KibanaService {
   }
 
   async start({ server }: KibanaServiceStartDependencies) {
-    server.addRoute(createRootRoute({ config: this.config, logger: this.logger }));
+    server.addRoute(new RootRoute({ config: this.config, logger: this.logger }));
   }
 
   stop() {
