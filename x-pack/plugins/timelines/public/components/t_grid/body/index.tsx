@@ -732,6 +732,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       setEventsDeleted,
       hasAlertsCrudPermissions,
     ]);
+    const closeCellPopoverAction = dataGridRef.current?.closeCellPopover;
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
         columnHeaders.map((header) => {
@@ -743,7 +744,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               header: columnHeaders.find((h) => h.id === header.id),
               pageSize,
               scopeId: id,
-              closeCellPopover: dataGridRef.current?.closeCellPopover,
+              closeCellPopover: closeCellPopoverAction,
             });
           return {
             ...header,
@@ -782,6 +783,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         dispatch,
         id,
         pageSize,
+        closeCellPopoverAction,
       ]
     );
 
@@ -833,6 +835,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           setCellProps,
           scopeId: id,
           truncate: isDetails ? false : true,
+          closeCellPopover: closeCellPopoverAction,
         }) as React.ReactElement;
       };
       return Cell;
@@ -846,6 +849,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       renderCellValue,
       rowRenderers,
       theme,
+      closeCellPopoverAction,
     ]);
 
     const onChangeItemsPerPage = useCallback(
