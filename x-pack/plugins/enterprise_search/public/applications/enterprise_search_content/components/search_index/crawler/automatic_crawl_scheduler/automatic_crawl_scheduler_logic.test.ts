@@ -183,20 +183,6 @@ describe('AutomaticCrawlSchedulerLogic', () => {
       });
 
       describe('error paths', () => {
-        it('resets the states of the crawl scheduler on a 404 response', async () => {
-          jest.spyOn(AutomaticCrawlSchedulerLogic.actions, 'clearCrawlSchedule');
-          http.get.mockReturnValueOnce(
-            Promise.reject({
-              response: { status: 404 },
-            })
-          );
-
-          AutomaticCrawlSchedulerLogic.actions.fetchCrawlSchedule();
-          await nextTick();
-
-          expect(AutomaticCrawlSchedulerLogic.actions.clearCrawlSchedule).toHaveBeenCalled();
-        });
-
         it('flashes an error on a non-404 response', async () => {
           http.get.mockReturnValueOnce(
             Promise.reject({
