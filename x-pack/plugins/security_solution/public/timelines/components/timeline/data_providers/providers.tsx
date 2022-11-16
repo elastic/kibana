@@ -110,9 +110,6 @@ const ParensContainer = styled(EuiFlexItem)`
   align-self: center;
 `;
 
-const getDataProviderValue = (dataProvider: DataProvidersAnd) =>
-  dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value;
-
 /**
  * Renders an interactive card representation of the data providers. It also
  * affords uniform UI controls for the following actions:
@@ -264,6 +261,10 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       [onKeyDown]
     );
 
+    const displayValue = String(
+      dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value
+    );
+
     const DraggableContent = useCallback(
       (provided, snapshot) => (
         <div
@@ -302,7 +303,8 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 toggleEnabledProvider={handleToggleEnabledProvider}
                 toggleExcludedProvider={handleToggleExcludedProvider}
                 toggleTypeProvider={handleToggleTypeProvider}
-                val={getDataProviderValue(dataProvider)}
+                displayValue={displayValue}
+                val={dataProvider.queryMatch.value}
                 type={dataProvider.type}
                 wrapperRef={keyboardHandlerRef}
               />
@@ -323,6 +325,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       [
         browserFields,
         dataProvider,
+        displayValue,
         group,
         handleDataProviderEdited,
         handleDeleteProvider,

@@ -16,7 +16,6 @@ import { PLUGIN_ID } from '../../common';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compliance_dashboard';
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineGetCspStatusRoute } from './status/status';
-import { defineEsPitRoute } from './es_pit/es_pit';
 
 /**
  * 1. Registers routes
@@ -33,7 +32,6 @@ export function setupRoutes({
   defineGetComplianceDashboardRoute(router);
   defineGetBenchmarksRoute(router);
   defineGetCspStatusRoute(router);
-  defineEsPitRoute(router);
 
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,
