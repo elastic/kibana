@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInitializeUrlParam } from '../../../../../common/utils/global_query_string';
+import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 import { useInitializeRulesTableSavedState } from './use_initialize_rules_table_saved_state';
 import type { RulesTableActions } from './rules_table_context';
 import { useRulesTableContext } from './rules_table_context';
@@ -114,6 +115,25 @@ describe('useInitializeRulesTableSavedState', () => {
       expect(actions.setPage).toHaveBeenCalledWith(urlSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(urlSavedState.perPage);
     });
+
+    it('restores the state ignoring negative page size', () => {
+      mockState({ urlState: { ...urlSavedState, perPage: -1 }, storageState: null });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores the state ignoring the page size larger than max allowed', () => {
+      mockState({
+        urlState: { ...urlSavedState, perPage: RULES_TABLE_MAX_PAGE_SIZE + 1 },
+        storageState: null,
+      });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
   });
 
   describe('when state is saved in the storage', () => {
@@ -130,6 +150,25 @@ describe('useInitializeRulesTableSavedState', () => {
       expect(actions.setSortingOptions).toHaveBeenCalledWith(storageSavedState.sort);
       expect(actions.setPage).toHaveBeenCalledWith(storageSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(storageSavedState.perPage);
+    });
+
+    it('restores the state ignoring negative page size', () => {
+      mockState({ urlState: null, storageState: { ...storageSavedState, perPage: -1 } });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores the state ignoring the page size larger than max allowed', () => {
+      mockState({
+        urlState: null,
+        storageState: { ...storageSavedState, perPage: RULES_TABLE_MAX_PAGE_SIZE + 1 },
+      });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(actions.setPerPage).not.toHaveBeenCalled();
     });
   });
 

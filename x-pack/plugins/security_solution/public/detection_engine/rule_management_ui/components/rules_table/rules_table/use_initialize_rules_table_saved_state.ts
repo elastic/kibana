@@ -6,7 +6,10 @@
  */
 
 import { useCallback } from 'react';
-import { RULE_TABLE_STATE_STORAGE_KEY } from '../../../../../../common/constants';
+import {
+  RULES_TABLE_MAX_PAGE_SIZE,
+  RULE_TABLE_STATE_STORAGE_KEY,
+} from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useInitializeUrlParam } from '../../../../../common/utils/global_query_string';
@@ -57,7 +60,7 @@ export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTa
         actions.setPage(page);
       }
 
-      if (perPage) {
+      if (perPage && perPage > 0 && perPage <= RULES_TABLE_MAX_PAGE_SIZE) {
         actions.setPerPage(perPage);
       }
     },
