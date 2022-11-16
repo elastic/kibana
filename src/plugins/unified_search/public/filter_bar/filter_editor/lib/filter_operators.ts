@@ -110,6 +110,34 @@ export const doesNotExistOperator = {
   negate: true,
 };
 
+export const intersectsOperator = {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.intersectsOperatorOptionLabel', {
+    defaultMessage: 'intersects',
+  }),
+  type: FILTERS.SPATIAL_FILTER,
+  negate: false,
+};
+export const withinOperator = {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.withinOperatorOptionLabel', {
+    defaultMessage: 'within',
+  }),
+  type: FILTERS.SPATIAL_FILTER,
+  negate: false,
+};
+export const disjointOperator = {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.disjointOperatorOptionLabel', {
+    defaultMessage: 'disjoint',
+  }),
+  type: FILTERS.SPATIAL_FILTER,
+  negate: false,
+};
+export const containsOperator = {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.containsOperatorOptionLabel', {
+    defaultMessage: 'contains',
+  }),
+  type: FILTERS.SPATIAL_FILTER,
+  negate: false,
+};
 export const FILTER_OPERATORS: Operator[] = [
   isOperator,
   isNotOperator,
@@ -119,4 +147,21 @@ export const FILTER_OPERATORS: Operator[] = [
   isNotBetweenOperator,
   existsOperator,
   doesNotExistOperator,
+  intersectsOperator,
+  withinOperator,
+  disjointOperator,
+  containsOperator
 ];
+
+export const geoOperatorToOperation =  (operator:Operator)=>{
+  if(operator === intersectsOperator){
+    return 'intersects'
+  }else if(operator === withinOperator){
+    return 'within'
+  }else if(operator === disjointOperator){
+    return 'disjoint'
+  }else if(operator === containsOperator){
+    return 'contains'
+  }
+  throw Error("Unsupported Geo Operator")
+}

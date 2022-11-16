@@ -16,6 +16,7 @@ import { buildExistsFilter } from './exists_filter';
 
 import type { DataViewFieldBase, DataViewBase } from '../../es_query';
 import { FilterStateStore } from './types';
+import { buildSpatialFilter, GeoFilterParams } from './spatial_filter';
 
 /**
  *
@@ -58,17 +59,21 @@ function buildBaseFilter(
   params: Serializable
 ): Filter {
   switch (type) {
-    case 'phrase':
+    case FILTERS.PHRASE:
       return buildPhraseFilter(field, params as PhraseFilterValue, indexPattern);
-    case 'phrases':
+    case FILTERS.PHRASES:
       return buildPhrasesFilter(field, params as PhraseFilterValue[], indexPattern);
-    case 'range':
+    case FILTERS.RANGE:
       const { from: gte, to: lt } = params as RangeFilterParams;
       return buildRangeFilter(field, { lt, gte }, indexPattern);
-    case 'range_from_value':
+    case FILTERS.RANGE_FROM_VALUE:
       return buildRangeFilter(field, params as RangeFilterParams, indexPattern);
-    case 'exists':
+    case FILTERS.EXISTS:
       return buildExistsFilter(field, indexPattern);
+    case FILTERS.SPATIAL_FILTER:
+      console.log(field,params,indexPattern)
+      let geoFilterParams:unknown = params
+      return buildSpatialFilter(indexPattern,field, geoFilterParams as GeoFilterParams);
     default:
       throw new Error(`Unknown filter type: ${type}`);
   }

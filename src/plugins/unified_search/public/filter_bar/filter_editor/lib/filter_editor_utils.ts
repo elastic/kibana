@@ -84,6 +84,8 @@ export function isFilterValid(
       );
     case 'exists':
       return true;
+    case 'spatial_filter':
+      return true
     default:
       throw new Error(`Unknown operator type: ${operator.type}`);
   }
