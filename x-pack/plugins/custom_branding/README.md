@@ -1,6 +1,7 @@
 # customBranding
-
-A Kibana plugin
+## !! UNDER DEVELOPMENT !!
+This is a plugin to configure custom branding.
+This plugin is currently under active development; do not use.
 
 ---
 
