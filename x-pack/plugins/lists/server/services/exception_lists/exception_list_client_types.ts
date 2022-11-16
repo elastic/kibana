@@ -288,6 +288,17 @@ export interface CreateEndpointListItemOptions {
 }
 
 /**
+ * ExceptionListClient.duplicateExceptionListAndItems
+ * {@link ExceptionListClient.duplicateExceptionListAndItems}
+ */
+export interface DuplicateExceptionListOptions {
+  /** The single list id to do the search against */
+  listId: ListId;
+  /** saved object namespace (single | agnostic) */
+  namespaceType: NamespaceType;
+}
+
+/**
  * ExceptionListClient.updateExceptionListItem
  * {@link ExceptionListClient.updateExceptionListItem}
  */
