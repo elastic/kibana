@@ -10,6 +10,7 @@ import { Query } from '@kbn/es-query';
 import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
 import { FindingsBaseURLQuery } from '../../pages/findings/types';
+import { useCallback } from 'react';
 
 const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery, 'query'> => {
   const query =
@@ -35,12 +36,15 @@ const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery
 export const useNavigateFindings = () => {
   const history = useHistory();
 
-  return (query?: Query['query']) => {
-    history.push({
-      pathname: findingsNavigation.findings_default.path,
-      ...(query && { search: encodeQuery(getFindingsQuery(query)) }),
-    });
-  };
+  return useCallback(
+    (query?: Query['query']) => {
+      history.push({
+        pathname: findingsNavigation.findings_default.path,
+        ...(query && { search: encodeQuery(getFindingsQuery(query)) }),
+      });
+    },
+    [history.push]
+  );
 };
 
 export const useNavigateFindingsByResource = () => {

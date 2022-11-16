@@ -12,12 +12,16 @@ import {
   EuiBasicTable,
   EuiBasicTableProps,
   useEuiTheme,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiTableComputedColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimestampTableCell } from '../../components/timestamp_table_cell';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import type { RuleSavedObject } from './use_csp_rules';
+import { useNavigateFindings } from '../../common/hooks/use_navigate_findings';
 
 type RulesTableProps = Pick<
   RulesState,
@@ -40,7 +44,19 @@ export const RulesTable = ({
   selectedRuleId,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
-  const columns = useMemo(() => getColumns({ setSelectedRuleId }), [setSelectedRuleId]);
+
+  const navigateToFindings = useNavigateFindings();
+  const columns = useMemo(
+    () =>
+      getColumns({
+        setSelectedRuleId,
+        navigateToRuleFindings: (name: string) =>
+          navigateToFindings({
+            ['rule.name']: name,
+          }),
+      }),
+    [setSelectedRuleId, navigateToFindings]
+  );
 
   const euiPagination: EuiBasicTableProps<RuleSavedObject>['pagination'] = {
     pageIndex: page,
@@ -80,11 +96,16 @@ export const RulesTable = ({
   );
 };
 
-type GetColumnProps = Pick<RulesTableProps, 'setSelectedRuleId'>;
+type GetColumnProps = Pick<RulesTableProps, 'setSelectedRuleId'> & {
+  navigateToRuleFindings(name: string): void;
+};
 
 const getColumns = ({
   setSelectedRuleId,
-}: GetColumnProps): Array<EuiTableFieldDataColumnType<RuleSavedObject>> => [
+  navigateToRuleFindings,
+}: GetColumnProps): Array<
+  EuiTableFieldDataColumnType<RuleSavedObject> | EuiTableComputedColumnType<RuleSavedObject>
+> => [
   {
     field: 'attributes.metadata.name',
     name: i18n.translate('xpack.csp.rules.rulesTable.nameColumnLabel', {
@@ -119,6 +140,25 @@ const getColumns = ({
       defaultMessage: 'Last Modified',
     }),
     width: '15%',
-    render: (timestamp) => <TimestampTableCell timestamp={timestamp} />,
+    render: (timestamp: number) => <TimestampTableCell timestamp={timestamp} />,
+  },
+  {
+    width: '50px',
+    name: i18n.translate('xpack.csp.rules.rulesTable.goToFindingsColumnLabel', {
+      defaultMessage: 'Findings',
+    }),
+    render: (data: RuleSavedObject) => (
+      <EuiToolTip
+        content={i18n.translate('xpack.csp.rules.rulesTable.goToFindingsCellLabel', {
+          defaultMessage: 'Go to rules findings',
+        })}
+      >
+        <EuiButtonIcon
+          iconType={'inspect'}
+          size="s"
+          onClick={() => navigateToRuleFindings(data.attributes.metadata.name)}
+        />
+      </EuiToolTip>
+    ),
   },
 ];
