@@ -12,7 +12,7 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types'
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { getMonitors, QuerySchema, SEARCH_FIELDS } from '../common';
+import { getMonitors, isMonitorsQueryFiltered, QuerySchema, SEARCH_FIELDS } from '../common';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -53,40 +53,27 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
     query: QuerySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const { filters, query } = request.query;
-    const monitorsPromise = getMonitors(
+    const queryResult = await getMonitors(
       request.query,
       syntheticsMonitorClient.syntheticsService,
       savedObjectsClient
     );
 
-    if (filters || query) {
-      const totalMonitorsPromise = savedObjectsClient.find({
-        type: syntheticsMonitorType,
-        perPage: 0,
-        page: 1,
-      });
+    const countResult = isMonitorsQueryFiltered(request.query)
+      ? await savedObjectsClient.find({
+          type: syntheticsMonitorType,
+          perPage: 0,
+          page: 1,
+        })
+      : queryResult;
 
-      const allResolved = await Promise.all([monitorsPromise, totalMonitorsPromise]);
-      const { saved_objects: monitors, per_page: perPageT, ...rest } = allResolved[0];
-      const { total } = allResolved[1];
-
-      return {
-        ...rest,
-        monitors,
-        perPage: perPageT,
-        absoluteTotal: total,
-        syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
-      };
-    }
-
-    const { saved_objects: monitors, per_page: perPageT, ...rest } = await monitorsPromise;
+    const { saved_objects: monitors, per_page: perPageT, ...rest } = queryResult;
 
     return {
       ...rest,
       monitors,
       perPage: perPageT,
-      absoluteTotal: rest.total,
+      absoluteTotal: countResult.total,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
     };
   },
