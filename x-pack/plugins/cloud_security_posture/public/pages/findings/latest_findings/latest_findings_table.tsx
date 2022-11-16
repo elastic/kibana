@@ -8,11 +8,13 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
+  useEuiTheme,
   type Pagination,
   type EuiBasicTableProps,
   type CriteriaWithPagination,
   type EuiTableActionsColumnType,
   type EuiTableFieldDataColumnType,
+  EuiThemeComputed,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
@@ -24,6 +26,7 @@ import {
   getExpandColumn,
   type OnAddFilter,
 } from '../layout/findings_layout';
+import { getSelectedRowStyle } from '../utils/utils';
 
 type TableProps = Required<EuiBasicTableProps<CspFinding>>;
 
@@ -44,10 +47,12 @@ const FindingsTableComponent = ({
   setTableOptions,
   onAddFilter,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
   const getRowProps = (row: CspFinding) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsTableRowTestId(row.resource.id),
+    style: getSelectedRowStyle(euiTheme, row, selectedFinding),
   });
 
   const getCellProps = (row: CspFinding, column: EuiTableFieldDataColumnType<CspFinding>) => ({
