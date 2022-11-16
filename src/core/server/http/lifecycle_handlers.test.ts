@@ -231,19 +231,28 @@ describe('customHeaders pre-response handler', () => {
     toolkit = httpServerMock.createToolkit();
   });
 
-  it('adds the kbn-name header to the response', () => {
-    const config = createConfig({ name: 'my-server-name' });
+  it('adds the kbn-name and Content-Security-Policy headers to the response', () => {
+    const config = createConfig({
+      name: 'my-server-name',
+      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
+    });
     const handler = createCustomHeadersPreResponseHandler(config as HttpConfig);
 
     handler({} as any, {} as any, toolkit);
 
     expect(toolkit.next).toHaveBeenCalledTimes(1);
-    expect(toolkit.next).toHaveBeenCalledWith({ headers: { 'kbn-name': 'my-server-name' } });
+    expect(toolkit.next).toHaveBeenCalledWith({
+      headers: {
+        'Content-Security-Policy': 'foo',
+        'kbn-name': 'my-server-name',
+      },
+    });
   });
 
   it('adds the security headers and custom headers defined in the configuration', () => {
     const config = createConfig({
       name: 'my-server-name',
+      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
       securityResponseHeaders: {
         headerA: 'value-A',
         headerB: 'value-B', // will be overridden by the custom response header below
@@ -259,6 +268,7 @@ describe('customHeaders pre-response handler', () => {
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
+        'Content-Security-Policy': 'foo',
         'kbn-name': 'my-server-name',
         headerA: 'value-A',
         headerB: 'x',
@@ -266,11 +276,13 @@ describe('customHeaders pre-response handler', () => {
     });
   });
 
-  it('preserve the kbn-name value from server.name if definied in custom headders ', () => {
+  it('do not allow overwrite of the kbn-name and Content-Security-Policy headers if defined in custom headders ', () => {
     const config = createConfig({
       name: 'my-server-name',
+      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
       customResponseHeaders: {
         'kbn-name': 'custom-name',
+        'Content-Security-Policy': 'custom-csp',
         headerA: 'value-A',
         headerB: 'value-B',
       },
@@ -283,6 +295,7 @@ describe('customHeaders pre-response handler', () => {
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
         'kbn-name': 'my-server-name',
+        'Content-Security-Policy': 'foo',
         headerA: 'value-A',
         headerB: 'value-B',
       },
