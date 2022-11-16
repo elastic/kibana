@@ -52,6 +52,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'alertDetailsPageEnabled',
         ])}`,
+        '--xpack.cloud.id=test',
         `--home.disableWelcomeScreen=true`,
       ],
     },

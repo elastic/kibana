@@ -10,7 +10,6 @@ import type { UrlObject } from 'url';
 import Url from 'url';
 
 import type { ROLES } from '../../common/test';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
 import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
 
@@ -287,23 +286,6 @@ export const getEnvAuth = (): User => {
 };
 
 /**
- * For all the new features tours we show in the app, this method disables them
- * by setting their configs in the local storage. It prevents the tours from appearing
- * on the page during test runs and covering other UI elements.
- * @param window - browser's window object
- */
-const disableNewFeaturesTours = (window: Window) => {
-  const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);
-  const tourConfig = {
-    isTourActive: false,
-  };
-
-  tourStorageKeys.forEach((key) => {
-    window.localStorage.setItem(key, JSON.stringify(tourConfig));
-  });
-};
-
-/**
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
@@ -328,29 +310,22 @@ export const visit = (
         if (onBeforeLoadCallback) {
           onBeforeLoadCallback(win);
         }
-        disableNewFeaturesTours(win);
       },
     }
   );
 };
 
 export const visitWithoutDateRange = (url: string, role?: ROLES) => {
-  cy.visit(role ? getUrlWithRoute(role, url) : url, {
-    onBeforeLoad: disableNewFeaturesTours,
-  });
+  cy.visit(role ? getUrlWithRoute(role, url) : url);
 };
 
 export const visitWithUser = (url: string, user: User) => {
-  cy.visit(constructUrlWithUser(user, url), {
-    onBeforeLoad: disableNewFeaturesTours,
-  });
+  cy.visit(constructUrlWithUser(user, url));
 };
 
 export const visitTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
-  cy.visit(role ? getUrlWithRoute(role, route) : route, {
-    onBeforeLoad: disableNewFeaturesTours,
-  });
+  cy.visit(role ? getUrlWithRoute(role, route) : route);
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };
