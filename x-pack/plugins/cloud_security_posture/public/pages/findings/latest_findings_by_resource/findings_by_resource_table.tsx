@@ -82,7 +82,7 @@ const FindingsByResourceTableComponent = ({
           <h2>
             <FormattedMessage
               id="xpack.csp.findings.findingsByResource.noFindingsTitle"
-              defaultMessage="There are no Findings."
+              defaultMessage="There are no Findings"
             />
           </h2>
         }
