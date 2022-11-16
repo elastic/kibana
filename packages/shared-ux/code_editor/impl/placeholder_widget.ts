@@ -7,53 +7,43 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { codeEditorPlaceholderContainerStyles } from './editor.styles';
 
-export interface PlaceholderWidgetProps {
-  placeholderText: string;
-  editor: monaco.editor.ICodeEditor;
-  colors: string;
-  widget?: monaco.editor.IContentWidget;
-  domNode?: HTMLElement;
-}
-
-export const createPlaceholderWidget = ({
-  placeholderText,
-  editor,
-  domNode,
-  colors,
-}: PlaceholderWidgetProps) => {
-  const widget = {
-    getDomNode: () => {
-      if (!domNode) {
-        const setDomNode = document.createElement('div');
-        setDomNode.innerText = placeholderText;
-        setDomNode.style.cssText += codeEditorPlaceholderContainerStyles(colors);
-        editor.applyFontInfo(setDomNode);
-        return setDomNode;
-      }
-      return domNode;
-    },
-    getPosition: (): monaco.editor.IContentWidgetPosition | null => {
-      return {
-        position: {
-          column: 1,
-          lineNumber: 1,
-        },
-        preference: [monaco.editor.ContentWidgetPositionPreference.EXACT],
-      };
-    },
-    getId: (): string => {
-      return 'KBN_CODE_EDITOR_PLACEHOLDER_WIDGET_ID';
-    },
-  };
-
-  return widget;
-};
-
-export const dispose = ({ editor, widget }: PlaceholderWidgetProps): void => {
-  if (!widget) {
-    new Error('There is no widget to dispose');
+export class PlaceholderWidget implements monaco.editor.IContentWidget {
+  constructor(
+    private readonly placeholderText: string,
+    private readonly editor: monaco.editor.ICodeEditor
+  ) {
+    editor.addContentWidget(this);
   }
-  return editor.removeContentWidget(widget!);
-};
+
+  private domNode: undefined | HTMLElement;
+
+  public getId(): string {
+    return 'KBN_CODE_EDITOR_PLACEHOLDER_WIDGET_ID';
+  }
+
+  public getDomNode(): HTMLElement {
+    if (!this.domNode) {
+      const domNode = document.createElement('div');
+      domNode.innerText = this.placeholderText;
+      domNode.className = 'kibanaCodeEditor__placeholderContainer';
+      this.editor.applyFontInfo(domNode);
+      this.domNode = domNode;
+    }
+    return this.domNode;
+  }
+
+  public getPosition(): monaco.editor.IContentWidgetPosition | null {
+    return {
+      position: {
+        column: 1,
+        lineNumber: 1,
+      },
+      preference: [monaco.editor.ContentWidgetPositionPreference.EXACT],
+    };
+  }
+
+  public dispose(): void {
+    this.editor.removeContentWidget(this);
+  }
+}

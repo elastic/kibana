@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
-import { createPlaceholderWidget } from './placeholder_widget';
+import { PlaceholderWidget } from './placeholder_widget';
 import {
   codeEditorControlsStyles,
   codeEditorFullScreenStyles,
@@ -408,10 +408,8 @@ export const CodeEditor: React.FC<Props> = ({
     if (placeholder && !value && _editor.current) {
       // Mounts editor inside constructor
       // @ts-ignore
-      _placeholderWidget.current = createPlaceholderWidget({
+      _placeholderWidget.current = new PlaceholderWidget({
         placeholderText: placeholder,
-        editor: _editor.current,
-        colors: euiTheme.colors.subduedText,
       });
     }
     return () => {
