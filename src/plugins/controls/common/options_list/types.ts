@@ -21,6 +21,7 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   singleSelect?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  hideSort?: boolean;
   sort?: SortingType;
   exclude?: boolean;
 }

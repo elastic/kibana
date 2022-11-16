@@ -59,6 +59,7 @@ export const OptionsListPopoverActionBar = ({
   const totalCardinality = select((state) => state.componentState.totalCardinality);
   const searchString = select((state) => state.componentState.searchString);
 
+  const hideSort = select((state) => state.explicitInput.hideSort);
   const sort = select((state) => state.explicitInput.sort ?? 'docDescending');
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
@@ -122,44 +123,46 @@ export const OptionsListPopoverActionBar = ({
               </EuiToolTip>
             )}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiToolTip
-                  position="top"
-                  content={OptionsListStrings.popover.getSortPopoverDescription()}
-                >
-                  <EuiButtonIcon
-                    iconType="sortable"
-                    disabled={showOnlySelected}
-                    data-test-subj="optionsList-control-sorting-options-button"
-                    onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
-                    aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-                  />
-                </EuiToolTip>
-              }
-              panelPaddingSize="none"
-              isOpen={isSortingPopoverOpen}
-              aria-labelledby="optionsList_sortingOptions"
-              closePopover={() => setIsSortingPopoverOpen(false)}
-              data-test-subj="optionsList-control-sorting-options-popover"
-            >
-              <EuiPopoverTitle paddingSize="s">
-                {OptionsListStrings.popover.getSortPopoverTitle()}
-              </EuiPopoverTitle>
-              <EuiSelectable
-                options={options}
-                style={{ width: 300 }}
-                singleSelection="always"
-                onChange={onSelectChange}
-                id="optionsList_sortingOptions"
-                listProps={{ bordered: false }}
-                aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+          {!hideSort && (
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={
+                  <EuiToolTip
+                    position="top"
+                    content={OptionsListStrings.popover.getSortPopoverDescription()}
+                  >
+                    <EuiButtonIcon
+                      iconType="sortable"
+                      disabled={showOnlySelected}
+                      data-test-subj="optionsList-control-sorting-options-button"
+                      onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
+                      aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+                    />
+                  </EuiToolTip>
+                }
+                panelPaddingSize="none"
+                isOpen={isSortingPopoverOpen}
+                aria-labelledby="optionsList_sortingOptions"
+                closePopover={() => setIsSortingPopoverOpen(false)}
+                data-test-subj="optionsList-control-sorting-options-popover"
               >
-                {(list) => list}
-              </EuiSelectable>
-            </EuiPopover>
-          </EuiFlexItem>
+                <EuiPopoverTitle paddingSize="s">
+                  {OptionsListStrings.popover.getSortPopoverTitle()}
+                </EuiPopoverTitle>
+                <EuiSelectable
+                  options={options}
+                  style={{ width: 300 }}
+                  singleSelection="always"
+                  onChange={onSelectChange}
+                  id="optionsList_sortingOptions"
+                  listProps={{ bordered: false }}
+                  aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+                >
+                  {(list) => list}
+                </EuiSelectable>
+              </EuiPopover>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"

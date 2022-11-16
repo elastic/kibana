@@ -35,6 +35,7 @@ export const ControlPanelDiffSystems: {
       const {
         sort: sortA,
         exclude: excludeA,
+        hideSort: hideSortA,
         hideExists: hideExistsA,
         hideExclude: hideExcludeA,
         selectedOptions: selectedA,
@@ -46,6 +47,7 @@ export const ControlPanelDiffSystems: {
       const {
         sort: sortB,
         exclude: excludeB,
+        hideSort: hideSortB,
         hideExists: hideExistsB,
         hideExclude: hideExcludeB,
         selectedOptions: selectedB,
@@ -57,6 +59,7 @@ export const ControlPanelDiffSystems: {
 
       return (
         Boolean(excludeA) === Boolean(excludeB) &&
+        Boolean(hideSortA) === Boolean(hideSortB) &&
         Boolean(hideExistsA) === Boolean(hideExistsB) &&
         Boolean(hideExcludeA) === Boolean(hideExcludeB) &&
         Boolean(singleSelectA) === Boolean(singleSelectB) &&

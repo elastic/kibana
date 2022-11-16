@@ -54,6 +54,14 @@ export const OptionsListStrings = {
         defaultMessage:
           'Allows you to create an exists query, which returns all documents that contain an indexed value for the field.',
       }),
+    getHideSortingTitle: () =>
+      i18n.translate('controls.optionsList.editor.hideSort', {
+        defaultMessage: 'Allow suggestions to be sorted',
+      }),
+    getSuggestionsSortingTitle: () =>
+      i18n.translate('controls.optionsList.editor.suggestionsSorting', {
+        defaultMessage: 'Suggestions sorting',
+      }),
   },
   popover: {
     getAriaLabel: (fieldName: string) =>

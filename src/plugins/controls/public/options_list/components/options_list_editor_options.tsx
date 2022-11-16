@@ -6,13 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiFormRow,
   EuiIconTip,
+  EuiSuperSelectOption,
+  EuiSpacer,
+  EuiSuperSelect,
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
@@ -20,17 +24,26 @@ import { css } from '@emotion/react';
 
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
+import {
+  DEFAULT_SORT,
+  OptionsListSortingTypes,
+  SortingType,
+} from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 interface OptionsListEditorState {
-  singleSelect?: boolean;
+  selectedSort: SortingType;
   runPastTimeout?: boolean;
+  singleSelect?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  hideSort?: boolean;
 }
 
 interface SwitchProps {
   checked: boolean;
   onChange: (event: EuiSwitchEvent) => void;
 }
+
+type SortItem = EuiSuperSelectOption<SortingType>;
 
 export const OptionsListEditorOptions = ({
   initialInput,
@@ -41,7 +54,18 @@ export const OptionsListEditorOptions = ({
     runPastTimeout: initialInput?.runPastTimeout,
     hideExclude: initialInput?.hideExclude,
     hideExists: initialInput?.hideExists,
+    hideSort: initialInput?.hideSort,
+    selectedSort: initialInput?.sort ?? DEFAULT_SORT,
   });
+
+  const options: SortItem[] = useMemo(() => {
+    return (Object.keys(OptionsListSortingTypes) as SortingType[]).map((key) => {
+      return {
+        value: key,
+        inputDisplay: OptionsListStrings.popover.sortBy[key].getSortByLabel(),
+      };
+    });
+  }, []);
 
   const SwitchWithTooltip = ({
     switchProps,
@@ -103,6 +127,38 @@ export const OptionsListEditorOptions = ({
             },
           }}
         />
+      </EuiFormRow>
+      <EuiFormRow>
+        <>
+          <EuiSwitch
+            label={OptionsListStrings.editor.getHideSortingTitle()}
+            checked={!state.hideSort}
+            onChange={() => {
+              onChange({ hideSort: !state.hideSort });
+              setState((s) => ({ ...s, hideSort: !s.hideSort }));
+            }}
+          />
+          {state.hideSort && (
+            <EuiForm className="optionsList--hiddenEditorForm">
+              <>
+                <EuiSpacer size="s" />
+                <EuiFormRow label={OptionsListStrings.editor.getSuggestionsSortingTitle()}>
+                  <EuiSuperSelect
+                    onChange={(value) => {
+                      onChange({
+                        sort: value,
+                      });
+                      setState((s) => ({ ...s, selectedSort: value }));
+                    }}
+                    options={options}
+                    valueOfSelected={state.selectedSort}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="s" />
+              </>
+            </EuiForm>
+          )}
+        </>
       </EuiFormRow>
       <EuiFormRow>
         <SwitchWithTooltip
