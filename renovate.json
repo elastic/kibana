@@ -144,6 +144,17 @@
       "enabled": true
     },
     {
+      "groupName": "scss",
+      "packageNames": [
+        "node-sass",
+        "sass-loader"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip", "backport:all-open"],
+      "enabled": true
+    },
+    {
       "groupName": "@testing-library",
       "packageNames": [
         "@testing-library/dom",
