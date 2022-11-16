@@ -594,7 +594,7 @@ describe('crawler routes', () => {
 
     it('validates correctly', () => {
       const request = {
-        body: { frequency: 7, unit: 'day' },
+        body: { frequency: 7, unit: 'day', use_connector_schedule: true },
         params: { indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
@@ -602,7 +602,7 @@ describe('crawler routes', () => {
 
     it('fails validation without a name param', () => {
       const request = {
-        body: { frequency: 7, unit: 'day' },
+        body: { frequency: 7, unit: 'day', use_connector_schedule: true },
         params: {},
       };
       mockRouter.shouldThrow(request);
@@ -610,7 +610,7 @@ describe('crawler routes', () => {
 
     it('fails validation without a unit property in body', () => {
       const request = {
-        body: { frequency: 7 },
+        body: { frequency: 7, use_connector_schedule: true },
         params: { indexName: 'index-name' },
       };
       mockRouter.shouldThrow(request);
@@ -618,7 +618,15 @@ describe('crawler routes', () => {
 
     it('fails validation without a frequency property in body', () => {
       const request = {
-        body: { unit: 'day' },
+        body: { unit: 'day', use_connector_schedule: true },
+        params: { indexName: 'index-name' },
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without a use_connector_schedule property in body', () => {
+      const request = {
+        body: { frequency: 7, unit: 'day' },
         params: { indexName: 'index-name' },
       };
       mockRouter.shouldThrow(request);

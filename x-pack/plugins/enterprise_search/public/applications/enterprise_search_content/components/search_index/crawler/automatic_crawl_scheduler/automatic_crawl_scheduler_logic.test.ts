@@ -21,7 +21,7 @@ import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic'
 describe('AutomaticCrawlSchedulerLogic', () => {
   const { mount } = new LogicMounter(AutomaticCrawlSchedulerLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
+  const { flashAPIErrors } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,6 +35,7 @@ describe('AutomaticCrawlSchedulerLogic', () => {
       crawlFrequency: 24,
       crawlUnit: CrawlUnits.hours,
       isSubmitting: false,
+      useConnectorSchedule: false,
     });
   });
 
@@ -102,6 +103,7 @@ describe('AutomaticCrawlSchedulerLogic', () => {
         AutomaticCrawlSchedulerLogic.actions.setCrawlSchedule({
           frequency: 3,
           unit: CrawlUnits.hours,
+          useConnectorSchedule: true,
         });
 
         expect(AutomaticCrawlSchedulerLogic.values).toMatchObject({
@@ -127,22 +129,8 @@ describe('AutomaticCrawlSchedulerLogic', () => {
 
   describe('listeners', () => {
     describe('deleteCrawlSchedule', () => {
-      it('resets the states of the crawl scheduler and popover, and shows a toast, on success', async () => {
-        jest.spyOn(AutomaticCrawlSchedulerLogic.actions, 'clearCrawlSchedule');
-        jest.spyOn(AutomaticCrawlSchedulerLogic.actions, 'onDoneSubmitting');
-        http.delete.mockReturnValueOnce(Promise.resolve());
-
-        AutomaticCrawlSchedulerLogic.actions.deleteCrawlSchedule();
-        await nextTick();
-
-        expect(AutomaticCrawlSchedulerLogic.actions.clearCrawlSchedule).toHaveBeenCalled();
-        expect(flashSuccessToast).toHaveBeenCalledWith(expect.any(String));
-        expect(AutomaticCrawlSchedulerLogic.actions.onDoneSubmitting).toHaveBeenCalled();
-      });
-
       describe('error paths', () => {
-        it('resets the states of the crawl scheduler and popover on a 404 respose', async () => {
-          jest.spyOn(AutomaticCrawlSchedulerLogic.actions, 'clearCrawlSchedule');
+        it('resets the states of the crawl scheduler on a 404 response', async () => {
           jest.spyOn(AutomaticCrawlSchedulerLogic.actions, 'onDoneSubmitting');
           http.delete.mockReturnValueOnce(
             Promise.reject({
@@ -153,11 +141,10 @@ describe('AutomaticCrawlSchedulerLogic', () => {
           AutomaticCrawlSchedulerLogic.actions.deleteCrawlSchedule();
           await nextTick();
 
-          expect(AutomaticCrawlSchedulerLogic.actions.clearCrawlSchedule).toHaveBeenCalled();
           expect(AutomaticCrawlSchedulerLogic.actions.onDoneSubmitting).toHaveBeenCalled();
         });
 
-        it('flashes an error on a non-404 respose', async () => {
+        it('flashes an error on a non-404 response', async () => {
           jest.spyOn(AutomaticCrawlSchedulerLogic.actions, 'onDoneSubmitting');
           http.delete.mockReturnValueOnce(
             Promise.reject({
@@ -196,21 +183,7 @@ describe('AutomaticCrawlSchedulerLogic', () => {
       });
 
       describe('error paths', () => {
-        it('resets the states of the crawl scheduler on a 404 respose', async () => {
-          jest.spyOn(AutomaticCrawlSchedulerLogic.actions, 'clearCrawlSchedule');
-          http.get.mockReturnValueOnce(
-            Promise.reject({
-              response: { status: 404 },
-            })
-          );
-
-          AutomaticCrawlSchedulerLogic.actions.fetchCrawlSchedule();
-          await nextTick();
-
-          expect(AutomaticCrawlSchedulerLogic.actions.clearCrawlSchedule).toHaveBeenCalled();
-        });
-
-        it('flashes an error on a non-404 respose', async () => {
+        it('flashes an error on a non-404 response', async () => {
           http.get.mockReturnValueOnce(
             Promise.reject({
               response: { status: 500 },
