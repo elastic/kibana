@@ -146,3 +146,11 @@ export const EQL_TIMESTAMP_FIELD_LABEL = i18n.translate(
     defaultMessage: 'Timestamp field',
   }
 );
+
+export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionInsufficientLicense',
+  {
+    defaultMessage:
+      'Alert suppression is configured but will not be applied due to insufficient licensing',
+  }
+);
