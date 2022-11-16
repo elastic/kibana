@@ -42,6 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
+
+      // check breakdown values
+      const list = await PageObjects.discover.getHistogramLegendList();
+      expect(list).to.eql(['png', 'css', 'jpg']);
+
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['extension.raw', '@timestamp', 'bytes']);
@@ -68,6 +73,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
+
+      // check breakdown values
+      const list = await PageObjects.discover.getHistogramLegendList();
+      expect(list).to.eql(['Other', 'png', 'css', 'jpg']);
+
       expect(await queryBar.getQueryString()).be.eql('');
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
@@ -104,6 +114,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
+
+      // check breakdown values
+      const list = await PageObjects.discover.getHistogramLegendList();
+      expect(list).to.eql(['png', 'css', 'jpg']);
+
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
         '( ( extension.raw: "png" ) OR ( extension.raw: "css" ) OR ( extension.raw: "jpg" ) )'
@@ -140,6 +155,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
+
+      // check breakdown values
+      const list = await PageObjects.discover.getHistogramLegendList();
+      expect(list).to.eql(['css', 'jpg']);
+
       // check the columns
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['extension.raw', '@timestamp', 'memory']);
@@ -175,6 +195,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
+
+      // check breakdown values
+      const list = await PageObjects.discover.getHistogramLegendList();
+      expect(list).to.eql(['css', 'jpg']);
 
       // check the query
       expect(await queryBar.getQueryString()).be.eql(

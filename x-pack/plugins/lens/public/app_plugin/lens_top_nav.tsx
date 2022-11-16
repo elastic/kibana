@@ -41,6 +41,10 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
+import type {
+  FieldBasedIndexPatternColumn,
+  FormBasedPrivateState,
+} from '../datasources/form_based/types';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -572,12 +576,30 @@ export const LensTopNavMenu = ({
             getEsQueryConfig(uiSettings)
           );
 
+          let breakdownField;
+          if (activeDatasourceId && datasourceMap[activeDatasourceId]) {
+            const dataSource = datasourceMap[activeDatasourceId];
+            const dataSourceState = datasourceStates[activeDatasourceId].state as
+              | FormBasedPrivateState
+              | undefined;
+            const [firstLayerId] = dataSource.getLayers(dataSourceState);
+            const firstLayer = dataSourceState?.layers[firstLayerId];
+            const termsColumn = Object.values(firstLayer?.columns || {}).find(
+              ({ operationType }) => operationType === 'terms'
+            );
+            if (termsColumn) {
+              breakdownField = (termsColumn as FieldBasedIndexPatternColumn | undefined)
+                ?.sourceField;
+            }
+          }
+
           return discoverLocator.getRedirectUrl({
             dataViewSpec: dataViews.indexPatterns[meta.id]?.spec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
             query: isOnTextBasedMode ? query : newQuery,
             columns: meta.columns,
+            breakdownField,
           });
         },
         openSettings: (anchorElement: HTMLElement) =>
@@ -617,9 +639,12 @@ export const LensTopNavMenu = ({
     query,
     filters,
     indexPatterns,
+    activeDatasourceId,
     dataViews.indexPatterns,
     data.query.timefilter.timefilter,
     isOnTextBasedMode,
+    datasourceMap,
+    datasourceStates,
     lensStore,
     theme$,
   ]);
