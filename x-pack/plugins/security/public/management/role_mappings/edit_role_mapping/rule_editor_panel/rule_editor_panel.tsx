@@ -39,6 +39,7 @@ interface Props {
   onValidityChange: (isValid: boolean) => void;
   validateForm: boolean;
   docLinks: DocLinksStart;
+  readOnly?: boolean;
 }
 
 interface State {
@@ -51,6 +52,10 @@ interface State {
 }
 
 export class RuleEditorPanel extends Component<Props, State> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -116,8 +121,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                 <Fragment>
                   {validationWarning}
                   {this.getEditor()}
-                  <EuiSpacer size="xl" />
-                  {this.getModeToggle()}
+                  {this.conditionallyRenderEditModeToggle()}
                   {this.getConfirmModeChangePrompt()}
                 </Fragment>
               </EuiErrorBoundary>
@@ -127,6 +131,17 @@ export class RuleEditorPanel extends Component<Props, State> {
       </EuiPanel>
     );
   }
+
+  private conditionallyRenderEditModeToggle = () => {
+    if (!this.props.readOnly) {
+      return (
+        <>
+          <EuiSpacer size="xl" />
+          {this.getModeToggle()}
+        </>
+      );
+    }
+  };
 
   private initializeFromRawRules = (rawRules: Props['rawRules']) => {
     const { rules, maxDepth } = generateRulesFromRaw(rawRules);
@@ -210,6 +225,7 @@ export class RuleEditorPanel extends Component<Props, State> {
             maxDepth={this.state.maxDepth}
             onChange={this.onRuleChange}
             onSwitchEditorMode={() => this.trySwitchEditorMode('json')}
+            readOnly={this.props.readOnly}
           />
         );
       case 'json':
@@ -218,6 +234,7 @@ export class RuleEditorPanel extends Component<Props, State> {
             rules={this.state.rules}
             onChange={this.onRuleChange}
             onValidityChange={this.onValidityChange}
+            readOnly={this.props.readOnly}
           />
         );
       default:

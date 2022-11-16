@@ -20,6 +20,7 @@ import {
   createBreadcrumbsChangeHandler,
 } from '../../components/breadcrumb';
 import type { PluginStartDependencies } from '../../plugin';
+import { ReadonlyBadge } from '../badges/readonly_badge';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
@@ -82,6 +83,7 @@ export const roleMappingsManagementApp = Object.freeze({
                 notifications={core.notifications}
                 docLinks={core.docLinks}
                 history={history}
+                readOnly={!core.application.capabilities.role_mappings.save}
               />
             </Breadcrumb>
           );
@@ -92,6 +94,12 @@ export const roleMappingsManagementApp = Object.freeze({
             <core.i18n.Context>
               <KibanaThemeProvider theme$={theme$}>
                 <Router history={history}>
+                  <ReadonlyBadge
+                    featureId="role_mappings"
+                    tooltip={i18n.translate('xpack.security.management.roles.readonlyTooltip', {
+                      defaultMessage: 'Unable to create or edit role mappings',
+                    })}
+                  />
                   <BreadcrumbsProvider
                     onChange={createBreadcrumbsChangeHandler(core.chrome, setBreadcrumbs)}
                   >
@@ -104,6 +112,7 @@ export const roleMappingsManagementApp = Object.freeze({
                           docLinks={core.docLinks}
                           history={history}
                           navigateToApp={core.application.navigateToApp}
+                          readOnly={!core.application.capabilities.role_mappings.save}
                         />
                       </Route>
                       <Route path="/edit/:name?">

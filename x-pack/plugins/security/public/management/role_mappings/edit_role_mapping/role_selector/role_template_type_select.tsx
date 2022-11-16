@@ -35,19 +35,24 @@ interface Props {
   onChange: (roleTempplate: RoleTemplate) => void;
   canUseStoredScripts: boolean;
   canUseInlineScripts: boolean;
+  readOnly?: boolean;
 }
 
-export const RoleTemplateTypeSelect = (props: Props) => {
+export const RoleTemplateTypeSelect = ({
+  roleTemplate,
+  onChange,
+  canUseInlineScripts,
+  canUseStoredScripts,
+  readOnly = false,
+}: Props) => {
   const availableOptions = templateTypeOptions.filter(
-    ({ id }) =>
-      (id === 'inline' && props.canUseInlineScripts) ||
-      (id === 'stored' && props.canUseStoredScripts)
+    ({ id }) => (id === 'inline' && canUseInlineScripts) || (id === 'stored' && canUseStoredScripts)
   );
 
   const selectedOptions = templateTypeOptions.filter(
     ({ id }) =>
-      (id === 'inline' && isInlineRoleTemplate(props.roleTemplate)) ||
-      (id === 'stored' && isStoredRoleTemplate(props.roleTemplate))
+      (id === 'inline' && isInlineRoleTemplate(roleTemplate)) ||
+      (id === 'stored' && isStoredRoleTemplate(roleTemplate))
   );
 
   return (
@@ -59,15 +64,15 @@ export const RoleTemplateTypeSelect = (props: Props) => {
       onChange={(selected) => {
         const [{ id }] = selected;
         if (id === 'inline') {
-          props.onChange({
-            ...props.roleTemplate,
+          onChange({
+            ...roleTemplate,
             template: {
               source: '',
             },
           });
         } else {
-          props.onChange({
-            ...props.roleTemplate,
+          onChange({
+            ...roleTemplate,
             template: {
               id: '',
             },
@@ -75,6 +80,7 @@ export const RoleTemplateTypeSelect = (props: Props) => {
         }
       }}
       isClearable={false}
+      isDisabled={readOnly}
     />
   );
 };

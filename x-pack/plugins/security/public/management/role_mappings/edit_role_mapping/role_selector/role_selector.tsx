@@ -26,6 +26,7 @@ interface Props {
   canUseStoredScripts: boolean;
   mode: 'roles' | 'templates';
   onChange: (roleMapping: RoleMapping) => void;
+  readOnly?: boolean;
 }
 
 interface State {
@@ -33,6 +34,10 @@ interface State {
 }
 
 export class RoleSelector extends React.Component<Props, State> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   constructor(props: Props) {
     super(props);
 
@@ -71,6 +76,7 @@ export class RoleSelector extends React.Component<Props, State> {
             role_templates: [],
           });
         }}
+        isDisabled={this.props.readOnly}
       />
     );
   };
@@ -101,10 +107,21 @@ export class RoleSelector extends React.Component<Props, State> {
                   role_templates: templates,
                 });
               }}
+              readOnly={this.props.readOnly}
             />
-            <EuiHorizontalRule />
+            {index === roleTemplates.length - 1 && this.props.readOnly ? null : (
+              <EuiHorizontalRule />
+            )}
           </Fragment>
         ))}
+        {this.conditionallyRenderAddRoleTemplateButton()}
+      </div>
+    );
+  };
+
+  private conditionallyRenderAddRoleTemplateButton = () => {
+    if (!this.props.readOnly) {
+      return (
         <AddRoleTemplateButton
           canUseStoredScripts={this.props.canUseStoredScripts}
           canUseInlineScripts={this.props.canUseInlineScripts}
@@ -133,8 +150,9 @@ export class RoleSelector extends React.Component<Props, State> {
             }
           }}
         />
-      </div>
-    );
+      );
+    }
+    return null;
   };
 
   private getHelpText = () => {

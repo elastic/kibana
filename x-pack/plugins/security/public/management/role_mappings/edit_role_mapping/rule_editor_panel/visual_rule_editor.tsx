@@ -22,9 +22,14 @@ interface Props {
   maxDepth: number;
   onChange: (rules: Rule | null) => void;
   onSwitchEditorMode: () => void;
+  readOnly?: boolean;
 }
 
 export class VisualRuleEditor extends Component<Props, {}> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   public render() {
     if (this.props.rules) {
       const rules = this.renderRule(this.props.rules, this.onRuleChange);
@@ -133,6 +138,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
           allowAdd={this.canUseVisualEditor()}
           onChange={(value) => onChange(value)}
           onDelete={this.onRuleDelete}
+          readOnly={this.props.readOnly}
         />
       );
     }
@@ -141,6 +147,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
         rule={rule as FieldRule}
         onChange={(value) => onChange(value)}
         onDelete={this.onRuleDelete}
+        readOnly={this.props.readOnly}
       />
     );
   }

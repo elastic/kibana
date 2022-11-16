@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -56,6 +57,7 @@ interface Props {
   docLinks: DocLinksStart;
   history: ScopedHistory;
   navigateToApp: ApplicationStart['navigateToApp'];
+  readOnly?: boolean;
 }
 
 interface State {
@@ -68,6 +70,10 @@ interface State {
 }
 
 export class RoleMappingsGridPage extends Component<Props, State> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   private tableRef: React.RefObject<EuiInMemoryTable<RoleMapping>>;
   constructor(props: any) {
     super(props);
@@ -132,7 +138,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     if (loadState === 'finished' && roleMappings && roleMappings.length === 0) {
       return (
         <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-          <EmptyPrompt history={this.props.history} />
+          <EmptyPrompt history={this.props.history} readOnly={this.props.readOnly} />
         </EuiPageContent>
       );
     }
@@ -163,19 +169,23 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               }}
             />
           }
-          rightSideItems={[
-            <EuiButton
-              fill
-              iconType="plusInCircleFilled"
-              data-test-subj="createRoleMappingButton"
-              {...reactRouterNavigate(this.props.history, EDIT_ROLE_MAPPING_PATH)}
-            >
-              <FormattedMessage
-                id="xpack.security.management.roleMappings.createRoleMappingButtonLabel"
-                defaultMessage="Create role mapping"
-              />
-            </EuiButton>,
-          ]}
+          rightSideItems={
+            this.props.readOnly
+              ? undefined
+              : [
+                  <EuiButton
+                    fill
+                    iconType="plusInCircleFilled"
+                    data-test-subj="createRoleMappingButton"
+                    {...reactRouterNavigate(this.props.history, EDIT_ROLE_MAPPING_PATH)}
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.roleMappings.createRoleMappingButtonLabel"
+                      defaultMessage="Create role mapping"
+                    />
+                  </EuiButton>,
+                ]
+          }
         />
 
         <EuiSpacer size="l" />
@@ -287,7 +297,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                 hasActions={true}
                 search={search}
                 sorting={sorting}
-                selection={selection}
+                selection={this.props.readOnly ? undefined : selection}
                 pagination={pagination}
                 loading={loadState === 'loadingTable'}
                 message={message}
@@ -307,7 +317,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
   };
 
   private getColumnConfig = (deleteRoleMappingPrompt: DeleteRoleMappings) => {
-    const config = [
+    const config: Array<EuiBasicTableColumn<RoleMapping>> = [
       {
         field: 'name',
         name: i18n.translate('xpack.security.management.roleMappings.nameColumnName', {
@@ -377,10 +387,14 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           return <DisabledBadge data-test-subj="roleMappingEnabled" />;
         },
       },
-      {
+    ];
+
+    if (!this.props.readOnly) {
+      config.push({
         name: i18n.translate('xpack.security.management.roleMappings.actionsColumnName', {
           defaultMessage: 'Actions',
         }),
+        width: '80px',
         actions: [
           {
             isPrimary: true,
@@ -478,8 +492,8 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             },
           },
         ],
-      },
-    ];
+      });
+    }
     return config;
   };
 
@@ -498,12 +512,14 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       const { canManageRoleMappings, hasCompatibleRealms } =
         await this.props.roleMappingsAPI.checkRoleMappingFeatures();
 
+      const canLoad = canManageRoleMappings || this.props.readOnly;
+
       this.setState({
-        loadState: canManageRoleMappings ? this.state.loadState : 'permissionDenied',
+        loadState: canLoad ? this.state.loadState : 'permissionDenied',
         hasCompatibleRealms,
       });
 
-      if (canManageRoleMappings) {
+      if (canLoad) {
         this.performInitialLoad();
       }
     } catch (e) {
