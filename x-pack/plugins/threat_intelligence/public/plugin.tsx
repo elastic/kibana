@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { generateAttachmentType } from './modules/cases/utils';
 import { KibanaContextProvider } from './hooks/use_kibana';
 import {
   SecuritySolutionPluginContext,
   Services,
+  SetupPlugins,
   ThreatIntelligencePluginSetup,
   ThreatIntelligencePluginStart,
   ThreatIntelligencePluginStartDeps,
@@ -52,7 +55,13 @@ export const createApp =
     );
 
 export class ThreatIntelligencePlugin implements Plugin<void, void> {
-  public async setup(): Promise<ThreatIntelligencePluginSetup> {
+  public async setup(
+    core: CoreSetup,
+    plugins: SetupPlugins
+  ): Promise<ThreatIntelligencePluginSetup> {
+    const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();
+    plugins.cases.attachmentFramework.registerExternalReference(externalAttachmentType);
+
     return {};
   }
 
