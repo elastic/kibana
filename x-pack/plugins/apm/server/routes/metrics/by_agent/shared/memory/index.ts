@@ -63,23 +63,27 @@ export const percentSystemMemoryUsedScript = {
 export const percentCgroupMemoryUsedScript = {
   lang: 'painless',
   source: `
-    /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
-      This number represents the max possible value for the limit field.
-    */
-    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
+    if(doc.containsKey('${METRIC_CGROUP_MEMORY_LIMIT_BYTES}') && doc.containsKey('${METRIC_CGROUP_MEMORY_USAGE_BYTES}')){
+      /*
+        When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
+        This number represents the max possible value for the limit field.
+      */
+      double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = '${METRIC_CGROUP_MEMORY_LIMIT_BYTES}';
+      String limitKey = '${METRIC_CGROUP_MEMORY_LIMIT_BYTES}';
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
+      //Should use cgropLimit when value is not empty and not equals to the max limit value.
+      boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-    double total = useCgroupLimit ? doc[limitKey].value : doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
+      double total = useCgroupLimit ? doc[limitKey].value : doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
 
-    double used = doc['${METRIC_CGROUP_MEMORY_USAGE_BYTES}'].value;
+      double used = doc['${METRIC_CGROUP_MEMORY_USAGE_BYTES}'].value;
 
-    return used / total;
-    `,
+      return used / total;
+    }
+    
+    return null;
+  `,
 } as const;
 
 export async function getMemoryChartData({
