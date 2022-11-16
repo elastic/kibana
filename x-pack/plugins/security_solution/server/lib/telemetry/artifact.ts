@@ -42,11 +42,12 @@ export class Artifact implements IArtifact {
         headers: {
           'If-None-Match': etag,
         },
+        validateStatus: (status) => status < 400,
       });
       if (response.status === 304) {
         return { etag };
       }
-      const responseEtag = response.headers.ETag;
+      const responseEtag = response.headers.etag;
       const zip = new AdmZip(response.data);
       const entries = zip.getEntries();
       const manifest = JSON.parse(entries[0].getData().toString());
