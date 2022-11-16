@@ -38,7 +38,7 @@ interface RuleFields {
   ruleQuery: RuleQuery;
   ruleName: RuleName;
   ruleTags: RuleTagArray;
-  severity: Severity;
+  ruleSeverity: Severity;
   threat: Threat;
   threatSubtechnique: ThreatSubtechnique;
   threatTechnique: ThreatTechnique;
