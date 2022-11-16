@@ -7,10 +7,10 @@
 
 import { useHistory } from 'react-router-dom';
 import { Query } from '@kbn/es-query';
+import { useCallback } from 'react';
 import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
 import { FindingsBaseURLQuery } from '../../pages/findings/types';
-import { useCallback } from 'react';
 
 const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery, 'query'> => {
   const query =
