@@ -20,7 +20,8 @@
     "https://www.cobaltstrike.com/help-setup-collaboration",
     "https://www.elastic.co/guide/en/beats/packetbeat/current/configuration-tls.html",
     "https://www.elastic.co/guide/en/beats/filebeat/7.9/filebeat-module-suricata.html",
-    "https://www.elastic.co/guide/en/beats/filebeat/7.9/filebeat-module-zeek.html"
+    "https://www.elastic.co/guide/en/beats/filebeat/7.9/filebeat-module-zeek.html",
+    "https://www.elastic.co/security-labs/collecting-cobalt-strike-beacons-with-the-elastic-stack"
   ],
   "required_fields": [
     {
@@ -81,5 +82,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 100
+  "version": 101
 }
