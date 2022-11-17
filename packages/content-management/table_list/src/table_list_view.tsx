@@ -133,6 +133,13 @@ interface URLQueryParams {
   [key: string]: unknown;
 }
 
+/**
+ * Deserializer to convert the URL query params to a sanitized object
+ * we can rely on in this component.
+ *
+ * @param params The URL query params
+ * @returns The URLState sanitized
+ */
 const urlStateDeserializer = (params: URLQueryParams): URLState => {
   const stateFromURL: URLState = {};
   const sanitizedParams = { ...params };
@@ -146,6 +153,8 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     }
   });
 
+  // For backward compability with the Dashboard app we will support both "s" and "title" passed
+  // in the query params. We might want to stop supporting both in a future release (v9.0?)
   stateFromURL.s = sanitizedParams.s ?? sanitizedParams.title;
 
   if (sanitizedParams.sort === 'title' || sanitizedParams.sort === 'updatedAt') {
@@ -161,6 +170,12 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
   return stateFromURL;
 };
 
+/**
+ * Serializer to convert the updated state of the component into query params in the URL
+ *
+ * @param updated The updated state of our component that we want to persist in the URL
+ * @returns The query params (flatten object) to update the URL
+ */
 const urlStateSerializer = (updated: {
   s?: string;
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
@@ -508,6 +523,14 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
   }, [searchQueryParser, searchQuery, findItems]);
 
+  const onTableSearchChange = useCallback(
+    (arg: { query: Query | null; queryText: string }) => {
+      const query = arg.query ?? new Query(Ast.create([]), undefined, arg.queryText);
+      updateQuery(query);
+    },
+    [updateQuery]
+  );
+
   const updateTableSortAndPagination = useCallback(
     (data: {
       sort?: State<T>['tableSort'];
@@ -525,10 +548,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         });
       }
 
-      dispatch({
-        type: 'onTableChange',
-        data,
-      });
+      if (data.page) {
+        dispatch({
+          type: 'onTableChange',
+          data,
+        });
+      }
     },
     [setUrlState, urlStateEnabled]
   );
@@ -543,14 +568,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       });
     },
     [updateTableSortAndPagination]
-  );
-
-  const onTableSearchChange = useCallback(
-    (arg: { query: Query | null; queryText: string }) => {
-      const query = arg.query ?? new Query(Ast.create([]), undefined, arg.queryText);
-      updateQuery(query);
-    },
-    [updateQuery]
   );
 
   const onTableChange = useCallback(
