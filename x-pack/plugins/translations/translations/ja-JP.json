@@ -14420,7 +14420,6 @@
     "xpack.idxMgmt.mappingsEditor.configuration.dateDetectionFieldLabel": "日付文字列の日付としてのマッピング",
     "xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldDocumentionLink": "詳細情報",
     "xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldLabel": "日付フォーマット",
-    "xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldValidationErrorMessage": "スペースは使用できません。",
     "xpack.idxMgmt.mappingsEditor.configuration.dynamicMappingStrictHelpText": "デフォルトとしては、動的マッピングが無効の場合、マップされていないフィールドは通知なし無視されます。オプションとして、ドキュメントがマッピングされていないフィールドを含む場合、例外を選択とすることも可能です。",
     "xpack.idxMgmt.mappingsEditor.configuration.enableDynamicMappingsLabel": "動的マッピングの有効化",
     "xpack.idxMgmt.mappingsEditor.configuration.excludeSourceFieldsLabel": "フィールドの除外",

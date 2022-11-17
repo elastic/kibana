@@ -14440,7 +14440,6 @@
     "xpack.idxMgmt.mappingsEditor.configuration.dateDetectionFieldLabel": "将日期字符串映射为日期",
     "xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldDocumentionLink": "了解详情。",
     "xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldLabel": "日期格式",
-    "xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldValidationErrorMessage": "不允许使用空格。",
     "xpack.idxMgmt.mappingsEditor.configuration.dynamicMappingStrictHelpText": "默认情况下，禁用动态映射时，将会忽略未映射字段。文档包含未映射字段时，您可以根据需要引发异常。",
     "xpack.idxMgmt.mappingsEditor.configuration.enableDynamicMappingsLabel": "启用动态映射",
     "xpack.idxMgmt.mappingsEditor.configuration.excludeSourceFieldsLabel": "排除字段",
