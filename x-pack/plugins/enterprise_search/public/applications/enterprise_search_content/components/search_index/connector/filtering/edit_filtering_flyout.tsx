@@ -23,6 +23,8 @@ import { EditFilteringTab } from './edit_filtering_tab';
 import { FilteringRulesTable } from './editable_filtering_rules_table';
 
 interface EditFilteringFlyoutProps {
+  hasAdvancedFilteringFeature: boolean;
+  hasBasicFilteringFeature: boolean;
   revertLocalAdvancedFiltering: () => void;
   revertLocalFilteringRules: () => void;
   setIsEditing: (value: boolean) => void;
@@ -34,39 +36,49 @@ enum FilteringTabs {
 }
 
 export const EditFilteringFlyout: React.FC<EditFilteringFlyoutProps> = ({
+  hasAdvancedFilteringFeature,
+  hasBasicFilteringFeature,
   revertLocalFilteringRules,
   revertLocalAdvancedFiltering,
   setIsEditing,
 }) => {
   const tabs: EuiTabbedContentTab[] = [
-    {
-      content: (
-        <EditFilteringTab revertAction={revertLocalFilteringRules}>
-          <FilteringRulesTable />
-        </EditFilteringTab>
-      ),
-      id: FilteringTabs.BASIC,
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.index.connector.filtering.basicTabTitle',
-        {
-          defaultMessage: 'Basic filters',
-        }
-      ),
-    },
-    {
-      content: (
-        <EditFilteringTab revertAction={revertLocalAdvancedFiltering}>
-          <AdvancedFilteringRules />
-        </EditFilteringTab>
-      ),
-      id: FilteringTabs.ADVANCED,
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.index.connector.filtering.advancedTabTitle',
-        {
-          defaultMessage: 'Advanced filters',
-        }
-      ),
-    },
+    ...(hasBasicFilteringFeature
+      ? [
+          {
+            content: (
+              <EditFilteringTab revertAction={revertLocalFilteringRules}>
+                <FilteringRulesTable />
+              </EditFilteringTab>
+            ),
+            id: FilteringTabs.BASIC,
+            name: i18n.translate(
+              'xpack.enterpriseSearch.content.index.connector.filtering.basicTabTitle',
+              {
+                defaultMessage: 'Basic filters',
+              }
+            ),
+          },
+        ]
+      : []),
+    ...(hasAdvancedFilteringFeature
+      ? [
+          {
+            content: (
+              <EditFilteringTab revertAction={revertLocalAdvancedFiltering}>
+                <AdvancedFilteringRules />
+              </EditFilteringTab>
+            ),
+            id: FilteringTabs.ADVANCED,
+            name: i18n.translate(
+              'xpack.enterpriseSearch.content.index.connector.filtering.advancedTabTitle',
+              {
+                defaultMessage: 'Advanced filters',
+              }
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
