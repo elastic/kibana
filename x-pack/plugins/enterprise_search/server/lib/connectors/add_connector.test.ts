@@ -88,6 +88,7 @@ describe('addConnector lib function', () => {
         configuration: {},
         description: null,
         error: null,
+        features: null,
         filtering: [
           {
             active: {
@@ -270,6 +271,7 @@ describe('addConnector lib function', () => {
         configuration: {},
         description: null,
         error: null,
+        features: null,
         filtering: [
           {
             active: {
@@ -374,6 +376,7 @@ describe('addConnector lib function', () => {
         configuration: {},
         description: null,
         error: null,
+        features: null,
         filtering: [
           {
             active: {
