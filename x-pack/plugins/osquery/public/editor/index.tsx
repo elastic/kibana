@@ -8,6 +8,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import styled from 'styled-components';
+import { EuiResizeObserver } from '@elastic/eui';
 
 import type { EuiCodeEditorProps } from '../shared_imports';
 import { EuiCodeEditor } from '../shared_imports';
@@ -30,11 +31,10 @@ interface OsqueryEditorProps {
   commands?: EuiCodeEditorProps['commands'];
 }
 
-const ResizeWrapper = styled.div<{ height: number; minHeight: number }>`
+const ResizeWrapper = styled.div`
   overflow: auto;
   resize: vertical;
-  height: ${(props) => props.height};
-  min-height: ${(props) => props.minHeight};
+  min-height: 100px;
 `;
 
 const MIN_HEIGHT = 100;
@@ -45,26 +45,24 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
 }) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
   const [height, setHeight] = useState(MIN_HEIGHT);
-  const [minHeight, setMinHeight] = useState(MIN_HEIGHT);
   const editorRef = useRef<{ renderer: { layerConfig: { maxHeight: number; minHeight: number } } }>(
     {
       renderer: { layerConfig: { maxHeight: 100, minHeight: 100 } },
     }
   );
 
-  useDebounce(() => onChange(editorValue), 500, [editorValue]);
+  useDebounce(
+    () => {
+      onChange(editorValue);
+      const config = editorRef.current?.renderer.layerConfig;
 
-  useEffect(() => {
-    const config = editorRef.current?.renderer.layerConfig;
-
-    if (config.maxHeight > MIN_HEIGHT) {
-      setHeight(config.maxHeight);
-    }
-
-    if (config.maxHeight < config.minHeight) {
-      setMinHeight(config.maxHeight);
-    }
-  }, [editorRef.current.renderer.layerConfig]);
+      if (config.maxHeight > config.minHeight) {
+        setHeight(config.maxHeight);
+      }
+    },
+    500,
+    [editorValue]
+  );
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 
@@ -77,26 +75,32 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
         setHeight(maxHeight);
       }
     }, 0);
+  }, []);
 
-    document.addEventListener('mouseup', () => editorInstance.resize(), { once: true });
+  const onResize = useCallback((dimensions) => {
+    setHeight(dimensions.height);
   }, []);
 
   return (
-    <ResizeWrapper height={height} minHeight={minHeight}>
-      <EuiCodeEditor
-        value={editorValue}
-        mode="osquery"
-        onChange={setEditorValue}
-        theme="tomorrow"
-        name="osquery_editor"
-        setOptions={EDITOR_SET_OPTIONS}
-        editorProps={EDITOR_PROPS}
-        onLoad={resizeEditor}
-        height={height + 'px'}
-        width="100%"
-        commands={commands}
-      />
-    </ResizeWrapper>
+    <EuiResizeObserver onResize={onResize}>
+      {(resizeRef) => (
+        <ResizeWrapper ref={resizeRef}>
+          <EuiCodeEditor
+            value={editorValue}
+            mode="osquery"
+            onChange={setEditorValue}
+            theme="tomorrow"
+            name="osquery_editor"
+            setOptions={EDITOR_SET_OPTIONS}
+            editorProps={EDITOR_PROPS}
+            onLoad={resizeEditor}
+            height={height + 'px'}
+            width="100%"
+            commands={commands}
+          />
+        </ResizeWrapper>
+      )}
+    </EuiResizeObserver>
   );
 };
 
