@@ -26,6 +26,7 @@ export {
   enableInfrastructureHostsView,
   enableServiceMetrics,
   enableAwsLambdaMetrics,
+  enableAgentExplorerView,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   enableCriticalPath,

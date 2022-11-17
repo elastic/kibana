@@ -18,7 +18,8 @@
   "references": [
     "https://help.okta.com/en/prod/Content/Topics/Security/network/network-zones.htm",
     "https://developer.okta.com/docs/reference/api/system-log/",
-    "https://developer.okta.com/docs/reference/api/event-types/"
+    "https://developer.okta.com/docs/reference/api/event-types/",
+    "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
   ],
   "related_integrations": [
     {
@@ -77,5 +78,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 101
+  "version": 102
 }
