@@ -6,40 +6,21 @@
  * Side Public License, v 1.
  */
 
-export type GuideId = 'observability' | 'security' | 'search';
-
-export type ObservabilityStepIds = 'add_data' | 'view_dashboard' | 'tour_observability';
-export type SecurityStepIds = 'add_data' | 'rules' | 'alertsCases';
-export type SearchStepIds = 'add_data' | 'browse_docs' | 'search_experience';
-
-export type GuideStepIds = ObservabilityStepIds | SecurityStepIds | SearchStepIds;
+import { GuideState } from '@kbn/guided-onboarding';
 
 /**
- * Allowed states for a guide:
- *  in_progress: Guide has been started
- *  ready_to_complete: All steps have been completed, but the "Continue using Elastic" button has not been clicked
- *  complete: All steps and the guide have been completed
+ * Guided onboarding overall status:
+ *  not_started: no guides have been started yet
+ *  in_progress: a guide is currently active
+ *  complete: at least one guide has been completed
+ *  quit: the user quit a guide before completion
+ *  skipped: the user skipped on the landing page
  */
-export type GuideStatus = 'in_progress' | 'ready_to_complete' | 'complete';
+export type PluginStatus = 'not_started' | 'in_progress' | 'complete' | 'quit' | 'skipped';
 
-/**
- * Allowed states for each step in a guide:
- *  inactive: Step has not started
- *  active: Step is ready to start (i.e., the guide has been started)
- *  in_progress: Step has been started and is in progress
- *  ready_to_complete: Step can be manually completed
- *  complete: Step has been completed
- */
-export type StepStatus = 'inactive' | 'active' | 'in_progress' | 'ready_to_complete' | 'complete';
-
-export interface GuideStep {
-  id: GuideStepIds;
-  status: StepStatus;
-}
-
-export interface GuideState {
-  guideId: GuideId;
-  status: GuideStatus;
-  isActive?: boolean; // Drives the current guide shown in the dropdown panel
-  steps: GuideStep[];
+export interface PluginState {
+  status: PluginStatus;
+  // a specific period after deployment creation when guided onboarding UI is highlighted
+  isActivePeriod: boolean;
+  activeGuide?: GuideState;
 }

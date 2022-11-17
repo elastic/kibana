@@ -13,6 +13,7 @@ import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitorWithId,
+  EncryptedSyntheticsMonitorWithId,
   HeartbeatConfig,
   PrivateLocation,
   EncryptedSyntheticsMonitor,
@@ -43,7 +44,7 @@ export class SyntheticsMonitorClient {
       const config = formatHeartbeatRequest({
         monitor,
         monitorId: id,
-        customHeartbeatId: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID],
+        heartbeatId: monitor[ConfigKey.MONITOR_QUERY_ID],
       });
 
       const { privateLocations, publicLocations } = this.parseLocations(config);
@@ -95,7 +96,7 @@ export class SyntheticsMonitorClient {
       const editedConfig = formatHeartbeatRequest({
         monitor: editedMonitor.monitor,
         monitorId: editedMonitor.id,
-        customHeartbeatId: (editedMonitor.monitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
+        heartbeatId: (editedMonitor.monitor as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
       });
       const { publicLocations, privateLocations } = this.parseLocations(editedConfig);
       if (publicLocations.length > 0) {
@@ -120,19 +121,23 @@ export class SyntheticsMonitorClient {
     }
   }
   async deleteMonitors(
-    monitors: SyntheticsMonitorWithId[],
+    monitors: Array<EncryptedSyntheticsMonitorWithId | SyntheticsMonitorWithId>,
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract,
     spaceId: string
   ) {
+    /* Type cast encrypted saved objects to decrypted saved objects for delete flow only.
+     * Deletion does not require all monitor fields */
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(
-      monitors,
+      monitors as SyntheticsMonitorWithId[],
       request,
       savedObjectsClient,
       spaceId
     );
 
-    const publicDeletePromise = this.syntheticsService.deleteConfigs(monitors);
+    const publicDeletePromise = this.syntheticsService.deleteConfigs(
+      monitors as SyntheticsMonitorWithId[]
+    );
     const [pubicResponse] = await Promise.all([publicDeletePromise, privateDeletePromise]);
 
     return pubicResponse;

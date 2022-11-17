@@ -20,6 +20,7 @@ import {
   DOC_COUNT,
   _DOC_COUNT,
 } from '../../../../../../../common/constants/field_types';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import {
   EVENT_RATE_FIELD_ID,
   Field,
@@ -261,25 +262,25 @@ export function convertToMultiMetricJob(
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
   stashJobForCloning(jobCreator, true, true);
-  navigateToPath(`jobs/new_job/${JOB_TYPE.MULTI_METRIC}`, true);
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC, true);
 }
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
   stashJobForCloning(jobCreator, true, true);
-  navigateToPath(`jobs/new_job/${JOB_TYPE.ADVANCED}`, true);
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED, true);
 }
 
 export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
   stashJobForCloning(jobCreator, true, false);
-  navigateToPath('/jobs/new_job');
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
 export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.jobId = '';
   stashJobForCloning(jobCreator, true, true);
-  navigateToPath('/jobs/new_job');
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
 export function advancedStartDatafeed(

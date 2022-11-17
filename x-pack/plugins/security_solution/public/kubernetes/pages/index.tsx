@@ -23,7 +23,7 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { SessionsView } from '../../common/components/sessions_viewer';
-import { TimelineId } from '../../../common/types/timeline';
+import { TableId } from '../../../common/types/timeline';
 import { kubernetesSessionsHeaders } from './constants';
 
 export const KubernetesContainer = React.memo(() => {
@@ -67,7 +67,7 @@ export const KubernetesContainer = React.memo(() => {
   const renderSessionsView = useCallback(
     (sessionsFilterQuery: string | undefined) => (
       <SessionsView
-        timelineId={TimelineId.kubernetesPageSessions}
+        tableId={TableId.kubernetesPageSessions}
         endDate={to}
         pageFilters={[]}
         startDate={from}

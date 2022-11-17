@@ -14,6 +14,7 @@ import {
   ES_TEST_INDEX_NAME,
   getUrlPrefix,
   ObjectRemover,
+  getEventLog,
 } from '../../../../../common/lib';
 import { createEsDocumentsWithGroups } from '../lib/create_test_data';
 import { createDataStream, deleteDataStream } from '../lib/create_test_data';
@@ -193,14 +194,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       // write documents from now to the future end date in 3 groups
       await createEsDocumentsInGroups(3);
 
-      // this never fires because of bad fields error
       await createRule({
         name: 'never fire',
-        timeField: 'source', // bad field for time
         aggType: 'avg',
-        aggField: 'source', // bad field for agg
+        aggField: 'testedValue',
         groupBy: 'all',
-        thresholdComparator: '>',
+        thresholdComparator: '<',
         threshold: [0],
       });
 
@@ -209,6 +208,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         aggType: 'avg',
         aggField: 'testedValue',
         groupBy: 'all',
+        timeWindowSize: RULE_INTERVAL_SECONDS * 10,
         thresholdComparator: '>=',
         threshold: [0],
       });
@@ -223,7 +223,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(name).to.be('always fire');
 
         const messagePattern =
-          /alert 'always fire' is active for group \'all documents\':\n\n- Value: .*\n- Conditions Met: avg\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+          /alert 'always fire' is active for group \'all documents\':\n\n- Value: .*\n- Conditions Met: avg\(testedValue\) is greater than or equal to 0 over 30s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
       }
     });
@@ -530,6 +530,43 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       const { message } = doc._source.params;
 
       expect(message).to.contain('Value: 5');
+    });
+
+    it('runs and gracefully handles ES errors', async () => {
+      // write documents from now to the future end date in 3 groups
+      await createEsDocumentsInGroups(3);
+
+      // this never fires because of bad fields error
+      const ruleId = await createRule({
+        name: 'never fire',
+        timeField: 'source', // bad field for time
+        aggType: 'avg',
+        aggField: 'source', // bad field for agg
+        groupBy: 'all',
+        thresholdComparator: '>',
+        threshold: [0],
+      });
+
+      // create some more documents in the first group
+      await createEsDocumentsInGroups(1);
+
+      // get the events we're expecting
+      const events = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 2 }]]),
+        });
+      });
+
+      for (const event of events) {
+        expect(event?.rule?.name).to.eql('never fire');
+        expect(event?.kibana?.alerting?.outcome).to.eql('success');
+        expect(event?.message).to.eql(`rule executed: .index-threshold:${ruleId}: 'never fire'`);
+      }
     });
 
     async function createEsDocumentsInGroups(

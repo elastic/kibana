@@ -37,6 +37,7 @@ import { postSourcererDataView } from './api';
 import * as source from '../source/use_data_view';
 import { sourcererActions } from '../../store/sourcerer';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -111,7 +112,13 @@ describe('Sourcerer Hooks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
-    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      mockGlobalState,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
     mockUseUserInfo.mockImplementation(() => userInfoState);
   });
   it('initializes loading default and timeline index patterns', async () => {
@@ -157,6 +164,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -259,6 +267,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -329,6 +338,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -387,6 +397,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
         kibanaObservable,
         storage
       );
@@ -428,6 +439,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
         kibanaObservable,
         storage
       );
@@ -470,6 +482,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
         kibanaObservable,
         storage
       );
@@ -516,6 +529,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
         kibanaObservable,
         storage
       );
@@ -564,6 +578,7 @@ describe('Sourcerer Hooks', () => {
             },
           },
           SUB_PLUGINS_REDUCER,
+          { dataTable: tGridReducer },
           kibanaObservable,
           storage
         );

@@ -46,8 +46,7 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
         end: endMoment.valueOf(),
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startMoment, endMoment]);
+  }, [startMoment, endMoment, setTimeRange]);
 
   // update our local start and end moment objects if
   // the parent start and end updates.

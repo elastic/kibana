@@ -36,7 +36,6 @@ import {
   createMlAlertType,
   createNewTermsAlertType,
   createQueryAlertType,
-  createSavedQueryAlertType,
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
@@ -80,9 +79,10 @@ import type {
   CreateQueryRuleAdditionalOptions,
 } from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
-import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
-// eslint-disable-next-line no-restricted-imports
-import { legacyIsNotificationAlertExecutor } from './lib/detection_engine/notifications/legacy_types';
+import {
+  legacyRulesNotificationAlertType,
+  legacyIsNotificationAlertExecutor,
+} from './lib/detection_engine/rule_actions_legacy';
 import { createSecurityRuleTypeWrapper } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 
 import { RequestContextFactory } from './request_context_factory';
@@ -259,7 +259,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
-        createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+        createQueryAlertType({
+          ...ruleOptions,
+          ...queryRuleAdditionalOptions,
+          id: SAVED_QUERY_RULE_TYPE_ID,
+          name: 'Saved Query Rule',
+        })
       )
     );
     plugins.alerting.registerType(
@@ -268,7 +273,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
-        createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+        createQueryAlertType({
+          ...ruleOptions,
+          ...queryRuleAdditionalOptions,
+          id: QUERY_RULE_TYPE_ID,
+          name: 'Custom Query Rule',
+        })
       )
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
@@ -342,7 +352,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
         endpointContext,
-        depsStart.spaces?.spacesService?.getSpaceId
+        depsStart.spaces?.spacesService?.getSpaceId,
+        ruleDataClient
       );
 
       plugins.data.search.registerSearchStrategy(

@@ -53,7 +53,7 @@ configService.atPath.mockImplementation((path) => {
       ssl: {
         verificationMode: 'none',
       },
-      compression: { enabled: true },
+      compression: { enabled: true, brotli: { enabled: false } },
       xsrf: {
         disableProtection: true,
         allowlist: [],

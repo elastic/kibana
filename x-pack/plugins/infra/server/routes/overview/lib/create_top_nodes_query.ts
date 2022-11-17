@@ -142,7 +142,7 @@ export const createTopNodesQuery = (
           timeseries: {
             date_histogram: {
               field: '@timestamp',
-              fixed_interval: '1m',
+              fixed_interval: options.bucketSize,
               extended_bounds: {
                 min: options.timerange.from,
                 max: options.timerange.to,

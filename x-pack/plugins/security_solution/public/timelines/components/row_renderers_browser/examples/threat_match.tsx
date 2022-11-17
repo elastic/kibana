@@ -16,7 +16,7 @@ const ThreatMatchExampleComponent: React.FC = () => (
     {threatMatchRowRenderer.renderRow({
       data: demoTimelineData[31].ecs,
       isDraggable: false,
-      timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
+      scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
     })}
   </>
 );

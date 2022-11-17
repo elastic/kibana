@@ -374,4 +374,25 @@ export function initRoutes(
       }
     }
   );
+
+  router.get(
+    {
+      path: '/api/registered_tasks',
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const tm = await taskManagerStart;
+        return res.ok({
+          body: tm.getRegisteredTypes(),
+        });
+      } catch (err) {
+        return res.badRequest({ body: err });
+      }
+    }
+  );
 }

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObject,
+} from '@kbn/core/server';
 
+import { normalizeHostsForAgents } from '../../common/services';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -19,8 +24,21 @@ import type {
   FleetServerHostSOAttributes,
   FleetServerHost,
   NewFleetServerHost,
+  AgentPolicy,
 } from '../types';
 import { FleetServerHostUnauthorizedError } from '../errors';
+
+import { agentPolicyService } from './agent_policy';
+
+function savedObjectToFleetServerHost(so: SavedObject<FleetServerHostSOAttributes>) {
+  const data = { ...so.attributes };
+
+  if (data.proxy_id === null) {
+    delete data.proxy_id;
+  }
+
+  return { id: so.id, ...data };
+}
 
 export async function createFleetServerHost(
   soClient: SavedObjectsClientContract,
@@ -39,16 +57,17 @@ export async function createFleetServerHost(
     }
   }
 
+  if (data.host_urls) {
+    data.host_urls = data.host_urls.map(normalizeHostsForAgents);
+  }
+
   const res = await soClient.create<FleetServerHostSOAttributes>(
     FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
     data,
     { id: options?.id, overwrite: options?.overwrite }
   );
 
-  return {
-    id: res.id,
-    ...res.attributes,
-  };
+  return savedObjectToFleetServerHost(res);
 }
 
 export async function getFleetServerHost(
@@ -60,10 +79,7 @@ export async function getFleetServerHost(
     id
   );
 
-  return {
-    id: res.id,
-    ...res.attributes,
-  };
+  return savedObjectToFleetServerHost(res);
 }
 
 export async function listFleetServerHosts(soClient: SavedObjectsClientContract) {
@@ -73,10 +89,7 @@ export async function listFleetServerHosts(soClient: SavedObjectsClientContract)
   });
 
   return {
-    items: res.saved_objects.map<FleetServerHost>((so) => ({
-      id: so.id,
-      ...so.attributes,
-    })),
+    items: res.saved_objects.map<FleetServerHost>(savedObjectToFleetServerHost),
     total: res.total,
     page: res.page,
     perPage: res.per_page,
@@ -85,6 +98,7 @@ export async function listFleetServerHosts(soClient: SavedObjectsClientContract)
 
 export async function deleteFleetServerHost(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   id: string,
   options?: { fromPreconfiguration?: boolean }
 ) {
@@ -101,6 +115,8 @@ export async function deleteFleetServerHost(
       `Default Fleet Server hosts ${id} cannot be deleted.`
     );
   }
+
+  await agentPolicyService.removeFleetServerHostFromAll(soClient, esClient, id);
 
   return await soClient.delete(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id);
 }
@@ -131,6 +147,10 @@ export async function updateFleetServerHost(
         { fromPreconfiguration: options?.fromPreconfiguration }
       );
     }
+  }
+
+  if (data.host_urls) {
+    data.host_urls = data.host_urls.map(normalizeHostsForAgents);
   }
 
   await soClient.update<FleetServerHostSOAttributes>(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id, data);
@@ -166,15 +186,28 @@ export async function bulkGetFleetServerHosts(
         return undefined;
       }
 
-      return {
-        id: so.id,
-        ...so.attributes,
-      };
+      return savedObjectToFleetServerHost(so);
     })
     .filter(
       (fleetServerHostOrUndefined): fleetServerHostOrUndefined is FleetServerHost =>
         typeof fleetServerHostOrUndefined !== 'undefined'
     );
+}
+
+export async function getFleetServerHostsForAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  agentPolicy: AgentPolicy
+) {
+  if (agentPolicy.fleet_server_host_id) {
+    return getFleetServerHost(soClient, agentPolicy.fleet_server_host_id);
+  }
+
+  const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
+  if (!defaultFleetServerHost) {
+    throw new Error('Default Fleet Server host is not setup');
+  }
+
+  return defaultFleetServerHost;
 }
 
 /**
@@ -192,10 +225,7 @@ export async function getDefaultFleetServerHost(
     return null;
   }
 
-  return {
-    id: res.saved_objects[0].id,
-    ...res.saved_objects[0].attributes,
-  };
+  return savedObjectToFleetServerHost(res.saved_objects[0]);
 }
 
 /**

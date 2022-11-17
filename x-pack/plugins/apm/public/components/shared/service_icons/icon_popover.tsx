@@ -55,8 +55,7 @@ export function IconPopover({
       ownFocus={false}
       button={
         <StyledButtonIcon
-          display="fill"
-          color="ghost"
+          color="text"
           onClick={onClick}
           iconType={icon.type}
           iconSize={icon.size ?? 'l'}

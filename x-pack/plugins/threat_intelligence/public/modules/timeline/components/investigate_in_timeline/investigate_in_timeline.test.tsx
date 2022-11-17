@@ -13,8 +13,8 @@ import {
   Indicator,
 } from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { InvestigateInTimelineButton, InvestigateInTimelineButtonIcon } from '.';
-import { EMPTY_VALUE } from '../../../../../common/constants';
+import { InvestigateInTimelineContextMenu, InvestigateInTimelineButtonIcon } from '.';
+import { EMPTY_VALUE } from '../../../../common/constants';
 
 describe('<InvestigateInTimeline />', () => {
   describe('<InvestigateInTimelineButton />', () => {
@@ -24,7 +24,7 @@ describe('<InvestigateInTimeline />', () => {
 
       const component = render(
         <TestProvidersComponent>
-          <InvestigateInTimelineButton data={mockData} data-test-subj={mockId} />
+          <InvestigateInTimelineContextMenu data={mockData} data-test-subj={mockId} />
         </TestProvidersComponent>
       );
 
@@ -38,7 +38,7 @@ describe('<InvestigateInTimeline />', () => {
 
       const component = render(
         <TestProvidersComponent>
-          <InvestigateInTimelineButton data={mockData} />
+          <InvestigateInTimelineContextMenu data={mockData} />
         </TestProvidersComponent>
       );
 

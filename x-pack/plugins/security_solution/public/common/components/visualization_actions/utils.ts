@@ -6,6 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import type { Request } from './types';
 
 export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
   hostName
@@ -34,20 +35,14 @@ export const hostNameExistsFilter: Filter[] = [
   {
     query: {
       bool: {
-        filter: [
+        should: [
           {
-            bool: {
-              should: [
-                {
-                  exists: {
-                    field: 'host.name',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
+            exists: {
+              field: 'host.name',
             },
           },
         ],
+        minimum_should_match: 1,
       },
     },
     meta: {
@@ -97,43 +92,23 @@ export const getNetworkDetailsPageFilter = (ipAddress?: string): Filter[] =>
       ]
     : [];
 
-export const filterNetworkExternalAlertData: Filter[] = [
+export const sourceOrDestinationIpExistsFilter: Filter[] = [
   {
     query: {
       bool: {
-        filter: [
+        should: [
           {
-            bool: {
-              should: [
-                {
-                  bool: {
-                    should: [
-                      {
-                        exists: {
-                          field: 'source.ip',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        exists: {
-                          field: 'destination.ip',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
+            exists: {
+              field: 'source.ip',
+            },
+          },
+          {
+            exists: {
+              field: 'destination.ip',
             },
           },
         ],
+        minimum_should_match: 1,
       },
     },
     meta: {
@@ -171,3 +146,25 @@ export const getIndexFilters = (selectedPatterns: string[]) =>
         },
       ]
     : [];
+
+export const getRequestsAndResponses = (requests: Request[]) => {
+  return requests.reduce(
+    (acc: { requests: string[]; responses: string[] }, req: Request) => {
+      return {
+        requests: [
+          ...acc.requests,
+          JSON.stringify(
+            { body: req?.json, index: (req?.stats?.indexFilter?.value ?? '').split(',') },
+            null,
+            2
+          ),
+        ],
+        responses: [
+          ...acc.responses,
+          JSON.stringify(req?.response?.json?.rawResponse ?? {}, null, 2),
+        ],
+      };
+    },
+    { requests: [], responses: [] }
+  );
+};

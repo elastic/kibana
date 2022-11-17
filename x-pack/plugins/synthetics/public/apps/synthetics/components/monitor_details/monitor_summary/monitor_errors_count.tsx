@@ -8,35 +8,45 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
-import { useParams } from 'react-router-dom';
-import { KpiWrapper } from './kpi_wrapper';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
-export const MonitorErrorsCount = ({ time }: { time?: { to: string; from: string } }) => {
+interface MonitorErrorsCountProps {
+  from: string;
+  to: string;
+}
+
+export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
 
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const monitorId = useMonitorQueryId();
+
+  const selectedLocation = useSelectedLocation();
+
+  if (!selectedLocation || !monitorId) {
+    return null;
+  }
 
   return (
-    <KpiWrapper>
-      <ExploratoryViewEmbeddable
-        align="left"
-        reportType={ReportTypes.SINGLE_METRIC}
-        attributes={[
-          {
-            time: {
-              from: 'now-30d/d',
-              to: 'now',
-            },
-            reportDefinitions: { config_id: [monitorId] },
-            dataType: 'synthetics',
-            selectedMetricField: 'state.id',
-            name: 'synthetics-series-1',
+    <ExploratoryViewEmbeddable
+      align="left"
+      customHeight="70px"
+      reportType={ReportTypes.SINGLE_METRIC}
+      attributes={[
+        {
+          time: props,
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation?.label],
           },
-        ]}
-      />
-    </KpiWrapper>
+          dataType: 'synthetics',
+          selectedMetricField: 'monitor_errors',
+          name: 'synthetics-series-1',
+        },
+      ]}
+    />
   );
 };

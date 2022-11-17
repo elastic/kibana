@@ -45,7 +45,13 @@ import { EcsUser } from './user';
 import { EcsUserAgent } from './user_agent';
 import { EcsVulnerability } from './vulnerability';
 
-export type { EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from './event';
+export type {
+  EcsEvent,
+  EcsEventCategory,
+  EcsEventKind,
+  EcsEventOutcome,
+  EcsEventType,
+} from './event';
 
 interface EcsField {
   /**

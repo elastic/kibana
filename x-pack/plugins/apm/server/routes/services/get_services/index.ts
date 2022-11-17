@@ -7,15 +7,17 @@
 
 import { Logger } from '@kbn/logging';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getServicesItems } from './get_services_items';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServices({
   environment,
   kuery,
-  setup,
+  mlClient,
+  apmEventClient,
   searchAggregatedTransactions,
   searchAggregatedServiceMetrics,
   logger,
@@ -26,7 +28,8 @@ export async function getServices({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  mlClient?: MlClient;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   searchAggregatedServiceMetrics: boolean;
   logger: Logger;
@@ -39,7 +42,8 @@ export async function getServices({
     const items = await getServicesItems({
       environment,
       kuery,
-      setup,
+      mlClient,
+      apmEventClient,
       searchAggregatedTransactions,
       searchAggregatedServiceMetrics,
       logger,

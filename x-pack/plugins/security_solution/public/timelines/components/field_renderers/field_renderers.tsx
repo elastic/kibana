@@ -334,7 +334,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                   dataProvider={dataProvider}
                   isDraggable={false}
                   render={() => (render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
-                  timelineId={undefined}
+                  scopeId={undefined}
                   fieldType={fieldType}
                   isAggregatable={isAggregatable}
                 />

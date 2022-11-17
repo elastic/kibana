@@ -9,7 +9,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { ExceptionItemCardConditions } from './conditions';
+import { ExceptionItemCardConditions } from '.';
 
 interface TestEntry {
   field: string;

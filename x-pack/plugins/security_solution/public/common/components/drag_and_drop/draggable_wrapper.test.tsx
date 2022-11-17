@@ -11,7 +11,7 @@ import React from 'react';
 import type { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
 
 import '../../mock/match_media';
-import { TimelineId } from '../../../../common/types';
+import { TableId, TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
@@ -35,25 +35,22 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const timelineIdsWithHoverActions = [
+const scopeIdsWithHoverActions = [
   undefined,
   TimelineId.active,
-  TimelineId.alternateTest,
+  TableId.alternateTest,
   TimelineId.casePage,
-  TimelineId.detectionsPage,
-  TimelineId.detectionsRulesDetailsPage,
-  TimelineId.hostsPageEvents,
-  TimelineId.hostsPageSessions,
-  TimelineId.kubernetesPageSessions,
-  TimelineId.networkPageEvents,
+  TableId.alertsOnAlertsPage,
+  TableId.alertsOnRuleDetailsPage,
+  TableId.hostsPageEvents,
+  TableId.hostsPageSessions,
+  TableId.kubernetesPageSessions,
+  TableId.networkPageEvents,
   TimelineId.test,
-  TimelineId.usersPageEvents,
+  TableId.usersPageEvents,
 ];
 
-const timelineIdsNoHoverActions = [
-  TimelineId.rulePreview,
-  ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
-];
+const scopeIdsNoHoverActions = [TableId.rulePreview, ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID];
 
 describe('DraggableWrapper', () => {
   const dataProvider = mockDataProviders[0];
@@ -61,7 +58,7 @@ describe('DraggableWrapper', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterEach(() => {
@@ -69,7 +66,9 @@ describe('DraggableWrapper', () => {
     if (portal != null) {
       portal.innerHTML = '';
     }
+  });
 
+  afterAll(() => {
     jest.useRealTimers();
   });
 
@@ -141,8 +140,8 @@ describe('DraggableWrapper', () => {
       });
     });
 
-    timelineIdsWithHoverActions.forEach((timelineId) => {
-      test(`it renders hover actions (by default) when 'isDraggable' is false and timelineId is '${timelineId}'`, async () => {
+    scopeIdsWithHoverActions.forEach((scopeId) => {
+      test(`it renders hover actions (by default) when 'isDraggable' is false and timelineId is '${scopeId}'`, async () => {
         const isDraggable = false;
 
         const { container } = render(
@@ -152,7 +151,7 @@ describe('DraggableWrapper', () => {
                 dataProvider={dataProvider}
                 isDraggable={isDraggable}
                 render={() => message}
-                timelineId={timelineId}
+                scopeId={scopeId}
               />
             </DragDropContextWrapper>
           </TestProviders>
@@ -166,8 +165,8 @@ describe('DraggableWrapper', () => {
       });
     });
 
-    timelineIdsNoHoverActions.forEach((timelineId) => {
-      test(`it does NOT render hover actions when 'isDraggable' is false and timelineId is '${timelineId}'`, async () => {
+    scopeIdsNoHoverActions.forEach((scopeId) => {
+      test(`it does NOT render hover actions when 'isDraggable' is false and timelineId is '${scopeId}'`, async () => {
         const isDraggable = false;
 
         const { container } = render(
@@ -177,7 +176,7 @@ describe('DraggableWrapper', () => {
                 dataProvider={dataProvider}
                 isDraggable={isDraggable}
                 render={() => message}
-                timelineId={timelineId}
+                scopeId={scopeId}
               />
             </DragDropContextWrapper>
           </TestProviders>
@@ -281,15 +280,15 @@ describe('ConditionalPortal', () => {
   });
 
   describe('disableHoverActions', () => {
-    timelineIdsNoHoverActions.forEach((timelineId) =>
-      test(`it returns true when timelineId is ${timelineId}`, () => {
-        expect(disableHoverActions(timelineId)).toBe(true);
+    scopeIdsNoHoverActions.forEach((scopeId) =>
+      test(`it returns true when timelineId is ${scopeId}`, () => {
+        expect(disableHoverActions(scopeId)).toBe(true);
       })
     );
 
-    timelineIdsWithHoverActions.forEach((timelineId) =>
-      test(`it returns false when timelineId is ${timelineId}`, () => {
-        expect(disableHoverActions(timelineId)).toBe(false);
+    scopeIdsWithHoverActions.forEach((scopeId) =>
+      test(`it returns false when timelineId is ${scopeId}`, () => {
+        expect(disableHoverActions(scopeId)).toBe(false);
       })
     );
   });

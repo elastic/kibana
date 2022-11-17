@@ -105,7 +105,7 @@ jest.mock('../../../../risk_score/containers', () => {
 });
 
 const defaultProps = {
-  timelineId: TimelineId.test,
+  scopeId: TimelineId.test,
   isHostIsolationPanelOpen: false,
   handleOnEventClosed: jest.fn(),
   onAddIsolationStatusClick: jest.fn(),

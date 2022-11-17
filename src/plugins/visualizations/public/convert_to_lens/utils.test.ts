@@ -213,6 +213,7 @@ describe('getBucketCollapseFn', () => {
 
 describe('getBucketColumns', () => {
   const dataView = stubLogstashDataView;
+  const visType = 'heatmap';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -228,7 +229,7 @@ describe('getBucketColumns', () => {
       [bucketKey]: [],
     };
 
-    expect(getBucketColumns(visSchemas, keys, dataView, false, [])).toEqual([]);
+    expect(getBucketColumns(visType, visSchemas, keys, dataView, false, [])).toEqual([]);
     expect(mockConvertBucketToColumns).toBeCalledTimes(0);
   });
 
@@ -254,7 +255,7 @@ describe('getBucketColumns', () => {
     };
     mockConvertBucketToColumns.mockReturnValueOnce(null);
 
-    expect(getBucketColumns(visSchemas, keys, dataView, false, [])).toBeNull();
+    expect(getBucketColumns(visType, visSchemas, keys, dataView, false, [])).toBeNull();
     expect(mockConvertBucketToColumns).toBeCalledTimes(1);
   });
 
@@ -280,7 +281,7 @@ describe('getBucketColumns', () => {
     };
     mockConvertBucketToColumns.mockReturnValueOnce([null]);
 
-    expect(getBucketColumns(visSchemas, keys, dataView, false, [])).toBeNull();
+    expect(getBucketColumns(visType, visSchemas, keys, dataView, false, [])).toBeNull();
     expect(mockConvertBucketToColumns).toBeCalledTimes(1);
   });
   test('should return columns', () => {
@@ -319,7 +320,7 @@ describe('getBucketColumns', () => {
 
     mockConvertBucketToColumns.mockReturnValue(returnValue);
 
-    expect(getBucketColumns(visSchemas, keys, dataView, false, [])).toEqual([
+    expect(getBucketColumns(visType, visSchemas, keys, dataView, false, [])).toEqual([
       ...returnValue,
       ...returnValue,
     ]);
@@ -592,6 +593,8 @@ describe('sortColumns', () => {
 });
 
 describe('getColumnIds', () => {
+  const visType = 'heatmap';
+
   const colId1 = '0_agg_id';
   const colId2 = '1_agg_id';
   const colId3 = '2_agg_id';
@@ -694,6 +697,7 @@ describe('getColumnIds', () => {
       });
       expect(
         getCustomBucketColumns(
+          visType,
           customBucketsWithMetricIds,
           [
             { columnId: 'col-3', meta: { aggId: '3' } },

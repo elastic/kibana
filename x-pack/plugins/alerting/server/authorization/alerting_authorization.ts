@@ -51,6 +51,8 @@ export enum WriteOperations {
   UnmuteAlert = 'unmuteAlert',
   Snooze = 'snooze',
   BulkEdit = 'bulkEdit',
+  BulkDelete = 'bulkDelete',
+  BulkEnable = 'bulkEnable',
   Unsnooze = 'unsnooze',
 }
 
@@ -126,12 +128,10 @@ export class AlertingAuthorization {
       });
 
     this.allPossibleConsumers = this.featuresIds.then((featuresIds) => {
-      return featuresIds.size
-        ? asAuthorizedConsumers([ALERTS_FEATURE_ID, ...featuresIds], {
-            read: true,
-            all: true,
-          })
-        : {};
+      return asAuthorizedConsumers([ALERTS_FEATURE_ID, ...featuresIds], {
+        read: true,
+        all: true,
+      });
     });
   }
 

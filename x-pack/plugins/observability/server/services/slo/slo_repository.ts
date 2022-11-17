@@ -5,35 +5,57 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
-import { StoredSLO, SLO } from '../../types/models';
+import { StoredSLO, SLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLONotFound } from '../../errors';
+import { sloSchema } from '../../types/schema';
+
+export interface Criteria {
+  name?: string;
+}
+
+export interface Pagination {
+  page: number;
+  perPage: number;
+}
+
+export interface Paginated<T> {
+  page: number;
+  perPage: number;
+  total: number;
+  results: T[];
+}
 
 export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
+  find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract) {}
 
   async save(slo: SLO): Promise<SLO> {
-    const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, slo, {
+    const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, toStoredSLO(slo), {
       id: slo.id,
       overwrite: true,
     });
 
-    return savedSLO.attributes;
+    return toSLO(savedSLO.attributes);
   }
 
   async findById(id: string): Promise<SLO> {
     try {
       const slo = await this.soClient.get<StoredSLO>(SO_SLO_TYPE, id);
-      return slo.attributes;
+      return toSLO(slo.attributes);
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw new SLONotFound(`SLO [${id}] not found`);
@@ -52,4 +74,42 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       throw err;
     }
   }
+
+  async find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>> {
+    const filterKuery = buildFilterKuery(criteria);
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: pagination.page,
+      perPage: pagination.perPage,
+      filter: filterKuery,
+    });
+
+    return {
+      total: response.total,
+      page: response.page,
+      perPage: response.per_page,
+      results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
+    };
+  }
+}
+
+function buildFilterKuery(criteria: Criteria): string | undefined {
+  const filters: string[] = [];
+  if (!!criteria.name) {
+    filters.push(`slo.attributes.name: ${criteria.name}`);
+  }
+  return filters.length > 0 ? filters.join(' and ') : undefined;
+}
+
+function toStoredSLO(slo: SLO): StoredSLO {
+  return sloSchema.encode(slo);
+}
+
+function toSLO(storedSLO: StoredSLO): SLO {
+  return pipe(
+    sloSchema.decode(storedSLO),
+    fold(() => {
+      throw new Error('Invalid Stored SLO');
+    }, t.identity)
+  );
 }

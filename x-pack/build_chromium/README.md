@@ -24,6 +24,11 @@ location](https://commondatastorage.googleapis.com/chromium-browser-snapshots/in
 
 ## Build Script Usage
 
+The system OS requires a few setup steps:
+1. Required packages: `bzip2`, `git`, `lsb_release`, `python3`
+2. The `python` command needs to launch Python 3.
+3. Recommended: `tmux`, as your ssh session may get interrupted
+
 These commands show how to set up an environment to build:
 ```sh
 # Allow our scripts to use depot_tools commands
@@ -36,7 +41,7 @@ mkdir ~/chromium && cd ~/chromium
 gsutil cp -r gs://headless_shell_staging/build_chromium .
 
 # Install the OS packages, configure the environment, download the chromium source (25GB)
-python ./build_chromium/init.py [arch_name]
+python ./build_chromium/init.py
 
 # Run the build script with the path to the chromium src directory, the git commit hash
 python ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 x64
@@ -67,7 +72,7 @@ A good how-to on building Chromium from source is
 We have an `linux/args.gn` file that is automatically copied to the build target directory.
 
 To get a list of the build arguments that are enabled, install `depot_tools` and run
-`gn args out/headless --list`. It prints out all of the flags and their
+`gn args out/headless --list` from the `chromium/src` directory. It prints out all of the flags and their
 settings, including the defaults. Some build flags are documented
 [here](https://www.chromium.org/developers/gn-build-configuration).
 
@@ -86,10 +91,6 @@ are created in x64 using cross-compiling. CentOS is not supported for building C
    - 8 CPU
    - 30GB memory
    - 80GB free space on disk (Try `ncdu /home` to see where space is used.)
-   - git
-   - python2 (`python` must link to `python2`)
-   - lsb_release
-   - tmux is recommended in case your ssh session is interrupted
    - "Cloud API access scopes": must have **read / write** scope for the Storage API
 4. Install [Google Cloud SDK](https://cloud.google.com/sdk) locally to ssh into the GCP instance
 

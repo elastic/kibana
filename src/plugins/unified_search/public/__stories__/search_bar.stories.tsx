@@ -298,6 +298,15 @@ storiesOf('SearchBar', module)
       query: { query: 'Test: miaou', language: 'kuery' },
     } as unknown as SearchBarProps)
   )
+  .add('with query menu off', () =>
+    wrapSearchBarInContext({
+      showDatePicker: false,
+      showFilterBar: false,
+      showQueryInput: true,
+      showQueryMenu: false,
+      query: { query: 'Test: miaou', language: 'kuery' },
+    } as unknown as SearchBarProps)
+  )
   .add('with only the filter bar and the date picker on', () =>
     wrapSearchBarInContext({
       showDatePicker: true,

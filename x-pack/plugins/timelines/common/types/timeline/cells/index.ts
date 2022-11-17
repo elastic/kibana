@@ -27,6 +27,8 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   rowRenderers?: RowRenderer[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFlyoutAlert?: (data: any) => void;
-  timelineId: string;
+  scopeId: string;
   truncate?: boolean;
+  key?: string;
+  closeCellPopover?: () => void;
 };

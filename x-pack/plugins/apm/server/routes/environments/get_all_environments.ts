@@ -7,13 +7,13 @@
 
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Setup } from '../../lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 /**
  * This is used for getting *all* environments, and does not filter by range.
@@ -23,20 +23,18 @@ export async function getAllEnvironments({
   includeMissing = false,
   searchAggregatedTransactions,
   serviceName,
-  setup,
+  apmEventClient,
   size,
 }: {
   includeMissing?: boolean;
   searchAggregatedTransactions: boolean;
   serviceName?: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   size: number;
 }) {
   const operationName = serviceName
     ? 'get_all_environments_for_service'
     : 'get_all_environments_for_all_services';
-
-  const { apmEventClient } = setup;
 
   const params = {
     apm: {

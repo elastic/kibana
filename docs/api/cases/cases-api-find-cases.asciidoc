@@ -6,6 +6,12 @@
 
 Retrieves a paginated subset of cases.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `GET <kibana host>:<port>/api/cases/_find`
@@ -141,6 +147,7 @@ The API returns a JSON object listing the retrieved cases. For example:
         "full_name": "Joe Smith",
         "username": "jsmith"
       },
+      "assignees": [],
       "connector": {
         "id": "none",
         "name": "none",

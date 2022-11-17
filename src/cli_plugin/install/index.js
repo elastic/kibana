@@ -8,7 +8,7 @@
 
 import { getConfigPath, kibanaPackageJson as pkg } from '@kbn/utils';
 import { install } from './install';
-import { Logger } from '../lib/logger';
+import { Logger } from '../../cli/logger';
 import { parse, parseMilliseconds } from './settings';
 import { logWarnings } from '../lib/log_warnings';
 

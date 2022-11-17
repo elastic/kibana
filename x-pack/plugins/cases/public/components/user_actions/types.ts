@@ -58,13 +58,13 @@ export interface UserActionBuilderArgs {
   loadingCommentIds: string[];
   loadingAlertData: boolean;
   alertData: Record<string, unknown>;
+  actionsNavigation?: ActionsNavigation;
   handleOutlineComment: (id: string) => void;
   handleManageMarkdownEditId: (id: string) => void;
   handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
   handleDeleteComment: (id: string) => void;
   handleManageQuote: (quote: string) => void;
   onShowAlertDetails: (alertId: string, index: string) => void;
-  actionsNavigation?: ActionsNavigation;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
 }

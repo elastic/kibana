@@ -71,7 +71,9 @@ describe('Flyout', () => {
 
       userEvent.click(screen.getByTestId('flyoutOverlay'));
 
-      expect(mockDispatch).toBeCalledWith(timelineActions.showTimeline({ id: 'test', show: true }));
+      expect(mockDispatch).toBeCalledWith(
+        timelineActions.showTimeline({ id: TimelineId.test, show: true })
+      );
     });
   });
 });

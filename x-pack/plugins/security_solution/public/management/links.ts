@@ -244,52 +244,52 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
-  const isEndpointRbacEnabled = ExperimentalFeaturesService.get().endpointRbacEnabled;
-  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
+  const { endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
+  const hasPermissionsForSecuritySolution = calculatePermissionsFromCapabilities(
+    core.application.capabilities
+  );
+  const linksToExclude: SecurityPageName[] = [];
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const { canAccessEndpointManagement, canIsolateHost, canReadActionsLogManagement } = fleetAuthz
+    const {
+      canReadActionsLogManagement,
+      canUnIsolateHost,
+      canIsolateHost,
+      canAccessEndpointManagement,
+    } = fleetAuthz
       ? calculateEndpointAuthz(
           licenseService,
           fleetAuthz,
           currentUserResponse.roles,
-          isEndpointRbacEnabled,
-          endpointPermissions
+          endpointRbacV1Enabled,
+          hasPermissionsForSecuritySolution
         )
       : getEndpointAuthzInitialState();
 
-    if (!canAccessEndpointManagement) {
-      return excludeLinks([
-        SecurityPageName.hostIsolationExceptions,
-        SecurityPageName.responseActionsHistory,
-      ]);
+    if (!canReadActionsLogManagement) {
+      linksToExclude.push(SecurityPageName.responseActionsHistory);
     }
 
-    if (!canReadActionsLogManagement) {
-      // <= enterprise license
-      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
-      if (!canIsolateHost && !hostExceptionCount) {
-        return excludeLinks([
-          SecurityPageName.hostIsolationExceptions,
-          SecurityPageName.responseActionsHistory,
-        ]);
+    if (!canIsolateHost && canUnIsolateHost) {
+      let shouldBeAbleToDeleteEntries: boolean;
+      try {
+        const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+        // has an HIE entry and is a super user then set to TRUE
+        shouldBeAbleToDeleteEntries = hostExceptionCount !== 0 && canAccessEndpointManagement;
+      } catch {
+        shouldBeAbleToDeleteEntries = false;
       }
-      return excludeLinks([SecurityPageName.responseActionsHistory]);
-    } else if (!canIsolateHost) {
-      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
-      if (!hostExceptionCount) {
-        // <= platinum so exclude also links that require enterprise
-        return excludeLinks([
-          SecurityPageName.hostIsolationExceptions,
-          SecurityPageName.responseActionsHistory,
-        ]);
+
+      if (!shouldBeAbleToDeleteEntries) {
+        linksToExclude.push(SecurityPageName.hostIsolationExceptions);
       }
-      return excludeLinks([SecurityPageName.responseActionsHistory]);
+    } else if (!canIsolateHost || !canAccessEndpointManagement) {
+      linksToExclude.push(SecurityPageName.hostIsolationExceptions);
     }
   } catch {
-    return excludeLinks([SecurityPageName.hostIsolationExceptions]);
+    linksToExclude.push(SecurityPageName.hostIsolationExceptions);
   }
 
-  return links;
+  return excludeLinks(linksToExclude);
 };

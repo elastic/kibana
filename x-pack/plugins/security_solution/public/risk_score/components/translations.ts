@@ -50,3 +50,7 @@ export const getRiskEntityTranslation = (
 
   return riskEntity === RiskScoreEntity.host ? HOST : USER;
 };
+
+export const ALERTS = i18n.translate('xpack.securitySolution.riskScore.overview.alerts', {
+  defaultMessage: 'Alerts',
+});

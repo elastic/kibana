@@ -19,9 +19,10 @@ import { SHOW_TOP_VALUES, HIDE_TOP_VALUES } from './translations';
 interface Props {
   field: ColumnHeaderOptions;
   globalFilters?: Filter[];
-  timelineId: string;
+  scopeId: string;
   value: string[] | undefined;
   onFilterAdded?: () => void;
+  closeCellPopover?: () => void;
 }
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
@@ -38,8 +39,9 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
   field,
   globalFilters,
   onFilterAdded,
-  timelineId,
+  scopeId,
   value,
+  closeCellPopover,
 }) => {
   const {
     timelines,
@@ -82,7 +84,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
             showLegend
             showTopN={showTopN}
             showTooltip={false}
-            timelineId={timelineId}
+            scopeId={scopeId}
             title={showTopN ? HIDE_TOP_VALUES : SHOW_TOP_VALUES}
             value={value}
           />
@@ -99,6 +101,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
             size: 's',
             showTooltip: false,
             value,
+            onClick: closeCellPopover,
           })}
         </EuiFlexItem>
         <EuiFlexItem>
@@ -111,6 +114,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
             size: 's',
             showTooltip: false,
             value,
+            onClick: closeCellPopover,
           })}
         </EuiFlexItem>
       </StyledFlexGroup>

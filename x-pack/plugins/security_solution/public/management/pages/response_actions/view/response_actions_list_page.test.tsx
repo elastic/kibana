@@ -20,6 +20,8 @@ import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../../../components/endpoint_response_actions_list/mocks';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
+jest.mock('../../../../common/experimental_features_service');
+
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
   isFetching?: boolean;
@@ -27,8 +29,10 @@ let mockUseGetEndpointActionList: {
   data?: ActionListApiResponse;
   refetch: () => unknown;
 };
-jest.mock('../../../hooks/endpoint/use_get_endpoint_action_list', () => {
-  const original = jest.requireActual('../../../hooks/endpoint/use_get_endpoint_action_list');
+jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list', () => {
+  const original = jest.requireActual(
+    '../../../hooks/response_actions/use_get_endpoint_action_list'
+  );
   return {
     ...original,
     useGetEndpointActionList: () => mockUseGetEndpointActionList,

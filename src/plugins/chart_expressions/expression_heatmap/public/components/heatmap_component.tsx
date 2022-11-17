@@ -589,6 +589,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}
               theme={[themeOverrides, chartTheme]}
+              baseTheme={chartsThemeService.useChartsBaseTheme()}
               xDomain={{
                 min:
                   dateHistogramMeta && dateHistogramMeta.timeRange
@@ -619,8 +620,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               xScale={xScale}
               ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
               xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
-              xAxisLabelName={xAxisColumn?.name}
-              yAxisLabelName={yAxisColumn?.name}
+              xAxisLabelName={xAxisColumn?.name || ''}
+              yAxisLabelName={yAxisColumn?.name || ''}
               xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
               yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
               xAxisLabelFormatter={(v) =>
