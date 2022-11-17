@@ -47,6 +47,7 @@ export const SparseDataSwitch: FC = () => {
         checked={sparseData}
         onChange={toggleSparseData}
         data-test-subj="mlJobWizardSwitchSparseData"
+        showLabel={false}
         label={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.sparseData.title', {
           defaultMessage: 'Sparse data',
         })}
