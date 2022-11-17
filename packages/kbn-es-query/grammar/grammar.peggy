@@ -26,7 +26,6 @@ start
     if (query !== null) return query;
     return nodeTypes.function.buildNode('is', '*', '*');
   }
-  / Literal
 
 OrQuery
   = head:AndQuery tail:(Or query:AndQuery { return query; })+ {

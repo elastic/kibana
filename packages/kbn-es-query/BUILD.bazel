@@ -66,6 +66,7 @@ peggy(
   ],
   output_dir = True,
   args = [
+    "--config=./%s/grammar/grammar.config.js" % package_name(),
     "-o",
     "$(@D)/built_grammar.js",
     "./%s/grammar/grammar.peggy" % package_name()
