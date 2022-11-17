@@ -380,7 +380,7 @@ export interface SavedObjectsClientContract {
    *
    * @param objects - array of objects to collect references for (contains ID and type)
    * @param options {@link SavedObjectsCollectMultiNamespaceReferencesOptions} - options for the collect multi namespace references operation
-   * @retuns the {@link SavedObjectsCollectMultiNamespaceReferencesResponse}
+   * @returns the {@link SavedObjectsCollectMultiNamespaceReferencesResponse}
    */
   collectMultiNamespaceReferences(
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
