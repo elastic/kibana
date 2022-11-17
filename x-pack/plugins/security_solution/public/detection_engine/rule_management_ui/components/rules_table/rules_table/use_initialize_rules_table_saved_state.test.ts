@@ -407,4 +407,21 @@ describe('useInitializeRulesTableSavedState', () => {
       expect(actions.setPerPage).toHaveBeenCalledWith(urlSavedState.perPage);
     });
   });
+
+  describe('when partial state is saved in the url and in the storage', () => {
+    it('restores only the search term', () => {
+      mockState({ urlState: { searchTerm: 'test' }, storageState: { sort: { field: 'name' } } });
+
+      renderHook(() => useInitializeRulesTableSavedState());
+
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        ...INITIAL_FILTER_OPTIONS,
+        filter: 'test',
+      });
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({
+        ...INITIAL_SORTING_OPTIONS,
+        field: 'name',
+      });
+    });
+  });
 });
