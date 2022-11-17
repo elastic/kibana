@@ -97,17 +97,15 @@ describe('Action List Route', () => {
       const withLicense = license ? license : Platinum;
       licenseEmitter.next(withLicense);
 
-      ctx.securitySolution.endpointAuthz = {
+      ctx.securitySolution.getEndpointAuthz.mockResolvedValue({
         ...getEndpointAuthzInitialStateMock({
-          canReadActionsLogManagement:
-            // mimicking the behavior of the EndpointAuthz class
-            // just so we can test the license check here
-            // since getEndpointAuthzInitialStateMock sets all keys to true
-            ctx.securitySolution.endpointAuthz.canAccessEndpointManagement &&
-            licenseService.isPlatinumPlus(),
+          // mimicking the behavior of the EndpointAuthz class
+          // just so we can test the license check here
+          // since getEndpointAuthzInitialStateMock sets all keys to true
+          canReadActionsLogManagement: licenseService.isPlatinumPlus(),
         }),
         ...authz,
-      };
+      });
 
       const mockRequest = httpServerMock.createKibanaRequest({ query });
       const [, routeHandler]: [

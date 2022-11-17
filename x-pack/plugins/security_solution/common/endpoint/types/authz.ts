@@ -60,6 +60,12 @@ export interface EndpointAuthz extends EndpointPermissions {
   canWriteHostIsolationExceptions: boolean;
   /** if user has read permissions for host isolation exceptions */
   canReadHostIsolationExceptions: boolean;
+  /**
+   * if user has permissions to delete host isolation exceptions. This could be set to true, while
+   * `canWriteHostIsolationExceptions` is false in cases where the license might have been downgraded.
+   * In that use case, users should still be allowed to ONLY delete entries.
+   */
+  canDeleteHostIsolationExceptions: boolean;
   /** if user has write permissions for blocklist entries */
   canWriteBlocklist: boolean;
   /** if user has read permissions for blocklist entries */

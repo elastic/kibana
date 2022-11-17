@@ -12,14 +12,11 @@ import '../../../common/mock/match_media';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { useCanSeeHostIsolationExceptionsMenu } from '../host_isolation_exceptions/view/hooks';
 import { endpointPageHttpMock } from '../endpoint_hosts/mocks';
 
 jest.mock('../../../common/components/user_privileges');
-jest.mock('../host_isolation_exceptions/view/hooks');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const useCanSeeHostIsolationExceptionsMenuMock = useCanSeeHostIsolationExceptionsMenu as jest.Mock;
 
 describe('when in the Administration tab', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -33,7 +30,6 @@ describe('when in the Administration tab', () => {
 
   afterEach(() => {
     useUserPrivilegesMock.mockReset();
-    useCanSeeHostIsolationExceptionsMenuMock.mockReset();
   });
 
   describe('when the user has no permissions', () => {
