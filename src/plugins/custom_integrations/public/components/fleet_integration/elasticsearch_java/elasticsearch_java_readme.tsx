@@ -168,25 +168,34 @@ export const ElasticsearchJavaClientReadme = () => {
                 <EuiTitle>
                   <h2>
                     <FormattedMessage
-                      id="customIntegrations.languageClients.JavaElasticsearch.readme.Configure"
-                      defaultMessage="Configure the Elasticsearch JavaScript Client"
+                      id="customIntegrations.languageClients.JavaElasticsearch.readme.connecting"
+                      defaultMessage="Connecting to Elastic cloud"
                     />
                   </h2>
                 </EuiTitle>
 
+                <EuiText>
+                  <FormattedMessage
+                    id="customIntegrations.languageClients.GoElasticsearch.readme.connectingText"
+                    defaultMessage="You can connect to Elastic Cloud using an {api_key} and a {cloud_id}:"
+                    values={{
+                      api_key: <EuiCode>API key</EuiCode>,
+                      cloud_id: <EuiCode>Cloud ID</EuiCode>,
+                    }}
+                  />
+                </EuiText>
+
                 <EuiSpacer size="s" />
 
                 <EuiCodeBlock isCopyable language="java">
-                  {`// Create the low-level client
-RestClient restClient = RestClient.builder(
-    new HttpHost("localhost", 9200)).build();
+                  {`// cloudID found in the 'Manage this deployment' page
+// apiKey found in the 'Management' page under the section 'Security'
 
-// Create the transport with a Jackson mapper
-ElasticsearchTransport transport = new RestClientTransport(
-    restClient, new JacksonJsonpMapper());
-
-// And create the API client
-ElasticsearchClient client = new ElasticsearchClient(transport);
+RestClientBuilder builder = RestClient.builder(cloudID);
+Header[] defaultHeaders =
+    new Header[]{new BasicHeader("Authorization",
+        "ApiKey " + apiKey)};
+builder.setDefaultHeaders(defaultHeaders);
 `}
                 </EuiCodeBlock>
               </EuiPageSection>
