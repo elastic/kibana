@@ -11,7 +11,6 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-import { checkForDuplicateTitle } from './check_for_duplicate_title';
 import { extractReferences } from '../saved_visualization_references';
 
 interface UpdateBasicSoAttributesDependencies {
@@ -30,7 +29,6 @@ export const updateBasicSoAttributes = async (
   },
   dependencies: UpdateBasicSoAttributesDependencies
 ) => {
-  let shouldUpdate = true;
   const so = await dependencies.savedObjectsClient.get<SerializableRecord>(type, soId);
   const extractedReferences = extractReferences({
     attributes: so.attributes,
@@ -52,31 +50,9 @@ export const updateBasicSoAttributes = async (
     );
   }
 
-  if (extractedReferences.attributes.title !== attributes.title) {
-    try {
-      const checkedForDuplicateTitle = await checkForDuplicateTitle(
-        {
-          id: soId,
-          title: attributes.title,
-          lastSavedTitle: `${extractedReferences.attributes.title}`,
-          getEsType: () => type,
-        },
-        false,
-        false,
-        undefined,
-        dependencies
-      );
-      shouldUpdate = shouldUpdate && checkedForDuplicateTitle;
-    } catch (e) {
-      shouldUpdate = false;
-    }
-  }
-
-  if (shouldUpdate) {
-    return await dependencies.savedObjectsClient.create(type, attributes, {
-      id: soId,
-      overwrite: true,
-      references,
-    });
-  }
+  return await dependencies.savedObjectsClient.create(type, attributes, {
+    id: soId,
+    overwrite: true,
+    references,
+  });
 };

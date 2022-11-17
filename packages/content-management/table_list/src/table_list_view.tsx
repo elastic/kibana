@@ -43,7 +43,8 @@ import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 
-interface InspectorConfig extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave'> {
+interface InspectorConfig
+  extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave' | 'checkForDuplicateTitle'> {
   enabled?: boolean;
 }
 

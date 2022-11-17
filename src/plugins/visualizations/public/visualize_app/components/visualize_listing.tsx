@@ -23,6 +23,7 @@ import { TableListView } from '@kbn/content-management-table-list';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { findListItems } from '../../utils/saved_visualize_utils';
 import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
+import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import {
@@ -206,6 +207,35 @@ export const VisualizeListing = () => {
     [overlays, savedObjects.client, savedObjectsTagging]
   );
 
+  const doCheckForDuplicateTitle = useCallback(
+    async (args: { id: string; title: string }) => {
+      let hasDuplicatedTitle = false;
+      const content = visualizedUserContent.current?.find(({ id }) => id === args.id);
+
+      if (content) {
+        try {
+          hasDuplicatedTitle = !(await checkForDuplicateTitle(
+            {
+              id: args.id,
+              title: args.title,
+              lastSavedTitle: content.title,
+              getEsType: () => content.type,
+            },
+            false,
+            false,
+            () => {},
+            { savedObjectsClient: savedObjects.client, overlays }
+          ));
+        } catch (e) {
+          hasDuplicatedTitle = true;
+        }
+      }
+
+      return hasDuplicatedTitle;
+    },
+    [overlays, savedObjects.client]
+  );
+
   const deleteItems = useCallback(
     async (selectedItems: object[]) => {
       await Promise.all(
@@ -262,6 +292,7 @@ export const VisualizeListing = () => {
       inspector={{
         isReadonly: !visualizeCapabilities.save,
         onSave: onInspectorSave,
+        checkForDuplicateTitle: doCheckForDuplicateTitle,
       }}
       emptyPrompt={noItemsFragment}
       entityName={i18n.translate('visualizations.listing.table.entityName', {
