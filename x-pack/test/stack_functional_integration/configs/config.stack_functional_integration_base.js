@@ -28,12 +28,12 @@ const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 
 export default async ({ readConfigFile }) => {
   const apiConfig = await readConfigFile(require.resolve('../../api_integration/config'));
-  const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../../functional/config.base.js')
-  );
   const externalConf = consumeState(resolve(__dirname, stateFilePath)) ?? {
     TESTS_LIST: 'alerts',
   };
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../../functional/config.ccs.ts')
+  );
   process.env.stack_functional_integration = true;
   logAll(log);
 
