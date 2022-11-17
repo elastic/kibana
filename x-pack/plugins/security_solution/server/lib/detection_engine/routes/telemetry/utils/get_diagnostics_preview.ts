@@ -11,6 +11,7 @@ import { PreviewTelemetryEventsSender } from '../../../../telemetry/preview_send
 import type { ITelemetryReceiver } from '../../../../telemetry/receiver';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { createTelemetryDiagnosticsTaskConfig } from '../../../../telemetry/tasks/diagnostic';
+import type { TaskState } from '../../../../telemetry/task';
 import { parseNdjson } from './parse_ndjson';
 
 export const getDiagnosticsPreview = async ({
@@ -26,6 +27,7 @@ export const getDiagnosticsPreview = async ({
     last: new Date(0).toISOString(),
     current: new Date().toISOString(),
   };
+  const taskState: TaskState = {};
 
   const taskSender = new PreviewTelemetryEventsSender(logger, telemetrySender);
   const task = createTelemetryDiagnosticsTaskConfig();
@@ -34,7 +36,8 @@ export const getDiagnosticsPreview = async ({
     logger,
     telemetryReceiver,
     taskSender,
-    taskExecutionPeriod
+    taskExecutionPeriod,
+    taskState
   );
   const messages = taskSender.getSentMessages();
   return parseNdjson(messages);

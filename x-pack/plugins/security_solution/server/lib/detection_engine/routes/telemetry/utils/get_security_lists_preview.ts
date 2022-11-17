@@ -11,6 +11,7 @@ import { PreviewTelemetryEventsSender } from '../../../../telemetry/preview_send
 import type { ITelemetryReceiver } from '../../../../telemetry/receiver';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { createTelemetrySecurityListTaskConfig } from '../../../../telemetry/tasks/security_lists';
+import type { TaskState } from '../../../../telemetry/task';
 import { parseNdjson } from './parse_ndjson';
 
 export const getSecurityListsPreview = async ({
@@ -26,6 +27,7 @@ export const getSecurityListsPreview = async ({
     last: new Date(0).toISOString(),
     current: new Date().toISOString(),
   };
+  const taskState: TaskState = {};
 
   const taskSender = new PreviewTelemetryEventsSender(logger, telemetrySender);
   const task = createTelemetrySecurityListTaskConfig(1000);
@@ -34,7 +36,8 @@ export const getSecurityListsPreview = async ({
     logger,
     telemetryReceiver,
     taskSender,
-    taskExecutionPeriod
+    taskExecutionPeriod,
+    taskState
   );
   const messages = taskSender.getSentMessages();
   return parseNdjson(messages);
