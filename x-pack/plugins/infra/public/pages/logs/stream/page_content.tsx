@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { useInterpret } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -14,7 +15,7 @@ import { useLogViewContext } from '../../../hooks/use_log_view';
 import { LogsPageTemplate } from '../page_template';
 import { LogsPageLogsContent } from './page_logs_content';
 import { fullHeightContentStyles } from '../../../page_template.styles';
-
+import { createLogStreamPageStateMachine } from '../../../observability_logs/log_stream_page/state';
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',
 });
@@ -28,6 +29,15 @@ export const StreamPageContent: React.FunctionComponent = () => {
     load,
     logViewStatus,
   } = useLogViewContext();
+
+  // TODO: Remove and move to a proper provider
+  const machine = useMemo(() => {
+    return createLogStreamPageStateMachine();
+  }, []);
+
+  const LogStreamPageStateService = useInterpret(machine, undefined, (state) => {
+    console.log(state);
+  });
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;

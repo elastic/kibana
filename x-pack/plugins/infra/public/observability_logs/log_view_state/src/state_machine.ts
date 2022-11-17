@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createMachine } from 'xstate';
+import { createMachine, sendParent } from 'xstate';
 import { createTypestateHelpers } from '../../xstate_helpers';
 import type { LogViewEvent, LogViewTypestate } from './types';
 
@@ -24,10 +24,11 @@ export const createLogViewStateMachine = () =>
           invoke: {
             src: 'loadLogView',
           },
+          entry: sendParent({ type: 'loadingLogView' }), // TODO: Sends consumer events (a subset of states)
           on: {
             loadingSucceeded: {
               target: 'resolving',
-              actions: 'storeLogView',
+              actions: ['storeLogView'],
             },
             loadingFailed: {
               target: 'loadingFailed',
@@ -83,6 +84,11 @@ export const createLogViewStateMachine = () =>
       preserveActionOrder: true,
     },
     {
+      services: {
+        loadLogView: (context, event) => (callback, onReceive) => {
+          callback({ type: 'loadingSucceeded' });
+        },
+      },
       actions: {
         storeLogViewId: logViewStateMachineHelpers.assignOnTransition(
           null,
