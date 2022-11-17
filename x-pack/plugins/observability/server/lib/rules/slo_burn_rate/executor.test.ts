@@ -24,13 +24,13 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { AlertStates } from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
 import {
   BurnRateAlertContext,
   BurnRateAlertState,
   BurnRateAllowedActionGroups,
   BurnRateRuleParams,
   FIRED_ACTION,
+  AlertStates,
   getRuleExecutor,
 } from './executor';
 import { aStoredSLO, createSLO } from '../../../services/slo/fixtures/slo';

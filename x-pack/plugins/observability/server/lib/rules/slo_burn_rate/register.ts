@@ -8,10 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import {
-  reasonActionVariableDescription,
-  timestampActionVariableDescription,
-} from '@kbn/infra-plugin/server/lib/alerting/common/messages';
 import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
@@ -68,5 +64,18 @@ const windowActionVariableDescription = i18n.translate(
   'xpack.observability.slo.alerting.windowDescription',
   {
     defaultMessage: 'The window duration with the associated burn rate value.',
+  }
+);
+
+export const reasonActionVariableDescription = i18n.translate(
+  'xpack.observability.slo.alerting.reasonDescription',
+  {
+    defaultMessage: 'A concise description of the reason for the alert',
+  }
+);
+export const timestampActionVariableDescription = i18n.translate(
+  'xpack.observability.slo.alerting.timestampDescription',
+  {
+    defaultMessage: 'A timestamp of when the alert was detected.',
   }
 );
