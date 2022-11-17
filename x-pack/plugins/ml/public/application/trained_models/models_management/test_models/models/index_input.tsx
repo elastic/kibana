@@ -34,6 +34,7 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
   } = data;
 
   const runningState = useObservable(inferrer.getRunningState$());
+  const pipeline = useObservable(inferrer.getPipeline$());
   const inputComponent = useMemo(() => inferrer.getInputComponent(), [inferrer]);
 
   return (
@@ -79,7 +80,7 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
         )}
       >
         <EuiCodeBlock language="json" fontSize="s" paddingSize="s" lineNumbers isCopyable={true}>
-          {JSON.stringify(inferrer.getPipeline(), null, 2)}
+          {JSON.stringify(pipeline, null, 2)}
         </EuiCodeBlock>
       </EuiAccordion>
     </>

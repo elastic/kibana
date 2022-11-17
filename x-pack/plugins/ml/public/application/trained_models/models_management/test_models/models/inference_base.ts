@@ -72,6 +72,8 @@ export abstract class InferenceBase<TInferResponse> {
   private validators$: Array<Observable<boolean>> = [];
   private validatorsSubscriptions$: Subscription = new Subscription();
 
+  private pipeline = new BehaviorSubject<estypes.IngestPipeline>({});
+
   constructor(
     protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     protected readonly model: estypes.MlTrainedModelConfig,
@@ -101,7 +103,10 @@ export abstract class InferenceBase<TInferResponse> {
             return validationResults.every((v) => !!v);
           })
         )
-        .subscribe(this.isValid$)
+        .subscribe((v) => {
+          this.isValid$.next(v);
+          this.pipeline.next(this.generatePipeline());
+        })
     );
   }
 
@@ -177,10 +182,18 @@ export abstract class InferenceBase<TInferResponse> {
   protected abstract inferText(): Promise<TInferResponse[]>;
   protected abstract inferIndex(): Promise<TInferResponse[]>;
 
-  public getPipeline(): estypes.IngestPipeline {
+  public generatePipeline(): estypes.IngestPipeline {
     return {
       processors: this.getProcessors(),
     };
+  }
+
+  public getPipeline$() {
+    return this.pipeline.asObservable();
+  }
+
+  public getPipeline(): estypes.IngestPipeline {
+    return this.pipeline.getValue();
   }
 
   protected getBasicProcessors(
