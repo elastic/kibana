@@ -22,6 +22,7 @@ export const NoDataEmptyState = memo<{
   titleLabel: string;
   aboutInfo: string;
   primaryButtonLabel: string;
+  canCreateItems?: boolean;
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
   backComponent?: React.ReactNode;
@@ -37,6 +38,7 @@ export const NoDataEmptyState = memo<{
     aboutInfo,
     primaryButtonLabel,
     secondaryAboutInfo,
+    canCreateItems = true,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
@@ -57,17 +59,21 @@ export const NoDataEmptyState = memo<{
               ) : undefined}
             </div>
           }
-          actions={[
-            <EuiButton
-              fill
-              isDisabled={isAddDisabled}
-              onClick={onAdd}
-              data-test-subj={getTestId('addButton')}
-            >
-              {primaryButtonLabel}
-            </EuiButton>,
-            ...(backComponent ? [backComponent] : []),
-          ]}
+          actions={
+            canCreateItems
+              ? [
+                  <EuiButton
+                    fill
+                    isDisabled={isAddDisabled}
+                    onClick={onAdd}
+                    data-test-subj={getTestId('addButton')}
+                  >
+                    {primaryButtonLabel}
+                  </EuiButton>,
+                  ...(backComponent ? [backComponent] : []),
+                ]
+              : []
+          }
         />
       </ManagementEmptyStateWrapper>
     );
