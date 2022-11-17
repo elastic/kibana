@@ -8,6 +8,10 @@
 import * as rt from 'io-ts';
 import { decodeSchema } from './schema_utils';
 
+/**
+ * This schema must match the CloseAlertParamsSchema in x-pack/plugins/stack_connectors/server/connector_types/stack/opsgenie/schema.ts
+ * except that it makes all fields partial.
+ */
 const CloseAlertSchema = rt.exact(
   rt.partial({
     alias: rt.string,
