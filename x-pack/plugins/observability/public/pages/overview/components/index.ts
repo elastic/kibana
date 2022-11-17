@@ -6,5 +6,6 @@
  */
 
 export * from './data_sections';
-export * from './loading_observability';
+export * from './header_actions';
 export * from './empty_section';
+export * from './loading_observability';
