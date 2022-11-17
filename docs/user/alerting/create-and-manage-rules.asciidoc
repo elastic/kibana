@@ -1,4 +1,3 @@
-[role="xpack"]
 [[create-and-manage-rules]]
 == Create and manage rules
 
@@ -9,7 +8,7 @@ The *Rules* UI provides a cross-app view of alerting. Different {kib} apps like 
 * Drill-down to <<rule-details, rule details>>
 
 [role="screenshot"]
-image:images/rules-and-connectors-ui.png[Example rule listing in the Rules and Connectors UI]
+image:images/rules-and-connectors-ui.png[Example rule listing in {rac-ui}]
 
 For more information on alerting concepts and the types of rules and connectors available, see <<alerting-getting-started>>.
 
@@ -22,7 +21,7 @@ Access to rules is granted based on your privileges to alerting-enabled features
 [[create-edit-rules]]
 === Create and edit rules
 
-Many rules must be created within the context of a {kib} app like <<metrics-app, Metrics>>, <<xpack-apm, APM>>, or <<uptime-app, Uptime>>, but others are generic. Generic rule types can be created in the *Rules* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting a rule type and configuring its conditions and action type. Refer to <<stack-rules, Stack rules>> for details on what types of rules are available and how to configure them.
+Many rules must be created within the context of a {kib} app like <<metrics-app,Metrics>>, <<xpack-apm,APM>>, or <<uptime-app,Uptime>>, but others are generic. Generic rule types can be created in the *Rules* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting a rule type and configuring its conditions and action type. Refer to <<stack-rules,Stack rules>> for details on what types of rules are available and how to configure them.
 
 After a rule is created, you can re-open the flyout and change a rule's properties by clicking the *Edit* button shown on each row of the rule listing.
 
