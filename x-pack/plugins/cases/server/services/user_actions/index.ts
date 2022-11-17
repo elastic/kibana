@@ -68,7 +68,7 @@ import { injectPersistableReferencesToSO } from '../../attachment_framework/so_r
 import type { IndexRefresh } from '../types';
 import { isAssigneesArray, isStringArray } from './type_guards';
 import type { CaseSavedObject } from '../../common/types';
-import { ConstructedUserAction } from './constructed_user_action';
+import type { ConstructedUserAction } from './constructed_user_action';
 
 export interface UserActionItem {
   attributes: CaseUserActionAttributesWithoutConnectorId;
