@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-// @ts-ignore
 export { formatTimestampToDuration } from './format_timestamp_to_duration';

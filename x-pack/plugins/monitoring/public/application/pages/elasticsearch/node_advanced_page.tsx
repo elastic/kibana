@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ItemTemplate } from './item_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-// @ts-ignore
 import { AdvancedNode } from '../../../components/elasticsearch/node/advanced';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
