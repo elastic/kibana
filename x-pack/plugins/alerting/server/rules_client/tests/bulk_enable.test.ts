@@ -143,6 +143,26 @@ describe('bulkEnableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
+      rules: [
+        {
+          actions: [],
+          alertTypeId: '.index-threshold',
+          id: 'id1',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: undefined,
+          snoozeSchedule: [],
+        },
+        {
+          actions: [],
+          alertTypeId: '.index-threshold',
+          id: 'id2',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: undefined,
+          snoozeSchedule: [],
+        },
+      ],
       total: 2,
       taskIdsFailedToBeEnabled: [],
     });
@@ -170,6 +190,17 @@ describe('bulkEnableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
+      rules: [
+        {
+          actions: [],
+          alertTypeId: '.index-threshold',
+          id: 'id1',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: undefined,
+          snoozeSchedule: [],
+        },
+      ],
       total: 2,
       taskIdsFailedToBeEnabled: [],
     });
@@ -213,6 +244,17 @@ describe('bulkEnableRules', () => {
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(3);
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
+      rules: [
+        {
+          actions: [],
+          alertTypeId: '.index-threshold',
+          id: 'id1',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: undefined,
+          snoozeSchedule: [],
+        },
+      ],
       total: 2,
       taskIdsFailedToBeEnabled: [],
     });
@@ -253,6 +295,26 @@ describe('bulkEnableRules', () => {
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2);
     expect(result).toStrictEqual({
       errors: [],
+      rules: [
+        {
+          actions: [],
+          alertTypeId: '.index-threshold',
+          id: 'id1',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: undefined,
+          snoozeSchedule: [],
+        },
+        {
+          actions: [],
+          alertTypeId: '.index-threshold',
+          id: 'id2',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: undefined,
+          snoozeSchedule: [],
+        },
+      ],
       total: 2,
       taskIdsFailedToBeEnabled: [],
     });
@@ -298,11 +360,12 @@ describe('bulkEnableRules', () => {
     });
 
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: successfulSavedObjects,
+      saved_objects: [],
     });
 
     const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
 
+    expect(unsecuredSavedObjectsClient.bulkCreate).toBeCalledWith([], { overwrite: true });
     expect(result).toStrictEqual({
       errors: [
         {
@@ -314,6 +377,7 @@ describe('bulkEnableRules', () => {
           rule: { id: 'id2', name: 'fakeName' },
         },
       ],
+      rules: [],
       taskIdsFailedToBeEnabled: [],
       total: 2,
     });
@@ -344,6 +408,26 @@ describe('bulkEnableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
+      rules: [
+        {
+          actions: [],
+          alertTypeId: '.index-threshold',
+          id: 'id1',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: undefined,
+          snoozeSchedule: [],
+        },
+        {
+          actions: [],
+          alertTypeId: '.index-threshold',
+          id: 'id2',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: undefined,
+          snoozeSchedule: [],
+        },
+      ],
       total: 2,
       taskIdsFailedToBeEnabled: [],
     });
@@ -381,6 +465,26 @@ describe('bulkEnableRules', () => {
       );
       expect(result).toStrictEqual({
         errors: [],
+        rules: [
+          {
+            actions: [],
+            alertTypeId: '.index-threshold',
+            id: 'id1',
+            notifyWhen: undefined,
+            params: undefined,
+            schedule: undefined,
+            snoozeSchedule: [],
+          },
+          {
+            actions: [],
+            alertTypeId: '.index-threshold',
+            id: 'id2',
+            notifyWhen: undefined,
+            params: undefined,
+            schedule: undefined,
+            snoozeSchedule: [],
+          },
+        ],
         total: 2,
         taskIdsFailedToBeEnabled: ['id2'],
       });
@@ -402,7 +506,27 @@ describe('bulkEnableRules', () => {
       );
       expect(result).toStrictEqual({
         errors: [],
-        taskIdsFailedToBeEnabled: ['id1', 'id2'],
+        rules: [
+          {
+            actions: [],
+            alertTypeId: '.index-threshold',
+            id: 'id1',
+            notifyWhen: undefined,
+            params: undefined,
+            schedule: undefined,
+            snoozeSchedule: [],
+          },
+          {
+            actions: [],
+            alertTypeId: '.index-threshold',
+            id: 'id2',
+            notifyWhen: undefined,
+            params: undefined,
+            schedule: undefined,
+            snoozeSchedule: [],
+          },
+        ],
+        taskIdsFailedToBeEnabled: ['taskId1', 'taskId2'],
         total: 2,
       });
     });

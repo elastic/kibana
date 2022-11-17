@@ -5700,7 +5700,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "string | number"
+              "string | number | (string | number)[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
@@ -5728,7 +5728,7 @@
             "label": "operator",
             "description": [],
             "signature": [
-              "\":\" | \":*\""
+              "\"includes\" | \":\" | \":*\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
@@ -7627,7 +7627,7 @@
           "The operator applied to a field"
         ],
         "signature": [
-          "\":\" | \":*\""
+          "\"includes\" | \":\" | \":*\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
@@ -7761,7 +7761,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          " | undefined; id?: string | undefined; timerange: ",
+          " | undefined; id?: string | undefined; timerange?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -7769,7 +7769,7 @@
             "section": "def-common.TimerangeInput",
             "text": "TimerangeInput"
           },
-          "; defaultIndex: string[]; filterQuery: string | ",
+          " | undefined; defaultIndex: string[]; filterQuery: string | ",
           "ESQuery",
           " | undefined; factoryQueryType?: ",
           "TimelineEventsQueries",

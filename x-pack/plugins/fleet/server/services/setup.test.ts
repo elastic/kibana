@@ -60,6 +60,7 @@ describe('setupFleet', () => {
     (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([]);
 
     soClient.find.mockResolvedValue({ saved_objects: [] } as any);
+    soClient.bulkGet.mockResolvedValue({ saved_objects: [] } as any);
   });
 
   afterEach(async () => {
