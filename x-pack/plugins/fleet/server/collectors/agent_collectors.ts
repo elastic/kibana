@@ -85,7 +85,7 @@ export const getAgentData = async (esClient?: ElasticsearchClient): Promise<Agen
     );
     const statuses = ((response?.aggregations?.last_checkin_status as any).buckets ?? []).reduce(
       (acc: any, bucket: any) => {
-        if (acc[bucket.key]) acc[bucket.key] = bucket.doc_count;
+        if (acc[bucket.key] !== undefined) acc[bucket.key] = bucket.doc_count;
         return acc;
       },
       { error: 0, degraded: 0 }
