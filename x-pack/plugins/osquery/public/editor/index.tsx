@@ -30,12 +30,11 @@ interface OsqueryEditorProps {
   commands?: EuiCodeEditorProps['commands'];
 }
 
-const ResizeWrapper = styled.div`
+const ResizeWrapper = styled.div<{ height: number; minHeight: number }>`
   overflow: auto;
   resize: vertical;
-  height: ${(props: { height: number }) => props.height};
-  min-height: 100px;
-  max-height: 1000px;
+  height: ${(props) => props.height};
+  min-height: ${(props) => props.minHeight};
 `;
 
 const MIN_HEIGHT = 100;
@@ -46,22 +45,26 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
 }) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
   const [height, setHeight] = useState(MIN_HEIGHT);
-  const editorRef = useRef<{ renderer: { layerConfig: { maxHeight: number } } }>({
-    renderer: { layerConfig: { maxHeight: 100 } },
-  });
-
-  useDebounce(
-    () => {
-      onChange(editorValue);
-      const maxHeight = editorRef.current?.renderer.layerConfig.maxHeight;
-
-      if (maxHeight > MIN_HEIGHT) {
-        setHeight(maxHeight);
-      }
-    },
-    500,
-    [editorValue]
+  const [minHeight, setMinHeight] = useState(MIN_HEIGHT);
+  const editorRef = useRef<{ renderer: { layerConfig: { maxHeight: number; minHeight: number } } }>(
+    {
+      renderer: { layerConfig: { maxHeight: 100, minHeight: 100 } },
+    }
   );
+
+  useDebounce(() => onChange(editorValue), 500, [editorValue]);
+
+  useEffect(() => {
+    const config = editorRef.current?.renderer.layerConfig;
+
+    if (config.maxHeight > MIN_HEIGHT) {
+      setHeight(config.maxHeight);
+    }
+
+    if (config.maxHeight < config.minHeight) {
+      setMinHeight(config.maxHeight);
+    }
+  }, [editorRef.current.renderer.layerConfig]);
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 
@@ -79,7 +82,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   }, []);
 
   return (
-    <ResizeWrapper height={height}>
+    <ResizeWrapper height={height} minHeight={minHeight}>
       <EuiCodeEditor
         value={editorValue}
         mode="osquery"
