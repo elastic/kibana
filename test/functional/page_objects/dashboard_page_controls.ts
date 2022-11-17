@@ -24,6 +24,15 @@ const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
   [RANGE_SLIDER_CONTROL]: 'Range slider',
 };
 
+interface OptionsListAdditionalSettings {
+  defaultSortType?: SortingType;
+  ignoreTimeout?: boolean;
+  allowMultiple?: boolean;
+  hideExclude?: boolean;
+  hideExists?: boolean;
+  hideSort?: boolean;
+}
+
 export class DashboardPageControls extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
@@ -247,6 +256,7 @@ export class DashboardPageControls extends FtrService {
     grow,
     title,
     width,
+    additionalSettings,
   }: {
     controlType: string;
     title?: string;
@@ -254,17 +264,23 @@ export class DashboardPageControls extends FtrService {
     width?: ControlWidth;
     dataViewTitle?: string;
     grow?: boolean;
+    additionalSettings?: OptionsListAdditionalSettings;
   }) {
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
     await this.openCreateControlFlyout();
 
     if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
-
     if (fieldName) await this.controlsEditorSetfield(fieldName, controlType);
-
     if (title) await this.controlEditorSetTitle(title);
     if (width) await this.controlEditorSetWidth(width);
     if (grow !== undefined) await this.controlEditorSetGrow(grow);
+
+    if (additionalSettings) {
+      if (controlType === OPTIONS_LIST_CONTROL) {
+        // only options lists currently have additional settings
+        await this.optionsListSetAdditionalSettings(additionalSettings);
+      }
+    }
 
     await this.controlEditorSave();
   }
@@ -313,6 +329,28 @@ export class DashboardPageControls extends FtrService {
   }
 
   // Options list functions
+  public async optionsListSetAdditionalSettings({
+    defaultSortType,
+    ignoreTimeout,
+    allowMultiple,
+    hideExclude,
+    hideExists,
+    hideSort,
+  }: OptionsListAdditionalSettings) {
+    const getSettingTestSubject = (setting: string) =>
+      `optionsListControl__${setting}AdditionalSetting`;
+
+    if (allowMultiple) await this.testSubjects.click(getSettingTestSubject('allowMultiple'));
+    if (hideExclude) await this.testSubjects.click(getSettingTestSubject('hideExclude'));
+    if (hideExists) await this.testSubjects.click(getSettingTestSubject('hideExists'));
+    if (hideSort) await this.testSubjects.click(getSettingTestSubject('hideSort'));
+    if (defaultSortType) {
+      await this.testSubjects.click('optionsListControl__chooseSortAdditionalSetting');
+      await this.testSubjects.click(`optionsList__defaultSortBy_${defaultSortType}`);
+    }
+    if (ignoreTimeout) await this.testSubjects.click(getSettingTestSubject('runPastTimeout'));
+  }
+
   public async optionsListGetSelectionsString(controlId: string) {
     this.log.debug(`Getting selections string for Options List: ${controlId}`);
     const controlElement = await this.getControlElementById(controlId);
@@ -367,12 +405,12 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async optionsListPopoverSetSort(sort: SortingType) {
-    this.log.debug(`select sorting for suggestions`);
+    this.log.debug(`select sorting type for suggestions`);
     await this.optionsListPopoverAssertOpen();
 
     await this.retry.waitFor('sorting popover to open', async () => {
-      await this.testSubjects.click('optionsList-control-sorting-options-button');
-      return await this.testSubjects.exists(`optionsList-control-sorting-options-popover`);
+      await this.testSubjects.click('optionsListControl__sortingOptionsButton');
+      return await this.testSubjects.exists(`optionsListControl__sortingOptionsPopover`);
     });
     await this.testSubjects.click(`optionsList__sortBy_${sort}`);
   }

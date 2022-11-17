@@ -106,13 +106,13 @@ describe('Options list popover', () => {
       explicitInput: { selectedOptions: selections },
     });
     let searchBox = findTestSubject(popover, 'optionsList-control-search-input');
-    let sortButton = findTestSubject(popover, 'optionsList-control-sorting-options-button');
+    let sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
     expect(searchBox.prop('disabled')).toBeFalsy();
     expect(sortButton.prop('disabled')).toBeFalsy();
 
     clickShowOnlySelections(popover);
     searchBox = findTestSubject(popover, 'optionsList-control-search-input');
-    sortButton = findTestSubject(popover, 'optionsList-control-sorting-options-button');
+    sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
     expect(searchBox.prop('disabled')).toBe(true);
     expect(sortButton.prop('disabled')).toBe(true);
   });
@@ -185,5 +185,42 @@ describe('Options list popover', () => {
     clickShowOnlySelections(popover);
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     expect(availableOptionsDiv.children().at(0).text()).toBe('Exists');
+  });
+
+  describe('Test advanced settings', () => {
+    const ensureComponentIsHidden = async ({
+      explicitInput,
+      testSubject,
+    }: {
+      explicitInput: Partial<OptionsListEmbeddableInput>;
+      testSubject: string;
+    }) => {
+      const popover = await mountComponent({
+        explicitInput,
+      });
+      const test = findTestSubject(popover, testSubject);
+      expect(test.exists()).toBeFalsy();
+    };
+
+    test('can hide exists option', async () => {
+      ensureComponentIsHidden({
+        explicitInput: { hideExists: true },
+        testSubject: 'optionsList-control-selection-exists',
+      });
+    });
+
+    test('can hide include/exclude toggle', async () => {
+      ensureComponentIsHidden({
+        explicitInput: { hideExclude: true },
+        testSubject: 'optionsList__includeExcludeButtonGroup',
+      });
+    });
+
+    test('can hide sorting button', async () => {
+      ensureComponentIsHidden({
+        explicitInput: { hideSort: true },
+        testSubject: 'optionsListControl__sortingOptionsButton',
+      });
+    });
   });
 });

@@ -69,7 +69,7 @@ export const OptionsListPopoverActionBar = ({
         data: key,
         checked: key === sort ? 'on' : undefined,
         'data-test-subj': `optionsList__sortBy_${key}`,
-        label: OptionsListStrings.popover.sortBy[key].getSortByLabel(),
+        label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),
       } as SortItem;
     });
   });
@@ -134,7 +134,7 @@ export const OptionsListPopoverActionBar = ({
                     <EuiButtonIcon
                       iconType="sortable"
                       disabled={showOnlySelected}
-                      data-test-subj="optionsList-control-sorting-options-button"
+                      data-test-subj="optionsListControl__sortingOptionsButton"
                       onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
                       aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
                     />
@@ -144,7 +144,7 @@ export const OptionsListPopoverActionBar = ({
                 isOpen={isSortingPopoverOpen}
                 aria-labelledby="optionsList_sortingOptions"
                 closePopover={() => setIsSortingPopoverOpen(false)}
-                data-test-subj="optionsList-control-sorting-options-popover"
+                data-test-subj="optionsListControl__sortingOptionsPopover"
               >
                 <EuiPopoverTitle paddingSize="s">
                   {OptionsListStrings.popover.getSortPopoverTitle()}
@@ -156,6 +156,7 @@ export const OptionsListPopoverActionBar = ({
                   onChange={onSelectChange}
                   id="optionsList_sortingOptions"
                   listProps={{ bordered: false }}
+                  data-test-subj="optionsListControl__sortingOptions"
                   aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
                 >
                   {(list) => list}

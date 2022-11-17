@@ -145,6 +145,15 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.sortDescription', {
         defaultMessage: 'Select a sorting strategy',
       }),
+  },
+  controlAndPopover: {
+    getExists: (negate: number = +false) =>
+      i18n.translate('controls.optionsList.controlAndPopover.exists', {
+        defaultMessage: '{negate, plural, one {Exist} other {Exists}}',
+        values: { negate },
+      }),
+  },
+  editorAndPopover: {
     sortBy: {
       docDescending: {
         getSortByLabel: () =>
@@ -171,12 +180,5 @@ export const OptionsListStrings = {
           }),
       },
     },
-  },
-  controlAndPopover: {
-    getExists: (negate: number = +false) =>
-      i18n.translate('controls.optionsList.controlAndPopover.exists', {
-        defaultMessage: '{negate, plural, one {Exist} other {Exists}}',
-        values: { negate },
-      }),
   },
 };

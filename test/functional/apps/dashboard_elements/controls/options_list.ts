@@ -213,12 +213,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('cannot create options list for scripted field', async () => {
-        expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
+        await dashboardControls.openCreateControlFlyout();
+        expect(await dashboardControls.optionsListEditorGetCurrentDataView(false)).to.eql(
           'animals-*'
         );
-        await dashboardControls.openCreateControlFlyout();
         await testSubjects.missingOrFail('field-picker-select-isDog');
         await dashboardControls.controlEditorCancel(true);
+      });
+
+      it('can create control with non-default sorting', async () => {
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
+          dataViewTitle: 'animals-*',
+          fieldName: 'sound.keyword',
+          additionalSettings: {
+            hideSort: true,
+            defaultSortType: 'keyAscending',
+          },
+        });
+        controlId = (await dashboardControls.getAllControlIds())[1];
+        expect(await dashboardControls.getControlsCount()).to.be(2);
+
+        await dashboardControls.optionsListOpenPopover(controlId);
+        await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort(), true);
+        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+      });
+
+      it('can edit default sorting method', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        expect(
+          await testSubjects.getVisibleText('optionsListControl__chooseSortAdditionalSetting')
+        ).to.equal('Alphabetical (ascending)');
+        await dashboardControls.optionsListSetAdditionalSettings({
+          defaultSortType: 'keyDescending',
+        });
+        await dashboardControls.controlEditorSave();
+
+        await dashboardControls.optionsListOpenPopover(controlId);
+        await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort().reverse(), true);
+        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
       });
 
       after(async () => {

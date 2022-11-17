@@ -22,13 +22,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { OptionsListStrings } from './options_list_strings';
-import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 import {
   DEFAULT_SORT,
   OptionsListSortingTypes,
   SortingType,
-} from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
+} from '../../../common/options_list/suggestions_sorting';
+import { OptionsListStrings } from './options_list_strings';
+import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
+
 interface OptionsListEditorState {
   selectedSort: SortingType;
   runPastTimeout?: boolean;
@@ -62,7 +63,8 @@ export const OptionsListEditorOptions = ({
     return (Object.keys(OptionsListSortingTypes) as SortingType[]).map((key) => {
       return {
         value: key,
-        inputDisplay: OptionsListStrings.popover.sortBy[key].getSortByLabel(),
+        inputDisplay: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),
+        'data-test-subj': `optionsList__defaultSortBy_${key}`,
       };
     });
   }, []);
@@ -101,6 +103,7 @@ export const OptionsListEditorOptions = ({
             onChange({ singleSelect: !state.singleSelect });
             setState((s) => ({ ...s, singleSelect: !s.singleSelect }));
           }}
+          data-test-subj={'optionsListControl__allowMultipleAdditionalSetting'}
         />
       </EuiFormRow>
       <EuiFormRow>
@@ -112,6 +115,7 @@ export const OptionsListEditorOptions = ({
             setState((s) => ({ ...s, hideExclude: !s.hideExclude }));
             if (initialInput?.exclude) onChange({ exclude: false });
           }}
+          data-test-subj={'optionsListControl__hideExcludeAdditionalSetting'}
         />
       </EuiFormRow>
       <EuiFormRow>
@@ -126,6 +130,7 @@ export const OptionsListEditorOptions = ({
               if (initialInput?.existsSelected) onChange({ existsSelected: false });
             },
           }}
+          data-test-subj={'optionsListControl__hideExistsAdditionalSetting'}
         />
       </EuiFormRow>
       <EuiFormRow>
@@ -137,6 +142,7 @@ export const OptionsListEditorOptions = ({
               onChange({ hideSort: !state.hideSort });
               setState((s) => ({ ...s, hideSort: !s.hideSort }));
             }}
+            data-test-subj={'optionsListControl__hideSortAdditionalSetting'}
           />
           {state.hideSort && (
             <EuiForm className="optionsList--hiddenEditorForm">
@@ -152,6 +158,7 @@ export const OptionsListEditorOptions = ({
                     }}
                     options={options}
                     valueOfSelected={state.selectedSort}
+                    data-test-subj={'optionsListControl__chooseSortAdditionalSetting'}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
@@ -171,6 +178,7 @@ export const OptionsListEditorOptions = ({
               setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
             },
           }}
+          data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
         />
       </EuiFormRow>
     </>
