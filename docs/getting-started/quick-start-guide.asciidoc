@@ -72,7 +72,7 @@ A dashboard is a collection of panels that you can use to visualize the data. Pa
 . Click *[eCommerce] Revenue Dashboard*.
 +
 [role="screenshot"]
-image::images/dashboard_ecommerceRevenueDashboard_7.15.0.png[The [eCommerce] Revenue Dashboard that comes with the Sample eCommerce order data set]
+image::images/dashboard_ecommerceRevenueDashboard_8.6.0.png[The [eCommerce] Revenue Dashboard that comes with the Sample eCommerce order data set]
 
 [float]
 [[create-a-visualization]]
