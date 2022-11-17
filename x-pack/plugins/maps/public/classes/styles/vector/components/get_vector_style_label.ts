@@ -66,6 +66,10 @@ export function getVectorStyleLabel(styleName: VECTOR_STYLES) {
       return i18n.translate('xpack.maps.styles.vector.labelBorderWidthLabel', {
         defaultMessage: 'Label border width',
       });
+    case VECTOR_STYLES.LABEL_BORDER_SIZE:
+      return i18n.translate('xpack.maps.styles.vector.labelPositionLabel', {
+        defaultMessage: 'Label position',
+      });
     default:
       return styleName;
   }

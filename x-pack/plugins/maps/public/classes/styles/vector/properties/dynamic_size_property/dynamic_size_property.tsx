@@ -78,7 +78,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
    */
   getMbSizeExpression() {
     const rangeFieldMeta = this.getRangeFieldMeta();
-    if (!this._isSizeDynamicConfigComplete() || !rangeFieldMeta) {
+    if (!this.isSizeDynamicConfigComplete() || !rangeFieldMeta) {
       // return min of size to avoid flashing
       // returning minimum allows "growing" of the symbols when the meta comes in
       // A grow effect us less visually jarring as shrinking.
@@ -140,7 +140,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     return ['interpolate', ['linear'], inputExpression, ...stops];
   }
 
-  _isSizeDynamicConfigComplete() {
+  isSizeDynamicConfigComplete() {
     return (
       this._field &&
       this._field.isValid() &&

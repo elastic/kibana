@@ -41,6 +41,7 @@ import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
 import { LabelZoomRangeProperty } from './properties/label_zoom_range_property';
 import { LabelBorderSizeProperty } from './properties/label_border_size_property';
+import { LabelPositionProperty } from './properties/label_position_property';
 import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
 import { SymbolizeAsProperty } from './properties/symbolize_as_property';
 import { StaticIconProperty } from './properties/static_icon_property';
@@ -183,6 +184,7 @@ export class VectorStyle implements IVectorStyle {
   private readonly _labelColorStyleProperty: StaticColorProperty | DynamicColorProperty;
   private readonly _labelBorderColorStyleProperty: StaticColorProperty | DynamicColorProperty;
   private readonly _labelBorderSizeStyleProperty: LabelBorderSizeProperty;
+  private readonly _labelPositionStyleProperty: LabelPositionProperty;
 
   static createDescriptor(
     properties: Partial<VectorStylePropertiesDescriptor> = {},
@@ -276,6 +278,12 @@ export class VectorStyle implements IVectorStyle {
     this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
       VECTOR_STYLES.LABEL_BORDER_SIZE,
+      this._labelSizeStyleProperty
+    );
+    this._labelPositionStyleProperty = new LabelPositionProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_POSITION].options,
+      VECTOR_STYLES.LABEL_POSITION,
+      this._iconSizeStyleProperty,
       this._labelSizeStyleProperty
     );
   }
@@ -472,6 +480,7 @@ export class VectorStyle implements IVectorStyle {
       this._labelColorStyleProperty,
       this._labelBorderColorStyleProperty,
       this._labelBorderSizeStyleProperty,
+      this._labelPositionStyleProperty,
     ];
   }
 
@@ -835,6 +844,7 @@ export class VectorStyle implements IVectorStyle {
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
     this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
     this._labelBorderSizeStyleProperty.syncLabelBorderSizeWithMb(textLayerId, mbMap);
+    this._labelPositionStyleProperty.syncLabelPositionWithMb(textLayerId, mbMap);
     this._labelBorderColorStyleProperty.syncLabelBorderColorWithMb(textLayerId, mbMap);
   }
 
