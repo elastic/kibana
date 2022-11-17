@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import type { LogView, ResolvedLogView } from '../../../../common/log_views';
+import * as rt from 'io-ts';
+import { LogView, logViewRT, ResolvedLogView } from '../../../../common/log_views';
 
-export interface LogViewContextWithId {
-  logViewId: string;
-}
+export const logViewContextWithIdRT = rt.type({
+  logViewId: rt.string,
+});
+export type LogViewContextWithId = rt.TypeOf<typeof logViewContextWithIdRT>;
 
-export interface LogViewContextWithLogView {
-  logView: LogView;
-}
+export const logViewContextWithLogViewRT = rt.type({
+  logView: logViewRT,
+});
+export type LogViewContextWithLogView = rt.TypeOf<typeof logViewContextWithLogViewRT>;
 
 export interface LogViewContextWithResolvedLogView {
   resolvedLogView: ResolvedLogView;
