@@ -58,12 +58,15 @@ import { MonitorSummary } from './components/monitor_details/monitor_summary/mon
 import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
 import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
 import { StepDetailPage } from './components/step_details_page/step_detail_page';
+import { useSelectedMonitor } from './components/monitor_details/hooks/use_selected_monitor';
+import { NotFound } from './components/not_found/not_found';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
   component: React.FC;
   dataTestSubj: string;
   title: string;
+  is404?: () => boolean;
 };
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
@@ -103,6 +106,10 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_ROUTE,
+      is404: function useIs404() {
+        const { error } = useSelectedMonitor();
+        return error?.body.statusCode === 404;
+      },
       component: () => (
         <MonitorDetailsPage>
           <MonitorSummary />
@@ -117,6 +124,10 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_HISTORY_ROUTE,
+      is404: function useIs404() {
+        const { error } = useSelectedMonitor();
+        return error?.body.statusCode === 404;
+      },
       component: () => (
         <MonitorDetailsPage>
           <MonitorHistory />
@@ -131,6 +142,10 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_ERRORS_ROUTE,
+      is404: function useIs404() {
+        const { error } = useSelectedMonitor();
+        return error?.body.statusCode === 404;
+      },
       component: () => (
         <MonitorDetailsPage>
           <MonitorErrors />
@@ -413,18 +428,25 @@ export const PageRouter: FC = () => {
           component: RouteComponent,
           dataTestSubj,
           pageHeader,
+          is404,
           ...pageTemplateProps
         }: RouteProps) => (
           <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
-              <SyntheticsPageTemplateComponent
-                path={path}
-                pageHeader={pageHeader}
-                {...pageTemplateProps}
-              >
-                <RouteComponent />
-              </SyntheticsPageTemplateComponent>
+              {is404?.() ? (
+                <SyntheticsPageTemplateComponent path={path} {...pageTemplateProps}>
+                  <NotFound />
+                </SyntheticsPageTemplateComponent>
+              ) : (
+                <SyntheticsPageTemplateComponent
+                  path={path}
+                  pageHeader={pageHeader}
+                  {...pageTemplateProps}
+                >
+                  <RouteComponent />
+                </SyntheticsPageTemplateComponent>
+              )}
             </div>
           </Route>
         )
