@@ -38,13 +38,14 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
 
   return (
     <>
-      <EuiFormRow label="Index">
+      <EuiFormRow label="Index" fullWidth>
         <EuiSelect
           options={dataViewListItems}
           value={selectedDataViewId}
           onChange={(e) => setSelectedDataViewId(e.target.value)}
           hasNoInitialSelection={true}
           disabled={runningState === RUNNING_STATE.RUNNING}
+          fullWidth
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -52,6 +53,7 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
         label={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.indexInput.fieldInput', {
           defaultMessage: 'Field',
         })}
+        fullWidth
       >
         <EuiSelect
           options={fieldNames}
@@ -59,6 +61,7 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
           onChange={(e) => setSelectedField(e.target.value)}
           hasNoInitialSelection={true}
           disabled={runningState === RUNNING_STATE.RUNNING}
+          fullWidth
         />
       </EuiFormRow>
 

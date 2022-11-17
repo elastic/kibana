@@ -29,6 +29,7 @@ export const TextInput: FC<{
       label={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.generalTextInput.inputTitle', {
         defaultMessage: 'Input text',
       })}
+      fullWidth
     >
       <EuiTextArea
         placeholder={
