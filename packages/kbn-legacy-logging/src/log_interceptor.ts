@@ -16,6 +16,10 @@ import { AnyEvent } from './log_events';
  */
 const OPENSSL_GET_RECORD_REGEX = /ssl3_get_record:http/;
 
+/**
+ * Matches error messages when clients connect via HTTPS and Kibana doesn't trust the certificate; Warning: the exact errors are numerous and can change when Node
+ * and its bundled OpenSSL binary are upgraded.
+ */
 const OPENSSL_READ_RECORD_REGEX = /ssl3_read_bytes:sslv3/;
 
 function doTagsMatch(event: AnyEvent, tags: string[]) {
@@ -56,25 +60,14 @@ function downgradeIfErrorType(errorType: string, event: AnyEvent) {
   };
 }
 
-function downgradeIfErrorMessage(match: RegExp | string, event: AnyEvent) {
-  let tagLevel: string = 'debug';
-  const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
+// generic method to convert the given event into the log level provided
+function downgradeIfErrorMessage(level: string, event: AnyEvent) {
   const errorMessage = get(event, 'error.message');
-  const matchesErrorMessage = isClientError && doesMessageMatch(errorMessage, match);
-
-  if (!matchesErrorMessage) {
-    return null;
-  }
-  // log in debug if OPENSSL_GET_RECORD_REGEX; log at info if OPENSSL_READ_RECORD_REGEX
-  // see https://github.com/elastic/kibana/issues/35004
-  if (doesMessageMatch(errorMessage, OPENSSL_READ_RECORD_REGEX)) {
-    tagLevel = 'info';
-  }
   return {
     event: 'log',
     pid: event.pid,
     timestamp: event.timestamp,
-    tags: [tagLevel, 'connection'],
+    tags: [level, 'connection'],
     data: errorMessage,
   };
 }
@@ -133,12 +126,47 @@ export class LogInterceptor extends Stream.Transform {
     return downgradeIfErrorType('HPE_INVALID_METHOD', event);
   }
 
+  /**
+   * When Kibana has HTTPS enabled, but a client tries to connect over HTTP,
+   * the client gets an empty response and an error surfaces in the logs.
+   * These logs are not useful unless you are trying to debug edge-case
+   * behaviors.
+   *
+   *  For that reason, we downgrade this from error to debug level
+   * See https://github.com/elastic/kibana/issues/77391
+   *
+   *  @param {object} - log event
+   */
   downgradeIfHTTPWhenHTTPS(event: AnyEvent) {
-    return downgradeIfErrorMessage(OPENSSL_GET_RECORD_REGEX, event);
+    const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
+    const errorMessage = get(event, 'error.message');
+    const matchesErrorMessage =
+      isClientError && doesMessageMatch(errorMessage, OPENSSL_GET_RECORD_REGEX);
+    if (!matchesErrorMessage) {
+      return null;
+    }
+    return downgradeIfErrorMessage('debug', event);
   }
-
+  /**
+   * When Kibana has HTTPS enabled and Kibana doesn't trust the certificate,
+   * an error surfaces in the logs.
+   * These error logs are not useful and can give the impression that
+   * Kibana is doing something wrong when it's the client that's doing it wrong.
+   *
+   *  For that reason, we downgrade this from error to info level
+   * See https://github.com/elastic/kibana/issues/35004
+   *
+   *  @param {object} - log event
+   */
   downgradeIfCertUntrusted(event: AnyEvent) {
-    return downgradeIfErrorMessage(OPENSSL_READ_RECORD_REGEX, event);
+    const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
+    const errorMessage = get(event, 'error.message');
+    const matchesErrorMessage =
+      isClientError && doesMessageMatch(errorMessage, OPENSSL_READ_RECORD_REGEX);
+    if (!matchesErrorMessage) {
+      return null;
+    }
+    return downgradeIfErrorMessage('info', event);
   }
 
   _transform(event: AnyEvent, enc: string, next: Stream.TransformCallback) {
