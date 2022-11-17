@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ValuesType } from 'utility-types';
 import { apm, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
+import { ValuesType } from 'utility-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
+import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const synthtraceClient = getService('synthtraceEsClient');
   const apmApiClient = getService('apmApiClient');
   const ml = getService('ml');
+  const es = getService('es');
 
   const start = '2021-01-01T12:00:00.000Z';
   const end = '2021-08-01T12:00:00.000Z';
@@ -99,10 +100,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await synthtraceClient.index(eventsWithinTimerange.merge(eventsOutsideOfTimerange));
 
-      // Creating multiple ml jobs in parallel is causing this tests to be flaky
-      // https://github.com/elastic/elasticsearch/issues/36271
-      await createAndRunApmMlJob({ environment: 'production', ml });
-      await createAndRunApmMlJob({ environment: 'development', ml });
+      await createAndRunApmMlJobs({ es, ml, environments: ['production', 'development'] });
     });
 
     after(() => {
