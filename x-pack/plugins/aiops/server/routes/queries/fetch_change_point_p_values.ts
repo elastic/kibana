@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Logger } from '@kbn/logging';
-import { ChangePoint } from '@kbn/ml-agg-utils';
+import { type ChangePoint, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { SPIKE_ANALYSIS_THRESHOLD } from '../../../common/constants';
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
@@ -85,6 +85,7 @@ export const getChangePointRequest = (
       // @ts-expect-error `random_sampler` is not yet part of `AggregationsAggregationContainer`
       random_sampler: {
         probability: sampleProbability,
+        seed: RANDOM_SAMPLER_SEED,
       },
       aggs: pValueAgg,
     },

@@ -48,6 +48,7 @@ export const apiRoutes = {
    */
   getFindRoute: () => `${API_BASE_PATH}/find`,
   getMetricsRoute: () => `${API_BASE_PATH}/metrics`,
+  getBulkDeleteRoute: () => `${API_BASE_PATH}/blobs`,
 };
 
 /**
@@ -86,6 +87,12 @@ export function createFilesClient({
   fileKind?: string;
 }): FilesClient | ScopedFilesClient {
   const api: FilesClient = {
+    bulkDelete: (args) => {
+      return http.delete(apiRoutes.getBulkDeleteRoute(), {
+        headers: commonBodyHeaders,
+        body: JSON.stringify(args),
+      });
+    },
     create: ({ kind, ...args }) => {
       return http.post(apiRoutes.getCreateFileRoute(scopedFileKind ?? kind), {
         headers: commonBodyHeaders,
