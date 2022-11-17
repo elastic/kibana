@@ -223,9 +223,9 @@ export interface MetricVisConfiguration {
 export interface PartitionLayerState {
   layerId: string;
   layerType: LayerType;
+  metrics: string[];
   primaryGroups: string[];
   secondaryGroups?: string[];
-  metric?: string;
   collapseFns?: Record<string, CollapseFunction>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;

@@ -26,12 +26,13 @@ export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
 
   const selectedLocation = useSelectedLocation();
 
-  if (!selectedLocation) {
+  if (!selectedLocation || !monitorId) {
     return null;
   }
 
   return (
     <ExploratoryViewEmbeddable
+      align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
