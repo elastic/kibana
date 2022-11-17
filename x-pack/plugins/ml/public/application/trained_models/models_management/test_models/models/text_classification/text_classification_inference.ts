@@ -34,16 +34,13 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
   ) {
     super(trainedModelsApi, model, inputType);
 
-    this.initializeValidators();
+    this.initialize();
   }
 
   public async inferText() {
     return this.runInfer<RawTextClassificationResponse>(
-      (inputText: string) => {
-        return {
-          docs: [{ [this.inputField]: inputText }],
-          inference_config: this.getInferenceConfig(this.getNumTopClassesConfig()),
-        };
+      () => {
+        return this.getInferenceConfig(this.getNumTopClassesConfig());
       },
       (resp, inputText) => {
         return processResponse(resp, this.model, inputText);
@@ -56,7 +53,7 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
       return {
         response: processInferenceResult(doc._source[this.inferenceType], this.model),
         rawResponse: doc._source[this.inferenceType],
-        inputText: doc._source[this.inputField],
+        inputText: doc._source[this.getInputField()],
       };
     });
   }

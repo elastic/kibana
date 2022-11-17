@@ -59,20 +59,19 @@ export enum INPUT_TYPE {
 export abstract class InferenceBase<TInferResponse> {
   protected abstract readonly inferenceType: InferenceType;
   protected abstract readonly inferenceTypeLabel: string;
-  protected inputField: string;
   protected readonly modelInputField: string;
+
   protected inputText$ = new BehaviorSubject<string[]>([]);
+  private inputField$ = new BehaviorSubject<string>('');
   private inferenceResult$ = new BehaviorSubject<TInferResponse[] | null>(null);
   private inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
   private runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
-  protected inputTextValid$ = new BehaviorSubject<boolean>(false);
-  protected isValid$ = new BehaviorSubject<boolean>(false);
+  private isValid$ = new BehaviorSubject<boolean>(false);
+  private pipeline$ = new BehaviorSubject<estypes.IngestPipeline>({});
+
   protected readonly info: string[] = [];
 
-  private validators$: Array<Observable<boolean>> = [];
-  private validatorsSubscriptions$: Subscription = new Subscription();
-
-  private pipeline = new BehaviorSubject<estypes.IngestPipeline>({});
+  private subscriptions$: Subscription = new Subscription();
 
   constructor(
     protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
@@ -80,33 +79,48 @@ export abstract class InferenceBase<TInferResponse> {
     protected readonly inputType: INPUT_TYPE
   ) {
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
-    this.inputField = this.modelInputField;
-
-    this.validators$.push(
-      this.inputText$.pipe(map((inputText) => inputText.some((t) => t !== '')))
-    );
+    this.inputField$.next(this.modelInputField);
   }
 
   public destroy() {
-    this.validatorsSubscriptions$.unsubscribe();
+    this.subscriptions$.unsubscribe();
   }
 
-  protected initializeValidators(additionalValidators?: Array<Observable<boolean>>) {
-    if (additionalValidators) {
-      this.validators$.push(...additionalValidators);
-    }
+  protected initialize(
+    additionalValidators?: Array<Observable<boolean>>,
+    additionalChanges?: Array<Observable<any>>
+  ) {
+    this.initializeValidators(additionalValidators);
+    this.initializePipeline(additionalChanges);
+  }
 
-    this.validatorsSubscriptions$.add(
-      combineLatest(this.validators$)
+  private initializeValidators(additionalValidators?: Array<Observable<boolean>>) {
+    const validators$: Array<Observable<boolean>> = [
+      this.inputText$.pipe(map((inputText) => inputText.some((t) => t !== ''))),
+      ...(additionalValidators ? additionalValidators : []),
+    ];
+
+    this.subscriptions$.add(
+      combineLatest(validators$)
         .pipe(
           map((validationResults) => {
             return validationResults.every((v) => !!v);
           })
         )
-        .subscribe((v) => {
-          this.isValid$.next(v);
-          this.pipeline.next(this.generatePipeline());
-        })
+        .subscribe(this.isValid$)
+    );
+  }
+
+  private initializePipeline(additionalChanges?: Array<Observable<any>>) {
+    const formObservables$: Array<Observable<any>> = [
+      this.inputField$.asObservable(),
+      ...(additionalChanges ? additionalChanges : []),
+    ];
+
+    this.subscriptions$.add(
+      combineLatest(formObservables$).subscribe(() => {
+        this.pipeline$.next(this.generatePipeline());
+      })
     );
   }
 
@@ -145,7 +159,11 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   public setInputField(field: string | undefined) {
-    this.inputField = field === undefined ? this.modelInputField : field;
+    this.inputField$.next(field === undefined ? this.modelInputField : field);
+  }
+
+  public getInputField() {
+    return this.inputField$.getValue();
   }
 
   public setInputText(text: string[]) {
@@ -189,11 +207,11 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   public getPipeline$() {
-    return this.pipeline.asObservable();
+    return this.pipeline$.asObservable();
   }
 
   public getPipeline(): estypes.IngestPipeline {
-    return this.pipeline.getValue();
+    return this.pipeline$.getValue();
   }
 
   protected getBasicProcessors(
@@ -204,7 +222,7 @@ export abstract class InferenceBase<TInferResponse> {
         model_id: this.model.model_id,
         target_field: this.inferenceType,
         field_map: {
-          [this.inputField]: this.modelInputField,
+          [this.inputField$.getValue()]: this.modelInputField,
         },
         ...(inferenceConfigOverrides && Object.keys(inferenceConfigOverrides).length
           ? { inference_config: this.getInferenceConfig(inferenceConfigOverrides) }
@@ -226,17 +244,20 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   protected async runInfer<TRawInferResponse>(
-    getInferBody: (inputText: string) => estypes.MlInferTrainedModelRequest['body'],
+    getInferenceConfig: () => estypes.MlInferenceConfigUpdateContainer | void,
     processResponse: (resp: TRawInferResponse, inputText: string) => TInferResponse
   ): Promise<TInferResponse[]> {
     try {
       this.setRunning();
       const inputText = this.inputText$.getValue()[0];
-      const body = getInferBody(inputText);
+      const inferenceConfig = getInferenceConfig();
 
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
-        body,
+        {
+          docs: this.getInferDocs(),
+          ...(inferenceConfig ? { inference_config: inferenceConfig } : {}),
+        },
         DEFAULT_INFERENCE_TIME_OUT
       )) as unknown as TRawInferResponse;
 
@@ -273,10 +294,14 @@ export abstract class InferenceBase<TInferResponse> {
 
   protected abstract getProcessors(): estypes.IngestProcessorContainer[];
 
+  protected getInferDocs() {
+    return [{ [this.inputField$.getValue()]: this.inputText$.getValue()[0] }];
+  }
+
   protected getPipelineDocs() {
     return this.inputText$.getValue().map((v) => ({
       _source: {
-        [this.inputField]: v,
+        [this.inputField$.getValue()]: v,
       },
     }));
   }

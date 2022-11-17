@@ -46,16 +46,12 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
   ) {
     super(trainedModelsApi, model, inputType);
 
-    this.initializeValidators();
+    this.initialize();
   }
 
   public async inferText() {
     return this.runInfer<RawTextEmbeddingResponse>(
-      (inputText: string) => {
-        return {
-          docs: [{ [this.inputField]: inputText }],
-        };
-      },
+      () => {},
       (resp, inputText) => {
         return processTextResponse(resp, inputText);
       }
@@ -64,7 +60,7 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
 
   protected async inferIndex() {
     return this.runPipelineSimulate((doc) => {
-      const inputText = doc._source[this.inputField];
+      const inputText = doc._source[this.getInputField()];
       return processIndexResponse(doc._source[this.inferenceType], inputText);
     });
   }

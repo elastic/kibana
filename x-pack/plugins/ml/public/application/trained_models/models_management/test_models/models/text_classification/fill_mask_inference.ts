@@ -38,18 +38,15 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
   ) {
     super(trainedModelsApi, model, inputType);
 
-    this.initializeValidators([
+    this.initialize([
       this.inputText$.pipe(map((inputText) => inputText.every((t) => t.includes(MASK)))),
     ]);
   }
 
   protected async inferText() {
     return this.runInfer<RawTextClassificationResponse>(
-      (inputText: string) => {
-        return {
-          docs: [{ [this.inputField]: inputText }],
-          inference_config: this.getInferenceConfig(this.getNumTopClassesConfig()),
-        };
+      () => {
+        return this.getInferenceConfig(this.getNumTopClassesConfig());
       },
       (resp, inputText) => {
         return processResponse(resp, this.model, inputText);
@@ -62,7 +59,7 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
       return {
         response: processInferenceResult(doc._source[this.inferenceType], this.model),
         rawResponse: doc._source[this.inferenceType],
-        inputText: doc._source[this.inputField],
+        inputText: doc._source[this.getInputField()],
       };
     });
   }

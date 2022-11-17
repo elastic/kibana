@@ -40,14 +40,12 @@ export class NerInference extends InferenceBase<NerResponse> {
   ) {
     super(trainedModelsApi, model, inputType);
 
-    this.initializeValidators();
+    this.initialize();
   }
 
   protected async inferText() {
     return this.runInfer<estypes.MlInferTrainedModelResponse>(
-      (inputText: string) => {
-        return { docs: [{ [this.inputField]: inputText }] };
-      },
+      () => {},
       (resp, inputText) => {
         return {
           response: parseResponse(resp),
@@ -63,7 +61,7 @@ export class NerInference extends InferenceBase<NerResponse> {
       return {
         response: parseResponse({ inference_results: [doc._source[this.inferenceType]] }),
         rawResponse: doc._source[this.inferenceType],
-        inputText: doc._source[this.inputField],
+        inputText: doc._source[this.getInputField()],
       };
     });
   }

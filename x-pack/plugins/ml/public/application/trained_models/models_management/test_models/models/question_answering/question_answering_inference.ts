@@ -66,22 +66,20 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
   ) {
     super(trainedModelsApi, model, inputType);
 
-    this.initializeValidators([
-      this.questionText$.pipe(map((questionText) => questionText !== '')),
-    ]);
+    this.initialize(
+      [this.questionText$.pipe(map((questionText) => questionText !== ''))],
+      [this.questionText$]
+    );
   }
 
   public async inferText() {
     return this.runInfer<RawQuestionAnsweringResponse>(
-      (inputText: string) => {
+      () => {
         const question = this.questionText$.value;
-        return {
-          docs: [{ [this.inputField]: inputText }],
-          inference_config: this.getInferenceConfig({
-            ...this.getNumTopClassesConfig(),
-            question,
-          }),
-        };
+        return this.getInferenceConfig({
+          ...this.getNumTopClassesConfig(),
+          question,
+        });
       },
       (resp, inputText) => {
         return processResponse(resp, inputText);
@@ -92,7 +90,7 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
   protected async inferIndex() {
     return this.runPipelineSimulate((doc) => {
       const pretendRawRequest = { inference_results: [doc._source[this.inferenceType]] };
-      const inputText = doc._source[this.inputField];
+      const inputText = doc._source[this.getInputField()];
 
       return processResponse(pretendRawRequest, inputText);
     });

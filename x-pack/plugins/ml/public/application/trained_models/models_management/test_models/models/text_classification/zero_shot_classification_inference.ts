@@ -41,25 +41,22 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
   ) {
     super(trainedModelsApi, model, inputType);
 
-    this.initializeValidators([
-      this.labelsText$.pipe(map((labelsText) => labelsText !== '')),
-      this.multiLabel$.pipe(map((multiLabel) => multiLabel !== undefined)),
-    ]);
+    this.initialize(
+      [this.labelsText$.pipe(map((labelsText) => labelsText !== ''))],
+      [this.labelsText$, this.multiLabel$.asObservable()]
+    );
   }
 
   public async inferText() {
     return this.runInfer<RawTextClassificationResponse>(
-      (inputText: string) => {
+      () => {
         const labelsText = this.labelsText$.getValue();
         const multiLabel = this.multiLabel$.getValue();
         const inputLabels = labelsText?.split(',').map((l) => l.trim());
-        return {
-          docs: [{ [this.inputField]: inputText }],
-          inference_config: this.getInferenceConfig({
-            labels: inputLabels,
-            multi_label: multiLabel,
-          } as estypes.MlZeroShotClassificationInferenceUpdateOptions),
-        };
+        return this.getInferenceConfig({
+          labels: inputLabels,
+          multi_label: multiLabel,
+        } as estypes.MlZeroShotClassificationInferenceUpdateOptions);
       },
       (resp, inputText) => {
         return processResponse(resp, this.model, inputText);
@@ -72,7 +69,7 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
       return {
         response: processInferenceResult(doc._source[this.inferenceType], this.model),
         rawResponse: doc._source[this.inferenceType],
-        inputText: doc._source[this.inputField],
+        inputText: doc._source[this.getInputField()],
       };
     });
   }
