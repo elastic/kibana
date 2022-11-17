@@ -33,6 +33,7 @@ jest.mock('../../static_globals', () => ({
 // deletes, adds, or updates the properties based on a default object
 function createResponseObjHit(params?: HitParams[]): ElasticsearchResponseHit {
   const defaultResponseObj: ElasticsearchResponseHit = {
+    _id: '123123a',
     _index: 'index',
     _source: {
       cluster_uuid: '123',

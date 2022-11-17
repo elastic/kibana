@@ -11,7 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
+import { type ChangePoint, type FieldValuePair, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 const FREQUENT_ITEMS_FIELDS_LIMIT = 15;
@@ -127,6 +127,7 @@ export async function fetchFrequentItems(
       // @ts-expect-error `random_sampler` is not yet part of `AggregationsAggregationContainer`
       random_sampler: {
         probability: sampleProbability,
+        seed: RANDOM_SAMPLER_SEED,
       },
       aggs: frequentItemsAgg,
     },

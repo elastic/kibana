@@ -328,6 +328,9 @@
           "id": "kibFileUploadPluginApi"
         },
         {
+          "id": "kibFilesPluginApi"
+        },
+        {
           "id": "kibFleetPluginApi"
         },
         {
