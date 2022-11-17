@@ -19,6 +19,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { loggerMock } from '@kbn/logging-mocks';
 import { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import {
   disabledRule2,
   enabledRule1,
@@ -34,6 +35,12 @@ jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
+jest.mock('../../task_runner/alert_task_instance', () => ({
+  taskInstanceToAlertTaskInstance: jest.fn()
+}));
+
+const { taskInstanceToAlertTaskInstance } = jest.requireMock('../../task_runner/alert_task_instance');
+
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -42,6 +49,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
+const eventLogger = eventLoggerMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -61,6 +69,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  eventLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
 };
 
@@ -509,6 +518,45 @@ describe('bulkDisableRules', () => {
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_disable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');
+    });
+  });
+
+  describe('recoverRuleAlerts', () => {
+    beforeEach(() => {
+      taskInstanceToAlertTaskInstance.mockImplementation(() => ({ state: { alertInstances: {
+        '1': {
+          meta: {
+            lastScheduledActions: {
+              group: 'default',
+              date: new Date().toISOString(),
+            },
+          },
+          state: { bar: false },
+        },
+      }}}))
+    })
+    test('should call logEvent', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: successfulSavedObjects,
+      });
+  
+      await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
+  
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    });
+
+    test('should call logger.warn', async () => {
+      eventLogger.logEvent.mockImplementation(() => {
+        throw new Error('UPS');
+      });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: successfulSavedObjects,
+      });
+  
+      await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
+  
+      expect(logger.warn).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenLastCalledWith("rulesClient.disable('id2') - Could not write recovery events - UPS");
     });
   });
 });
