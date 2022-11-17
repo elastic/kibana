@@ -1,7 +1,7 @@
 # @kbn/health-gateway-server
 
-This package runs a small server called the Health Gateway, which exists to query
-the status APIs of multiple Kibana instances and return an aggregated result.
+This package runs a small server called the Health Gateway, which exists to 
+check the health of multiple Kibana instances and return an aggregated result.
 
 This is used by the Elastic Cloud infrastructure to run two different Kibana processes 
 with different `node.roles`: one process for handling UI requests, and one for background
@@ -70,8 +70,8 @@ above (5605-5606).
 
 Once you have your `gateway.yml` and have started docker-compose, you can run the
 server from the `/packages/kbn-health-gateway-server` directory with `yarn start`. Then you should
-be able to make requests to the `/api/status` endpoint:
+be able to make requests to the `/` endpoint:
 
 ```bash
-$ curl "https://localhost:3000/api/status"
+$ curl "https://localhost:3000/"
 ```

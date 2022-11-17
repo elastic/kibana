@@ -88,16 +88,18 @@ export function getLensAttributes({
     ],
     state: {
       visualization: {
-        shape: 'pie',
+        shape: 'donut',
         layers: [
           {
             layerId: metricId,
             primaryGroups: [columnA],
-            metric: columnB,
+            metrics: [columnB],
             categoryDisplay: 'default',
             legendDisplay: 'hide',
+            nestedLegend: false,
             numberDisplay: 'percent',
             layerType: 'data',
+            legendPosition: 'bottom',
           },
         ],
       } as PieVisualizationState,

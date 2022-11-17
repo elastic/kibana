@@ -9341,7 +9341,7 @@
         "label": "AggGroupName",
         "description": [],
         "signature": [
-          "\"none\" | \"buckets\" | \"metrics\""
+          "\"none\" | \"metrics\" | \"buckets\""
         ],
         "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
         "deprecated": false,
@@ -12457,7 +12457,15 @@
             },
             {
               "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_expanded_row/choropleth_map.tsx"
             },
             {
               "plugin": "stackAlerts",
@@ -13148,6 +13156,22 @@
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -13186,26 +13210,6 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
                 "plugin": "observability",
@@ -13734,6 +13738,10 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
+              },
+              {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -14764,16 +14772,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               ") => ",
               {
@@ -14802,16 +14810,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -20842,6 +20850,22 @@
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -20880,26 +20904,6 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
                 "plugin": "observability",
@@ -21428,6 +21432,10 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
+              },
+              {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -22458,16 +22466,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               ") => ",
               {
@@ -22496,16 +22504,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",

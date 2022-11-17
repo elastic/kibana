@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import { euiPaletteForStatus } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../common/constants';
 
-const [success, warning, danger] = euiPaletteForStatus(3);
+export const statusColors = {
+  passed: euiThemeVars.euiColorVis0,
+  failed: euiThemeVars.euiColorVis9,
+};
 
-export const statusColors = { success, warning, danger };
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
+export const MAX_FINDINGS_TO_LOAD = 500;
+export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
+
+export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY = 'cloudPosture:findings:pageSize';
+export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
+export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 
 export type CloudPostureIntegrations = typeof cloudPostureIntegrations;
 
@@ -29,7 +37,7 @@ export const cloudPostureIntegrations = {
       {
         type: CLOUDBEAT_VANILLA,
         name: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.nameTitle', {
-          defaultMessage: 'Unmanaged Kubernetes',
+          defaultMessage: 'Self-Managed/Vanilla Kubernetes',
         }),
         benchmark: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.benchmarkTitle', {
           defaultMessage: 'CIS Kubernetes',

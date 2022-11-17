@@ -133,6 +133,8 @@ import { ExceptionsViewer } from '../../../rule_exceptions/components/all_except
 import type { NavTab } from '../../../../common/components/navigation/types';
 import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
+import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
+import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -625,6 +627,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  const {
+    isBulkDuplicateConfirmationVisible,
+    showBulkDuplicateConfirmation,
+    cancelRuleDuplication,
+    confirmRuleDuplication,
+  } = useBulkDuplicateExceptionsConfirmation();
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -646,6 +655,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
+      {isBulkDuplicateConfirmationVisible && (
+        <BulkActionDuplicateExceptionsConfirmation
+          onCancel={cancelRuleDuplication}
+          onConfirm={confirmRuleDuplication}
+          rulesCount={1}
+        />
+      )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
@@ -736,6 +752,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             rule,
                             hasActionsPrivileges
                           )}
+                          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
