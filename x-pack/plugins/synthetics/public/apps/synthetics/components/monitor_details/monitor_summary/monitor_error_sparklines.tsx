@@ -25,6 +25,8 @@ export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
 
   const selectedLocation = useSelectedLocation();
 
+  const time = useMemo(() => ({ from, to }), [from, to]);
+
   if (!selectedLocation) {
     return null;
   }
@@ -37,11 +39,10 @@ export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
       hideTicks={true}
       attributes={[
         {
+          time,
           seriesType: 'area',
-          time: useMemo(() => ({ from, to }), [from, to]),
-          reportDefinitions: { 'monitor.id': monitorId },
           reportDefinitions: {
-            'monitor.id': [monitorId],
+            'monitor.id': monitorId,
             'observer.geo.name': [selectedLocation?.label],
           },
           dataType: 'synthetics',
