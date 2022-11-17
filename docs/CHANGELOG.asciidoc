@@ -38,6 +38,51 @@ Review important information about the {kib} 8.5.x releases.
 
 --
 
+[[release-notes-8.5.2]]
+== {kib} 8.5.2
+
+coming::[8.5.2]
+
+Review the following information about the {kib} 8.5.2 release.
+
+[float]
+[[breaking-changes-8.5.2]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in {kib} 8.5.2.
+// end::notable-breaking-changes[]
+
+{kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[enhancement-v8.5.2]]
+=== Enhancement
+Security::
+* Adds a `Content-Security-Policy` header to all `/api/*` responses {kibana-pull}144902[#144902]
+
+[float]
+[[fixes-v8.5.2]]
+=== Bug fixes
+APM::
+* Limit the number of source map artifacts {kibana-pull}144963[#144963]
+* Suppress error toast when data view cannot be created {kibana-pull}143639[#143639]
+
+Dashboard::
+Fixes unexpected suggestions for text/keyword multi-fields {kibana-pull}145177[#145177]
+
+Discover::
+Fixes % for field stats calculations (edge cases) {kibana-pull}144962[#144962]
+
+Management::
+Fixes autocomplete_entities API crash when response size is too big {kibana-pull}140569[#140569]
+
+Uptime::
+Adjust formula for synthetics monitor availability {kibana-pull}144868[#144868]
+
 [[release-notes-8.5.1]]
 == {kib} 8.5.1
 
@@ -50,9 +95,7 @@ Review the following information about the {kib} 8.5.1 release.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade, review the breaking change, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
 There are no breaking changes in {kib} 8.5.1.
-// end::notable-breaking-changes[]
 
 {kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
