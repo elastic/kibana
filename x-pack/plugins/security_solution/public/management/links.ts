@@ -39,6 +39,7 @@ import {
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   RULES,
+  SHARED_LIST_DETAILS,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
@@ -137,6 +138,22 @@ export const links: LinkItem = {
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.exceptions', {
           defaultMessage: 'Exception lists',
+        }),
+      ],
+    },
+    {
+      id: SecurityPageName.sharedExceptionListDetails,
+      title: SHARED_LIST_DETAILS,
+      description: i18n.translate('xpack.securitySolution.appLinks.sharedListDetailsDescription', {
+        defaultMessage: 'Manage shared exception list details',
+      }),
+      landingIcon: IconExceptionLists,
+      path: '',
+      skipUrlState: true,
+      hideTimeline: true,
+      globalSearchKeywords: [
+        i18n.translate('xpack.securitySolution.appLinks.sharedListDetailsDescription', {
+          defaultMessage: 'Shared list details',
         }),
       ],
     },

@@ -10,7 +10,11 @@ import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
-import { EXCEPTIONS_PATH, SecurityPageName } from '../../common/constants';
+import {
+  EXCEPTIONS_PATH,
+  SecurityPageName,
+  SHARED_EXCEPTION_LIST_DETAIL_PATH,
+} from '../../common/constants';
 
 import { SharedLists, ListsDetailView } from './pages';
 import { SpyRoute } from '../common/utils/route/spy_routes';
@@ -42,7 +46,7 @@ const ExceptionsContainerComponent: React.FC = () => {
   return (
     <Switch>
       <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />
-      <Route path={'/exceptions/shared/:exceptionListId'} component={ExceptionsListDetailRoute} />
+      <Route path={SHARED_EXCEPTION_LIST_DETAIL_PATH} component={ExceptionsListDetailRoute} />
       <Route component={NotFoundPage} />
     </Switch>
   );

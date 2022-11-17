@@ -114,8 +114,10 @@ export const useExceptionListDetails = () => {
         id: exceptionListId,
         http,
       });
-      if (!result || !isAnExceptionListItem(result)) return setInvalidListId(true);
-
+      if (!result || !isAnExceptionListItem(result)) {
+        setIsLoading(false);
+        return setInvalidListId(true);
+      }
       setList(result);
       await initializeListRules(result);
       setIsLoading(false);

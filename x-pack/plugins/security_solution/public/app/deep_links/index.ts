@@ -48,6 +48,7 @@ import {
   TIMELINES,
   TRUSTED_APPLICATIONS,
   USERS,
+  SHARED_LIST_DETAILS,
 } from '../translations';
 import {
   ALERTS_PATH,
@@ -237,7 +238,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         deepLinks: [
           {
             id: SecurityPageName.sharedExceptionListDetails,
-            title: 'List Details',
+            title: SHARED_LIST_DETAILS,
             path: '/exceptions/shared/:exceptionListId',
             navLinkStatus: AppNavLinkStatus.hidden,
             searchable: false,
