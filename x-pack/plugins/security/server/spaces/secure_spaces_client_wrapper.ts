@@ -325,7 +325,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       const { typeMap } = await this.securityExtension.checkAuthorization({
         types: new Set(typesAndSpaces.keys()),
         spaces: uniqueSpaces,
-        actions: ['bulk_update'],
+        actions: new Set(['bulk_update']),
       });
       let error: Error | undefined;
       try {

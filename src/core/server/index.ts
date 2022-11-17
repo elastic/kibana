@@ -328,6 +328,7 @@ export type {
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensionFactory,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
   SavedObjectsExportResultDetails,
   SavedObjectsExportExcludedObject,

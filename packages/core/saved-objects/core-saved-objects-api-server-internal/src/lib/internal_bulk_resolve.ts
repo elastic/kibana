@@ -327,7 +327,7 @@ async function authorizeAuditAndRedact<T>(
   const authorizationResult = await securityExtension.checkAuthorization({
     types: new Set(typesAndSpaces.keys()),
     spaces: spacesToAuthorize,
-    actions: ['bulk_get'],
+    actions: new Set(['bulk_get']),
   });
   securityExtension.enforceAuthorization({
     typesAndSpaces,

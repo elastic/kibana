@@ -16,9 +16,7 @@ import type {
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
   SavedObjectsExtensions,
-  ISavedObjectsEncryptionExtension,
-  ISavedObjectsSecurityExtension,
-  ISavedObjectsSpacesExtension,
+  SavedObjectsExtensionFactory,
 } from '@kbn/core-saved-objects-server';
 import {
   ENCRYPTION_EXTENSION_ID,
@@ -87,27 +85,18 @@ export class SavedObjectsClientProvider {
   }
 
   getExtensions(request: KibanaRequest, excludedExtensions: string[]): SavedObjectsExtensions {
-    const extensionInfo = [
-      { id: ENCRYPTION_EXTENSION_ID, factory: this.encryptionExtensionFactory },
-      { id: SECURITY_EXTENSION_ID, factory: this.securityExtensionFactory },
-      { id: SPACES_EXTENSION_ID, factory: this.spacesExtensionFactory },
-    ];
-
-    const extensions = extensionInfo.map((extension) => {
-      const isIncluded = !excludedExtensions.includes(extension.id) && !!extension.factory;
-      return isIncluded
-        ? extension.factory?.({ typeRegistry: this._typeRegistry, request })
+    const createExt = <T>(
+      extensionId: string,
+      extensionFactory?: SavedObjectsExtensionFactory<T | undefined>
+    ): T | undefined =>
+      !excludedExtensions.includes(extensionId) && !!extensionFactory
+        ? extensionFactory?.({ typeRegistry: this._typeRegistry, request })
         : undefined;
-    });
-
-    const encryptionExtension = extensions[0] as ISavedObjectsEncryptionExtension;
-    const securityExtension = extensions[1] as ISavedObjectsSecurityExtension;
-    const spacesExtension = extensions[2] as ISavedObjectsSpacesExtension;
 
     return {
-      encryptionExtension,
-      securityExtension,
-      spacesExtension,
+      encryptionExtension: createExt(ENCRYPTION_EXTENSION_ID, this.encryptionExtensionFactory),
+      securityExtension: createExt(SECURITY_EXTENSION_ID, this.securityExtensionFactory),
+      spacesExtension: createExt(SPACES_EXTENSION_ID, this.spacesExtensionFactory),
     };
   }
 }

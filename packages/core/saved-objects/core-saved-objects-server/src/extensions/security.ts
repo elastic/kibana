@@ -23,9 +23,9 @@ export interface CheckAuthorizationParams<A extends string> {
    */
   spaces: Set<string>;
   /**
-   * An array of actions to check.
+   * An set of actions to check.
    */
-  actions: A[];
+  actions: Set<A>;
   /**
    * Authorization options - whether or not to allow global resources, false if options are undefined
    */

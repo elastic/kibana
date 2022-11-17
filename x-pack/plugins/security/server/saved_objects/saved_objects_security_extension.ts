@@ -56,13 +56,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     if (spaces.size === 0) {
       throw new Error('No spaces specified for authorization check');
     }
-    if (actions.length === 0) {
+    if (actions.size === 0) {
       throw new Error('No actions specified for authorization check');
     }
     const typesArray = [...types];
+    const actionsArray = [...actions];
     const privilegeActionsMap = new Map(
       typesArray.flatMap((type) =>
-        actions.map((action) => [this.actions.savedObject.get(type, action), { type, action }])
+        actionsArray.map((action) => [this.actions.savedObject.get(type, action), { type, action }])
       )
     );
     const privilegeActions = [...privilegeActionsMap.keys(), this.actions.login]; // Always check login action, we will need it later for redacting namespaces
@@ -127,7 +128,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     } else if (typeMap.size > 0) {
       for (const entry of typeMap.values()) {
         const typeActions = Object.keys(entry);
-        if (actions.some((a) => typeActions.includes(a))) {
+        if (actionsArray.some((a) => typeActions.includes(a))) {
           // Only return 'partially_authorized' if the user is actually authorized for one of the actions they requested
           // (e.g., not just the 'login:' action)
           return { typeMap, status: 'partially_authorized' };

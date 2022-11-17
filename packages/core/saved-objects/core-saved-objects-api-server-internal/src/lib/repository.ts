@@ -358,7 +358,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const authorizationResult = await this._securityExtension?.checkAuthorization({
       types: new Set([type]),
       spaces: new Set([...spacesToEnforce, ...spacesToAuthorize]), // existing namespaces are included so we can later redact if necessary
-      actions: ['create'],
+      actions: new Set(['create']),
       // If a user tries to create an object with `initialNamespaces: ['*']`, they need to have 'create' privileges for the Global Resource
       // (e.g., All privileges for All Spaces).
       // Inversely, if a user tries to overwrite an object that already exists in '*', they don't need to 'create' privileges for the Global
@@ -551,7 +551,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const authorizationResult = await this._securityExtension?.checkAuthorization({
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
-      actions: ['bulk_create'],
+      actions: new Set(['bulk_create']),
       // If a user tries to create an object with `initialNamespaces: ['*']`, they need to have 'bulk_create' privileges for the Global
       // Resource (e.g., All privileges for All Spaces).
       // Inversely, if a user tries to overwrite an object that already exists in '*', they don't need to have 'bulk_create' privileges for the Global
@@ -780,7 +780,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const authorizationResult = await this._securityExtension?.checkAuthorization({
       types: new Set(typesAndSpaces.keys()),
       spaces: new Set([namespaceString]), // Always check authZ for the active space
-      actions: ['bulk_create'],
+      actions: new Set(['bulk_create']),
     });
     if (authorizationResult) {
       this._securityExtension!.enforceAuthorization({
@@ -863,7 +863,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const authorizationResult = await this._securityExtension?.checkAuthorization({
       types: new Set([type]),
       spaces: new Set([namespaceString]), // Always check authZ for the active space
-      actions: ['delete'],
+      actions: new Set(['delete']),
     });
     if (authorizationResult) {
       this._securityExtension!.enforceAuthorization({
@@ -1168,7 +1168,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const authorizationResult = await this._securityExtension?.checkAuthorization({
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
-      actions: ['bulk_delete'],
+      actions: new Set(['bulk_delete']),
     });
     if (authorizationResult) {
       this._securityExtension!.enforceAuthorization({
@@ -1474,7 +1474,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       preAuthorizationResult = await this._securityExtension.checkAuthorization({
         types: new Set(types),
         spaces: spacesToPreauthorize,
-        actions: ['find'],
+        actions: new Set(['find']),
       });
       if (preAuthorizationResult.status === 'unauthorized') {
         // If the user is unauthorized to find *anything* they requested, return an empty response
@@ -1588,7 +1588,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           await this._securityExtension?.checkAuthorization({
             types: new Set(types),
             spaces: spacesToAuthorize,
-            actions: ['find'],
+            actions: new Set(['find']),
           })
         : undefined;
 
@@ -1757,7 +1757,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const authorizationResult = await this._securityExtension?.checkAuthorization({
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
-      actions: ['bulk_get'],
+      actions: new Set(['bulk_get']),
     });
     if (authorizationResult) {
       this._securityExtension!.enforceAuthorization({
@@ -1846,7 +1846,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const authorizationResult = await this._securityExtension?.checkAuthorization({
       types: new Set([type]),
       spaces: new Set([...spacesToEnforce, ...existingNamespaces]), // existing namespaces are included so we can later redact if necessary
-      actions: ['get'],
+      actions: new Set(['get']),
     });
     if (authorizationResult) {
       this._securityExtension!.enforceAuthorization({
@@ -1953,7 +1953,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const authorizationResult = await this._securityExtension?.checkAuthorization({
       types: new Set([type]),
       spaces: new Set([...spacesToEnforce, ...existingNamespaces]), // existing namespaces are included so we can later redact if necessary
-      actions: ['update'],
+      actions: new Set(['update']),
     });
     if (authorizationResult) {
       this._securityExtension!.enforceAuthorization({
@@ -2240,7 +2240,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const authorizationResult = await this._securityExtension?.checkAuthorization({
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
-      actions: ['bulk_update'],
+      actions: new Set(['bulk_update']),
     });
     if (authorizationResult) {
       this._securityExtension!.enforceAuthorization({
@@ -2420,7 +2420,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const authorizationResult = await this._securityExtension?.checkAuthorization({
       types: new Set([type]),
       spaces,
-      actions: ['delete'],
+      actions: new Set(['delete']),
     });
     if (authorizationResult) {
       this._securityExtension!.enforceAuthorization({
@@ -2711,7 +2711,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       const preAuthorizationResult = await this._securityExtension.checkAuthorization({
         types: new Set(types),
         spaces,
-        actions: ['open_point_in_time'],
+        actions: new Set(['open_point_in_time']),
       });
       if (preAuthorizationResult.status === 'unauthorized') {
         // If the user is unauthorized to find *anything* they requested, return an empty response

@@ -207,7 +207,7 @@ export async function updateObjectsSpaces({
   const authorizationResult = await securityExtension?.checkAuthorization({
     types: new Set(typesAndSpaces.keys()),
     spaces: spacesToAuthorize,
-    actions: ['share_to_space'],
+    actions: new Set(['share_to_space']),
     // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource (e.g.,
     // All privileges for All Spaces).
     options: { allowGlobalResource: true },

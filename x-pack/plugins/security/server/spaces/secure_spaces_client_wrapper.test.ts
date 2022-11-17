@@ -739,7 +739,7 @@ describe('SecureSpacesClientWrapper', () => {
       expect(securityExtension!.checkAuthorization).toHaveBeenCalledWith({
         types: new Set(targetTypes), // unique types of the alias targets
         spaces: new Set(targetSpaces), // unique spaces of the alias targets
-        actions: ['bulk_update'],
+        actions: new Set(['bulk_update']),
       });
     }
 

@@ -255,7 +255,7 @@ async function optionallyUseSecurity(
   const { typeMap } = await securityExtension.checkAuthorization({
     types: typesToAuthorize,
     spaces: spacesToAuthorize,
-    actions: [action],
+    actions: new Set([action]),
   });
 
   // Enforce authorization based on all *requested* object types and the current space

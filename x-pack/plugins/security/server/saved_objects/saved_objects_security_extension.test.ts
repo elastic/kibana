@@ -38,7 +38,7 @@ describe('#checkAuthorization', () => {
   // These arguments are used for all unit tests below
   const types = new Set(['a', 'b', 'c']);
   const spaces = new Set(['x', 'y']);
-  const actions = ['foo', 'bar'];
+  const actions = new Set(['foo', 'bar']);
 
   const fullyAuthorizedCheckPrivilegesResponse = {
     hasAllRequested: true,
@@ -100,7 +100,7 @@ describe('#checkAuthorization', () => {
     const { securityExtension, checkPrivileges } = setup();
 
     await expect(
-      securityExtension.checkAuthorization({ types, spaces, actions: [] })
+      securityExtension.checkAuthorization({ types, spaces, actions: new Set([]) })
     ).rejects.toThrowError('No actions specified for authorization check');
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
