@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-export const WELCOME_STEP = '[data-test-subj="welcomeStep"]';
-export const MANAGE_STEP = '[data-test-subj="manageStep"]';
-export const ALERTS_STEP = '[data-test-subj="alertsStep"]';
-export const CASES_STEP = '[data-test-subj="casesStep"]';
-export const DATA_STEP = '[data-test-subj="dataStep"]';
+export const ALERTS_STEP_GUIDE_BUTTON = '[data-test-subj="onboarding--stepButton--siem--step3"]';
+export const COMPLETE_SIEM_GUIDE_BUTTON =
+  '[data-test-subj="onboarding--completeGuideButton--siem"]';
 
 export const NEXT_STEP_BUTTON = '[data-test-subj="onboarding--securityTourNextStepButton"]';
-export const END_TOUR_BUTTON = '[data-test-subj="onboarding--securityTourEndButton"]';
-export const SKIP_TOUR_BUTTON = '[data-test-subj="onboarding--securityTourSkipButton"]';
+export const COMPLETION_POPOVER = '[data-test-subj="manualCompletionPopover"]';
+
+export const GLOBAL_TOUR_BUTTON = `[data-test-subj="guideButton"]`;
+
+export const CLOSE_CREATE_CASE_FLYOUT = `[data-test-subj="create-case-flyout"] [data-test-subj="euiFlyoutCloseButton"]`;
