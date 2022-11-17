@@ -552,7 +552,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         });
       }
 
-      if (data.page) {
+      if (data.page || !urlStateEnabled) {
         dispatch({
           type: 'onTableChange',
           data,

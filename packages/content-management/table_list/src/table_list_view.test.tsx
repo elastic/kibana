@@ -49,6 +49,7 @@ const requiredProps: TableListViewProps = {
   tableListTitle: 'test title',
   findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
   getDetailViewLink: () => 'http://elastic.co',
+  urlStateEnabled: false,
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/145267
@@ -65,7 +66,7 @@ describe.skip('TableListView', () => {
     WithServices<TableListViewProps>(TableListView),
     {
       defaultProps: { ...requiredProps },
-      memoryRouter: { wrapComponent: false },
+      memoryRouter: { wrapComponent: true },
     }
   );
 
@@ -332,7 +333,7 @@ describe.skip('TableListView', () => {
       WithServices<TableListViewProps>(TableListView, { TagList: getTagList({ references: [] }) }),
       {
         defaultProps: { ...requiredProps },
-        memoryRouter: { wrapComponent: false },
+        memoryRouter: { wrapComponent: true },
       }
     );
 
@@ -543,7 +544,7 @@ describe.skip('TableListView', () => {
       WithServices<TableListViewProps>(TableListView),
       {
         defaultProps: { ...requiredProps },
-        memoryRouter: { wrapComponent: false },
+        memoryRouter: { wrapComponent: true },
       }
     );
 
@@ -601,7 +602,7 @@ describe.skip('TableListView', () => {
       }),
       {
         defaultProps: { ...requiredProps },
-        memoryRouter: { wrapComponent: false },
+        memoryRouter: { wrapComponent: true },
       }
     );
 
