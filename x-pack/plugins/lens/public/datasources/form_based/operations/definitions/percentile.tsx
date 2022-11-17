@@ -31,8 +31,7 @@ import { useDebouncedValue } from '../../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
-import { groupByKey } from '../../dedupe_aggs';
-import { getGroupByKey } from './get_group_by_key';
+import { getGroupByKey, groupByKey } from './get_group_by_key';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
