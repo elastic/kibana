@@ -710,8 +710,14 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
       if (searchQueryParser) {
         // Parse possible tags in the search text
-        const { references, referencesToExclude, searchQuery } = await searchQueryParser(text);
-        termMatch = searchQuery;
+        const {
+          references,
+          referencesToExclude,
+          searchQuery: searchTerm,
+        } = await searchQueryParser(text);
+
+        termMatch = searchTerm;
+
         if (references?.length || referencesToExclude?.length) {
           const allTags = getTagList();
 
