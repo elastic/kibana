@@ -7,7 +7,6 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-// import { combineLatest } from 'rxjs';
 import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
