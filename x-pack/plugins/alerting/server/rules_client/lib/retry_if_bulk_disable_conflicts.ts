@@ -62,7 +62,7 @@ export const retryIfBulkDisableConflicts = async (
       taskIdsToDisable: currentTaskIdsToDisable,
       taskIdsToDelete: currentTaskIdsToDelete,
     } = await bulkDisableOperation(filter);
-    
+
     const rules = [...accRules, ...currentRules];
     const taskIdsToDisable = [...accTaskIdsToDisable, ...currentTaskIdsToDisable];
     const taskIdsToDelete = [...accTaskIdsToDelete, ...currentTaskIdsToDelete];
