@@ -10,16 +10,20 @@ import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import { capitalize } from 'lodash';
 import { FieldValueSuggestions, useInspectorContext } from '@kbn/observability-plugin/public';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 import { SelectedFilters } from './selected_filters';
 import { useUptimeDataView } from '../../../contexts/uptime_data_view_context';
 import { useGetUrlParams } from '../../../hooks';
 import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../../common/constants/client_defaults';
+import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
 
 const Container = styled(EuiFilterGroup)`
   margin-bottom: 10px;
 `;
+
+export const TAG_KEY_FOR_AND_CONDITION = 'useANDForTagsFilter';
 
 export const FilterGroup = () => {
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
@@ -34,6 +38,8 @@ export const FilterGroup = () => {
     updatedFieldValues.notValues
   );
 
+  const { refreshApp } = useUptimeRefreshContext();
+
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const { inspectorAdapters } = useInspectorContext();
@@ -41,6 +47,8 @@ export const FilterGroup = () => {
   const { filtersList } = useSelectedFilters();
 
   const dataView = useUptimeDataView();
+
+  const [useLogicalAND, setLogicalANDForTag] = useLocalStorage(TAG_KEY_FOR_AND_CONDITION, false);
 
   const onFilterFieldChange = useCallback(
     (fieldName: string, values: string[], notValues: string[]) => {
@@ -62,9 +70,13 @@ export const FilterGroup = () => {
               label={label}
               selectedValue={selectedItems}
               excludedValue={excludedItems}
-              onChange={(values, notValues) =>
-                onFilterFieldChange(field, values ?? [], notValues ?? [])
-              }
+              onChange={(values, notValues, isLogicalAND) => {
+                onFilterFieldChange(field, values ?? [], notValues ?? []);
+                if (isLogicalAND !== undefined) {
+                  setLogicalANDForTag(isLogicalAND);
+                  setTimeout(() => refreshApp(), 0);
+                }
+              }}
               asCombobox={false}
               asFilterButton={true}
               forceOpen={false}
@@ -82,6 +94,8 @@ export const FilterGroup = () => {
                 adapter: inspectorAdapters.requests,
                 title: 'get' + capitalize(label) + 'FilterValues',
               }}
+              showLogicalConditionSwitch={field === 'tags'}
+              useLogicalAND={field === 'tags' ? useLogicalAND : undefined}
             />
           ))}
       </Container>
