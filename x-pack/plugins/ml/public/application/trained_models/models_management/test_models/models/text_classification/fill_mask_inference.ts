@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
-import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { processResponse, processInferenceResult } from './common';
@@ -38,10 +38,11 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
   ) {
     super(trainedModelsApi, model, inputType);
 
-    combineLatest([this.inputTextValid$]).subscribe(([inputTextValid]) => {
-      const valid = inputTextValid && this.inputText$.getValue().every((t) => t.includes(MASK));
-      this.isValid$.next(valid);
-    });
+    this.validators$.push(
+      this.inputText$.pipe(map((inputText) => inputText.every((t) => t.includes(MASK))))
+    );
+
+    this.initializeValidators();
   }
 
   protected async inferText() {

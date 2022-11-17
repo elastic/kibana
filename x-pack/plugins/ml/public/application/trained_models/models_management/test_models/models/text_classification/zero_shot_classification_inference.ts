@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { estypes } from '@elastic/elasticsearch';
-import { combineLatest } from 'rxjs';
 import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
@@ -41,12 +41,9 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
   ) {
     super(trainedModelsApi, model, inputType);
 
-    combineLatest([this.inputTextValid$, this.labelsText$]).subscribe(
-      ([inputTextValid, labelsText]) => {
-        const isValid = inputTextValid && labelsText !== '';
-        this.isValid$.next(isValid);
-      }
-    );
+    this.validators$.push(this.labelsText$.pipe(map((labelsText) => labelsText !== '')));
+
+    this.initializeValidators();
   }
 
   public async inferText() {

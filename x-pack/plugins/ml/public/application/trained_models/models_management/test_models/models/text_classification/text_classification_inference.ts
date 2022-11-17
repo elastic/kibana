@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
-import { combineLatest } from 'rxjs';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
@@ -35,9 +34,7 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
   ) {
     super(trainedModelsApi, model, inputType);
 
-    combineLatest([this.inputTextValid$]).subscribe(([inputTextValid]) => {
-      this.isValid$.next(inputTextValid);
-    });
+    this.initializeValidators();
   }
 
   public async inferText() {

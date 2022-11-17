@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
@@ -65,12 +66,8 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
   ) {
     super(trainedModelsApi, model, inputType);
 
-    combineLatest([this.inputTextValid$, this.questionText$]).subscribe(
-      ([inputTextValid, questionText]) => {
-        const valid = inputTextValid && questionText !== '';
-        this.isValid$.next(valid);
-      }
-    );
+    this.validators$.push(this.questionText$.pipe(map((questionText) => questionText !== '')));
+    this.initializeValidators();
   }
 
   public async inferText() {

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, Subscription } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 
+import { map } from 'rxjs/operators';
 import { MLHttpFetchError } from '../../../../../../common/util/errors';
 import { SupportedPytorchTasksType } from '../../../../../../common/constants/trained_models';
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
@@ -68,6 +69,9 @@ export abstract class InferenceBase<TInferResponse> {
   protected isValid$ = new BehaviorSubject<boolean>(false);
   protected readonly info: string[] = [];
 
+  protected validators$: Array<Observable<boolean>> = [];
+  private validatorsSubscriptions$: Subscription = new Subscription();
+
   constructor(
     protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     protected readonly model: estypes.MlTrainedModelConfig,
@@ -76,10 +80,27 @@ export abstract class InferenceBase<TInferResponse> {
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
     this.inputField = this.modelInputField;
 
-    this.inputText$.subscribe((inputText) => {
-      const inputTextPopulated = inputText.some((t) => t !== '');
-      this.inputTextValid$.next(inputTextPopulated);
-    });
+    this.validators$.push(
+      this.inputText$.pipe(map((inputText) => inputText.some((t) => t !== '')))
+    );
+  }
+
+  public destroy() {
+    this.validatorsSubscriptions$.unsubscribe();
+  }
+
+  protected initializeValidators() {
+    this.validatorsSubscriptions$.add(
+      combineLatest(this.validators$)
+        .pipe(
+          map((validationResults) => {
+            return validationResults.every((v) => !!v);
+          })
+        )
+        .subscribe((v) => {
+          this.isValid$.next(v);
+        })
+    );
   }
 
   public setStopped() {
