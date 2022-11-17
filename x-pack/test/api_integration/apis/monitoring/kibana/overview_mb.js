@@ -15,32 +15,35 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const { setup, tearDown } = getLifecycleMethods(getService);
 
-  describe('overview mb', () => {
-    const archive =
-      'x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum_mb';
-    const timeRange = {
-      min: '2017-08-29T17:24:17.000Z',
-      max: '2017-08-29T17:26:08.000Z',
-    };
+  describe('overview - metricbeat and package', () => {
+    ['mb', 'package'].forEach((source) => {
+      describe(`overview ${source}`, () => {
+        const archive = `x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum_${source}`;
+        const timeRange = {
+          min: '2017-08-29T17:24:17.000Z',
+          max: '2017-08-29T17:26:08.000Z',
+        };
 
-    before('load archive', () => {
-      return setup(archive);
-    });
+        before('load archive', () => {
+          return setup(archive);
+        });
 
-    after('unload archive', () => {
-      return tearDown();
-    });
+        after('unload archive', () => {
+          return tearDown(archive);
+        });
 
-    it('should summarize kibana instances with stats', async () => {
-      const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/DFDDUmKHR0Ge0mkdYW2bew/kibana')
-        .set('kbn-xsrf', 'xxx')
-        .send({ timeRange })
-        .expect(200);
+        it('should summarize kibana instances with stats', async () => {
+          const { body } = await supertest
+            .post('/api/monitoring/v1/clusters/DFDDUmKHR0Ge0mkdYW2bew/kibana')
+            .set('kbn-xsrf', 'xxx')
+            .send({ timeRange })
+            .expect(200);
 
-      body.metrics = normalizeDataTypeDifferences(body.metrics, overviewFixture);
-      overviewFixture.metrics = setIndicesFound(overviewFixture.metrics, true);
-      expect(body).to.eql(overviewFixture);
+          body.metrics = normalizeDataTypeDifferences(body.metrics, overviewFixture);
+          overviewFixture.metrics = setIndicesFound(overviewFixture.metrics, true);
+          expect(body).to.eql(overviewFixture);
+        });
+      });
     });
   });
 }
