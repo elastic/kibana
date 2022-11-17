@@ -10,7 +10,7 @@ import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
 import { v4 } from 'uuid';
-import { difference, remove } from 'lodash';
+import { difference } from 'lodash';
 import {
   RuleExecutorOptions,
   Alert,
@@ -44,7 +44,7 @@ import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
 import { getCommonAlertFields } from './get_common_alert_fields';
-import { atCapacity, isFlapping, updateFlappingHistory } from './flapping_utils';
+import { atCapacity, getFlappingHistory, isFlapping } from './flapping_utils';
 import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
@@ -260,40 +260,14 @@ export const createLifecycleExecutor =
         const isRecovered = !currentAlerts[alertId];
         const isActive = !isRecovered;
 
-        // duplicating this logic to determine flapping at this level
-        let flappingHistory: boolean[] = [];
-        if (isNew) {
-          flappingHistory = updateFlappingHistory([], false);
-        } else if (isActive) {
-          if (!state.trackedAlerts[alertId] && state.trackedAlertsRecovered[alertId]) {
-            // this alert has flapped from recovered to active
-            flappingHistory = updateFlappingHistory(
-              state.trackedAlertsRecovered[alertId].flappingHistory,
-              true
-            );
-            remove(trackedAlertRecoveredIds, (id) => id === alertId);
-          } else {
-            // this alert is still active
-            flappingHistory = updateFlappingHistory(
-              state.trackedAlerts[alertId].flappingHistory,
-              false
-            );
-          }
-        } else if (isRecovered) {
-          if (state.trackedAlerts[alertId]) {
-            // this alert has flapped from active to recovered
-            flappingHistory = updateFlappingHistory(
-              state.trackedAlerts[alertId].flappingHistory,
-              true
-            );
-          } else if (state.trackedAlertsRecovered[alertId]) {
-            // this alert is still recovered
-            flappingHistory = updateFlappingHistory(
-              state.trackedAlertsRecovered[alertId].flappingHistory,
-              false
-            );
-          }
-        }
+        const flappingHistory = getFlappingHistory<State>(
+          alertId,
+          state,
+          isNew,
+          isRecovered,
+          isActive,
+          trackedAlertRecoveredIds
+        );
 
         const { alertUuid, started } = !isNew
           ? state.trackedAlerts[alertId]

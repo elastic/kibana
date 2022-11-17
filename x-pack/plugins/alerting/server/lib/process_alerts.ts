@@ -32,6 +32,7 @@ interface ProcessAlertsResult<
 > {
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  // recovered alerts in the current rule run that were previously active
   currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
 }

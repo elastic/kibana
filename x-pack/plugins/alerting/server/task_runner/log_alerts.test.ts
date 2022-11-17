@@ -37,7 +37,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      flappingAlertIds: [],
+      flappingAlertIds: new Set<string>(),
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(1);
@@ -63,7 +63,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      flappingAlertIds: [],
+      flappingAlertIds: new Set<string>(),
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -96,7 +96,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
       shouldPersistAlerts: true,
-      flappingAlertIds: [],
+      flappingAlertIds: new Set<string>(),
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -121,7 +121,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
       shouldPersistAlerts: true,
-      flappingAlertIds: [],
+      flappingAlertIds: new Set<string>(),
     });
 
     expect(logger.debug).not.toHaveBeenCalled();
@@ -149,7 +149,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      flappingAlertIds: [],
+      flappingAlertIds: new Set<string>(),
     });
 
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(1);
@@ -238,7 +238,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: false,
-      flappingAlertIds: [],
+      flappingAlertIds: new Set<string>(),
     });
 
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(0);
@@ -270,7 +270,7 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      flappingAlertIds: ['2', '1'],
+      flappingAlertIds: new Set(['2', '1']),
     });
 
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {

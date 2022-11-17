@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { drop } from 'lodash';
+import { RuleTypeState } from '@kbn/alerting-plugin/common';
+import { drop, remove } from 'lodash';
+import { WrappedLifecycleRuleState } from './create_lifecycle_executor';
 
 const MAX_CAPACITY = 20;
 const MAX_FLAP_COUNT = 4;
@@ -38,4 +40,43 @@ export function getCapacityDiff(flappingHistory: boolean[] = []) {
   const len = flappingHistory.length;
   // adding + 1 to make space for next the flapping state
   return len + 1 - MAX_CAPACITY;
+}
+
+export function getFlappingHistory<State extends RuleTypeState = never>(
+  alertId: string,
+  state: WrappedLifecycleRuleState<State>,
+  isNew: boolean,
+  isRecovered: boolean,
+  isActive: boolean,
+  recoveredIds: string[]
+) {
+  // duplicating this logic to determine flapping at this level
+  let flappingHistory: boolean[] = [];
+  if (isNew) {
+    flappingHistory = updateFlappingHistory([], false);
+  } else if (isActive) {
+    if (!state.trackedAlerts[alertId] && state.trackedAlertsRecovered[alertId]) {
+      // this alert has flapped from recovered to active
+      flappingHistory = updateFlappingHistory(
+        state.trackedAlertsRecovered[alertId].flappingHistory,
+        true
+      );
+      remove(recoveredIds, (id) => id === alertId);
+    } else {
+      // this alert is still active
+      flappingHistory = updateFlappingHistory(state.trackedAlerts[alertId].flappingHistory, false);
+    }
+  } else if (isRecovered) {
+    if (state.trackedAlerts[alertId]) {
+      // this alert has flapped from active to recovered
+      flappingHistory = updateFlappingHistory(state.trackedAlerts[alertId].flappingHistory, true);
+    } else if (state.trackedAlertsRecovered[alertId]) {
+      // this alert is still recovered
+      flappingHistory = updateFlappingHistory(
+        state.trackedAlertsRecovered[alertId].flappingHistory,
+        false
+      );
+    }
+  }
+  return flappingHistory;
 }

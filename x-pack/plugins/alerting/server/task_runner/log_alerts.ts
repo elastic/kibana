@@ -28,7 +28,7 @@ export interface LogAlertsParams<
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
   shouldPersistAlerts: boolean;
-  flappingAlertIds: string[];
+  flappingAlertIds: Set<string>;
 }
 
 export function logAlerts<
@@ -97,7 +97,7 @@ export function logAlerts<
       const { group: actionGroup } = recoveredAlerts[id].getLastScheduledActions() ?? {};
       const state = recoveredAlerts[id].getState();
       const message = `${ruleLogPrefix} alert '${id}' has recovered`;
-      const flapping = flappingAlertIds.includes(id);
+      const flapping = flappingAlertIds.has(id);
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         id,
@@ -126,7 +126,7 @@ export function logAlerts<
       const { actionGroup } = activeAlerts[id].getScheduledActionOptions() ?? {};
       const state = activeAlerts[id].getState();
       const message = `${ruleLogPrefix} active alert: '${id}' in actionGroup: '${actionGroup}'`;
-      const flapping = flappingAlertIds.includes(id);
+      const flapping = flappingAlertIds.has(id);
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.activeInstance,
         id,

@@ -1251,28 +1251,8 @@ describe('processAlerts', () => {
       updateFlappingHistory(alert, true);
       const fh = alert.getFlappingHistory() || [];
       expect(fh.length).toEqual(20);
-      expect(fh).toEqual([
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-      ]);
+      const result = new Array(19).fill(false);
+      expect(fh).toEqual(result.concat(true));
     });
 
     test('correctly updates flappingHistory while maintaining if array is larger than fixed size', () => {
@@ -1283,28 +1263,8 @@ describe('processAlerts', () => {
       updateFlappingHistory(alert, true);
       const fh = alert.getFlappingHistory() || [];
       expect(fh.length).toEqual(20);
-      expect(fh).toEqual([
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-      ]);
+      const result = new Array(19).fill(false);
+      expect(fh).toEqual(result.concat(true));
     });
   });
 

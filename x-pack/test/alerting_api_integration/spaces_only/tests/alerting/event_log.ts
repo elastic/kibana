@@ -544,32 +544,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           // pattern of when the alert should fire
+          const instance = [true, false, true, false].concat(new Array(19).fill(true));
           const pattern = {
-            instance: [
-              true,
-              false,
-              true,
-              false,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-              true,
-            ],
+            instance,
           };
 
           const response = await supertest
@@ -624,31 +601,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          expect(flapping).to.eql([
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,
-            true,
-            false,
-            false,
-          ]);
+          const result = new Array(19).fill(false).concat([true, true, false, false]);
+          expect(flapping).to.eql(result);
         });
 
         it('should generate expected events for flapping alerts that are mainly recovered', async () => {
@@ -664,29 +618,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           // pattern of when the alert should fire
+          const instance = [true, false, true].concat(new Array(16).fill(false)).concat(true);
           const pattern = {
-            instance: [
-              true,
-              false,
-              true,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              true,
-            ],
+            instance,
           };
 
           const response = await supertest

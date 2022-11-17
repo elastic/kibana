@@ -16,13 +16,13 @@ export function determineFlapping<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string
->(activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {}): string[] {
-  const flappingAlertIds: string[] = [];
+>(activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {}): Set<string> {
+  const flappingAlertIds = new Set<string>();
 
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
     if (isFlapping(alert)) {
-      flappingAlertIds.push(id);
+      flappingAlertIds.add(id);
     }
   }
 
