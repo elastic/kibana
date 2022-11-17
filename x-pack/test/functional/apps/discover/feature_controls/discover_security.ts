@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esSupertest = getService('esSupertest');
-  // const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const find = getService('find');
   const indexPatterns = getService('indexPatterns');
@@ -56,9 +55,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('discover feature controls security', () => {
     before(async () => {
-      // // ensure we're logged out so we can login as the appropriate users
-      // await PageObjects.security.forceLogout();
-
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
       );
@@ -347,7 +343,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
 
-      it('Permalinks shows create the short-url button', async () => {
+      it('Permalinks shows create short-url button', async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close the menu
@@ -583,10 +579,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             return JSON.parse(text)._index === logstashIndexName;
           }
         );
-
-        // switch back to the default index
-        // await browser.goBack();
-        // await PageObjects.discover.selectIndexPattern('logstash-*');
       });
     });
   });
