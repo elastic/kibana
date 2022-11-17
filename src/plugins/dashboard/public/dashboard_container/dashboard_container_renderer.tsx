@@ -10,9 +10,9 @@ import './_dashboard_container.scss';
 
 import uuid from 'uuid';
 import classNames from 'classnames';
-import { EuiLoadingElastic } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-
+import { EuiLoadingElastic, useEuiOverflowScroll } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import {
@@ -107,8 +107,13 @@ export const DashboardContainerRenderer = ({
     { 'dashboardViewport--screenshotMode': isScreenshotMode() },
     { 'dashboardViewport--loading': loading }
   );
+
+  const viewportStyles = css`
+    ${useEuiOverflowScroll('y')}
+  `;
+
   return (
-    <div className={viewportClasses}>
+    <div className={viewportClasses} css={viewportStyles}>
       {loading ? <EuiLoadingElastic size="xxl" /> : <div ref={dashboardRoot} />}
     </div>
   );
