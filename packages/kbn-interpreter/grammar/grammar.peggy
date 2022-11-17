@@ -20,7 +20,7 @@
 /* ----- Expressions ----- */
 
 start
-  = expression
+  = expression / argument
 
 expression
   = blank? first:function? rest:('|' blank? fn:function { return fn; })* {

@@ -70,8 +70,6 @@ peggy(
   ],
   output_dir = True,
   args = [
-    "--allowed-start-rules",
-    "expression,argument",
     "-o",
     "$(@D)/built_grammar.js",
     "./%s/grammar/grammar.peggy" % package_name()
