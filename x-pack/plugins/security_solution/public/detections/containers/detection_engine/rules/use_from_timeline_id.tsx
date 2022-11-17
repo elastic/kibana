@@ -7,30 +7,30 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   convertKueryToElasticSearchQuery,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '@kbn/timelines-plugin/public';
 import { useDispatch } from 'react-redux';
 import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { getTimelineUrl, useFormatUrl } from '../../../../../common/components/link_to';
-import { SecurityPageName } from '../../../../../../common/constants';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { sourcererActions } from '../../../../../common/store/sourcerer';
-import { sourcererSelectors } from '../../../../../common/store';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import type { TimelineModel } from '../../../../..';
+
+import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
+import { getTimelineUrl, useFormatUrl } from '../../../../common/components/link_to';
+import { SecurityPageName } from '../../../../../common/constants';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { sourcererActions } from '../../../../common/store/sourcerer';
+import { sourcererSelectors } from '../../../../common/store';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   dispatchUpdateTimeline,
   queryTimelineById,
-} from '../../../../../timelines/components/open_timeline/helpers';
-import type { FieldValueQueryBar } from '../../../../components/rules/query_bar';
-import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_query_string/helpers';
-import { buildGlobalQuery } from '../../../../../timelines/components/timeline/helpers';
-import { getDataProviderFilter } from '../../../../../timelines/components/timeline/query_bar';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import * as i18n from './translations';
+} from '../../../../timelines/components/open_timeline/helpers';
+import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
+import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
+import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import * as i18n from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/translations';
 
 export const FROM_TIMELINE_ID_URL_PARAM = 'createRuleFromTimelineId';
 

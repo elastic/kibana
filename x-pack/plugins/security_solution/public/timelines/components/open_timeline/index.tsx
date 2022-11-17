@@ -8,8 +8,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { FROM_TIMELINE_ID_URL_PARAM } from '../../../detections/containers/detection_engine/rules/use_from_timeline_id';
 import { encodeRisonUrlState } from '../../../common/utils/global_query_string/helpers';
-import { FROM_TIMELINE_ID_URL_PARAM } from '../../../detections/pages/detection_engine/rules/create/use_from_timeline_id';
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
