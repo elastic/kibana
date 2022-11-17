@@ -19,7 +19,6 @@ import {
   ALERT_END,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { isNil } from 'lodash';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
 import { useServiceAgentFetcher } from '../../../../context/apm_service/use_service_agent_fetcher';
@@ -46,7 +45,7 @@ import {
 } from '../../../shared/charts/helper/get_timeseries_color';
 import { AlertDetailsAppSectionProps } from './types';
 import { getAggsTypeFromRule } from './helpers';
-import { APMChartSpec, Coordinate } from '../../../../../typings/timeseries';
+import { filterNil } from '../../../shared/charts/latency_chart';
 
 export function AlertDetailsAppSection({
   rule,
@@ -176,7 +175,7 @@ export function AlertDetailsAppSection({
   const timeseriesLatency = [
     currentPeriod,
     comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
-  ].filter((timeserie) => !isNil(timeserie)) as Array<APMChartSpec<Coordinate>>;
+  ].filter(filterNil);
 
   const latencyMaxY = getMaxY(timeseriesLatency);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
