@@ -9,9 +9,11 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import React, { useEffect } from 'react';
+import queryString from 'query-string';
 import moment, { Moment } from 'moment';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
+import type { LocationDescriptor, History } from 'history';
 
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
@@ -39,6 +41,13 @@ jest.mock('react-use/lib/useDebounce', () => {
     }, deps);
   };
 });
+
+interface Router {
+  history: Partial<History>;
+  route: {
+    location: LocationDescriptor;
+  };
+}
 
 const requiredProps: TableListViewProps = {
   entityName: 'test',
@@ -738,5 +747,100 @@ describe('TableListView', () => {
       expect(getSearchBoxValue()).toBe(expected);
       expect(searchTerm).toBe(expected);
     });
+  });
+
+  describe('url state', () => {
+    let router: Router | undefined;
+
+    const setupTagFiltering = registerTestBed<string, TableListViewProps>(
+      WithServices<TableListViewProps>(TableListView, {
+        getTagList: () => [
+          { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
+          { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
+        ],
+      }),
+      {
+        defaultProps: { ...requiredProps, urlStateEnabled: true },
+        memoryRouter: {
+          wrapComponent: true,
+          onRouter: (_router: Router) => {
+            router = _router;
+          },
+        },
+      }
+    );
+
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: '123',
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 1',
+          description: 'Item 1 description',
+        },
+        references: [
+          { id: 'id-tag-1', name: 'tag-1', type: 'tag' },
+          { id: 'id-tag-2', name: 'tag-2', type: 'tag' },
+        ],
+      },
+      {
+        id: '456',
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 2',
+          description: 'Item 2 description',
+        },
+        references: [],
+      },
+    ];
+
+    test('should read search term from URL', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      // Start with empty search box
+      expect(getSearchBoxValue()).toBe('');
+      expect(router?.history.location?.search).toBe('');
+
+      // Change the URL
+      await act(async () => {
+        if (router?.history.push) {
+          router.history.push({
+            search: `?${queryString.stringify({ s: 'hello' }, { encode: false })}`,
+          });
+        }
+      });
+      component.update();
+
+      // Search box is updated
+      expect(getSearchBoxValue()).toBe('hello');
+      expect(router?.history.location?.search).toBe('?s=hello');
+
+      // Enter new search term in box
+      await act(async () => {
+        find('tableListSearchBox').simulate('keyup', {
+          key: 'Enter',
+          target: { value: 'search-changed' },
+        });
+      });
+      component.update();
+
+      expect(router?.history.location?.search).toBe('?s=search-changed');
+    });
+
   });
 });
