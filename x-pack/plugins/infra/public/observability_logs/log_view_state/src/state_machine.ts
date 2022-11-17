@@ -1,0 +1,115 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createMachine } from 'xstate';
+import { assignOnTransition } from '../../xstate_helpers';
+import type { LogViewEvent, LogViewTypestate } from './types';
+
+export const createLogViewStateMachine = () =>
+  createMachine<{}, LogViewEvent, LogViewTypestate>(
+    {
+      id: 'LogView',
+      initial: 'uninitialized',
+      states: {
+        uninitialized: {
+          always: {
+            target: 'loading',
+          },
+        },
+        loading: {
+          invoke: {
+            src: 'loadLogView',
+          },
+          on: {
+            loadingSucceeded: {
+              target: 'resolving',
+              actions: 'storeLogView',
+            },
+            loadingFailed: {
+              target: 'loadingFailed',
+              actions: 'storeError',
+            },
+          },
+        },
+        resolving: {
+          invoke: {
+            src: 'resolveLogView',
+          },
+          on: {
+            resolutionSucceeded: {
+              target: 'resolved',
+              actions: 'storeResolvedLogView',
+            },
+            resolutionFailed: {
+              target: 'resolutionFailed',
+              actions: 'storeError',
+            },
+          },
+        },
+        resolved: {
+          on: {
+            reloadLogView: {
+              target: 'loading',
+            },
+          },
+        },
+        loadingFailed: {
+          on: {
+            retry: {
+              target: 'loading',
+            },
+          },
+        },
+        resolutionFailed: {
+          on: {
+            retry: {
+              target: 'resolving',
+            },
+          },
+        },
+      },
+      on: {
+        logViewIdChanged: {
+          target: '.loading',
+          actions: 'storeLogViewId',
+        },
+      },
+      context: {},
+      predictableActionArguments: true,
+      preserveActionOrder: true,
+    },
+    {
+      actions: {
+        storeLogViewId: assignOnTransition<LogViewTypestate, LogViewEvent>()(
+          null,
+          'loading',
+          'logViewIdChanged',
+          (_context, event) => ({
+            logViewId: event.logViewId,
+          })
+        ),
+        storeLogView: assignOnTransition<LogViewTypestate, LogViewEvent>()(
+          'loading',
+          'resolving',
+          'loadingSucceeded',
+          (context, event) => ({
+            ...context,
+            logView: event.logView,
+          })
+        ),
+        storeResolvedLogView: assignOnTransition<LogViewTypestate, LogViewEvent>()(
+          'resolving',
+          'resolved',
+          'resolutionSucceeded',
+          (context, event) => ({
+            ...context,
+            resolvedLogView: event.resolvedLogView,
+          })
+        ),
+      },
+    }
+  );
