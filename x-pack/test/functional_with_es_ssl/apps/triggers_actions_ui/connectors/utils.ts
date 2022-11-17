@@ -46,7 +46,6 @@ export const createSlackConnector = async ({
     config: {},
     secrets: { webhookUrl: 'https://test.com' },
     connectorTypeId: '.slack',
-    supertest,
   });
 
   return connector;

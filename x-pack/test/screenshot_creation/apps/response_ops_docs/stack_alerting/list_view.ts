@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
   const pageObjects = getPageObjects(['common', 'header']);
   const actions = getService('actions');
-  const supertest = getService('supertest');
 
   describe('list view', function () {
     let serverLogConnectorId: string;
@@ -44,7 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       config: {},
       secrets: {},
       connectorTypeId: '.server-log',
-      supertest,
     });
   };
 }

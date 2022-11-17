@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
@@ -17,15 +16,13 @@ export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
       config,
       secrets,
       connectorTypeId,
-      supertest,
     }: {
       name: string;
       config: Record<string, unknown>;
       secrets: Record<string, unknown>;
       connectorTypeId: string;
-      supertest: SuperTest.SuperTest<SuperTest.Test>;
     }) {
-      const { body: createdAction } = await supertest
+      const { body: createdAction } = await kbnSupertest
         .post(`/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({

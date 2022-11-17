@@ -272,7 +272,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         config: { url: simulatorUrl },
         secrets: { email: 'test@foo.com', token: 'apiToken' },
         connectorTypeId: '.tines',
-        supertest,
       });
     };
   });

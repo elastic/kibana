@@ -371,7 +371,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         config: { apiUrl: 'https//test.com' },
         secrets: { apiKey: '1234' },
         connectorTypeId: '.opsgenie',
-        supertest,
       });
     };
   });
