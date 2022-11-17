@@ -22,14 +22,14 @@ export function useUrlState<
   queryParamsSerializer,
 }: {
   queryParamsDeserializer: (params: Q) => T;
-  queryParamsSerializer: (params: Partial<T>) => Partial<Q>;
-}): [T, (updated: Partial<T>) => void] {
+  queryParamsSerializer: (params: Record<string, unknown>) => Partial<Q>;
+}): [T, (updated: Record<string, unknown>) => void] {
   const history = useHistory();
   const params = useQuery<Q>();
   const [urlState, setUrlState] = useState<T>({} as T);
 
   const updateQuerParams = useCallback(
-    (updated: Partial<T>) => {
+    (updated: Record<string, unknown>) => {
       const updatedQuery = queryParamsSerializer(updated);
 
       const queryParams = {

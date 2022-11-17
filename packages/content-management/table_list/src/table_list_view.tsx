@@ -161,7 +161,10 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
   return stateFromURL;
 };
 
-const urlStateSerializer = (updated: Partial<URLState>) => {
+const urlStateSerializer = (updated: {
+  s?: string;
+  sort?: { field: 'title' | 'updatedAt'; direction: Direction };
+}) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};
 
   if (updated.sort) {
@@ -505,17 +508,42 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
   }, [searchQueryParser, searchQuery, findItems]);
 
-  const onSortChange = useCallback((field: SortColumnField, direction: Direction) => {
-    dispatch({
-      type: 'onTableChange',
-      data: {
+  const updateTableSortAndPagination = useCallback(
+    (data: {
+      sort?: State<T>['tableSort'];
+      page?: {
+        pageIndex: number;
+        pageSize: number;
+      };
+    }) => {
+      if (data.sort && urlStateEnabled) {
+        setUrlState({
+          sort: {
+            field: data.sort.field === 'attributes.title' ? 'title' : data.sort.field,
+            direction: data.sort.direction,
+          },
+        });
+      }
+
+      dispatch({
+        type: 'onTableChange',
+        data,
+      });
+    },
+    [setUrlState, urlStateEnabled]
+  );
+
+  const onSortChange = useCallback(
+    (field: SortColumnField, direction: Direction) => {
+      updateTableSortAndPagination({
         sort: {
           field,
           direction,
         },
-      },
-    });
-  }, []);
+      });
+    },
+    [updateTableSortAndPagination]
+  );
 
   const onTableSearchChange = useCallback(
     (arg: { query: Query | null; queryText: string }) => {
@@ -525,29 +553,32 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     [updateQuery]
   );
 
-  const onTableChange = useCallback((criteria: CriteriaWithPagination<T>) => {
-    const data: {
-      sort?: State<T>['tableSort'];
-      page?: {
-        pageIndex: number;
-        pageSize: number;
+  const onTableChange = useCallback(
+    (criteria: CriteriaWithPagination<T>) => {
+      const data: {
+        sort?: State<T>['tableSort'];
+        page?: {
+          pageIndex: number;
+          pageSize: number;
+        };
+      } = {};
+
+      if (criteria.sort) {
+        data.sort = {
+          field: criteria.sort.field as SortColumnField,
+          direction: criteria.sort.direction,
+        };
+      }
+
+      data.page = {
+        pageIndex: criteria.page.index,
+        pageSize: criteria.page.size,
       };
-    } = {};
 
-    if (criteria.sort) {
-      data.sort = {
-        field: criteria.sort.field as SortColumnField,
-        direction: criteria.sort.direction,
-      };
-    }
-
-    data.page = {
-      pageIndex: criteria.page.index,
-      pageSize: criteria.page.size,
-    };
-
-    dispatch({ type: 'onTableChange', data });
-  }, []);
+      updateTableSortAndPagination(data);
+    },
+    [updateTableSortAndPagination]
+  );
 
   const deleteSelectedItems = useCallback(async () => {
     if (isDeletingItems) {
@@ -655,7 +686,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       return;
     }
 
-    const updateQueryFromURL = async (text: string) => {
+    // Update our Query instance based on the URL "s" text
+    const updateQueryFromURL = async (text: string = '') => {
       let ast = Ast.create([]);
 
       if (searchQueryParser) {
@@ -696,11 +728,25 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       });
     };
 
-    updateQueryFromURL(urlState.s ?? '');
+    // Update our State "sort" based on the URL "sort" and "sortdir"
+    const updateSortFromURL = (sort?: URLState['sort']) => {
+      if (!sort) {
+        return;
+      }
 
-    if (urlState.sort !== undefined) {
-      // TODO
-    }
+      dispatch({
+        type: 'onTableChange',
+        data: {
+          sort: {
+            field: sort.field,
+            direction: sort.direction,
+          },
+        },
+      });
+    };
+
+    updateQueryFromURL(urlState.s);
+    updateSortFromURL(urlState.sort);
   }, [urlState, searchQueryParser, getTagList, urlStateEnabled]);
 
   useEffect(() => {
