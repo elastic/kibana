@@ -33,6 +33,10 @@ jest.mock('react-redux', () => {
   };
 });
 
+jest.mock('uuid', () => ({
+  v4: () => 'mock-id',
+}));
+
 const id = 'timeline-1';
 const renderUseNavigatgeToTimeline = () => renderHook(() => useNavigateToTimeline());
 
