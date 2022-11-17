@@ -17,13 +17,10 @@ import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
 import { TestRunSteps } from './test_run_steps';
 import { useTestRunDetailsBreadcrumbs } from './hooks/use_test_run_details_breadcrumbs';
-import { useSyntheticsRefreshContext } from '../../contexts';
 
 export const TestRunDetails = () => {
   // Step index from starts at 1 in synthetics
   const [stepIndex, setStepIndex] = React.useState(1);
-
-  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { data: stepsData, loading: stepsLoading, stepEnds } = useJourneySteps();
 
@@ -76,7 +73,7 @@ export const TestRunDetails = () => {
         <TestRunSteps isLoading={stepsLoading} steps={stepsData?.steps ?? []} />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
-        <StepDurationPanel lastRefresh={lastRefresh} legendPosition="bottom" />
+        <StepDurationPanel legendPosition="bottom" />
         <EuiSpacer size="m" />
         <MonitorDetailsPanel />
       </EuiFlexItem>
