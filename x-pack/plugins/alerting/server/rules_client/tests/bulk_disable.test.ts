@@ -36,10 +36,12 @@ jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation
 }));
 
 jest.mock('../../task_runner/alert_task_instance', () => ({
-  taskInstanceToAlertTaskInstance: jest.fn()
+  taskInstanceToAlertTaskInstance: jest.fn(),
 }));
 
-const { taskInstanceToAlertTaskInstance } = jest.requireMock('../../task_runner/alert_task_instance');
+const { taskInstanceToAlertTaskInstance } = jest.requireMock(
+  '../../task_runner/alert_task_instance'
+);
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -523,25 +525,29 @@ describe('bulkDisableRules', () => {
 
   describe('recoverRuleAlerts', () => {
     beforeEach(() => {
-      taskInstanceToAlertTaskInstance.mockImplementation(() => ({ state: { alertInstances: {
-        '1': {
-          meta: {
-            lastScheduledActions: {
-              group: 'default',
-              date: new Date().toISOString(),
+      taskInstanceToAlertTaskInstance.mockImplementation(() => ({
+        state: {
+          alertInstances: {
+            '1': {
+              meta: {
+                lastScheduledActions: {
+                  group: 'default',
+                  date: new Date().toISOString(),
+                },
+              },
+              state: { bar: false },
             },
           },
-          state: { bar: false },
         },
-      }}}))
-    })
+      }));
+    });
     test('should call logEvent', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: successfulSavedObjects,
       });
-  
+
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
-  
+
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
     });
 
@@ -552,11 +558,13 @@ describe('bulkDisableRules', () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: successfulSavedObjects,
       });
-  
+
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
-  
+
       expect(logger.warn).toHaveBeenCalledTimes(2);
-      expect(logger.warn).toHaveBeenLastCalledWith("rulesClient.disable('id2') - Could not write recovery events - UPS");
+      expect(logger.warn).toHaveBeenLastCalledWith(
+        "rulesClient.disable('id2') - Could not write recovery events - UPS"
+      );
     });
   });
 });
