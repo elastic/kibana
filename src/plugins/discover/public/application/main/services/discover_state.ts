@@ -129,9 +129,9 @@ export interface DiscoverStateContainer {
      */
     setDataView: (dataView: DataView) => void;
     /**
-     * Append a given ad-hoc data view to the list of ad-hoc data view
+     * Append a given ad-hoc data views to the list of ad-hoc data view
      */
-    appendAdHocDataView: (dataView: DataView) => void;
+    appendAdHocDataViews: (dataViews: DataView | DataView[]) => void;
     /**
      * Remove the ad-hoc data view of the given id from the list of ad-hoc data view
      * @param id
@@ -228,8 +228,8 @@ export function getDiscoverStateContainer({
 
   const setDataView = (dataView: DataView) =>
     internalStateContainer.transitions.setDataView(dataView);
-  const appendAdHocDataView = (dataView: DataView) =>
-    internalStateContainer.transitions.appendAdHocDataView(dataView);
+  const appendAdHocDataViews = (dataViews: DataView | DataView[]) =>
+    internalStateContainer.transitions.appendAdHocDataViews(dataViews);
   const replaceAdHocDataViewWithId = (id: string, dataView: DataView) =>
     internalStateContainer.transitions.replaceAdHocDataViewWithId(id, dataView);
   const removeAdHocDataViewById = (id: string) =>
@@ -316,7 +316,7 @@ export function getDiscoverStateContainer({
     },
     actions: {
       setDataView,
-      appendAdHocDataView,
+      appendAdHocDataViews,
       replaceAdHocDataViewWithId,
       removeAdHocDataViewById,
     },

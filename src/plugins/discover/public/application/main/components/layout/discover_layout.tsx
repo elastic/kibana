@@ -182,7 +182,7 @@ export function DiscoverLayout({
   const onDataViewCreated = useCallback(
     (nextDataView: DataView) => {
       if (!nextDataView.isPersisted()) {
-        stateContainer.actions.appendAdHocDataView(nextDataView);
+        stateContainer.actions.appendAdHocDataViews(nextDataView);
       }
       if (nextDataView.id) {
         onChangeDataView(nextDataView.id);

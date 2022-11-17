@@ -8,7 +8,7 @@
 
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ChangeDataView } from './change_dataview';
 
@@ -54,6 +54,10 @@ export interface DataViewPickerProps {
    * The adHocDataviews.
    */
   adHocDataViews?: DataView[];
+  /**
+   * Refreshes the list of dataviews.
+   */
+  refreshListId?: number;
   /**
    * EuiSelectable properties.
    */
@@ -102,6 +106,7 @@ export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
+  refreshListId,
   onChangeDataView,
   onEditDataView,
   onAddField,
@@ -126,6 +131,7 @@ export const DataViewPicker = ({
       onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
       trigger={trigger}
       adHocDataViews={adHocDataViews}
+      refreshListId={refreshListId}
       selectableProps={selectableProps}
       textBasedLanguages={textBasedLanguages}
       onSaveTextLanguageQuery={onSaveTextLanguageQuery}

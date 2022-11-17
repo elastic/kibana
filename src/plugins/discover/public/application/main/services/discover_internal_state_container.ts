@@ -20,7 +20,9 @@ export interface InternalState {
 
 interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
-  appendAdHocDataView: (state: InternalState) => (dataView: DataView) => InternalState;
+  appendAdHocDataViews: (
+    state: InternalState
+  ) => (dataViews: DataView | DataView[]) => InternalState;
   removeAdHocDataViewById: (state: InternalState) => (id: string) => InternalState;
   replaceAdHocDataViewWithId: (
     state: InternalState
@@ -46,10 +48,11 @@ export function getInternalStateContainer() {
         ...prevState,
         dataView: nextDataView,
       }),
-      appendAdHocDataView: (prevState: InternalState) => (dataViewAdHoc: DataView) => ({
-        ...prevState,
-        dataViewAdHocList: prevState.dataViewAdHocList.concat(dataViewAdHoc),
-      }),
+      appendAdHocDataViews:
+        (prevState: InternalState) => (dataViewsAdHoc: DataView | DataView[]) => ({
+          ...prevState,
+          dataViewAdHocList: prevState.dataViewAdHocList.concat(dataViewsAdHoc),
+        }),
       removeAdHocDataViewById: (prevState: InternalState) => (id: string) => ({
         ...prevState,
         dataViewAdHocList: prevState.dataViewAdHocList.filter((dataView) => dataView.id !== id),

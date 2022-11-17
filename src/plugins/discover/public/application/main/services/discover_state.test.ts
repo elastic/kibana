@@ -234,17 +234,17 @@ describe('createSearchSessionRestorationDataProvider', () => {
       expect(state.internalState.getState().dataView).toBe(dataViewMock);
     });
 
-    test('appendAdHocDataView', async () => {
-      state.actions.appendAdHocDataView(dataViewMock);
+    test('appendAdHocDataViews', async () => {
+      state.actions.appendAdHocDataViews(dataViewMock);
       expect(state.internalState.getState().dataViewAdHocList).toEqual([dataViewMock]);
     });
     test('removeAdHocDataViewById', async () => {
-      state.actions.appendAdHocDataView(dataViewMock);
+      state.actions.appendAdHocDataViews(dataViewMock);
       state.actions.removeAdHocDataViewById(dataViewMock.id!);
       expect(state.internalState.getState().dataViewAdHocList).toEqual([]);
     });
     test('replaceAdHocDataViewWithId', async () => {
-      state.actions.appendAdHocDataView(dataViewMock);
+      state.actions.appendAdHocDataViews(dataViewMock);
       state.actions.replaceAdHocDataViewWithId(dataViewMock.id!, dataViewComplexMock);
       expect(state.internalState.getState().dataViewAdHocList).toEqual([dataViewComplexMock]);
     });
