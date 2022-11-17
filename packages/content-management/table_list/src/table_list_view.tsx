@@ -706,11 +706,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     // Update our Query instance based on the URL "s" text
     const updateQueryFromURL = async (text: string = '') => {
       let ast = Ast.create([]);
+      let termMatch = text;
 
       if (searchQueryParser) {
         // Parse possible tags in the search text
-        const { references, referencesToExclude } = await searchQueryParser(text);
-
+        const { references, referencesToExclude, searchQuery } = await searchQueryParser(text);
+        termMatch = searchQuery;
         if (references?.length || referencesToExclude?.length) {
           const allTags = getTagList();
 
@@ -732,6 +733,10 @@ function TableListViewComp<T extends UserContentCommonSchema>({
             });
           }
         }
+      }
+
+      if (termMatch.trim() !== '') {
+        ast = ast.addClause({ type: 'term', value: termMatch, match: 'must' });
       }
 
       const updatedQuery = new Query(ast, undefined, text);
