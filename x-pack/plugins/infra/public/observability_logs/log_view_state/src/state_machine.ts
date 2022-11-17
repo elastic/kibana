@@ -6,7 +6,7 @@
  */
 
 import { createMachine } from 'xstate';
-import { assignOnTransition } from '../../xstate_helpers';
+import { createTypestateHelpers } from '../../xstate_helpers';
 import type { LogViewEvent, LogViewTypestate } from './types';
 
 export const createLogViewStateMachine = () =>
@@ -84,7 +84,7 @@ export const createLogViewStateMachine = () =>
     },
     {
       actions: {
-        storeLogViewId: assignOnTransition<LogViewTypestate, LogViewEvent>()(
+        storeLogViewId: logViewStateMachineHelpers.assignOnTransition(
           null,
           'loading',
           'logViewIdChanged',
@@ -92,7 +92,7 @@ export const createLogViewStateMachine = () =>
             logViewId: event.logViewId,
           })
         ),
-        storeLogView: assignOnTransition<LogViewTypestate, LogViewEvent>()(
+        storeLogView: logViewStateMachineHelpers.assignOnTransition(
           'loading',
           'resolving',
           'loadingSucceeded',
@@ -101,7 +101,7 @@ export const createLogViewStateMachine = () =>
             logView: event.logView,
           })
         ),
-        storeResolvedLogView: assignOnTransition<LogViewTypestate, LogViewEvent>()(
+        storeResolvedLogView: logViewStateMachineHelpers.assignOnTransition(
           'resolving',
           'resolved',
           'resolutionSucceeded',
@@ -113,3 +113,5 @@ export const createLogViewStateMachine = () =>
       },
     }
   );
+
+const logViewStateMachineHelpers = createTypestateHelpers<LogViewTypestate, LogViewEvent>();

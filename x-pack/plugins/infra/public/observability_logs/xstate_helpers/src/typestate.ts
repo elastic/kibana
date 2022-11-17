@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { Typestate } from 'xstate';
+import { EventObject, Typestate } from 'xstate';
+import { assignOnTransition } from './assign_action';
+
+export const createTypestateHelpers = <T extends Typestate<{}>, E extends EventObject>() => ({
+  assignOnTransition: assignOnTransition<T, E>(),
+});
 
 export type ContextForState<
   T extends Typestate<{}>,
