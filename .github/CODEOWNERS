@@ -660,10 +660,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 /x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 
-# Security Solution onboarding tour
-/x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/platform-onboarding
-/x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/platform-onboarding
-
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
 
