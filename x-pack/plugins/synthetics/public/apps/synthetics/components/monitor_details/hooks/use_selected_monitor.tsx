@@ -14,6 +14,7 @@ import {
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
   selectorMonitorDetailsState,
+  selectorError,
 } from '../../../state';
 
 export const useSelectedMonitor = () => {
@@ -25,6 +26,7 @@ export const useSelectedMonitor = () => {
     [monitorId, monitorsList]
   );
   const { syntheticsMonitor, syntheticsMonitorLoading } = useSelector(selectorMonitorDetailsState);
+  const error = useSelector(selectorError);
   const dispatch = useDispatch();
 
   const isMonitorFromListValid =
@@ -46,5 +48,6 @@ export const useSelectedMonitor = () => {
   return {
     monitor: availableMonitor,
     loading: syntheticsMonitorLoading || monitorListLoading,
+    error,
   };
 };
