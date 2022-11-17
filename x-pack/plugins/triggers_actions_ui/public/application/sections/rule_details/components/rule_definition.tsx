@@ -209,7 +209,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                 })}
               </ItemTitleRuleSummary>
               <EuiFlexItem grow={3}>
-                <RuleActions ruleActions={rule.actions} actionTypeRegistry={actionTypeRegistry} />
+                <RuleActions
+                  ruleActions={rule.actions}
+                  actionTypeRegistry={actionTypeRegistry}
+                  legacyNotifyWhen={rule.notifyWhen}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
