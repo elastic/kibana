@@ -33,6 +33,7 @@ export function registerApmRuleTypes(
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlErrorCount(
+          // TODO:fix SERVICE_NAME when we move it to initializeIndex
           String(fields[SERVICE_NAME]![0]),
           fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0])
         ),
@@ -79,6 +80,7 @@ export function registerApmRuleTypes(
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlTransaction(
+          // TODO:fix SERVICE_NAME when we move it to initializeIndex
           String(fields[SERVICE_NAME]![0]),
           fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
           String(fields[TRANSACTION_TYPE]![0])
@@ -128,6 +130,7 @@ export function registerApmRuleTypes(
     format: ({ fields, formatters: { asPercent } }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
+        // TODO:fix SERVICE_NAME when we move it to initializeIndex
         String(fields[SERVICE_NAME]![0]),
         fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
         String(fields[TRANSACTION_TYPE]![0])
@@ -173,6 +176,7 @@ export function registerApmRuleTypes(
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
+        // TODO:fix SERVICE_NAME when we move it to initializeIndex
         String(fields[SERVICE_NAME]![0]),
         fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
         String(fields[TRANSACTION_TYPE]![0])
