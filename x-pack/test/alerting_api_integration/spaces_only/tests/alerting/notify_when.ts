@@ -125,7 +125,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
       const pattern = {
         instance: [true, true, false, false, true, false],
       };
-      const expectedActionGroupBasedOnPattern = ['default', 'recovered', 'recovered', 'default'];
+      const expectedActionGroupBasedOnPattern = ['default', 'recovered', 'default', 'recovered'];
 
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

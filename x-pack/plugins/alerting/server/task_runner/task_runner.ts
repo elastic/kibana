@@ -401,7 +401,7 @@ export class TaskRunner<
         };
       });
 
-    const { activeAlerts, recoveredAlerts } = await this.timer.runWithTimer(
+    const { activeAlerts, recoveredAlerts, currentRecoveredAlerts } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.ProcessAlerts,
       async () => {
         const {
@@ -441,6 +441,7 @@ export class TaskRunner<
           newAlerts: processedAlertsNew,
           activeAlerts: processedAlertsActive,
           recoveredAlerts: processedAlertsRecovered,
+          currentRecoveredAlerts: processedAlertsRecoveredCurrent,
         };
       }
     );
@@ -472,7 +473,7 @@ export class TaskRunner<
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
         await executionHandler.run(activeAlerts);
-        await executionHandler.run(recoveredAlerts, true);
+        await executionHandler.run(currentRecoveredAlerts, true);
       }
     });
 
