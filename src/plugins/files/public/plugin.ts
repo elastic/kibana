@@ -7,6 +7,8 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { FilesPluginStartDependencies } from './types';
 import {
   getFileKindsRegistry,
   setFileKindsRegistry,
@@ -44,10 +46,19 @@ export type FilesStart = Pick<FilesSetup, 'filesClientFactory'>;
  * Bringing files to Kibana
  */
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
+  private static securityStart: FilesPluginStartDependencies['security'];
   private filesClientFactory: undefined | FilesClientFactory;
 
   constructor() {
     setFileKindsRegistry(new FileKindsRegistryImpl());
+  }
+
+  private static setSecurity(security: SecurityPluginStart) {
+    FilesPlugin.securityStart = security;
+  }
+
+  public static getSecurity() {
+    return FilesPlugin.securityStart;
   }
 
   setup(core: CoreSetup): FilesSetup {
@@ -67,7 +78,9 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
     };
   }
 
-  start(core: CoreStart): FilesStart {
+  start(core: CoreStart, { security }: FilesPluginStartDependencies): FilesStart {
+    FilesPlugin.setSecurity(security);
+
     return {
       filesClientFactory: this.filesClientFactory!,
     };

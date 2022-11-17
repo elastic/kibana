@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { FileJSON } from '../common';
 import type {
   FindFilesHttpEndpoint,
@@ -184,4 +185,8 @@ export interface FilesClientFactory {
    * @param fileKind - The {@link FileKind} to create a client for.
    */
   asScoped<M = unknown>(fileKind: string): ScopedFilesClient<M>;
+}
+
+export interface FilesPluginStartDependencies {
+  security: SecurityPluginStart;
 }

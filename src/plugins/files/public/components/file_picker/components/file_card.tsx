@@ -12,6 +12,7 @@ import numeral from '@elastic/numeral';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiCard, EuiText, EuiIcon, useEuiTheme, EuiButtonIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useCurrentUser } from '../../../hooks/use_current_user';
 import { FileImageMetadata, FileJSON } from '../../../../common';
 import { Image } from '../../image';
 import { isImage } from '../../util';
@@ -36,7 +37,9 @@ export const FileCard: FunctionComponent<Props> = ({ file, onClickDelete }) => {
   const displayImage = isImage({ type: file.mimeType });
   const isSelected$ = useMemo(() => state.watchFileSelected$(file.id), [file.id, state]);
   const isSelected = useObservable(isSelected$, false);
+  const currentUser = useCurrentUser();
 
+  const isUserOwnFile = currentUser?.profile_uid === file.user?.id;
   const imageHeight = `calc(${euiTheme.size.xxxl} * 2)`;
 
   return (
@@ -49,7 +52,7 @@ export const FileCard: FunctionComponent<Props> = ({ file, onClickDelete }) => {
         paddingSize="s"
         selectable={{
           isSelected,
-          onClick: () => (isSelected ? state.unselectFile(file.id) : state.selectFile(file.id)),
+          onClick: () => (isSelected ? state.unselectFile(file.id) : state.selectFile(file)),
         }}
         image={
           <div
@@ -114,18 +117,20 @@ export const FileCard: FunctionComponent<Props> = ({ file, onClickDelete }) => {
         }
         hasBorder
       />
-      <EuiButtonIcon
-        iconType="trash"
-        aria-label="Delete"
-        color="danger"
-        css={{
-          position: 'absolute',
-          right: `${euiTheme.size.s}`,
-          top: `${euiTheme.size.s}`,
-          display: 'none',
-        }}
-        onClick={() => onClickDelete({ id: file.id, name: file.name, kind })}
-      />
+      {isUserOwnFile && (
+        <EuiButtonIcon
+          iconType="trash"
+          aria-label="Delete"
+          color="danger"
+          css={{
+            position: 'absolute',
+            right: `${euiTheme.size.s}`,
+            top: `${euiTheme.size.s}`,
+            display: 'none',
+          }}
+          onClick={() => onClickDelete({ id: file.id, name: file.name, kind })}
+        />
+      )}
     </div>
   );
 };
