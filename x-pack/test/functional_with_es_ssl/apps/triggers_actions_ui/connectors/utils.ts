@@ -23,7 +23,6 @@ export const createSlackConnectorAndObjectRemover = async ({
   const testData = getTestActionData();
   const createdAction = await createSlackConnector({
     name: testData.name,
-    supertest,
     getService,
   });
   objectRemover.add(createdAction.id, 'action', 'actions');
@@ -33,11 +32,9 @@ export const createSlackConnectorAndObjectRemover = async ({
 
 export const createSlackConnector = async ({
   name,
-  supertest,
   getService,
 }: {
   name: string;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
   getService: FtrProviderContext['getService'];
 }) => {
   const actions = getService('actions');
