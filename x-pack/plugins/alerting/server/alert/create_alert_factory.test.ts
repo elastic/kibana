@@ -140,7 +140,7 @@ describe('createAlertFactory()', () => {
 
   test('returns recovered alerts when setsRecoveryContext is true', () => {
     (processAlerts as jest.Mock).mockReturnValueOnce({
-      recoveredAlerts: {
+      currentRecoveredAlerts: {
         z: {
           id: 'z',
           state: { foo: true },

@@ -2419,7 +2419,7 @@ describe('Task Runner', () => {
                 date: new Date(DATE_1970),
                 group: 'default',
               },
-              flappingHistory: [false],
+              flappingHistory: [true],
             },
             state: {
               duration: '0',
@@ -2582,7 +2582,7 @@ describe('Task Runner', () => {
                 date: new Date(DATE_1970),
                 group: 'default',
               },
-              flappingHistory: [false],
+              flappingHistory: [true],
             },
             state: {
               duration: '0',
@@ -2595,7 +2595,7 @@ describe('Task Runner', () => {
                 date: new Date(DATE_1970),
                 group: 'default',
               },
-              flappingHistory: [false],
+              flappingHistory: [true],
             },
             state: {
               duration: '0',
