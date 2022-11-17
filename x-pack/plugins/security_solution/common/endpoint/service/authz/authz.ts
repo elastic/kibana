@@ -199,11 +199,9 @@ export const calculateEndpointAuthz = (
 
   const canReadHostIsolationExceptions =
     canWriteHostIsolationExceptions ||
-    (hasReadHostIsolationExceptionsPermission && isPlatinumPlusLicense) ||
-    // Should be able to see Host Isolation Exceptions if license was downgraded
     (hasReadHostIsolationExceptionsPermission &&
-      !isPlatinumPlusLicense &&
-      hasHostIsolationExceptionsItems);
+      // We still allow `read` if not Platinum license, but entries exists for HIE
+      (isPlatinumPlusLicense || hasHostIsolationExceptionsItems));
 
   const canDeleteHostIsolationExceptions =
     canWriteHostIsolationExceptions ||

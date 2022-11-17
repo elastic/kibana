@@ -110,16 +110,20 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
 
       checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(http))
         .then((hasData) => {
-          setHasHostIsolationExceptionsItems(hasData);
+          if (isMounted()) {
+            setHasHostIsolationExceptionsItems(hasData);
+          }
         })
         .finally(() => {
-          setCheckHostIsolationExceptionsDone(true);
+          if (isMounted()) {
+            setCheckHostIsolationExceptionsDone(true);
+          }
         });
     } else {
       setHasHostIsolationExceptionsItems(true);
       setCheckHostIsolationExceptionsDone(true);
     }
-  }, [http, isPlatinumPlus]);
+  }, [http, isMounted, isPlatinumPlus]);
 
   return privileges;
 };
