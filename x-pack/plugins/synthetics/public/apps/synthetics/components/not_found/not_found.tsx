@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const NOT_FOUND_TITLE = i18n.translate('xpack.synthetics.notFoundTitle', {
