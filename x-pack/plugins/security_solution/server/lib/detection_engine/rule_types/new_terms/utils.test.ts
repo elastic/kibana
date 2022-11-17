@@ -191,19 +191,48 @@ describe('new terms utils', () => {
 
   describe('getNewTermsRuntimeMappings', () => {
     it('should not return runtime field if new terms fields is empty', () => {
-      expect(getNewTermsRuntimeMappings([])).toBeUndefined();
+      expect(getNewTermsRuntimeMappings([], [])).toBeUndefined();
     });
     it('should not return runtime field if new terms fields has only one field', () => {
-      expect(getNewTermsRuntimeMappings(['host.name'])).toBeUndefined();
+      expect(getNewTermsRuntimeMappings(['host.name'], [])).toBeUndefined();
     });
 
     it('should return runtime field if new terms fields has more than one field', () => {
-      const runtimeMappings = getNewTermsRuntimeMappings(['host.name', 'host.ip']);
+      const runtimeMappings = getNewTermsRuntimeMappings(
+        ['source.host', 'source.ip'],
+        [
+          {
+            key: {
+              'source.host': 'host-0',
+              'source.ip': '127.0.0.1',
+            },
+            doc_count: 1,
+          },
+          {
+            key: {
+              'source.host': 'host-1',
+              'source.ip': '127.0.0.1',
+            },
+            doc_count: 1,
+          },
+        ]
+      );
 
       expect(runtimeMappings?.[AGG_FIELD_NAME]).toMatchObject({
         type: 'keyword',
         script: {
-          params: { fields: ['host.name', 'host.ip'] },
+          params: {
+            fields: ['source.host', 'source.ip'],
+            values: {
+              'source.host': {
+                'host-0': true,
+                'host-1': true,
+              },
+              'source.ip': {
+                '127.0.0.1': true,
+              },
+            },
+          },
           source: expect.any(String),
         },
       });

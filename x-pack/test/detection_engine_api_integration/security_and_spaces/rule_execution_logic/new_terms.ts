@@ -28,6 +28,8 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 
+import newTermsLargeArrayBuckets from './mocks/new_terms_large_array_buckets.json';
+
 const removeRandomValuedProperties = (alert: DetectionAlert | undefined) => {
   if (!alert) {
     return undefined;
@@ -608,25 +610,40 @@ export default ({ getService }: FtrProviderContext) => {
           query: { match: { id: 'first_doc' } },
           index: 'new_terms',
           fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'host.ip'], {
-            'host.name': { 'host-0': true },
-            'host.ip': { '127.0.0.1': true },
-          }),
+          runtimeMappings: getNewTermsRuntimeMappings(
+            ['host.name', 'host.ip'],
+            [
+              {
+                key: {
+                  'host.name': 'host-0',
+                  'host.ip': '127.0.0.1',
+                },
+                doc_count: 1,
+              },
+            ]
+          ),
         });
 
         expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
       });
 
-      it('should not return runtime field created from 2 single values if its value is not in value map', async () => {
+      it('should not return runtime field created from 2 single values if its value is not in buckets', async () => {
         const { hits } = await performSearchQuery({
           es,
           query: { match: { id: 'first_doc' } },
           index: 'new_terms',
           fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'host.ip'], {
-            'host.name': { 'host-0': true },
-            'host.ip': {},
-          }),
+          runtimeMappings: getNewTermsRuntimeMappings(
+            ['host.name', 'host.ip'],
+            [
+              {
+                key: {
+                  'host.name': 'host-0',
+                },
+                doc_count: 1,
+              },
+            ]
+          ),
         });
 
         expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.be(undefined);
@@ -640,10 +657,18 @@ export default ({ getService }: FtrProviderContext) => {
           query: { match: { id: 'first_doc' } },
           index: 'new_terms',
           fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(['user.name', 'user.id'], {
-            'user.name': { 'user-0': true },
-            'user.id': { '0': true },
-          }),
+          runtimeMappings: getNewTermsRuntimeMappings(
+            ['user.name', 'user.id'],
+            [
+              {
+                key: {
+                  'user.name': 'user-0',
+                  'user.id': 0,
+                },
+                doc_count: 1,
+              },
+            ]
+          ),
         });
 
         expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
@@ -657,10 +682,18 @@ export default ({ getService }: FtrProviderContext) => {
           query: { match: { id: 'first_doc' } },
           index: 'new_terms',
           fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(['user.name', 'user.enabled'], {
-            'user.name': { 'user-0': true },
-            'user.enabled': { ['true']: true },
-          }),
+          runtimeMappings: getNewTermsRuntimeMappings(
+            ['user.name', 'user.enabled'],
+            [
+              {
+                key: {
+                  'user.name': 'user-0',
+                  'user.enabled': true,
+                },
+                doc_count: 1,
+              },
+            ]
+          ),
         });
 
         expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
@@ -674,11 +707,19 @@ export default ({ getService }: FtrProviderContext) => {
           query: { match: { id: 'first_doc' } },
           index: 'new_terms',
           fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'host.ip', 'user.name'], {
-            'host.name': { 'host-0': true },
-            'host.ip': { '127.0.0.1': true },
-            'user.name': { 'user-0': true },
-          }),
+          runtimeMappings: getNewTermsRuntimeMappings(
+            ['host.name', 'host.ip', 'user.name'],
+            [
+              {
+                key: {
+                  'host.name': 'host-0',
+                  'host.ip': '127.0.0.1',
+                  'user.name': 'user-0',
+                },
+                doc_count: 1,
+              },
+            ]
+          ),
         });
 
         expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
@@ -700,28 +741,54 @@ export default ({ getService }: FtrProviderContext) => {
           query: { match: { id: 'doc_with_source_ip_as_array' } },
           index: 'new_terms',
           fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(['source.ip', 'tags'], {
-            'source.ip': { '192.168.1.1': true, '192.168.1.2': true },
-            tags: { 'tag-new-1': true, 'tag-2': true, 'tag-new-3': true },
-          }),
-        });
+          runtimeMappings: getNewTermsRuntimeMappings(
+            ['source.ip', 'tags'],
 
-        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
-      });
-
-      it('should return runtime field without duplicated values', async () => {
-        // encoded base64 values of "host-0" and ["tag-1", "tag-2", "tag-2", "tag-1", "tag-1"]
-        // joined with underscore, without duplicates in tags
-        const expectedEncodedValues = ['aG9zdC0w_dGFnLTE=', 'aG9zdC0w_dGFnLTI='];
-        const { hits } = await performSearchQuery({
-          es,
-          query: { match: { id: 'doc_with_duplicated_tags' } },
-          index: 'new_terms',
-          fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'tags'], {
-            'host.name': { 'host-0': true },
-            tags: { 'tag-1': true, 'tag-2': true },
-          }),
+            [
+              {
+                key: {
+                  tags: 'tag-new-1',
+                  'source.ip': '192.168.1.1',
+                },
+                doc_count: 1,
+              },
+              {
+                key: {
+                  tags: 'tag-2',
+                  'source.ip': '192.168.1.1',
+                },
+                doc_count: 1,
+              },
+              {
+                key: {
+                  tags: 'tag-new-3',
+                  'source.ip': '192.168.1.1',
+                },
+                doc_count: 1,
+              },
+              {
+                key: {
+                  tags: 'tag-new-1',
+                  'source.ip': '192.168.1.2',
+                },
+                doc_count: 1,
+              },
+              {
+                key: {
+                  tags: 'tag-2',
+                  'source.ip': '192.168.1.2',
+                },
+                doc_count: 1,
+              },
+              {
+                key: {
+                  tags: 'tag-new-3',
+                  'source.ip': '192.168.1.2',
+                },
+                doc_count: 1,
+              },
+            ]
+          ),
         });
 
         expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
@@ -733,10 +800,18 @@ export default ({ getService }: FtrProviderContext) => {
           query: { match: { id: 'doc_with_null_field' } },
           index: 'new_terms',
           fields: [AGG_FIELD_NAME, 'possibly_null_field', 'host.name'],
-          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'possibly_null_field'], {
-            'host.name': { 'host-0': true },
-            tags: {},
-          }),
+          runtimeMappings: getNewTermsRuntimeMappings(
+            ['host.name', 'possibly_null_field'],
+            [
+              {
+                key: {
+                  'host.name': 'host-0',
+                  possibly_null_field: null,
+                },
+                doc_count: 1,
+              },
+            ]
+          ),
         });
 
         expect(hits.hits.length).to.be(1);
@@ -745,16 +820,23 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits.hits[0].fields?.['host.name']).to.eql(['host-0']);
       });
 
-      it('should not return runtime field if one of fields is not defined', async () => {
+      it('should not return runtime field if one of fields is not defined in a document', async () => {
         const { hits } = await performSearchQuery({
           es,
           query: { match: { id: 'doc_without_large_arrays' } },
           index: 'new_terms',
           fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(['host.name', 'large_array_5'], {
-            'host.name': { 'host-0': true },
-            large_array_5: {},
-          }),
+          runtimeMappings: getNewTermsRuntimeMappings(
+            ['host.name', 'large_array_5'],
+            [
+              {
+                key: {
+                  'host.name': 'host-0',
+                },
+                doc_count: 1,
+              },
+            ]
+          ),
         });
 
         expect(hits.hits.length).to.be(1);
@@ -769,42 +851,10 @@ export default ({ getService }: FtrProviderContext) => {
           query: { match: { id: 'first_doc' } },
           index: 'new_terms',
           fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(['large_array_20', 'large_array_10'], {
-            large_array_20: {
-              'value-of-20-0': true,
-              'value-of-20-1': true,
-              'value-of-20-2': true,
-              'value-of-20-3': true,
-              'value-of-20-4': true,
-              'value-of-20-5': true,
-              'value-of-20-6': true,
-              'value-of-20-7': true,
-              'value-of-20-8': true,
-              'value-of-20-9': true,
-              'value-of-20-10': true,
-              'value-of-20-11': true,
-              'value-of-20-12': true,
-              'value-of-20-13': true,
-              'value-of-20-14': true,
-              'value-of-20-15': true,
-              'value-of-20-16': true,
-              'value-of-20-17': true,
-              'value-of-20-18': true,
-              'value-of-20-19': true,
-            },
-            large_array_10: {
-              'value-of-10-0': true,
-              'value-of-10-1': true,
-              'value-of-10-2': true,
-              'value-of-10-3': true,
-              'value-of-10-4': true,
-              'value-of-10-5': true,
-              'value-of-10-6': true,
-              'value-of-10-7': true,
-              'value-of-10-8': true,
-              'value-of-10-9': true,
-            },
-          }),
+          runtimeMappings: getNewTermsRuntimeMappings(
+            ['large_array_20', 'large_array_10'],
+            newTermsLargeArrayBuckets
+          ),
         });
 
         // runtime field should have 100 values, as large_array_20 and large_array_10

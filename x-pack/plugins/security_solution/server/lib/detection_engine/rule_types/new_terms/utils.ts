@@ -116,13 +116,14 @@ export const createFieldValuesMap = (
 
 export const getNewTermsRuntimeMappings = (
   newTermsFields: string[],
-  values?: Record<string, Record<string, boolean>>
+  buckets: estypes.AggregationsCompositeBucket[]
 ): undefined | { [AGG_FIELD_NAME]: estypes.MappingRuntimeField } => {
   // if new terms include only one field we don't use runtime mappings and don't stich fields buckets together
   if (newTermsFields.length <= 1) {
     return undefined;
   }
 
+  const values = createFieldValuesMap(newTermsFields, buckets);
   return {
     [AGG_FIELD_NAME]: {
       type: 'keyword',
