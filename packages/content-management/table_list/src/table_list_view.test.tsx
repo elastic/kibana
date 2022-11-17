@@ -61,6 +61,11 @@ const requiredProps: TableListViewProps = {
   urlStateEnabled: false,
 };
 
+const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
+const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
+const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+const yesterdayToString = new Date(yesterday.getTime()).toDateString();
+
 describe('TableListView', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -125,10 +130,6 @@ describe('TableListView', () => {
   });
 
   describe('default columns', () => {
-    const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
-    const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
-    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
-    const yesterdayToString = new Date(yesterday.getTime()).toDateString();
     const hits: UserContentCommonSchema[] = [
       {
         id: '123',
@@ -352,10 +353,6 @@ describe('TableListView', () => {
       },
     });
 
-    const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
-    const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
-    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
-    const yesterdayToString = new Date(yesterday.getTime()).toDateString();
     const hits: UserContentCommonSchema[] = [
       {
         id: '123',
@@ -773,7 +770,7 @@ describe('TableListView', () => {
     const hits: UserContentCommonSchema[] = [
       {
         id: '123',
-        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
+        updatedAt: yesterday.toISOString(),
         type: 'dashboard',
         attributes: {
           title: 'Item 1',
@@ -783,7 +780,7 @@ describe('TableListView', () => {
       },
       {
         id: '456',
-        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
+        updatedAt: twoDaysAgo.toISOString(),
         type: 'dashboard',
         attributes: {
           title: 'Item 2',
@@ -927,6 +924,64 @@ describe('TableListView', () => {
       component.update();
 
       expect(router?.history.location?.search).toBe('?s=tag:(tag-2)');
+    });
+
+    test('should set sort column and direction from URL', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      // Start with empty search box
+      expect(router?.history.location?.search).toBe('');
+
+      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['Item 1tag-1', yesterdayToString],
+        ['Item 2tag-2', twoDaysAgoToString],
+      ]);
+
+      // Change the URL
+      await act(async () => {
+        if (router?.history.push) {
+          router.history.push({
+            search: `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'asc' })}`,
+          });
+        }
+      });
+      component.update();
+
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      expect(tableCellsValues).toEqual([
+        ['Item 2tag-2', twoDaysAgoToString], // Sort got inverted
+        ['Item 1tag-1', yesterdayToString],
+      ]);
+
+      await act(async () => {
+        if (router?.history.push) {
+          router.history.push({
+            search: `?${queryString.stringify({ sort: 'title' })}`, // if dir not specified, asc by default
+          });
+        }
+      });
+      component.update();
+
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      expect(tableCellsValues).toEqual([
+        ['Item 1tag-1', yesterdayToString],
+        ['Item 2tag-2', twoDaysAgoToString],
+      ]);
     });
   });
 });
