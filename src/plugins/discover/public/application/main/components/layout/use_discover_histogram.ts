@@ -166,6 +166,7 @@ export const useDiscoverHistogram = ({
   const onTotalHitsChange = useCallback(
     (status: UnifiedHistogramFetchStatus, result?: number | Error) => {
       if (result instanceof Error) {
+        // Display the error and set totalHits$ to an error state
         sendErrorTo(data, savedSearchData$.totalHits$);
         return;
       }
@@ -177,14 +178,17 @@ export const useDiscoverHistogram = ({
         return;
       }
 
+      // Set a local copy of the hits context to pass to unified histogram
       setLocalHitsContext({ status, total: result });
 
+      // Sync the totalHits$ observable with the unified histogram state
       savedSearchData$.totalHits$.next({
         fetchStatus: status.toString() as FetchStatus,
         result,
         recordRawType,
       });
 
+      // Check the hits count to set a partial or no results state
       if (status === UnifiedHistogramFetchStatus.complete && typeof result === 'number') {
         checkHitCount(savedSearchData$.main$, result);
       }
@@ -255,6 +259,7 @@ export const useDiscoverHistogram = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchSessionId]);
 
+  // Don't render the unified histogram layout until the first search has been requested
   return searchSessionId
     ? {
         topPanelHeight,
