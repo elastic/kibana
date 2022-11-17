@@ -76,7 +76,7 @@ export class VisualizationExtractor {
       splitField &&
       isTermsField(splitField) &&
       splitField.operation.fields &&
-      splitField.operation.fields?.length > 1
+      splitField.operation.fields.length > 1
     ) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.splitFieldHasMultipleFields', {
