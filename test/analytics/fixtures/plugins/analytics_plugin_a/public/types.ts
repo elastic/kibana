@@ -13,6 +13,7 @@ declare global {
   interface Window {
     __analyticsPluginA__: {
       getActionsUntilReportTestPluginLifecycleEvent: () => Promise<Action[]>;
+      getFlushAction: () => Promise<Action>;
       stats: TelemetryCounter[];
       setOptIn: (optIn: boolean) => void;
     };
