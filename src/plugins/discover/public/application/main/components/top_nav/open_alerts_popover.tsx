@@ -8,7 +8,7 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { CoreTheme, I18nStart } from '@kbn/core/public';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
