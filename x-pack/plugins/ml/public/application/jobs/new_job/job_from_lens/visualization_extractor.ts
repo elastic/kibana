@@ -43,7 +43,7 @@ export class VisualizationExtractor {
     lens: LensPublicStart
   ): Promise<LayerResult[]> {
     const { chartInfo } = await getJobsItemsFromEmbeddable(embeddable, lens);
-    return this.getLayers(chartInfo!, lens);
+    return this.getLayers(chartInfo, lens);
   }
 
   public async extractFields(layer: ChartInfo['layers'][number]) {
@@ -56,7 +56,7 @@ export class VisualizationExtractor {
     }
 
     const timeField = layer.dimensions.find(({ operation }) => operation.dataType === 'date');
-    if (timeField === undefined) {
+    if (timeField === undefined || !timeField.operation.fields?.length) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noDateField', {
           defaultMessage: 'Cannot find a date field.',
@@ -101,7 +101,7 @@ export class VisualizationExtractor {
       );
     }
 
-    if (timeField.operation.fields?.[0] !== layer.dataView.timeFieldName) {
+    if (timeField.operation.fields[0] !== layer.dataView.timeFieldName) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.timeFieldNotInDataView', {
           defaultMessage:
@@ -160,11 +160,7 @@ function validateDimensions(dimensions: ChartInfo['layers'][number]['dimensions'
     return dimension.operation.dataType !== 'date' && getMlFunction(dimension.operation.type);
   });
 
-  if (
-    dimensions.some(
-      (dimension) => !dimension.operation.fields || !dimension.operation.fields.length
-    )
-  ) {
+  if (dimensions.some((dimension) => !dimension.operation.fields?.length)) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.colsNoSourceField', {
         defaultMessage: 'Some columns do not contain a source field.',

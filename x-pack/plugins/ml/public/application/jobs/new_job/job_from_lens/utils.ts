@@ -6,7 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Embeddable, LensPublicStart, DataType, ChartInfo } from '@kbn/lens-plugin/public';
+import type {
+  Embeddable,
+  LensPublicStart,
+  DataType,
+  ChartInfo,
+  LensSavedObjectAttributes,
+} from '@kbn/lens-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
@@ -61,6 +67,14 @@ export async function redirectToADJobWizards(
 }
 
 export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: LensPublicStart) {
+  if (!lens) {
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.lensNotFound', {
+        defaultMessage: 'Lens is not intialized',
+      })
+    );
+  }
+
   const { filters, timeRange, ...input } = embeddable.getInput();
   const query = input.query === undefined ? { query: '', language: 'kuery' } : input.query;
 
@@ -83,20 +97,7 @@ export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: 
     );
   }
 
-  if (!lens) {
-    throw Error(
-      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.lensNotFound', {
-        defaultMessage: 'Lens is not intialized',
-      })
-    );
-  }
-
-  const chartInfo = await (await (await lens.stateHelperApi()).chartInfo).getChartInfo(vis);
-
-  if (!chartInfo) {
-    throw new Error('Cannot create job, chart info is undefined');
-  }
-
+  const chartInfo = await getChartInfoFromVisualization(lens, vis);
   const dashboard = embeddable.parent?.type === 'dashboard' ? embeddable.parent : undefined;
 
   return {
@@ -230,4 +231,15 @@ export function createDetectors(
       ...(splitField ? { partition_field_name: splitField.operation.fields?.[0] } : {}),
     };
   });
+}
+
+export async function getChartInfoFromVisualization(
+  lens: LensPublicStart,
+  vis: LensSavedObjectAttributes
+) {
+  const chartInfo = await (await (await lens.stateHelperApi()).chartInfo).getChartInfo(vis);
+  if (!chartInfo) {
+    throw new Error('Cannot create job, chart info is undefined');
+  }
+  return chartInfo;
 }

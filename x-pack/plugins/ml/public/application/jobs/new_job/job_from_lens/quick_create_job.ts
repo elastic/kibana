@@ -35,7 +35,12 @@ import {
   JOB_TYPE,
 } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
-import { isCompatibleLayer, createDetectors, getJobsItemsFromEmbeddable } from './utils';
+import {
+  isCompatibleLayer,
+  createDetectors,
+  getJobsItemsFromEmbeddable,
+  getChartInfoFromVisualization,
+} from './utils';
 import { VisualizationExtractor } from './visualization_extractor';
 
 type Dashboard = Embeddable['parent'];
@@ -75,10 +80,6 @@ export class QuickJobCreator {
     );
     if (query === undefined || filters === undefined) {
       throw new Error('Cannot create job, query and filters are undefined');
-    }
-
-    if (!chartInfo) {
-      throw new Error('Cannot create job, chart info is undefined');
     }
 
     const { jobConfig, datafeedConfig, start, end, jobType } = await this.createJob(
@@ -198,10 +199,7 @@ export class QuickJobCreator {
     filters: Filter[],
     layerIndex: number | undefined
   ) {
-    const chartInfo = await (await (await this.lens.stateHelperApi()).chartInfo).getChartInfo(vis);
-    if (!chartInfo) {
-      throw new Error('Cannot create job, chart info is undefined');
-    }
+    const chartInfo = await getChartInfoFromVisualization(this.lens, vis);
     try {
       const { jobConfig, datafeedConfig, jobType, start, end, includeTimeRange } =
         await this.createJob(
