@@ -74,12 +74,14 @@ export function LabelPositionEditor({
     </EuiFormRow>
   );
 
-  return !disabled ? (
+  const isIconSizeSupported = styleProperty.isIconSizeSupported();
+
+  return isIconSizeSupported && !disabled ? (
     form
   ) : (
     <EuiToolTip
       anchorClassName="mapStyleFormDisabledTooltip"
-      content={getDisabledByMessage(disabledBy)}
+      content={disabled ? getDisabledByMessage(disabledBy) : styleProperty.getIconSizeNotSupportedMsg()}
     >
       {form}
     </EuiToolTip>
