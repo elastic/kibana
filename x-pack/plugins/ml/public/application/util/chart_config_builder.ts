@@ -11,6 +11,8 @@
  */
 
 import { get } from 'lodash';
+import { SeriesConfig } from '../../../common/types/results';
+import { Job } from '../../../common/types/anomaly_detection_jobs';
 
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { DOC_COUNT, _DOC_COUNT } from '../../../common/constants/field_types';
@@ -18,20 +20,21 @@ import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 
 // Builds the basic configuration to plot a chart of the source data
 // analyzed by the the detector at the given index from the specified ML job.
-export function buildConfigFromDetector(job, detectorIndex) {
+export function buildConfigFromDetector(job: Job, detectorIndex: number) {
   const analysisConfig = job.analysis_config;
   const detector = analysisConfig.detectors[detectorIndex];
 
-  const config = {
+  const config: SeriesConfig = {
     jobId: job.job_id,
-    detectorIndex: detectorIndex,
+    detectorIndex,
     metricFunction:
       detector.function === ML_JOB_AGGREGATION.LAT_LONG
         ? ML_JOB_AGGREGATION.LAT_LONG
         : mlFunctionToESAggregation(detector.function),
-    timeField: job.data_description.time_field,
+    timeField: job.data_description.time_field!,
+    // @ts-expect-error bucket_span is of type estypes.Duration
     interval: job.analysis_config.bucket_span,
-    datafeedConfig: job.datafeed_config,
+    datafeedConfig: job.datafeed_config!,
     summaryCountFieldName: job.analysis_config.summary_count_field_name,
   };
 
@@ -51,7 +54,7 @@ export function buildConfigFromDetector(job, detectorIndex) {
     // The cardinality field will be in:
     // aggregations/<agg_name>/aggregations/<summaryCountFieldName>/cardinality/field
     // or aggs/<agg_name>/aggs/<summaryCountFieldName>/cardinality/field
-    let cardinalityField = undefined;
+    let cardinalityField;
     const topAgg = get(job.datafeed_config, 'aggregations') || get(job.datafeed_config, 'aggs');
     if (topAgg !== undefined && Object.values(topAgg).length > 0) {
       cardinalityField =
