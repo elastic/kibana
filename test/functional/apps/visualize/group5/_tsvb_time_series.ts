@@ -29,6 +29,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   // Failing: See https://github.com/elastic/kibana/issues/145563
+  // Failing: See https://github.com/elastic/kibana/issues/145560
+  // Failing: See https://github.com/elastic/kibana/issues/139096
   describe.skip('visual builder', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles([
