@@ -24,8 +24,8 @@ import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 export const AllRules = React.memo(() => {
   const [activeTab, setActiveTab] = useState(AllRulesTabs.rules);
 
-  useInitializeRulesTableSavedState(setActiveTab);
-  useSyncRulesTableSavedState(activeTab);
+  useInitializeRulesTableSavedState();
+  useSyncRulesTableSavedState();
 
   return (
     <>
