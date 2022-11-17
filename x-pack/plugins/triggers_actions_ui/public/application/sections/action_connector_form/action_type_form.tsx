@@ -48,7 +48,7 @@ import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './act
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
-import { ActionNotifyWhen, DEFAULT_FREQUENCY } from './action_notify_when';
+import { ActionNotifyWhen } from './action_notify_when';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -58,6 +58,7 @@ export type ActionTypeFormProps = {
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -80,8 +81,6 @@ const preconfiguredMessage = i18n.translate(
   }
 );
 
-type ActionFrequency = NonNullable<RuleAction['frequency']>;
-
 export const ActionTypeForm = ({
   actionItem,
   actionConnector,
@@ -90,6 +89,7 @@ export const ActionTypeForm = ({
   onConnectorSelected,
   onDeleteAction,
   setActionParamsProperty,
+  setActionFrequencyProperty,
   actionTypesIndex,
   connectors,
   defaultActionGroupId,
@@ -122,19 +122,6 @@ export const ActionTypeForm = ({
     actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
   );
 
-  const setActionFrequencyProperty = useCallback(
-    <Key extends keyof ActionFrequency>(key: Key, value: ActionFrequency[Key]) => {
-      setActionParamsProperty(
-        'frequency',
-        {
-          ...(actionItem.frequency ?? DEFAULT_FREQUENCY),
-          [key]: value,
-        },
-        index
-      );
-    },
-    [setActionParamsProperty, actionItem.frequency, index]
-  );
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
     let defaultParams;
@@ -189,6 +176,13 @@ export const ActionTypeForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem]);
 
+  // useEffect(() => {
+  //   if (!actionItem.frequency) {
+  //     setActionFrequency(DEFAULT_FREQUENCY, index);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [actionItem.frequency]);
+
   const canSave = hasSaveActionsCapability(capabilities);
 
   const actionGroupDisplay = (
@@ -220,17 +214,21 @@ export const ActionTypeForm = ({
       throttleUnit={actionThrottleUnit}
       onNotifyWhenChange={useCallback(
         (notifyWhen) => {
-          setActionFrequencyProperty('notifyWhen', notifyWhen);
+          setActionFrequencyProperty('notifyWhen', notifyWhen, index);
         },
-        [setActionFrequencyProperty]
+        [setActionFrequencyProperty, index]
       )}
       onThrottleChange={useCallback(
         (throttle: number | null, throttleUnit: string) => {
           setActionThrottle(throttle);
           setActionThrottleUnit(throttleUnit);
-          setActionFrequencyProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
+          setActionFrequencyProperty(
+            'throttle',
+            throttle ? `${throttle}${throttleUnit}` : null,
+            index
+          );
         },
-        [setActionFrequencyProperty]
+        [setActionFrequencyProperty, index]
       )}
     />
   );

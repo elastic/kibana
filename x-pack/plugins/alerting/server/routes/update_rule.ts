@@ -37,7 +37,7 @@ const bodySchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDurationSchema }),
   }),
-  throttle: schema.nullable(schema.maybe(schema.string({ validate: validateDurationSchema }))),
+  throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDurationSchema }))),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   actions: actionsSchema,
   notify_when: schema.maybe(schema.string({ validate: validateNotifyWhenType })),
@@ -96,11 +96,12 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: actions.map(({ group, id, actionTypeId, params }) => ({
+        actions: actions.map(({ group, id, actionTypeId, params, frequency }) => ({
           group,
           id,
           params,
           connector_type_id: actionTypeId,
+          frequency,
         })),
       }
     : {}),

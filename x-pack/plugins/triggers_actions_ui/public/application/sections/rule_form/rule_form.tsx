@@ -281,6 +281,13 @@ export const RuleForm = ({
     [dispatch]
   );
 
+  const setActionFrequencyProperty = useCallback(
+    (key: string, value: RuleActionParam, index: number) => {
+      dispatch({ command: { type: 'setRuleActionFrequency' }, payload: { key, value, index } });
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     const searchValue = searchText ? searchText.trim().toLocaleLowerCase() : null;
     setFilteredRuleTypes(
@@ -557,7 +564,7 @@ export const RuleForm = ({
             <RuleParamsExpressionComponent
               ruleParams={rule.params}
               ruleInterval={`${ruleInterval ?? 1}${ruleIntervalUnit}`}
-              ruleThrottle={`${ruleThrottle ?? 1}${ruleThrottleUnit}`}
+              ruleThrottle={''}
               alertNotifyWhen={rule.notifyWhen ?? 'onActionGroupChange'}
               errors={errors}
               setRuleParams={setRuleParams}
@@ -664,6 +671,7 @@ export const RuleForm = ({
             setActions={setActions}
             setActionParamsProperty={setActionParamsProperty}
             actionTypeRegistry={actionTypeRegistry}
+            setActionFrequencyProperty={setActionFrequencyProperty}
           />
         </>
       ) : null}

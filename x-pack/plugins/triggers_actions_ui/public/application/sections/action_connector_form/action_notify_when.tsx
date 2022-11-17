@@ -24,14 +24,9 @@ import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { RuleNotifyWhenType, RuleAction } from '../../../types';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 const DEFAULT_NOTIFY_WHEN_VALUE: RuleNotifyWhenType = 'onActionGroupChange';
-
-export const DEFAULT_FREQUENCY = {
-  notifyWhen: DEFAULT_NOTIFY_WHEN_VALUE,
-  throttle: null,
-  summary: false,
-};
 
 export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
   {
@@ -153,12 +148,18 @@ export const ActionNotifyWhen = ({
     setShowCustomThrottleOpts(notifyWhenValue === 'onThrottleInterval');
   }, [notifyWhenValue]);
 
-  const onNotifyWhenValueChange = useCallback((newValue: RuleNotifyWhenType) => {
-    onThrottleChange(newValue === 'onThrottleInterval' ? ruleThrottle : null, throttleUnit);
-    onNotifyWhenChange(newValue);
-    setNotifyWhenValue(newValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const onNotifyWhenValueChange = useCallback(
+    (newValue: RuleNotifyWhenType) => {
+      onNotifyWhenChange(newValue);
+      setNotifyWhenValue(newValue);
+      setTimeout(
+        () =>
+          onThrottleChange(newValue === 'onThrottleInterval' ? ruleThrottle : null, throttleUnit),
+        100
+      );
+    },
+    [onNotifyWhenChange, setNotifyWhenValue, onThrottleChange, ruleThrottle, throttleUnit]
+  );
 
   const labelForRuleRenotify = [
     i18n.translate('xpack.triggersActionsUI.sections.ruleForm.renotifyFieldLabel', {

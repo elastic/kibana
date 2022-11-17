@@ -9,10 +9,10 @@ import { SavedObjectAttribute } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import { Reducer } from 'react';
 import { RuleActionParam, IntervalSchedule } from '@kbn/alerting-plugin/common';
-import { Rule, RuleAction } from '../../../types';
+import { Rule, RuleAction, RuleNotifyWhenType } from '../../../types';
 
 export type InitialRule = Partial<Rule> &
-  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;
+  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
 
 interface CommandType<
   T extends
@@ -22,9 +22,16 @@ interface CommandType<
     | 'setRuleParams'
     | 'setRuleActionParams'
     | 'setRuleActionProperty'
+    | 'setRuleActionFrequency'
 > {
   type: T;
 }
+
+export const DEFAULT_FREQUENCY = {
+  notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,
+  throttle: null,
+  summary: false,
+};
 
 export interface RuleState {
   rule: InitialRule;
@@ -77,7 +84,11 @@ export type RuleReducerAction =
     }
   | {
       command: CommandType<'setRuleActionProperty'>;
-      payload: RuleActionPayload<keyof RuleAction>;
+      payload: Payload<string, RuleActionParam>;
+    }
+  | {
+      command: CommandType<'setRuleActionFrequency'>;
+      payload: Payload<string, RuleActionParam>;
     };
 
 export type InitialRuleReducer = Reducer<{ rule: InitialRule }, RuleReducerAction>;
@@ -166,6 +177,36 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
           ...oldAction,
           params: {
             ...oldAction.params,
+            [key]: value,
+          },
+        };
+        rule.actions.splice(index, 0, updatedAction);
+        return {
+          ...state,
+          rule: {
+            ...rule,
+            actions: [...rule.actions],
+          },
+        };
+      }
+    }
+    case 'setRuleActionFrequency': {
+      const { key, value, index } = action.payload as Payload<
+        keyof RuleAction,
+        SavedObjectAttribute
+      >;
+      if (
+        index === undefined ||
+        rule.actions[index] == null ||
+        (!!rule.actions[index][key] && isEqual(rule.actions[index][key], value))
+      ) {
+        return state;
+      } else {
+        const oldAction = rule.actions.splice(index, 1)[0];
+        const updatedAction = {
+          ...oldAction,
+          frequency: {
+            ...(oldAction.frequency ?? DEFAULT_FREQUENCY),
             [key]: value,
           },
         };
