@@ -45,7 +45,7 @@ If you have alerting rules that have been snoozed, do not upgrade {kib} from
 8.3.3 to 8.4.0. Upgrade to 8.4.1 instead.
 
 To determine if you have snoozed alerting rules, open the main menu, then click
-**{stack-manage-app}** -> **{rules-ui}**. Filter the rule list by selecting
+**{stack-manage-app}** -> **{rac-ui}**. Filter the rule list by selecting
 **View** -> **Snoozed**. If you must upgrade to 8.4.0, for each space, cancel
 the snooze for all affected rules before you upgrade.
 
@@ -194,7 +194,7 @@ If you have upgraded to 8.3.0 or 8.3.1, and your alerting rules fail, reset the 
 
 To disable, then re-enable your alerting rules:
 
-. Open the main menu, then click *{stack-manage-app} > {rules-ui}*.
+. Open the main menu, then click *{stack-manage-app} > {rac-ui}*.
 
 . Select the failed alerting rules.
 
@@ -262,7 +262,7 @@ Alerting users who are running 8.2 should not upgrade to either 8.3.0 or 8.3.1.
 Both 8.3.0 and 8.3.1 have a bug where alerting rules that were created or edited
 in 8.2 will stop running on upgrade. If you have upgraded to 8.3.0 or 8.3.1 and
 your alerting rules have stopped running with an error similar to the following
-example, you will need to go to *{stack-manage-app} > {rules-ui}*, multi-select
+example, you will need to go to *{stack-manage-app} > {rac-ui}*, multi-select
 the failed rules, click on **Manage rules > Disable** and then click on 
 **Manage rules > Enable**. Disabling and re-enabling the rule will generate a 
 new API key using the credentials of the user performing these actions and reset 
@@ -283,7 +283,7 @@ If you have alerting rules that have been snoozed, do not upgrade {kib} from
 8.3.3 to 8.4.0. Upgrade to 8.4.1 instead.
 
 To determine if you have snoozed alerting rules, open the main menu, then click 
-**{stack-manage-app}** -> **{rules-ui}**. Filter the rule list by selecting
+**{stack-manage-app}** -> **{rac-ui}**. Filter the rule list by selecting
 **View** -> **Snoozed**. If you must upgrade to 8.4.0, for each space, cancel
 the snooze for all affected rules before you upgrade.
 

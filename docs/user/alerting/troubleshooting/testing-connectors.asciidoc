@@ -1,9 +1,7 @@
-[role="xpack"]
 [[testing-connectors]]
 === Test connectors
 
-
-By using Kibana Management UI you can test a newly created Connector by navigating to the Test tab of Connector Edit flyout or by clicking "Save & test" button on Create flyout:
+In *{stack-manage-app} > {rac-ui}*, you can test a newly created Connector by navigating to the Test tab of Connector Edit flyout or by clicking "Save & test" button on Create flyout:
 [role="screenshot"]
 image::user/alerting/images/connector-save-and-test.png[Rule management page with the errors banner]
 

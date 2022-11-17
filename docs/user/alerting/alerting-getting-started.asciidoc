@@ -7,7 +7,7 @@
 
 Alerting allows you to define *rules* to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting,*Maps*>> and {ml-docs}/ml-configuring-alerts.html[*{ml-app}*], can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, connectors>> and <<stack-rules, rules>> (known as stack rules) for you to use.
 
-image::images/alerting-overview.png[Rules and Connectors UI]
+image::images/alerting-overview.png[{rac-ui} UI]
 
 [IMPORTANT]
 ==============================================
