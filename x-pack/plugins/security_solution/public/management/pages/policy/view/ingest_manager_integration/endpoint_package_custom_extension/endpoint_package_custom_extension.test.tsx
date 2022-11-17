@@ -73,7 +73,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
       artifactCards.forEach((artifactCard) => {
         expect(renderResult.queryByTestId(artifactCard)).toBeNull();
       });
-      expect(renderResult.queryByTestId('noIngestPermissions')).toBeTruthy();
+      expect(renderResult.queryByTestId('noPrivilegesPage')).toBeTruthy();
     });
   });
 
