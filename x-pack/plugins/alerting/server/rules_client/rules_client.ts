@@ -396,8 +396,8 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
     params: Params;
-    throttle: string | null;
-    notifyWhen: RuleNotifyWhenType | null;
+    throttle?: string | null;
+    notifyWhen?: RuleNotifyWhenType | null;
   };
 }
 
@@ -691,7 +691,7 @@ export class RulesClient {
       throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
-    await this.validateActions(ruleType, data.actions);
+    await this.validateActions(ruleType, data);
 
     // Throw error if schedule interval is less than the minimum and we are enforcing it
     const intervalInMs = parseDuration(data.schedule.interval);
@@ -711,7 +711,8 @@ export class RulesClient {
     const createTime = Date.now();
     const lastRunTimestamp = new Date();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
-    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
+    const throttle = data.throttle ?? null;
 
     const rawRule: RawRule = {
       ...data,
@@ -727,6 +728,7 @@ export class RulesClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
+      throttle,
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
     };
@@ -1870,7 +1872,7 @@ export class RulesClient {
 
     // Validate
     const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
-    await this.validateActions(ruleType, data.actions);
+    await this.validateActions(ruleType, data);
 
     // Throw error if schedule interval is less than the minimum and we are enforcing it
     const intervalInMs = parseDuration(data.schedule.interval);
@@ -1899,7 +1901,7 @@ export class RulesClient {
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
     let updatedObject: SavedObject<RawRule>;
     const createAttributes = this.updateMeta({
@@ -2429,7 +2431,7 @@ export class RulesClient {
             for (const operation of operations) {
               switch (operation.field) {
                 case 'actions':
-                  await this.validateActions(ruleType, operation.value);
+                  await this.validateActions(ruleType, { ...attributes, actions: operation.value });
                   ruleActions = applyBulkEditOperation(operation, ruleActions);
                   break;
                 case 'snoozeSchedule':
@@ -2539,7 +2541,7 @@ export class RulesClient {
 
             // get notifyWhen
             const notifyWhen = getRuleNotifyWhenType(
-              attributes.notifyWhen,
+              attributes.notifyWhen ?? null,
               attributes.throttle ?? null
             );
 
@@ -2650,7 +2652,7 @@ export class RulesClient {
       action: 'ENABLE',
     });
 
-    const { errors, taskIdsToEnable } = await retryIfBulkEnableConflicts(
+    const { errors, rules, taskIdsToEnable } = await retryIfBulkEnableConflicts(
       this.logger,
       (filterKueryNode: KueryNode | null) =>
         this.bulkEnableRulesWithOCC({ filter: filterKueryNode }),
@@ -2679,7 +2681,17 @@ export class RulesClient {
       }
     }
 
-    return { errors, total, taskIdsFailedToBeEnabled };
+    const updatedRules = rules.map(({ id, attributes, references }) => {
+      return this.getAlertFromRaw(
+        id,
+        attributes.alertTypeId as string,
+        attributes as RawRule,
+        references,
+        false
+      );
+    });
+
+    return { errors, rules: updatedRules, total, taskIdsFailedToBeEnabled };
   };
 
   private bulkEnableRulesWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
@@ -2693,7 +2705,7 @@ export class RulesClient {
         }
       );
 
-    const rulesToEnable: SavedObjectsBulkUpdateObject[] = [];
+    const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const taskIdsToEnable: string[] = [];
     const errors: BulkOperationError[] = [];
     const taskIdToRuleIdMapping: Record<string, string> = {};
@@ -2788,11 +2800,14 @@ export class RulesClient {
       overwrite: true,
     });
 
+    const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+
     result.saved_objects.forEach((rule) => {
       if (rule.error === undefined) {
         if (taskIdToRuleIdMapping[rule.id]) {
           taskIdsToEnable.push(taskIdToRuleIdMapping[rule.id]);
         }
+        rules.push(rule);
       } else {
         errors.push({
           message: rule.error.message ?? 'n/a',
@@ -2804,7 +2819,7 @@ export class RulesClient {
         });
       }
     });
-    return { errors, taskIdsToEnable };
+    return { errors, rules, taskIdsToEnable };
   };
 
   private apiKeyAsAlertAttributes(
@@ -3904,8 +3919,23 @@ export class RulesClient {
 
   private async validateActions(
     alertType: UntypedNormalizedRuleType,
-    actions: NormalizedAlertAction[]
+    data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertAction[] }
   ): Promise<void> {
+    const { actions, notifyWhen, throttle } = data;
+    const hasNotifyWhen = typeof notifyWhen !== 'undefined';
+    const hasThrottle = typeof throttle !== 'undefined';
+    let usesRuleLevelFreqParams;
+    if (hasNotifyWhen && hasThrottle) usesRuleLevelFreqParams = true;
+    else if (!hasNotifyWhen && !hasThrottle) usesRuleLevelFreqParams = false;
+    else {
+      throw Boom.badRequest(
+        i18n.translate('xpack.alerting.rulesClient.usesValidGlobalFreqParams.oneUndefined', {
+          defaultMessage:
+            'Rule-level notifyWhen and throttle must both be defined or both be undefined',
+        })
+      );
+    }
+
     if (actions.length === 0) {
       return;
     }
@@ -3947,6 +3977,34 @@ export class RulesClient {
           },
         })
       );
+    }
+
+    // check for actions using frequency params if the rule has rule-level frequency params defined
+    if (usesRuleLevelFreqParams) {
+      const actionsWithFrequency = actions.filter((action) => Boolean(action.frequency));
+      if (actionsWithFrequency.length) {
+        throw Boom.badRequest(
+          i18n.translate('xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams', {
+            defaultMessage:
+              'Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: {groups}',
+            values: {
+              groups: actionsWithFrequency.map((a) => a.group).join(', '),
+            },
+          })
+        );
+      }
+    } else {
+      const actionsWithoutFrequency = actions.filter((action) => !action.frequency);
+      if (actionsWithoutFrequency.length) {
+        throw Boom.badRequest(
+          i18n.translate('xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq', {
+            defaultMessage: 'Actions missing frequency parameters: {groups}',
+            values: {
+              groups: actionsWithoutFrequency.map((a) => a.group).join(', '),
+            },
+          })
+        );
+      }
     }
   }
 

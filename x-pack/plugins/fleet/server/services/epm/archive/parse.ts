@@ -539,6 +539,10 @@ export function parseDataStreamElasticsearchEntry(
     );
   }
 
+  if (expandedElasticsearch?.index_mode) {
+    parsedElasticsearchEntry.index_mode = expandedElasticsearch.index_mode;
+  }
+
   return parsedElasticsearchEntry;
 }
 
