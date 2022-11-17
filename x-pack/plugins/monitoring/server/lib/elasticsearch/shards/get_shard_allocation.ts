@@ -34,9 +34,8 @@ export function handleResponse(response: ElasticsearchResponse) {
         mbShard?.shard?.relocating_node?.id ?? legacyShard?.relocating_node ?? null;
       const node = mbShard?.node?.id ?? legacyShard?.node;
       // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both
-      const shardId = `${index}-${shardNumber}-${primary}-${relocatingNode}-${node}`;
 
-      if (!uniqueShards.has(shardId)) {
+      if (!uniqueShards.has(hit._id)) {
         shards.push({
           index,
           node,
@@ -45,7 +44,7 @@ export function handleResponse(response: ElasticsearchResponse) {
           shard: shardNumber,
           state: legacyShard?.state ?? mbShard?.shard?.state,
         });
-        uniqueShards.add(shardId);
+        uniqueShards.add(hit._id);
       }
     }
 
