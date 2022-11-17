@@ -2804,7 +2804,11 @@ export class RulesClient {
           { version }
         );
       } catch (e) {
-        rule = {} as SavedObjectsUpdateResponse<unknown>;
+        return {
+          rule: {} as SavedObjectsUpdateResponse<unknown>,
+          tasks: [],
+          errors: [e],
+        };
       }
 
       // If the scheduledTaskId does not match the rule id, we should
