@@ -19,7 +19,7 @@ export function createTelemetryFilterListArtifactTaskConfig() {
   return {
     type: 'security:telemetry-filterlist-artifact',
     title: 'Security Solution Telemetry Filter List Artifact Task',
-    interval: '30s',
+    interval: '45m',
     timeout: '1m',
     version: '1.0.0',
     runTask: async (
