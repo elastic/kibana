@@ -580,7 +580,7 @@ describe('collectMultiNamespaceReferences', () => {
         expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.checkAuthorization).toBeCalledWith(
           expect.objectContaining({
-            actions: ['bulk_get'],
+            actions: new Set(['bulk_get']),
           })
         );
         expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
@@ -600,7 +600,7 @@ describe('collectMultiNamespaceReferences', () => {
         expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.checkAuthorization).toBeCalledWith(
           expect.objectContaining({
-            actions: ['share_to_space'],
+            actions: new Set(['share_to_space']),
           })
         );
         expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
