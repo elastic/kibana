@@ -80,6 +80,8 @@ export const PolicyTabs = React.memo(() => {
   const privileges = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
+  const { canReadTrustedApplications } = privileges;
+
   const allPolicyHostIsolationExceptionsListRequest = useListArtifact(
     HostIsolationExceptionsApiClient.getInstance(http),
     {
@@ -98,12 +100,22 @@ export const PolicyTabs = React.memo(() => {
     (allPolicyHostIsolationExceptionsListRequest.isFetched &&
       allPolicyHostIsolationExceptionsListRequest.data?.total !== 0);
 
-  // move the use out of this route if they can't access it
   useEffect(() => {
-    if (isInHostIsolationExceptionsTab && !canSeeHostIsolationExceptions) {
+    const shouldRedirectFromUnauthorizedTab =
+      (isInHostIsolationExceptionsTab && !canSeeHostIsolationExceptions) ||
+      (isInTrustedAppsTab && !canReadTrustedApplications);
+
+    if (shouldRedirectFromUnauthorizedTab) {
       history.replace(getPolicyDetailPath(policyId));
     }
-  }, [canSeeHostIsolationExceptions, history, isInHostIsolationExceptionsTab, policyId]);
+  }, [
+    canReadTrustedApplications,
+    canSeeHostIsolationExceptions,
+    history,
+    isInHostIsolationExceptionsTab,
+    isInTrustedAppsTab,
+    policyId,
+  ]);
 
   const getTrustedAppsApiClientInstance = useCallback(
     () => TrustedAppsApiClient.getInstance(http),
@@ -183,25 +195,30 @@ export const PolicyTabs = React.memo(() => {
           </>
         ),
       },
-      [PolicyTabKeys.TRUSTED_APPS]: {
-        id: PolicyTabKeys.TRUSTED_APPS,
-        name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.trustedApps', {
-          defaultMessage: 'Trusted applications',
-        }),
-        content: (
-          <>
-            <EuiSpacer />
-            <PolicyArtifactsLayout
-              policyItem={policyItem}
-              labels={trustedAppsLabels}
-              getExceptionsListApiClient={getTrustedAppsApiClientInstance}
-              searchableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
-              getArtifactPath={getTrustedAppsListPath}
-              getPolicyArtifactsPath={getPolicyDetailsArtifactsListPath}
-            />
-          </>
-        ),
-      },
+      [PolicyTabKeys.TRUSTED_APPS]: canReadTrustedApplications
+        ? {
+            id: PolicyTabKeys.TRUSTED_APPS,
+            name: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.tabs.trustedApps',
+              {
+                defaultMessage: 'Trusted applications',
+              }
+            ),
+            content: (
+              <>
+                <EuiSpacer />
+                <PolicyArtifactsLayout
+                  policyItem={policyItem}
+                  labels={trustedAppsLabels}
+                  getExceptionsListApiClient={getTrustedAppsApiClientInstance}
+                  searchableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
+                  getArtifactPath={getTrustedAppsListPath}
+                  getPolicyArtifactsPath={getPolicyDetailsArtifactsListPath}
+                />
+              </>
+            ),
+          }
+        : undefined,
       [PolicyTabKeys.EVENT_FILTERS]: {
         id: PolicyTabKeys.EVENT_FILTERS,
         name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.eventFilters', {
@@ -268,6 +285,7 @@ export const PolicyTabs = React.memo(() => {
     };
   }, [
     canSeeHostIsolationExceptions,
+    canReadTrustedApplications,
     getEventFiltersApiClientInstance,
     getHostIsolationExceptionsApiClientInstance,
     getBlocklistsApiClientInstance,

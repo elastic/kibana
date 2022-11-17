@@ -16,7 +16,12 @@ import {
   createAppRootMockRenderer,
   resetReactDomCreatePortalMock,
 } from '../../../../common/mock/endpoint';
-import { getEndpointListPath, getPoliciesPath, getPolicyDetailPath } from '../../../common/routing';
+import {
+  getEndpointListPath,
+  getPoliciesPath,
+  getPolicyDetailPath,
+  getPolicyTrustedAppsPath,
+} from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
 import { APP_UI_ID } from '../../../../../common/constants';
@@ -34,6 +39,7 @@ const useIsExperimentalFeatureMock = useIsExperimentalFeatureEnabled as jest.Moc
 
 describe('Policy Details', () => {
   const policyDetailsPathUrl = getPolicyDetailPath('1');
+  const policyTrustedAppsPathUrl = getPolicyTrustedAppsPath('1');
   const policyListPath = getPoliciesPath();
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
@@ -215,60 +221,118 @@ describe('Policy Details', () => {
       expect(tab.text()).toBe('Host isolation exceptions');
     });
 
-    describe('without canIsolateHost permissions', () => {
-      let findExceptionsApiHttpMock: ReturnType<typeof exceptionsFindHttpMocks>;
+    describe('RBAC', () => {
+      describe('without canIsolateHost permissions', () => {
+        let findExceptionsApiHttpMock: ReturnType<typeof exceptionsFindHttpMocks>;
 
-      beforeEach(() => {
-        useUserPrivilegesMock.mockReturnValue({
-          endpointPrivileges: {
-            loading: false,
-            canIsolateHost: false,
-          },
+        beforeEach(() => {
+          useUserPrivilegesMock.mockReturnValue({
+            endpointPrivileges: {
+              loading: false,
+              canIsolateHost: false,
+            },
+          });
+
+          findExceptionsApiHttpMock = exceptionsFindHttpMocks(http);
         });
 
-        findExceptionsApiHttpMock = exceptionsFindHttpMocks(http);
+        it('should not display the host isolation exceptions tab with no privileges and no assigned exceptions', async () => {
+          findExceptionsApiHttpMock.responseProvider.exceptionsFind.mockReturnValue({
+            data: [],
+            total: 0,
+            page: 1,
+            per_page: 100,
+          });
+          policyView = render();
+          await asyncActions;
+          policyView.update();
+          await waitFor(() => {
+            expect(findExceptionsApiHttpMock.responseProvider.exceptionsFind).toHaveBeenCalled();
+          });
+          expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(0);
+        });
+
+        it('should not display the host isolation exceptions tab with no privileges and no data', async () => {
+          findExceptionsApiHttpMock.responseProvider.exceptionsFind.mockReturnValue({
+            data: [],
+            total: 0,
+            page: 1,
+            per_page: 100,
+          });
+          policyView = render();
+          await asyncActions;
+          policyView.update();
+          await waitFor(() => {
+            expect(findExceptionsApiHttpMock.responseProvider.exceptionsFind).toHaveBeenCalled();
+          });
+          expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(0);
+        });
+
+        it('should display the host isolation exceptions tab with no privileges if there are assigned exceptions', async () => {
+          policyView = render();
+          await asyncActions;
+          policyView.update();
+          await waitFor(() => {
+            expect(findExceptionsApiHttpMock.responseProvider.exceptionsFind).toHaveBeenCalled();
+          });
+          expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(1);
+        });
       });
 
-      it('should not display the host isolation exceptions tab with no privileges and no assigned exceptions', async () => {
-        findExceptionsApiHttpMock.responseProvider.exceptionsFind.mockReturnValue({
-          data: [],
-          total: 0,
-          page: 1,
-          per_page: 100,
-        });
-        policyView = render();
-        await asyncActions;
-        policyView.update();
-        await waitFor(() => {
-          expect(findExceptionsApiHttpMock.responseProvider.exceptionsFind).toHaveBeenCalled();
-        });
-        expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(0);
-      });
+      describe('Trusted Apps tab', () => {
+        describe('with canReadTrustedApplications', () => {
+          beforeEach(() => {
+            useUserPrivilegesMock.mockReturnValue({
+              endpointPrivileges: { loading: false, canReadTrustedApplications: true },
+            });
+          });
 
-      it('should not display the host isolation exceptions tab with no privileges and no data', async () => {
-        findExceptionsApiHttpMock.responseProvider.exceptionsFind.mockReturnValue({
-          data: [],
-          total: 0,
-          page: 1,
-          per_page: 100,
-        });
-        policyView = render();
-        await asyncActions;
-        policyView.update();
-        await waitFor(() => {
-          expect(findExceptionsApiHttpMock.responseProvider.exceptionsFind).toHaveBeenCalled();
-        });
-        expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(0);
-      });
+          it('should show Trusted Apps tab button', async () => {
+            policyView = render();
+            await asyncActions;
+            policyView.update();
 
-      it('should display the host isolation exceptions tab with no privileges if there are assigned exceptions', async () => {
-        policyView = render();
-        await asyncActions;
-        policyView.update();
-        await waitFor(() => {
-          expect(findExceptionsApiHttpMock.responseProvider.exceptionsFind).toHaveBeenCalled();
+            const trustedAppsTab = policyView.find('button#trustedApps');
+            expect(trustedAppsTab).toHaveLength(1);
+          });
+
+          it('should be able to open Trusted Apps tab', async () => {
+            history.push(policyTrustedAppsPathUrl);
+
+            policyView = render();
+            await asyncActions;
+            policyView.update();
+
+            expect(history.location.pathname).toEqual(policyTrustedAppsPathUrl);
+          });
         });
-        expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(1);
+
+        describe('without canReadTrustedApplications', () => {
+          beforeEach(() => {
+            useUserPrivilegesMock.mockReturnValue({
+              endpointPrivileges: { loading: false, canReadTrustedApplications: false },
+            });
+          });
+
+          it('should hide Trusted Apps tab button', async () => {
+            policyView = render();
+            await asyncActions;
+            policyView.update();
+
+            const trustedAppsTab = policyView.find('button#trustedApps');
+            expect(trustedAppsTab).toHaveLength(0);
+          });
+
+          it('should redirect from Trusted Apps url without privilege', async () => {
+            history.push(policyTrustedAppsPathUrl);
+
+            policyView = render();
+            await asyncActions;
+            policyView.update();
+
+            expect(history.location.pathname).toEqual(policyDetailsPathUrl);
+          });
+        });
       });
     });
   });
