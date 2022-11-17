@@ -12,7 +12,7 @@ const MAX_FLAP_COUNT = 4;
 
 export function updateFlappingHistory(flappingHistory: boolean[], state: boolean) {
   if (atCapacity(flappingHistory)) {
-    const diff = getCapcityDiff(flappingHistory);
+    const diff = getCapacityDiff(flappingHistory);
     // drop old flapping states to make space for the next state
     flappingHistory = drop(flappingHistory, diff);
   }
@@ -34,7 +34,7 @@ export function atCapacity(flappingHistory: boolean[] = []): boolean {
   return flappingHistory.length >= MAX_CAPACITY;
 }
 
-export function getCapcityDiff(flappingHistory: boolean[] = []) {
+export function getCapacityDiff(flappingHistory: boolean[] = []) {
   const len = flappingHistory.length;
   // adding + 1 to make space for next the flapping state
   return len + 1 - MAX_CAPACITY;

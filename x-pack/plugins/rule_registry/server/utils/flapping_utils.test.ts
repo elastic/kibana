@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { atCapacity, updateFlappingHistory, getCapcityDiff, isFlapping } from './flapping_utils';
+import { atCapacity, updateFlappingHistory, getCapacityDiff, isFlapping } from './flapping_utils';
 
 describe('updateFlappingHistory function', () => {
   test('correctly updates flappingHistory', () => {
@@ -70,17 +70,17 @@ describe('updateFlappingHistory function', () => {
   });
 });
 
-describe('atCapacity and getCapcityDiff functions', () => {
+describe('atCapacity and getCapacityDiff functions', () => {
   test('returns true if flappingHistory == set capacity', () => {
     const flappingHistory = new Array(20).fill(false);
     expect(atCapacity(flappingHistory)).toEqual(true);
-    expect(getCapcityDiff(flappingHistory)).toEqual(1);
+    expect(getCapacityDiff(flappingHistory)).toEqual(1);
   });
 
   test('returns true if flappingHistory > set capacity', () => {
     const flappingHistory = new Array(25).fill(false);
     expect(atCapacity(flappingHistory)).toEqual(true);
-    expect(getCapcityDiff(flappingHistory)).toEqual(6);
+    expect(getCapacityDiff(flappingHistory)).toEqual(6);
   });
 
   test('returns false if flappingHistory < set capacity', () => {
