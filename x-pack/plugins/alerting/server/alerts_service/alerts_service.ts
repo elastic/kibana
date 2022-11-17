@@ -7,7 +7,7 @@
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { ecsComponentTemplate } from './schema/lib/ecsComponentTemplate';
+import { alertsComponentTemplate, ecsComponentTemplate } from '../../common';
 import { ILM_POLICY_NAME, DEFAULT_ILM_POLICY } from './default_lifecycle_policy';
 
 interface AlertsServiceParams {
@@ -75,7 +75,7 @@ export class AlertsService implements IAlertsService {
 
   private async createOrUpdateComponentTemplates(esClient: ElasticsearchClient) {
     await Promise.all([
-      // this.createOrUpdateComponentTemplate(esClient, ALERTS_COMPONENT_TEMPLATE_NAME, {}),
+      this.createOrUpdateComponentTemplate(esClient, alertsComponentTemplate),
       this.createOrUpdateComponentTemplate(esClient, ecsComponentTemplate),
     ]);
   }

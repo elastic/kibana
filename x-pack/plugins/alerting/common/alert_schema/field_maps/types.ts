@@ -5,14 +5,24 @@
  * 2.0.
  */
 
+export interface MultiField {
+  flat_name?: string;
+  name: string;
+  type: string;
+}
+
 export interface FieldMap {
   [key: string]: {
     type: string;
-    required?: boolean;
     array?: boolean;
-    path?: string;
+    doc_values?: boolean;
+    enabled?: boolean;
+    format?: string;
     ignore_above?: number;
+    index?: boolean;
+    multi_fields?: MultiField[];
+    path?: string;
+    required?: boolean;
     scaling_factor?: number;
-    multi_fields?: Array<{ flat_name: string; name: string; type: string }>;
   };
 }

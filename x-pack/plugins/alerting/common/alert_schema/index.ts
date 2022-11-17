@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './merge_field_maps';
-export * from './runtime_type_from_fieldmap';
-export * from './types';
+export { ecsComponentTemplate } from './component_templates/ecs_component_template';
+export { alertsComponentTemplate } from './component_templates/alerts_component_template';

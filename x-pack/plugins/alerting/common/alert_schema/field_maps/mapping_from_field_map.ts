@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { set } from '@kbn/safer-lodash-set';
-import { FieldMap } from './types';
+import { FieldMap, MultiField } from './types';
 
 export function mappingFromFieldMap(
   fieldMap: FieldMap,
   dynamic: 'strict' | boolean = 'strict'
-): estypes.MappingTypeMapping {
+): MappingTypeMapping {
   const mappings = {
     dynamic,
     properties: {},
   };
 
-  const fields = Object.keys(fieldMap).map((key) => {
+  const fields = Object.keys(fieldMap).map((key: string) => {
     const field = fieldMap[key];
     return {
       name: key,
@@ -34,7 +34,7 @@ export function mappingFromFieldMap(
       ? {
           ...rest,
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          fields: multi_fields.reduce((acc, multi_field) => {
+          fields: multi_fields.reduce((acc, multi_field: MultiField) => {
             return {
               ...acc,
               [multi_field.name]: {

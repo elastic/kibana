@@ -93,6 +93,14 @@ describe('mappingFromFieldMap', () => {
       required: false,
       ignore_above: 1024,
     },
+    unmapped_object: {
+      type: 'object',
+      enabled: false,
+    },
+    formatted_field: {
+      type: 'date_range',
+      format: 'epoch_millis||strict_date_optional_time',
+    },
   };
   const expectedMapping = {
     properties: {
@@ -156,6 +164,14 @@ describe('mappingFromFieldMap', () => {
       scaled_float_field: {
         scaling_factor: 1000,
         type: 'scaled_float',
+      },
+      unmapped_object: {
+        enabled: false,
+        type: 'object',
+      },
+      formatted_field: {
+        type: 'date_range',
+        format: 'epoch_millis||strict_date_optional_time',
       },
     },
   };

@@ -14,6 +14,7 @@ const { reduce } = require('lodash');
 
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
+const deleteFile = util.promisify(fs.unlink);
 const exec = util.promisify(execCb);
 
 const ecsYmlUrlPrefix = `https://raw.githubusercontent.com/elastic/ecs/v8.5.2/generated/ecs/`;
@@ -79,7 +80,7 @@ async function generate() {
       do not manually edit
       */
 
-          export const ecsFieldMap = ${JSON.stringify(fields, null, 2)} as const
+          export const ecsFieldMap = ${JSON.stringify(fields, null, 2)}
 
           export type EcsFieldMap = typeof ecsFieldMap;
           `,
@@ -90,6 +91,8 @@ async function generate() {
         ]);
 
         console.log(`Successfully generated fieldmap at ${outputFieldMapFilename}`);
+
+        await deleteFile(ecsYmlFilename);
       });
     },
     (err) => {

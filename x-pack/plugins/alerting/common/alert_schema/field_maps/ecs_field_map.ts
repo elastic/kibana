@@ -9005,6 +9005,6 @@ export const ecsFieldMap = {
     required: false,
     ignore_above: 1024,
   },
-} as const;
+};
 
 export type EcsFieldMap = typeof ecsFieldMap;
