@@ -184,7 +184,8 @@ the `subAction` value.
 (Optional, string) A description that provides detailed information about the alert.
 
 `details`::::
-(Optional, string) The custom properties of the alert.
+(Optional, object) The custom properties of the alert. For example:
+`{"key1":"value1","key2":"value2"}`.
 
 `entity`::::
 (Optional, string) The domain of the alert. For example, the application or server
@@ -202,13 +203,14 @@ name.
 
 `responders`::::
 (Optional, array of objects) The entities to receive notifications about the
-alert. Only one of `id`, `name`, or `username` is required.
+alert. If `type` is `user`, either `id` or `username` is required. If `type` is
+`team`, either `id` or `name` is required.
 +
 .Properties of `responders` objects
 [%collapsible%open]
 =======
 `id`::::
-(Required^*^, string) The identifier for the entity.
+(Required^*^, string) The identifier for the entity. 
 
 `name`::::
 (Required^*^, string) The name of the entity.
@@ -217,8 +219,7 @@ alert. Only one of `id`, `name`, or `username` is required.
 (Required, string) Valid values are `escalation`, `schedule`, `team`, and `user`.
 
 `username`::::
-(Required^*^, string) The user name. This property is required only when the
-`type` is `user`.
+(Required^*^, string) A valid email address for the user.
 =======
 
 `source`::::
