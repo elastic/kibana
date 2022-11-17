@@ -11,7 +11,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { FleetConfigType } from '..';
 
 import { getIsAgentsEnabled } from './config_collectors';
-import { getAgentUsage, getAgentVersions } from './agent_collectors';
+import { getAgentUsage, getAgentData } from './agent_collectors';
 import type { AgentUsage } from './agent_collectors';
 import { getInternalClients } from './helpers';
 import { getPackageUsage } from './package_collectors';
@@ -34,7 +34,7 @@ export const fetchFleetUsage = async (core: CoreSetup, config: FleetConfigType) 
     agents: await getAgentUsage(config, soClient, esClient),
     fleet_server: await getFleetServerUsage(soClient, esClient),
     packages: await getPackageUsage(soClient),
-    agent_versions: await getAgentVersions(esClient),
+    ...(await getAgentData(esClient)),
     fleet_server_config: await getFleetServerConfig(soClient, esClient),
     agent_policies: await getAgentPoliciesUsage(soClient, esClient),
   };

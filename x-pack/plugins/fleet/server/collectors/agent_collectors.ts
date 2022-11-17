@@ -50,9 +50,22 @@ export const getAgentUsage = async (
   };
 };
 
-export const getAgentVersions = async (esClient?: ElasticsearchClient): Promise<string[]> => {
+export interface AgentData {
+  agent_versions: string[];
+  agent_last_checkin_status: {
+    error: number;
+    degraded: number;
+  };
+}
+
+const DEFAULT_AGENT_DATA = {
+  agent_versions: [],
+  agent_last_checkin_status: { error: 0, degraded: 0 },
+};
+
+export const getAgentData = async (esClient?: ElasticsearchClient): Promise<AgentData> => {
   if (!esClient) {
-    return [];
+    return DEFAULT_AGENT_DATA;
   }
   try {
     const response = await esClient.search({
@@ -62,17 +75,31 @@ export const getAgentVersions = async (esClient?: ElasticsearchClient): Promise<
         versions: {
           terms: { field: 'agent.version' },
         },
+        last_checkin_status: {
+          terms: { field: 'last_checkin_status' },
+        },
       },
     });
-    return ((response?.aggregations?.versions as any).buckets ?? []).map(
+    const versions = ((response?.aggregations?.versions as any).buckets ?? []).map(
       (bucket: any) => bucket.key
     );
+    const statuses = ((response?.aggregations?.last_checkin_status as any).buckets ?? []).reduce(
+      (acc: any, bucket: any) => {
+        if (acc[bucket.key]) acc[bucket.key] = bucket.doc_count;
+        return acc;
+      },
+      { error: 0, degraded: 0 }
+    );
+    return {
+      agent_versions: versions,
+      agent_last_checkin_status: statuses,
+    };
   } catch (error) {
     if (error.statusCode === 404) {
       appContextService.getLogger().debug('Index .fleet-agents does not exist yet.');
     } else {
       throw error;
     }
-    return [];
+    return DEFAULT_AGENT_DATA;
   }
 };
