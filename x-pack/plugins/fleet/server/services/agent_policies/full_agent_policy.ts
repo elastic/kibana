@@ -8,7 +8,13 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
 
-import type { FullAgentPolicy, PackagePolicy, Output, FullAgentPolicyOutput } from '../../types';
+import type {
+  FullAgentPolicy,
+  AgentPolicy,
+  PackagePolicy,
+  Output,
+  FullAgentPolicyOutput,
+} from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
 import { dataTypes, outputType } from '../../../common/constants';
@@ -34,7 +40,7 @@ export async function getFullAgentPolicy(
   id: string,
   options?: { standalone: boolean }
 ): Promise<FullAgentPolicy | null> {
-  let agentPolicy;
+  let agentPolicy: AgentPolicy | null | undefined;
   const standalone = options?.standalone ?? false;
 
   try {
@@ -187,7 +193,9 @@ export async function getFullAgentPolicy(
   if (!standalone) {
     const fleetServerHost = await getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch(
       (err) => {
-        appContextService.getLogger()?.error(err);
+        appContextService
+          .getLogger()
+          ?.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
 
         return;
       }

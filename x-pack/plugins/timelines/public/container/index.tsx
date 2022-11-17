@@ -347,6 +347,7 @@ export const useTimelineEventsHandler = ({
           from: startDate,
           to: endDate,
         },
+        filterStatus,
       };
 
       const newActivePage = deepEqual(prevSearchParameters, currentSearchParameters)
@@ -450,6 +451,7 @@ export const useTimelineEvents = ({
   indexNames,
   fields,
   filterQuery,
+  filterStatus,
   startDate,
   language = 'kuery',
   limit,
@@ -465,6 +467,7 @@ export const useTimelineEvents = ({
     endDate,
     entityType,
     excludeEcsData,
+    filterStatus,
     id,
     indexNames,
     fields,

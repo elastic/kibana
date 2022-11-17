@@ -20,7 +20,8 @@
   "query": "event.category:(network OR network_traffic) AND type:(tls OR http) AND network.transport:tcp AND destination.domain:/[a-z]{3}.stage.[0-9]{8}\\..*/\n",
   "references": [
     "https://blog.morphisec.com/fin7-attacks-restaurant-industry",
-    "https://www.fireeye.com/blog/threat-research/2017/04/fin7-phishing-lnk.html"
+    "https://www.fireeye.com/blog/threat-research/2017/04/fin7-phishing-lnk.html",
+    "https://www.elastic.co/security-labs/collecting-cobalt-strike-beacons-with-the-elastic-stack"
   ],
   "risk_score": 73,
   "rule_id": "cf53f532-9cc9-445a-9ae7-fced307ec53c",
@@ -63,5 +64,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 100
+  "version": 101
 }

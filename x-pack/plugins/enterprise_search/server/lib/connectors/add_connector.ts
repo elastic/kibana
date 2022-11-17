@@ -95,6 +95,7 @@ export const addConnector = async (
     configuration: {},
     description: null,
     error: null,
+    features: null,
     filtering: [
       {
         active: {
