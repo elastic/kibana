@@ -5,9 +5,7 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      <div
-        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-      >
+      <div>
         <header
           class="euiPageHeader emotion-euiPageHeader"
           data-test-subj="PageHeader"
@@ -25,13 +23,15 @@ Object {
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
                 >
-                  <button
+                  <a
                     aria-current="false"
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    href=""
+                    rel="noreferrer"
                     title="Rule exceptions"
-                    type="button"
                   >
                     <div
+                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                       data-test-subj="Breadcrumb"
                     >
                       <span
@@ -39,7 +39,7 @@ Object {
                       />
                       Rule exceptions
                     </div>
-                  </button>
+                  </a>
                 </li>
               </ol>
             </nav>
@@ -386,9 +386,7 @@ Object {
     </div>
   </body>,
   "container": <div>
-    <div
-      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-    >
+    <div>
       <header
         class="euiPageHeader emotion-euiPageHeader"
         data-test-subj="PageHeader"
@@ -406,13 +404,15 @@ Object {
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
               >
-                <button
+                <a
                   aria-current="false"
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  href=""
+                  rel="noreferrer"
                   title="Rule exceptions"
-                  type="button"
                 >
                   <div
+                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     data-test-subj="Breadcrumb"
                   >
                     <span
@@ -420,7 +420,7 @@ Object {
                     />
                     Rule exceptions
                   </div>
-                </button>
+                </a>
               </li>
             </ol>
           </nav>
@@ -668,9 +668,7 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      <div
-        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-      >
+      <div>
         <header
           class="euiPageHeader emotion-euiPageHeader"
           data-test-subj="PageHeader"
@@ -688,13 +686,15 @@ Object {
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
                 >
-                  <button
+                  <a
                     aria-current="false"
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    href=""
+                    rel="noreferrer"
                     title="Rule exceptions"
-                    type="button"
                   >
                     <div
+                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                       data-test-subj="Breadcrumb"
                     >
                       <span
@@ -702,7 +702,7 @@ Object {
                       />
                       Rule exceptions
                     </div>
-                  </button>
+                  </a>
                 </li>
               </ol>
             </nav>
@@ -893,9 +893,7 @@ Object {
     </div>
   </body>,
   "container": <div>
-    <div
-      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-    >
+    <div>
       <header
         class="euiPageHeader emotion-euiPageHeader"
         data-test-subj="PageHeader"
@@ -913,13 +911,15 @@ Object {
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
               >
-                <button
+                <a
                   aria-current="false"
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  href=""
+                  rel="noreferrer"
                   title="Rule exceptions"
-                  type="button"
                 >
                   <div
+                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     data-test-subj="Breadcrumb"
                   >
                     <span
@@ -927,7 +927,7 @@ Object {
                     />
                     Rule exceptions
                   </div>
-                </button>
+                </a>
               </li>
             </ol>
           </nav>
@@ -1175,9 +1175,7 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      <div
-        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-      >
+      <div>
         <header
           class="euiPageHeader emotion-euiPageHeader"
           data-test-subj="PageHeader"
@@ -1195,13 +1193,15 @@ Object {
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
                 >
-                  <button
+                  <a
                     aria-current="false"
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    href=""
+                    rel="noreferrer"
                     title="Rule exceptions"
-                    type="button"
                   >
                     <div
+                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                       data-test-subj="Breadcrumb"
                     >
                       <span
@@ -1209,7 +1209,7 @@ Object {
                       />
                       Rule exceptions
                     </div>
-                  </button>
+                  </a>
                 </li>
               </ol>
             </nav>
@@ -1373,9 +1373,7 @@ Object {
     </div>
   </body>,
   "container": <div>
-    <div
-      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-    >
+    <div>
       <header
         class="euiPageHeader emotion-euiPageHeader"
         data-test-subj="PageHeader"
@@ -1393,13 +1391,15 @@ Object {
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
               >
-                <button
+                <a
                   aria-current="false"
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  href=""
+                  rel="noreferrer"
                   title="Rule exceptions"
-                  type="button"
                 >
                   <div
+                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     data-test-subj="Breadcrumb"
                   >
                     <span
@@ -1407,7 +1407,7 @@ Object {
                     />
                     Rule exceptions
                   </div>
-                </button>
+                </a>
               </li>
             </ol>
           </nav>
@@ -1628,9 +1628,7 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      <div
-        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-      >
+      <div>
         <header
           class="euiPageHeader emotion-euiPageHeader"
           data-test-subj="PageHeader"
@@ -1648,13 +1646,15 @@ Object {
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
                 >
-                  <button
+                  <a
                     aria-current="false"
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    href=""
+                    rel="noreferrer"
                     title="Rule exceptions"
-                    type="button"
                   >
                     <div
+                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                       data-test-subj="Breadcrumb"
                     >
                       <span
@@ -1662,7 +1662,7 @@ Object {
                       />
                       Rule exceptions
                     </div>
-                  </button>
+                  </a>
                 </li>
               </ol>
             </nav>
@@ -1764,25 +1764,6 @@ Object {
                         >
                           Linked to 0 rules
                         </span>
-                      </div>
-                      <div
-                        class="euiFlexItem"
-                      >
-                        <button
-                          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
-                          data-test-subj="RightSideMenuItemsManageRulesButton"
-                          type="button"
-                        >
-                          <span
-                            class="emotion-euiButtonDisplayContent"
-                          >
-                            <span
-                              class="eui-textTruncate"
-                            >
-                              Manage rules
-                            </span>
-                          </span>
-                        </button>
                       </div>
                       <div
                         class="euiFlexItem"
@@ -1906,9 +1887,7 @@ Object {
     </div>
   </body>,
   "container": <div>
-    <div
-      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-    >
+    <div>
       <header
         class="euiPageHeader emotion-euiPageHeader"
         data-test-subj="PageHeader"
@@ -1926,13 +1905,15 @@ Object {
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
               >
-                <button
+                <a
                   aria-current="false"
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  href=""
+                  rel="noreferrer"
                   title="Rule exceptions"
-                  type="button"
                 >
                   <div
+                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     data-test-subj="Breadcrumb"
                   >
                     <span
@@ -1940,7 +1921,7 @@ Object {
                     />
                     Rule exceptions
                   </div>
-                </button>
+                </a>
               </li>
             </ol>
           </nav>
@@ -2042,25 +2023,6 @@ Object {
                       >
                         Linked to 0 rules
                       </span>
-                    </div>
-                    <div
-                      class="euiFlexItem"
-                    >
-                      <button
-                        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
-                        data-test-subj="RightSideMenuItemsManageRulesButton"
-                        type="button"
-                      >
-                        <span
-                          class="emotion-euiButtonDisplayContent"
-                        >
-                          <span
-                            class="eui-textTruncate"
-                          >
-                            Manage rules
-                          </span>
-                        </span>
-                      </button>
                     </div>
                     <div
                       class="euiFlexItem"

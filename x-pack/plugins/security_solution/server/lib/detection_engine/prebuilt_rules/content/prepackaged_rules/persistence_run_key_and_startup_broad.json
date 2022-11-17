@@ -52,7 +52,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Persistence"
+    "Persistence",
+    "has_guide"
   ],
   "threat": [
     {
@@ -82,5 +83,5 @@
   "timeline_title": "Comprehensive Registry Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 101
+  "version": 102
 }

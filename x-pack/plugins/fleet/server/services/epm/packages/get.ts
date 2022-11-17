@@ -330,6 +330,18 @@ export async function getInstallationObject(options: {
   });
 }
 
+export async function getInstallationObjects(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgNames: string[];
+}) {
+  const { savedObjectsClient, pkgNames } = options;
+  const res = await savedObjectsClient.bulkGet<Installation>(
+    pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
+  );
+
+  return res.saved_objects.filter((so) => so?.attributes);
+}
+
 export async function getInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -337,6 +349,14 @@ export async function getInstallation(options: {
 }) {
   const savedObject = await getInstallationObject(options);
   return savedObject?.attributes;
+}
+
+export async function getInstallationsByName(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgNames: string[];
+}) {
+  const savedObjects = await getInstallationObjects(options);
+  return savedObjects.map((so) => so.attributes);
 }
 
 function sortByName(a: { name: string }, b: { name: string }) {
