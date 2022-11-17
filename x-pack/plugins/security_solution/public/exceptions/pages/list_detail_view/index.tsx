@@ -58,7 +58,7 @@ export const ListsDetailViewComponent: FC = () => {
 
   if (isLoading) return <EuiLoadingContent lines={4} data-test-subj="loading" />;
 
-  if (invalidListId || !listName || !listDescription || !list) return <NotFoundPage />;
+  if (invalidListId || !listName || !list) return <NotFoundPage />;
   return (
     <>
       <MissingPrivilegesCallOut />
