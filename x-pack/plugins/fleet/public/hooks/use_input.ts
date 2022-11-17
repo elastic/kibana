@@ -229,3 +229,29 @@ export function useNumberInput(
     hasChanged,
   };
 }
+
+export function useSelectInput(
+  options: Array<{ value: string; text: string }>,
+  defaultValue: string = '',
+  disabled = false
+) {
+  const [value, setValue] = useState<string>(defaultValue);
+
+  const onChange = useCallback((e) => {
+    setValue(e.target.value);
+  }, []);
+
+  return {
+    props: {
+      options,
+      value,
+      onChange,
+      disabled,
+    },
+    value,
+    clear: () => {
+      setValue('');
+    },
+    setValue,
+  };
+}

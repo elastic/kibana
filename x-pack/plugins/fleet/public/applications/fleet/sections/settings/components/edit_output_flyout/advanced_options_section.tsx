@@ -18,30 +18,35 @@ import {
   EuiSpacer,
   EuiFieldText,
   EuiFieldNumber,
-  // EuiSelect,
+  EuiSelect,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import type { useSwitchInput, useInput, useNumberInput } from '../../../../hooks';
+import type { OutputFormInputsType } from './use_output_form';
 
 export interface AdvancedOptionsSectionProps {
   enabled: boolean;
-  diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
-  diskQueuePathInput: ReturnType<typeof useInput>;
-  diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
-  loadBalanceEnabledInput: ReturnType<typeof useSwitchInput>;
-  diskQueueEncryptionEnabled: ReturnType<typeof useSwitchInput>;
+  inputs: OutputFormInputsType;
 }
 
 export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSectionProps> = ({
   enabled,
-  diskQueueEnabledInput,
-  diskQueuePathInput,
-  diskQueueMaxSizeInput,
-  loadBalanceEnabledInput,
-  diskQueueEncryptionEnabled,
+  inputs,
 }) => {
+  const {
+    diskQueueEnabledInput,
+    diskQueuePathInput,
+    diskQueueMaxSizeInput,
+    loadBalanceEnabledInput,
+    diskQueueEncryptionEnabled,
+    diskQueueCompressionEnabled,
+    compressionLevelInput,
+    memQueueSize,
+    queueFlushTimeout,
+    maxBatchSize,
+  } = inputs;
+
   return enabled ? (
     <EuiAccordion
       id="advancedOutputOptions"
@@ -55,6 +60,83 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
     >
       <>
         <EuiSpacer size="m" />
+        <EuiFormRow
+          fullWidth
+          {...maxBatchSize.formRowProps}
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.maxBatchSizeDescriptionLabel"
+              defaultMessage="Maximum Batch Size"
+            />
+          }
+        >
+          <EuiFlexGroup alignItems="flexStart">
+            <EuiFlexItem>
+              <EuiFieldNumber {...maxBatchSize.props} placeholder="Batching Bytes" min={0} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.maxBatchSizeDescription"
+                  defaultMessage="Data will be sent to the output when the agent has events which total larger then this configured maximum."
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiFormRow
+          fullWidth
+          {...queueFlushTimeout.formRowProps}
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.queueFlushTimeoutLabel"
+              defaultMessage="Flush Timeout"
+            />
+          }
+        >
+          <EuiFlexGroup alignItems="flexStart">
+            <EuiFlexItem>
+              <EuiFieldNumber {...queueFlushTimeout.props} placeholder="Seconds" min={0} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.queueFlushTimeoutDescription"
+                  defaultMessage="Upon expiry the output queue is flushed and data is written to the output."
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiFormRow
+          fullWidth
+          {...memQueueSize.formRowProps}
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.memQueueSizeLabel"
+              defaultMessage="Memory Queue Size"
+            />
+          }
+        >
+          <EuiFlexGroup alignItems="flexStart">
+            <EuiFlexItem>
+              <EuiFieldNumber {...memQueueSize.props} placeholder="Bytes" min={0} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.memQueueSizeDescription"
+                  defaultMessage="Memory queue is calculated as a function of Maximum Batch Size. However it can also be overwritten. For the best performance it's advisable to have a memory queue larger then the batch size."
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+
+        <EuiHorizontalRule />
+
         <EuiFormRow fullWidth {...loadBalanceEnabledInput.formRowProps}>
           <EuiFlexGroup alignItems="flexStart">
             <EuiFlexItem>
@@ -168,7 +250,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
         >
           <EuiFlexGroup alignItems="flexStart">
             <EuiFlexItem>
-              <EuiFieldNumber {...diskQueueMaxSizeInput.props} />
+              <EuiFieldNumber {...diskQueueMaxSizeInput.props} placeholder="Bytes" min={0} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -182,6 +264,39 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
         </EuiFormRow>
 
         <EuiHorizontalRule />
+
+        <EuiFormRow fullWidth>
+          <EuiFlexGroup alignItems="flexStart">
+            <EuiFlexItem>
+              <EuiSwitch
+                data-test-subj="editOutputFlyout.compressionSwitch"
+                {...diskQueueCompressionEnabled.props}
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.compressionSwitchLabel"
+                    defaultMessage="Compression"
+                  />
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSelect
+                data-test-subj="editOutputFlyout.compressionLevelSelect"
+                id="selectCompressionLevel"
+                aria-label="Use aria labels when no actual label is in use"
+                {...compressionLevelInput.props}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.compressionSwitchDescription"
+                  defaultMessage="Level 1 compression is the fastest, Level 9 however would provide the best compression."
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
       </>
     </EuiAccordion>
   ) : null;

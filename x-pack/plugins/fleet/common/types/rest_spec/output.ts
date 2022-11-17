@@ -45,7 +45,12 @@ export interface PutOutputRequest {
     disk_queue_path?: string;
     disk_queue_max_size?: number;
     disk_queue_encryption_enabled?: boolean;
+    disk_queue_compression_enabled?: boolean;
+    compression_level?: number;
     loadbalance?: boolean;
+    mem_queue_size?: number;
+    queue_flush_timeout?: number;
+    max_batch_size?: number;
   };
 }
 
@@ -69,7 +74,12 @@ export interface PostOutputRequest {
     disk_queue_path?: string;
     disk_queue_max_size?: number;
     disk_queue_encryption_enabled?: boolean;
+    disk_queue_compression_enabled?: boolean;
+    compression_level?: number;
     loadbalance?: boolean;
+    mem_queue_size?: number;
+    queue_flush_timeout?: number;
+    max_batch_size?: number;
   };
 }
 

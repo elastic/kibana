@@ -13,7 +13,7 @@ import {
   sendPostOutput,
   useComboInput,
   useInput,
-  useNumberInput,
+  useSelectInput,
   useSwitchInput,
   useStartServices,
   sendPutOutput,
@@ -35,14 +35,16 @@ import { confirmUpdate } from './confirm_update';
 
 const DEFAULT_QUEUE_MAX_SIZE = 4096;
 
-export interface OutputFormInputs {
+export interface OutputFormInputsType {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
   diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
   diskQueuePathInput: ReturnType<typeof useInput>;
-  diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
+  diskQueueMaxSizeInput: ReturnType<typeof useInput>;
   diskQueueEncryptionEnabled: ReturnType<typeof useSwitchInput>;
+  diskQueueCompressionEnabled: ReturnType<typeof useSwitchInput>;
+  compressionLevelInput: ReturnType<typeof useSelectInput>;
   logstashHostsInput: ReturnType<typeof useComboInput>;
   additionalYamlConfigInput: ReturnType<typeof useInput>;
   defaultOutputInput: ReturnType<typeof useSwitchInput>;
@@ -52,6 +54,9 @@ export interface OutputFormInputs {
   sslKeyInput: ReturnType<typeof useInput>;
   sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
   loadBalanceEnabledInput: ReturnType<typeof useSwitchInput>;
+  memQueueSize: ReturnType<typeof useInput>;
+  queueFlushTimeout: ReturnType<typeof useInput>;
+  maxBatchSize: ReturnType<typeof useInput>;
 }
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
@@ -100,16 +105,36 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isPreconfigured
   );
   // Shipper inputs - disk queue inputs are under this as well
+
   // Handle case where shipper.disabled: true
   const isShipperEnabled = !!output?.config_yaml?.includes('shipper');
 
   const diskQueueEnabledInput = useSwitchInput(output?.disk_queue_enabled ?? false);
   const diskQueuePathInput = useInput(output?.disk_queue_path ?? '');
-  const diskQueueMaxSizeInput = useNumberInput(
-    output?.disk_queue_max_size ?? DEFAULT_QUEUE_MAX_SIZE
+  const diskQueueMaxSizeInput = useInput(
+    `${output?.disk_queue_max_size}` ?? `${DEFAULT_QUEUE_MAX_SIZE}`
   );
   const diskQueueEncryptionEnabled = useSwitchInput(output?.disk_queue_encryption_enabled ?? false);
   const loadBalanceEnabledInput = useSwitchInput(output?.disk_queue_enabled ?? false);
+  const diskQueueCompressionEnabled = useSwitchInput(
+    output?.disk_queue_compression_enabled ?? false
+  );
+
+  const options = Array.from(Array(10).keys())
+    .slice(1)
+    .map((val) => {
+      return { value: `${val}`, text: `Level ${val}` };
+    });
+  const compressionLevelInput = useSelectInput(
+    options,
+    options[0].value,
+    !diskQueueCompressionEnabled.value ?? false
+  );
+
+  // These three parameters are yet tbd
+  const memQueueSize = useInput(`${output?.mem_queue_size}`);
+  const queueFlushTimeout = useInput(`${output?.queue_flush_timeout}`);
+  const maxBatchSize = useInput(`${output?.max_batch_size}`);
 
   // Logstash inputs
   const logstashHostsInput = useComboInput(
@@ -134,7 +159,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
   const isLogstash = typeInput.value === 'logstash';
 
-  const inputs: OutputFormInputs = {
+  const inputs: OutputFormInputsType = {
     nameInput,
     typeInput,
     elasticsearchUrlInput,
@@ -142,6 +167,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     diskQueuePathInput,
     diskQueueEncryptionEnabled,
     diskQueueMaxSizeInput,
+    diskQueueCompressionEnabled,
+    compressionLevelInput,
     logstashHostsInput,
     additionalYamlConfigInput,
     defaultOutputInput,
@@ -151,6 +178,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     sslKeyInput,
     sslCertificateAuthoritiesInput,
     loadBalanceEnabledInput,
+    memQueueSize,
+    queueFlushTimeout,
+    maxBatchSize,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -202,6 +232,39 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         return;
       }
       setIsloading(true);
+      console.log('memQueueSize', memQueueSize.value ? 'true' : 'false');
+      console.log(queueFlushTimeout.value);
+
+      let shipperParams = {};
+      if (!isLogstash) {
+        shipperParams = {
+          ...(diskQueueEnabledInput.value
+            ? { disk_queue_enabled: diskQueueEnabledInput.value }
+            : null),
+          ...(diskQueuePathInput.value ? { disk_queue_path: diskQueuePathInput.value } : null),
+          ...(diskQueueMaxSizeInput.value
+            ? { disk_queue_max_size: diskQueueMaxSizeInput.value }
+            : null),
+          ...(diskQueueEncryptionEnabled.value
+            ? { disk_queue_encryption_enabled: diskQueueEncryptionEnabled.value }
+            : null),
+          ...(diskQueueCompressionEnabled.value
+            ? { disk_queue_compression_enabled: diskQueueCompressionEnabled.value }
+            : null),
+          ...(diskQueueCompressionEnabled.value && compressionLevelInput.value
+            ? { compression_level: Number(compressionLevelInput.value) }
+            : null),
+          ...(loadBalanceEnabledInput.value
+            ? { loadbalance: loadBalanceEnabledInput.value }
+            : null),
+          ...(memQueueSize.value ? { mem_queue_size: Number(memQueueSize.value) } : null),
+          ...(queueFlushTimeout.value
+            ? { queue_flush_timeout: Number(queueFlushTimeout.value) }
+            : null),
+          ...(maxBatchSize.value ? { max_batch_size: Number(maxBatchSize.value) } : null),
+        };
+        console.log(shipperParams);
+      }
 
       const data: PostOutputRequest['body'] = isLogstash
         ? {
@@ -227,11 +290,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
             is_default_monitoring: defaultMonitoringOutputInput.value,
             config_yaml: additionalYamlConfigInput.value,
             ca_trusted_fingerprint: caTrustedFingerprintInput.value,
-            disk_queue_enabled: diskQueueEnabledInput.value,
-            disk_queue_path: diskQueuePathInput.value,
-            disk_queue_max_size: diskQueueMaxSizeInput.value,
-            disk_queue_encryption_enabled: diskQueueEncryptionEnabled.value,
-            loadbalance: loadBalanceEnabledInput.value,
+            ...shipperParams,
           };
 
       if (output) {
@@ -281,7 +340,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     diskQueuePathInput.value,
     diskQueueMaxSizeInput.value,
     diskQueueEncryptionEnabled.value,
+    diskQueueCompressionEnabled.value,
+    compressionLevelInput.value,
     loadBalanceEnabledInput.value,
+    memQueueSize.value,
+    queueFlushTimeout.value,
+    maxBatchSize.value,
     output,
     onSucess,
     confirm,
