@@ -8,11 +8,7 @@
 import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
-import {
-  ActionGroup,
-  RuleExecutionStatusErrorReasons,
-  AlertStatusValues,
-} from '@kbn/alerting-plugin/common';
+import { ActionGroup, AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
@@ -20,16 +16,20 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import './rule.scss';
-import { getHealthColor } from '../../rules_list/components/rule_execution_status_filter';
-import {
-  rulesStatusesTranslationsMapping,
-  ALERT_STATUS_LICENSE_ERROR,
-} from '../../rules_list/translations';
 import type { RuleEventLogListProps } from './rule_event_log_list';
 import { AlertListItem } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
+import {
+  getRuleHealthColor,
+  getRuleStatusMessage,
+} from '../../../../common/lib/rule_status_helpers';
 import RuleStatusPanelWithApi from './rule_status_panel';
+import {
+  ALERT_STATUS_LICENSE_ERROR,
+  rulesLastRunOutcomeTranslationMapping,
+  rulesStatusesTranslationsMapping,
+} from '../../rules_list/translations';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
@@ -78,12 +78,13 @@ export function RuleComponent({
     requestRefresh();
   };
 
-  const healthColor = getHealthColor(rule.executionStatus.status);
-  const isLicenseError =
-    rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
-  const statusMessage = isLicenseError
-    ? ALERT_STATUS_LICENSE_ERROR
-    : rulesStatusesTranslationsMapping[rule.executionStatus.status];
+  const healthColor = getRuleHealthColor(rule);
+  const statusMessage = getRuleStatusMessage({
+    rule,
+    licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
+    lastOutcomeTranslations: rulesLastRunOutcomeTranslationMapping,
+    executionStatusTranslations: rulesStatusesTranslationsMapping,
+  });
 
   const renderRuleAlertList = () => {
     return suspendedComponentWithProps(

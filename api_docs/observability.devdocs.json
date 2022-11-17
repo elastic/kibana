@@ -129,7 +129,7 @@
                 "label": "reportType",
                 "description": [],
                 "signature": [
-                  "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
+                  "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
                 ],
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
                 "deprecated": false,
@@ -764,6 +764,41 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.LoadWhenInView",
+        "type": "Function",
+        "tags": [],
+        "label": "LoadWhenInView",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "LoadWhenInViewProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.LoadWhenInView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "LoadWhenInViewProps"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.NavigationWarningPromptProvider",
         "type": "Function",
         "tags": [],
@@ -1244,7 +1279,13 @@
             "text": "IInspectorInfo"
           },
           " | undefined; name: string; }) => { data: ",
-          "ESSearchResponse",
+          {
+            "pluginId": "@kbn/es-types",
+            "scope": "server",
+            "docId": "kibKbnEsTypesPluginApi",
+            "section": "def-server.ESSearchResponse",
+            "text": "ESSearchResponse"
+          },
           "<DocumentSource, TParams, { restTotalHitsAsInt: false; }>; loading: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/observability/public/hooks/use_es_search.ts",
@@ -2107,12 +2148,12 @@
           {
             "parentPluginId": "observability",
             "id": "def-public.ExploratoryEmbeddableProps.customHeight",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "customHeight",
             "description": [],
             "signature": [
-              "string | number | undefined"
+              "string | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -2300,7 +2341,7 @@
             "label": "reportType",
             "description": [],
             "signature": [
-              "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
+              "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -2315,21 +2356,6 @@
             "description": [],
             "signature": [
               "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.singleMetricOptions",
-            "type": "Object",
-            "tags": [],
-            "label": "singleMetricOptions",
-            "description": [],
-            "signature": [
-              "SingleMetricOptions",
-              " | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -3813,11 +3839,11 @@
             "label": "format",
             "description": [],
             "signature": [
-              "(options: { fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+              "(options: { fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
-              "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link: string; }"
+              "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }) => { reason: string; link: string; }"
             ],
             "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
             "deprecated": false,
@@ -3832,11 +3858,11 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+                  "{ fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
                   "Maybe",
                   "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
                   "Maybe",
-                  "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }"
+                  "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }"
                 ],
                 "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
                 "deprecated": false,
@@ -4028,9 +4054,21 @@
             "description": [],
             "signature": [
               "(",
-              "ExistsFilter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ExistsFilter",
+                "text": "ExistsFilter"
+              },
               " | ",
-              "PhraseFilter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.PhraseFilter",
+                "text": "PhraseFilter"
+              },
               " | ",
               {
                 "pluginId": "lens",
@@ -4054,9 +4092,21 @@
             "description": [],
             "signature": [
               "(string | { field: string; nested?: string | undefined; singleSelection?: boolean | undefined; filters?: (",
-              "ExistsFilter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ExistsFilter",
+                "text": "ExistsFilter"
+              },
               " | ",
-              "PhraseFilter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.PhraseFilter",
+                "text": "PhraseFilter"
+              },
               " | ",
               {
                 "pluginId": "lens",
@@ -4136,7 +4186,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -4930,10 +4986,7 @@
         "tags": [],
         "label": "METRIC_TYPE",
         "description": [],
-        "signature": [
-          "METRIC_TYPE"
-        ],
-        "path": "node_modules/@types/kbn__analytics/index.d.ts",
+        "path": "packages/kbn-analytics/src/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5080,6 +5133,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.enableAgentExplorerView",
+        "type": "string",
+        "tags": [],
+        "label": "enableAgentExplorerView",
+        "description": [],
+        "signature": [
+          "\"observability:apmAgentExplorerView\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.enableComparisonByDefault",
         "type": "string",
         "tags": [],
@@ -5132,21 +5200,6 @@
         "description": [],
         "signature": [
           "\"observability:enableNewSyntheticsView\""
-        ],
-        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.enableServiceGroups",
-        "type": "string",
-        "tags": [],
-        "label": "enableServiceGroups",
-        "description": [],
-        "signature": [
-          "\"observability:enableServiceGroups\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -5343,11 +5396,11 @@
         "label": "ObservabilityRuleTypeFormatter",
         "description": [],
         "signature": [
-          "(options: { fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+          "(options: { fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
           "Maybe",
           "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
           "Maybe",
-          "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link: string; }"
+          "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }) => { reason: string; link: string; }"
         ],
         "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
         "deprecated": false,
@@ -5362,11 +5415,11 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+              "{ fields: OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
-              "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }"
+              "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }"
             ],
             "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
             "deprecated": false,
@@ -5497,7 +5550,7 @@
           "EuiIconProps",
           ", \"type\"> | undefined; icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; showToolTip?: boolean | undefined; extraAction?: ({ type?: \"reset\" | \"button\" | \"submit\" | undefined; } & ",
           "EuiButtonIconProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; } & { alwaysShow?: boolean | undefined; }) | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; }"
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; } & { alwaysShow?: boolean | undefined; }) | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; toolTipText?: string | undefined; }"
         ],
         "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
         "deprecated": false,
@@ -5831,9 +5884,21 @@
           " | undefined; runtime?: ",
           "MappingRuntimeFields",
           " | undefined; }; client: ",
-          "ElasticsearchClient",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
           "; logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; }) => Promise<void>"
         ],
         "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
@@ -7103,7 +7168,13 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  "Logger"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.Logger",
+                    "text": "Logger"
+                  }
                 ],
                 "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
                 "deprecated": false,
@@ -7136,7 +7207,13 @@
             "text": "RequestStatus"
           },
           "; esResponse: any; kibanaRequest: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>; operationName: string; startTime: number; }) => ",
           {
             "pluginId": "inspector",
@@ -7232,7 +7309,13 @@
                 "label": "kibanaRequest",
                 "description": [],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/observability/common/utils/get_inspect_response.ts",
@@ -7375,7 +7458,7 @@
         "label": "termQuery",
         "description": [],
         "signature": [
-          "(field: T, value: string | number | boolean | null | undefined) => ",
+          "(field: T, value: string | number | boolean | null | undefined, opts: TermQueryOpts) => ",
           "QueryDslQueryContainer",
           "[]"
         ],
@@ -7412,6 +7495,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.termQuery.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "TermQueryOpts"
+            ],
+            "path": "x-pack/plugins/observability/server/utils/queries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -7550,9 +7648,21 @@
             "description": [],
             "signature": [
               "{ start: () => Promise<",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
               ">; setup: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>; }"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -7607,7 +7717,13 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -7622,7 +7738,13 @@
             "label": "context",
             "description": [],
             "signature": [
-              "RequestHandlerContext",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
               " & { licensing: Promise<",
               {
                 "pluginId": "licensing",
@@ -7640,7 +7762,13 @@
                 "text": "AlertingApiRequestHandlerContext"
               },
               ">; core: Promise<",
-              "CoreRequestHandlerContext",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.CoreRequestHandlerContext",
+                "text": "CoreRequestHandlerContext"
+              },
               ">; }"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -7655,7 +7783,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
             "deprecated": false,
@@ -7676,9 +7810,21 @@
         "description": [],
         "signature": [
           "{ [x: string]: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<string, ",
-          "RouteParamsRT",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
           " | undefined, any, any, Record<string, any>>; }"
         ],
         "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -7728,8 +7874,48 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"DELETE /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          "{ \"GET /api/observability/slos\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/slos\", ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ name: ",
+          "StringC",
+          "; page: ",
+          "StringC",
+          "; per_page: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { page: number; per_page: number; total: number; results: { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; revision: number; created_at: string; updated_at: string; }[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"DELETE /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -7753,7 +7939,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"GET /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -7768,7 +7960,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"slo.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7777,7 +7969,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"PUT /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -7796,7 +7994,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_duration\">; params: ",
+          "<\"sli.apm.transaction_duration\">; params: ",
           "TypeC",
           "<{ environment: ",
           "UnionC",
@@ -7828,7 +8026,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_error_rate\">; params: ",
+          "<\"sli.apm.transaction_error_rate\">; params: ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -7874,7 +8072,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.kql.custom\">; params: ",
+          "<\"sli.kql.custom\">; params: ",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -7932,7 +8130,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"slo.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7941,7 +8139,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"POST /api/observability/slos\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"POST /api/observability/slos\", ",
           "TypeC",
           "<{ body: ",
@@ -7956,7 +8160,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_duration\">; params: ",
+          "<\"sli.apm.transaction_duration\">; params: ",
           "TypeC",
           "<{ environment: ",
           "UnionC",
@@ -7988,7 +8192,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_error_rate\">; params: ",
+          "<\"sli.apm.transaction_error_rate\">; params: ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -8034,7 +8238,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.kql.custom\">; params: ",
+          "<\"sli.kql.custom\">; params: ",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -8101,7 +8305,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", ",
           "TypeC",
           "<{ query: ",
@@ -8129,7 +8339,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           ">; }[TEndpoint] extends ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<any, any, any, infer TReturnType, ",
           "ServerRouteCreateOptions",
           "> ? TReturnType : never"
@@ -8147,7 +8363,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; }>; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
+          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { metrics: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; }>; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -8162,8 +8378,48 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"DELETE /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          "{ \"GET /api/observability/slos\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /api/observability/slos\", ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ name: ",
+          "StringC",
+          "; page: ",
+          "StringC",
+          "; per_page: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { page: number; per_page: number; total: number; results: { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; revision: number; created_at: string; updated_at: string; }[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"DELETE /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -8187,7 +8443,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"GET /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -8202,7 +8464,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"slo.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8211,7 +8473,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"PUT /api/observability/slos/{id}\", ",
           "TypeC",
           "<{ path: ",
@@ -8230,7 +8498,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_duration\">; params: ",
+          "<\"sli.apm.transaction_duration\">; params: ",
           "TypeC",
           "<{ environment: ",
           "UnionC",
@@ -8262,7 +8530,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_error_rate\">; params: ",
+          "<\"sli.apm.transaction_error_rate\">; params: ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -8308,7 +8576,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.kql.custom\">; params: ",
+          "<\"sli.kql.custom\">; params: ",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -8366,7 +8634,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"slo.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8375,7 +8643,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"POST /api/observability/slos\"?: ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"POST /api/observability/slos\", ",
           "TypeC",
           "<{ body: ",
@@ -8390,7 +8664,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_duration\">; params: ",
+          "<\"sli.apm.transaction_duration\">; params: ",
           "TypeC",
           "<{ environment: ",
           "UnionC",
@@ -8422,7 +8696,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.apm.transaction_error_rate\">; params: ",
+          "<\"sli.apm.transaction_error_rate\">; params: ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -8468,7 +8742,7 @@
           "TypeC",
           "<{ type: ",
           "LiteralC",
-          "<\"slo.kql.custom\">; params: ",
+          "<\"sli.kql.custom\">; params: ",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -8535,7 +8809,13 @@
             "text": "ObservabilityRouteCreateOptions"
           },
           "> | undefined; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
-          "ServerRoute",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
           "<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", ",
           "TypeC",
           "<{ query: ",
@@ -8633,10 +8913,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableNewSyntheticsView.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8658,10 +8941,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableNewSyntheticsView.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8674,7 +8960,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -8725,10 +9017,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInspectEsQueries.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8750,10 +9045,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInspectEsQueries.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8766,7 +9064,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -8817,10 +9121,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.maxSuggestions.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8839,10 +9146,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.maxSuggestions.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8855,7 +9165,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<number>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -8892,10 +9208,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableComparisonByDefault.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8917,10 +9236,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableComparisonByDefault.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8933,7 +9255,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -8984,10 +9312,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.defaultApmServiceEnvironment.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8995,10 +9326,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.defaultApmServiceEnvironment.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9022,7 +9356,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<string>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9059,10 +9399,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9070,10 +9413,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9106,7 +9452,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<",
                   {
                     "pluginId": "observability",
@@ -9184,10 +9536,13 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.off",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.off]",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9195,10 +9550,13 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.low",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.low]",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9206,10 +9564,13 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.medium",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.medium]",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9217,10 +9578,13 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.high",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.high]",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -9230,112 +9594,6 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.showInLabs",
-                "type": "boolean",
-                "tags": [],
-                "label": "showInLabs",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.enableServiceGroups",
-            "type": "Object",
-            "tags": [],
-            "label": "[enableServiceGroups]",
-            "description": [],
-            "path": "x-pack/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  "Type",
-                  "<boolean>"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableServiceGroups.showInLabs",
                 "type": "boolean",
                 "tags": [],
                 "label": "showInLabs",
@@ -9377,10 +9635,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableServiceMetrics.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9402,10 +9663,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableServiceMetrics.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9418,7 +9682,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9483,10 +9753,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9494,10 +9767,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9510,7 +9786,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9603,10 +9885,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9625,10 +9910,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9641,7 +9929,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<number>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9678,10 +9972,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmTraceExplorerTab.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9689,10 +9986,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmTraceExplorerTab.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9705,7 +10005,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9798,10 +10104,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmOperationsTab.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9809,10 +10118,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmOperationsTab.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9825,7 +10137,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -9918,10 +10236,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmLabsButton.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9929,10 +10250,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmLabsButton.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9945,7 +10269,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -10024,10 +10354,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInfrastructureHostsView.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10049,10 +10382,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInfrastructureHostsView.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10065,7 +10401,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -10102,10 +10444,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAwsLambdaMetrics.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10113,10 +10458,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAwsLambdaMetrics.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10129,7 +10477,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -10196,6 +10550,328 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableAgentExplorerView",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableAgentExplorerView]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.description",
+                "type": "Any",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableAgentExplorerView.showInLabs",
+                "type": "boolean",
+                "tags": [],
+                "label": "showInLabs",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmAWSLambdaPriceFactor",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmAWSLambdaPriceFactor]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"json\""
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.value",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.description",
+                "type": "Any",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<{ arm: ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<number>; x86_64: ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<number>; }>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmAWSLambdaRequestCostPerMillion]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.value",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<number>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-server.uiSettings.enableCriticalPath",
             "type": "Object",
             "tags": [],
@@ -10222,10 +10898,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableCriticalPath.name",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "name",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10233,10 +10912,13 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableCriticalPath.description",
-                "type": "string",
+                "type": "Any",
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10249,7 +10931,13 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "Type",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
                   "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
@@ -10326,8 +11014,14 @@
       "label": "ObservabilityPluginSetup",
       "description": [],
       "signature": [
-        "{ getAlertDetailsConfig(): Readonly<{} & { apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
-        "RequestHandlerContext",
+        "{ getAlertDetailsConfig(): Readonly<{} & { metrics: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
+        {
+          "pluginId": "@kbn/core-http-request-handler-context-server",
+          "scope": "server",
+          "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+          "section": "def-server.RequestHandlerContext",
+          "text": "RequestHandlerContext"
+        },
         " & { licensing: Promise<",
         {
           "pluginId": "licensing",
@@ -10337,7 +11031,13 @@
           "text": "LicensingApiRequestHandlerContext"
         },
         ">; }, request: ",
-        "KibanaRequest",
+        {
+          "pluginId": "@kbn/core-http-server",
+          "scope": "server",
+          "docId": "kibKbnCoreHttpServerPluginApi",
+          "section": "def-server.KibanaRequest",
+          "text": "KibanaRequest"
+        },
         "<unknown, unknown, unknown, any>) => Promise<{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
         "Annotation",
         "; }>; getById: (getByIdParams: { id: string; }) => Promise<",
@@ -10496,6 +11196,36 @@
     "misc": [
       {
         "parentPluginId": "observability",
+        "id": "def-common.apmAWSLambdaPriceFactor",
+        "type": "string",
+        "tags": [],
+        "label": "apmAWSLambdaPriceFactor",
+        "description": [],
+        "signature": [
+          "\"observability:apmAWSLambdaPriceFactor\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmAWSLambdaRequestCostPerMillion",
+        "type": "string",
+        "tags": [],
+        "label": "apmAWSLambdaRequestCostPerMillion",
+        "description": [],
+        "signature": [
+          "\"observability:apmAWSLambdaRequestCostPerMillion\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.apmLabsButton",
         "type": "string",
         "tags": [],
@@ -10642,7 +11372,7 @@
         "signature": [
           "(numerator: ",
           "Maybe",
-          "<number>, denominator: number | undefined, fallbackResult?: string) => string"
+          "<number>, denominator: number | undefined, fallbackResult?: any) => any"
         ],
         "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
         "deprecated": false,
@@ -10680,10 +11410,13 @@
           {
             "parentPluginId": "observability",
             "id": "def-common.AsPercent.$3",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "fallbackResult",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10730,6 +11463,21 @@
         "description": [],
         "signature": [
           "\"observability:apmDefaultServiceEnvironment\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.enableAgentExplorerView",
+        "type": "string",
+        "tags": [],
+        "label": "enableAgentExplorerView",
+        "description": [],
+        "signature": [
+          "\"observability:apmAgentExplorerView\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -10820,21 +11568,6 @@
         "description": [],
         "signature": [
           "\"observability:enableNewSyntheticsView\""
-        ],
-        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.enableServiceGroups",
-        "type": "string",
-        "tags": [],
-        "label": "enableServiceGroups",
-        "description": [],
-        "signature": [
-          "\"observability:enableServiceGroups\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,

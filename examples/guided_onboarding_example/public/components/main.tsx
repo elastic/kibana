@@ -113,7 +113,10 @@ export const Main = (props: MainProps) => {
       guideId: selectedGuide!,
     };
 
-    const response = await guidedOnboardingApi?.updateGuideState(updatedGuideState, true);
+    const response = await guidedOnboardingApi?.updatePluginState(
+      { status: 'in_progress', guide: updatedGuideState },
+      true
+    );
     if (response) {
       notifications.toasts.addSuccess(
         i18n.translate('guidedOnboardingExample.updateGuideState.toastLabel', {
@@ -216,7 +219,8 @@ export const Main = (props: MainProps) => {
                   )}
                   {(guideState?.isActive === true ||
                     guideState?.status === 'in_progress' ||
-                    guideState?.status === 'ready_to_complete') && (
+                    guideState?.status === 'ready_to_complete' ||
+                    guideState?.status === 'not_started') && (
                     <FormattedMessage
                       id="guidedOnboardingExample.guidesSelection.continueButtonLabel"
                       defaultMessage="Continue {guideId} guide"

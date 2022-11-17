@@ -24,7 +24,7 @@ import {
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { flattenPanelTree } from '../../../services';
 
-class JobActionMenuUi extends Component {
+export class JobActionMenuUi extends Component {
   static propTypes = {
     startJobs: PropTypes.func.isRequired,
     stopJobs: PropTypes.func.isRequired,

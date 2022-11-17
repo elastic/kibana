@@ -18,7 +18,6 @@ export {
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
-  enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
@@ -27,6 +26,9 @@ export {
   enableInfrastructureHostsView,
   enableServiceMetrics,
   enableAwsLambdaMetrics,
+  enableAgentExplorerView,
+  apmAWSLambdaPriceFactor,
+  apmAWSLambdaRequestCostPerMillion,
   enableCriticalPath,
 } from './ui_settings_keys';
 

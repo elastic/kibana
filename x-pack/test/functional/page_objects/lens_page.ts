@@ -1229,14 +1229,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const tiles = await this.getMetricTiles();
       const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
 
-      const metricData = [];
+      const metricDataPromises = [];
       for (const tile of tiles) {
-        metricData.push({
-          ...(await this.getMetricDatum(tile)),
-          showingBar,
-        });
+        metricDataPromises.push(this.getMetricDatum(tile));
       }
-      return metricData;
+      const metricData = await Promise.all(metricDataPromises);
+      return metricData.map((d) => ({ ...d, showingBar }));
     },
 
     /**

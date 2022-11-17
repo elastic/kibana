@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import type { HorizontalAlignment } from '@elastic/eui';
 
 import {
   EuiI18nNumber,
@@ -20,6 +19,7 @@ import {
   EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
+  type HorizontalAlignment,
 } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,6 +33,7 @@ import { getEmptyValue } from '../../../common/components/empty_value';
 import { StatusBadge } from './components/status_badge';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
+import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
 
 const emptyValue = getEmptyValue();
 
@@ -137,6 +138,7 @@ export const useResponseActionsLogTable = ({
           : undefined;
 
         const command = getUiCommand(_command);
+        const isGetFileCommand = command === 'get-file';
         const dataList = [
           {
             title: OUTPUT_MESSAGES.expandSection.placedAt,
@@ -169,6 +171,35 @@ export const useResponseActionsLogTable = ({
           };
         });
 
+        const getOutputContent = () => {
+          if (isExpired) {
+            return OUTPUT_MESSAGES.hasExpired(command);
+          }
+
+          if (!isCompleted) {
+            return OUTPUT_MESSAGES.isPending(command);
+          }
+
+          if (!wasSuccessful) {
+            return OUTPUT_MESSAGES.hasFailed(command);
+          }
+
+          if (isGetFileCommand) {
+            return (
+              <>
+                {OUTPUT_MESSAGES.wasSuccessful(command)}
+                <ResponseActionFileDownloadLink
+                  action={item}
+                  textSize="xs"
+                  data-test-subj={getTestId('getFileDownloadLink')}
+                />
+              </>
+            );
+          }
+
+          return OUTPUT_MESSAGES.wasSuccessful(command);
+        };
+
         const outputList = [
           {
             title: (
@@ -177,13 +208,7 @@ export const useResponseActionsLogTable = ({
             description: (
               // codeblock for output
               <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
-                {isExpired
-                  ? OUTPUT_MESSAGES.hasExpired(command)
-                  : isCompleted
-                  ? wasSuccessful
-                    ? OUTPUT_MESSAGES.wasSuccessful(command)
-                    : OUTPUT_MESSAGES.hasFailed(command)
-                  : OUTPUT_MESSAGES.isPending(command)}
+                {getOutputContent()}
               </StyledEuiCodeBlock>
             ),
           },

@@ -353,12 +353,12 @@
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/plugin.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
               },
               {
                 "plugin": "security",
@@ -566,7 +566,13 @@
               "\nThe category for this feature.\nThis will be used to organize the list of features for display within the\nSpaces and Roles management screens."
             ],
             "signature": [
-              "AppCategory"
+              {
+                "pluginId": "@kbn/core-application-common",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationCommonPluginApi",
+                "section": "def-common.AppCategory",
+                "text": "AppCategory"
+              }
             ],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -1053,11 +1059,29 @@
                 "description": [],
                 "signature": [
                   "Readonly<{ id: string; management?: Readonly<{ [x: string]: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<string>; }> | undefined; catalogue?: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<string> | undefined; privileges: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<",
                   {
                     "pluginId": "features",
@@ -1095,7 +1119,13 @@
             "label": "catalogue",
             "description": [],
             "signature": [
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -1111,7 +1141,13 @@
             "description": [],
             "signature": [
               "Readonly<{ [x: string]: ",
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<string>; }> | undefined"
             ],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -1126,7 +1162,13 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<",
               {
                 "pluginId": "features",
@@ -1697,12 +1739,12 @@
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/plugin.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
               },
               {
                 "plugin": "security",
@@ -1910,7 +1952,13 @@
               "\nThe category for this feature.\nThis will be used to organize the list of features for display within the\nSpaces and Roles management screens."
             ],
             "signature": [
-              "AppCategory"
+              {
+                "pluginId": "@kbn/core-application-common",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationCommonPluginApi",
+                "section": "def-common.AppCategory",
+                "text": "AppCategory"
+              }
             ],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -2435,7 +2483,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "Capabilities"
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              }
             ],
             "path": "x-pack/plugins/features/server/plugin.ts",
             "deprecated": false,
@@ -2740,11 +2794,29 @@
                 "description": [],
                 "signature": [
                   "Readonly<{ id: string; management?: Readonly<{ [x: string]: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<string>; }> | undefined; catalogue?: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<string> | undefined; privileges: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<",
                   {
                     "pluginId": "features",
@@ -2782,7 +2854,13 @@
             "label": "catalogue",
             "description": [],
             "signature": [
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -2798,7 +2876,13 @@
             "description": [],
             "signature": [
               "Readonly<{ [x: string]: ",
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<string>; }> | undefined"
             ],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -2813,7 +2897,13 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<",
               {
                 "pluginId": "features",
@@ -3506,12 +3596,12 @@
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/plugin.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
               },
               {
                 "plugin": "security",
@@ -3719,7 +3809,13 @@
               "\nThe category for this feature.\nThis will be used to organize the list of features for display within the\nSpaces and Roles management screens."
             ],
             "signature": [
-              "AppCategory"
+              {
+                "pluginId": "@kbn/core-application-common",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationCommonPluginApi",
+                "section": "def-common.AppCategory",
+                "text": "AppCategory"
+              }
             ],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,

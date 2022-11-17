@@ -21,6 +21,7 @@ import {
   createBreadcrumbsChangeHandler,
 } from '../../components/breadcrumb';
 import type { PluginStartDependencies } from '../../plugin';
+import { ReadonlyBadge } from '../badges/readonly_badge';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
@@ -118,6 +119,12 @@ export const rolesManagementApp = Object.freeze({
             <i18nStart.Context>
               <KibanaThemeProvider theme$={theme$}>
                 <Router history={history}>
+                  <ReadonlyBadge
+                    featureId="roles"
+                    tooltip={i18n.translate('xpack.security.management.roles.readonlyTooltip', {
+                      defaultMessage: 'Unable to create or edit roles',
+                    })}
+                  />
                   <BreadcrumbsProvider
                     onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
                   >
@@ -127,6 +134,7 @@ export const rolesManagementApp = Object.freeze({
                           notifications={notifications}
                           rolesAPIClient={rolesAPIClient}
                           history={history}
+                          readOnly={!startServices.application.capabilities.roles.save}
                         />
                       </Route>
                       <Route path="/edit/:roleName?">
