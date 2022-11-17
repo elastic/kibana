@@ -45,6 +45,10 @@ export class HomePageObject extends FtrService {
     return await this.testSubjects.isDisplayed('homeWelcomeInterstitial');
   }
 
+  async isGuidedOnboardingLandingDisplayed() {
+    return await this.testSubjects.isDisplayed('onboarding--landing-page');
+  }
+
   async getVisibileSolutions() {
     const solutionPanels = await this.testSubjects.findAll('~homSolutionPanel', 2000);
     const panelAttributes = await Promise.all(

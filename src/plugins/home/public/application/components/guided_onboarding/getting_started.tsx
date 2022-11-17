@@ -183,7 +183,12 @@ export const GettingStarted = () => {
   return (
     <KibanaPageTemplate panelled={false} grow>
       <EuiPageTemplate.Section alignment="center">
-        <EuiPanel color="plain" hasShadow css={paddingCss}>
+        <EuiPanel
+          color="plain"
+          hasShadow
+          css={paddingCss}
+          data-test-subj="onboarding--landing-page"
+        >
           <EuiTitle size="l" className="eui-textCenter">
             <h1>{title}</h1>
           </EuiTitle>
