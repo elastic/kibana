@@ -278,6 +278,13 @@ const frameLRU = new LRUCache<StackFrameID, StackFrame>({
   maxAge: CACHE_TTL_MILLISECONDS,
 });
 
+// clearStackFrameCache clears the entire cache and returns the number of deleted items
+export function clearStackFrameCache(): number {
+  const numDeleted = frameLRU.length;
+  frameLRU.reset();
+  return numDeleted;
+}
+
 export async function mgetStackFrames({
   logger,
   client,
@@ -349,6 +356,13 @@ const executableLRU = new LRUCache<FileID, Executable>({
   max: CACHE_MAX_ITEMS,
   maxAge: CACHE_TTL_MILLISECONDS,
 });
+
+// clearExecutableCache clears the entire cache and returns the number of deleted items
+export function clearExecutableCache(): number {
+  const numDeleted = executableLRU.length;
+  executableLRU.reset();
+  return numDeleted;
+}
 
 export async function mgetExecutables({
   logger,

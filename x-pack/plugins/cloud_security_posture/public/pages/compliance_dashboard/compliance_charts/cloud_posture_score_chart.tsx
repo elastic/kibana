@@ -29,6 +29,7 @@ import {
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { statusColors } from '../../../common/constants';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import type { Evaluation, PostureTrend, Stats } from '../../../../common/types';
@@ -163,7 +164,7 @@ export const CloudPostureScoreChart = ({
               <CounterLink
                 text="passed"
                 count={data.totalPassed}
-                color="success"
+                color={statusColors.passed}
                 onClick={() => onEvalCounterClick(RULE_PASSED)}
                 tooltipContent={i18n.translate(
                   'xpack.csp.cloudPostureScoreChart.counterLink.passedFindingsTooltip',
@@ -174,7 +175,7 @@ export const CloudPostureScoreChart = ({
               <CounterLink
                 text="failed"
                 count={data.totalFailed}
-                color="danger"
+                color={statusColors.failed}
                 onClick={() => onEvalCounterClick(RULE_FAILED)}
                 tooltipContent={i18n.translate(
                   'xpack.csp.cloudPostureScoreChart.counterLink.failedFindingsTooltip',

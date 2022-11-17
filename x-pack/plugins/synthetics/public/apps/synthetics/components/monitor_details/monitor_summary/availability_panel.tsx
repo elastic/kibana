@@ -27,7 +27,7 @@ export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
 
   const monitorId = useMonitorQueryId();
 
-  if (!selectedLocation) {
+  if (!selectedLocation || !monitorId) {
     return null;
   }
 

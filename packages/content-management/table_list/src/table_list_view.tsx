@@ -18,6 +18,8 @@ import {
   EuiSpacer,
   EuiTableActionsColumnType,
   CriteriaWithPagination,
+  Query,
+  Ast,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +41,7 @@ import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './
 import type { Action } from './actions';
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
+import { useTags } from './use_tags';
 
 interface InspectorConfig extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave'> {
   enabled?: boolean;
@@ -49,7 +52,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   entityNamePlural: string;
   tableListTitle: string;
   listingLimit: number;
-  initialFilter: string;
+  initialFilter?: string;
   initialPageSize: number;
   emptyPrompt?: JSX.Element;
   /** Add an additional custom column */
@@ -64,7 +67,10 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   children?: ReactNode | undefined;
   findItems(
     searchQuery: string,
-    references?: SavedObjectsFindOptionsReference[]
+    refs?: {
+      references?: SavedObjectsFindOptionsReference[];
+      referencesToExclude?: SavedObjectsFindOptionsReference[];
+    }
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
   getDetailViewLink?: (entity: T) => string | undefined;
@@ -73,6 +79,21 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   editItem?(item: T): void;
+  /**
+   * Name for the column containing the "title" value.
+   */
+  titleColumnName?: string;
+  /**
+   * Additional actions (buttons) to be placed in the page header.
+   * @note only the first two values will be used.
+   */
+  additionalRightSideActions?: ReactNode[];
+  /**
+   * This assumes the content is already wrapped in an outer PageTemplate component.
+   * @note Hack! This is being used as a workaround so that this page can be rendered in the Kibana management UI
+   * @deprecated
+   */
+  withoutPageTemplateWrapper?: boolean;
   inspector?: InspectorConfig;
 }
 
@@ -83,7 +104,10 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   isDeletingItems: boolean;
   showDeleteModal: boolean;
   fetchError?: IHttpFetchError<Error>;
-  searchQuery: string;
+  searchQuery: {
+    text: string;
+    query: Query;
+  };
   selectedIds: string[];
   totalItems: number;
   hasUpdatedAtMetadata: boolean;
@@ -105,6 +129,8 @@ export interface UserContentCommonSchema {
   };
 }
 
+const ast = Ast.create([]);
+
 function TableListViewComp<T extends UserContentCommonSchema>({
   tableListTitle,
   entityName,
@@ -124,6 +150,9 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   id = 'userContent',
   inspector = { enabled: false },
   children,
+  titleColumnName,
+  additionalRightSideActions = [],
+  withoutPageTemplateWrapper,
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(
@@ -170,7 +199,10 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     showDeleteModal: false,
     hasUpdatedAtMetadata: false,
     selectedIds: [],
-    searchQuery: initialQuery,
+    searchQuery:
+      initialQuery !== undefined
+        ? { text: initialQuery, query: new Query(ast, undefined, initialQuery) }
+        : { text: '', query: new Query(ast, undefined, '') },
     pagination: {
       pageIndex: 0,
       totalItemCount: 0,
@@ -197,10 +229,30 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     pagination,
     tableSort,
   } = state;
-  const hasNoItems = !isFetchingItems && items.length === 0 && !searchQuery;
+
+  const hasQuery = searchQuery.text !== '';
+  const hasNoItems = !isFetchingItems && items.length === 0 && !hasQuery;
   const pageDataTestSubject = `${entityName}LandingPage`;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
+
+  const updateQuery = useCallback((query: Query) => {
+    dispatch({
+      type: 'onSearchQueryChange',
+      data: { query, text: query.text },
+    });
+  }, []);
+
+  const {
+    addOrRemoveIncludeTagFilter,
+    addOrRemoveExcludeTagFilter,
+    clearTagSelection,
+    tagsToTableItemMap,
+  } = useTags({
+    query: searchQuery.query,
+    updateQuery,
+    items,
+  });
 
   const inspectItem = useCallback(
     (item: T) => {
@@ -226,9 +278,11 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
         field: 'attributes.title',
-        name: i18n.translate('contentManagement.tableList.mainColumnName', {
-          defaultMessage: 'Name, description, tags',
-        }),
+        name:
+          titleColumnName ??
+          i18n.translate('contentManagement.tableList.mainColumnName', {
+            defaultMessage: 'Name, description, tags',
+          }),
         sortable: true,
         render: (field: keyof T, record: T) => {
           return (
@@ -237,7 +291,14 @@ function TableListViewComp<T extends UserContentCommonSchema>({
               item={record}
               getDetailViewLink={getDetailViewLink}
               onClickTitle={onClickTitle}
-              searchTerm={searchQuery}
+              onClickTag={(tag, withModifierKey) => {
+                if (withModifierKey) {
+                  addOrRemoveExcludeTagFilter(tag);
+                } else {
+                  addOrRemoveIncludeTagFilter(tag);
+                }
+              }}
+              searchTerm={searchQuery.text}
             />
           );
         },
@@ -322,13 +383,16 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
     return columns;
   }, [
+    titleColumnName,
     customTableColumn,
     hasUpdatedAtMetadata,
     editItem,
     id,
     getDetailViewLink,
     onClickTitle,
-    searchQuery,
+    searchQuery.text,
+    addOrRemoveIncludeTagFilter,
+    addOrRemoveExcludeTagFilter,
     DateFormatterComp,
     inspector,
     inspectItem,
@@ -351,11 +415,15 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     try {
       const idx = ++fetchIdx.current;
 
-      const { searchQuery: searchQueryParsed, references } = searchQueryParser
-        ? searchQueryParser(searchQuery)
-        : { searchQuery, references: undefined };
+      const {
+        searchQuery: searchQueryParsed,
+        references,
+        referencesToExclude,
+      } = searchQueryParser
+        ? searchQueryParser(searchQuery.text)
+        : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
 
-      const response = await findItems(searchQueryParsed, references);
+      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
 
       if (!isMounted.current) {
         return;
@@ -504,23 +572,30 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     return null;
   }
 
-  if (!fetchError && hasNoItems) {
+  const PageTemplate = withoutPageTemplateWrapper
+    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
+    : KibanaPageTemplate;
+
+  if (!showFetchError && hasNoItems) {
     return (
-      <KibanaPageTemplate panelled isEmptyState={true} data-test-subj={pageDataTestSubject}>
+      <PageTemplate panelled isEmptyState={true} data-test-subj={pageDataTestSubject}>
         <KibanaPageTemplate.Section
           aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
         >
           {renderNoItemsMessage()}
         </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+      </PageTemplate>
     );
   }
 
   return (
-    <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
+    <PageTemplate panelled data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{tableListTitle}</span>}
-        rightSideItems={[renderCreateButton() ?? <span />]}
+        rightSideItems={[
+          renderCreateButton() ?? <span />,
+          ...additionalRightSideActions?.slice(0, 2),
+        ]}
         data-test-subj="top-nav"
       />
       <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
@@ -554,10 +629,14 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           selectedIds={selectedIds}
           entityName={entityName}
           entityNamePlural={entityNamePlural}
+          tagsToTableItemMap={tagsToTableItemMap}
           deleteItems={deleteItems}
           tableCaption={tableListTitle}
           onTableChange={onTableChange}
           onSortChange={onSortChange}
+          addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
+          addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+          clearTagSelection={clearTagSelection}
         />
 
         {/* Delete modal */}
@@ -572,7 +651,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           />
         )}
       </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+    </PageTemplate>
   );
 }
 

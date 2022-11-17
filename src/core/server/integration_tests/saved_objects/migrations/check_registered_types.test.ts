@@ -8,7 +8,7 @@
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
-import { Root } from '../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 describe('checking migration metadata changes on all registered SO types', () => {
@@ -53,7 +53,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "7858e6d5a9f231bf23f6f2e57328eb0095b26735",
         "action_task_params": "bbd38cbfd74bf6713586fe078e3fa92db2234299",
-        "alert": "48461f3375d9ba22882ea23a318b62a5b0921a9b",
+        "alert": "eefada4a02ce05962387c0679d7b292771a931c4",
         "api_key_pending_invalidation": "9b4bc1235337da9a87ef05a1d1f4858b2a3b77c6",
         "apm-indices": "ceb0870f3a74e2ffc3a1cd3a3c73af76baca0999",
         "apm-server-schema": "2bfd2998d3873872e1366458ce553def85418f91",
@@ -80,7 +80,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "endpoint:user-artifact": "f94c250a52b30d0a2d32635f8b4c5bdabd1e25c0",
         "endpoint:user-artifact-manifest": "8c14d49a385d5d1307d956aa743ec78de0b2be88",
         "enterprise_search_telemetry": "fafcc8318528d34f721c42d1270787c52565bad5",
-        "epm-packages": "cb22b422398a785e7e0565a19c6d4d5c7af6f2fd",
+        "epm-packages": "fe3716a54188b3c71327fa060dd6780a674d3994",
         "epm-packages-assets": "9fd3d6726ac77369249e9a973902c2cd615fc771",
         "event_loop_delays_daily": "d2ed39cf669577d90921c176499908b4943fb7bd",
         "exception-list": "fe8cc004fd2742177cdb9300f4a67689463faf9c",
@@ -92,6 +92,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fleet-preconfiguration-deletion-record": "7b28f200513c28ae774f1b7d7d7906954e3c6e16",
         "graph-workspace": "3342f2cd561afdde8f42f5fb284bf550dee8ebb5",
         "guided-onboarding-guide-state": "561db8d481b131a2bbf46b1e534d6ce960255135",
+        "guided-onboarding-plugin-state": "a802ed58e9d0076b9632c59d7943861ba476f99c",
         "index-pattern": "48e77ca393c254e93256f11a7cdc0232dd754c08",
         "infrastructure-monitoring-log-view": "e2c78c1076bd35e57d7c5fa1b410e5c126d12327",
         "infrastructure-ui-source": "7c8dbbc0a608911f1b683a944f4a65383f6153ed",

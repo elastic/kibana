@@ -58,7 +58,7 @@ export class CsvGenerator {
   private async openPointInTime(indexPatternTitle: string, settings: CsvExportSettings) {
     const { duration } = settings.scroll;
     let pitId: string | undefined;
-    this.logger.debug(`Requesting point-in-time for: [${indexPatternTitle}]...`);
+    this.logger.debug(`Requesting PIT for: [${indexPatternTitle}]...`);
     try {
       // NOTE: if ES is overloaded, this request could time out
       const response = await this.clients.es.asCurrentUser.openPointInTime(
@@ -78,10 +78,10 @@ export class CsvGenerator {
     }
 
     if (!pitId) {
-      throw new Error(`Could not receive a point-in-time ID!`);
+      throw new Error(`Could not receive a PIT ID!`);
     }
 
-    this.logger.debug(`Opened PIT ID: ${this.truncatePitId(pitId)}`);
+    this.logger.debug(`Opened PIT ID: ${this.formatPit(pitId)}`);
 
     return pitId;
   }
@@ -100,7 +100,7 @@ export class CsvGenerator {
 
     const pitId = searchSource.getField('pit')?.id;
     this.logger.debug(
-      `Executing search request with PIT ID: [${this.truncatePitId(pitId)}]` +
+      `Executing search request with PIT ID: [${this.formatPit(pitId)}]` +
         (searchAfter ? ` search_after: [${searchAfter}]` : '')
     );
 
@@ -378,13 +378,13 @@ export class CsvGenerator {
         const { pit_id: newPitId, ...header } = headerWithPit;
 
         const logInfo = {
-          header: { pit_id: `${this.truncatePitId(newPitId)}`, ...header },
+          header: { pit_id: `${this.formatPit(newPitId)}`, ...header },
           hitsMeta,
         };
         this.logger.debug(`Results metadata: ${JSON.stringify(logInfo)}`);
 
         // use the most recently received id for the next search request
-        this.logger.debug(`Received PIT ID: [${this.truncatePitId(results.pit_id)}]`);
+        this.logger.debug(`Received PIT ID: [${this.formatPit(results.pit_id)}]`);
         pitId = results.pit_id ?? pitId;
 
         // Update last sort results for next query. PIT is used, so the sort results
@@ -450,14 +450,18 @@ export class CsvGenerator {
       } else {
         warnings.push(i18nTexts.unknownError(err?.message ?? err));
       }
-    } finally {
-      //
+    }
+
+    try {
       if (pitId) {
-        this.logger.debug(`Closing point-in-time`);
+        this.logger.debug(`Closing PIT ${this.formatPit(pitId)}`);
         await this.clients.es.asCurrentUser.closePointInTime({ body: { id: pitId } });
       } else {
         this.logger.warn(`No PIT ID to clear!`);
       }
+    } catch (err) {
+      this.logger.error(err);
+      warnings.push(i18nTexts.csvUnableToClosePit());
     }
 
     this.logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
@@ -484,7 +488,8 @@ export class CsvGenerator {
     };
   }
 
-  private truncatePitId(pitId: string | undefined) {
-    return pitId?.substring(0, 12) + '...';
+  private formatPit(pitId: string | undefined) {
+    const byteSize = pitId ? Buffer.byteLength(pitId, 'utf-8') : 0;
+    return pitId?.substring(0, 12) + `[${byteSize} bytes]`;
   }
 }

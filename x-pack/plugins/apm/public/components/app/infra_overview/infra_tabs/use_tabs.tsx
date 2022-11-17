@@ -10,12 +10,19 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ApmPluginStartDeps } from '../../../../plugin';
 
 type Tab = NonNullable<EuiTabbedContentProps['tabs']>[0] & {
   id: 'containers' | 'pods' | 'hosts';
   hidden?: boolean;
 };
+
+export enum InfraTab {
+  containers = 'containers',
+  pods = 'pods',
+  hosts = 'hosts',
+}
 
 export function useTabs({
   containerIds,
@@ -102,20 +109,26 @@ export function useTabs({
 
   const tabs: Tab[] = [
     {
-      id: 'containers',
-      name: 'Containers',
+      id: InfraTab.containers,
+      name: i18n.translate('xpack.apm.views.infra.tabs.containers', {
+        defaultMessage: 'Containers',
+      }),
       content: containerMetricsTable,
       hidden: containerIds && containerIds.length <= 0,
     },
     {
-      id: 'pods',
-      name: 'Pods',
+      id: InfraTab.pods,
+      name: i18n.translate('xpack.apm.views.infra.tabs.pods', {
+        defaultMessage: 'Pods',
+      }),
       content: podMetricsTable,
       hidden: podNames && podNames.length <= 0,
     },
     {
-      id: 'hosts',
-      name: 'Hosts',
+      id: InfraTab.hosts,
+      name: i18n.translate('xpack.apm.views.infra.tabs.hosts', {
+        defaultMessage: 'Hosts',
+      }),
       content: hostMetricsTable,
     },
   ];
