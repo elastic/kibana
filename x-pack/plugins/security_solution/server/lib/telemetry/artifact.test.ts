@@ -15,7 +15,8 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('telemetry artifact test', () => {
   test('start should set manifest url for snapshot version', async () => {
-    const expectedManifestUrl = 'https://artifacts.security.elastic.co/downloads/kibana/manifest/artifacts-8.0.0.zip';
+    const expectedManifestUrl =
+      'https://artifacts.security.elastic.co/downloads/kibana/manifest/artifacts-8.0.0.zip';
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const artifact = new Artifact();
     await artifact.start(mockTelemetryReceiver);
@@ -24,7 +25,8 @@ describe('telemetry artifact test', () => {
   });
 
   test('start should set manifest url for non-snapshot version', async () => {
-    const expectedManifestUrl = 'https://artifacts.security.elastic.co/downloads/kibana/manifest/artifacts-8.0.0.zip';
+    const expectedManifestUrl =
+      'https://artifacts.security.elastic.co/downloads/kibana/manifest/artifacts-8.0.0.zip';
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const stubClusterInfo = {
       name: 'Stub-MacBook-Pro.local',

@@ -27,10 +27,11 @@ export class Artifact implements IArtifact {
     this.receiver = receiver;
     this.esClusterInfo = await this.receiver.fetchClusterInfo();
     if (this.esClusterInfo.version) {
-      const version = this.esClusterInfo.version.number.substring(
-        0,
-        this.esClusterInfo.version.number.indexOf('-')
-      ) || this.esClusterInfo.version.number;
+      const version =
+        this.esClusterInfo.version.number.substring(
+          0,
+          this.esClusterInfo.version.number.indexOf('-')
+        ) || this.esClusterInfo.version.number;
       this.manifestUrl = `${this.CDN_URL}/downloads/kibana/manifest/artifacts-${version}.zip`;
     }
   }
