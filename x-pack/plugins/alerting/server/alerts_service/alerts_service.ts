@@ -143,5 +143,5 @@ export class AlertsService implements IAlertsService {
   //   }
   // }
 
-  private async installWithRetry() {}
+  // private async installWithRetry() {}
 }

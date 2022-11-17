@@ -14,6 +14,7 @@ export interface MultiField {
 export interface FieldMap {
   [key: string]: {
     type: string;
+    required: boolean;
     array?: boolean;
     doc_values?: boolean;
     enabled?: boolean;
@@ -22,7 +23,6 @@ export interface FieldMap {
     index?: boolean;
     multi_fields?: MultiField[];
     path?: string;
-    required?: boolean;
     scaling_factor?: number;
   };
 }
