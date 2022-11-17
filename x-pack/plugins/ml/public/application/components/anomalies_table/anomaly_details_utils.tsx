@@ -195,10 +195,11 @@ export const DetailsItems: FC<{
           defaultMessage: 'Upper bound',
         }),
         description: formatValue(
-          anomaly.source.anomaly_score_explanation?.upper_confidence_bound, 
-          source.function, 
-          undefined, 
-          source),
+          anomaly.source.anomaly_score_explanation?.upper_confidence_bound,
+          source.function,
+          undefined,
+          source
+        ),
       });
 
       items.push({
