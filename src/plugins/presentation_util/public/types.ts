@@ -8,7 +8,7 @@
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { registerExpressionsLanguage } from '.';
-import { PresentationLabsService } from './services/labs';
+import { PresentationLabsService } from './services/labs/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}
