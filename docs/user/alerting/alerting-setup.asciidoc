@@ -1,4 +1,3 @@
-[role="xpack"]
 [[alerting-setup]]
 == Alerting set up
 ++++
@@ -95,7 +94,7 @@ example, in the case of imported rules), it generates a new key that has your
 security privileges.
 
 You can update an API key manually in 
-**{stack-manage-app} > {rules-ui}** or in the rule details page by selecting 
+**{stack-manage-app} > {rac-ui}** or in the rule details page by selecting 
 **Update API key** in the actions menu.
 
 [IMPORTANT]
