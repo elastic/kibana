@@ -309,6 +309,7 @@ describe('API Keys', () => {
         api_key: 'abc123',
         id: '123',
         name: 'key-name',
+        encoded: 'utf8',
       });
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
