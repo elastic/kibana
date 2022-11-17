@@ -9831,7 +9831,6 @@
     "xpack.csp.findings.findingsByResourceTable.failedFindingsToolTip": "{failed} 个（共 {total} 个）",
     "xpack.csp.findings.findingsTableCell.addFilterButton": "添加 {field} 筛选",
     "xpack.csp.findings.findingsTableCell.addNegateFilterButton": "添加 {field} 作废筛选",
-    "xpack.csp.findings.latestFindings.bottomBarLabel": "这些是匹配您的搜索的前 {maxItems} 个结果，请优化搜索以查看其他结果。",
     "xpack.csp.rules.header.rulesCountLabel": "{count, plural, other { 规则}}",
     "xpack.csp.rules.header.totalRulesCount": "正在显示 {rules}",
     "xpack.csp.rules.rulePageHeader.pageHeaderTitle": "规则 - {integrationName}",
