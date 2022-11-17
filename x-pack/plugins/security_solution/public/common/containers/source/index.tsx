@@ -49,9 +49,10 @@ export const getIndexFields = memoizeOne(
           fields: fields.map((field) =>
             pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
           ),
-          title,
+          type: 'title',
+          value: title,
         }
-      : { fields: [], title },
+      : { fields: [], type: 'title', value: title },
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 

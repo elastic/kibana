@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useEffect } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -103,6 +103,9 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    useEffect(() => {
+      console.error({ indexPatterns });
+    }, [indexPatterns]);
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
     return (

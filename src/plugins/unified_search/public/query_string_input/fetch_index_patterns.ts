@@ -18,6 +18,7 @@ export async function fetchIndexPatterns(
   indexPatternsService: DataViewsContract,
   indexPatternStrings: DataViewByIdOrTitle[]
 ): Promise<DataView[]> {
+  console.error({ indexPatternStrings });
   if (!indexPatternStrings || isEmpty(indexPatternStrings)) {
     return [];
   }
@@ -44,10 +45,18 @@ export async function fetchIndexPatterns(
     ...matchesById,
   ];
 
+  console.error({ exactMatches });
+
+  console.error('indexPatternStrings.length', indexPatternStrings.length);
+
   const allMatches =
     exactMatches.length === indexPatternStrings.length
       ? exactMatches
       : [...exactMatches, await indexPatternsService.getDefault()];
 
-  return allMatches.filter((d: DataView | null): d is DataView => d != null);
+  console.error({ allMatches });
+
+  const toReturn = allMatches.filter((d: DataView | null): d is DataView => d != null);
+  console.error({ toReturn });
+  return toReturn;
 }
