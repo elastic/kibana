@@ -15,43 +15,39 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 interface MonitorDurationTrendProps {
   from: string;
   to: string;
-  lastRefresh: number;
 }
 
-export const MonitorDurationTrend = React.memo(
-  (props: MonitorDurationTrendProps) => {
-    const { observability } = useKibana<ClientPluginsStart>().services;
+export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
+  const { observability } = useKibana<ClientPluginsStart>().services;
 
-    const { ExploratoryViewEmbeddable } = observability;
+  const { ExploratoryViewEmbeddable } = observability;
 
-    const monitorId = useMonitorQueryId();
-    const selectedLocation = useSelectedLocation();
+  const monitorId = useMonitorQueryId();
+  const selectedLocation = useSelectedLocation();
 
-    if (!selectedLocation || !monitorId) {
-      return null;
-    }
+  if (!selectedLocation || !monitorId) {
+    return null;
+  }
 
-    return (
-      <ExploratoryViewEmbeddable
-        customHeight="240px"
-        reportType="kpi-over-time"
-        attributes={Object.keys(metricsToShow).map((metric) => ({
-          dataType: 'synthetics',
-          time: props,
-          name: metricsToShow[metric],
-          selectedMetricField: 'monitor.duration.us',
-          reportDefinitions: {
-            'monitor.id': [monitorId],
-            'observer.geo.name': [selectedLocation?.label],
-          },
-          seriesType: 'line',
-          operationType: metric,
-        }))}
-      />
-    );
-  },
-  ({ lastRefresh }, { lastRefresh: next }) => lastRefresh !== next
-);
+  return (
+    <ExploratoryViewEmbeddable
+      customHeight="240px"
+      reportType="kpi-over-time"
+      attributes={Object.keys(metricsToShow).map((metric) => ({
+        dataType: 'synthetics',
+        time: props,
+        name: metricsToShow[metric],
+        selectedMetricField: 'monitor.duration.us',
+        reportDefinitions: {
+          'monitor.id': [monitorId],
+          'observer.geo.name': [selectedLocation?.label],
+        },
+        seriesType: 'line',
+        operationType: metric,
+      }))}
+    />
+  );
+};
 
 const MIN_LABEL = i18n.translate('xpack.synthetics.durationTrend.min', {
   defaultMessage: 'Min',
