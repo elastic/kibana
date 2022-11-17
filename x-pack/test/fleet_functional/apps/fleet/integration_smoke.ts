@@ -11,7 +11,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
 
-  describe('Elastic synthetics integration', () => {
+  describe('Elastic synthetics integration', function () {
     this.tags(['smoke']);
     before(async () => {
       await PageObjects.common.navigateToUrl('management', 'integrations/installed', {
