@@ -33,7 +33,7 @@ describe('RuleSearchField', () => {
     expect(screen.getByRole('searchbox')).toHaveValue('some updated initial value');
   });
 
-  it('does not update the initial value after editing the value', () => {
+  it('updates the initial value after editing the value', () => {
     const { rerender } = render(
       <RuleSearchField initialValue="some initial value" onSearch={jest.fn()} />
     );
@@ -43,7 +43,7 @@ describe('RuleSearchField', () => {
 
     rerender(<RuleSearchField initialValue="some updated initial value" onSearch={jest.fn()} />);
 
-    expect(screen.getByRole('searchbox')).toHaveValue('custom value');
+    expect(screen.getByRole('searchbox')).toHaveValue('some updated initial value');
   });
 
   it('fires onSearch', () => {

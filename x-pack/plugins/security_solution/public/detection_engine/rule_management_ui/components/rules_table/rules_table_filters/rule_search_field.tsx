@@ -28,20 +28,14 @@ interface RuleSearchFieldProps {
 
 export function RuleSearchField({ initialValue, onSearch }: RuleSearchFieldProps): JSX.Element {
   const [searchText, setSearchText] = useState(initialValue);
-  const [valueIsDirty, setValueIsDirty] = useState(false);
   const handleChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setSearchText(e.target.value);
-      setValueIsDirty(true);
-    },
+    (e: ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value),
     [setSearchText]
   );
 
   useEffect(() => {
-    if (!valueIsDirty) {
-      setSearchText(initialValue);
-    }
-  }, [initialValue, valueIsDirty]);
+    setSearchText(initialValue);
+  }, [initialValue]);
 
   return (
     <SearchBarWrapper grow>
