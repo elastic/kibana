@@ -36,7 +36,7 @@ export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       refreshApp();
-    }, 1000 * 3);
+    }, 1000 * 30);
     return () => clearInterval(interval);
   }, [refreshApp]);
 

@@ -20,7 +20,7 @@ import { useAbsoluteDate } from '../../../hooks';
 
 export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Position }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
-  const { from, to } = useAbsoluteDate({ from: 'now-24h/h', to: 'now' });
+  const time = useAbsoluteDate({ from: 'now-24h/h', to: 'now' });
 
   const { ExploratoryViewEmbeddable } = observability;
 
@@ -62,6 +62,7 @@ export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Positio
         legendPosition={legendPosition}
         attributes={[
           {
+            time,
             name: DURATION_BY_STEP_LABEL,
             reportDefinitions: {
               'monitor.id': [monitorId],
@@ -69,7 +70,6 @@ export const StepDurationPanel = ({ legendPosition }: { legendPosition?: Positio
             },
             selectedMetricField: isBrowser ? 'synthetics.step.duration.us' : 'monitor.duration.us',
             dataType: 'synthetics',
-            time: { from, to },
             breakdown: isBrowser ? 'synthetics.step.name.keyword' : 'observer.geo.name',
             operationType: 'last_value',
             seriesType: 'area_stacked',
