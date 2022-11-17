@@ -136,6 +136,8 @@ export const createExternalService = (
     }, '');
   };
 
+  const escapeSpecialCharacters = (str: string) => str.replace(/[!^&*()+\-[\]\\/{}|:?~]/g, '\\\\$&')?.replace(/-/g, '\\\\x2d');
+
   const hasSupportForNewAPI = (capabilities: { capabilities?: {} }) =>
     createMetaCapabilities.every((c) => Object.keys(capabilities?.capabilities ?? {}).includes(c));
 
@@ -498,8 +500,9 @@ export const createExternalService = (
   };
 
   const getIssues = async (title: string) => {
+    const modifiedTitle = escapeSpecialCharacters(title ?? '');
     const query = `${searchUrl}?jql=${encodeURIComponent(
-      `project="${projectKey}" and summary ~"${title}"`
+      `project="${projectKey}" and summary ~"${modifiedTitle}"`
     )}`;
 
     try {

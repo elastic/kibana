@@ -443,6 +443,63 @@ describe('Jira service', () => {
       });
     });
 
+    test('escapes special characters from summary', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            capabilities: {
+              navigation: 'https://coolsite.net/rest/capabilities/navigation',
+            },
+          },
+        })
+      );
+
+      // getIssueType mocks
+      requestMock.mockImplementationOnce(() => issueTypesResponse);
+
+      // getIssueType mocks
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: { id: '1', key: 'CK-1', fields: { summary: '[th!s^is()a-te+st-{~is*s|ue?or&and\\bye:}]', description: 'description' } },
+        })
+      );
+
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: { id: '1', key: 'CK-1', fields: { created: '2020-04-27T10:59:46.202Z' } },
+        })
+      );
+
+      await service.createIncident({
+        incident: {
+          summary: '[th!s^is()a-te+st-{~is*s|ue?or&and\\bye:}]',
+          description: 'desc',
+          labels: [],
+          priority: 'High',
+          issueType: null,
+          parent: null,
+        },
+      });
+
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        url: 'https://coolsite.net/rest/api/2/issue',
+        logger,
+        method: 'post',
+        configurationUtilities,
+        data: {
+          fields: {
+            summary: '[th!s^is()a-te+st-{~is*s|ue?or&and\\bye:}]',
+            description: 'desc',
+            project: { key: 'CK' },
+            issuetype: { id: '10006' },
+            labels: [],
+            priority: { name: 'High' },
+          },
+        },
+      });
+    });
+
     test('it should call request with correct arguments', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({
