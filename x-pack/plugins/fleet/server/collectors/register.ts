@@ -18,6 +18,7 @@ import { getPackageUsage } from './package_collectors';
 import type { PackageUsage } from './package_collectors';
 import { getFleetServerUsage, getFleetServerConfig } from './fleet_server_collector';
 import type { FleetServerUsage } from './fleet_server_collector';
+import { getAgentPoliciesUsage } from './agent_policies';
 
 export interface Usage {
   agents_enabled: boolean;
@@ -35,6 +36,7 @@ export const fetchFleetUsage = async (core: CoreSetup, config: FleetConfigType) 
     packages: await getPackageUsage(soClient),
     agent_versions: await getAgentVersions(esClient),
     fleet_server_config: await getFleetServerConfig(soClient, esClient),
+    agent_policies: await getAgentPoliciesUsage(soClient, esClient),
   };
   return usage;
 };

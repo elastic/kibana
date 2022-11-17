@@ -1,0 +1,167 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { RootSchema } from '@kbn/analytics-client';
+
+export const fleetUsagesSchema: RootSchema<any> = {
+  agents_enabled: { type: 'boolean', _meta: { description: 'agents enabled' } },
+  agents: {
+    properties: {
+      total_enrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents, in any state',
+        },
+      },
+      healthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in a healthy state',
+        },
+      },
+      unhealthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an unhealthy state',
+        },
+      },
+      updating: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an updating state',
+        },
+      },
+      offline: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently offline',
+        },
+      },
+      total_all_statuses: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of agents in any state, both enrolled and inactive',
+        },
+      },
+    },
+  },
+  fleet_server: {
+    properties: {
+      total_enrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled Fleet Server agents, in any state',
+        },
+      },
+      total_all_statuses: {
+        type: 'long',
+        _meta: {
+          description:
+            'The total number of Fleet Server agents in any state, both enrolled and inactive.',
+        },
+      },
+      healthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled Fleet Server agents in a healthy state.',
+        },
+      },
+      unhealthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled Fleet Server agents in an unhealthy state',
+        },
+      },
+      updating: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled Fleet Server agents in an updating state',
+        },
+      },
+      offline: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled Fleet Server agents currently offline',
+        },
+      },
+      num_host_urls: {
+        type: 'long',
+        _meta: {
+          description: 'The number of Fleet Server hosts configured in Fleet settings.',
+        },
+      },
+    },
+  },
+  packages: {
+    type: 'array',
+    items: {
+      properties: {
+        name: { type: 'keyword' },
+        version: { type: 'keyword' },
+        enabled: { type: 'boolean' },
+      },
+    },
+  },
+  agent_versions: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'The agent versions enrolled in this deployment.' },
+    },
+  },
+  fleet_server_config: {
+    properties: {
+      hosts: {
+        type: 'array',
+        items: {
+          properties: {
+            id: { type: 'keyword' },
+            name: { type: 'keyword' },
+            host_urls: {
+              type: 'array',
+              items: {
+                type: 'keyword',
+              },
+            },
+            is_default: { type: 'boolean' },
+            is_preconfigured: { type: 'boolean' },
+            proxy_id: { type: 'keyword' },
+          },
+        },
+      },
+      policies: {
+        type: 'array',
+        items: {
+          properties: {
+            id: { type: 'keyword' },
+            name: { type: 'keyword' },
+            enabled: { type: 'boolean' },
+            policy_id: { type: 'keyword' },
+            input_config: { type: 'pass_through' },
+          },
+        },
+      },
+    },
+  },
+  agent_policies: {
+    properties: {
+      count: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agent policies',
+        },
+      },
+      output_types: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: { description: 'Output types of agent policies' },
+        },
+      },
+    },
+  },
+};

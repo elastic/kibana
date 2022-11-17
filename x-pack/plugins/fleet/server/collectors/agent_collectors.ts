@@ -10,6 +10,7 @@ import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
 import type { FleetConfigType } from '../../common/types';
 import { AGENTS_INDEX } from '../../common';
 import * as AgentService from '../services/agents';
+import { appContextService } from '../services';
 
 export interface AgentUsage {
   total_enrolled: number;
@@ -49,18 +50,29 @@ export const getAgentUsage = async (
   };
 };
 
-export const getAgentVersions = async (esClient?: ElasticsearchClient) => {
+export const getAgentVersions = async (esClient?: ElasticsearchClient): Promise<string[]> => {
   if (!esClient) {
-    return {};
+    return [];
   }
-  const response = await esClient.search({
-    index: AGENTS_INDEX,
-    size: 0,
-    aggs: {
-      versions: {
-        terms: { field: 'agent.version' },
+  try {
+    const response = await esClient.search({
+      index: AGENTS_INDEX,
+      size: 0,
+      aggs: {
+        versions: {
+          terms: { field: 'agent.version' },
+        },
       },
-    },
-  });
-  return ((response?.aggregations?.versions as any).buckets ?? []).map((bucket: any) => bucket.key);
+    });
+    return ((response?.aggregations?.versions as any).buckets ?? []).map(
+      (bucket: any) => bucket.key
+    );
+  } catch (error) {
+    if (error.statusCode === 404) {
+      appContextService.getLogger().debug('Index .fleet-agents does not exist yet.');
+    } else {
+      throw error;
+    }
+    return [];
+  }
 };
