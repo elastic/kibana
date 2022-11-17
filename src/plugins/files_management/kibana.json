@@ -1,0 +1,15 @@
+{
+  "id": "filesManagement",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "@elastic/kibana-global-experience",
+    "githubTeam": "@elastic/kibana-global-experience"
+  },
+  "description": "Simple UI for managing files in Kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["files", "management"],
+  "optionalPlugins": [],
+  "requiredBundles": ["kibanaReact"]
+}
