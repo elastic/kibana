@@ -303,6 +303,7 @@ describe('ruleParamsModifier', () => {
         ]
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
+      expect(isParamsUpdateSkipped).toBe(false);
     });
 
     test('should set dataViewId to undefined if overwrite_data_views=true on delete_index_patterns action', () => {
