@@ -12,6 +12,7 @@ import moment from 'moment-timezone';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
@@ -270,16 +271,18 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const { Wrapper: TimeSliderControlReduxWrapper } = this.reduxEmbeddableTools;
 
     ReactDOM.render(
-      <TimeSliderControlReduxWrapper>
-        <TimeSlider
-          formatDate={this.epochToKbnDateFormat}
-          onChange={(value?: [number, number]) => {
-            this.onTimesliceChange(value);
-            const range = value ? value[TO_INDEX] - value[FROM_INDEX] : undefined;
-            this.onRangeChange(range);
-          }}
-        />
-      </TimeSliderControlReduxWrapper>,
+      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+        <TimeSliderControlReduxWrapper>
+          <TimeSlider
+            formatDate={this.epochToKbnDateFormat}
+            onChange={(value?: [number, number]) => {
+              this.onTimesliceChange(value);
+              const range = value ? value[TO_INDEX] - value[FROM_INDEX] : undefined;
+              this.onRangeChange(range);
+            }}
+          />
+        </TimeSliderControlReduxWrapper>
+      </KibanaThemeProvider>,
       node
     );
   };
