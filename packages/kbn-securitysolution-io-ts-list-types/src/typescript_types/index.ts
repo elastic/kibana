@@ -44,6 +44,7 @@ export interface UseExceptionListsProps {
   notifications: NotificationsStart;
   initialPagination?: Pagination;
   hideLists?: readonly string[];
+  initialSort?: Sort;
 }
 
 export interface UseExceptionListProps {
@@ -56,6 +57,7 @@ export interface UseExceptionListProps {
   showEndpointListsOnly: boolean;
   matchFilters: boolean;
   onSuccess?: (arg: UseExceptionListItemsSuccess) => void;
+  sort?: Sort;
 }
 
 export interface FilterExceptionsOptions {
@@ -81,6 +83,10 @@ export interface ApiListExportProps {
   onSuccess: (blob: Blob) => void;
 }
 
+export interface Sort {
+  field: string;
+  order: string;
+}
 export interface Pagination {
   page: Page;
   perPage: PerPage;
@@ -168,6 +174,7 @@ export interface ApiCallFetchExceptionListsProps {
   http: HttpStart;
   namespaceTypes: string;
   pagination: Partial<Pagination>;
+  sort?: Sort;
   filters: string;
   signal: AbortSignal;
 }
