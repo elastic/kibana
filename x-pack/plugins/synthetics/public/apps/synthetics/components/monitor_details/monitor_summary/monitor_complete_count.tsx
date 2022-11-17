@@ -10,6 +10,7 @@ import React from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface MonitorCompleteCountProps {
   from: string;
@@ -22,6 +23,11 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
   const { ExploratoryViewEmbeddable } = observability;
 
   const monitorId = useMonitorQueryId();
+  const selectedLocation = useSelectedLocation();
+
+  if (!monitorId || !selectedLocation) {
+    return null;
+  }
 
   return (
     <ExploratoryViewEmbeddable
@@ -30,7 +36,10 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
       attributes={[
         {
           time: props,
-          reportDefinitions: { config_id: [monitorId] },
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation.label],
+          },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_complete',
           name: 'synthetics-series-1',

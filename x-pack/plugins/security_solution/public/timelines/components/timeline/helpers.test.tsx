@@ -7,9 +7,19 @@
 
 import { cloneDeep } from 'lodash/fp';
 
-import { DataProviderType } from './data_providers/data_provider';
+import { DataProviderType, EXISTS_OPERATOR, IS_OPERATOR } from './data_providers/data_provider';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
-import { buildGlobalQuery, showGlobalFilters } from './helpers';
+
+import {
+  buildExistsQueryMatch,
+  buildGlobalQuery,
+  buildIsOneOfQueryMatch,
+  buildIsQueryMatch,
+  handleIsOperator,
+  isStringOrNumberArray,
+  showGlobalFilters,
+} from './helpers';
+
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
@@ -94,6 +104,24 @@ describe('Build KQL Query', () => {
     dataProviders[0].enabled = false;
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 2"');
+  });
+
+  test('Build KQL query with "includes" operator', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].enabled = true;
+    dataProviders[0].queryMatch.operator = 'includes';
+    dataProviders[0].queryMatch.value = ['a', 'b', 'c'];
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual(`name : (\"a\" OR \"b\" OR \"c\")`);
+  });
+
+  test('Handles bad inputs to buildKQLQuery', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].enabled = true;
+    dataProviders[0].queryMatch.operator = 'includes';
+    dataProviders[0].queryMatch.value = [undefined] as unknown as string[];
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : [null]');
   });
 
   test('Build KQL query with two data provider and second is disabled', () => {
@@ -240,6 +268,126 @@ describe('Build KQL Query', () => {
 
     test('it returns true when `globalFullScreen` is false and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
       expect(showGlobalFilters({ globalFullScreen: false, graphEventId: '' })).toBe(true);
+    });
+  });
+});
+
+describe('isStringOrNumberArray', () => {
+  test('it returns false when value is not an array', () => {
+    expect(isStringOrNumberArray('just a string')).toBe(false);
+  });
+
+  test('it returns false when value is an array of mixed types', () => {
+    expect(isStringOrNumberArray(['mixed', 123, 'types'])).toBe(false);
+  });
+  test('it returns false when value is an array of bad types', () => {
+    const badValues = [undefined, null, {}] as unknown as string[];
+    expect(isStringOrNumberArray(badValues)).toBe(false);
+  });
+
+  test('it returns true when value is an empty array', () => {
+    expect(isStringOrNumberArray([])).toBe(true);
+  });
+
+  test('it returns true when value is an array of all strings', () => {
+    expect(isStringOrNumberArray(['all', 'string', 'values'])).toBe(true);
+  });
+
+  test('it returns true when value is an array of all numbers', () => {
+    expect(isStringOrNumberArray([123, 456, 789])).toBe(true);
+  });
+
+  describe('queryHandlerFunctions', () => {
+    describe('handleIsOperator', () => {
+      it('returns the entire query unchanged, if value is an array', () => {
+        expect(
+          handleIsOperator({
+            browserFields: {},
+            field: 'host.name',
+            isExcluded: '',
+            isFieldTypeNested: false,
+            type: undefined,
+            value: ['some', 'values'],
+          })
+        ).toBe('host.name : ["some","values"]');
+      });
+    });
+  });
+
+  describe('buildExistsQueryMatch', () => {
+    it('correcty computes EXISTS query with no nested field', () => {
+      expect(
+        buildExistsQueryMatch({ isFieldTypeNested: false, field: 'host', browserFields: {} })
+      ).toBe(`host ${EXISTS_OPERATOR}`);
+    });
+    it('correcty computes EXISTS query with nested field', () => {
+      expect(
+        buildExistsQueryMatch({
+          isFieldTypeNested: true,
+          field: 'nestedField.firstAttributes',
+          browserFields: mockBrowserFields,
+        })
+      ).toBe(`nestedField: { firstAttributes: * }`);
+    });
+  });
+
+  describe('buildIsQueryMatch', () => {
+    it('correcty computes IS query with no nested field', () => {
+      expect(
+        buildIsQueryMatch({
+          isFieldTypeNested: false,
+          field: 'nestedField.thirdAttributes',
+          value: 100000,
+          browserFields: {},
+        })
+      ).toBe(`nestedField.thirdAttributes ${IS_OPERATOR} 100000`);
+    });
+    it('correcty computes IS query with nested date field', () => {
+      expect(
+        buildIsQueryMatch({
+          isFieldTypeNested: true,
+          browserFields: mockBrowserFields,
+          field: 'nestedField.thirdAttributes',
+          value: 100000,
+        })
+      ).toBe(`nestedField: { thirdAttributes${IS_OPERATOR} \"100000\" }`);
+    });
+    it('correcty computes IS query with nested string field', () => {
+      expect(
+        buildIsQueryMatch({
+          isFieldTypeNested: true,
+          browserFields: mockBrowserFields,
+          field: 'nestedField.secondAttributes',
+          value: 'text',
+        })
+      ).toBe(`nestedField: { secondAttributes${IS_OPERATOR} text }`);
+    });
+  });
+
+  describe('buildIsOneOfQueryMatch', () => {
+    it('correcty computes IS ONE OF query with numbers', () => {
+      expect(
+        buildIsOneOfQueryMatch({
+          field: 'kibana.alert.worflow_status',
+          value: [1, 2, 3],
+        })
+      ).toBe('kibana.alert.worflow_status : (1 OR 2 OR 3)');
+    });
+    it('correcty computes IS ONE OF query with strings', () => {
+      expect(
+        buildIsOneOfQueryMatch({
+          field: 'kibana.alert.worflow_status',
+          value: ['a', 'b', 'c'],
+        })
+      ).toBe(`kibana.alert.worflow_status : (\"a\" OR \"b\" OR \"c\")`);
+    });
+    it('correcty computes IS ONE OF query if value is an empty array', () => {
+      expect(
+        buildIsOneOfQueryMatch({
+          field: 'kibana.alert.worflow_status',
+          value: [],
+        })
+      ).toBe("kibana.alert.worflow_status : ''");
     });
   });
 });
