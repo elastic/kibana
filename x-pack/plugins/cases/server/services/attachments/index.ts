@@ -100,6 +100,43 @@ export class AttachmentService {
     private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
   ) {}
 
+  public async getAttachmentIdsForCases({
+    caseIds,
+    unsecuredSavedObjectsClient,
+  }: {
+    caseIds: string[];
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  }) {
+    try {
+      this.log.debug(`Attempting to retrieve attachments associated with cases: [${caseIds}]`);
+
+      const finder = unsecuredSavedObjectsClient.createPointInTimeFinder({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReference: caseIds.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        /**
+         * We only care about the ids so to reduce the data returned we should limit the fields in the response. Core
+         * doesn't support retrieving no fields (id would always be returned anyway) so to limit it we'll only request
+         * the owner even though we don't need it.
+         */
+        fields: ['owner'],
+        perPage: MAX_DOCS_PER_PAGE,
+      });
+
+      const ids: string[] = [];
+
+      for await (const attachmentSavedObject of finder.find()) {
+        ids.push(...attachmentSavedObject.saved_objects.map((attachment) => attachment.id));
+      }
+
+      return ids;
+    } catch (error) {
+      this.log.error(`Error retrieving attachments associated with cases: [${caseIds}]: ${error}`);
+      throw error;
+    }
+  }
+
   public async countAlertsAttachedToCase(
     params: AlertsAttachedToCaseArgs
   ): Promise<number | undefined> {

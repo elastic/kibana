@@ -7,6 +7,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
   CASE_REF_NAME,
@@ -19,17 +20,21 @@ import { ActionTypes, NONE_CONNECTOR_ID } from '../../../common/api';
 import type {
   BuilderDeps,
   BuilderParameters,
-  BuilderReturnValue,
   CommonBuilderArguments,
+  PersistableUserActionFields,
+  UserActionLogBody,
   UserActionParameters,
 } from './types';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { ConstructedUserAction } from './constructed_user_action';
 
 export abstract class UserActionBuilder {
   protected readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  private readonly auditLogger?: AuditLogger;
 
   constructor(deps: BuilderDeps) {
     this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
+    this.auditLogger = deps.auditLogger;
   }
 
   protected getCommonUserActionAttributes({ user, owner }: { user: User; owner: string }) {
@@ -98,7 +103,7 @@ export abstract class UserActionBuilder {
     attachmentId,
     connectorId,
     type,
-  }: CommonBuilderArguments): BuilderReturnValue => {
+  }: CommonBuilderArguments): PersistableUserActionFields => {
     return {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
@@ -119,7 +124,18 @@ export abstract class UserActionBuilder {
     };
   };
 
+  protected createConstructedUserAction(
+    body: UserActionLogBody,
+    persistableUserActionFields: PersistableUserActionFields
+  ): ConstructedUserAction {
+    return new ConstructedUserAction({
+      commonFields: { auditLogger: this.auditLogger },
+      logBody: body,
+      persistableUserAction: persistableUserActionFields,
+    });
+  }
+
   public abstract build<T extends keyof BuilderParameters>(
     args: UserActionParameters<T>
-  ): BuilderReturnValue;
+  ): ConstructedUserAction;
 }

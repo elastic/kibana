@@ -15,6 +15,8 @@ import type {
   SavedObjectsUpdateResponse,
   SavedObjectsResolveResponse,
   SavedObjectsFindOptions,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -305,6 +307,21 @@ export class CasesService {
     } catch (error) {
       this.log.error(`Error on DELETE case ${caseId}: ${error}`);
       throw error;
+    }
+  }
+
+  public async bulkDeleteCaseEntities({
+    entities,
+    options,
+  }: {
+    entities: SavedObjectsBulkDeleteObject[];
+    options?: SavedObjectsBulkDeleteOptions;
+  }) {
+    try {
+      this.log.debug(`Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
+      return await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
+    } catch (error) {
+      this.log.error(`Error bulk deleting case entities ${JSON.stringify(entities)}: ${error}`);
     }
   }
 

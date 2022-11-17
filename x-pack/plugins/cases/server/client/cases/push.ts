@@ -259,7 +259,6 @@ export const push = async (
     if (shouldMarkAsClosed) {
       await userActionService.createUserAction({
         type: ActionTypes.status,
-        unsecuredSavedObjectsClient,
         payload: { status: CaseStatuses.closed },
         user,
         caseId,
@@ -274,7 +273,6 @@ export const push = async (
 
     await userActionService.createUserAction({
       type: ActionTypes.pushed,
-      unsecuredSavedObjectsClient,
       payload: { externalService },
       user,
       caseId,

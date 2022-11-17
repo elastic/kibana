@@ -5,14 +5,24 @@
  * 2.0.
  */
 
+import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import type { UserActionParameters, BuilderReturnValue } from '../types';
+import type { ConstructedUserAction } from '../constructed_user_action';
+import type {
+  PersistableUserActionFields,
+  UserActionLogBody,
+  UserActionParameters,
+} from '../types';
 
 export class DeleteCaseUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'delete_case'>): BuilderReturnValue {
+  build(args: UserActionParameters<'delete_case'>): ConstructedUserAction {
     const { caseId, owner, user, connectorId } = args;
-    return {
+
+    const createMessage = (userActionId: string) =>
+      `Case id: ${caseId} deleted - user action id: ${userActionId}`;
+
+    const persistableFields: PersistableUserActionFields = {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
         action: Actions.delete,
@@ -24,5 +34,14 @@ export class DeleteCaseUserActionBuilder extends UserActionBuilder {
         ...this.createConnectorReference(connectorId ?? null),
       ],
     };
+
+    const loggerFields: UserActionLogBody = {
+      createMessage,
+      eventAction: 'case_user_action_delete_case',
+      entityId: caseId,
+      entityType: CASE_SAVED_OBJECT,
+    };
+
+    return this.createConstructedUserAction(loggerFields, persistableFields);
   }
 }

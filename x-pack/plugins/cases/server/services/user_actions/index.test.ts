@@ -637,7 +637,6 @@ describe('CaseUserActionService', () => {
     const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
     const mockLogger = loggerMock.create();
     const commonArgs = {
-      unsecuredSavedObjectsClient,
       caseId: '123',
       user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
       owner: SECURITY_SOLUTION_OWNER,
@@ -645,7 +644,11 @@ describe('CaseUserActionService', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      service = new CaseUserActionService(mockLogger, persistableStateAttachmentTypeRegistry);
+      service = new CaseUserActionService({
+        unsecuredSavedObjectsClient,
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+      });
     });
 
     describe('createUserAction', () => {
@@ -850,7 +853,6 @@ describe('CaseUserActionService', () => {
     describe('bulkCreateCaseDeletion', () => {
       it('creates a delete case user action', async () => {
         await service.bulkCreateCaseDeletion({
-          unsecuredSavedObjectsClient,
           cases: [
             { id: '1', owner: SECURITY_SOLUTION_OWNER, connectorId: '3' },
             { id: '2', owner: SECURITY_SOLUTION_OWNER, connectorId: '4' },
@@ -1400,7 +1402,6 @@ describe('CaseUserActionService', () => {
     describe('create', () => {
       it('creates user actions', async () => {
         await service.create<{ title: string }>({
-          unsecuredSavedObjectsClient,
           attributes: { title: 'test' },
           references: [],
         });
@@ -1458,7 +1459,6 @@ describe('CaseUserActionService', () => {
 
       it('it returns an empty array if the response is not valid', async () => {
         const res = await service.getUniqueConnectors({
-          unsecuredSavedObjectsClient,
           caseId: '123',
         });
 
@@ -1472,7 +1472,6 @@ describe('CaseUserActionService', () => {
         } as unknown as Promise<SavedObjectsFindResponse>);
 
         const res = await service.getUniqueConnectors({
-          unsecuredSavedObjectsClient,
           caseId: '123',
         });
 
@@ -1485,7 +1484,6 @@ describe('CaseUserActionService', () => {
 
       it('it returns the unique connectors', async () => {
         await service.getUniqueConnectors({
-          unsecuredSavedObjectsClient,
           caseId: '123',
         });
 

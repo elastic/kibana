@@ -189,10 +189,11 @@ export class CasesClientFactory {
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
-      userActionService: new CaseUserActionService(
-        this.logger,
-        this.options.persistableStateAttachmentTypeRegistry
-      ),
+      userActionService: new CaseUserActionService({
+        log: this.logger,
+        persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+      }),
       attachmentService,
       licensingService,
       notificationService,
