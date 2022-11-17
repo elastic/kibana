@@ -777,12 +777,9 @@ describe('TableListView', () => {
         type: 'dashboard',
         attributes: {
           title: 'Item 1',
-          description: 'Item 1 description',
+          description: '',
         },
-        references: [
-          { id: 'id-tag-1', name: 'tag-1', type: 'tag' },
-          { id: 'id-tag-2', name: 'tag-2', type: 'tag' },
-        ],
+        references: [{ id: 'id-tag-1', name: 'tag-1', type: 'tag' }],
       },
       {
         id: '456',
@@ -790,9 +787,9 @@ describe('TableListView', () => {
         type: 'dashboard',
         attributes: {
           title: 'Item 2',
-          description: 'Item 2 description',
+          description: '',
         },
-        references: [],
+        references: [{ id: 'id-tag-2', name: 'tag-2', type: 'tag' }],
       },
     ];
 
@@ -829,6 +826,21 @@ describe('TableListView', () => {
       // Search box is updated
       expect(getSearchBoxValue()).toBe('hello');
       expect(router?.history.location?.search).toBe('?s=hello');
+    });
+
+    test('should update the URL when changing the search term', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
 
       // Enter new search term in box
       await act(async () => {
@@ -842,5 +854,79 @@ describe('TableListView', () => {
       expect(router?.history.location?.search).toBe('?s=search-changed');
     });
 
+    test('should filter by tag from the URL', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      const getLastCallArgsFromFindItems = () =>
+        findItems.mock.calls[findItems.mock.calls.length - 1];
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      let expected = '';
+      let [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+
+      // Change the URL to filter down by tag
+      await act(async () => {
+        if (router?.history.push) {
+          router.history.push({
+            search: `?${queryString.stringify({ s: 'tag:(tag-2)' }, { encode: false })}`,
+          });
+        }
+      });
+      component.update();
+
+      // The search bar should be updated
+      expected = 'tag:(tag-2)';
+      [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+    });
+
+    test('should update the URL when changing a tag from the filter dropdown', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      expect(router?.history.location?.search).toBe('');
+
+      const openTagFilterDropdown = async () => {
+        await act(async () => {
+          find('tagFilterPopoverButton').simulate('click');
+        });
+        component.update();
+      };
+
+      // Change tag selection in drop down should update the URL
+      await openTagFilterDropdown();
+
+      await act(async () => {
+        find('tag-searchbar-option-tag-2').simulate('click');
+      });
+      component.update();
+
+      expect(router?.history.location?.search).toBe('?s=tag:(tag-2)');
+    });
   });
 });
