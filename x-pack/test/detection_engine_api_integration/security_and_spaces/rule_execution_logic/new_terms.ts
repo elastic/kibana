@@ -28,7 +28,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 
-import newTermsLargeArrayBuckets from './mocks/new_terms_large_array_buckets.json';
+import { largeArraysBuckets } from './mocks/new_terms';
 
 const removeRandomValuedProperties = (alert: DetectionAlert | undefined) => {
   if (!alert) {
@@ -743,7 +743,6 @@ export default ({ getService }: FtrProviderContext) => {
           fields: [AGG_FIELD_NAME],
           runtimeMappings: getNewTermsRuntimeMappings(
             ['source.ip', 'tags'],
-
             [
               {
                 key: {
@@ -784,6 +783,39 @@ export default ({ getService }: FtrProviderContext) => {
                 key: {
                   tags: 'tag-new-3',
                   'source.ip': '192.168.1.2',
+                },
+                doc_count: 1,
+              },
+            ]
+          ),
+        });
+
+        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
+      });
+
+      it('should return runtime field without duplicated values', async () => {
+        // encoded base64 values of "host-0" and ["tag-1", "tag-2", "tag-2", "tag-1", "tag-1"]
+        // joined with underscore, without duplicates in tags
+        const expectedEncodedValues = ['aG9zdC0w_dGFnLTE=', 'aG9zdC0w_dGFnLTI='];
+        const { hits } = await performSearchQuery({
+          es,
+          query: { match: { id: 'doc_with_duplicated_tags' } },
+          index: 'new_terms',
+          fields: [AGG_FIELD_NAME],
+          runtimeMappings: getNewTermsRuntimeMappings(
+            ['host.name', 'tags'],
+            [
+              {
+                key: {
+                  tags: 'tag-1',
+                  'host.name': 'host-0',
+                },
+                doc_count: 1,
+              },
+              {
+                key: {
+                  tags: 'tag-2',
+                  'host.name': 'host-0',
                 },
                 doc_count: 1,
               },
@@ -853,7 +885,7 @@ export default ({ getService }: FtrProviderContext) => {
           fields: [AGG_FIELD_NAME],
           runtimeMappings: getNewTermsRuntimeMappings(
             ['large_array_20', 'large_array_10'],
-            newTermsLargeArrayBuckets
+            largeArraysBuckets
           ),
         });
 
