@@ -1473,6 +1473,32 @@ describe('OnPreResponse', () => {
   });
 });
 
+describe('runs with default preResponse handlers', () => {
+  it('does not allow overwriting of the "kbn-name" and "Content-Security-Policy" headers', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({
+        headers: {
+          foo: 'bar',
+          'kbn-name': 'hijacked!',
+          'Content-Security-Policy': 'hijacked!',
+        },
+      })
+    );
+    await server.start();
+
+    const response = await supertest(innerServer.listener).get('/').expect(200);
+
+    expect(response.header.foo).toBe('bar');
+    expect(response.header['kbn-name']).toBe('kibana');
+    expect(response.header['content-security-policy']).toBe(
+      `script-src 'self' 'unsafe-eval'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+    );
+  });
+});
+
 describe('run interceptors in the right order', () => {
   it('with Auth registered', async () => {
     const {
