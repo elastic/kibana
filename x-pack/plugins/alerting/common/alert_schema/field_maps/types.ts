@@ -11,6 +11,8 @@ export interface FieldMap {
     required?: boolean;
     array?: boolean;
     path?: string;
+    ignore_above?: number;
     scaling_factor?: number;
+    multi_fields?: Array<{ flat_name: string; name: string; type: string }>;
   };
 }
