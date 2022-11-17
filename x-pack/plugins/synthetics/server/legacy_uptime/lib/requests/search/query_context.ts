@@ -115,7 +115,7 @@ export class QueryContext {
     }
 
     const tsEnd = parseRelativeDate(this.dateRangeEnd, { roundUp: true })!;
-    const tsStart = moment(tsEnd).subtract(5, 'minutes');
+    const tsStart = moment(tsEnd).subtract(20, 'minutes');
 
     return {
       range: {

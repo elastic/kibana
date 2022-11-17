@@ -53,11 +53,7 @@ export const getInlineErrorFilters = () => [
       ],
     },
   },
-  {
-    range: {
-      'monitor.timespan': getTimeSpanFilter(),
-    },
-  },
+  getTimeSpanFilter(),
   EXCLUDE_RUN_ONCE_FILTER,
 ];
 

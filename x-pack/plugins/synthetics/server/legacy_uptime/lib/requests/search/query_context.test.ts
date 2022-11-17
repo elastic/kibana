@@ -80,11 +80,11 @@ describe(QueryContext, () => {
   describe('timespanClause()', () => {
     it('should always cover the last 20m', () => {
       // 5m expected range between GTE and LTE in the response
-      // since timespan is hardcoded to 5m
+      // since timespan is hardcoded to 20m
       expect(qc.timespanClause()).toEqual({
         range: {
           'monitor.timespan': {
-            // end date minus 5m
+            // end date minus 20
             gte: new Date(Date.parse(rangeEnd) - 20 * 60 * 1000).toISOString(),
             lte: rangeEnd,
           },
