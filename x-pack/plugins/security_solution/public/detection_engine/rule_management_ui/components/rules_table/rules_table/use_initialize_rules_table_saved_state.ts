@@ -18,7 +18,7 @@ import {
 } from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
 
-export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTabs) => void): void {
+export function useInitializeRulesTableSavedState(): void {
   const { actions } = useRulesTableContext();
   const {
     services: { sessionStorage },
@@ -33,17 +33,12 @@ export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTa
         return;
       }
 
-      const activeTab = params?.tab ?? savedState?.tab;
       const searchTerm = params?.searchTerm ?? savedState?.searchTerm;
       const showCustomRules = params?.showCustomRules ?? savedState?.showCustomRules;
       const tags = params?.tags ?? savedState?.tags;
       const sorting = params?.sort ?? savedState?.sort;
       const page = params?.page ?? savedState?.page;
       const perPage = params?.perPage ?? savedState?.perPage;
-
-      if (activeTab === AllRulesTabs.monitoring) {
-        setActiveTab(activeTab);
-      }
 
       actions.setFilterOptions({
         filter: typeof searchTerm === 'string' ? searchTerm : INITIAL_FILTER_OPTIONS.filter,
@@ -67,7 +62,7 @@ export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTa
         actions.setPerPage(perPage);
       }
     },
-    [actions, sessionStorage, setActiveTab]
+    [actions, sessionStorage]
   );
 
   useInitializeUrlParam(URL_PARAM_KEY.rulesTable, onInitializeRulesTableContextFromUrlParam);

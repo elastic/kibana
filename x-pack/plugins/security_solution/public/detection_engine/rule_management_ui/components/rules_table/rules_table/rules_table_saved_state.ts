@@ -8,7 +8,6 @@
 import type { SortingOptions } from '../../../../rule_management/logic/types';
 
 export interface RulesTableSavedState {
-  tab?: string;
   searchTerm?: string;
   showCustomRules?: boolean;
   tags?: string[];

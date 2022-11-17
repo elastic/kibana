@@ -9,7 +9,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useUpdateUrlParam } from '../../../../../common/utils/global_query_string';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
-import { AllRulesTabs } from '../rules_table_toolbar';
 import type { RulesTableState } from './rules_table_context';
 import {
   DEFAULT_PAGE,
@@ -46,7 +45,7 @@ describe('useSyncRulesTableSavedState', () => {
       state,
     });
 
-    renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.rules));
+    renderHook(() => useSyncRulesTableSavedState());
 
     expect(updateUrlParam).toHaveBeenCalledWith(expected);
   };
@@ -55,7 +54,7 @@ describe('useSyncRulesTableSavedState', () => {
       state,
     });
 
-    renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.rules));
+    renderHook(() => useSyncRulesTableSavedState());
 
     expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expected);
   };
@@ -76,21 +75,13 @@ describe('useSyncRulesTableSavedState', () => {
   it('does not sync the default state', () => {
     (useRulesTableContext as jest.Mock).mockReturnValue({ state: defaultState });
 
-    renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.rules));
+    renderHook(() => useSyncRulesTableSavedState());
 
     expect(updateUrlParam).not.toHaveBeenCalled();
     expect(setStorage).not.toHaveBeenCalled();
   });
 
   describe('with the url', () => {
-    it('syncs only the active tab', () => {
-      (useRulesTableContext as jest.Mock).mockReturnValue({ state: defaultState });
-
-      renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.monitoring));
-
-      expect(updateUrlParam).toHaveBeenCalledWith({ tab: 'monitoring' });
-    });
-
     it('syncs only the search term', () => {
       expectUrlSync(
         { ...defaultState, filterOptions: { ...INITIAL_FILTER_OPTIONS, filter: 'test' } },
@@ -176,14 +167,6 @@ describe('useSyncRulesTableSavedState', () => {
   });
 
   describe('with the storage', () => {
-    it('syncs only the active tab', () => {
-      (useRulesTableContext as jest.Mock).mockReturnValue({ state: defaultState });
-
-      renderHook(() => useSyncRulesTableSavedState(AllRulesTabs.monitoring));
-
-      expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, { tab: 'monitoring' });
-    });
-
     it('syncs only the search term', () => {
       expectStorageSync(
         { ...defaultState, filterOptions: { ...defaultState.filterOptions, filter: 'test' } },

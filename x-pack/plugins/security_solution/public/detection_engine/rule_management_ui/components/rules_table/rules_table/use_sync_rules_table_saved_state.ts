@@ -9,7 +9,6 @@ import { useEffect } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useUpdateUrlParam } from '../../../../../common/utils/global_query_string';
-import { AllRulesTabs } from '../rules_table_toolbar';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
   DEFAULT_PAGE,
@@ -19,7 +18,7 @@ import {
 } from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
 
-export function useSyncRulesTableSavedState(activeTab: AllRulesTabs): void {
+export function useSyncRulesTableSavedState(): void {
   const { state } = useRulesTableContext();
   const {
     services: { sessionStorage },
@@ -28,10 +27,6 @@ export function useSyncRulesTableSavedState(activeTab: AllRulesTabs): void {
 
   useEffect(() => {
     const savedState: RulesTableSavedState = {};
-
-    if (activeTab === AllRulesTabs.monitoring) {
-      savedState.tab = activeTab;
-    }
 
     if (state.filterOptions.filter.length > 0) {
       savedState.searchTerm = state.filterOptions.filter;
@@ -67,5 +62,5 @@ export function useSyncRulesTableSavedState(activeTab: AllRulesTabs): void {
 
     updateUrlParam(savedState);
     sessionStorage.set(RULES_TABLE_STATE_STORAGE_KEY, savedState);
-  }, [updateUrlParam, sessionStorage, state, activeTab]);
+  }, [updateUrlParam, sessionStorage, state]);
 }

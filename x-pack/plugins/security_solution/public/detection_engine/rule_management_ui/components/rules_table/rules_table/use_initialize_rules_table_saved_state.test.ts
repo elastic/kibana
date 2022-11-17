@@ -43,7 +43,6 @@ function mockState({
 
 describe('useInitializeRulesTableSavedState', () => {
   const urlSavedState: RulesTableSavedState = {
-    tab: 'monitoring',
     searchTerm: 'test',
     showCustomRules: true,
     tags: ['test'],
@@ -66,7 +65,6 @@ describe('useInitializeRulesTableSavedState', () => {
     perPage: 20,
   };
   let actions: Partial<RulesTableActions>;
-  let setActiveTab: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -77,7 +75,6 @@ describe('useInitializeRulesTableSavedState', () => {
       setPage: jest.fn(),
       setPerPage: jest.fn(),
     };
-    setActiveTab = jest.fn();
 
     (useRulesTableContext as jest.Mock).mockReturnValue({ actions });
   });
@@ -88,9 +85,8 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('does not restore the state', () => {
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).not.toHaveBeenCalled();
       expect(actions.setSortingOptions).not.toHaveBeenCalled();
       expect(actions.setPage).not.toHaveBeenCalled();
@@ -104,9 +100,8 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores the state', () => {
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).toHaveBeenCalledWith('monitoring');
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         filter: urlSavedState.searchTerm,
         showCustomRules: urlSavedState.showCustomRules,
@@ -121,7 +116,7 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores the state ignoring negative page size', () => {
       mockState({ urlState: { ...urlSavedState, perPage: -1 }, storageState: null });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
       expect(actions.setPerPage).not.toHaveBeenCalled();
     });
@@ -132,31 +127,18 @@ describe('useInitializeRulesTableSavedState', () => {
         storageState: null,
       });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
       expect(actions.setPerPage).not.toHaveBeenCalled();
     });
   });
 
   describe('when partial state is saved in the url', () => {
-    it('restores only the active tab', () => {
-      mockState({ urlState: { tab: 'monitoring' }, storageState: null });
-
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
-
-      expect(setActiveTab).toHaveBeenCalledWith('monitoring');
-      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
-      expect(actions.setSortingOptions).not.toHaveBeenCalled();
-      expect(actions.setPage).not.toHaveBeenCalled();
-      expect(actions.setPerPage).not.toHaveBeenCalled();
-    });
-
     it('restores only the search term', () => {
       mockState({ urlState: { searchTerm: 'test' }, storageState: null });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         ...INITIAL_FILTER_OPTIONS,
         filter: 'test',
@@ -169,9 +151,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only show elastic rules filter', () => {
       mockState({ urlState: { showCustomRules: false }, storageState: null });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         ...INITIAL_FILTER_OPTIONS,
         showElasticRules: true,
@@ -184,9 +165,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only show custom rules filter', () => {
       mockState({ urlState: { showCustomRules: true }, storageState: null });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         ...INITIAL_FILTER_OPTIONS,
         showCustomRules: true,
@@ -199,9 +179,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only tags', () => {
       mockState({ urlState: { tags: ['test'] }, storageState: null });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         ...INITIAL_FILTER_OPTIONS,
         tags: ['test'],
@@ -214,9 +193,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only sorting field', () => {
       mockState({ urlState: { sort: { field: 'name' } }, storageState: null });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
       expect(actions.setSortingOptions).toHaveBeenCalledWith({
         field: 'name',
@@ -229,9 +207,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only sorting order', () => {
       mockState({ urlState: { sort: { order: 'asc' } }, storageState: null });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
       expect(actions.setSortingOptions).toHaveBeenCalledWith({
         field: INITIAL_SORTING_OPTIONS.field,
@@ -244,9 +221,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only page number', () => {
       mockState({ urlState: { page: 10 }, storageState: null });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
       expect(actions.setSortingOptions).not.toHaveBeenCalled();
       expect(actions.setPage).toHaveBeenCalledWith(10);
@@ -256,9 +232,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only page size', () => {
       mockState({ urlState: { perPage: 10 }, storageState: null });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
       expect(actions.setSortingOptions).not.toHaveBeenCalled();
       expect(actions.setPage).not.toHaveBeenCalled();
@@ -272,9 +247,8 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores the state', () => {
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         filter: storageSavedState.searchTerm,
         showCustomRules: storageSavedState.showCustomRules,
@@ -289,7 +263,7 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores the state ignoring negative page size', () => {
       mockState({ urlState: null, storageState: { ...storageSavedState, perPage: -1 } });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
       expect(actions.setPerPage).not.toHaveBeenCalled();
     });
@@ -300,31 +274,18 @@ describe('useInitializeRulesTableSavedState', () => {
         storageState: { ...storageSavedState, perPage: RULES_TABLE_MAX_PAGE_SIZE + 1 },
       });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
       expect(actions.setPerPage).not.toHaveBeenCalled();
     });
   });
 
   describe('when partial state is saved in the storage', () => {
-    it('restores only the active tab', () => {
-      mockState({ urlState: null, storageState: { tab: 'monitoring' } });
-
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
-
-      expect(setActiveTab).toHaveBeenCalledWith('monitoring');
-      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
-      expect(actions.setSortingOptions).not.toHaveBeenCalled();
-      expect(actions.setPage).not.toHaveBeenCalled();
-      expect(actions.setPerPage).not.toHaveBeenCalled();
-    });
-
     it('restores only the search term', () => {
       mockState({ urlState: null, storageState: { searchTerm: 'test' } });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         ...INITIAL_FILTER_OPTIONS,
         filter: 'test',
@@ -337,9 +298,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only show elastic rules filter', () => {
       mockState({ urlState: null, storageState: { showCustomRules: false } });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         ...INITIAL_FILTER_OPTIONS,
         showElasticRules: true,
@@ -352,9 +312,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only show custom rules filter', () => {
       mockState({ urlState: null, storageState: { showCustomRules: true } });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         ...INITIAL_FILTER_OPTIONS,
         showCustomRules: true,
@@ -367,9 +326,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only tags', () => {
       mockState({ urlState: null, storageState: { tags: ['test'] } });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         ...INITIAL_FILTER_OPTIONS,
         tags: ['test'],
@@ -382,9 +340,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only sorting field', () => {
       mockState({ urlState: null, storageState: { sort: { field: 'name' } } });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
       expect(actions.setSortingOptions).toHaveBeenCalledWith({
         field: 'name',
@@ -397,9 +354,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only sorting order', () => {
       mockState({ urlState: null, storageState: { sort: { order: 'asc' } } });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
       expect(actions.setSortingOptions).toHaveBeenCalledWith({
         field: INITIAL_SORTING_OPTIONS.field,
@@ -412,9 +368,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only page number', () => {
       mockState({ urlState: null, storageState: { page: 10 } });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
       expect(actions.setSortingOptions).not.toHaveBeenCalled();
       expect(actions.setPage).toHaveBeenCalledWith(10);
@@ -424,9 +379,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only page size', () => {
       mockState({ urlState: null, storageState: { perPage: 10 } });
 
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
       expect(actions.setSortingOptions).not.toHaveBeenCalled();
       expect(actions.setPage).not.toHaveBeenCalled();
@@ -440,9 +394,8 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores the state from the url', () => {
-      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+      renderHook(() => useInitializeRulesTableSavedState());
 
-      expect(setActiveTab).toHaveBeenCalledWith('monitoring');
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         filter: urlSavedState.searchTerm,
         showCustomRules: urlSavedState.showCustomRules,
