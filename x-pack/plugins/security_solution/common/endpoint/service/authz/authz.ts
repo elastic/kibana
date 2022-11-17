@@ -143,12 +143,16 @@ export const calculateEndpointAuthz = (
       hasEndpointManagementAccess,
       'readTrustedApplications'
     );
+
   const hasWriteHostIsolationExceptionsPermission = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
     hasEndpointManagementAccess,
     'writeHostIsolationExceptions'
   );
+  const canWriteHostIsolationExceptions =
+    hasWriteHostIsolationExceptionsPermission && isPlatinumPlusLicense;
+
   const hasReadHostIsolationExceptionsPermission =
     hasWriteHostIsolationExceptionsPermission ||
     hasKibanaPrivilege(
@@ -157,6 +161,21 @@ export const calculateEndpointAuthz = (
       hasEndpointManagementAccess,
       'readHostIsolationExceptions'
     );
+  // Calculate the Host Isolation Exceptions Authz. Some of these authz properties could be
+  // set to `true` in cases where license was downgraded, but entries still exist.
+  const canReadHostIsolationExceptions =
+    canWriteHostIsolationExceptions ||
+    (hasReadHostIsolationExceptionsPermission &&
+      // We still allow `read` if not Platinum license, but entries exists for HIE
+      (isPlatinumPlusLicense || hasHostIsolationExceptionsItems));
+
+  const canDeleteHostIsolationExceptions =
+    canWriteHostIsolationExceptions ||
+    // Should be able to delete if host isolation exceptions exists and license is not platinum+
+    (hasWriteHostIsolationExceptionsPermission &&
+      !isPlatinumPlusLicense &&
+      hasHostIsolationExceptionsItems);
+
   const canWriteBlocklist = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
@@ -191,24 +210,6 @@ export const calculateEndpointAuthz = (
     hasEndpointManagementAccess,
     'writeFileOperations'
   );
-
-  // Calculate the Host Isolation Exceptions Authz. Some of these authz properties could be
-  // set to `true` in cases where license was downgraded, but entries still exist.
-  const canWriteHostIsolationExceptions =
-    hasWriteHostIsolationExceptionsPermission && isPlatinumPlusLicense;
-
-  const canReadHostIsolationExceptions =
-    canWriteHostIsolationExceptions ||
-    (hasReadHostIsolationExceptionsPermission &&
-      // We still allow `read` if not Platinum license, but entries exists for HIE
-      (isPlatinumPlusLicense || hasHostIsolationExceptionsItems));
-
-  const canDeleteHostIsolationExceptions =
-    canWriteHostIsolationExceptions ||
-    // Should be able to delete if host isolation exceptions exists and license is not platinum+
-    (hasWriteHostIsolationExceptionsPermission &&
-      !isPlatinumPlusLicense &&
-      hasHostIsolationExceptionsItems);
 
   return {
     canWriteSecuritySolution,
