@@ -8,7 +8,6 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import type { FindingsBaseProps } from '../types';
@@ -22,7 +21,6 @@ import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import {
   getFindingsPageSizeInfo,
   getFilters,
-  getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
   usePersistedQuery,
@@ -30,9 +28,14 @@ import {
 import { PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
+import { usePageSlice } from '../../../common/hooks/use_page_slice';
+import { usePageSize } from '../../../common/hooks/use_page_size';
 import { ErrorCallout } from '../layout/error_callout';
 import { getLimitProperties } from '../utils/get_limit_properties';
-import { LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY } from '../../../../common/constants';
+import {
+  MAX_FINDINGS_TO_LOAD,
+  LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
+} from '../../../common/constants';
 
 export const getDefaultQuery = ({
   query,
@@ -42,18 +45,13 @@ export const getDefaultQuery = ({
   filters,
   sort: { field: '@timestamp', direction: 'desc' },
   pageIndex: 0,
-  pageSize: 10,
 });
-
-const MAX_ITEMS = 500;
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const [pageSize, setPageSize] = useLocalStorage(
-    LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY,
-    urlQuery.pageSize
-  );
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
+
   /**
    * Page URL query to ES query
    */
@@ -67,14 +65,12 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
    * Page ES query result
    */
   const findingsGroupByNone = useLatestFindings({
-    ...getPaginationQuery({
-      pageIndex: urlQuery.pageIndex,
-      pageSize: pageSize || urlQuery.pageSize,
-    }),
     query: baseEsQuery.query,
     sort: urlQuery.sort,
     enabled: !baseEsQuery.error,
   });
+
+  const slicedPage = usePageSlice(findingsGroupByNone.data?.page, urlQuery.pageIndex, pageSize);
 
   const error = findingsGroupByNone.error || baseEsQuery.error;
 
@@ -82,11 +78,11 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     () =>
       getLimitProperties(
         findingsGroupByNone.data?.total || 0,
-        MAX_ITEMS,
-        urlQuery.pageSize,
+        MAX_FINDINGS_TO_LOAD,
+        pageSize,
         urlQuery.pageIndex
       ),
-    [findingsGroupByNone.data?.total, urlQuery.pageIndex, urlQuery.pageSize]
+    [findingsGroupByNone.data?.total, urlQuery.pageIndex, pageSize]
   );
 
   const handleDistributionClick = (evaluation: Evaluation) => {
@@ -134,8 +130,8 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
                 failed: findingsGroupByNone.data.count.failed,
                 ...getFindingsPageSizeInfo({
                   pageIndex: urlQuery.pageIndex,
-                  pageSize: urlQuery.pageSize,
-                  currentPageSize: findingsGroupByNone.data.page.length,
+                  pageSize,
+                  currentPageSize: slicedPage.length,
                 }),
               }}
             />
@@ -143,9 +139,9 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
           <EuiSpacer />
           <FindingsTable
             loading={findingsGroupByNone.isFetching}
-            items={findingsGroupByNone.data?.page || []}
+            items={slicedPage}
             pagination={getPaginationTableParams({
-              pageSize: pageSize || urlQuery.pageSize,
+              pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: limitedTotalItemCount,
             })}
@@ -157,7 +153,6 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
               setUrlQuery({
                 sort,
                 pageIndex: page.index,
-                pageSize: page.size,
               });
             }}
             onAddFilter={(field, value, negate) =>
@@ -182,7 +177,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
                     id="xpack.csp.findings.latestFindings.bottomBarLabel"
                     defaultMessage="These are the first {maxItems} findings matching your search, refine your search to see others."
                     values={{
-                      maxItems: MAX_ITEMS,
+                      maxItems: MAX_FINDINGS_TO_LOAD,
                     }}
                   />
                 </EuiText>

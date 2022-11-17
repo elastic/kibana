@@ -14,11 +14,12 @@ import { useFilesContext } from '../context';
 import { UploadFile as Component } from './upload_file.component';
 import { createUploadState } from './upload_state';
 import { context } from './context';
+import type { FileJSON } from '../../../common';
 
 /**
- * An object representing an uploadded file
+ * An object representing an uploaded file
  */
-interface UploadedFile {
+interface UploadedFile<Meta = unknown> {
   /**
    * The ID that was generated for the uploaded file
    */
@@ -27,6 +28,10 @@ interface UploadedFile {
    * The kind of the file that was passed in to this component
    */
   kind: string;
+  /**
+   * Attributes of a file that represent a serialised version of the file.
+   */
+  fileJSON: FileJSON<Meta>;
 }
 
 /**
