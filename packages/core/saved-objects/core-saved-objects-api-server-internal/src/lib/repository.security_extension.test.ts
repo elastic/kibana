@@ -182,7 +182,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       );
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['get'];
+      const expectedActions = new Set(['get']);
       const expectedSpaces = new Set(multiNamespaceObjNamespaces);
       const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
 
@@ -192,7 +192,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -323,7 +323,7 @@ describe('SavedObjectsRepository Security Extension', () => {
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
 
-      const expectedActions = ['update'];
+      const expectedActions = new Set(['update']);
       const expectedSpaces = new Set(multiNamespaceObjNamespaces);
       const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
 
@@ -333,7 +333,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -472,7 +472,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['create'];
+      const expectedActions = new Set(['create']);
       const expectedSpaces = new Set([namespace]);
       const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
 
@@ -482,7 +482,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -494,7 +494,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['create'];
+      const expectedActions = new Set(['create']);
       const expectedSpaces = new Set(multiNamespaceObjNamespaces);
       const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
 
@@ -504,7 +504,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -648,7 +648,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['delete'];
+      const expectedActions = new Set(['delete']);
       const expectedSpaces = new Set([namespace]);
       const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
 
@@ -658,7 +658,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -759,7 +759,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       await removeReferencesToSuccess(client, repository, type, id, { namespace });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['delete'];
+      const expectedActions = new Set(['delete']);
       const expectedSpaces = new Set([namespace]);
       const expectedTypes = new Set([type]);
 
@@ -769,7 +769,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -896,7 +896,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       await checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['bulk_create'];
+      const expectedActions = new Set(['bulk_create']);
       const expectedSpaces = new Set([namespace]);
       const expectedTypes = new Set([type]);
 
@@ -906,7 +906,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -989,7 +989,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       await repository.openPointInTimeForType(type, { namespaces: [namespace] });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['open_point_in_time'];
+      const expectedActions = new Set(['open_point_in_time']);
       const expectedSpaces = new Set([namespace]);
       const expectedTypes = new Set([type]);
 
@@ -999,7 +999,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -1157,7 +1157,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       await findSuccess(client, repository, { type, namespaces: [namespace] });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(2);
-      const expectedActions = ['find'];
+      const expectedActions = new Set(['find']);
       const expectedSpaces = new Set([namespace]);
       const expectedTypes = new Set([type]);
 
@@ -1167,7 +1167,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -1338,7 +1338,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['bulk_get'];
+      const expectedActions = new Set(['bulk_get']);
       const expectedSpaces = new Set([optionsNamespace, ...objA.namespaces, ...objB.namespaces]);
       const expectedTypes = new Set([objA.type, objB.type]);
 
@@ -1348,7 +1348,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -1517,7 +1517,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['bulk_create'];
+      const expectedActions = new Set(['bulk_create']);
       const expectedSpaces = new Set([namespace]);
       const expectedTypes = new Set([obj1.type, obj2.type]);
 
@@ -1527,7 +1527,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -1553,7 +1553,7 @@ describe('SavedObjectsRepository Security Extension', () => {
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
 
-      const expectedActions = ['bulk_create'];
+      const expectedActions = new Set(['bulk_create']);
       const expectedSpaces = new Set([
         optionsNamespace,
         ...objA.initialNamespaces,
@@ -1567,7 +1567,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -1728,7 +1728,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['bulk_update'];
+      const expectedActions = new Set(['bulk_update']);
       const expectedSpaces = new Set([namespace]);
       const expectedTypes = new Set([obj1.type, obj2.type]);
 
@@ -1738,7 +1738,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -1760,7 +1760,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['bulk_update'];
+      const expectedActions = new Set(['bulk_update']);
       const expectedSpaces = new Set([namespace, objA.namespace, objB.namespace]);
       const expectedTypes = new Set([objA.type, objB.type]);
 
@@ -1770,7 +1770,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });
@@ -1955,7 +1955,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       await bulkDeleteSuccess(client, repository, registry, testObjs, options, internalOptions);
 
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['bulk_delete'];
+      const expectedActions = new Set(['bulk_delete']);
       const expectedSpaces = new Set(internalOptions.mockMGetResponseObjects[1].initialNamespaces);
       const expectedTypes = new Set([obj1.type, obj2.type]);
 
@@ -1965,7 +1965,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });

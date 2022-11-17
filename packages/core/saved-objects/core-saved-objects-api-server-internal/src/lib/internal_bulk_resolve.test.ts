@@ -504,7 +504,7 @@ describe('internalBulkResolve', () => {
 
       await internalBulkResolve(params);
       expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = ['bulk_get'];
+      const expectedActions = new Set(['bulk_get']);
       const expectedSpaces = new Set([namespace]);
       const expectedTypes = new Set([objects[0].type]);
 
@@ -514,7 +514,7 @@ describe('internalBulkResolve', () => {
         types: actualTypes,
       } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
     });

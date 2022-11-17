@@ -771,7 +771,7 @@ describe('#updateObjectsSpaces', () => {
 
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-        const expectedActions = ['share_to_space'];
+        const expectedActions = new Set(['share_to_space']);
         const expectedSpaces = new Set([defaultSpace, otherSpace, EXISTING_SPACE]);
         const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
 
@@ -781,7 +781,7 @@ describe('#updateObjectsSpaces', () => {
           types: actualTypes,
         } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-        expect(actualActions).toEqual(expectedActions);
+        expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
         expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
       });
@@ -857,7 +857,7 @@ describe('#updateObjectsSpaces', () => {
 
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-        const expectedActions = ['share_to_space'];
+        const expectedActions = new Set(['share_to_space']);
         const expectedSpaces = new Set(['*', defaultSpace, otherSpace, EXISTING_SPACE]);
         const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
 
@@ -867,7 +867,7 @@ describe('#updateObjectsSpaces', () => {
           types: actualTypes,
         } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-        expect(actualActions).toEqual(expectedActions);
+        expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
         expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
       });
@@ -880,7 +880,7 @@ describe('#updateObjectsSpaces', () => {
 
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-        const expectedActions = ['share_to_space'];
+        const expectedActions = new Set(['share_to_space']);
         const expectedSpaces = new Set(['*', defaultSpace, otherSpace, EXISTING_SPACE]);
         const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
 
@@ -890,7 +890,7 @@ describe('#updateObjectsSpaces', () => {
           types: actualTypes,
         } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
 
-        expect(actualActions).toEqual(expectedActions);
+        expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
         expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
       });
