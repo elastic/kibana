@@ -422,7 +422,7 @@ describe('createLifecycleExecutor', () => {
   });
 
   describe('updating flappingHistory', () => {
-    it('sets flapping state to false on a new alert', async () => {
+    it('sets flapping state to true on a new alert', async () => {
       const logger = loggerMock.create();
       const ruleDataClientMock = createRuleDataClientMock();
       const executor = createLifecycleExecutor(
@@ -457,12 +457,12 @@ describe('createLifecycleExecutor', () => {
         Object {
           "TEST_ALERT_0": Object {
             "flappingHistory": Array [
-              false,
+              true,
             ],
           },
           "TEST_ALERT_1": Object {
             "flappingHistory": Array [
-              false,
+              true,
             ],
           },
         }

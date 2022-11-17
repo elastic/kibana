@@ -110,7 +110,7 @@ function processAlertsHelper<
             // this alert was not recovered in the previous run, it is considered "new"
             newAlerts[id] = alerts[id];
             if (setFlapping) {
-              updateFlappingHistory(newAlerts[id], false);
+              updateFlappingHistory(newAlerts[id], true);
             }
           }
         } else {
@@ -245,7 +245,7 @@ function processAlertsLimitReached<
           // this alert was not recovered in the previous run, it is considered "new"
           newAlerts[id] = alerts[id];
           if (setFlapping) {
-            updateFlappingHistory(newAlerts[id], false);
+            updateFlappingHistory(newAlerts[id], true);
           }
         }
 

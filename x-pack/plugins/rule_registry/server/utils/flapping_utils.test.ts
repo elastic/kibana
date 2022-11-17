@@ -80,12 +80,12 @@ describe('getFlappingHistory', () => {
     aRuleStateKey: 'INITIAL_RULE_STATE_VALUE',
   };
 
-  test('sets flapping state to false if the alert is new', () => {
+  test('sets flapping state to true if the alert is new', () => {
     const state = { wrapped: initialRuleState, trackedAlerts: {}, trackedAlertsRecovered: {} };
     expect(getFlappingHistory('TEST_ALERT_0', state, true, false, false, []))
       .toMatchInlineSnapshot(`
       Array [
-        false,
+        true,
       ]
     `);
   });

@@ -544,7 +544,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           // pattern of when the alert should fire
-          const instance = [true, false, true, false].concat(new Array(19).fill(true));
+          const instance = [true, false, true, false, true, true, true];
           const pattern = {
             instance,
           };
@@ -584,12 +584,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 22 }],
-                ['execute', { gte: 22 }],
-                ['execute-action', { equal: 21 }],
+                ['execute-start', { gte: 8 }],
+                ['execute', { gte: 8 }],
+                ['execute-action', { equal: 5 }],
                 ['new-instance', { equal: 1 }],
-                ['active-instance', { gte: 21 }],
-                ['recovered-instance', { equal: 2 }],
+                ['active-instance', { gte: 5 }],
+                ['recovered-instance', { equal: 3 }],
               ]),
             });
           });
@@ -601,8 +601,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          const result = new Array(19).fill(false).concat([true, true, false, false]);
-          expect(flapping).to.eql(result);
+          expect(flapping).to.eql([false, false, false, false, true, true, true, false]);
         });
 
         it('should generate expected events for flapping alerts that are mainly recovered', async () => {
@@ -618,7 +617,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           // pattern of when the alert should fire
-          const instance = [true, false, true].concat(new Array(16).fill(false)).concat(true);
+          const instance = [true, false, true, false, false, false, true];
           const pattern = {
             instance,
           };
@@ -658,8 +657,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 20 }],
-                ['execute', { gte: 20 }],
+                ['execute-start', { gte: 8 }],
+                ['execute', { gte: 8 }],
                 ['execute-action', { equal: 3 }],
                 ['new-instance', { equal: 1 }],
                 ['active-instance', { gte: 3 }],

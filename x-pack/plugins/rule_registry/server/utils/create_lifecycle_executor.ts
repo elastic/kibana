@@ -97,7 +97,7 @@ const trackedAlertStateRt = rt.type({
   alertId: rt.string,
   alertUuid: rt.string,
   started: rt.string,
-  // an array used to track changes in alert state
+  // an array used to track changes in alert state, the order is based on the rule executions
   // true - alert has changed from active/recovered
   // false - alert is new or the status has remained either active or recovered
   flappingHistory: rt.array(rt.boolean),

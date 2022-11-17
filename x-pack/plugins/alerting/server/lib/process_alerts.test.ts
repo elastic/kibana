@@ -734,7 +734,7 @@ describe('processAlerts', () => {
   });
 
   describe('updating flappingHistory', () => {
-    test('if new alert, set flapping state to false', () => {
+    test('if new alert, set flapping state to true', () => {
       const activeAlert = new Alert<{}, {}, DefaultActionGroupId>('1');
 
       const alerts = cloneDeep({ '1': activeAlert });
@@ -755,7 +755,7 @@ describe('processAlerts', () => {
           "1": Object {
             "meta": Object {
               "flappingHistory": Array [
-                false,
+                true,
               ],
             },
             "state": Object {
@@ -770,7 +770,7 @@ describe('processAlerts', () => {
           "1": Object {
             "meta": Object {
               "flappingHistory": Array [
-                false,
+                true,
               ],
             },
             "state": Object {
@@ -1045,7 +1045,7 @@ describe('processAlerts', () => {
         expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
       });
 
-      test('if new alert, set flapping state to false', () => {
+      test('if new alert, set flapping state to true', () => {
         const activeAlert1 = new Alert<{}, {}, DefaultActionGroupId>('1', {
           meta: { flappingHistory: [false] },
         });
@@ -1080,7 +1080,7 @@ describe('processAlerts', () => {
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [
-                  false,
+                  true,
                 ],
               },
               "state": Object {
@@ -1095,7 +1095,7 @@ describe('processAlerts', () => {
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [
-                  false,
+                  true,
                 ],
               },
               "state": Object {
@@ -1146,7 +1146,7 @@ describe('processAlerts', () => {
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [
-                  false,
+                  true,
                 ],
               },
               "state": Object {
@@ -1161,7 +1161,7 @@ describe('processAlerts', () => {
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [
-                  false,
+                  true,
                 ],
               },
               "state": Object {

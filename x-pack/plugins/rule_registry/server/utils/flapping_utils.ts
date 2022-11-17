@@ -49,7 +49,7 @@ export function getFlappingHistory<State extends RuleTypeState = never>(
   // duplicating this logic to determine flapping at this level
   let flappingHistory: boolean[] = [];
   if (isNew) {
-    flappingHistory = updateFlappingHistory([], false);
+    flappingHistory = updateFlappingHistory([], true);
   } else if (isActive) {
     if (!state.trackedAlerts[alertId] && state.trackedAlertsRecovered[alertId]) {
       // this alert has flapped from recovered to active

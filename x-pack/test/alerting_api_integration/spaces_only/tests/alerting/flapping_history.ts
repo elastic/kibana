@@ -6,17 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { get } from 'lodash';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import {
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
-  getUrlPrefix,
-  getTestRuleData,
-  ObjectRemover,
-  AlertUtils,
-} from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { Spaces } from '../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
@@ -25,31 +18,20 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const supertest = getService('supertest');
-  const esTestIndexTool = new ESTestIndexTool(es, retry);
   const space = Spaces.default;
 
+  const ACTIVE_PATH = 'alertInstances.instance.meta.flappingHistory';
+  const RECOVERED_PATH = 'alertRecoveredInstances.instance.meta.flappingHistory';
+
   describe('Flapping History', () => {
-    let alertUtils: AlertUtils;
     let actionId: string;
-    const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
     before(async () => {
-      await esTestIndexTool.destroy();
-      await esTestIndexTool.setup();
-      await es.indices.create({ index: authorizationIndex });
       actionId = await createAction();
-      alertUtils = new AlertUtils({
-        space,
-        supertestWithoutAuth,
-        indexRecordActionId: actionId,
-        objectRemover,
-      });
     });
 
     after(async () => {
-      await esTestIndexTool.destroy();
-      await es.indices.delete({ index: authorizationIndex });
       objectRemover.add(space.id, actionId, 'connector', 'actions');
       await objectRemover.removeAll();
     });
@@ -57,127 +39,100 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
     afterEach(() => objectRemover.removeAll());
 
     it('should update flappingHistory when the alert flaps states', async () => {
-      const reference = alertUtils.generateReference();
       let start = new Date().toISOString();
       const pattern = {
         instance: [true, true, false, true],
       };
 
-      const alertId = await createAlert(pattern, actionId, reference);
+      const alertId = await createAlert(pattern, actionId);
       objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
-      let state = await getRuleState(start, alertId, reference);
-      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false]);
+      let state = await getRuleState(start, alertId);
+      expect(get(state, ACTIVE_PATH)).to.eql([true]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
-      state = await getRuleState(start, alertId, reference, 2, true);
-      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false, false]);
+      state = await getRuleState(start, alertId, 2, true);
+      expect(get(state, ACTIVE_PATH)).to.eql([true, false]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
-      state = await getRuleState(start, alertId, reference, 3, true);
-      expect(state.alertRecoveredInstances.instance.meta.flappingHistory).to.eql([
-        false,
-        false,
-        true,
-      ]);
+      state = await getRuleState(start, alertId, 3, true, true);
+      expect(get(state, RECOVERED_PATH)).to.eql([true, false, true]);
       expect(state.alertInstances).to.eql({});
 
       start = new Date().toISOString();
-      state = await getRuleState(start, alertId, reference, 4, true);
-      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false, false, true, true]);
+      state = await getRuleState(start, alertId, 4, true);
+      expect(get(state, ACTIVE_PATH)).to.eql([true, false, true, true]);
       expect(state.alertRecoveredInstances).to.eql({});
     });
 
     it('should update flappingHistory when the alert remains active', async () => {
-      const reference = alertUtils.generateReference();
       let start = new Date().toISOString();
       const pattern = {
         instance: [true, true, true, true],
       };
 
-      const alertId = await createAlert(pattern, actionId, reference);
+      const alertId = await createAlert(pattern, actionId);
       objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
-      let state = await getRuleState(start, alertId, reference);
-      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false]);
+      let state = await getRuleState(start, alertId);
+      expect(get(state, ACTIVE_PATH)).to.eql([true]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
-      state = await getRuleState(start, alertId, reference, 2, true);
-      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false, false]);
+      state = await getRuleState(start, alertId, 2, true);
+      expect(get(state, ACTIVE_PATH)).to.eql([true, false]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
-      state = await getRuleState(start, alertId, reference, 3, true);
-      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false, false, false]);
+      state = await getRuleState(start, alertId, 3, true);
+      expect(get(state, ACTIVE_PATH)).to.eql([true, false, false]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
-      state = await getRuleState(start, alertId, reference, 4, true);
-      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([
-        false,
-        false,
-        false,
-        false,
-      ]);
+      state = await getRuleState(start, alertId, 4, true);
+      expect(get(state, ACTIVE_PATH)).to.eql([true, false, false, false]);
       expect(state.alertRecoveredInstances).to.eql({});
     });
 
     it('should update flappingHistory when the alert remains recovered', async () => {
-      const reference = alertUtils.generateReference();
       let start = new Date().toISOString();
       const pattern = {
-        instance: [true, false, false, false, false],
+        instance: [true, false, false, false, true],
       };
 
-      const alertId = await createAlert(pattern, actionId, reference);
+      const alertId = await createAlert(pattern, actionId);
       objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
-      let state = await getRuleState(start, alertId, reference);
-      expect(state.alertInstances.instance.meta.flappingHistory).to.eql([false]);
+      let state = await getRuleState(start, alertId);
+      expect(get(state, ACTIVE_PATH)).to.eql([true]);
       expect(state.alertRecoveredInstances).to.eql({});
 
       start = new Date().toISOString();
-      state = await getRuleState(start, alertId, reference, 2, true);
-      expect(state.alertRecoveredInstances.instance.meta.flappingHistory).to.eql([false, true]);
+      state = await getRuleState(start, alertId, 2, true, true);
+      expect(get(state, RECOVERED_PATH)).to.eql([true, true]);
       expect(state.alertInstances).to.eql({});
 
       start = new Date().toISOString();
-      state = await getRuleState(start, alertId, reference, 3, true);
-      expect(state.alertRecoveredInstances.instance.meta.flappingHistory).to.eql([
-        false,
-        true,
-        false,
-      ]);
+      state = await getRuleState(start, alertId, 3, true, true);
+      expect(get(state, RECOVERED_PATH)).to.eql([true, true, false]);
       expect(state.alertInstances).to.eql({});
 
       start = new Date().toISOString();
-      state = await getRuleState(start, alertId, reference, 4, true);
-      expect(state.alertRecoveredInstances.instance.meta.flappingHistory).to.eql([
-        false,
-        true,
-        false,
-        false,
-      ]);
+      state = await getRuleState(start, alertId, 4, true, true);
+      expect(get(state, RECOVERED_PATH)).to.eql([true, true, false, false]);
       expect(state.alertInstances).to.eql({});
 
       start = new Date().toISOString();
-      state = await getRuleState(start, alertId, reference, 5, true);
-      expect(state.alertRecoveredInstances.instance.meta.flappingHistory).to.eql([
-        false,
-        true,
-        false,
-        false,
-        false,
-      ]);
-      expect(state.alertInstances).to.eql({});
+      state = await getRuleState(start, alertId, 5, true, false);
+      expect(get(state, ACTIVE_PATH)).to.eql([true, true, false, false, true]);
+      expect(state.alertRecoveredInstances).to.eql({});
     });
   });
 
-  async function getTaskDoc(start: string) {
-    const doc: any = await retry.try(async () => {
+  async function getState(start: string, runs: number, recovered: boolean) {
+    const result: any = await retry.try(async () => {
       const searchResult = await es.search({
         index: '.kibana_task_manager',
         body: {
@@ -201,18 +156,33 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
           },
         },
       });
-      expect((searchResult.hits.total as estypes.SearchTotalHits).value).to.eql(1);
-      return searchResult.hits.hits[0];
+
+      const hits = (searchResult.hits.total as estypes.SearchTotalHits).value;
+      if (hits !== 1) {
+        throw new Error(`Expected 1 search hit but received ${hits}.`);
+      }
+
+      const taskDoc: any = searchResult.hits.hits[0];
+      const state = JSON.parse(taskDoc._source.task.state);
+      const flappingHistory = recovered
+        ? get(state, RECOVERED_PATH, [])
+        : get(state, ACTIVE_PATH, []);
+      if (flappingHistory.length !== runs) {
+        throw new Error(`Expected ${runs} rule executions but received ${flappingHistory.length}.`);
+      }
+
+      return state;
     });
-    return doc;
+
+    return result;
   }
 
   async function getRuleState(
     start: string,
     alertId: string,
-    reference: string,
-    numDocs: number = 1,
-    runRule: boolean = false
+    runs: number = 1,
+    runRule: boolean = false,
+    recovered: boolean = false
   ) {
     if (runRule) {
       const response = await supertest
@@ -220,19 +190,10 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
         .set('kbn-xsrf', 'foo');
       expect(response.status).to.eql(204);
     }
-
-    await esTestIndexTool.waitForDocs('action:test.index-record', reference, numDocs);
-
-    const taskDoc: any = await getTaskDoc(start);
-    const state = JSON.parse(taskDoc._source.task.state);
-    return state;
+    return await getState(start, runs, recovered);
   }
 
-  async function createAlert(
-    pattern: { instance: boolean[] },
-    actionId: string,
-    reference: string
-  ) {
+  async function createAlert(pattern: { instance: boolean[] }, actionId: string) {
     const { body: createdAlert } = await supertest
       .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
@@ -244,26 +205,7 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
           params: {
             pattern,
           },
-          actions: [
-            {
-              group: 'default',
-              id: actionId,
-              params: {
-                index: ES_TEST_INDEX_NAME,
-                reference,
-                message: 'Active message',
-              },
-            },
-            {
-              group: RecoveredActionGroup.id,
-              id: actionId,
-              params: {
-                index: ES_TEST_INDEX_NAME,
-                reference,
-                message: 'Recovered message',
-              },
-            },
-          ],
+          actions: [],
         })
       )
       .expect(200);
