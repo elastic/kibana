@@ -77,7 +77,7 @@ const Indexing = () => (
       <h2>
         <FormattedMessage
           id="xpack.csp.noFindingsStates.indexing.indexingButtonTitle"
-          defaultMessage="No Findings Yet"
+          defaultMessage="Posture evaluation underway"
         />
       </h2>
     }
