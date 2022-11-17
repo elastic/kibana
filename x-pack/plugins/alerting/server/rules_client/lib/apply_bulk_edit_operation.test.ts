@@ -14,96 +14,102 @@ describe('applyBulkEditOperation', () => {
       const ruleMock: Partial<Rule> = {
         tags: ['tag-1', 'tag-2'],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'tags',
-            value: ['add-tag'],
-            operation: 'add',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('tags', ['tag-1', 'tag-2', 'add-tag']);
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'tags',
+          value: ['add-tag'],
+          operation: 'add',
+        },
+        ruleMock
+      );
+
+      expect(modifiedAttributes).toHaveProperty('tags', ['tag-1', 'tag-2', 'add-tag']);
+      expect(isAttributeModified).toBe(true);
     });
 
     test('should add multiple tags', () => {
       const ruleMock: Partial<Rule> = {
         tags: ['tag-1', 'tag-2'],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'tags',
-            value: ['add-tag-1', 'add-tag-2'],
-            operation: 'add',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('tags', ['tag-1', 'tag-2', 'add-tag-1', 'add-tag-2']);
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'tags',
+          value: ['add-tag-1', 'add-tag-2'],
+          operation: 'add',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('tags', [
+        'tag-1',
+        'tag-2',
+        'add-tag-1',
+        'add-tag-2',
+      ]);
+      expect(isAttributeModified).toBe(true);
     });
 
     test('should not have duplicated tags when added existed ones', () => {
       const ruleMock: Partial<Rule> = {
         tags: ['tag-1', 'tag-2'],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'tags',
-            value: ['tag-1', 'tag-3'],
-            operation: 'add',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('tags', ['tag-1', 'tag-2', 'tag-3']);
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'tags',
+          value: ['tag-1', 'tag-3'],
+          operation: 'add',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('tags', ['tag-1', 'tag-2', 'tag-3']);
+      expect(isAttributeModified).toBe(true);
     });
 
     test('should delete tag', () => {
       const ruleMock: Partial<Rule> = {
         tags: ['tag-1', 'tag-2'],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'tags',
-            value: ['tag-1'],
-            operation: 'delete',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('tags', ['tag-2']);
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'tags',
+          value: ['tag-1'],
+          operation: 'delete',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('tags', ['tag-2']);
+      expect(isAttributeModified).toBe(true);
     });
 
     test('should delete multiple tags', () => {
       const ruleMock: Partial<Rule> = {
         tags: ['tag-1', 'tag-2'],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'tags',
-            value: ['tag-1', 'tag-2'],
-            operation: 'delete',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('tags', []);
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'tags',
+          value: ['tag-1', 'tag-2'],
+          operation: 'delete',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('tags', []);
+      expect(isAttributeModified).toBe(true);
     });
 
     test('should rewrite tags', () => {
       const ruleMock: Partial<Rule> = {
         tags: ['tag-1', 'tag-2'],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'tags',
-            value: ['rewrite-tag'],
-            operation: 'set',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('tags', ['rewrite-tag']);
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'tags',
+          value: ['rewrite-tag'],
+          operation: 'set',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('tags', ['rewrite-tag']);
+      expect(isAttributeModified).toBe(true);
     });
   });
 
@@ -112,60 +118,60 @@ describe('applyBulkEditOperation', () => {
       const ruleMock = {
         actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'actions',
-            value: [
-              { id: 'mock-add-action-id-1', group: 'default', params: {} },
-              { id: 'mock-add-action-id-2', group: 'default', params: {} },
-            ],
-            operation: 'add',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('actions', [
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'actions',
+          value: [
+            { id: 'mock-add-action-id-1', group: 'default', params: {} },
+            { id: 'mock-add-action-id-2', group: 'default', params: {} },
+          ],
+          operation: 'add',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('actions', [
         { id: 'mock-action-id', group: 'default', params: {} },
         { id: 'mock-add-action-id-1', group: 'default', params: {} },
         { id: 'mock-add-action-id-2', group: 'default', params: {} },
       ]);
+      expect(isAttributeModified).toBe(true);
     });
 
     test('should add action with different params and same id', () => {
       const ruleMock = {
         actions: [{ id: 'mock-action-id', group: 'default', params: { test: 1 } }],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'actions',
-            value: [{ id: 'mock-action-id', group: 'default', params: { test: 2 } }],
-            operation: 'add',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('actions', [
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'actions',
+          value: [{ id: 'mock-action-id', group: 'default', params: { test: 2 } }],
+          operation: 'add',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('actions', [
         { id: 'mock-action-id', group: 'default', params: { test: 1 } },
         { id: 'mock-action-id', group: 'default', params: { test: 2 } },
       ]);
+      expect(isAttributeModified).toBe(true);
     });
 
     test('should rewrite actions', () => {
       const ruleMock = {
         actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'actions',
-            value: [{ id: 'mock-rewrite-action-id-1', group: 'default', params: {} }],
-            operation: 'set',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('actions', [
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'actions',
+          value: [{ id: 'mock-rewrite-action-id-1', group: 'default', params: {} }],
+          operation: 'set',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('actions', [
         { id: 'mock-rewrite-action-id-1', group: 'default', params: {} },
       ]);
+      expect(isAttributeModified).toBe(true);
     });
   });
 
@@ -174,16 +180,16 @@ describe('applyBulkEditOperation', () => {
       const ruleMock = {
         actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'throttle',
-            value: '1d',
-            operation: 'set',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('throttle', '1d');
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'throttle',
+          value: '1d',
+          operation: 'set',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('throttle', '1d');
+      expect(isAttributeModified).toBe(true);
     });
   });
 
@@ -192,16 +198,16 @@ describe('applyBulkEditOperation', () => {
       const ruleMock = {
         actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'notifyWhen',
-            value: 'onThrottleInterval',
-            operation: 'set',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('notifyWhen', 'onThrottleInterval');
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'notifyWhen',
+          value: 'onThrottleInterval',
+          operation: 'set',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('notifyWhen', 'onThrottleInterval');
+      expect(isAttributeModified).toBe(true);
     });
   });
 
@@ -210,16 +216,16 @@ describe('applyBulkEditOperation', () => {
       const ruleMock = {
         actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
       };
-      expect(
-        applyBulkEditOperation(
-          {
-            field: 'schedule',
-            value: { interval: '1d' },
-            operation: 'set',
-          },
-          ruleMock
-        )
-      ).toHaveProperty('schedule', { interval: '1d' });
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'schedule',
+          value: { interval: '1d' },
+          operation: 'set',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('schedule', { interval: '1d' });
+      expect(isAttributeModified).toBe(true);
     });
   });
 });
