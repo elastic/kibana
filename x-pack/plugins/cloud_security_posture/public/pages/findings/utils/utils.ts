@@ -6,12 +6,13 @@
  */
 
 import { buildEsQuery, type Query } from '@kbn/es-query';
-import { EuiBasicTableProps, Pagination } from '@elastic/eui';
+import type { EuiBasicTableProps, EuiThemeComputed, Pagination } from '@elastic/eui';
 import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
+import type { CspFinding } from '../../../../common/schemas/csp_finding';
 export { getFilters } from './get_filters';
 
 const getBaseQuery = ({ dataView, query, filters }: FindingsBaseURLQuery & FindingsBaseProps) => {
@@ -128,3 +129,14 @@ export const getAggregationCount = (buckets: estypes.AggregationsStringRareTerms
     failed: failed?.doc_count || 0,
   };
 };
+
+const isSelectedRow = (row: CspFinding, selected?: CspFinding) =>
+  row.resource.id === selected?.resource.id && row.rule.id === selected?.rule.id;
+
+export const getSelectedRowStyle = (
+  theme: EuiThemeComputed,
+  row: CspFinding,
+  selected?: CspFinding
+): React.CSSProperties => ({
+  background: isSelectedRow(row, selected) ? theme.colors.highlight : undefined,
+});

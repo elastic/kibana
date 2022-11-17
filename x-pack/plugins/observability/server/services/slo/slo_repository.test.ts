@@ -13,11 +13,12 @@ import {
 } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { SLO, sloSchema, StoredSLO } from '../../types/models';
+import { SLO, StoredSLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
 import { createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
 import { SLONotFound } from '../../errors';
+import { sloSchema } from '../../types/schema';
 
 const SOME_SLO = createSLO({ indicator: createAPMTransactionDurationIndicator() });
 

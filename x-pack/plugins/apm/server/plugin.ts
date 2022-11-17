@@ -92,7 +92,7 @@ export class APMPlugin
     ) {
       createApmTelemetry({
         core,
-        config$,
+        config: currentConfig,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
@@ -190,12 +190,13 @@ export class APMPlugin
 
     if (plugins.alerting) {
       registerApmRuleTypes({
-        ruleDataClient,
         alerting: plugins.alerting,
-        ml: plugins.ml,
+        basePath: core.http.basePath,
         config$,
         logger: this.logger!.get('rule'),
-        basePath: core.http.basePath,
+        ml: plugins.ml,
+        observability: plugins.observability,
+        ruleDataClient,
       });
     }
 

@@ -11,13 +11,14 @@ import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elast
 import { ISearchSource } from '@kbn/data-plugin/common';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
-import { EsQueryRuleParams, SearchType } from '../types';
-import { useTriggersAndActionsUiDeps } from '../util';
+import { EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
 import { DEFAULT_VALUES } from '../constants';
+import { useTriggerUiActionServices } from '../util';
 
 export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<
-  EsQueryRuleParams<SearchType.searchSource>
+  EsQueryRuleParams<SearchType.searchSource>,
+  EsQueryRuleMetaData
 >;
 
 export const SearchSourceExpression = ({
@@ -25,6 +26,8 @@ export const SearchSourceExpression = ({
   errors,
   setRuleParams,
   setRuleProperty,
+  metadata,
+  onChangeMetaData,
 }: SearchSourceExpressionProps) => {
   const {
     thresholdComparator,
@@ -36,7 +39,7 @@ export const SearchSourceExpression = ({
     searchConfiguration,
     excludeHitsFromPreviousRun,
   } = ruleParams;
-  const { data } = useTriggersAndActionsUiDeps();
+  const { data } = useTriggerUiActionServices();
 
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
@@ -76,7 +79,7 @@ export const SearchSourceExpression = ({
 
       data.search.searchSource
         .create(initialSearchConfiguration)
-        .then((fetchedSearchSource) => setSearchSource(fetchedSearchSource))
+        .then(setSearchSource)
         .catch(setParamsError);
     };
 
@@ -112,6 +115,8 @@ export const SearchSourceExpression = ({
       errors={errors}
       initialSavedQuery={savedQuery}
       setParam={setParam}
+      metadata={metadata}
+      onChangeMetaData={onChangeMetaData}
     />
   );
 };

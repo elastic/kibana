@@ -9,6 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface Props {
   from: string;
@@ -22,6 +23,12 @@ export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
 
   const { euiTheme } = useEuiTheme();
 
+  const selectedLocation = useSelectedLocation();
+
+  if (!selectedLocation) {
+    return null;
+  }
+
   return (
     <ExploratoryViewEmbeddable
       reportType="kpi-over-time"
@@ -33,8 +40,12 @@ export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
           seriesType: 'area',
           time: useMemo(() => ({ from, to }), [from, to]),
           reportDefinitions: { 'monitor.id': monitorId },
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation?.label],
+          },
           dataType: 'synthetics',
-          selectedMetricField: 'state.id',
+          selectedMetricField: 'state.up',
           name: 'Monitor errors',
           color: euiTheme.colors.danger,
           operationType: 'unique_count',
