@@ -16,21 +16,18 @@ interface DuplicateTitleCalloutProps {
 }
 
 const getI18nTexts = ({ title, entityName }: { title: string; entityName: string }) => ({
-  title: i18n.translate('contentManagement.inspector.metadataForm.duplicateTitleLabel', {
+  title: i18n.translate('contentManagement.inspector.duplicateTitleLabel', {
     defaultMessage: 'This {entityName} already exists.',
     values: {
       entityName,
     },
   }),
-  description: i18n.translate(
-    'contentManagement.inspector.metadataForm.duplicateTitleDescription',
-    {
-      defaultMessage: "Saving '{title}' creates a duplicate title.",
-      values: {
-        title,
-      },
-    }
-  ),
+  description: i18n.translate('contentManagement.inspector.duplicateTitleDescription', {
+    defaultMessage: "Saving '{title}' creates a duplicate title.",
+    values: {
+      title,
+    },
+  }),
 });
 
 export const DuplicateTitleCallout = ({ title, entityName }: DuplicateTitleCalloutProps) => {
