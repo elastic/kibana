@@ -69,7 +69,7 @@ export abstract class InferenceBase<TInferResponse> {
   protected isValid$ = new BehaviorSubject<boolean>(false);
   protected readonly info: string[] = [];
 
-  protected validators$: Array<Observable<boolean>> = [];
+  private validators$: Array<Observable<boolean>> = [];
   private validatorsSubscriptions$: Subscription = new Subscription();
 
   constructor(
@@ -89,7 +89,11 @@ export abstract class InferenceBase<TInferResponse> {
     this.validatorsSubscriptions$.unsubscribe();
   }
 
-  protected initializeValidators() {
+  protected initializeValidators(additionalValidators?: Array<Observable<boolean>>) {
+    if (additionalValidators) {
+      this.validators$.push(...additionalValidators);
+    }
+
     this.validatorsSubscriptions$.add(
       combineLatest(this.validators$)
         .pipe(

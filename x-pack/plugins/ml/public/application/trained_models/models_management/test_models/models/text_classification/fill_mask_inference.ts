@@ -38,11 +38,9 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
   ) {
     super(trainedModelsApi, model, inputType);
 
-    this.validators$.push(
-      this.inputText$.pipe(map((inputText) => inputText.every((t) => t.includes(MASK))))
-    );
-
-    this.initializeValidators();
+    this.initializeValidators([
+      this.inputText$.pipe(map((inputText) => inputText.every((t) => t.includes(MASK)))),
+    ]);
   }
 
   protected async inferText() {

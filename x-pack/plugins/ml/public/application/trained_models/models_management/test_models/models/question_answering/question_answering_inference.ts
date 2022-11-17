@@ -66,8 +66,9 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
   ) {
     super(trainedModelsApi, model, inputType);
 
-    this.validators$.push(this.questionText$.pipe(map((questionText) => questionText !== '')));
-    this.initializeValidators();
+    this.initializeValidators([
+      this.questionText$.pipe(map((questionText) => questionText !== '')),
+    ]);
   }
 
   public async inferText() {

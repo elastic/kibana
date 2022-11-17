@@ -41,9 +41,7 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
   ) {
     super(trainedModelsApi, model, inputType);
 
-    this.validators$.push(this.labelsText$.pipe(map((labelsText) => labelsText !== '')));
-
-    this.initializeValidators();
+    this.initializeValidators([this.labelsText$.pipe(map((labelsText) => labelsText !== ''))]);
   }
 
   public async inferText() {
