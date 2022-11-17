@@ -54,6 +54,21 @@ export class CustomIntegrationsPlugin
       python: React.lazy(async () => ({
         default: (await import('./language_components')).ElasticsearchPyClientReadme,
       })),
+      go: React.lazy(async () => ({
+        default: (await import('./language_components')).ElasticsearchGoClientReadme,
+      })),
+      ruby: React.lazy(async () => ({
+        default: (await import('./language_components')).ElasticsearchRubyClientReadme,
+      })),
+      java: React.lazy(async () => ({
+        default: (await import('./language_components')).ElasticsearchJavaClientReadme,
+      })),
+      php: React.lazy(async () => ({
+        default: (await import('./language_components')).ElasticsearchPhpClientReadme,
+      })),
+      dotnet: React.lazy(async () => ({
+        default: (await import('./language_components')).ElasticsearchDotnetClientReadme,
+      })),
     };
 
     const ContextProvider: React.FC = ({ children }) => (
