@@ -13,6 +13,7 @@ import type { ESClusterInfo } from './types';
 export interface IArtifact {
   start(receiver: ITelemetryReceiver): Promise<void>;
   getArtifact(name: string): Promise<unknown>;
+  getManifestUrl(): string | undefined;
 }
 
 export class Artifact implements IArtifact {
@@ -29,7 +30,7 @@ export class Artifact implements IArtifact {
       const version = this.esClusterInfo.version.number.substring(
         0,
         this.esClusterInfo.version.number.indexOf('-')
-      );
+      ) || this.esClusterInfo.version.number;
       this.manifestUrl = `${this.CDN_URL}/downloads/kibana/manifest/artifacts-${version}.zip`;
     }
   }
@@ -54,6 +55,10 @@ export class Artifact implements IArtifact {
     } else {
       throw Error(`No manifest url for version ${this.esClusterInfo?.version?.number}`);
     }
+  }
+
+  public getManifestUrl() {
+    return this.manifestUrl;
   }
 }
 
