@@ -2874,7 +2874,7 @@ export class RulesClient {
       action: 'DISABLE',
     });
 
-    const { errors, taskIdsToDisable, taskIdsToDelete } = await retryIfBulkDisableConflicts(
+    const { errors, rules, taskIdsToDisable, taskIdsToDelete } = await retryIfBulkDisableConflicts(
       this.logger,
       (filterKueryNode: KueryNode | null) =>
         this.bulkDisableRulesWithOCC({ filter: filterKueryNode }),
@@ -2933,7 +2933,17 @@ export class RulesClient {
       }
     }
 
-    return { errors, total };
+    const updatedRules = rules.map(({ id, attributes, references }) => {
+      return this.getAlertFromRaw(
+        id,
+        attributes.alertTypeId as string,
+        attributes as RawRule,
+        references,
+        false
+      );
+    });
+
+    return { errors, rules: updatedRules, total };
   };
 
   private bulkDisableRulesWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
@@ -3010,6 +3020,7 @@ export class RulesClient {
 
     const taskIdsToDisable: string[] = [];
     const taskIdsToDelete: string[] = [];
+    const disabledRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
 
     result.saved_objects.forEach((rule) => {
       if (rule.error === undefined) {
@@ -3020,6 +3031,7 @@ export class RulesClient {
             taskIdsToDisable.push(rule.attributes.scheduledTaskId);
           }
         }
+        disabledRules.push(rule);
       } else {
         errors.push({
           message: rule.error.message ?? 'n/a',
@@ -3032,7 +3044,7 @@ export class RulesClient {
       }
     });
 
-    return { errors, taskIdsToDisable, taskIdsToDelete };
+    return { errors, rules: disabledRules, taskIdsToDisable, taskIdsToDelete };
   };
 
   private apiKeyAsAlertAttributes(

@@ -26,7 +26,7 @@ beforeEach(() => {
 
 describe('bulkDisableRulesRoute', () => {
   const bulkDisableRequest = { filter: '' };
-  const bulkDisableResult = { errors: [], total: 1 };
+  const bulkDisableResult = { errors: [], rules: [], total: 1 };
 
   it('should disable rules with proper parameters', async () => {
     const licenseState = licenseStateMock.create();

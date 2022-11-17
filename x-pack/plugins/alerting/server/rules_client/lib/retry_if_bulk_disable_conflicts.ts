@@ -8,21 +8,24 @@
 import pMap from 'p-map';
 import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkOperationError } from '../rules_client';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
+import { RawRule } from '../../types';
 
 const MAX_RULES_IDS_IN_RETRY = 1000;
 
 export type BulkDisableOperation = (filter: KueryNode | null) => Promise<{
   errors: BulkOperationError[];
+  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   taskIdsToDisable: string[];
   taskIdsToDelete: string[];
 }>;
 
 interface ReturnRetry {
   errors: BulkOperationError[];
+  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   taskIdsToDisable: string[];
   taskIdsToDelete: string[];
 }
@@ -36,6 +39,7 @@ interface ReturnRetry {
  * @param filter - KueryNode filter
  * @param retries - number of retries left
  * @param accErrors - accumulated conflict errors
+ * @param accRules - accumulated disabled rules
  * @param accTaskIdsToDisable - accumulated task ids to disable
  * @param accTaskIdsToDelete - accumulated task ids to delete
  * @returns Promise<ReturnRetry>
@@ -47,16 +51,19 @@ export const retryIfBulkDisableConflicts = async (
   filter: KueryNode | null,
   retries: number = RETRY_IF_CONFLICTS_ATTEMPTS,
   accErrors: BulkOperationError[] = [],
+  accRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [],
   accTaskIdsToDisable: string[] = [],
   accTaskIdsToDelete: string[] = []
 ): Promise<ReturnRetry> => {
   try {
     const {
       errors: currentErrors,
+      rules: currentRules,
       taskIdsToDisable: currentTaskIdsToDisable,
       taskIdsToDelete: currentTaskIdsToDelete,
     } = await bulkDisableOperation(filter);
-
+    
+    const rules = [...accRules, ...currentRules];
     const taskIdsToDisable = [...accTaskIdsToDisable, ...currentTaskIdsToDisable];
     const taskIdsToDelete = [...accTaskIdsToDelete, ...currentTaskIdsToDelete];
     const errors =
@@ -74,6 +81,7 @@ export const retryIfBulkDisableConflicts = async (
     if (ruleIdsWithConflictError.length === 0) {
       return {
         errors,
+        rules,
         taskIdsToDisable,
         taskIdsToDelete,
       };
@@ -84,6 +92,7 @@ export const retryIfBulkDisableConflicts = async (
 
       return {
         errors,
+        rules,
         taskIdsToDisable,
         taskIdsToDelete,
       };
@@ -108,6 +117,7 @@ export const retryIfBulkDisableConflicts = async (
             convertRuleIdsToKueryNode(queryIds),
             retries - 1,
             errors,
+            rules,
             taskIdsToDisable
           ),
         {
@@ -118,11 +128,12 @@ export const retryIfBulkDisableConflicts = async (
       (acc, item) => {
         return {
           errors: [...acc.errors, ...item.errors],
+          rules: [...acc.rules, ...item.rules],
           taskIdsToDisable: [...acc.taskIdsToDisable, ...item.taskIdsToDisable],
           taskIdsToDelete: [...acc.taskIdsToDelete, ...item.taskIdsToDelete],
         };
       },
-      { errors: [], taskIdsToDisable: [], taskIdsToDelete: [] }
+      { errors: [], rules: [], taskIdsToDisable: [], taskIdsToDelete: [] }
     );
   } catch (err) {
     throw err;

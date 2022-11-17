@@ -120,3 +120,23 @@ export const rule2 = {
     apiKey: Buffer.from('321:abc').toString('base64'),
   },
 };
+
+export const updatedRule1 = {
+  actions: [],
+  id: 'id1',
+  notifyWhen: undefined,
+  params: undefined,
+  schedule: undefined,
+  snoozeSchedule: [],
+  scheduledTaskId: 'id1',
+};
+
+export const updatedRule2 = {
+  actions: [],
+  id: 'id2',
+  notifyWhen: undefined,
+  params: undefined,
+  schedule: undefined,
+  snoozeSchedule: [],
+  scheduledTaskId: 'id2',
+};

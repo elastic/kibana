@@ -10,7 +10,39 @@ import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
-const defaultSuccessfulResponse = { total: 1, errors: [] };
+const getDefaultRules = (response: any) => ({
+  id: response.body.rules[0].id,
+  notifyWhen: 'onThrottleInterval',
+  enabled: false,
+  name: 'abc',
+  tags: ['foo'],
+  consumer: 'alertsFixture',
+  throttle: '1m',
+  alertTypeId: 'test.noop',
+  apiKeyOwner: response.body.rules[0].apiKeyOwner,
+  createdBy: 'elastic',
+  updatedBy: response.body.rules[0].updatedBy,
+  muteAll: false,
+  mutedInstanceIds: [],
+  schedule: { interval: '1m' },
+  actions: [],
+  params: {},
+  snoozeSchedule: [],
+  updatedAt: response.body.rules[0].updatedAt,
+  createdAt: response.body.rules[0].createdAt,
+  scheduledTaskId: response.body.rules[0].scheduledTaskId,
+  executionStatus: {
+    lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+    status: 'pending',
+  },
+  monitoring: response.body.rules[0].monitoring,
+});
+
+const getDefaultResponse = (response: any) => ({
+  total: 1,
+  rules: [getDefaultRules(response)],
+  errors: [],
+});
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -73,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql(getDefaultResponse(response));
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -132,7 +164,17 @@ export default ({ getService }: FtrProviderContext) => {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                total: 1,
+                rules: [
+                  {
+                    ...getDefaultRules(response),
+                    alertTypeId: 'test.restricted-noop',
+                    consumer: 'alertsRestrictedFixture',
+                  },
+                ],
+                errors: [],
+              });
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -182,7 +224,16 @@ export default ({ getService }: FtrProviderContext) => {
               objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'superuser at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                total: 1,
+                rules: [
+                  {
+                    ...getDefaultRules(response),
+                    alertTypeId: 'test.restricted-noop',
+                  },
+                ],
+                errors: [],
+              });
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -232,7 +283,16 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                total: 1,
+                rules: [
+                  {
+                    ...getDefaultRules(response),
+                    consumer: 'alerts',
+                  },
+                ],
+                errors: [],
+              });
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -289,7 +349,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
+              expect(response.body.total).to.eql(3);
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -346,7 +406,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
+              expect(response.body.total).to.eql(3);
               expect(response.statusCode).to.eql(200);
               await Promise.all(
                 rules.map((rule) => {
@@ -375,7 +435,7 @@ export default ({ getService }: FtrProviderContext) => {
           switch (scenario.id) {
             // This superuser has more privileges that we think
             case 'superuser at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql(getDefaultResponse(response));
               expect(response.statusCode).to.eql(200);
               break;
             case 'global_read at space1':

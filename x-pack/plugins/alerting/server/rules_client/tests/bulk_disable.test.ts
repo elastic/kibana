@@ -29,6 +29,8 @@ import {
   successfulSavedObject1,
   successfulSavedObject2,
   successfulSavedObjects,
+  updatedRule1,
+  updatedRule2,
 } from './test_helpers';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
@@ -152,6 +154,7 @@ describe('bulkDisableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
+      rules: [updatedRule1, updatedRule2],
       total: 2,
     });
   });
@@ -178,6 +181,7 @@ describe('bulkDisableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
+      rules: [updatedRule1],
       total: 2,
     });
   });
@@ -222,6 +226,7 @@ describe('bulkDisableRules', () => {
     expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
+      rules: [updatedRule1],
       total: 2,
     });
   });
@@ -262,6 +267,7 @@ describe('bulkDisableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
+      rules: [updatedRule1, updatedRule2],
       total: 2,
     });
   });
@@ -325,6 +331,7 @@ describe('bulkDisableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
+      rules: [updatedRule1],
       total: 2,
     });
   });
