@@ -68,8 +68,9 @@ Security::
 [[fixes-v8.5.2]]
 === Bug fixes
 APM::
-* Limit the number of source map artifacts {kibana-pull}144963[#144963]
-* Suppress error toast when data view cannot be created {kibana-pull}143639[#143639]
+* Limits the number of source map artifacts {kibana-pull}144963[#144963]
+* Fixes an incorrect documentation link {kibana-pull}145077[#145077]
+* Suppresses error toast when data view cannot be created {kibana-pull}143639[#143639]
 
 Dashboard::
 Fixes unexpected suggestions for text/keyword multi-fields {kibana-pull}145177[#145177]
