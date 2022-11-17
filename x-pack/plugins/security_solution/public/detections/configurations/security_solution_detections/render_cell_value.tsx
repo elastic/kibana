@@ -9,7 +9,6 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { find } from 'lodash/fp';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
 import {
@@ -48,7 +47,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     [columnId, props.isDetails, rowIndex, scopeId]
   );
 
-  const suppressionCount = find({ field: 'kibana.alert.suppression.docs_count' }, props.data);
+  const suppressionCount = props.ecsData?.kibana?.alert.suppression?.docs_count;
 
   const component = (
     <GuidedOnboardingTourStep
@@ -61,12 +60,12 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
   );
 
   return columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
-    suppressionCount?.value &&
-    parseInt(suppressionCount.value[0], 10) > 0 ? (
+    suppressionCount &&
+    parseInt(suppressionCount[0], 10) > 0 ? (
     <SuppressedAlertIconWrapper>
       <EuiToolTip
         position="top"
-        content={SUPPRESSED_ALERT_TOOLTIP(parseInt(suppressionCount.value[0], 10))}
+        content={SUPPRESSED_ALERT_TOOLTIP(parseInt(suppressionCount[0], 10))}
       >
         <EuiIcon type="layers" />
       </EuiToolTip>
