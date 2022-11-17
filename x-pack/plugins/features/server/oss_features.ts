@@ -423,6 +423,45 @@ export const buildOSSFeatures = ({
       },
     },
     {
+      id: 'filesManagement',
+      name: i18n.translate('xpack.features.filesManagementFeatureName', {
+        defaultMessage: 'Files Management',
+      }),
+      order: 1600,
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: ['kibana'],
+      catalogue: [],
+      management: {
+        kibana: ['filesManagement'],
+      },
+      privileges: {
+        all: {
+          app: ['kibana'],
+          management: {
+            kibana: ['filesManagement'],
+          },
+          savedObject: {
+            all: ['files'],
+            read: [],
+          },
+          ui: [],
+          api: ['files:manageFiles'],
+        },
+        read: {
+          app: ['kibana'],
+          management: {
+            kibana: ['filesManagement'],
+          },
+          savedObject: {
+            all: [],
+            read: ['files'],
+          },
+          ui: [],
+          api: ['files:manageFiles'],
+        },
+      },
+    },
+    {
       id: 'savedObjectsManagement',
       name: i18n.translate('xpack.features.savedObjectsManagementFeatureName', {
         defaultMessage: 'Saved Objects Management',
