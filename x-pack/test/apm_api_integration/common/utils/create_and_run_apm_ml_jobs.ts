@@ -5,13 +5,38 @@
  * 2.0.
  */
 
+import { Client } from '@elastic/elasticsearch';
 import job from '@kbn/ml-plugin/server/models/data_recognizer/modules/apm_transaction/ml/apm_tx_metrics.json';
 import datafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/apm_transaction/ml/datafeed_apm_tx_metrics.json';
 import { MlApi } from '../../../functional/services/ml/api';
 
-export function createAndRunApmMlJob({ ml, environment }: { ml: MlApi; environment: string }) {
+export async function createAndRunApmMlJobs({
+  es,
+  ml,
+  environments,
+}: {
+  es: Client;
+  ml: MlApi;
+  environments: string[];
+}) {
+  // Creating multiple ml jobs in parallel is causing this tests to be flaky
+  // https://github.com/elastic/elasticsearch/issues/36271
+  for (const environment of environments) {
+    await createAndRunApmMlJob({ es, environment, ml });
+  }
+}
+
+async function createAndRunApmMlJob({
+  es,
+  ml,
+  environment,
+}: {
+  es: Client;
+  ml: MlApi;
+  environment: string;
+}) {
   const jobId = `apm-tx-metrics-${environment}`;
-  return ml.createAndRunAnomalyDetectionLookbackJob(
+  await ml.createAndRunAnomalyDetectionLookbackJob(
     // @ts-expect-error not entire job config
     {
       ...job,
@@ -37,4 +62,6 @@ export function createAndRunApmMlJob({ ml, environment }: { ml: MlApi; environme
       },
     }
   );
+
+  await es.cluster.health({ index: '.ml-state-*', wait_for_status: 'yellow' });
 }
