@@ -28,7 +28,7 @@ import type { AppState, GetStateReturn } from '../../services/discover_state';
 import { FetchStatus } from '../../../types';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
-import { sendErrorTo } from '../../utils/fetch_all';
+import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
@@ -184,8 +184,12 @@ export const useDiscoverHistogram = ({
         result,
         recordRawType,
       });
+
+      if (status === UnifiedHistogramFetchStatus.complete && typeof result === 'number') {
+        checkHitCount(savedSearchData$.main$, result);
+      }
     },
-    [data, savedSearchData$.totalHits$]
+    [data, savedSearchData$.main$, savedSearchData$.totalHits$]
   );
 
   // We only rely on the totalHits$ observable if we don't have a local hits context yet,

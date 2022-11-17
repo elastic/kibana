@@ -26,6 +26,7 @@ import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/pu
 import { useInspector } from '../../hooks/use_inspector';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
+import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
@@ -216,27 +217,30 @@ export function DiscoverLayout({
     }
 
     return (
-      <DiscoverHistogramLayout
-        isPlainRecord={isPlainRecord}
-        dataView={dataView}
-        navigateTo={navigateTo}
-        resetSavedSearch={resetSavedSearch}
-        expandedDoc={expandedDoc}
-        setExpandedDoc={setExpandedDoc}
-        savedSearch={savedSearch}
-        savedSearchData$={savedSearchData$}
-        savedSearchRefetch$={savedSearchRefetch$}
-        state={state}
-        stateContainer={stateContainer}
-        isTimeBased={isTimeBased}
-        viewMode={viewMode}
-        onAddFilter={onAddFilter as DocViewFilterFn}
-        onFieldEdited={onFieldEdited}
-        columns={columns}
-        resizeRef={resizeRef}
-        inspectorAdapters={inspectorAdapters}
-        searchSessionManager={searchSessionManager}
-      />
+      <>
+        <DiscoverHistogramLayout
+          isPlainRecord={isPlainRecord}
+          dataView={dataView}
+          navigateTo={navigateTo}
+          resetSavedSearch={resetSavedSearch}
+          expandedDoc={expandedDoc}
+          setExpandedDoc={setExpandedDoc}
+          savedSearch={savedSearch}
+          savedSearchData$={savedSearchData$}
+          savedSearchRefetch$={savedSearchRefetch$}
+          state={state}
+          stateContainer={stateContainer}
+          isTimeBased={isTimeBased}
+          viewMode={viewMode}
+          onAddFilter={onAddFilter as DocViewFilterFn}
+          onFieldEdited={onFieldEdited}
+          columns={columns}
+          resizeRef={resizeRef}
+          inspectorAdapters={inspectorAdapters}
+          searchSessionManager={searchSessionManager}
+        />
+        {resultState === 'loading' && <LoadingSpinner />}
+      </>
     );
   }, [
     columns,

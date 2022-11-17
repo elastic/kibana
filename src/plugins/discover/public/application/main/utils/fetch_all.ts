@@ -12,24 +12,18 @@ import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
 import { getRawRecordType } from './get_raw_record_type';
 import {
+  checkHitCount,
   sendCompleteMsg,
   sendErrorMsg,
+  sendErrorTo,
   sendLoadingMsg,
-  sendNoResultsFoundMsg,
-  sendPartialMsg,
   sendResetMsg,
 } from '../hooks/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
 import { fetchDocuments } from './fetch_documents';
 import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';
-import {
-  DataDocuments$,
-  DataMain$,
-  DataMsg,
-  RecordRawType,
-  SavedSearchData,
-} from '../hooks/use_saved_search';
+import { DataMsg, RecordRawType, SavedSearchData } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
 
@@ -44,25 +38,6 @@ export interface FetchDeps {
   services: DiscoverServices;
   useNewFieldsApi: boolean;
 }
-
-/**
- * Method to create an error handler that will forward the received error
- * to the specified subjects. It will ignore AbortErrors and will use the data
- * plugin to show a toast for the error (e.g. allowing better insights into shard failures).
- */
-export const sendErrorTo = (
-  data: DataPublicPluginStart,
-  ...errorSubjects: Array<DataMain$ | DataDocuments$>
-) => {
-  return (error: Error) => {
-    if (error instanceof Error && error.name === 'AbortError') {
-      return;
-    }
-
-    data.search.showError(error);
-    errorSubjects.forEach((subject) => sendErrorMsg(subject, error));
-  };
-};
 
 /**
  * This function starts fetching all required queries in Discover. This will be the query to load the individual
@@ -109,21 +84,6 @@ export function fetchAll(
         ? fetchSql(query, services.dataViews, data, services.expressions)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
 
-    /**
-     * This method checks the passed in hit count and will send a PARTIAL message to main$
-     * if there are results, indicating that we have finished some of the requests that have been
-     * sent. If there are no results we already COMPLETE main$ with no results found, so Discover
-     * can show the "no results" screen. We know at that point, that the other query returning
-     * will neither carry any data, since there are no documents.
-     */
-    const checkHitCount = (hitsCount: number) => {
-      if (hitsCount > 0) {
-        sendPartialMsg(dataSubjects.main$);
-      } else {
-        sendNoResultsFoundMsg(dataSubjects.main$);
-      }
-    };
-
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     documents
       .then((docs) => {
@@ -144,7 +104,7 @@ export function fetchAll(
           query,
         });
 
-        checkHitCount(docs.length);
+        checkHitCount(dataSubjects.main$, docs.length);
       })
       // Only the document query should send its errors to main$, to cause the full Discover app
       // to get into an error state. The other queries will not cause all of Discover to error out

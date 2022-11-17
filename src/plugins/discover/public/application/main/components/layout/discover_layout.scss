@@ -41,6 +41,8 @@ discover-app {
 }
 
 .dscPageContent {
+  position: relative;
+  overflow: hidden;
   border: $euiBorderThin;
 }
 

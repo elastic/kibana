@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../types';
 import type {
@@ -105,3 +106,37 @@ export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchSta
     recordRawType,
   });
 }
+
+/**
+ * Method to create an error handler that will forward the received error
+ * to the specified subjects. It will ignore AbortErrors and will use the data
+ * plugin to show a toast for the error (e.g. allowing better insights into shard failures).
+ */
+export const sendErrorTo = (
+  data: DataPublicPluginStart,
+  ...errorSubjects: Array<DataMain$ | DataDocuments$>
+) => {
+  return (error: Error) => {
+    if (error instanceof Error && error.name === 'AbortError') {
+      return;
+    }
+
+    data.search.showError(error);
+    errorSubjects.forEach((subject) => sendErrorMsg(subject, error));
+  };
+};
+
+/**
+ * This method checks the passed in hit count and will send a PARTIAL message to main$
+ * if there are results, indicating that we have finished some of the requests that have been
+ * sent. If there are no results we already COMPLETE main$ with no results found, so Discover
+ * can show the "no results" screen. We know at that point, that the other query returning
+ * will neither carry any data, since there are no documents.
+ */
+export const checkHitCount = (main$: DataMain$, hitsCount: number) => {
+  if (hitsCount > 0) {
+    sendPartialMsg(main$);
+  } else {
+    sendNoResultsFoundMsg(main$);
+  }
+};
