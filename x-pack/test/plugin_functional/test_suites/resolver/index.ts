@@ -31,7 +31,7 @@ export default function ({
   // FLAKY: https://github.com/elastic/kibana/issues/133907
   // FLAKY: https://github.com/elastic/kibana/issues/144820
   // FLAKY: https://github.com/elastic/kibana/issues/144861
-  describe.skip('Resolver test app', function () {
+  describe('Resolver test app', function () {
     // Note: these tests are intended to run on the same page in serial.
     before(async function () {
       await pageObjects.common.navigateToApp('resolverTest');
