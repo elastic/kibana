@@ -6,9 +6,9 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { RULES_TABLE_STATE_STORAGE_KEY } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useUpdateUrlParam } from '../../../../../common/utils/global_query_string';
+import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import { AllRulesTabs } from '../rules_table_toolbar';
 import type { RulesTableState } from './rules_table_context';
 import {

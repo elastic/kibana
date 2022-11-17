@@ -6,15 +6,11 @@
  */
 
 import { useCallback } from 'react';
-import {
-  RULES_TABLE_MAX_PAGE_SIZE,
-  RULES_TABLE_STATE_STORAGE_KEY,
-} from '../../../../../../common/constants';
+import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useInitializeUrlParam } from '../../../../../common/utils/global_query_string';
-import { AllRulesTabs } from '../rules_table_toolbar';
-
+import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
   INITIAL_FILTER_OPTIONS,
   INITIAL_SORTING_OPTIONS,
