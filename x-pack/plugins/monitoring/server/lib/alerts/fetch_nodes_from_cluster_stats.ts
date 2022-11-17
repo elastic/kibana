@@ -6,15 +6,15 @@
  */
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AlertCluster, AlertClusterStatsNodes } from '../../../common/types/alerts';
-import { ElasticsearchSource } from '../../../common/types/es';
+import { ElasticsearchResponse, ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 
-function formatNode(
-  nodes: NonNullable<NonNullable<ElasticsearchSource['cluster_state']>['nodes']> | undefined
-) {
+type Nodes = NonNullable<ElasticsearchSource['cluster_state']>['nodes'];
+
+function formatNode(nodes: Nodes | undefined) {
   if (!nodes) {
     return [];
   }
@@ -87,7 +87,7 @@ export async function fetchNodesFromClusterStats(
                   },
                 ],
                 _source: {
-                  includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.nodes'],
+                  includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.states.nodes'],
                 },
                 size: 2,
               },
@@ -109,22 +109,35 @@ export async function fetchNodesFromClusterStats(
 
   const response = await esClient.search(params);
   const nodes: AlertClusterStatsNodes[] = [];
-  // @ts-expect-error declare type for aggregations explicitly
-  const clusterBuckets = response.aggregations?.clusters?.buckets;
+
+  const { buckets: clusterBuckets } = (
+    response.aggregations as {
+      clusters: {
+        buckets: Array<{
+          key: string;
+          top: ElasticsearchResponse;
+        }>;
+      };
+    }
+  ).clusters;
+
   if (!clusterBuckets?.length) {
     return nodes;
   }
   for (const clusterBucket of clusterBuckets) {
     const clusterUuid = clusterBucket.key;
-    const hits = clusterBucket.top.hits.hits;
+
+    const hits = clusterBucket.top?.hits?.hits ?? [];
     const indexName = hits[0]._index;
     nodes.push({
       clusterUuid,
       recentNodes: formatNode(
-        hits[0]._source.cluster_state?.nodes || hits[0]._source.elasticsearch.cluster.stats.nodes
+        hits[1]._source.cluster_state?.nodes ??
+          hits[0]._source.elasticsearch?.cluster?.stats?.state?.nodes
       ),
       priorNodes: formatNode(
-        hits[1]._source.cluster_state?.nodes || hits[1]._source.elasticsearch.cluster.stats.nodes
+        hits[1]._source.cluster_state?.nodes ??
+          hits[1]._source.elasticsearch?.cluster?.stats?.state?.nodes
       ),
       ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
     });

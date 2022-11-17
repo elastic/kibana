@@ -8,23 +8,25 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchClusters } from './fetch_clusters';
+import { Globals } from '../../static_globals';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
-        },
+const getConfig = (ccsEnabled: boolean) =>
+  ({
+    config: {
+      ui: {
+        ccs: { enabled: ccsEnabled },
       },
     },
-  },
-}));
-import { Globals } from '../../static_globals';
+  } as Partial<typeof Globals.app> as typeof Globals.app);
 
 describe('fetchClusters', () => {
   const clusterUuid = '1sdfds734';
   const clusterName = 'monitoring';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(true));
+  });
 
   it('return a list of clusters', async () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -119,17 +121,17 @@ describe('fetchClusters', () => {
     });
   });
   it('should call ES with correct query when ccs disabled', async () => {
-    // @ts-ignore
-    Globals.app.config.ui.ccs.enabled = false;
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(false));
+
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    let params = null;
+    let params: estypes.SearchRequest | undefined;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
       return Promise.resolve({} as any);
     });
     await fetchClusters(esClient);
-    // @ts-ignore
-    expect(params.index).toBe(
+
+    expect(params?.index).toBe(
       '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
     );
   });

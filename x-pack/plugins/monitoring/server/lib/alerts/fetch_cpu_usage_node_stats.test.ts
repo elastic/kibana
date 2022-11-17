@@ -34,44 +34,54 @@ describe('fetchCpuUsageNodeStats', () => {
   const size = 10;
 
   it('fetch normal stats', async () => {
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      {
-        aggregations: {
-          clusters: {
-            buckets: [
-              {
-                key: clusters[0].clusterUuid,
-                nodes: {
-                  buckets: [
-                    {
-                      key: 'theNodeId',
-                      index: {
-                        buckets: [
-                          {
-                            key: '.monitoring-es-TODAY',
-                          },
-                        ],
-                      },
-                      name: {
-                        buckets: [
-                          {
-                            key: 'theNodeName',
-                          },
-                        ],
-                      },
-                      average_cpu: {
-                        value: 10,
-                      },
+    esClient.search.mockResponse({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 0,
+        successful: 0,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      aggregations: {
+        clusters: {
+          buckets: [
+            {
+              key: clusters[0].clusterUuid,
+              nodes: {
+                buckets: [
+                  {
+                    key: 'theNodeId',
+                    index: {
+                      buckets: [
+                        {
+                          key: '.monitoring-es-TODAY',
+                        },
+                      ],
                     },
-                  ],
-                },
+                    name: {
+                      buckets: [
+                        {
+                          key: 'theNodeName',
+                        },
+                      ],
+                    },
+                    average_cpu: {
+                      value: 10,
+                    },
+                  },
+                ],
               },
-            ],
-          },
+            },
+          ],
         },
-      }
-    );
+      },
+    });
     const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result).toEqual([
       {
@@ -88,57 +98,67 @@ describe('fetchCpuUsageNodeStats', () => {
   });
 
   it('fetch container stats', async () => {
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      {
-        aggregations: {
-          clusters: {
-            buckets: [
-              {
-                key: clusters[0].clusterUuid,
-                nodes: {
-                  buckets: [
-                    {
-                      key: 'theNodeId',
-                      index: {
-                        buckets: [
-                          {
-                            key: '.monitoring-es-TODAY',
-                          },
-                        ],
-                      },
-                      name: {
-                        buckets: [
-                          {
-                            key: 'theNodeName',
-                          },
-                        ],
-                      },
-                      histo: {
-                        buckets: [
-                          null,
-                          {
-                            usage_deriv: {
-                              normalized_value: 10,
-                            },
-                            periods_deriv: {
-                              normalized_value: 5,
-                            },
-                          },
-                        ],
-                      },
-                      average_quota: {
-                        value: 50,
-                      },
+    esClient.search.mockResponse({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 0,
+        successful: 0,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      aggregations: {
+        clusters: {
+          buckets: [
+            {
+              key: clusters[0].clusterUuid,
+              nodes: {
+                buckets: [
+                  {
+                    key: 'theNodeId',
+                    index: {
+                      buckets: [
+                        {
+                          key: '.monitoring-es-TODAY',
+                        },
+                      ],
                     },
-                  ],
-                },
+                    name: {
+                      buckets: [
+                        {
+                          key: 'theNodeName',
+                        },
+                      ],
+                    },
+                    histo: {
+                      buckets: [
+                        null,
+                        {
+                          usage_deriv: {
+                            normalized_value: 10,
+                          },
+                          periods_deriv: {
+                            normalized_value: 5,
+                          },
+                        },
+                      ],
+                    },
+                    average_quota: {
+                      value: 50,
+                    },
+                  },
+                ],
               },
-            ],
-          },
+            },
+          ],
         },
-      }
-    );
+      },
+    });
     const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result).toEqual([
       {
@@ -155,50 +175,60 @@ describe('fetchCpuUsageNodeStats', () => {
   });
 
   it('fetch properly return ccs', async () => {
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      {
-        aggregations: {
-          clusters: {
-            buckets: [
-              {
-                key: clusters[0].clusterUuid,
-                nodes: {
-                  buckets: [
-                    {
-                      key: 'theNodeId',
-                      index: {
-                        buckets: [
-                          {
-                            key: 'foo:.monitoring-es-TODAY',
-                          },
-                        ],
-                      },
-                      name: {
-                        buckets: [
-                          {
-                            key: 'theNodeName',
-                          },
-                        ],
-                      },
-                      average_usage: {
-                        value: 10,
-                      },
-                      average_periods: {
-                        value: 5,
-                      },
-                      average_quota: {
-                        value: 50,
-                      },
+    esClient.search.mockResponse({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 0,
+        successful: 0,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      aggregations: {
+        clusters: {
+          buckets: [
+            {
+              key: clusters[0].clusterUuid,
+              nodes: {
+                buckets: [
+                  {
+                    key: 'theNodeId',
+                    index: {
+                      buckets: [
+                        {
+                          key: 'foo:.monitoring-es-TODAY',
+                        },
+                      ],
                     },
-                  ],
-                },
+                    name: {
+                      buckets: [
+                        {
+                          key: 'theNodeName',
+                        },
+                      ],
+                    },
+                    average_usage: {
+                      value: 10,
+                    },
+                    average_periods: {
+                      value: 5,
+                    },
+                    average_quota: {
+                      value: 50,
+                    },
+                  },
+                ],
               },
-            ],
-          },
+            },
+          ],
         },
-      }
-    );
+      },
+    });
     const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result[0].ccs).toBe('foo');
   });

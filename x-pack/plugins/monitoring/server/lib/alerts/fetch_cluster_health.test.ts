@@ -22,7 +22,21 @@ jest.mock('../../static_globals', () => ({
 }));
 import { Globals } from '../../static_globals';
 
+const getConfig = (ccsEnabled: boolean) =>
+  ({
+    config: {
+      ui: {
+        ccs: { enabled: ccsEnabled },
+      },
+    },
+  } as Partial<typeof Globals.app> as typeof Globals.app);
+
 describe('fetchClusterHealth', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(true));
+  });
+
   it('should return the cluster health', async () => {
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     const clusterUuid = 'sdfdsaj34434';
@@ -100,10 +114,10 @@ describe('fetchClusterHealth', () => {
   });
 
   it('should call ES with correct query when ccs disabled', async () => {
-    // @ts-ignore
-    Globals.app.config.ui.ccs.enabled = false;
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(false));
+
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    let params = null;
+    let params: estypes.SearchRequest | undefined;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
       return Promise.resolve({} as any);
@@ -111,8 +125,7 @@ describe('fetchClusterHealth', () => {
 
     await fetchClusterHealth(esClient, [{ clusterUuid: '1', clusterName: 'foo1' }]);
 
-    // @ts-ignore
-    expect(params.index).toBe(
+    expect(params?.index).toBe(
       '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
     );
   });

@@ -121,8 +121,20 @@ export async function fetchDiskUsageNodeStats(
     return stats;
   }
 
-  // @ts-expect-error declare type for aggregations explicitly
-  const { buckets: clusterBuckets } = response.aggregations.clusters;
+  const { buckets: clusterBuckets } = (
+    response.aggregations as {
+      clusters: {
+        buckets: Array<{
+          key?: string;
+          nodes: {
+            buckets: Array<{
+              key?: string;
+            }>;
+          };
+        }>;
+      };
+    }
+  ).clusters;
 
   if (!clusterBuckets?.length) {
     return stats;
@@ -130,17 +142,17 @@ export async function fetchDiskUsageNodeStats(
 
   for (const clusterBucket of clusterBuckets) {
     for (const node of clusterBucket.nodes.buckets) {
-      const indexName = get(node, 'index.buckets[0].key', '');
+      const indexName: string = get(node, 'index.buckets[0].key', '');
       const diskUsage = Number(get(node, 'usage_ratio_percentile.value'));
       if (isNaN(diskUsage) || diskUsage === undefined || diskUsage === null) {
         continue;
       }
       stats.push({
         diskUsage,
-        clusterUuid: clusterBucket.key,
-        nodeId: node.key,
+        clusterUuid: clusterBucket.key ?? '',
+        nodeId: node.key ?? '',
         nodeName: get(node, 'name.buckets[0].key'),
-        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
+        ccs: indexName.includes(':') ? indexName.split(':')[0] : '',
       });
     }
   }

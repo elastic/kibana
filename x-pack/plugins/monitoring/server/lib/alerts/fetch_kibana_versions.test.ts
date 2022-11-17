@@ -7,19 +7,17 @@
 
 import { fetchKibanaVersions } from './fetch_kibana_versions';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { Globals } from '../../static_globals';
+import type { estypes } from '@elastic/elasticsearch';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
-        },
+const getConfig = (ccsEnabled: boolean) =>
+  ({
+    config: {
+      ui: {
+        ccs: { enabled: ccsEnabled },
       },
     },
-  },
-}));
-import { Globals } from '../../static_globals';
+  } as Partial<typeof Globals.app> as typeof Globals.app);
 
 describe('fetchKibanaVersions', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -32,50 +30,65 @@ describe('fetchKibanaVersions', () => {
   const index = '.monitoring-kibana-*';
   const size = 10;
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(true));
+  });
+
   it('fetch as expected', async () => {
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      {
-        aggregations: {
-          index: {
-            buckets: [
-              {
-                key: `Monitoring:${index}`,
-              },
-            ],
-          },
-          cluster: {
-            buckets: [
-              {
-                key: 'cluster123',
-                group_by_kibana: {
-                  buckets: [
-                    {
-                      group_by_version: {
-                        buckets: [
-                          {
-                            key: '8.0.0',
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      group_by_version: {
-                        buckets: [
-                          {
-                            key: '7.2.1',
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+    esClient.search.mockResponse({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 0,
+        successful: 0,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      aggregations: {
+        index: {
+          buckets: [
+            {
+              key: `Monitoring:${index}`,
+            },
+          ],
         },
-      }
-    );
+        cluster: {
+          buckets: [
+            {
+              key: 'cluster123',
+              group_by_kibana: {
+                buckets: [
+                  {
+                    group_by_version: {
+                      buckets: [
+                        {
+                          key: '8.0.0',
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    group_by_version: {
+                      buckets: [
+                        {
+                          key: '7.2.1',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    });
 
     const result = await fetchKibanaVersions(esClient, clusters, size);
     expect(result).toEqual([
@@ -137,15 +150,14 @@ describe('fetchKibanaVersions', () => {
     });
   });
   it('should call ES with correct query when ccs disabled', async () => {
-    // @ts-ignore
-    Globals.app.config.ui.ccs.enabled = false;
-    let params = null;
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(false));
+    let params: estypes.SearchRequest | undefined;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
       return Promise.resolve({} as any);
     });
     await fetchKibanaVersions(esClient, clusters, size);
-    // @ts-ignore
-    expect(params.index).toBe('.monitoring-kibana-*,metrics-kibana.stack_monitoring.stats-*');
+
+    expect(params?.index).toBe('.monitoring-kibana-*,metrics-kibana.stack_monitoring.stats-*');
   });
 });

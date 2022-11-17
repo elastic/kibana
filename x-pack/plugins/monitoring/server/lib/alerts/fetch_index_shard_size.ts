@@ -6,8 +6,13 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
-import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
+import {
+  ElasticsearchIndexStats,
+  ElasticsearchResponse,
+  ElasticsearchResponseHit,
+} from '../../../common/types/es';
 import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
@@ -121,11 +126,23 @@ export async function fetchIndexShardSize(
     return stats;
   }
 
-  // @ts-expect-error declare aggegations type explicitly
-  const { buckets: clusterBuckets } = response.aggregations.clusters;
+  const { buckets: clusterBuckets } = (
+    response.aggregations as {
+      clusters: {
+        buckets: Array<{
+          key: string;
+          index: {
+            buckets: Array<estypes.AggregationsRangeBucket & { hits: ElasticsearchResponse }>;
+          };
+        }>;
+      };
+    }
+  ).clusters;
+
   if (!clusterBuckets?.length) {
     return stats;
   }
+
   const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
   const thresholdBytes = threshold * gbMultiplier;
   for (const clusterBucket of clusterBuckets) {
@@ -133,7 +150,7 @@ export async function fetchIndexShardSize(
     const clusterUuid = clusterBucket.key;
 
     for (const indexBucket of indexBuckets) {
-      const shardIndex = indexBucket.key;
+      const shardIndex = indexBucket.key ?? '';
       const topHit = indexBucket.hits?.hits?.hits[0] as TopHitType;
       if (!topHit || !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)) {
         continue;

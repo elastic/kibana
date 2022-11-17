@@ -8,19 +8,16 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchElasticsearchVersions } from './fetch_elasticsearch_versions';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Globals } from '../../static_globals';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
-        },
+const getConfig = (ccsEnabled: boolean) =>
+  ({
+    config: {
+      ui: {
+        ccs: { enabled: ccsEnabled },
       },
     },
-  },
-}));
-import { Globals } from '../../static_globals';
+  } as Partial<typeof Globals.app> as typeof Globals.app);
 
 describe('fetchElasticsearchVersions', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -34,6 +31,11 @@ describe('fetchElasticsearchVersions', () => {
   const index = '.monitoring-es-*';
   const size = 10;
   const versions = ['8.0.0', '7.2.1'];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(true));
+  });
 
   it('fetch as expected', async () => {
     esClient.search.mockResponse({
@@ -105,16 +107,15 @@ describe('fetchElasticsearchVersions', () => {
     });
   });
   it('should call ES with correct query when ccs disabled', async () => {
-    // @ts-ignore
-    Globals.app.config.ui.ccs.enabled = false;
-    let params = null;
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(false));
+
+    let params: estypes.SearchRequest | undefined;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
       return Promise.resolve({} as estypes.SearchResponse);
     });
     await fetchElasticsearchVersions(esClient, clusters, size);
-    // @ts-ignore
-    expect(params.index).toBe(
+    expect(params?.index).toBe(
       '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
     );
   });

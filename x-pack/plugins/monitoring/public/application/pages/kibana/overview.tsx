@@ -21,9 +21,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaTemplate } from './kibana_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
-// @ts-ignore
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { useCharts } from '../../hooks/use_charts';

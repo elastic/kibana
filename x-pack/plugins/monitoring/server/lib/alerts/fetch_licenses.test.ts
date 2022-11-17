@@ -6,19 +6,17 @@
  */
 import { fetchLicenses } from './fetch_licenses';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { Globals } from '../../static_globals';
+import { estypes } from '@elastic/elasticsearch';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
-        },
+const getConfig = (ccsEnabled: boolean) =>
+  ({
+    config: {
+      ui: {
+        ccs: { enabled: ccsEnabled },
       },
     },
-  },
-}));
-import { Globals } from '../../static_globals';
+  } as Partial<typeof Globals.app> as typeof Globals.app);
 
 describe('fetchLicenses', () => {
   const clusterName = 'MyCluster';
@@ -28,6 +26,11 @@ describe('fetchLicenses', () => {
     expiry_date_in_millis: 1579532493876,
     type: 'basic',
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(true));
+  });
 
   it('return a list of licenses', async () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -119,18 +122,17 @@ describe('fetchLicenses', () => {
     });
   });
   it('should call ES with correct query  when ccs disabled', async () => {
-    // @ts-ignore
-    Globals.app.config.ui.ccs.enabled = false;
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(false));
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    let params = null;
+    let params: estypes.SearchRequest | undefined;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
       return Promise.resolve({} as any);
     });
     const clusters = [{ clusterUuid, clusterName }];
     await fetchLicenses(esClient, clusters);
-    // @ts-ignore
-    expect(params.index).toBe(
+
+    expect(params?.index).toBe(
       '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
     );
   });

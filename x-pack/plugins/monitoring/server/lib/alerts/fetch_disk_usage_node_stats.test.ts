@@ -7,19 +7,17 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchDiskUsageNodeStats } from './fetch_disk_usage_node_stats';
+import { Globals } from '../../static_globals';
+import type { estypes } from '@elastic/elasticsearch';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
-        },
+const getConfig = (ccsEnabled: boolean) =>
+  ({
+    config: {
+      ui: {
+        ccs: { enabled: ccsEnabled },
       },
     },
-  },
-}));
-import { Globals } from '../../static_globals';
+  } as Partial<typeof Globals.app> as typeof Globals.app);
 
 describe('fetchDiskUsageNodeStats', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -33,7 +31,20 @@ describe('fetchDiskUsageNodeStats', () => {
   const duration = '5m';
   const size = 10;
 
-  const esRes = {
+  const esRes: estypes.SearchResponse = {
+    took: 1,
+    timed_out: false,
+    _shards: {
+      total: 0,
+      successful: 0,
+      failed: 0,
+      skipped: 0,
+    },
+    hits: {
+      total: 0,
+      max_score: 0,
+      hits: [],
+    },
     aggregations: {
       clusters: {
         buckets: [
@@ -68,11 +79,14 @@ describe('fetchDiskUsageNodeStats', () => {
       },
     },
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(true));
+  });
+
   it('fetch normal stats', async () => {
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      esRes
-    );
+    esClient.search.mockResponse(esRes);
 
     const result = await fetchDiskUsageNodeStats(esClient, clusters, duration, size);
     expect(result).toEqual([
@@ -143,16 +157,14 @@ describe('fetchDiskUsageNodeStats', () => {
     });
   });
   it('should call ES with correct query when ccs disabled', async () => {
-    // @ts-ignore
-    Globals.app.config.ui.ccs.enabled = false;
-    let params = null;
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(false));
+    let params: estypes.SearchRequest | undefined;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
       return Promise.resolve(esRes as any);
     });
     await fetchDiskUsageNodeStats(esClient, clusters, duration, size);
-    // @ts-ignore
-    expect(params.index).toBe(
+    expect(params?.index).toBe(
       '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.node_stats-*'
     );
   });

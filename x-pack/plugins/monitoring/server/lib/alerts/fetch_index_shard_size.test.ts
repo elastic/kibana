@@ -8,20 +8,16 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchIndexShardSize } from './fetch_index_shard_size';
 import { estypes } from '@elastic/elasticsearch';
+import { Globals } from '../../static_globals';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      getKeyStoreValue: () => '*',
-      config: {
-        ui: {
-          ccs: { enabled: true },
-        },
+const getConfig = (ccsEnabled: boolean) =>
+  ({
+    config: {
+      ui: {
+        ccs: { enabled: ccsEnabled },
       },
     },
-  },
-}));
-import { Globals } from '../../static_globals';
+  } as Partial<typeof Globals.app> as typeof Globals.app);
 
 describe('fetchIndexShardSize', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -166,6 +162,11 @@ describe('fetchIndexShardSize', () => {
     },
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(true));
+  });
+
   it('fetch as expected', async () => {
     esClient.search.mockResponse(esRes);
     const result = await fetchIndexShardSize(
@@ -274,15 +275,14 @@ describe('fetchIndexShardSize', () => {
   });
 
   it('should call ES with correct query when ccs disabled', async () => {
-    // @ts-ignore
-    Globals.app.config.ui.ccs.enabled = false;
-    let params = null;
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(false));
+
+    let params: estypes.SearchRequest | undefined;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
       return Promise.resolve(esRes as any);
     });
     await fetchIndexShardSize(esClient, clusters, threshold, shardIndexPatterns, size);
-    // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.stack_monitoring.index-*');
+    expect(params?.index).toBe('.monitoring-es-*,metrics-elasticsearch.stack_monitoring.index-*');
   });
 });

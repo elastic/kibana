@@ -7,19 +7,8 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchMissingMonitoringData } from './fetch_missing_monitoring_data';
-
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
-        },
-      },
-    },
-  },
-}));
 import { Globals } from '../../static_globals';
+import type { estypes } from '@elastic/elasticsearch';
 
 function getResponse(
   index: string,
@@ -51,11 +40,25 @@ function getResponse(
   };
 }
 
+const getConfig = (ccsEnabled: boolean) =>
+  ({
+    config: {
+      ui: {
+        ccs: { enabled: ccsEnabled },
+      },
+    },
+  } as Partial<typeof Globals.app> as typeof Globals.app);
+
 describe('fetchMissingMonitoringData', () => {
   const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
 
   const startMs = 100;
   const size = 10;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(true));
+  });
 
   it('fetch as expected', async () => {
     const now = 10;
@@ -66,38 +69,48 @@ describe('fetchMissingMonitoringData', () => {
       },
     ];
 
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      {
-        aggregations: {
-          clusters: {
-            buckets: clusters.map((cluster) => ({
-              key: cluster.clusterUuid,
-              es_uuids: getResponse('.monitoring-es-*', [
-                {
-                  uuid: 'nodeUuid1',
-                  nameSource: {
-                    source_node: {
-                      name: 'nodeName1',
-                    },
+    esClient.search.mockResponse({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 0,
+        successful: 0,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      aggregations: {
+        clusters: {
+          buckets: clusters.map((cluster) => ({
+            key: cluster.clusterUuid,
+            es_uuids: getResponse('.monitoring-es-*', [
+              {
+                uuid: 'nodeUuid1',
+                nameSource: {
+                  source_node: {
+                    name: 'nodeName1',
                   },
-                  timestamp: 9,
                 },
-                {
-                  uuid: 'nodeUuid2',
-                  nameSource: {
-                    source_node: {
-                      name: 'nodeName2',
-                    },
+                timestamp: 9,
+              },
+              {
+                uuid: 'nodeUuid2',
+                nameSource: {
+                  source_node: {
+                    name: 'nodeName2',
                   },
-                  timestamp: 2,
                 },
-              ]),
-            })),
-          },
+                timestamp: 2,
+              },
+            ]),
+          })),
         },
-      }
-    );
+      },
+    });
     const result = await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     expect(result).toEqual([
       {
@@ -125,29 +138,39 @@ describe('fetchMissingMonitoringData', () => {
         clusterName: 'clusterName1',
       },
     ];
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      {
-        aggregations: {
-          clusters: {
-            buckets: clusters.map((cluster) => ({
-              key: cluster.clusterUuid,
-              es_uuids: getResponse('Monitoring:.monitoring-es-*', [
-                {
-                  uuid: 'nodeUuid1',
-                  nameSource: {
-                    source_node: {
-                      name: 'nodeName1',
-                    },
+    esClient.search.mockResponse({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 0,
+        successful: 0,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      aggregations: {
+        clusters: {
+          buckets: clusters.map((cluster) => ({
+            key: cluster.clusterUuid,
+            es_uuids: getResponse('Monitoring:.monitoring-es-*', [
+              {
+                uuid: 'nodeUuid1',
+                nameSource: {
+                  source_node: {
+                    name: 'nodeName1',
                   },
-                  timestamp: 9,
                 },
-              ]),
-            })),
-          },
+                timestamp: 9,
+              },
+            ]),
+          })),
         },
-      }
-    );
+      },
+    });
     const result = await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     expect(result).toEqual([
       {
@@ -168,7 +191,7 @@ describe('fetchMissingMonitoringData', () => {
         clusterName: 'clusterName1',
       },
     ];
-    let params = null;
+    let params: estypes.SearchRequest | undefined;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
       return Promise.resolve({} as any);
@@ -225,6 +248,7 @@ describe('fetchMissingMonitoringData', () => {
       },
     });
   });
+
   it('should call ES with correct query when ccs disabled', async () => {
     const now = 10;
     const clusters = [
@@ -233,16 +257,14 @@ describe('fetchMissingMonitoringData', () => {
         clusterName: 'clusterName1',
       },
     ];
-    // @ts-ignore
-    Globals.app.config.ui.ccs.enabled = false;
-    let params = null;
+    jest.spyOn(Globals, 'app', 'get').mockReturnValue(getConfig(false));
+    let params: estypes.SearchRequest | undefined;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
       return Promise.resolve({} as any);
     });
     await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
-    // @ts-ignore
-    expect(params.index).toBe(
+    expect(params?.index).toBe(
       '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.node_stats-*'
     );
   });

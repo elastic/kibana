@@ -6,7 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { get } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
+import { ElasticsearchResponse } from '../../../common/types/es';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
 import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
@@ -138,8 +139,18 @@ export async function fetchCCRReadExceptions(
     return stats;
   }
 
-  // @ts-expect-error declare aggegations type explicitly
-  const { buckets: remoteClusterBuckets = [] } = response.aggregations.remote_clusters;
+  const { buckets: remoteClusterBuckets = [] } = (
+    response.aggregations as {
+      remote_clusters: {
+        buckets: Array<{
+          key: string;
+          follower_indices: {
+            buckets: Array<estypes.AggregationsRangeBucket & { hits?: ElasticsearchResponse }>;
+          };
+        }>;
+      };
+    }
+  ).remote_clusters;
 
   if (!remoteClusterBuckets?.length) {
     return stats;
@@ -150,21 +161,26 @@ export async function fetchCCRReadExceptions(
     const remoteCluster = remoteClusterBucket.key;
 
     for (const followerIndexBucket of followerIndicesBuckets) {
-      const followerIndex = followerIndexBucket.key;
+      const followerIndex = followerIndexBucket.key ?? '';
+
+      const hits = followerIndexBucket.hits?.hits?.hits ?? [];
+
       const clusterUuid =
-        get(followerIndexBucket, 'hits.hits.hits[0]._source.cluster_uuid') ||
-        get(followerIndexBucket, 'hits.hits.hits[0]_source.elasticsearch.cluster.id');
+        hits[0]?._source?.cluster_uuid ?? hits[0]?._source?.elasticsearch?.cluster?.id ?? '';
 
-      const monitoringIndexName = get(followerIndexBucket, 'hits.hits.hits[0]._index');
-      const ccrStats =
-        get(followerIndexBucket, 'hits.hits.hits[0]._source.ccr_stats') ||
-        get(followerIndexBucket, 'hits.hits.hits[0]._source.elasticsearch.ccr');
+      const monitoringIndexName = hits[0]._index;
+      const leaderIndex =
+        hits[0]?._source?.ccr_stats?.leader_index ??
+        hits[0]?._source?.elasticsearch?.ccr?.leader?.index ??
+        '';
+      const readExceptions =
+        hits[0]?._source?.ccr_stats?.read_exceptions ??
+        hits[0]?._source?.elasticsearch?.ccr?.read_exceptions ??
+        [];
+      const shardId =
+        hits[0]?._source?.ccr_stats?.shard_id ?? hits[0]?._source?.elasticsearch?.ccr?.shard_id;
 
-      const { read_exceptions: readExceptions, shard_id: shardId } = ccrStats;
-
-      const leaderIndex = ccrStats.leaderIndex || ccrStats.leader.index;
-
-      const { exception: lastReadException } = readExceptions[readExceptions.length - 1];
+      const { exception: lastReadException = {} } = readExceptions[readExceptions.length - 1];
 
       stats.push({
         clusterUuid,
@@ -173,7 +189,7 @@ export async function fetchCCRReadExceptions(
         shardId,
         leaderIndex,
         lastReadException,
-        ccs: monitoringIndexName.includes(':') ? monitoringIndexName.split(':')[0] : null,
+        ccs: monitoringIndexName.includes(':') ? monitoringIndexName.split(':')[0] : '',
       });
     }
   }

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { createQuery } from '../../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
@@ -39,7 +37,6 @@ export function handleResponse(response: ElasticsearchResponse) {
       const shardId = `${index}-${shardNumber}-${primary}-${relocatingNode}-${node}`;
 
       if (!uniqueShards.has(shardId)) {
-        // @ts-ignore
         shards.push({
           index,
           node,
