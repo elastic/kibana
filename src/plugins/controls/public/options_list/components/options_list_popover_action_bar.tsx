@@ -24,7 +24,8 @@ import {
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import {
-  OptionsListSortingTypes,
+  DEFAULT_SORT,
+  getCompatibleSortingTypes,
   SortingType,
 } from '../../../common/options_list/suggestions_sorting';
 import { OptionsListReduxState } from '../types';
@@ -38,7 +39,7 @@ interface OptionsListPopoverProps {
 }
 
 type SortItem = EuiSelectableOption & {
-  data: SortingType;
+  data: { sortingType: SortingType };
 };
 
 export const OptionsListPopoverActionBar = ({
@@ -58,15 +59,16 @@ export const OptionsListPopoverActionBar = ({
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality);
   const searchString = select((state) => state.componentState.searchString);
+  const field = select((state) => state.componentState.field);
 
   const hideSort = select((state) => state.explicitInput.hideSort);
-  const sort = select((state) => state.explicitInput.sort ?? 'docDescending');
+  const sort = select((state) => state.explicitInput.sort ?? DEFAULT_SORT);
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
   const [options, setOptions] = useState<SortItem[]>(() => {
-    return (Object.keys(OptionsListSortingTypes) as SortingType[]).map((key) => {
+    return getCompatibleSortingTypes(field?.type).map((key) => {
       return {
-        data: key,
+        data: { sortingType: key },
         checked: key === sort ? 'on' : undefined,
         'data-test-subj': `optionsList__sortBy_${key}`,
         label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),
@@ -78,7 +80,7 @@ export const OptionsListPopoverActionBar = ({
     setOptions(updatedOptions);
     const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
     if (selectedOption) {
-      dispatch(setSort(selectedOption.data));
+      dispatch(setSort(selectedOption.data.sortingType));
       setIsSortingPopoverOpen(false);
     }
   };

@@ -24,7 +24,7 @@ import { css } from '@emotion/react';
 
 import {
   DEFAULT_SORT,
-  OptionsListSortingTypes,
+  getCompatibleSortingTypes,
   SortingType,
 } from '../../../common/options_list/suggestions_sorting';
 import { OptionsListStrings } from './options_list_strings';
@@ -49,6 +49,7 @@ type SortItem = EuiSuperSelectOption<SortingType>;
 export const OptionsListEditorOptions = ({
   initialInput,
   onChange,
+  fieldType,
 }: ControlEditorProps<OptionsListEmbeddableInput>) => {
   const [state, setState] = useState<OptionsListEditorState>({
     singleSelect: initialInput?.singleSelect,
@@ -60,14 +61,14 @@ export const OptionsListEditorOptions = ({
   });
 
   const options: SortItem[] = useMemo(() => {
-    return (Object.keys(OptionsListSortingTypes) as SortingType[]).map((key) => {
+    return getCompatibleSortingTypes(fieldType).map((key: SortingType) => {
       return {
         value: key,
         inputDisplay: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),
         'data-test-subj': `optionsList__defaultSortBy_${key}`,
       };
     });
-  }, []);
+  }, [fieldType]);
 
   const SwitchWithTooltip = ({
     switchProps,
@@ -139,8 +140,8 @@ export const OptionsListEditorOptions = ({
             label={OptionsListStrings.editor.getHideSortingTitle()}
             checked={!state.hideSort}
             onChange={() => {
-              onChange({ hideSort: !state.hideSort });
-              setState((s) => ({ ...s, hideSort: !s.hideSort }));
+              onChange({ hideSort: !state.hideSort, sort: DEFAULT_SORT });
+              setState((s) => ({ ...s, hideSort: !s.hideSort, selectedSort: DEFAULT_SORT }));
             }}
             data-test-subj={'optionsListControl__hideSortAdditionalSetting'}
           />

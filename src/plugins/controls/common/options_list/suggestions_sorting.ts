@@ -9,7 +9,6 @@
 import { Direction } from '@elastic/eui';
 
 export const DEFAULT_SORT: SortingType = 'docDescending';
-
 export type SortingType = 'docDescending' | 'docAscending' | 'keyDescending' | 'keyAscending';
 
 interface DocumentCountSort {
@@ -26,4 +25,15 @@ export const OptionsListSortingTypes: {
   docAscending: { _count: 'asc' },
   keyDescending: { _key: 'desc' },
   keyAscending: { _key: 'asc' },
+};
+
+export const getCompatibleSortingTypes = (type?: string): SortingType[] => {
+  switch (type) {
+    case 'ip': {
+      return ['docDescending', 'docAscending'];
+    }
+    default: {
+      return ['docDescending', 'docAscending', 'keyDescending', 'keyAscending'];
+    }
+  }
 };
