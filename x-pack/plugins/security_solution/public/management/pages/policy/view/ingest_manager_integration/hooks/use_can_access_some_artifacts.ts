@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { useCanSeeHostIsolationExceptionsMenu } from '../../../../host_isolation_exceptions/view/hooks';
 import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint';
 
 /**
@@ -14,21 +13,24 @@ import { useEndpointPrivileges } from '../../../../../../common/components/user_
  * Note that this hook will return `false` if the Authz is still being loaded.
  */
 export const useCanAccessSomeArtifacts = (): boolean => {
-  const { canReadBlocklist, canReadEventFilters, canReadTrustedApplications } =
-    useEndpointPrivileges();
-  const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+  const {
+    canReadBlocklist,
+    canReadEventFilters,
+    canReadTrustedApplications,
+    canReadHostIsolationExceptions,
+  } = useEndpointPrivileges();
 
   return useMemo(() => {
     return (
       canReadBlocklist ||
       canReadEventFilters ||
       canReadTrustedApplications ||
-      canSeeHostIsolationExceptions
+      canReadHostIsolationExceptions
     );
   }, [
     canReadBlocklist,
     canReadEventFilters,
     canReadTrustedApplications,
-    canSeeHostIsolationExceptions,
+    canReadHostIsolationExceptions,
   ]);
 };

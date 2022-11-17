@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import type { Action, Reducer } from 'redux';
 import type { RenderOptions } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -84,17 +84,6 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
   const queryClient = new SecuritySolutionQueryClient();
 
   const Wrapper: RenderOptions['wrapper'] = ({ children }) => {
-    const services = useMemo(() => {
-      const { http, notifications, application } = mockedContext.coreStart;
-
-      return {
-        http,
-        notifications,
-        application,
-        data: mockedContext.depsStart.data,
-      };
-    }, []);
-
     useEffect(() => {
       return () => {
         // When the component un-mounts, reset the Experimental features since
@@ -108,7 +97,7 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
     return (
       <I18nProvider>
         <EuiThemeProvider>
-          <KibanaContextProvider services={services}>
+          <KibanaContextProvider services={mockedContext.startServices}>
             <RenderContextProviders
               store={store}
               depsStart={mockedContext.depsStart}

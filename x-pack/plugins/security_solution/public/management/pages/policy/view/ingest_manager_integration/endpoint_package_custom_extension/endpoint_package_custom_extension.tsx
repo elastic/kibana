@@ -12,7 +12,6 @@ import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/pub
 import { NoPrivileges } from '../../../../../../common/components/no_privileges';
 import { useCanAccessSomeArtifacts } from '../hooks/use_can_access_some_artifacts';
 import { useHttp, useKibana } from '../../../../../../common/lib/kibana';
-import { useCanSeeHostIsolationExceptionsMenu } from '../../../../host_isolation_exceptions/view/hooks';
 import { TrustedAppsApiClient } from '../../../../trusted_apps/service/api_client';
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
@@ -110,9 +109,13 @@ BlockListArtifactCard.displayName = 'BlockListArtifactCard';
  */
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   (props) => {
-    const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
-    const { loading, canReadBlocklist, canReadEventFilters, canReadTrustedApplications } =
-      useEndpointPrivileges();
+    const {
+      loading,
+      canReadBlocklist,
+      canReadEventFilters,
+      canReadTrustedApplications,
+      canReadHostIsolationExceptions,
+    } = useEndpointPrivileges();
     const { docLinks } = useKibana().services;
 
     const userCanAccessContent = useCanAccessSomeArtifacts();
@@ -142,7 +145,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
             </>
           )}
 
-          {canSeeHostIsolationExceptions && (
+          {canReadHostIsolationExceptions && (
             <>
               <HostIsolationExceptionsArtifactCard {...props} />
               <EuiSpacer />
@@ -156,7 +159,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       canReadBlocklist,
       canReadEventFilters,
       canReadTrustedApplications,
-      canSeeHostIsolationExceptions,
+      canReadHostIsolationExceptions,
       docLinks.links.securitySolution.privileges,
       loading,
       props,
