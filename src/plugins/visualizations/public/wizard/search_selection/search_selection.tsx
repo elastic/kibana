@@ -26,6 +26,7 @@ interface SearchSelectionProps {
 }
 interface SavedSearchesAttributes extends SavedObjectAttributes {
   isTextBasedQuery: boolean;
+  isOfAdHocDataView: boolean;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps> {
@@ -71,10 +72,10 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                   }
                 ),
                 // ignore the saved searches that have text-based languages queries
-                includeFields: ['isTextBasedQuery'],
+                includeFields: ['isTextBasedQuery', 'isOfAdHocDataView'],
                 showSavedObject: (savedObject) => {
                   const so = savedObject as unknown as SimpleSavedObject<SavedSearchesAttributes>;
-                  return !so.attributes.isTextBasedQuery;
+                  return !so.attributes.isTextBasedQuery && !so.attributes.isOfAdHocDataView;
                 },
               },
               {

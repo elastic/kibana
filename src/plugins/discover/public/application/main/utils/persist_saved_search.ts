@@ -67,6 +67,10 @@ export async function persistSavedSearch(
     savedSearch.isTextBasedQuery = isTextBasedQuery;
   }
 
+  if (!dataView.isPersisted()) {
+    savedSearch.isOfAdHocDataView = true;
+  }
+
   const { from, to } = services.timefilter.getTime();
   const refreshInterval = services.timefilter.getRefreshInterval();
   savedSearch.timeRange =
