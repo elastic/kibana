@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiText,
+} from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -33,6 +40,27 @@ export const SubFeatureForm = (props: Props) => {
     .getPrivilegeGroups()
     .filter((group) => group.privileges.length > 0);
 
+  const getTooltip = () => {
+    if (!props.subFeature.privilegesTooltip) {
+      return null;
+    }
+    const tooltipContent = (
+      <EuiText>
+        <p>{props.subFeature.privilegesTooltip}</p>
+      </EuiText>
+    );
+    return (
+      <EuiIconTip
+        iconProps={{
+          className: 'eui-alignTop',
+        }}
+        type="iInCircle"
+        color="subdued"
+        content={tooltipContent}
+      />
+    );
+  };
+
   if (groupsWithPrivileges.length === 0) {
     return null;
   }
@@ -40,7 +68,9 @@ export const SubFeatureForm = (props: Props) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiText size="s">{props.subFeature.name}</EuiText>
+        <EuiText size="s">
+          {props.subFeature.name} {getTooltip()}
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
     </EuiFlexGroup>

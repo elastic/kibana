@@ -33,6 +33,11 @@ import {
   UpdatePipelineApiLogic,
 } from '../../../api/connector/update_pipeline_api_logic';
 import {
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicValues,
+  CachedFetchIndexApiLogicActions,
+} from '../../../api/index/cached_fetch_index_api_logic';
+import {
   CreateCustomPipelineApiLogic,
   CreateCustomPipelineApiLogicArgs,
   CreateCustomPipelineApiLogicResponse,
@@ -43,16 +48,26 @@ import {
   FetchCustomPipelineApiLogic,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import {
-  FetchIndexApiLogic,
-  FetchIndexApiParams,
-  FetchIndexApiResponse,
-} from '../../../api/index/fetch_index_api_logic';
-import { CreateMlInferencePipelineApiLogic } from '../../../api/ml_models/create_ml_inference_pipeline';
+  AttachMlInferencePipelineApiLogic,
+  AttachMlInferencePipelineApiLogicArgs,
+  AttachMlInferencePipelineResponse,
+} from '../../../api/pipelines/attach_ml_inference_pipeline';
+import {
+  CreateMlInferencePipelineApiLogic,
+  CreateMlInferencePipelineApiLogicArgs,
+  CreateMlInferencePipelineResponse,
+} from '../../../api/pipelines/create_ml_inference_pipeline';
 import {
   DeleteMlInferencePipelineApiLogic,
   DeleteMlInferencePipelineApiLogicArgs,
   DeleteMlInferencePipelineResponse,
-} from '../../../api/ml_models/delete_ml_inference_pipeline';
+} from '../../../api/pipelines/delete_ml_inference_pipeline';
+import {
+  DetachMlInferencePipelineApiLogic,
+  DetachMlInferencePipelineApiLogicArgs,
+  DetachMlInferencePipelineResponse,
+} from '../../../api/pipelines/detach_ml_inference_pipeline';
+
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
@@ -60,6 +75,10 @@ type PipelinesActions = Pick<
   Actions<PostPipelineArgs, PostPipelineResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
+  attachMlInferencePipelineSuccess: Actions<
+    AttachMlInferencePipelineApiLogicArgs,
+    AttachMlInferencePipelineResponse
+  >['apiSuccess'];
   closeAddMlInferencePipelineModal: () => void;
   closeModal: () => void;
   createCustomPipeline: Actions<
@@ -74,6 +93,10 @@ type PipelinesActions = Pick<
     CreateCustomPipelineApiLogicArgs,
     CreateCustomPipelineApiLogicResponse
   >['apiSuccess'];
+  createMlInferencePipelineSuccess: Actions<
+    CreateMlInferencePipelineApiLogicArgs,
+    CreateMlInferencePipelineResponse
+  >['apiSuccess'];
   deleteMlPipeline: Actions<
     DeleteMlInferencePipelineApiLogicArgs,
     DeleteMlInferencePipelineResponse
@@ -86,6 +109,18 @@ type PipelinesActions = Pick<
     DeleteMlInferencePipelineApiLogicArgs,
     DeleteMlInferencePipelineResponse
   >['apiSuccess'];
+  detachMlPipeline: Actions<
+    DetachMlInferencePipelineApiLogicArgs,
+    DetachMlInferencePipelineResponse
+  >['makeRequest'];
+  detachMlPipelineError: Actions<
+    DetachMlInferencePipelineApiLogicArgs,
+    DetachMlInferencePipelineResponse
+  >['apiError'];
+  detachMlPipelineSuccess: Actions<
+    DetachMlInferencePipelineApiLogicArgs,
+    DetachMlInferencePipelineResponse
+  >['apiSuccess'];
   fetchCustomPipeline: Actions<
     FetchCustomPipelineApiLogicArgs,
     FetchCustomPipelineApiLogicResponse
@@ -96,7 +131,7 @@ type PipelinesActions = Pick<
   >['apiSuccess'];
   fetchDefaultPipeline: Actions<undefined, FetchDefaultPipelineResponse>['makeRequest'];
   fetchDefaultPipelineSuccess: Actions<undefined, FetchDefaultPipelineResponse>['apiSuccess'];
-  fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
+  fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
   fetchMlInferenceProcessors: typeof FetchMlInferencePipelineProcessorsApiLogic.actions.makeRequest;
   fetchMlInferenceProcessorsApiError: (error: HttpError) => HttpError;
   openAddMlInferencePipelineModal: () => void;
@@ -114,7 +149,7 @@ interface PipelinesValues {
   defaultPipelineValues: IngestPipelineParams;
   defaultPipelineValuesData: IngestPipelineParams | null;
   hasIndexIngestionPipeline: boolean;
-  index: FetchIndexApiResponse;
+  index: CachedFetchIndexApiLogicValues['fetchIndexApiData'];
   indexName: string;
   mlInferencePipelineProcessors: InferencePipeline[];
   pipelineName: string;
@@ -142,7 +177,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ],
       UpdatePipelineApiLogic,
       ['apiSuccess', 'apiError', 'makeRequest'],
-      FetchIndexApiLogic,
+      CachedFetchIndexApiLogic,
       ['apiSuccess as fetchIndexApiSuccess'],
       FetchDefaultPipelineApiLogic,
       ['apiSuccess as fetchDefaultPipelineSuccess', 'makeRequest as fetchDefaultPipeline'],
@@ -153,6 +188,8 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         'makeRequest as fetchMlInferenceProcessors',
         'apiError as fetchMlInferenceProcessorsApiError',
       ],
+      AttachMlInferencePipelineApiLogic,
+      ['apiSuccess as attachMlInferencePipelineSuccess'],
       CreateMlInferencePipelineApiLogic,
       ['apiSuccess as createMlInferencePipelineSuccess'],
       DeleteMlInferencePipelineApiLogic,
@@ -161,14 +198,20 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         'apiSuccess as deleteMlPipelineSuccess',
         'makeRequest as deleteMlPipeline',
       ],
+      DetachMlInferencePipelineApiLogic,
+      [
+        'apiError as detachMlPipelineError',
+        'apiSuccess as detachMlPipelineSuccess',
+        'makeRequest as detachMlPipeline',
+      ],
     ],
     values: [
       FetchCustomPipelineApiLogic,
       ['data as customPipelineData'],
       FetchDefaultPipelineApiLogic,
       ['data as defaultPipelineValuesData'],
-      FetchIndexApiLogic,
-      ['data as index'],
+      CachedFetchIndexApiLogic,
+      ['fetchIndexApiData as index'],
       FetchMlInferencePipelineProcessorsApiLogic,
       ['data as mlInferencePipelineProcessors'],
     ],
@@ -200,6 +243,12 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
           defaultMessage: 'Pipelines successfully updated',
         })
       );
+    },
+    attachMlInferencePipelineSuccess: () => {
+      // Re-fetch processors to ensure we display newly added ml processor
+      actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+      // Needed to ensure correct JSON is available in the JSON configurations tab
+      actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     closeModal: () =>
       actions.setPipelineState(
@@ -237,6 +286,26 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
               defaultMessage: 'Deleted machine learning inference pipeline "{pipelineName}"',
               values: {
                 pipelineName: value.deleted,
+              },
+            }
+          )
+        );
+      }
+      // Re-fetch processors to ensure we display newly removed ml processor
+      actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+      // Needed to ensure correct JSON is available in the JSON configurations tab
+      actions.fetchCustomPipeline({ indexName: values.index.name });
+    },
+    detachMlPipelineError: (error) => flashAPIErrors(error),
+    detachMlPipelineSuccess: (response) => {
+      if (response.updated) {
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.successToastDetachMlPipeline.title',
+            {
+              defaultMessage: 'Detached machine learning inference pipeline from "{pipelineName}"',
+              values: {
+                pipelineName: response.updated,
               },
             }
           )
@@ -287,6 +356,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
     showAddMlInferencePipelineModal: [
       false,
       {
+        attachMlInferencePipelineSuccess: () => false,
         closeAddMlInferencePipelineModal: () => false,
         createMlInferencePipelineSuccess: () => false,
         openAddMlInferencePipelineModal: () => true,

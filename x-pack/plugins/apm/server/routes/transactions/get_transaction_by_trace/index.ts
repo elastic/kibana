@@ -10,14 +10,12 @@ import {
   TRACE_ID,
   PARENT_ID,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getRootTransactionByTraceId(
   traceId: string,
-  setup: Setup
+  apmEventClient: APMEventClient
 ) {
-  const { apmEventClient } = setup;
-
   const params = {
     apm: {
       events: [ProcessorEvent.transaction as const],

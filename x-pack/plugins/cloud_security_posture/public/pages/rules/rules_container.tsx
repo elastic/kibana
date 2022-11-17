@@ -22,6 +22,8 @@ import {
 } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
+import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
+import { usePageSize } from '../../common/hooks/use_page_size';
 
 interface RulesPageData {
   rules_page: RuleSavedObject[];
@@ -68,6 +70,7 @@ export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
 export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     filter: createCspRuleSearchFilterByPackagePolicy({
       packagePolicyId: params.packagePolicyId,
@@ -75,7 +78,7 @@ export const RulesContainer = () => {
     }),
     search: '',
     page: 0,
-    perPage: 10,
+    perPage: pageSize || 10,
   });
 
   const { data, status, error } = useFindCspRules({
@@ -92,7 +95,7 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <EuiPanel hasBorder hasShadow={false}>
+      <EuiPanel hasBorder={false} hasShadow={false}>
         <RulesTableHeader
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
           searchValue={rulesQuery.search}
@@ -105,11 +108,12 @@ export const RulesContainer = () => {
           total={rulesPageData.total}
           error={rulesPageData.error}
           loading={rulesPageData.loading}
-          perPage={rulesQuery.perPage}
+          perPage={pageSize || rulesQuery.perPage}
           page={rulesQuery.page}
-          setPagination={(paginationQuery) =>
-            setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }))
-          }
+          setPagination={(paginationQuery) => {
+            setPageSize(paginationQuery.perPage);
+            setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }));
+          }}
           setSelectedRuleId={setSelectedRuleId}
           selectedRuleId={selectedRuleId}
         />

@@ -144,9 +144,21 @@
             ],
             "signature": [
               "() => Readonly<Record<string, ",
-              "PublicUiSettingsParams",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.PublicUiSettingsParams",
+                "text": "PublicUiSettingsParams"
+              },
               " & ",
-              "UserProvidedValues",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UserProvidedValues",
+                "text": "UserProvidedValues"
+              },
               "<any>>>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
@@ -437,9 +449,21 @@
             "description": [],
             "signature": [
               "[key: string]:  ",
-              "PublicUiSettingsParams",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.PublicUiSettingsParams",
+                "text": "PublicUiSettingsParams"
+              },
               " & ",
-              "UserProvidedValues",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UserProvidedValues",
+                "text": "UserProvidedValues"
+              },
               "<any>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",

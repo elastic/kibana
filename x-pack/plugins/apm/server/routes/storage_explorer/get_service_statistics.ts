@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   termQuery,
   kqlQuery,
@@ -12,7 +11,6 @@ import {
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ApmPluginRequestHandlerContext } from '../typings';
-import { Setup } from '../../lib/helpers/setup_request';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
@@ -34,9 +32,10 @@ import {
   getEstimatedSizeForDocumentsInIndex,
 } from './indices_stats_helpers';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 async function getMainServiceStatistics({
-  setup,
+  apmEventClient,
   context,
   indexLifecyclePhase,
   randomSampler,
@@ -45,7 +44,7 @@ async function getMainServiceStatistics({
   environment,
   kuery,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
@@ -54,10 +53,8 @@ async function getMainServiceStatistics({
   environment: string;
   kuery: string;
 }) {
-  const { apmEventClient } = setup;
-
   const [{ indices: allIndicesStats }, response] = await Promise.all([
-    getTotalIndicesStats({ context, setup }),
+    getTotalIndicesStats({ context, apmEventClient }),
     apmEventClient.search('get_main_service_statistics', {
       apm: {
         events: [
@@ -82,7 +79,7 @@ async function getMainServiceStatistics({
                     indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
                   )
                 : []),
-            ] as QueryDslQueryContainer[],
+            ],
           },
         },
         aggs: {
@@ -176,7 +173,7 @@ async function getMainServiceStatistics({
 }
 
 export async function getServiceStatistics({
-  setup,
+  apmEventClient,
   context,
   indexLifecyclePhase,
   randomSampler,
@@ -186,7 +183,7 @@ export async function getServiceStatistics({
   kuery,
   searchAggregatedTransactions,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
@@ -199,7 +196,7 @@ export async function getServiceStatistics({
   const [docCountPerProcessorEvent, totalTransactionsPerService] =
     await Promise.all([
       getMainServiceStatistics({
-        setup,
+        apmEventClient,
         context,
         indexLifecyclePhase,
         randomSampler,
@@ -209,7 +206,7 @@ export async function getServiceStatistics({
         end,
       }),
       getTotalTransactionsPerService({
-        setup,
+        apmEventClient,
         searchAggregatedTransactions,
         indexLifecyclePhase,
         randomSampler,

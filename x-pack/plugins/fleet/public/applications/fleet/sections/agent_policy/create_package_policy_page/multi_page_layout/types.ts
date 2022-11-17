@@ -11,7 +11,6 @@ import type {
   RegistryPolicyTemplate,
   PackageInfo,
   AgentPolicy,
-  Settings,
   EnrollmentAPIKey,
 } from '../../../../types';
 
@@ -21,7 +20,7 @@ export interface MultiPageStep {
 }
 
 export interface MultiPageStepLayoutProps {
-  settings?: Settings;
+  fleetServerHosts: string[];
   agentPolicy?: AgentPolicy;
   error?: Error;
   enrollmentAPIKey?: EnrollmentAPIKey;

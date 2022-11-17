@@ -7,7 +7,7 @@
 
 import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-import { Duration, DurationUnit } from '../models/duration';
+import { Duration, DurationUnit } from '../../domain/models/duration';
 
 const durationType = new t.Type<Duration, string, unknown>(
   'Duration',
@@ -24,7 +24,7 @@ const durationType = new t.Type<Duration, string, unknown>(
         return t.failure(input, context);
       }
     }),
-  (duration: Duration): string => `${duration.value}${duration.unit}`
+  (duration: Duration): string => duration.format()
 );
 
 export { durationType };

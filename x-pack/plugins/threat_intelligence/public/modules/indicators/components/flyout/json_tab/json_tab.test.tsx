@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
-import { generateMockIndicator, Indicator } from '../../../types';
+import { generateMockIndicator, Indicator } from '../../../../../../common/types/indicator';
 import { CODE_BLOCK_TEST_ID, IndicatorsFlyoutJson } from '.';
 import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
 

@@ -112,17 +112,25 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon
         ? this._options.minSize / HALF_MAKI_ICON_SIZE
         : this._options.minSize;
-    const stops =
-      rangeFieldMeta.min === rangeFieldMeta.max
-        ? [maxValueStopInput, maxRangeStopOutput]
+    const invert = this._options.invert === undefined ? false : this._options.invert;
+    function getStopsWithoutRange() {
+      return invert
+        ? [maxValueStopInput, minRangeStopOutput]
+        : [maxValueStopInput, maxRangeStopOutput];
+    }
+    function getStops() {
+      return invert
+        ? [minValueStopInput, maxRangeStopOutput, maxValueStopInput, minRangeStopOutput]
         : [minValueStopInput, minRangeStopOutput, maxValueStopInput, maxRangeStopOutput];
+    }
+    const stops = rangeFieldMeta.min === rangeFieldMeta.max ? getStopsWithoutRange() : getStops();
 
     const valueExpression = makeMbClampedNumberExpression({
       lookupFunction: this.getMbLookupFunction(),
       maxValue: rangeFieldMeta.max,
       minValue: rangeFieldMeta.min,
       fieldName: this.getMbFieldName(),
-      fallback: rangeFieldMeta.min,
+      fallback: invert ? rangeFieldMeta.max : rangeFieldMeta.min,
     });
     const valueShiftExpression =
       rangeFieldMeta.min < 1 ? ['+', valueExpression, valueShift] : valueExpression;

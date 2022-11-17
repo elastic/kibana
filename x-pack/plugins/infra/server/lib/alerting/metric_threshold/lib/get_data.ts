@@ -5,22 +5,35 @@
  * 2.0.
  */
 
+import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import {
   Aggregators,
   Comparator,
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
-import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
+import {
+  AdditionalContext,
+  doFieldsExist,
+  KUBERNETES_POD_UID,
+  termsAggField,
+  UNGROUPED_FACTORY_KEY,
+} from '../../common/utils';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<
   string,
-  { warn: boolean; trigger: boolean; value: number | null }
+  {
+    warn: boolean;
+    trigger: boolean;
+    value: number | null;
+    bucketKey: BucketKey;
+  } & AdditionalContext
 >;
 
-type BucketKey = Record<string, string>;
+export type BucketKey = Record<string, string>;
 interface AggregatedValue {
   value: number | null;
   values?: Record<string, number | null>;
@@ -40,7 +53,20 @@ interface Aggs {
   missingGroup?: {
     value: number;
   };
+  containerContext?: ContainerContext;
+  additionalContext?: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
 }
+
+interface ContainerContext {
+  buckets: ContainerBucket[];
+}
+
+interface ContainerBucket {
+  key: BucketKey;
+  doc_count: number;
+  container: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
+}
+
 interface Bucket extends Aggs {
   key: BucketKey;
   doc_count: number;
@@ -69,7 +95,17 @@ const NO_DATA_RESPONSE = {
     value: null,
     warn: false,
     trigger: false,
+    bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
   },
+};
+
+const createContainerList = (containerContext: ContainerContext) => {
+  return containerContext.buckets
+    .map((bucket) => {
+      const containerHits = bucket.container.hits?.hits;
+      return containerHits?.length > 0 ? containerHits[0]._source?.container : undefined;
+    })
+    .filter((container) => container !== undefined);
 };
 
 export const getData = async (
@@ -106,12 +142,22 @@ export const getData = async (
           missingGroup,
           currentPeriod: { aggregatedValue, doc_count: docCount },
           aggregatedValue: aggregatedValueForRate,
+          additionalContext,
+          containerContext,
         } = bucket;
+
+        const containerList = containerContext ? createContainerList(containerContext) : undefined;
+
+        const bucketHits = additionalContext?.hits?.hits;
+        const additionalContextSource =
+          bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
+
         if (missingGroup && missingGroup.value > 0) {
           previous[key] = {
             trigger: false,
             warn: false,
             value: null,
+            bucketKey: bucket.key,
           };
         } else {
           const value =
@@ -122,10 +168,14 @@ export const getData = async (
               : aggregatedValue != null
               ? getValue(aggregatedValue, params)
               : null;
+
           previous[key] = {
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
             warn: (shouldWarn && shouldWarn.value > 0) || false,
             value,
+            bucketKey: bucket.key,
+            container: containerList,
+            ...additionalContextSource,
           };
         }
       }
@@ -154,6 +204,7 @@ export const getData = async (
         shouldWarn,
         shouldTrigger,
       } = aggs.all.buckets.all;
+
       const value =
         params.aggType === Aggregators.COUNT
           ? docCount
@@ -177,6 +228,7 @@ export const getData = async (
             value,
             warn,
             trigger,
+            bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
           },
         };
       }
@@ -185,12 +237,18 @@ export const getData = async (
           value,
           warn: (shouldWarn && shouldWarn.value > 0) || false,
           trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
+          bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
         },
       };
     } else {
       return NO_DATA_RESPONSE;
     }
   };
+
+  const fieldsExisted = groupBy?.includes(KUBERNETES_POD_UID)
+    ? await doFieldsExist(esClient, [termsAggField[KUBERNETES_POD_UID]], index)
+    : null;
+
   const request = {
     index,
     allow_no_indices: true,
@@ -203,7 +261,8 @@ export const getData = async (
       lastPeriodEnd,
       groupBy,
       filterQuery,
-      afterKey
+      afterKey,
+      fieldsExisted
     ),
   };
   logger.trace(`Request: ${JSON.stringify(request)}`);

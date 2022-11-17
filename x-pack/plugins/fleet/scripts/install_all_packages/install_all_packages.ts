@@ -57,7 +57,7 @@ async function deletePackage(name: string, version: string) {
 
 async function getAllPackages() {
   const res = await fetch(
-    `${REGISTRY_URL}/search?experimental=true&kibana.version=${KIBANA_VERSION}`,
+    `${REGISTRY_URL}/search?prerelease=true&kibana.version=${KIBANA_VERSION}`,
     {
       headers: {
         accept: '*/*',

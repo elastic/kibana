@@ -9,7 +9,6 @@
 import React, { ReactNode } from 'react';
 import { EuiCard, EuiText, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GuideId } from '../../types';
 
 type UseCaseConstants = {
   [key in UseCase]: {
@@ -53,7 +52,7 @@ const constants: UseCaseConstants = {
 export type UseCase = 'search' | 'observability' | 'security';
 
 export interface UseCaseCardProps {
-  useCase: GuideId;
+  useCase: UseCase;
   title: string;
   description: string;
   footer: ReactNode;
@@ -84,18 +83,13 @@ export const UseCaseCard = ({
       </h4>
     </EuiText>
   );
-  const descriptionElement = (
-    <EuiText size="s" textAlign="center">
-      <p>{description}</p>
-    </EuiText>
-  );
+
   return (
     <EuiCard
       display="subdued"
-      textAlign="left"
       image={<EuiImage src={getImageUrl(useCase)} alt={constants[useCase].logAltText} />}
       title={titleElement}
-      description={descriptionElement}
+      description={description}
       footer={footer}
       betaBadgeProps={{
         label: constants[useCase].betaBadgeLabel,
