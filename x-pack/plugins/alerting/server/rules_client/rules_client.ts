@@ -2789,18 +2789,23 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     if (attributes.enabled === true) {
-      const rule = await this.unsecuredSavedObjectsClient.update(
-        'alert',
-        id,
-        this.updateMeta({
-          ...attributes,
-          enabled: false,
-          scheduledTaskId: attributes.scheduledTaskId === id ? attributes.scheduledTaskId : null,
-          updatedBy: await this.getUserName(),
-          updatedAt: new Date().toISOString(),
-        }),
-        { version }
-      );
+      let rule: SavedObjectsUpdateResponse<unknown>;
+      try {
+        rule = await this.unsecuredSavedObjectsClient.update(
+          'alert',
+          id,
+          this.updateMeta({
+            ...attributes,
+            enabled: false,
+            scheduledTaskId: attributes.scheduledTaskId === id ? attributes.scheduledTaskId : null,
+            updatedBy: await this.getUserName(),
+            updatedAt: new Date().toISOString(),
+          }),
+          { version }
+        );
+      } catch (e) {
+        rule = {} as SavedObjectsUpdateResponse<unknown>;
+      }
 
       // If the scheduledTaskId does not match the rule id, we should
       // remove the task, otherwise mark the task as disabled
