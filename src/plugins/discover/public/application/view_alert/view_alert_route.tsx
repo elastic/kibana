@@ -21,20 +21,21 @@ type NonNullableEntry<T> = { [K in keyof T]: NonNullable<T[keyof T]> };
 
 const getDataViewParamsChecksum = (dataViewSpec: DataViewSpec) => {
   const { title, timeFieldName, sourceFilters, runtimeFieldMap } = dataViewSpec;
-  return sha256
-    .create()
-    .update(JSON.stringify({ title, timeFieldName, sourceFilters, runtimeFieldMap }))
-    .hex();
+  const orderedParams = Object.values({ title, timeFieldName, sourceFilters, runtimeFieldMap });
+  return sha256.create().update(JSON.stringify(orderedParams)).hex();
 };
 
 /**
  * Get rule params checksum skipping serialized data view object
  */
 const getRuleParamsChecksum = (params: SearchThresholdAlertParams) => {
+  const orderedParams = Object.values(params);
   return sha256
     .create()
     .update(
-      JSON.stringify(params, (key: string, value: string) => (key === 'index' ? undefined : value))
+      JSON.stringify(orderedParams, (key: string, value: string) =>
+        key === 'index' ? undefined : value
+      )
     )
     .hex();
 };

@@ -110,20 +110,21 @@ function isTimeBasedDataView(index?: DataView) {
 
 function getDataViewChecksum(index: DataViewSpec) {
   const { title, timeFieldName, sourceFilters, runtimeFieldMap } = index;
-  return sha256
-    .create()
-    .update(JSON.stringify({ title, timeFieldName, sourceFilters, runtimeFieldMap }))
-    .hex();
+  const orderedParams = Object.values({ title, timeFieldName, sourceFilters, runtimeFieldMap });
+  return sha256.create().update(JSON.stringify(orderedParams)).hex();
 }
 
 /**
  * Get rule params checksum skipping serialized data view object
  */
 function getRuleParamsChecksum(params: OnlySearchSourceRuleParams) {
+  const orderedParams = Object.values(params);
   return sha256
     .create()
     .update(
-      JSON.stringify(params, (key: string, value: string) => (key === 'index' ? undefined : value))
+      JSON.stringify(orderedParams, (key: string, value: string) =>
+        key === 'index' ? undefined : value
+      )
     )
     .hex();
 }
