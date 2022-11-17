@@ -16,7 +16,7 @@ import {
   SecurityStepId,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { Ecs } from '../../../../../common/ecs';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
@@ -40,25 +40,17 @@ export const useAddToCaseActions = ({
   isActiveTimelines,
   isInDetections,
 }: UseAddToCaseActions) => {
-  const { cases: casesUi } = useKibana().services;
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const {
+    cases: {
+      helpers: { getRuleIdFromEvent, canUseCases },
+      hooks: { getUseCasesAddToNewCaseFlyout, getUseCasesAddToExistingCaseModal },
+    },
+  } = useKibana().services;
+  const userCasesPermissions = canUseCases();
 
   const isAlert = useMemo(() => {
     return ecsData?.event?.kind?.includes('signal');
   }, [ecsData]);
-
-  const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
-    return ecsData?._id
-      ? [
-          {
-            alertId: ecsData?._id ?? '',
-            index: ecsData?._index ?? '',
-            type: CommentType.alert,
-            rule: casesUi.helpers.getRuleIdFromEvent({ ecs: ecsData, data: nonEcsData ?? [] }),
-          },
-        ]
-      : [];
-  }, [casesUi.helpers, ecsData, nonEcsData]);
 
   const { activeStep, incrementStep, setStep, isTourShown } = useTourContext();
 
@@ -79,17 +71,30 @@ export const useAddToCaseActions = ({
     [activeStep, isTourShown]
   );
 
-  const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
+  const createCaseFlyout = getUseCasesAddToNewCaseFlyout({
     onClose: onMenuItemClick,
     onSuccess,
     afterCaseCreated,
     ...prefillCasesValue,
   });
 
-  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
+  const selectCaseModal = getUseCasesAddToExistingCaseModal({
     onClose: onMenuItemClick,
     onRowClick: onSuccess,
   });
+
+  const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
+    return ecsData?._id
+      ? [
+          {
+            alertId: ecsData?._id ?? '',
+            index: ecsData?._index ?? '',
+            type: CommentType.alert,
+            rule: getRuleIdFromEvent({ ecs: ecsData, data: nonEcsData ?? [] }),
+          },
+        ]
+      : [];
+  }, [ecsData, getRuleIdFromEvent, nonEcsData]);
 
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`

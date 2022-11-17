@@ -35,7 +35,6 @@ import {
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
-import { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
 import { useColumns } from './hooks/use_columns';
 
 const DefaultPagination = {
@@ -44,6 +43,9 @@ const DefaultPagination = {
 };
 
 interface CaseUi {
+  helpers: {
+    canUseCases: () => void;
+  };
   ui: {
     getCasesContext: () => React.FC<any>;
   };
@@ -108,8 +110,14 @@ const AlertsTableState = ({
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
+  const {
+    helpers: { canUseCases },
+    ui: { getCasesContext },
+  } = cases;
+
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
+
   const alertsTableConfiguration = hasAlertsTableConfiguration
     ? alertsTableConfigurationRegistry.get(configurationId)
     : EmptyConfiguration;
@@ -283,8 +291,8 @@ const AlertsTableState = ({
     ]
   );
 
-  const CasesContext = cases?.ui.getCasesContext();
-  const userCasesPermissions = useGetUserCasesPermissions(alertsTableConfiguration.casesFeatureId);
+  const CasesContext = getCasesContext();
+  const userCasesPermissions = canUseCases();
 
   return hasAlertsTableConfiguration ? (
     <>

@@ -15,7 +15,7 @@ import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineStatus, TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
@@ -29,10 +29,17 @@ interface Props {
 const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const {
-    cases,
     application: { navigateToApp },
+    cases: {
+      helpers: { canUseCases },
+      ui: { getAllCasesSelectorModal },
+    },
   } = useKibana().services;
+
+  const userCasesPermissions = canUseCases();
+
   const dispatch = useDispatch();
+
   const {
     graphEventId,
     savedObjectId,
@@ -45,6 +52,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
+
   const [isPopoverOpen, setPopover] = useState(false);
   const [isCaseModalOpen, openCaseModal] = useState(false);
 
@@ -66,8 +74,6 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     },
     [dispatch, graphEventId, navigateToApp, savedObjectId, timelineId, timelineTitle]
   );
-
-  const userCasesPermissions = useGetUserCasesPermissions();
 
   const handleButtonClick = useCallback(() => {
     setPopover((currentIsOpen) => !currentIsOpen);
@@ -165,7 +171,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
       {isCaseModalOpen &&
-        cases.ui.getAllCasesSelectorModal({
+        getAllCasesSelectorModal({
           onRowClick,
           onClose: onCaseModalClose,
           owner: [APP_ID],

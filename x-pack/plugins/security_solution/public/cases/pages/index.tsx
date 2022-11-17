@@ -17,7 +17,7 @@ import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
 
-import { useGetUserCasesPermissions, useKibana, useNavigation } from '../../common/lib/kibana';
+import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
 import { timelineActions } from '../../timelines/store/timeline';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
@@ -45,9 +45,15 @@ const TimelineDetailsPanel = () => {
 };
 
 const CaseContainerComponent: React.FC = () => {
-  const { cases } = useKibana().services;
+  const {
+    cases: {
+      helpers: { canUseCases },
+      ui: { getCases },
+    },
+  } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = canUseCases();
+
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
@@ -110,7 +116,7 @@ const CaseContainerComponent: React.FC = () => {
   return (
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
-        {cases.ui.getCases({
+        {getCases({
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {

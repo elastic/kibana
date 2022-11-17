@@ -15,7 +15,7 @@ import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { APP_ID } from '../../common/constants';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
-import { useGetUserCasesPermissions, useKibana } from '../common/lib/kibana';
+import { useKibana } from '../common/lib/kibana';
 import type { AppAction } from '../common/store/actions';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { NotFoundPage } from './404';
@@ -34,10 +34,18 @@ const PageRouterComponent: FC<RouterProps> = ({
   onAppLeave,
   setHeaderActionMenu,
 }) => {
-  const { cases } = useKibana().services;
-  const CasesContext = cases.ui.getCasesContext();
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const {
+    cases: {
+      helpers: { canUseCases },
+      ui: { getCasesContext },
+    },
+  } = useKibana().services;
+
+  const CasesContext = getCasesContext();
+  const userCasesPermissions = canUseCases();
+
   const dispatch = useDispatch<(action: AppAction) => void>();
+
   useEffect(() => {
     return () => {
       // When app is dismounted via a non-router method (ex. using Kibana's `services.application.navigateToApp()`)

@@ -13,7 +13,6 @@ import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
 } from '../pages/alerts/containers/alerts_table/translations';
-import { useGetUserCasesPermissions } from './use_get_user_cases_permissions';
 import { ObservabilityAppServices } from '../application/types';
 
 export interface UseAddToCaseActions {
@@ -22,15 +21,21 @@ export interface UseAddToCaseActions {
 }
 
 export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActions = {}) => {
-  const { cases: casesUi } = useKibana<ObservabilityAppServices>().services;
+  const {
+    cases: {
+      hooks: { getUseCasesAddToExistingCaseModal, getUseCasesAddToNewCaseFlyout },
+      helpers: { canUseCases, groupAlertsByRule },
+    },
+  } = useKibana<ObservabilityAppServices>().services;
 
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = canUseCases();
 
-  const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
+  const createCaseFlyout = getUseCasesAddToNewCaseFlyout({
     onClose,
     onSuccess,
   });
-  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
+
+  const selectCaseModal = getUseCasesAddToExistingCaseModal({
     onClose,
     onRowClick: onSuccess,
   });
@@ -45,7 +50,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             disableOnQuery: true,
             disabledLabel: ADD_TO_CASE_DISABLED,
             onClick: (items?: TimelineItem[]) => {
-              const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
+              const caseAttachments = items ? groupAlertsByRule(items) : [];
               createCaseFlyout.open({ attachments: caseAttachments });
             },
           },
@@ -56,17 +61,17 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             disabledLabel: ADD_TO_CASE_DISABLED,
             'data-test-subj': 'attach-existing-case',
             onClick: (items?: TimelineItem[]) => {
-              const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
+              const caseAttachments = items ? groupAlertsByRule(items) : [];
               selectCaseModal.open({ attachments: caseAttachments });
             },
           },
         ]
       : [];
   }, [
-    casesUi.helpers,
-    createCaseFlyout,
     userCasesPermissions.create,
     userCasesPermissions.read,
+    groupAlertsByRule,
+    createCaseFlyout,
     selectCaseModal,
   ]);
 };

@@ -7,7 +7,7 @@
 import { useCallback, useMemo } from 'react';
 import { CommentType } from '@kbn/cases-plugin/common';
 
-import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
+import { useKibana } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 
 import type { LensAttributes } from './types';
@@ -21,8 +21,15 @@ export const useAddToExistingCase = ({
   lensAttributes: LensAttributes | null;
   timeRange: { from: string; to: string } | null;
 }) => {
-  const userCasesPermissions = useGetUserCasesPermissions();
-  const { cases } = useKibana().services;
+  const {
+    cases: {
+      helpers: { canUseCases },
+      hooks: { getUseCasesAddToExistingCaseModal },
+    },
+  } = useKibana().services;
+
+  const userCasesPermissions = canUseCases();
+
   const attachments = useMemo(() => {
     return [
       {
@@ -35,7 +42,7 @@ export const useAddToExistingCase = ({
     ];
   }, [lensAttributes, timeRange]);
 
-  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({
+  const selectCaseModal = getUseCasesAddToExistingCaseModal({
     onClose: onAddToCaseClicked,
     toastContent: ADD_TO_CASE_SUCCESS,
   });

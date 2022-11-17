@@ -15,7 +15,6 @@ import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../../components/shared/alert_search_bar';
 import { observabilityAlertFeatureIds } from '../../../../config';
-import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useHasData } from '../../../../hooks/use_has_data';
@@ -34,14 +33,18 @@ import {
 import { RuleStatsState } from './types';
 
 export function AlertsPage() {
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const {
-    cases,
+    cases: {
+      helpers: { canUseCases },
+      ui: { getCasesContext },
+    },
     docLinks,
     http,
     notifications: { toasts },
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = useKibana<ObservabilityAppServices>().services;
+
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
 
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
@@ -107,8 +110,8 @@ export function AlertsPage() {
   // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
-  const CasesContext = cases.ui.getCasesContext();
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const CasesContext = getCasesContext();
+  const userCasesPermissions = canUseCases();
 
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;

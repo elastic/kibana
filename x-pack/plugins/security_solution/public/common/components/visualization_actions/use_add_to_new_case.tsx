@@ -8,7 +8,7 @@ import { useCallback, useMemo } from 'react';
 
 import { CommentType } from '@kbn/cases-plugin/common';
 
-import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
+import { useKibana } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 
 import type { LensAttributes } from './types';
@@ -20,8 +20,15 @@ export interface UseAddToNewCaseProps {
 }
 
 export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddToNewCaseProps) => {
-  const userCasesPermissions = useGetUserCasesPermissions();
-  const { cases } = useKibana().services;
+  const {
+    cases: {
+      helpers: { canUseCases },
+      hooks: { getUseCasesAddToNewCaseFlyout },
+    },
+  } = useKibana().services;
+
+  const userCasesPermissions = canUseCases();
+
   const attachments = useMemo(() => {
     return [
       {
@@ -34,7 +41,7 @@ export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddTo
     ];
   }, [lensAttributes, timeRange]);
 
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
+  const createCaseFlyout = getUseCasesAddToNewCaseFlyout({
     toastContent: ADD_TO_CASE_SUCCESS,
   });
 

@@ -21,7 +21,6 @@ import { CommentType } from '@kbn/cases-plugin/common';
 import type { ActionProps } from '@kbn/timelines-plugin/common';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { useKibana } from '../../../utils/kibana_react';
-import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { parseAlert } from './parse_alert';
 import { translations, paths } from '../../../config';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../containers/alerts_table/translations';
@@ -53,7 +52,13 @@ export function ObservabilityActions({
 }: ObservabilityActionsProps) {
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const [openActionsPopoverId, setActionsPopover] = useState(null);
-  const { cases, http } = useKibana<ObservabilityAppServices>().services;
+  const {
+    cases: {
+      hooks: { getUseCasesAddToNewCaseFlyout, getUseCasesAddToExistingCaseModal },
+      helpers: { canUseCases, getRuleIdFromEvent },
+    },
+    http,
+  } = useKibana<ObservabilityAppServices>().services;
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -70,17 +75,23 @@ export function ObservabilityActions({
     setActionsPopover((current) => (current ? null : id));
   }, []);
 
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = canUseCases();
+
+  const createCaseFlyout = getUseCasesAddToNewCaseFlyout();
+  const selectCaseModal = getUseCasesAddToExistingCaseModal();
+
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule =
     pageId !== RULE_DETAILS_PAGE_ID && ruleId
       ? http.basePath.prepend(paths.observability.ruleDetails(ruleId))
       : null;
+
   const alertId = alert.fields['kibana.alert.uuid'] ?? null;
   const linkToAlert =
     pageId !== ALERT_DETAILS_PAGE_ID && alertId
       ? http.basePath.prepend(paths.observability.alertDetails(alertId))
       : null;
+
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
       ? [
@@ -88,15 +99,11 @@ export function ObservabilityActions({
             alertId: ecsData?._id ?? '',
             index: ecsData?._index ?? '',
             type: CommentType.alert,
-            rule: cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
+            rule: getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
           },
         ]
       : [];
-  }, [ecsData, cases.helpers, data]);
-
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout();
-
-  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal();
+  }, [ecsData, getRuleIdFromEvent, data]);
 
   const handleAddToNewCaseClick = useCallback(() => {
     createCaseFlyout.open({ attachments: caseAttachments });

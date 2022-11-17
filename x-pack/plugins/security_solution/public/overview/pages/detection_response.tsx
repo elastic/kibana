@@ -17,7 +17,7 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
-import { useKibana, useGetUserCasesPermissions } from '../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 
 import { EmptyPage } from '../../common/components/empty_page';
 import { LandingPageComponent } from '../../common/components/landing_page';
@@ -53,10 +53,16 @@ const NoPrivilegePage: React.FC = () => {
 };
 
 const DetectionResponseComponent = () => {
+  const {
+    cases: {
+      helpers: { canUseCases },
+    },
+  } = useKibana().services;
+
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
   const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
-  const canReadCases = useGetUserCasesPermissions().read;
+  const { read: canReadCases } = canUseCases();
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
   const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
   if (!canReadAlerts && !canReadCases) {

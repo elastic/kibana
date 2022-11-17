@@ -18,7 +18,7 @@ import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import styled from 'styled-components';
 import type { TimelineEventsDetailsItem } from '../../../../../../../common/search_strategy';
-import { useGetUserCasesPermissions, useKibana } from '../../../../../../common/lib/kibana';
+import { useKibana } from '../../../../../../common/lib/kibana';
 import { useGetRelatedCasesByEvent } from '../../../../../../common/containers/cases/use_get_related_cases_by_event';
 import {
   ADD_TO_EXISTING_CASE_BUTTON,
@@ -65,10 +65,24 @@ export const CasesPanelNoReadPermissions = () => <EuiEmptyPrompt body={CASE_NO_R
 
 export const CasesPanel = React.memo<CasesPanelProps>(
   ({ eventId, dataAsNestedObject, detailsData }) => {
-    const { cases: casesUi } = useKibana().services;
+    const {
+      cases: {
+        helpers: { canUseCases, getRuleIdFromEvent },
+        hooks: { getUseCasesAddToNewCaseFlyout, getUseCasesAddToExistingCaseModal },
+      },
+    } = useKibana().services;
+    const userCasesPermissions = canUseCases();
+
     const { loading, error, relatedCases, refetchRelatedCases } =
       useGetRelatedCasesByEvent(eventId);
-    const userCasesPermissions = useGetUserCasesPermissions();
+
+    const createCaseFlyout = getUseCasesAddToNewCaseFlyout({
+      onSuccess: refetchRelatedCases,
+    });
+
+    const selectCaseModal = getUseCasesAddToExistingCaseModal({
+      onRowClick: refetchRelatedCases,
+    });
 
     const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
       return dataAsNestedObject
@@ -77,22 +91,14 @@ export const CasesPanel = React.memo<CasesPanelProps>(
               alertId: eventId,
               index: dataAsNestedObject._index ?? '',
               type: CommentType.alert,
-              rule: casesUi.helpers.getRuleIdFromEvent({
+              rule: getRuleIdFromEvent({
                 ecs: dataAsNestedObject,
                 data: detailsData,
               }),
             },
           ]
         : [];
-    }, [casesUi.helpers, dataAsNestedObject, detailsData, eventId]);
-
-    const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
-      onSuccess: refetchRelatedCases,
-    });
-
-    const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
-      onRowClick: refetchRelatedCases,
-    });
+    }, [dataAsNestedObject, detailsData, eventId, getRuleIdFromEvent]);
 
     const addToNewCase = useCallback(() => {
       if (userCasesPermissions.create) {

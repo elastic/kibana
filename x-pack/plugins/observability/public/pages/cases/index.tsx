@@ -11,7 +11,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Cases } from './cases';
 
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useHasData } from '../../hooks/use_has_data';
 import { LoadingObservability } from '../overview';
@@ -19,9 +18,16 @@ import { getNoDataConfig } from '../../utils/no_data_config';
 import { ObservabilityAppServices } from '../../application/types';
 
 export const CasesPage = React.memo(() => {
-  const userCasesPermissions = useGetUserCasesPermissions();
-  const { docLinks, http } = useKibana<ObservabilityAppServices>().services;
+  const {
+    cases: {
+      helpers: { canUseCases },
+    },
+    docLinks,
+    http,
+  } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate } = usePluginContext();
+
+  const userCasesPermissions = canUseCases();
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();
 

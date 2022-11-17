@@ -40,7 +40,7 @@ import type { TimerangeInput } from '../../../../../common/search_strategy';
 import { AddToCaseButton } from '../add_to_case_button';
 import { AddTimelineButton } from '../add_timeline_button';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -369,7 +369,12 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
       };
     }
   });
-  const { uiSettings } = useKibana().services;
+  const {
+    cases: {
+      helpers: { canUseCases },
+    },
+    uiSettings,
+  } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timeline: TimelineModel = useSelector(
@@ -417,7 +422,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     filterQuery: combinedQueries?.filterQuery ?? '',
   });
 
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = canUseCases();
 
   return (
     <StyledTimelineHeader alignItems="center" gutterSize="s">

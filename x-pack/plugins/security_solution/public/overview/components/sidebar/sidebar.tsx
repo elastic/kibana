@@ -17,7 +17,7 @@ import { SidebarHeader } from '../../../common/components/sidebar_header';
 
 import * as i18n from '../../pages/translations';
 import { RecentCases } from '../recent_cases';
-import { useGetUserCasesPermissions } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 
 const SidebarSpacerComponent = () => (
   <EuiFlexItem grow={false}>
@@ -30,6 +30,12 @@ export const Sidebar = React.memo<{
   recentTimelinesFilterBy: RecentTimelinesFilterMode;
   setRecentTimelinesFilterBy: (filterBy: RecentTimelinesFilterMode) => void;
 }>(({ recentTimelinesFilterBy, setRecentTimelinesFilterBy }) => {
+  const {
+    cases: {
+      helpers: { canUseCases },
+    },
+  } = useKibana().services;
+
   const recentTimelinesFilters = useMemo(
     () => (
       <RecentTimelinesFilters
@@ -41,7 +47,7 @@ export const Sidebar = React.memo<{
   );
 
   // only render the recently created cases view if the user has at least read permissions
-  const hasCasesReadPermissions = useGetUserCasesPermissions().read;
+  const { read: hasCasesReadPermissions } = canUseCases();
 
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="l">

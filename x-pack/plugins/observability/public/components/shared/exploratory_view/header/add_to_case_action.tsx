@@ -15,7 +15,6 @@ import {
   GetAllCasesSelectorModalProps,
 } from '@kbn/cases-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { observabilityFeatureId, observabilityAppId } from '../../../../../common';
@@ -38,14 +37,16 @@ export function AddToCaseAction({
   setAutoOpen,
   timeRange,
 }: AddToCaseProps) {
-  const kServices = useKibana<ObservabilityAppServices>().services;
-  const userCasesPermissions = useGetUserCasesPermissions();
-
   const {
-    cases,
+    cases: {
+      helpers: { canUseCases },
+      ui: { getAllCasesSelectorModal },
+    },
     application: { getUrlForApp },
     theme,
-  } = kServices;
+  } = useKibana<ObservabilityAppServices>().services;
+
+  const userCasesPermissions = canUseCases();
 
   const getToastText = useCallback(
     (theCase) =>
@@ -114,9 +115,7 @@ export function AddToCaseAction({
           })}
         </EuiButtonEmpty>
       )}
-      {isCasesOpen &&
-        lensAttributes &&
-        cases.ui.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
+      {isCasesOpen && lensAttributes && getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
     </>
   );
 }

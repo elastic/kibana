@@ -11,7 +11,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { SearchHit } from '../../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../../common/types';
 import { useDetailPanel } from '../../../../../timelines/components/side_panel/hooks/use_detail_panel';
-import { useGetUserCasesPermissions } from '../../../../../common/lib/kibana';
+import { useKibana } from '../../../../../common/lib/kibana';
 import type { SelectedDataView } from '../../../../../common/store/sourcerer/model';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import type { Ecs } from '../../../../../../common/ecs';
@@ -38,7 +38,13 @@ export const DetailsSummaryTab = React.memo(
     eventId,
     sourcererDataView,
   }: DetailsSummaryTabProps) => {
-    const userCasesPermissions = useGetUserCasesPermissions();
+    const {
+      cases: {
+        helpers: { canUseCases },
+      },
+    } = useKibana().services;
+
+    const userCasesPermissions = canUseCases();
 
     const { DetailsPanel, openHostDetailsPanel, openUserDetailsPanel } = useDetailPanel({
       isFlyoutView: true,

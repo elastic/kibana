@@ -14,7 +14,7 @@ import * as i18n from './translations';
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { hasData } from './helpers';
-import { useGetUserCasesPermissions } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useLicense } from '../../../hooks/use_license';
 import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
@@ -36,6 +36,11 @@ interface Props {
  */
 export const Insights = React.memo<Props>(
   ({ browserFields, eventId, data, isReadOnly, scopeId }) => {
+    const {
+      cases: {
+        helpers: { canUseCases },
+      },
+    } = useKibana().services;
     const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
       'insightsRelatedAlertsByProcessAncestry'
     );
@@ -68,8 +73,7 @@ export const Insights = React.memo<Props>(
     );
     const hasSourceEventInfo = hasData(sourceEventField);
 
-    const userCasesPermissions = useGetUserCasesPermissions();
-    const hasCasesReadPermissions = userCasesPermissions.read;
+    const { read: hasCasesReadPermissions } = canUseCases();
 
     // Make sure that the alert has at least one of the associated fields
     // or the user has the required permissions for features/fields that

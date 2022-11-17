@@ -7,16 +7,21 @@
 
 import React from 'react';
 
-import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
 
 const MAX_CASES_TO_SHOW = 3;
 const RecentCasesComponent = () => {
-  const { cases } = useKibana().services;
+  const {
+    cases: {
+      helpers: { canUseCases },
+      ui: { getRecentCases },
+    },
+  } = useKibana().services;
 
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = canUseCases();
 
-  return cases.ui.getRecentCases({
+  return getRecentCases({
     permissions: userCasesPermissions,
     maxCasesToShow: MAX_CASES_TO_SHOW,
     owner: [APP_ID],

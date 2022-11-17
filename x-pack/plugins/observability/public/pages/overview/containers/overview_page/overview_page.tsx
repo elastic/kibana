@@ -46,7 +46,6 @@ import { getNewsFeed } from '../../../../services/get_news_feed';
 import { DataSections, LoadingObservability } from '../../components';
 import { SectionContainer } from '../../../../components/app/section';
 import { ObservabilityAppServices } from '../../../../application/types';
-import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { paths } from '../../../../config';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { ObservabilityStatusProgress } from '../../../../components/app/observability_status/observability_status_progress';
@@ -69,11 +68,17 @@ export function OverviewPage() {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const {
-    cases,
+    cases: {
+      helpers: { canUseCases },
+      ui: { getCasesContext },
+    },
     http,
     application: { capabilities },
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = useKibana<ObservabilityAppServices>().services;
+
+  const CasesContext = getCasesContext();
+  const userCasesPermissions = canUseCases();
 
   const { ObservabilityPageTemplate } = usePluginContext();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
@@ -119,9 +124,6 @@ export function OverviewPage() {
     );
     return refetch.current && refetch.current();
   }, [relativeEnd, relativeStart]);
-
-  const CasesContext = cases.ui.getCasesContext();
-  const userCasesPermissions = useGetUserCasesPermissions();
 
   useEffect(() => {
     if (hasAnyData !== true) {

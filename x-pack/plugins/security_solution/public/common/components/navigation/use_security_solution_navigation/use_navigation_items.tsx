@@ -13,7 +13,6 @@ import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
 import type { PrimaryNavigationItemsProps } from './types';
 import { useKibana } from '../../../lib/kibana/kibana_react';
-import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import type { NavTab } from '../types';
 import { SecurityNavGroupKey } from '../types';
@@ -70,13 +69,19 @@ export const usePrimaryNavigationItems = ({
 };
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
-  const hasCasesReadPermissions = useGetUserCasesPermissions().read;
+  const {
+    application: { capabilities: uiCapabilities },
+    cases: {
+      helpers: { canUseCases },
+    },
+  } = useKibana().services;
+
+  const hasCasesReadPermissions = canUseCases().read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
   const canSeeResponseActionsHistory =
     useUserPrivileges().endpointPrivileges.canReadActionsLogManagement;
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
 
-  const uiCapabilities = useKibana().services.application.capabilities;
   return useMemo(
     () =>
       uiCapabilities.siem.show
