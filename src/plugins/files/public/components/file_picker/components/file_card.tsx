@@ -40,7 +40,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
       paddingSize="s"
       selectable={{
         isSelected,
-        onClick: () => (isSelected ? state.unselectFile(file.id) : state.selectFile(file.id)),
+        onClick: () => (isSelected ? state.unselectFile(file.id) : state.selectFile(file)),
       }}
       image={
         <div
