@@ -20,6 +20,7 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
+import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
@@ -90,10 +91,27 @@ const ActionsTableComponent = () => {
       );
     }
 
+    const query = item._source.queries[0].query;
+    const queryWithoutMultiLines = removeMultilines(query);
+    const content =
+      queryWithoutMultiLines && queryWithoutMultiLines.length > 90
+        ? `${queryWithoutMultiLines?.substring(0, 90)}...`
+        : queryWithoutMultiLines;
+
     return (
-      <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {item._source.queries[0].query}
-      </EuiCodeBlock>
+      <EuiFlexItem>
+        <EuiToolTip
+          content={
+            <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+              {queryWithoutMultiLines}
+            </EuiCodeBlock>
+          }
+        >
+          <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+            {content}
+          </EuiCodeBlock>
+        </EuiToolTip>
+      </EuiFlexItem>
     );
   }, []);
 
@@ -196,6 +214,7 @@ const ActionsTableComponent = () => {
           defaultMessage: 'Query',
         }),
         truncateText: true,
+        width: '60%',
         render: renderQueryColumn,
       },
       {
