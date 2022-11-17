@@ -232,7 +232,7 @@ Object {
           class="euiFlexItem"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="ManageRulesButton"
             type="button"
           >
@@ -299,7 +299,7 @@ Object {
         class="euiFlexItem"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
           data-test-subj="ManageRulesButton"
           type="button"
         >
@@ -423,7 +423,7 @@ Object {
           class="euiFlexItem"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="ManageRulesButton"
             type="button"
           >
@@ -570,7 +570,7 @@ Object {
         class="euiFlexItem"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
           data-test-subj="ManageRulesButton"
           type="button"
         >
@@ -1012,7 +1012,7 @@ Object {
           class="euiFlexItem"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="ManageRulesButton"
             type="button"
           >
@@ -1107,7 +1107,7 @@ Object {
         class="euiFlexItem"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
           data-test-subj="ManageRulesButton"
           type="button"
         >
