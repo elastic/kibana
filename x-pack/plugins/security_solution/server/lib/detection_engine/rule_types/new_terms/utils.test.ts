@@ -312,7 +312,7 @@ describe('createFieldValuesMap', () => {
     });
   });
 
-  it('should not put value in map if it is a boolean', () => {
+  it('should put value in map if it is a boolean', () => {
     expect(
       createFieldValuesMap(
         ['source.host', 'user.enabled'],
