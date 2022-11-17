@@ -66,6 +66,7 @@ jsts_transpiler(
 peggy(
   name = "grammar",
   data = [
+    ":grammar/grammar.config.json",
     ":grammar/grammar.peggy"
   ],
   output_dir = True,
