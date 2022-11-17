@@ -7,7 +7,6 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListPluginSetup {}
 

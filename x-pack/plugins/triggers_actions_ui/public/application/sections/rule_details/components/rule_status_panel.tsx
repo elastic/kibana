@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -32,7 +32,7 @@ export interface RuleStatusPanelProps {
   isEditable: boolean;
   requestRefresh: () => void;
   healthColor: string;
-  statusMessage: string;
+  statusMessage?: string | null;
 }
 
 type ComponentOpts = Pick<
@@ -67,6 +67,20 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
     (scheduleIds) => unsnoozeRule(rule, scheduleIds),
     [rule, unsnoozeRule]
   );
+
+  const statusMessageDisplay = useMemo(() => {
+    if (!statusMessage) {
+      return (
+        <EuiStat
+          titleSize="xs"
+          title="--"
+          description=""
+          isLoading={!rule.lastRun?.outcome && !rule.nextRun}
+        />
+      );
+    }
+    return statusMessage;
+  }, [rule, statusMessage]);
 
   const getLastNumberOfExecutions = useCallback(async () => {
     try {
@@ -142,7 +156,7 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
                   color={healthColor}
                   style={{ fontWeight: 400 }}
                 >
-                  {statusMessage}
+                  {statusMessageDisplay}
                 </EuiHealth>
               }
               description={i18n.translate(
