@@ -263,30 +263,35 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     return getReducer<T>();
   }, []);
 
-  const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
-    items: [],
-    totalItems: 0,
-    hasInitialFetchReturned: false,
-    isFetchingItems: false,
-    isDeletingItems: false,
-    showDeleteModal: false,
-    hasUpdatedAtMetadata: false,
-    selectedIds: [],
-    searchQuery:
-      initialQuery !== undefined
-        ? { text: initialQuery, query: new Query(Ast.create([]), undefined, initialQuery) }
-        : { text: '', query: new Query(Ast.create([]), undefined, '') },
-    pagination: {
-      pageIndex: 0,
-      totalItemCount: 0,
-      pageSize: initialPageSize,
-      pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
-    },
-    tableSort: {
-      field: 'attributes.title' as const,
-      direction: 'asc',
-    },
-  });
+  const initialState = useMemo<State<T>>(
+    () => ({
+      items: [],
+      totalItems: 0,
+      hasInitialFetchReturned: false,
+      isFetchingItems: false,
+      isDeletingItems: false,
+      showDeleteModal: false,
+      hasUpdatedAtMetadata: false,
+      selectedIds: [],
+      searchQuery:
+        initialQuery !== undefined
+          ? { text: initialQuery, query: new Query(Ast.create([]), undefined, initialQuery) }
+          : { text: '', query: new Query(Ast.create([]), undefined, '') },
+      pagination: {
+        pageIndex: 0,
+        totalItemCount: 0,
+        pageSize: initialPageSize,
+        pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+      },
+      tableSort: {
+        field: 'attributes.title' as const,
+        direction: 'asc',
+      },
+    }),
+    [initialPageSize, initialQuery]
+  );
+
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const {
     searchQuery,
