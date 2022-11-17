@@ -193,4 +193,34 @@ describe('useTagsAction', () => {
       );
     });
   });
+
+  it('do not update cases with no changes', async () => {
+    const updateSpy = jest.spyOn(api, 'updateCases');
+
+    const { result, waitFor } = renderHook(
+      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
+      {
+        wrapper: appMockRender.AppWrapper,
+      }
+    );
+
+    const action = result.current.getAction([{ ...basicCase, tags: [] }]);
+
+    act(() => {
+      action.onClick();
+    });
+
+    expect(onAction).toHaveBeenCalled();
+    expect(result.current.isFlyoutOpen).toBe(true);
+
+    act(() => {
+      result.current.onSaveTags({ selectedTags: [], unSelectedTags: ['pepsi'] });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isFlyoutOpen).toBe(false);
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+  });
 });
