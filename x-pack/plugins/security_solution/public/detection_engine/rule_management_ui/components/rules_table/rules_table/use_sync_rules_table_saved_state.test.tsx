@@ -81,6 +81,46 @@ describe('useSyncRulesTableSavedState', () => {
     expect(setStorage).not.toHaveBeenCalled();
   });
 
+  it('syncs both the url and the storage', () => {
+    const state = {
+      filterOptions: {
+        filter: 'test',
+        tags: ['test'],
+        showCustomRules: true,
+        showElasticRules: false,
+      },
+      sortingOptions: {
+        field: 'name',
+        order: 'asc',
+      },
+      pagination: {
+        page: 3,
+        perPage: 10,
+        total: 100,
+      },
+    };
+    const expected = {
+      searchTerm: 'test',
+      showCustomRules: true,
+      tags: ['test'],
+      sort: {
+        field: 'name',
+        order: 'asc',
+      },
+      page: 3,
+      perPage: 10,
+    };
+
+    (useRulesTableContext as jest.Mock).mockReturnValue({
+      state,
+    });
+
+    renderHook(() => useSyncRulesTableSavedState());
+
+    expect(updateUrlParam).toHaveBeenCalledWith(expected);
+    expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expected);
+  });
+
   describe('with the url', () => {
     it('syncs only the search term', () => {
       expectUrlSync(
