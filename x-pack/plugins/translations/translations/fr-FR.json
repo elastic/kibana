@@ -9930,7 +9930,6 @@
     "xpack.csp.rules.ruleFlyout.remediationTabLabel": "Résolution",
     "xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel": "Intégrations Benchmark",
     "xpack.csp.rules.rulesTable.cisSectionColumnLabel": "Section CIS",
-    "xpack.csp.rules.rulesTable.lastModifiedColumnLabel": "Dernière modification",
     "xpack.csp.rules.rulesTable.nameColumnLabel": "Nom",
     "xpack.csp.rules.rulesTable.searchPlaceholder": "Recherche",
     "xpack.dataVisualizer.choroplethMap.topValuesCount": "Compte des valeurs les plus élevées pour {fieldName}",

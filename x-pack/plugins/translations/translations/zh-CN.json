@@ -9935,7 +9935,6 @@
     "xpack.csp.rules.ruleFlyout.remediationTabLabel": "补救",
     "xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel": "基准集成",
     "xpack.csp.rules.rulesTable.cisSectionColumnLabel": "CIS 部分",
-    "xpack.csp.rules.rulesTable.lastModifiedColumnLabel": "最后修改时间",
     "xpack.csp.rules.rulesTable.nameColumnLabel": "名称",
     "xpack.csp.rules.rulesTable.searchPlaceholder": "搜索",
     "xpack.dataVisualizer.choroplethMap.topValuesCount": "{fieldName} 的排名最前值计数",
