@@ -152,7 +152,7 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [
-        i18n.translate('xpack.securitySolution.appLinks.sharedListDetailsDescription', {
+        i18n.translate('xpack.securitySolution.appLinks.sharedListDetails', {
           defaultMessage: 'Shared list details',
         }),
       ],
