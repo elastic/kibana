@@ -23,6 +23,7 @@ import type {
   OutdatedDocumentsTransform,
   SetSourceWriteBlockState,
   State,
+  CompareMappingsState,
   UpdateTargetMappingsState,
   UpdateTargetMappingsWaitForTaskState,
   CreateReindexTempState,
@@ -129,6 +130,11 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.cloneIndex({ client, source: state.tempIndex, target: state.targetIndex }),
     REFRESH_TARGET: (state: RefreshTarget) =>
       Actions.refreshIndex({ client, targetIndex: state.targetIndex }),
+    COMPARE_MAPPINGS: (state: CompareMappingsState) =>
+      Actions.compareMappings({
+        sourceIndexMappings: state.sourceIndexMappings,
+        targetIndexMappings: state.targetIndexMappings,
+      }),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings({
         client,

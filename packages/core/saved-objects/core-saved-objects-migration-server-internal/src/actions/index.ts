@@ -78,6 +78,8 @@ export { updateAliases } from './update_aliases';
 export type { CreateIndexParams } from './create_index';
 export { createIndex } from './create_index';
 
+export { compareMappings } from './compare_mappings';
+
 export type {
   UpdateAndPickupMappingsResponse,
   UpdateAndPickupMappingsParams,

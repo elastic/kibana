@@ -102,6 +102,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // This version's migration has already been completed.
         versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliases)
       ) {
+        const source = aliases[stateP.currentAlias]!;
+
         return {
           ...stateP,
           // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
@@ -112,6 +114,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // index
           sourceIndex: Option.none,
           targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          sourceIndexMappings: indices[source].mappings,
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
             indices[aliases[stateP.currentAlias]!].mappings
@@ -1005,7 +1008,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
       return {
         ...state,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
+        controlState: 'COMPARE_MAPPINGS',
       };
     } else {
       throwBadResponse(stateP, res);
@@ -1015,11 +1018,25 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
+        controlState: 'COMPARE_MAPPINGS',
       };
     } else {
       throwBadResponse(stateP, res);
     }
+  } else if (stateP.controlState === 'COMPARE_MAPPINGS') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isLeft(res) || !res.right.match) {
+      return {
+        ...stateP,
+        controlState: 'UPDATE_TARGET_MAPPINGS',
+      };
+    }
+
+    // The md5 of the mappings match, so there's no need to update target mappings
+    return {
+      ...stateP,
+      controlState: 'DONE',
+    };
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {

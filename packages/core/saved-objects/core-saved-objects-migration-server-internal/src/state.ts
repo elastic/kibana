@@ -286,6 +286,11 @@ export interface RefreshTarget extends PostInitState {
   readonly targetIndex: string;
 }
 
+export interface CompareMappingsState extends PostInitState {
+  readonly controlState: 'COMPARE_MAPPINGS';
+  readonly sourceIndexMappings?: IndexMapping;
+}
+
 export interface UpdateTargetMappingsState extends PostInitState {
   /** Update the mappings of the target index */
   readonly controlState: 'UPDATE_TARGET_MAPPINGS';
@@ -300,6 +305,7 @@ export interface UpdateTargetMappingsWaitForTaskState extends PostInitState {
 export interface OutdatedDocumentsSearchOpenPit extends PostInitState {
   /** Open PiT for target index to search for outdated documents */
   readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT';
+  readonly sourceIndexMappings?: IndexMapping;
 }
 
 export interface OutdatedDocumentsSearchRead extends PostInitState {
@@ -451,6 +457,7 @@ export type State = Readonly<
   | ReindexSourceToTempIndexBulk
   | SetTempWriteBlock
   | CloneTempToSource
+  | CompareMappingsState
   | UpdateTargetMappingsState
   | UpdateTargetMappingsWaitForTaskState
   | OutdatedDocumentsSearchOpenPit
