@@ -60,7 +60,6 @@ export function LabelPositionEditor({
   const form = (
     <EuiFormRow
       label={getVectorStyleLabel(VECTOR_STYLES.LABEL_POSITION)}
-      display="columnCompressed"
     >
       <EuiSelect
         disabled={disabled}
