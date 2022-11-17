@@ -34,23 +34,24 @@ import * as i18n from '../../../../detection_engine/rule_creation_ui/pages/rule_
 
 export const FROM_TIMELINE_ID_URL_PARAM = 'createRuleFromTimelineId';
 
-interface UseFromTimelineId {
+interface UseRuleFromTimelineId {
   index: string[];
   queryBar: FieldValueQueryBar;
 }
 
-interface FromTimelineId {
+interface RuleFromTimelineId {
   index: string[];
   loading: boolean;
   queryBar: FieldValueQueryBar;
   updated: boolean;
+  onOpenTimeline: (timeline: TimelineModel) => void;
 }
 
-export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimelineId => {
+export const useRuleFromTimelineId = (initialState: UseRuleFromTimelineId): RuleFromTimelineId => {
   const dispatch = useDispatch();
   const toasts = useAppToasts();
   const [loading, setLoading] = useState(true);
-  const [fromTimeline, setFromTimeline] = useState<TimelineModel | null>(null);
+  const [ruleFromTimeline, setRuleFromTimeline] = useState<TimelineModel | null>(null);
   const [ruleData, setRuleData] = useState<{
     index: string[];
     queryBar: FieldValueQueryBar;
@@ -61,7 +62,7 @@ export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimeline
   });
 
   const getInitialUrlParamValue = useGetInitialUrlParamValue<string>(FROM_TIMELINE_ID_URL_PARAM);
-  const { decodedParam: fromTimelineId } = useMemo(getInitialUrlParamValue, [
+  const { decodedParam: ruleFromTimelineId } = useMemo(getInitialUrlParamValue, [
     getInitialUrlParamValue,
   ]);
 
@@ -79,6 +80,7 @@ export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimeline
       }),
     [formatUrl]
   );
+
   const selectedDataViewBrowserFields = useMemo(() => {
     if (selectedDataView == null) {
       // the timeline data view is deleted, user must fix timeline to use with rule
@@ -88,11 +90,11 @@ export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimeline
         toastMessage: (
           <>
             <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.createRule.fromTimelineErrorToast"
+              id="xpack.securitySolution.detectionEngine.createRule.ruleFromTimelineErrorToast"
               defaultMessage="There is an issue with the data view used with this saved timeline. To create a rule from this timeline, you must {link}."
               values={{
-                link: fromTimelineId ? (
-                  <EuiLink href={getTimelineLink(fromTimelineId)}>
+                link: ruleFromTimelineId ? (
+                  <EuiLink href={getTimelineLink(ruleFromTimelineId)}>
                     {i18n.FROM_TIMELINE_ERROR_ACTION}
                   </EuiLink>
                 ) : (
@@ -107,9 +109,9 @@ export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimeline
     }
 
     if (
-      fromTimeline == null ||
-      fromTimeline.dataViewId == null ||
-      selectedDataView.id !== fromTimeline.dataViewId
+      ruleFromTimeline == null ||
+      ruleFromTimeline.dataViewId == null ||
+      selectedDataView.id !== ruleFromTimeline.dataViewId
     ) {
       return null;
     }
@@ -119,7 +121,7 @@ export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimeline
     }
 
     return selectedDataView.browserFields;
-  }, [selectedDataView, fromTimeline, toasts, fromTimelineId, getTimelineLink]);
+  }, [selectedDataView, ruleFromTimeline, toasts, ruleFromTimelineId, getTimelineLink]);
 
   useEffect(() => {
     if (selectedDataViewBrowserFields != null) {
@@ -129,24 +131,28 @@ export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimeline
   }, [selectedDataViewBrowserFields]);
 
   const setTheState = useCallback(() => {
-    if (fromTimeline == null || selectedDataView == null || selectedDataViewBrowserFields == null)
+    if (
+      ruleFromTimeline == null ||
+      selectedDataView == null ||
+      selectedDataViewBrowserFields == null
+    )
       return;
-    const indexPattern = fromTimeline.indexNames.length
-      ? fromTimeline.indexNames
+    const indexPattern = ruleFromTimeline.indexNames.length
+      ? ruleFromTimeline.indexNames
       : selectedDataView.patternList;
     const newQuery = {
-      query: fromTimeline.kqlQuery.filterQuery?.kuery?.expression ?? '',
-      language: fromTimeline.kqlQuery.filterQuery?.kuery?.kind ?? 'kuery',
+      query: ruleFromTimeline.kqlQuery.filterQuery?.kuery?.expression ?? '',
+      language: ruleFromTimeline.kqlQuery.filterQuery?.kuery?.kind ?? 'kuery',
     };
     const dataProvidersDsl =
-      fromTimeline.dataProviders != null && fromTimeline.dataProviders.length > 0
+      ruleFromTimeline.dataProviders != null && ruleFromTimeline.dataProviders.length > 0
         ? convertKueryToElasticSearchQuery(
-            buildGlobalQuery(fromTimeline.dataProviders, selectedDataViewBrowserFields),
+            buildGlobalQuery(ruleFromTimeline.dataProviders, selectedDataViewBrowserFields),
             { fields: [], title: indexPattern.join(',') }
           )
         : '';
 
-    const newFilters = fromTimeline.filters ?? [];
+    const newFilters = ruleFromTimeline.filters ?? [];
     // if something goes wrong and we don't hit this
     // the create new rule page will be unusable
     // probably need to add some sort of timer and in case we don't hit it we show error???
@@ -177,11 +183,11 @@ export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimeline
         })
       );
     }
-  }, [fromTimeline, selectedDataView, selectedDataViewBrowserFields, ogDataView, dispatch]);
+  }, [ruleFromTimeline, selectedDataView, selectedDataViewBrowserFields, ogDataView, dispatch]);
 
   const onOpenTimeline = useCallback(
     (timeline: TimelineModel) => {
-      setFromTimeline(timeline);
+      setRuleFromTimeline(timeline);
       dispatch(
         sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
@@ -211,13 +217,13 @@ export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimeline
   );
 
   useEffect(() => {
-    if (fromTimelineId != null) {
-      getTimelineById(fromTimelineId);
+    if (ruleFromTimelineId != null) {
+      getTimelineById(ruleFromTimelineId);
     } else {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromTimelineId]);
+  }, [ruleFromTimelineId]);
 
-  return { loading, ...ruleData };
+  return { loading, ...ruleData, onOpenTimeline };
 };

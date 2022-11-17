@@ -27,7 +27,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useFromTimelineId } from '../../../containers/detection_engine/rules/use_from_timeline_id';
+import { useRuleFromTimelineId } from '../../../containers/detection_engine/rules/use_rule_from_timeline_id';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -183,17 +183,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     },
   });
-  const fromTimelineData = useFromTimelineId({
+  const { onOpenTimeline, ...ruleFromTimelineData } = useRuleFromTimelineId({
     index: initialState.index,
     queryBar: initialState.queryBar,
   });
 
   useEffect(() => {
-    if (fromTimelineData.updated) {
-      setFieldValue('index', fromTimelineData.index);
-      setFieldValue('queryBar', fromTimelineData.queryBar);
+    if (ruleFromTimelineData.updated) {
+      setFieldValue('index', ruleFromTimelineData.index);
+      setFieldValue('queryBar', ruleFromTimelineData.queryBar);
     }
-  }, [fromTimelineData, setFieldValue]);
+  }, [ruleFromTimelineData, setFieldValue]);
 
   const {
     index,
@@ -586,8 +586,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   euiFieldProps: {
                     fullWidth: true,
                     placeholder: '',
-                    isDisabled: fromTimelineData.loading,
-                    isLoading: fromTimelineData.loading,
+                    isDisabled: ruleFromTimelineData.loading,
+                    isLoading: ruleFromTimelineData.loading,
                   },
                 }}
               />
@@ -597,7 +597,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       </RuleTypeEuiFormRow>
     );
   }, [
-    fromTimelineData.loading,
+    ruleFromTimelineData.loading,
     dataSourceType,
     onChangeDataSource,
     dataViewIndexPatternToggleButtonOptions,
@@ -630,31 +630,33 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             browserFields,
             idAria: 'detectionEngineStepDefineRuleQueryBar',
             indexPattern,
-            isDisabled: isLoading || formShouldLoadQueryDynamically || fromTimelineData.loading,
+            isDisabled: isLoading || formShouldLoadQueryDynamically || ruleFromTimelineData.loading,
             resetToSavedQuery: formShouldLoadQueryDynamically,
-            isLoading: isIndexPatternLoading || fromTimelineData.loading,
+            isLoading: isIndexPatternLoading || ruleFromTimelineData.loading,
             dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
             openTimelineSearch,
             onValidityChange: setIsQueryBarValid,
             onCloseTimelineSearch: handleCloseTimelineSearch,
             onSavedQueryError: handleSavedQueryError,
             defaultSavedQuery,
+            onOpenTimeline,
           } as QueryBarDefineRuleProps
         }
       />
     ),
     [
-      browserFields,
-      fromTimelineData.loading,
-      handleCloseTimelineSearch,
       handleOpenTimelineSearch,
-      indexPattern,
-      isIndexPatternLoading,
-      isLoading,
-      openTimelineSearch,
       formShouldLoadQueryDynamically,
+      browserFields,
+      indexPattern,
+      isLoading,
+      ruleFromTimelineData.loading,
+      isIndexPatternLoading,
+      openTimelineSearch,
+      handleCloseTimelineSearch,
       handleSavedQueryError,
       defaultSavedQuery,
+      onOpenTimeline,
     ]
   );
   const onOptionsChange = useCallback((field: FieldsEqlOptions, value: string | undefined) => {

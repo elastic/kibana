@@ -7,17 +7,17 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useFromTimelineId } from './use_from_timeline_id';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_query_string/helpers';
-import { resolveTimeline } from '../../../../../timelines/containers/api';
-import { mockTimeline } from '../../../../../../server/lib/timeline/__mocks__/create_timelines';
-import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';
+import { useRuleFromTimelineId } from './use_rule_from_timeline_id';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
+import { resolveTimeline } from '../../../../timelines/containers/api';
+import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
+import { mockBrowserFields } from '../../../../common/containers/source/mock';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
-jest.mock('../../../../../common/components/link_to', () => {
-  const originalModule = jest.requireActual('../../../../../common/components/link_to');
+jest.mock('../../../../common/components/link_to', () => {
+  const originalModule = jest.requireActual('../../../../common/components/link_to');
   return {
     ...originalModule,
     getTimelineUrl: jest.fn(),
@@ -37,10 +37,10 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../../common/utils/global_query_string/helpers');
-jest.mock('../../../../../common/hooks/use_selector');
-jest.mock('../../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../../timelines/containers/api');
+jest.mock('../../../../common/utils/global_query_string/helpers');
+jest.mock('../../../../common/hooks/use_selector');
+jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../timelines/containers/api');
 
 const defaults = {
   index: ['auditbeat-*'],
@@ -91,7 +91,7 @@ const fromTimeline = {
     },
   },
 };
-describe('useFromTimelineId', () => {
+describe('useRuleFromTimelineId', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
@@ -119,8 +119,10 @@ describe('useFromTimelineId', () => {
     (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
       decodedParam: undefined,
     }));
-    const { result } = renderHook(() => useFromTimelineId(defaults));
-    expect(result.current).toEqual({
+    const { result } = renderHook(() => useRuleFromTimelineId(defaults));
+
+    const { onOpenTimeline, ...hookData } = result.current;
+    expect(hookData).toEqual({
       ...defaults,
       updated: false,
       loading: false,
@@ -128,8 +130,9 @@ describe('useFromTimelineId', () => {
   });
 
   it('if from timeline id, update false and loading true', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useFromTimelineId(defaults));
-    expect(result.current).toEqual({
+    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimelineId(defaults));
+    const { onOpenTimeline, ...hookData } = result.current;
+    expect(hookData).toEqual({
       ...defaults,
       updated: false,
       loading: true,
@@ -138,7 +141,7 @@ describe('useFromTimelineId', () => {
   });
 
   it('if from timeline id, set active timeline data view to from timeline data view', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useFromTimelineId(defaults));
+    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimelineId(defaults));
     await waitForNextUpdate();
     expect(mockDispatch).toHaveBeenCalledTimes(3);
     expect(mockDispatch).toHaveBeenNthCalledWith(1, {
@@ -165,7 +168,8 @@ describe('useFromTimelineId', () => {
       },
     });
 
-    expect(result.current).toEqual({
+    const { onOpenTimeline, ...hookData } = result.current;
+    expect(hookData).toEqual({
       ...defaults,
       updated: false,
       loading: true,
@@ -184,10 +188,11 @@ describe('useFromTimelineId', () => {
         selectedPatterns: ['auditbeat-*'],
       },
     });
-    const { result, waitForNextUpdate } = renderHook(() => useFromTimelineId(defaults));
+    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimelineId(defaults));
     await waitForNextUpdate();
 
-    expect(result.current).toEqual({
+    const { onOpenTimeline, ...hookData } = result.current;
+    expect(hookData).toEqual({
       index: [
         'auditbeat-*',
         'endgame-*',

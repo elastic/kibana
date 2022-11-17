@@ -8,7 +8,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { FROM_TIMELINE_ID_URL_PARAM } from '../../../detections/containers/detection_engine/rules/use_from_timeline_id';
+import { FROM_TIMELINE_ID_URL_PARAM } from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline_id';
 import { encodeRisonUrlState } from '../../../common/utils/global_query_string/helpers';
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
