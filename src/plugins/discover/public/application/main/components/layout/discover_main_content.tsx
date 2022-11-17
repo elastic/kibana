@@ -21,7 +21,7 @@ import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 
-const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
+export const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
 export interface DiscoverMainContentProps {
   dataView: DataView;

@@ -233,7 +233,6 @@ describe('test fetchAll', () => {
     expect(await collectMain()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
-      // { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document' }, // There is no partial, since documents query failed
       {
         fetchStatus: FetchStatus.ERROR,
         error: { msg: 'This query failed' },

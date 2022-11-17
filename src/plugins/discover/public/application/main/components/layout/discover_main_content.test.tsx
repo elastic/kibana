@@ -24,18 +24,25 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
-import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
+import {
+  DiscoverMainContent,
+  DiscoverMainContentProps,
+  FieldStatisticsTableMemoized,
+} from './discover_main_content';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { CoreTheme } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { setTimeout } from 'timers/promises';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { DiscoverDocuments } from './discover_documents';
 
 const mountComponent = async ({
   isPlainRecord = false,
+  viewMode = VIEW_MODE.DOCUMENT_LEVEL,
 }: {
   isPlainRecord?: boolean;
+  viewMode?: VIEW_MODE;
 } = {}) => {
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -97,7 +104,7 @@ const mountComponent = async ({
     } as unknown as GetStateReturn,
     onFieldEdited: jest.fn(),
     columns: [],
-    viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    viewMode,
     onAddFilter: jest.fn(),
   };
 
@@ -129,6 +136,20 @@ describe('Discover main content component', () => {
     it('should not show DocumentViewModeToggle when isPlainRecord is true', async () => {
       const component = await mountComponent({ isPlainRecord: true });
       expect(component.find(DocumentViewModeToggle).exists()).toBe(false);
+    });
+  });
+
+  describe('Document view', () => {
+    it('should show DiscoverDocuments when VIEW_MODE is DOCUMENT_LEVEL', async () => {
+      const component = await mountComponent();
+      expect(component.find(DiscoverDocuments).exists()).toBe(true);
+      expect(component.find(FieldStatisticsTableMemoized).exists()).toBe(false);
+    });
+
+    it('should show FieldStatisticsTableMemoized when VIEW_MODE is not DOCUMENT_LEVEL', async () => {
+      const component = await mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
+      expect(component.find(DiscoverDocuments).exists()).toBe(false);
+      expect(component.find(FieldStatisticsTableMemoized).exists()).toBe(true);
     });
   });
 });

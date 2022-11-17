@@ -163,7 +163,7 @@ describe('Chart', () => {
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeFalsy();
   });
 
-  it('should render chart if data view is not time based', async () => {
+  it('should render chart if data view is time based', async () => {
     const component = await mountComponent();
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
   });

@@ -35,6 +35,9 @@ import { HISTOGRAM_HEIGHT_KEY } from './use_discover_histogram';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
+import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
+import { ResetSearchButton } from './reset_search_button';
 
 const mountComponent = async ({
   isPlainRecord = false,
@@ -96,6 +99,10 @@ const mountComponent = async ({
     availableFields$,
   };
 
+  const session = getSessionServiceMock();
+
+  session.getSession$.mockReturnValue(new BehaviorSubject('123'));
+
   const props: DiscoverHistogramLayoutProps = {
     isPlainRecord,
     dataView: dataViewMock,
@@ -120,7 +127,7 @@ const mountComponent = async ({
     resetSavedSearch,
     isTimeBased,
     resizeRef: { current: null },
-    searchSessionManager: createSearchSessionMock().searchSessionManager,
+    searchSessionManager: createSearchSessionMock(session).searchSessionManager,
     inspectorAdapters: { requests: new RequestAdapter() },
   };
 
@@ -156,18 +163,58 @@ describe('Discover histogram layout component', () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const originalGet = storage.get;
       storage.get = jest.fn().mockImplementation(originalGet);
-      await mountComponent({ storage });
+      const component = await mountComponent({ storage });
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
       expect(storage.get).toHaveReturnedWith(null);
+      expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(undefined);
     });
 
     it('should pass the stored topPanelHeight to UnifiedHistogramLayout if a value is found in storage', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const topPanelHeight = 123;
       storage.get = jest.fn().mockImplementation(() => topPanelHeight);
-      await mountComponent({ storage });
+      const component = await mountComponent({ storage });
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
       expect(storage.get).toHaveReturnedWith(topPanelHeight);
+      expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(topPanelHeight);
+    });
+
+    it('should update the topPanelHeight in storage and pass the new value to UnifiedHistogramLayout when the topPanelHeight changes', async () => {
+      const storage = new LocalStorageMock({}) as unknown as Storage;
+      const originalSet = storage.set;
+      storage.set = jest.fn().mockImplementation(originalSet);
+      const component = await mountComponent({ storage });
+      const newTopPanelHeight = 123;
+      expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).not.toBe(
+        newTopPanelHeight
+      );
+      act(() => {
+        component.find(UnifiedHistogramLayout).prop('onTopPanelHeightChange')!(newTopPanelHeight);
+      });
+      component.update();
+      expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
+      expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(newTopPanelHeight);
+    });
+  });
+
+  describe('reset search button', () => {
+    it('renders the button when there is a saved search', async () => {
+      const component = await mountComponent();
+      expect(component.find(ResetSearchButton).exists()).toBe(true);
+    });
+
+    it('does not render the button when there is no saved search', async () => {
+      const component = await mountComponent({
+        savedSearch: { ...savedSearchMock, id: undefined },
+      });
+      expect(component.find(ResetSearchButton).exists()).toBe(false);
+    });
+
+    it('should call resetSavedSearch when clicked', async () => {
+      const resetSavedSearch = jest.fn();
+      const component = await mountComponent({ resetSavedSearch });
+      component.find(ResetSearchButton).find('button').simulate('click');
+      expect(resetSavedSearch).toHaveBeenCalled();
     });
   });
 });
