@@ -195,8 +195,8 @@ Infrastructure::
 Inital hosts page {kibana-pull}138173[#138173]
 
 Lens & Visualizations::
-* Adds the ability to duplicate layers in *Lens* {kibana-pull}140603[#140603]
-* Updates the AggConfig for nested sibling pipeline aggs {kibana-pull}140650[#140650]
+* Adds query-based annotations in *Lens* {kibana-pull}138753[#138753]
+* Enables ad-hoc data views in *Lens* {kibana-pull}138732[#138732]
 
 Machine Learning::
 * Notifications page {kibana-pull}140613[#140613]
@@ -287,13 +287,12 @@ Lens & Visualizations::
 * Adds TSDB support for *Lens*, *TSVB* and *Timelion* {kibana-pull}139020[#139020]
 * Adds the format selector to the new metric visualization in *Lens* {kibana-pull}139018[#139018]
 * Shows the edit/delete button while field stats are loading in *Lens* {kibana-pull}138899[#138899]
-* Adds query-based annotations in *Lens* {kibana-pull}138753[#138753]
-* Enables ad-hoc data views in *Lens* {kibana-pull}138732[#138732]
 * Adds auto mode for secondary metric prefix in *Lens* {kibana-pull}138167[#138167]
 * Adds open in *Lens* extendability {kibana-pull}136928[#136928]
 * Adds TSDB warning handling support for *Lens*, Agg based, and *TSVB* {kibana-pull}136833[#136833]
 * Adds reduced time range option in *Lens* {kibana-pull}136706[#136706]
 * Migrates xy visualization type to new unified xy expression {kibana-pull}136475[#136475]
+* Adds the ability to duplicate layers in *Lens* {kibana-pull}140603[#140603]
 
 Machine Learning::
 * Explain Log Rate Spikes: add main chart sync on row hover at group level {kibana-pull}141138[#141138]
