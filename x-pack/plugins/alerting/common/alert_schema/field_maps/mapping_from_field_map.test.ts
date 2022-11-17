@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { mappingFromFieldMap } from './mapping_from_field_map';
+import { FieldMap } from './types';
 
 describe('mappingFromFieldMap', () => {
-  const fieldMap = {
+  const fieldMap: FieldMap = {
     date_field: {
       type: 'date',
       array: false,
@@ -95,10 +96,12 @@ describe('mappingFromFieldMap', () => {
     },
     unmapped_object: {
       type: 'object',
+      required: false,
       enabled: false,
     },
     formatted_field: {
       type: 'date_range',
+      required: false,
       format: 'epoch_millis||strict_date_optional_time',
     },
   };
