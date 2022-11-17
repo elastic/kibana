@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { memoize } from 'lodash';
+import { chain, memoize, pick } from 'lodash';
 import { Agent, AgentOptions } from 'https';
 import { URL } from 'url';
 import type { Request, ResponseObject, ResponseToolkit, ServerRoute } from '@hapi/hapi';
@@ -15,20 +15,28 @@ import type { IConfigService } from '@kbn/config';
 import type { Logger } from '@kbn/logging';
 import { KibanaConfig } from '../kibana_config';
 
-const HTTPS = 'https:';
-const KIBANA_ROOT_ROUTE = '/';
-
 interface RootRouteDependencies {
   logger: Logger;
   config: IConfigService;
 }
 
+type Status = 'healthy' | 'unhealthy' | 'failure' | 'timeout';
+
+interface RootRouteResponse {
+  status: Status;
+  hosts?: HostStatus[];
+}
+
+interface HostStatus {
+  host: string;
+  status: Status;
+  code?: number;
+  message?: string;
+}
+
 export class RootRoute implements ServerRoute {
-  private static isUnhealthyResponse(response: PromiseSettledResult<Response>) {
-    return (
-      response.status === 'rejected' ||
-      !(RootRoute.isSuccess(response.value) || RootRoute.isUnauthorized(response.value))
-    );
+  private static isHealthy(response: Response) {
+    return RootRoute.isSuccess(response) || RootRoute.isUnauthorized(response);
   }
 
   private static isUnauthorized({ status, headers }: Response): boolean {
@@ -38,6 +46,14 @@ export class RootRoute implements ServerRoute {
   private static isSuccess({ status }: Response): boolean {
     return (status >= 200 && status <= 299) || status === 302;
   }
+
+  private static readonly POLL_ROUTE = '/';
+  private static readonly STATUS_CODE: Record<Status, number> = {
+    healthy: 200,
+    unhealthy: 503,
+    failure: 502,
+    timeout: 504,
+  };
 
   readonly method = 'GET';
   readonly path = '/';
@@ -50,67 +66,63 @@ export class RootRoute implements ServerRoute {
     this.logger = logger;
     this.handler = this.handler.bind(this);
 
-    return {
-      method: this.method,
-      path: this.path,
-      handler: this.handler,
-    } as RootRoute;
+    return pick(this, ['method', 'path', 'handler']) as RootRoute;
   }
 
   async handler(request: Request, toolkit: ResponseToolkit): Promise<ResponseObject> {
-    const responses = await this.fetchHosts();
-    const { body, statusCode } = this.mergeResponses(responses);
-    this.logger.debug(`Returning ${statusCode} response with body: ${JSON.stringify(body)}`);
+    const body = await this.poll();
+    const code = RootRoute.STATUS_CODE[body.status];
 
-    return toolkit.response(body).type('application/json').code(statusCode);
+    this.logger.debug(`Returning ${code} response with body: ${JSON.stringify(body)}`);
+
+    return toolkit.response(body).type('application/json').code(code);
   }
 
-  private async fetchHosts() {
-    const responses = await Promise.allSettled(
-      this.kibanaConfig.hosts.map((host) => {
-        this.logger.debug(`Fetching response from ${host}${KIBANA_ROOT_ROUTE}`);
-        return this.fetch(`${host}${KIBANA_ROOT_ROUTE}`);
-      })
-    );
-
-    responses.forEach((response, index) => {
-      const host = `${this.kibanaConfig.hosts[index]}${KIBANA_ROOT_ROUTE}`;
-
-      if (response.status !== 'rejected') {
-        this.logger.debug(`Got response from ${host}: ${JSON.stringify(response.value.status)}`);
-
-        return;
-      }
-
-      if (response.reason instanceof Error) {
-        this.logger.error(response.reason);
-      }
-
-      if (response.reason instanceof Error && response.reason.name === 'AbortError') {
-        this.logger.error(`Request timeout for ${host}`);
-
-        return;
-      }
-
-      this.logger.error(
-        `No response from ${host}: ${
-          response.reason instanceof Error
-            ? response.reason.message
-            : JSON.stringify(response.reason)
-        }`
-      );
-    });
-
-    return responses;
-  }
-
-  private mergeResponses(responses: Array<PromiseSettledResult<Response>>) {
-    const hasUnhealthyResponse = responses.some(RootRoute.isUnhealthyResponse);
+  private async poll(): Promise<RootRouteResponse> {
+    const hosts = await Promise.all(this.kibanaConfig.hosts.map(this.pollHost.bind(this)));
+    const statuses = chain(hosts).map('status').uniq().value();
+    const status = statuses.length <= 1 ? statuses[0] ?? 'healthy' : 'unhealthy';
 
     return {
-      body: {}, // The control plane health check ignores the body, so we do the same
-      statusCode: hasUnhealthyResponse ? 503 : 200,
+      status,
+      hosts,
     };
+  }
+
+  private async pollHost(host: string): Promise<HostStatus> {
+    const url = `${host}${RootRoute.POLL_ROUTE}`;
+    this.logger.debug(`Requesting ${url}`);
+
+    try {
+      const response = await this.fetch(url);
+      this.logger.debug(`Healthy response from ${url} with code ${response.status}`);
+
+      return {
+        host,
+        status: RootRoute.isHealthy(response) ? 'healthy' : 'unhealthy',
+        code: response.status,
+      };
+    } catch (error) {
+      this.logger.error(error);
+
+      if (error.name === 'AbortError') {
+        this.logger.error(`Request timeout for ${url}`);
+
+        return {
+          host,
+          status: 'timeout',
+          message: error.message,
+        };
+      }
+
+      this.logger.error(`Failed response from ${url}: ${error.message}`);
+
+      return {
+        host,
+        status: 'failure',
+        message: error.message,
+      };
+    }
   }
 
   private async fetch(url: string) {
@@ -124,7 +136,7 @@ export class RootRoute implements ServerRoute {
 
     try {
       return await nodeFetch(url, {
-        agent: protocol === HTTPS ? this.getAgent() : undefined,
+        agent: protocol === 'https:' ? this.getAgent() : undefined,
         signal: controller.signal,
         redirect: 'manual',
       });
