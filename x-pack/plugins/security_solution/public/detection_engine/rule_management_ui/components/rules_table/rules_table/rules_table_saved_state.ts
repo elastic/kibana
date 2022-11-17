@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { FilterOptions, SortingOptions } from '../../../../rule_management/logic/types';
+import type { SortingOptions } from '../../../../rule_management/logic/types';
 
 export interface RulesTableSavedState {
   tab?: string;
-  filter: FilterOptions;
-  sort: SortingOptions;
-  page: number;
-  perPage: number;
+  searchTerm?: string;
+  showCustomRules?: boolean;
+  tags?: string[];
+  sort?: Partial<SortingOptions>;
+  page?: number;
+  perPage?: number;
 }

@@ -11,12 +11,20 @@ import { useInitializeUrlParam } from '../../../../../common/utils/global_query_
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 import { useInitializeRulesTableSavedState } from './use_initialize_rules_table_saved_state';
 import type { RulesTableActions } from './rules_table_context';
-import { useRulesTableContext } from './rules_table_context';
+import {
+  INITIAL_FILTER_OPTIONS,
+  INITIAL_SORTING_OPTIONS,
+  useRulesTableContext,
+} from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/utils/global_query_string');
-jest.mock('./rules_table_context');
+jest.mock('./rules_table_context', () => ({
+  INITIAL_FILTER_OPTIONS: jest.requireActual('./rules_table_context').INITIAL_FILTER_OPTIONS,
+  INITIAL_SORTING_OPTIONS: jest.requireActual('./rules_table_context').INITIAL_SORTING_OPTIONS,
+  useRulesTableContext: jest.fn(),
+}));
 
 function mockState({
   urlState,
@@ -36,26 +44,20 @@ function mockState({
 describe('useInitializeRulesTableSavedState', () => {
   const urlSavedState: RulesTableSavedState = {
     tab: 'monitoring',
-    filter: {
-      filter: '',
-      showCustomRules: false,
-      showElasticRules: false,
-      tags: [],
-    },
+    searchTerm: 'test',
+    showCustomRules: true,
+    tags: ['test'],
     sort: {
       field: 'name',
-      order: 'desc',
+      order: 'asc',
     },
     page: 2,
     perPage: 10,
   };
   const storageSavedState: RulesTableSavedState = {
-    filter: {
-      filter: 'test',
-      showCustomRules: false,
-      showElasticRules: true,
-      tags: [],
-    },
+    searchTerm: 'test',
+    showCustomRules: true,
+    tags: ['test'],
     sort: {
       field: 'name',
       order: 'asc',
@@ -70,7 +72,6 @@ describe('useInitializeRulesTableSavedState', () => {
     jest.clearAllMocks();
 
     actions = {
-      setIsInMemorySorting: jest.fn(),
       setFilterOptions: jest.fn(),
       setSortingOptions: jest.fn(),
       setPage: jest.fn(),
@@ -90,7 +91,6 @@ describe('useInitializeRulesTableSavedState', () => {
       renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
       expect(setActiveTab).not.toHaveBeenCalled();
-      expect(actions.setIsInMemorySorting).not.toHaveBeenCalled();
       expect(actions.setFilterOptions).not.toHaveBeenCalled();
       expect(actions.setSortingOptions).not.toHaveBeenCalled();
       expect(actions.setPage).not.toHaveBeenCalled();
@@ -107,7 +107,12 @@ describe('useInitializeRulesTableSavedState', () => {
       renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
       expect(setActiveTab).toHaveBeenCalledWith('monitoring');
-      expect(actions.setFilterOptions).toHaveBeenCalledWith(urlSavedState.filter);
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        filter: urlSavedState.searchTerm,
+        showCustomRules: urlSavedState.showCustomRules,
+        showElasticRules: !urlSavedState.showCustomRules,
+        tags: urlSavedState.tags,
+      });
       expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sort);
       expect(actions.setPage).toHaveBeenCalledWith(urlSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(urlSavedState.perPage);
@@ -133,6 +138,134 @@ describe('useInitializeRulesTableSavedState', () => {
     });
   });
 
+  describe('when partial state is saved in the url', () => {
+    it('restores only the active tab', () => {
+      mockState({ urlState: { tab: 'monitoring' }, storageState: null });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).toHaveBeenCalledWith('monitoring');
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only the search term', () => {
+      mockState({ urlState: { searchTerm: 'test' }, storageState: null });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        ...INITIAL_FILTER_OPTIONS,
+        filter: 'test',
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only show elastic rules filter', () => {
+      mockState({ urlState: { showCustomRules: false }, storageState: null });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        ...INITIAL_FILTER_OPTIONS,
+        showElasticRules: true,
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only show custom rules filter', () => {
+      mockState({ urlState: { showCustomRules: true }, storageState: null });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        ...INITIAL_FILTER_OPTIONS,
+        showCustomRules: true,
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only tags', () => {
+      mockState({ urlState: { tags: ['test'] }, storageState: null });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        ...INITIAL_FILTER_OPTIONS,
+        tags: ['test'],
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only sorting field', () => {
+      mockState({ urlState: { sort: { field: 'name' } }, storageState: null });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({
+        field: 'name',
+        order: INITIAL_SORTING_OPTIONS.order,
+      });
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only sorting order', () => {
+      mockState({ urlState: { sort: { order: 'asc' } }, storageState: null });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({
+        field: INITIAL_SORTING_OPTIONS.field,
+        order: 'asc',
+      });
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only page number', () => {
+      mockState({ urlState: { page: 10 }, storageState: null });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).toHaveBeenCalledWith(10);
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only page size', () => {
+      mockState({ urlState: { perPage: 10 }, storageState: null });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).toHaveBeenCalledWith(10);
+    });
+  });
+
   describe('when state is saved in the storage', () => {
     beforeEach(() => {
       mockState({ urlState: null, storageState: storageSavedState });
@@ -142,7 +275,12 @@ describe('useInitializeRulesTableSavedState', () => {
       renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
       expect(setActiveTab).not.toHaveBeenCalled();
-      expect(actions.setFilterOptions).toHaveBeenCalledWith(storageSavedState.filter);
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        filter: storageSavedState.searchTerm,
+        showCustomRules: storageSavedState.showCustomRules,
+        showElasticRules: !storageSavedState.showCustomRules,
+        tags: storageSavedState.tags,
+      });
       expect(actions.setSortingOptions).toHaveBeenCalledWith(storageSavedState.sort);
       expect(actions.setPage).toHaveBeenCalledWith(storageSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(storageSavedState.perPage);
@@ -168,6 +306,134 @@ describe('useInitializeRulesTableSavedState', () => {
     });
   });
 
+  describe('when partial state is saved in the storage', () => {
+    it('restores only the active tab', () => {
+      mockState({ urlState: null, storageState: { tab: 'monitoring' } });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).toHaveBeenCalledWith('monitoring');
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only the search term', () => {
+      mockState({ urlState: null, storageState: { searchTerm: 'test' } });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        ...INITIAL_FILTER_OPTIONS,
+        filter: 'test',
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only show elastic rules filter', () => {
+      mockState({ urlState: null, storageState: { showCustomRules: false } });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        ...INITIAL_FILTER_OPTIONS,
+        showElasticRules: true,
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only show custom rules filter', () => {
+      mockState({ urlState: null, storageState: { showCustomRules: true } });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        ...INITIAL_FILTER_OPTIONS,
+        showCustomRules: true,
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only tags', () => {
+      mockState({ urlState: null, storageState: { tags: ['test'] } });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        ...INITIAL_FILTER_OPTIONS,
+        tags: ['test'],
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only sorting field', () => {
+      mockState({ urlState: null, storageState: { sort: { field: 'name' } } });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({
+        field: 'name',
+        order: INITIAL_SORTING_OPTIONS.order,
+      });
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only sorting order', () => {
+      mockState({ urlState: null, storageState: { sort: { order: 'asc' } } });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({
+        field: INITIAL_SORTING_OPTIONS.field,
+        order: 'asc',
+      });
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only page number', () => {
+      mockState({ urlState: null, storageState: { page: 10 } });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).toHaveBeenCalledWith(10);
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
+    it('restores only page size', () => {
+      mockState({ urlState: null, storageState: { perPage: 10 } });
+
+      renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
+
+      expect(setActiveTab).not.toHaveBeenCalled();
+      expect(actions.setFilterOptions).toHaveBeenCalledWith(INITIAL_FILTER_OPTIONS);
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).toHaveBeenCalledWith(10);
+    });
+  });
+
   describe('when state is saved in the url and the storage', () => {
     beforeEach(() => {
       mockState({ urlState: urlSavedState, storageState: storageSavedState });
@@ -177,7 +443,12 @@ describe('useInitializeRulesTableSavedState', () => {
       renderHook(() => useInitializeRulesTableSavedState(setActiveTab));
 
       expect(setActiveTab).toHaveBeenCalledWith('monitoring');
-      expect(actions.setFilterOptions).toHaveBeenCalledWith(urlSavedState.filter);
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        filter: urlSavedState.searchTerm,
+        showCustomRules: urlSavedState.showCustomRules,
+        showElasticRules: !urlSavedState.showCustomRules,
+        tags: urlSavedState.tags,
+      });
       expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sort);
       expect(actions.setPage).toHaveBeenCalledWith(urlSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(urlSavedState.perPage);

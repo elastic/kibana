@@ -97,17 +97,18 @@ export interface RulesTableState {
   sortingOptions: SortingOptions;
 }
 
-const initialFilterOptions: FilterOptions = {
+export const INITIAL_FILTER_OPTIONS: FilterOptions = {
   filter: '',
   tags: [],
   showCustomRules: false,
   showElasticRules: false,
 };
-
-const initialSortingOptions: SortingOptions = {
+export const INITIAL_SORTING_OPTIONS: SortingOptions = {
   field: 'enabled',
   order: 'desc',
 };
+export const DEFAULT_PAGE = 1;
+export const DEFAULT_RULES_PER_PAGE = 20;
 
 export type LoadingRuleAction =
   | 'delete'
@@ -163,8 +164,6 @@ interface RulesTableContextProviderProps {
 
 const IN_MEMORY_STORAGE_KEY = 'detection-rules-table-in-memory';
 
-const DEFAULT_RULES_PER_PAGE = 20;
-
 export const RulesTableContextProvider = ({ children }: RulesTableContextProviderProps) => {
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
@@ -176,8 +175,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const [isInMemorySorting, setIsInMemorySorting] = useState<boolean>(
     storage.get(IN_MEMORY_STORAGE_KEY) ?? false
   );
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>(initialFilterOptions);
-  const [sortingOptions, setSortingOptions] = useState<SortingOptions>(initialSortingOptions);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>(INITIAL_FILTER_OPTIONS);
+  const [sortingOptions, setSortingOptions] = useState<SortingOptions>(INITIAL_SORTING_OPTIONS);
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [isRefreshOn, setIsRefreshOn] = useState(autoRefreshSettings.on);
   const [loadingRules, setLoadingRules] = useState<LoadingRules>({
@@ -185,7 +184,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     action: null,
   });
   const [isPreflightInProgress, setIsPreflightInProgress] = useState(false);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(DEFAULT_PAGE);
   const [perPage, setPerPage] = useState(DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
   const autoRefreshBeforePause = useRef<boolean | null>(null);
@@ -197,7 +196,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
       // Reset sorting options when switching to server-side implementation as currently selected sorting might not be supported
       if (value === false) {
-        setSortingOptions(initialSortingOptions);
+        setSortingOptions(INITIAL_SORTING_OPTIONS);
       }
     },
     [storage]

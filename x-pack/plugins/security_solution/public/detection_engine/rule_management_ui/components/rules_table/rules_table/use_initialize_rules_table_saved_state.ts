@@ -15,7 +15,11 @@ import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useInitializeUrlParam } from '../../../../../common/utils/global_query_string';
 import { AllRulesTabs } from '../rules_table_toolbar';
 
-import { useRulesTableContext } from './rules_table_context';
+import {
+  INITIAL_FILTER_OPTIONS,
+  INITIAL_SORTING_OPTIONS,
+  useRulesTableContext,
+} from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
 
 export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTabs) => void): void {
@@ -34,7 +38,9 @@ export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTa
       }
 
       const activeTab = params?.tab ?? savedState?.tab;
-      const filterOptions = params?.filter ?? savedState?.filter;
+      const searchTerm = params?.searchTerm ?? savedState?.searchTerm;
+      const showCustomRules = params?.showCustomRules ?? savedState?.showCustomRules;
+      const tags = params?.tags ?? savedState?.tags;
       const sorting = params?.sort ?? savedState?.sort;
       const page = params?.page ?? savedState?.page;
       const perPage = params?.perPage ?? savedState?.perPage;
@@ -43,12 +49,18 @@ export function useInitializeRulesTableSavedState(setActiveTab: (tab: AllRulesTa
         setActiveTab(activeTab);
       }
 
-      if (filterOptions !== undefined) {
-        actions.setFilterOptions(filterOptions);
-      }
+      actions.setFilterOptions({
+        filter: typeof searchTerm === 'string' ? searchTerm : INITIAL_FILTER_OPTIONS.filter,
+        showElasticRules: showCustomRules === false,
+        showCustomRules: showCustomRules === true,
+        tags: Array.isArray(tags) ? tags : INITIAL_FILTER_OPTIONS.tags,
+      });
 
-      if (sorting && sorting.field && sorting.order) {
-        actions.setSortingOptions(sorting);
+      if (sorting) {
+        actions.setSortingOptions({
+          field: sorting.field ?? INITIAL_SORTING_OPTIONS.field,
+          order: sorting.order ?? INITIAL_SORTING_OPTIONS.order,
+        });
       }
 
       if (page) {
