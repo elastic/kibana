@@ -101,9 +101,7 @@ export abstract class InferenceBase<TInferResponse> {
             return validationResults.every((v) => !!v);
           })
         )
-        .subscribe((v) => {
-          this.isValid$.next(v);
-        })
+        .subscribe(this.isValid$)
     );
   }
 
