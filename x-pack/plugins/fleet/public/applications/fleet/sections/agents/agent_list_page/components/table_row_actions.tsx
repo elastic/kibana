@@ -38,7 +38,7 @@ export const TableRowActions: React.FunctionComponent<{
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { showRequestDiagnostics } = ExperimentalFeaturesService.get();
+  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
   const menuItems = [
     <EuiContextMenuItem
       icon="inspect"
@@ -110,7 +110,7 @@ export const TableRowActions: React.FunctionComponent<{
       </EuiContextMenuItem>
     );
 
-    if (showRequestDiagnostics) {
+    if (diagnosticFileUploadEnabled) {
       menuItems.push(
         <EuiContextMenuItem
           icon="download"
