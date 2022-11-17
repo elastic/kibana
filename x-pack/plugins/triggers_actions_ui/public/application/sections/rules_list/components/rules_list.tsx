@@ -22,13 +22,10 @@ import {
   EuiSpacer,
   EuiLink,
   EuiEmptyPrompt,
-  EuiHealth,
   EuiTableSortingType,
   EuiButtonIcon,
   EuiSelectableOption,
-  EuiIcon,
   EuiDescriptionList,
-  EuiCallOut,
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useHistory } from 'react-router-dom';
@@ -37,6 +34,7 @@ import {
   RuleExecutionStatus,
   ALERTS_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
+  RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
@@ -56,9 +54,12 @@ import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
+import { RulesListStatuses } from './rules_list_statuses';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { RuleExecutionStatusFilter } from './rule_execution_status_filter';
+import { RuleLastRunOutcomeFilter } from './rule_last_run_outcome_filter';
+import { RulesListErrorBanner } from './rules_list_error_banner';
 import {
   loadRuleTypes,
   disableRule,
@@ -118,6 +119,8 @@ export interface RulesListProps {
   onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
   lastResponseFilter?: string[];
   onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
+  lastRunOutcomeFilter?: string[];
+  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: RulesListVisibleColumns[];
@@ -130,9 +133,9 @@ interface RuleTypeState {
 }
 
 export const percentileFields = {
-  [Percentiles.P50]: 'monitoring.execution.calculated_metrics.p50',
-  [Percentiles.P95]: 'monitoring.execution.calculated_metrics.p95',
-  [Percentiles.P99]: 'monitoring.execution.calculated_metrics.p99',
+  [Percentiles.P50]: 'monitoring.run.calculated_metrics.p50',
+  [Percentiles.P95]: 'monitoring.run.calculated_metrics.p95',
+  [Percentiles.P99]: 'monitoring.run.calculated_metrics.p99',
 };
 
 const initialPercentileOptions = Object.values(Percentiles).map((percentile) => ({
@@ -150,6 +153,8 @@ export const RulesList = ({
   onStatusFilterChange,
   lastResponseFilter,
   onLastResponseFilterChange,
+  lastRunOutcomeFilter,
+  onLastRunOutcomeFilterChange,
   refresh,
   rulesListKey,
   visibleColumns,
@@ -176,6 +181,9 @@ export const RulesList = ({
   const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>(
     lastResponseFilter || []
   );
+  const [ruleLastRunOutcomesFilter, setRuleLastRunOutcomesFilter] = useState<string[]>(
+    lastRunOutcomeFilter || []
+  );
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>(statusFilter || []);
 
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
@@ -190,6 +198,7 @@ export const RulesList = ({
 
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
+  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
 
   const cloneRuleId = useRef<null | string>(null);
 
@@ -282,6 +291,7 @@ export const RulesList = ({
     typesFilter: rulesTypesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
+    ruleLastRunOutcomesFilter,
     ruleStatusesFilter,
     tagsFilter,
     sort,
@@ -294,15 +304,17 @@ export const RulesList = ({
     onError,
   });
 
-  const { loadRuleAggregations, rulesStatusesTotal } = useLoadRuleAggregations({
-    searchText,
-    typesFilter,
-    actionTypesFilter,
-    ruleExecutionStatusesFilter,
-    ruleStatusesFilter,
-    tagsFilter,
-    onError,
-  });
+  const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
+    useLoadRuleAggregations({
+      searchText,
+      typesFilter: rulesTypesFilter,
+      actionTypesFilter,
+      ruleExecutionStatusesFilter,
+      ruleLastRunOutcomesFilter,
+      ruleStatusesFilter,
+      tagsFilter,
+      onError,
+    });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
@@ -420,10 +432,22 @@ export const RulesList = ({
   }, [lastResponseFilter]);
 
   useEffect(() => {
+    if (lastRunOutcomeFilter) {
+      setRuleLastRunOutcomesFilter(lastRunOutcomeFilter);
+    }
+  }, [lastResponseFilter]);
+
+  useEffect(() => {
     if (onLastResponseFilterChange) {
       onLastResponseFilterChange(ruleExecutionStatusesFilter);
     }
   }, [ruleExecutionStatusesFilter]);
+
+  useEffect(() => {
+    if (onLastRunOutcomeFilterChange) {
+      onLastRunOutcomeFilterChange(ruleLastRunOutcomesFilter);
+    }
+  }, [ruleLastRunOutcomesFilter]);
 
   // Clear bulk selection anytime the filters change
   useEffect(() => {
@@ -433,6 +457,7 @@ export const RulesList = ({
     rulesTypesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
+    ruleLastRunOutcomesFilter,
     ruleStatusesFilter,
     tagsFilter,
     hasDefaultRuleTypesFiltersOn,
@@ -493,7 +518,11 @@ export const RulesList = ({
     setShowErrors((prevValue) => {
       if (!prevValue) {
         const rulesToExpand = rulesState.data.reduce((acc, ruleItem) => {
-          if (ruleItem.executionStatus.status === 'error') {
+          // Check both outcome and executionStatus for now until we deprecate executionStatus
+          if (
+            ruleItem.lastRun?.outcome === RuleLastRunOutcomeValues[2] ||
+            ruleItem.executionStatus.status === 'error'
+          ) {
             return {
               ...acc,
               [ruleItem.id]: (
@@ -556,6 +585,25 @@ export const RulesList = ({
     return null;
   };
 
+  const getRuleOutcomeOrStatusFilter = () => {
+    if (isRuleLastRunOutcomeEnabled) {
+      return [
+        <RuleLastRunOutcomeFilter
+          key="rule-last-run-outcome-filter"
+          selectedOutcomes={ruleLastRunOutcomesFilter}
+          onChange={setRuleLastRunOutcomesFilter}
+        />,
+      ];
+    }
+    return [
+      <RuleExecutionStatusFilter
+        key="rule-status-filter"
+        selectedStatuses={ruleExecutionStatusesFilter}
+        onChange={setRuleExecutionStatusesFilter}
+      />,
+    ];
+  };
+
   const onDisableRule = (rule: RuleTableItem) => {
     return disableRule({ http, id: rule.id });
   };
@@ -599,11 +647,7 @@ export const RulesList = ({
         filters={typesFilter}
       />
     ),
-    <RuleExecutionStatusFilter
-      key="rule-status-filter"
-      selectedStatuses={ruleExecutionStatusesFilter}
-      onChange={setRuleExecutionStatusesFilter}
-    />,
+    ...getRuleOutcomeOrStatusFilter(),
     ...getRuleTagFilter(),
   ];
 
@@ -625,6 +669,7 @@ export const RulesList = ({
     typesFilter: rulesTypesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
+    ruleLastRunOutcomesFilter,
     ruleStatusesFilter,
     tagsFilter,
   });
@@ -716,34 +761,11 @@ export const RulesList = ({
 
   const table = (
     <>
-      {rulesStatusesTotal.error > 0 ? (
-        <>
-          <EuiCallOut color="danger" size="s" data-test-subj="rulesErrorBanner">
-            <p>
-              <EuiIcon color="danger" type="alert" />
-              &nbsp;
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.rulesList.attentionBannerTitle"
-                defaultMessage="Error found in {totalStatusesError, plural, one {# rule} other {# rules}}."
-                values={{
-                  totalStatusesError: rulesStatusesTotal.error,
-                }}
-              />
-              &nbsp;
-              <EuiLink color="primary" onClick={() => setRuleExecutionStatusesFilter(['error'])}>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel"
-                  defaultMessage="Show {totalStatusesError, plural, one {rule} other {rules}} with error"
-                  values={{
-                    totalStatusesError: rulesStatusesTotal.error,
-                  }}
-                />
-              </EuiLink>
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-        </>
-      ) : null}
+      <RulesListErrorBanner
+        rulesLastRunOutcomes={rulesLastRunOutcomesTotal}
+        setRuleExecutionStatusesFilter={setRuleExecutionStatusesFilter}
+        setRuleLastRunOutcomesFilter={setRuleLastRunOutcomesFilter}
+      />
       <EuiFlexGroup gutterSize="s">
         {authorizedToCreateAnyRules && showCreateRuleButton ? (
           <EuiFlexItem grow={false}>
@@ -813,68 +835,10 @@ export const RulesList = ({
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="success" data-test-subj="totalActiveRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesActiveDescription"
-                  defaultMessage="Active: {totalStatusesActive}"
-                  values={{
-                    totalStatusesActive: rulesStatusesTotal.active,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="danger" data-test-subj="totalErrorRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesErrorDescription"
-                  defaultMessage="Error: {totalStatusesError}"
-                  values={{ totalStatusesError: rulesStatusesTotal.error }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="warning" data-test-subj="totalWarningRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription"
-                  defaultMessage="Warning: {totalStatusesWarning}"
-                  values={{
-                    totalStatusesWarning: rulesStatusesTotal.warning,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="primary" data-test-subj="totalOkRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesOkDescription"
-                  defaultMessage="Ok: {totalStatusesOk}"
-                  values={{ totalStatusesOk: rulesStatusesTotal.ok }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="accent" data-test-subj="totalPendingRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesPendingDescription"
-                  defaultMessage="Pending: {totalStatusesPending}"
-                  values={{
-                    totalStatusesPending: rulesStatusesTotal.pending,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="subdued" data-test-subj="totalUnknownRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesUnknownDescription"
-                  defaultMessage="Unknown: {totalStatusesUnknown}"
-                  values={{
-                    totalStatusesUnknown: rulesStatusesTotal.unknown,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
+            <RulesListStatuses
+              rulesStatuses={rulesStatusesTotal}
+              rulesLastRunOutcomes={rulesLastRunOutcomesTotal}
+            />
             <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={refreshRules} />
           </EuiFlexGroup>
         </EuiFlexItem>

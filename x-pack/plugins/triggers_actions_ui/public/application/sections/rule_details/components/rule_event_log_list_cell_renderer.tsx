@@ -32,10 +32,19 @@ interface RuleEventLogListCellRendererProps {
   dateFormat?: string;
   ruleId?: string;
   spaceIds?: string[];
+  lastRunOutcomeEnabled?: boolean;
 }
 
 export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRendererProps) => {
-  const { columnId, value, version, dateFormat = DEFAULT_DATE_FORMAT, ruleId, spaceIds } = props;
+  const {
+    columnId,
+    value,
+    version,
+    dateFormat = DEFAULT_DATE_FORMAT,
+    ruleId,
+    spaceIds,
+    lastRunOutcomeEnabled = false,
+  } = props;
   const spacesData = useSpacesData();
   const { http } = useKibana().services;
 
@@ -87,7 +96,12 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
   }
 
   if (columnId === 'status') {
-    return <RuleEventLogListStatus status={value as RuleAlertingOutcome} />;
+    return (
+      <RuleEventLogListStatus
+        status={value as RuleAlertingOutcome}
+        lastRunOutcomeEnabled={lastRunOutcomeEnabled}
+      />
+    );
   }
 
   if (columnId === 'timestamp') {
