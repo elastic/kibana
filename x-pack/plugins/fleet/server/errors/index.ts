@@ -77,6 +77,7 @@ export class OutputLicenceError extends FleetError {}
 export class DownloadSourceError extends FleetError {}
 
 export class FleetServerHostUnauthorizedError extends FleetError {}
+export class FleetProxyUnauthorizedError extends FleetError {}
 
 export class ArtifactsClientError extends FleetError {}
 export class ArtifactsClientAccessDeniedError extends FleetError {

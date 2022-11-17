@@ -67,22 +67,7 @@ import {
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
-import {
-  registerEPMRoutes,
-  registerPackagePolicyRoutes,
-  registerDataStreamRoutes,
-  registerAgentPolicyRoutes,
-  registerSetupRoutes,
-  registerAgentAPIRoutes,
-  registerEnrollmentApiKeyRoutes,
-  registerOutputRoutes,
-  registerSettingsRoutes,
-  registerAppRoutes,
-  registerPreconfigurationRoutes,
-  registerDownloadSourcesRoutes,
-  registerHealthCheckRoutes,
-  registerFleetServerHostRoutes,
-} from './routes';
+import { registerRoutes } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
 import type {
@@ -402,29 +387,7 @@ export class FleetPlugin
       makeRouterWithFleetAuthz(router);
 
     core.http.registerOnPostAuth(fleetAuthzOnPostAuthHandler);
-
-    // Always register app routes for permissions checking
-    registerAppRoutes(fleetAuthzRouter);
-
-    // The upload package route is only authorized for the superuser
-    registerEPMRoutes(fleetAuthzRouter);
-
-    registerSetupRoutes(fleetAuthzRouter, config);
-    registerAgentPolicyRoutes(fleetAuthzRouter);
-    registerPackagePolicyRoutes(fleetAuthzRouter);
-    registerOutputRoutes(fleetAuthzRouter);
-    registerSettingsRoutes(fleetAuthzRouter);
-    registerDataStreamRoutes(fleetAuthzRouter);
-    registerPreconfigurationRoutes(fleetAuthzRouter);
-    registerFleetServerHostRoutes(fleetAuthzRouter);
-    registerDownloadSourcesRoutes(fleetAuthzRouter);
-    registerHealthCheckRoutes(fleetAuthzRouter);
-
-    // Conditional config routes
-    if (config.agents.enabled) {
-      registerAgentAPIRoutes(fleetAuthzRouter, config);
-      registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
-    }
+    registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);

@@ -65,13 +65,14 @@ export function outputIdToUuid(id: string) {
   return uuid(id, uuid.DNS);
 }
 
-function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
-  const { output_id: outputId, ssl, ...atributes } = so.attributes;
+function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
+  const { output_id: outputId, ssl, proxy_id: proxyId, ...atributes } = so.attributes;
 
   return {
     id: outputId ?? so.id,
     ...atributes,
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
+    ...(proxyId ? { proxy_id: proxyId } : {}),
   };
 }
 
