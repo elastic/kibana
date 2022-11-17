@@ -46,11 +46,13 @@ export const MonitorErrors = () => {
             </EuiTitle>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <MonitorErrorsCount
-                  to={dateRangeEnd}
-                  from={dateRangeStart}
-                  monitorId={[monitorId]}
-                />
+                {monitorId && (
+                  <MonitorErrorsCount
+                    to={dateRangeEnd}
+                    from={dateRangeStart}
+                    monitorId={[monitorId]}
+                  />
+                )}
               </EuiFlexItem>
               <EuiFlexItem>
                 <FailedTestsCount to={dateRangeEnd} from={dateRangeStart} />

@@ -9,7 +9,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface MonitorErrorsCountProps {
@@ -23,9 +22,9 @@ export const MonitorErrorsCount = ({ monitorId, from, to }: MonitorErrorsCountPr
 
   const { ExploratoryViewEmbeddable } = observability;
 
-  const monitorId = useMonitorQueryId();
-
   const selectedLocation = useSelectedLocation();
+
+  const time = useMemo(() => ({ from, to }), [from, to]);
 
   if (!selectedLocation || !monitorId) {
     return null;
@@ -38,10 +37,9 @@ export const MonitorErrorsCount = ({ monitorId, from, to }: MonitorErrorsCountPr
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
         {
-          time: useMemo(() => ({ from, to }), [from, to]),
-          reportDefinitions: { 'monitor.id': monitorId },
+          time,
           reportDefinitions: {
-            'monitor.id': [monitorId],
+            'monitor.id': monitorId,
             'observer.geo.name': [selectedLocation?.label],
           },
           dataType: 'synthetics',
