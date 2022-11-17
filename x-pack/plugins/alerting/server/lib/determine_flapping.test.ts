@@ -54,11 +54,15 @@ describe('determineFlapping', () => {
 
     const flappingAlertIds = determineFlapping(activeAlerts);
 
-    expect(flappingAlertIds).toEqual(['1']);
+    expect(flappingAlertIds).toMatchInlineSnapshot(`
+      Set {
+        "1",
+      }
+    `);
   });
 
   describe('isFlapping', () => {
-    test('returns true if at capacity and flap count exceeds the threshold', () => {
+    test('returns true if the flap count exceeds the threshold', () => {
       const flappingHistory = [true, true, true, true].concat(new Array(16).fill(false));
       const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
         meta: { flappingHistory },
@@ -66,7 +70,7 @@ describe('determineFlapping', () => {
       expect(isFlapping(alert)).toEqual(true);
     });
 
-    test("returns false if at capacity and flap count doesn't exceed the threshold", () => {
+    test("returns false the flap count doesn't exceed the threshold", () => {
       const flappingHistory = [true, true].concat(new Array(20).fill(false));
       const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
         meta: { flappingHistory },
@@ -74,12 +78,12 @@ describe('determineFlapping', () => {
       expect(isFlapping(alert)).toEqual(false);
     });
 
-    test('returns false if not at capacity', () => {
+    test('returns true if not at capacity and the flap count exceeds the threshold', () => {
       const flappingHistory = new Array(5).fill(true);
       const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
         meta: { flappingHistory },
       });
-      expect(isFlapping(alert)).toEqual(false);
+      expect(isFlapping(alert)).toEqual(true);
     });
   });
 

@@ -66,9 +66,9 @@ describe('isFlapping', () => {
     expect(isFlapping(flappingHistory)).toEqual(false);
   });
 
-  test('returns false if not at capacity', () => {
+  test('returns true if not at capacity', () => {
     const flappingHistory = new Array(5).fill(true);
-    expect(isFlapping(flappingHistory)).toEqual(false);
+    expect(isFlapping(flappingHistory)).toEqual(true);
   });
 });
 

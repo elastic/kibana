@@ -23,13 +23,9 @@ export function updateFlappingHistory(flappingHistory: boolean[], state: boolean
 }
 
 export function isFlapping(flappingHistory: boolean[]): boolean {
-  // an alert is determined flapping if the flappingHistory array is at capacity, meaning the alert has been executed at least that many times,
-  // and the number of state changes is >= the max flapping count
-  if (atCapacity(flappingHistory)) {
-    const numStateChanges = flappingHistory.filter((f) => f).length;
-    return numStateChanges >= MAX_FLAP_COUNT;
-  }
-  return false;
+  // an alert is determined flapping if the number of state changes in flappingHistory array >= the max flapping count
+  const numStateChanges = flappingHistory.filter((f) => f).length;
+  return numStateChanges >= MAX_FLAP_COUNT;
 }
 
 export function atCapacity(flappingHistory: boolean[] = []): boolean {
