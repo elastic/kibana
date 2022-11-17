@@ -316,10 +316,6 @@
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
-              },
-              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
@@ -902,6 +898,10 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
+              },
+              {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -8609,10 +8609,6 @@
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
-              },
-              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
@@ -9195,6 +9191,10 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
+              },
+              {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -15983,10 +15983,6 @@
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
-              },
-              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
@@ -16569,6 +16565,10 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
+              },
+              {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "visTypeTimelion",

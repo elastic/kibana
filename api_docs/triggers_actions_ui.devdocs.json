@@ -4051,7 +4051,7 @@
             "label": "throttle",
             "description": [],
             "signature": [
-              "string | null"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
@@ -4630,6 +4630,20 @@
                 "section": "def-common.SavedObjectAttributes",
                 "text": "SavedObjectAttributes"
               }
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleAction.frequency",
+            "type": "Object",
+            "tags": [],
+            "label": "frequency",
+            "description": [],
+            "signature": [
+              "{ summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,

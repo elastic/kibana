@@ -8745,15 +8745,33 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.IAnalyticsClient.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nForces all shippers to send all their enqueued events and fulfills the returned promise."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.IAnalyticsClient.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
             "description": [
-              "\nStops the client."
+              "\nStops the client. Flushing any pending events in the process."
             ],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
@@ -9481,6 +9499,24 @@
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IShipper.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nSends all the enqueued events and fulfills the returned promise."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/client/src/shippers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -32042,15 +32078,33 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.IAnalyticsClient.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nForces all shippers to send all their enqueued events and fulfills the returned promise."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.IAnalyticsClient.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
             "description": [
-              "\nStops the client."
+              "\nStops the client. Flushing any pending events in the process."
             ],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
@@ -41123,6 +41177,24 @@
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IShipper.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nSends all the enqueued events and fulfills the returned promise."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/client/src/shippers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
