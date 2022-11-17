@@ -82,10 +82,15 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
 
     const shouldAlert =
       longWindowBurnRate >= params.threshold && shortWindowBurnRate >= params.threshold;
+
     if (shouldAlert) {
-      const reason = `The burn rate for the past ${longWindowDuration.format()} is ${longWindowBurnRate} and for the past ${shortWindowDuration.format()} is ${shortWindowBurnRate}. Alert when above ${
-        params.threshold
-      } for both windows`;
+      const reason = buildReason(
+        longWindowDuration,
+        longWindowBurnRate,
+        shortWindowDuration,
+        shortWindowBurnRate,
+        params
+      );
 
       const context = {
         longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
@@ -129,3 +134,23 @@ export const FIRED_ACTION = {
     defaultMessage: 'Alert',
   }),
 };
+
+function buildReason(
+  longWindowDuration: Duration,
+  longWindowBurnRate: number,
+  shortWindowDuration: Duration,
+  shortWindowBurnRate: number,
+  params: BurnRateRuleParams
+) {
+  return i18n.translate('xpack.observability.slo.alerting.burnRate.reason', {
+    defaultMessage:
+      'The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate}. Alert when above {threshold} for both windows',
+    values: {
+      longWindowDuration: longWindowDuration.format(),
+      longWindowBurnRate,
+      shortWindowDuration: shortWindowDuration.format(),
+      shortWindowBurnRate,
+      threshold: params.threshold,
+    },
+  });
+}
