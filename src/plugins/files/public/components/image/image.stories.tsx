@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { css } from '@emotion/react';
 
 import { getImageMetadata } from '../util';
 import { Image, Props } from './image';
@@ -82,25 +81,3 @@ WithCustomSizing.loaders = [
 WithCustomSizing.args = {
   css: `width: 100px; height: 500px; object-fit: fill`,
 };
-
-export const OffScreen = Template.bind({});
-OffScreen.storyName = 'Offscreen';
-OffScreen.args = {
-  /* demonstrates how to make image lazy load */
-  /* @note: the demo doesn't really work with the base64 encoded src */
-  loading: 'lazy',
-};
-OffScreen.decorators = [
-  (Story) => (
-    <>
-      <p>Scroll down</p>
-      <div
-        css={css`
-          margin-top: 100vh;
-        `}
-      >
-        <Story />
-      </div>
-    </>
-  ),
-];

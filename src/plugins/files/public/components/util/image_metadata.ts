@@ -57,6 +57,8 @@ export async function getImageMetadata(file: File | Blob): Promise<undefined | F
   try {
     const image = await loadImage(imgUrl);
     const canvas = document.createElement('canvas');
+    // blurhash encoding and decoding is an expensive algorithm,
+    // so we have to shrink the image to speed up the calculation
     const { width, height } = fitToBox(image.width, image.height);
     canvas.width = width;
     canvas.height = height;
@@ -87,28 +89,23 @@ export function getBlurhashSrc({
   width: number;
   height: number;
   hash: string;
-}): Promise<string> {
-  const canvas = document.createElement('canvas');
+}): string {
+  const smallSizeImageCanvas = document.createElement('canvas');
   const { width: blurWidth, height: blurHeight } = fitToBox(width, height);
-  canvas.width = blurWidth;
-  canvas.height = blurHeight;
+  smallSizeImageCanvas.width = blurWidth;
+  smallSizeImageCanvas.height = blurHeight;
 
-  const ctx = canvas.getContext('2d')!;
-  const imageData = ctx.createImageData(blurWidth, blurHeight);
+  const smallSizeImageCtx = smallSizeImageCanvas.getContext('2d')!;
+  const imageData = smallSizeImageCtx.createImageData(blurWidth, blurHeight);
   imageData.data.set(bh.decode(hash, blurWidth, blurHeight));
-  ctx.putImageData(imageData, 0, 0);
+  smallSizeImageCtx.putImageData(imageData, 0, 0);
 
-  return new Promise((resolve) => {
-    // On this point canvas contains a downsized blurred image
-    // Now we have to stretch it to the size of the original image
-    const image = new Image();
-    image.src = canvas.toDataURL();
-    image.onload = () => {
-      canvas.width = width;
-      canvas.height = height;
-      ctx.clearRect(0, 0, width, height);
-      ctx.drawImage(image, 0, 0, width, height);
-      resolve(canvas.toDataURL());
-    };
-  });
+  // scale back the blurred image to the size of the original image,
+  // so it is sized and positioned the same as the original image when used with an `<img>` tag
+  const originalSizeImageCanvas = document.createElement('canvas');
+  originalSizeImageCanvas.width = width;
+  originalSizeImageCanvas.height = height;
+  const originalSizeImageCtx = originalSizeImageCanvas.getContext('2d')!;
+  originalSizeImageCtx.drawImage(smallSizeImageCanvas, 0, 0, width, height);
+  return originalSizeImageCanvas.toDataURL();
 }

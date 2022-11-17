@@ -25,25 +25,39 @@ export type Props = { meta?: FileImageMetadata } & EuiImageProps;
  */
 export const Image = ({ src, url, alt, onLoad, onError, meta, ...rest }: Props) => {
   const imageSrc = (src || url)!; // <EuiImage/> allows to use either `src` or `url`
-  const [currentImageSrc, onBlurHashLoaded] = useCurrentImageSrc(imageSrc, meta);
+
+  const [isBlurHashLoaded, setIsBlurHashLoaded] = useState<boolean>(false);
+  const { blurhash, width, height } = meta ?? {};
+  const blurhashSrc = React.useMemo(
+    () => (blurhash && width && height ? getBlurhashSrc({ hash: blurhash, width, height }) : null),
+    [blurhash, width, height]
+  );
+
+  // prettier-ignore
+  const currentSrc = (isBlurHashLoaded || !blurhashSrc) ? imageSrc : blurhashSrc
 
   return (
     <EuiImage
       alt=""
+      loading={'lazy'}
       {...rest}
-      src={currentImageSrc}
+      src={currentSrc}
       onLoad={(ev) => {
-        if (currentImageSrc === imageSrc) {
+        // if the `meta.blurhash` is passed, then the component first renders the blurhash and the `onLoad` event fires for the first time,
+        // In the event handler we call `onBlurHashLoaded` so that the `currentSrc` is swapped with the url to the original image.
+        // When the onLoad event fires for the 2nd time (as the original image is finished loading)
+        // we notify the parent component by calling `onLoad` from props
+        if (currentSrc === imageSrc) {
           onLoad?.(ev);
         } else {
           // @ts-ignore
           if (window?.__image_stories_simulate_slow_load) {
             // hack for storybook blurhash testing
             setTimeout(() => {
-              onBlurHashLoaded();
+              setIsBlurHashLoaded(true);
             }, 3000);
           } else {
-            onBlurHashLoaded();
+            setIsBlurHashLoaded(true);
           }
         }
       }}
@@ -53,35 +67,3 @@ export const Image = ({ src, url, alt, onLoad, onError, meta, ...rest }: Props) 
     />
   );
 };
-
-function useCurrentImageSrc(
-  imageSrc: string,
-  meta: FileImageMetadata | undefined
-): [string, () => void] {
-  const [isBlurHashLoaded, setIsBlurHashLoaded] = useState<boolean>(false);
-  const [blurhashSrc, setBlurHash] = useState<string | null>(null);
-  const { blurhash, width, height } = meta ?? {};
-  const hasBlurHash = blurhash && width && height;
-  React.useEffect(() => {
-    if (blurhash && width && height) {
-      getBlurhashSrc({
-        height,
-        width,
-        hash: blurhash,
-      }).then((hash) => {
-        setBlurHash(hash);
-      });
-    } else {
-      setBlurHash(null);
-    }
-  }, [blurhash, width, height]);
-
-  const currentSrc = isBlurHashLoaded || !hasBlurHash ? imageSrc : blurhashSrc ? blurhashSrc : null;
-
-  return [
-    currentSrc as string,
-    () => {
-      setIsBlurHashLoaded(true);
-    },
-  ];
-}
