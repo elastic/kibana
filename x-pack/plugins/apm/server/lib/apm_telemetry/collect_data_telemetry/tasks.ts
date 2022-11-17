@@ -41,7 +41,7 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
   USER_AGENT_ORIGINAL,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import {
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
   MAX_NUMBER_OF_SERVICE_GROUPS,

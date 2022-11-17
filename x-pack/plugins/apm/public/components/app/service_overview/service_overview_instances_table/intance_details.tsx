@@ -28,7 +28,7 @@ import {
   KUBERNETES_POD_UID,
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
