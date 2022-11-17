@@ -17,29 +17,31 @@ import { useFleetStatus, useFlyoutContext } from '../../../hooks';
 
 export function getConfirmFleetServerConnectionStep({
   disabled,
-  isFleetServerReady,
+  hasRecentlyEnrolledFleetServers,
 }: {
   disabled: boolean;
-  isFleetServerReady: boolean;
+  hasRecentlyEnrolledFleetServers: boolean;
 }): EuiStepProps {
   return {
-    title: isFleetServerReady
+    title: hasRecentlyEnrolledFleetServers
       ? i18n.translate('xpack.fleet.fleetServerFlyout.confirmConnectionSuccessTitle', {
           defaultMessage: 'Fleet Server connected',
         })
       : i18n.translate('xpack.fleet.fleetServerFlyout.confirmConnectionTitle', {
           defaultMessage: 'Confirm connection',
         }),
-    status: isFleetServerReady ? 'complete' : 'disabled',
+    status: hasRecentlyEnrolledFleetServers ? 'complete' : 'disabled',
     children: !disabled && (
-      <ConfirmFleetServerConnectionStepContent isFleetServerReady={isFleetServerReady} />
+      <ConfirmFleetServerConnectionStepContent
+        hasRecentlyEnrolledFleetServers={hasRecentlyEnrolledFleetServers}
+      />
     ),
   };
 }
 
 const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
-  isFleetServerReady: boolean;
-}> = ({ isFleetServerReady }) => {
+  hasRecentlyEnrolledFleetServers: boolean;
+}> = ({ hasRecentlyEnrolledFleetServers }) => {
   const flyoutContext = useFlyoutContext();
   const fleetStatus = useFleetStatus();
 
@@ -48,7 +50,7 @@ const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
     flyoutContext.openEnrollmentFlyout();
   };
 
-  return isFleetServerReady ? (
+  return hasRecentlyEnrolledFleetServers ? (
     <>
       <EuiText>
         <FormattedMessage

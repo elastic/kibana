@@ -20,12 +20,14 @@ import { UpgradeActionRunner } from './upgrade_action_runner';
 import { UpdateAgentTagsActionRunner } from './update_agent_tags_action_runner';
 import { UnenrollActionRunner } from './unenroll_action_runner';
 import type { ActionParams, RetryParams } from './action_runner';
+import { RequestDiagnosticsActionRunner } from './request_diagnostics_action_runner';
 
 export enum BulkActionTaskType {
   REASSIGN_RETRY = 'fleet:reassign_action:retry',
   UNENROLL_RETRY = 'fleet:unenroll_action:retry',
   UPGRADE_RETRY = 'fleet:upgrade_action:retry',
   UPDATE_AGENT_TAGS_RETRY = 'fleet:update_agent_tags:retry',
+  REQUEST_DIAGNOSTICS_RETRY = 'fleet:request_diagnostics:retry',
 }
 
 /**
@@ -49,6 +51,7 @@ export class BulkActionsResolver {
         [BulkActionTaskType.REASSIGN_RETRY]: ReassignActionRunner,
         [BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY]: UpdateAgentTagsActionRunner,
         [BulkActionTaskType.UPGRADE_RETRY]: UpgradeActionRunner,
+        [BulkActionTaskType.REQUEST_DIAGNOSTICS_RETRY]: RequestDiagnosticsActionRunner,
       };
 
       return createRetryTask(
@@ -94,7 +97,7 @@ export class BulkActionsResolver {
     this.taskManager = taskManager;
   }
 
-  getTaskId(actionId: string, type: string) {
+  public getTaskId(actionId: string, type: string) {
     return `${type}:${actionId}`;
   }
 
@@ -102,9 +105,9 @@ export class BulkActionsResolver {
     actionParams: ActionParams,
     retryParams: RetryParams,
     taskType: string,
+    taskId: string,
     runAt?: Date
   ) {
-    const taskId = this.getTaskId(actionParams.actionId!, taskType);
     await this.taskManager?.ensureScheduled({
       id: taskId,
       taskType,

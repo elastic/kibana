@@ -300,8 +300,14 @@ export async function getPackageFromSource(options: {
       }
     }
   } else {
-    res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
-    logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+    res = getArchivePackage({ name: pkgName, version: pkgVersion });
+
+    if (res) {
+      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from cache`);
+    } else {
+      res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+    }
   }
   if (!res) {
     throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);
@@ -324,6 +330,18 @@ export async function getInstallationObject(options: {
   });
 }
 
+export async function getInstallationObjects(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgNames: string[];
+}) {
+  const { savedObjectsClient, pkgNames } = options;
+  const res = await savedObjectsClient.bulkGet<Installation>(
+    pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
+  );
+
+  return res.saved_objects.filter((so) => so?.attributes);
+}
+
 export async function getInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -331,6 +349,14 @@ export async function getInstallation(options: {
 }) {
   const savedObject = await getInstallationObject(options);
   return savedObject?.attributes;
+}
+
+export async function getInstallationsByName(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgNames: string[];
+}) {
+  const savedObjects = await getInstallationObjects(options);
+  return savedObjects.map((so) => so.attributes);
 }
 
 function sortByName(a: { name: string }, b: { name: string }) {

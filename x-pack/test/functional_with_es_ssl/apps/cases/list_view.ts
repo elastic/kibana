@@ -113,6 +113,63 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.missingOrFail('case-table-column-severity-low');
         });
       });
+
+      describe('tags', () => {
+        let caseIds: string[] = [];
+        beforeEach(async () => {
+          caseIds = [];
+          const case1 = await cases.api.createCase({ title: 'case 1', tags: ['one', 'three'] });
+          const case2 = await cases.api.createCase({ title: 'case 2', tags: ['two', 'four'] });
+          const case3 = await cases.api.createCase({ title: 'case 3', tags: ['two', 'five'] });
+
+          caseIds.push(case1.id);
+          caseIds.push(case2.id);
+          caseIds.push(case3.id);
+
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        afterEach(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        it('bulk edit tags', async () => {
+          /**
+           * Case 3 tags: two, five
+           * Case 2 tags: two, four
+           * Case 1 tags: one, three
+           * All tags: one, two, three, four, five.
+           *
+           * It selects Case 3 and Case 2 because the table orders
+           * the cases in descending order by creation date and clicks
+           * the one, three, and five tags
+           */
+          await cases.casesTable.bulkEditTags([0, 1], ['two', 'three', 'five']);
+          await header.waitUntilLoadingHasFinished();
+          const case1 = await cases.api.getCase({ caseId: caseIds[0] });
+          const case2 = await cases.api.getCase({ caseId: caseIds[1] });
+          const case3 = await cases.api.getCase({ caseId: caseIds[2] });
+
+          expect(case3.tags).eql(['five', 'three']);
+          expect(case2.tags).eql(['four', 'five', 'three']);
+          expect(case1.tags).eql(['one', 'three']);
+        });
+
+        it('adds a new tag', async () => {
+          await cases.casesTable.bulkAddNewTag([0, 1], 'tw');
+          await header.waitUntilLoadingHasFinished();
+
+          const case1 = await cases.api.getCase({ caseId: caseIds[0] });
+          const case2 = await cases.api.getCase({ caseId: caseIds[1] });
+          const case3 = await cases.api.getCase({ caseId: caseIds[2] });
+
+          expect(case3.tags).eql(['two', 'five', 'tw']);
+          expect(case2.tags).eql(['two', 'four', 'tw']);
+          expect(case1.tags).eql(['one', 'three']);
+        });
+      });
     });
 
     describe('filtering', () => {
@@ -319,7 +376,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('pagination', () => {
       before(async () => {
-        await cases.api.createNthRandomCases(8);
+        await cases.api.createNthRandomCases(12);
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -331,7 +388,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('paginates cases correctly', async () => {
         await testSubjects.click('tablePaginationPopoverButton');
-        await testSubjects.click('tablePagination-5-rows');
+        await testSubjects.click('tablePagination-25-rows');
+        await testSubjects.missingOrFail('pagination-button-1');
+        await testSubjects.click('tablePaginationPopoverButton');
+        await testSubjects.click('tablePagination-10-rows');
         await testSubjects.isEnabled('pagination-button-1');
         await testSubjects.click('pagination-button-1');
         await testSubjects.isEnabled('pagination-button-0');

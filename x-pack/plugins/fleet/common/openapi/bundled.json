@@ -667,6 +667,14 @@
           "name": "ignoreUnverified",
           "description": "Ignore if the package is fails signature verification",
           "in": "query"
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "full",
+          "description": "Return all fields from the package manifest, not just those supported by the Elastic Package Registry",
+          "in": "query"
         }
       ],
       "post": {
@@ -2117,6 +2125,109 @@
           }
         },
         "operationId": "get-agent-tags"
+      }
+    },
+    "/agents/{agentId}/request_diagnostics": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Agent - Request Diagnostics",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "request-diagnostics-agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
+    "/agents/bulk_request_diagnostics": {
+      "post": {
+        "summary": "Agent - Bulk Request Diagnostics",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-request-diagnostics",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "batchSize": {
+                    "type": "number"
+                  },
+                  "agents": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "description": "KQL query string, leave empty to action all agents"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "list of agent IDs"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "agents"
+                ]
+              },
+              "example": {
+                "agents": "fleet-agents.policy_id : (\"policy1\" or \"policy2\")"
+              }
+            }
+          }
+        }
       }
     },
     "/agent_policies": {
@@ -4255,6 +4366,7 @@
             "type": "boolean"
           },
           "fleet_server_hosts": {
+            "deprecated": true,
             "type": "array",
             "items": {
               "type": "string"

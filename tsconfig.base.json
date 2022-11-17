@@ -18,6 +18,8 @@
       "@kbn/analytics-shippers-fullstory/*": ["packages/analytics/shippers/fullstory/*"],
       "@kbn/analytics-shippers-gainsight": ["packages/analytics/shippers/gainsight"],
       "@kbn/analytics-shippers-gainsight/*": ["packages/analytics/shippers/gainsight/*"],
+      "@kbn/content-management-inspector": ["packages/content-management/inspector"],
+      "@kbn/content-management-inspector/*": ["packages/content-management/inspector/*"],
       "@kbn/content-management-table-list": ["packages/content-management/table_list"],
       "@kbn/content-management-table-list/*": ["packages/content-management/table_list/*"],
       "@kbn/core-analytics-browser": ["packages/core/analytics/core-analytics-browser"],
@@ -280,6 +282,8 @@
       "@kbn/core-rendering-server-mocks/*": ["packages/core/rendering/core-rendering-server-mocks/*"],
       "@kbn/core-root-browser-internal": ["packages/core/root/core-root-browser-internal"],
       "@kbn/core-root-browser-internal/*": ["packages/core/root/core-root-browser-internal/*"],
+      "@kbn/core-root-server-internal": ["packages/core/root/core-root-server-internal"],
+      "@kbn/core-root-server-internal/*": ["packages/core/root/core-root-server-internal/*"],
       "@kbn/core-saved-objects-api-browser": ["packages/core/saved-objects/core-saved-objects-api-browser"],
       "@kbn/core-saved-objects-api-browser/*": ["packages/core/saved-objects/core-saved-objects-api-browser/*"],
       "@kbn/core-saved-objects-api-server": ["packages/core/saved-objects/core-saved-objects-api-server"],
@@ -824,6 +828,8 @@
       "@kbn/expressions-plugin/*": ["src/plugins/expressions/*"],
       "@kbn/field-formats-plugin": ["src/plugins/field_formats"],
       "@kbn/field-formats-plugin/*": ["src/plugins/field_formats/*"],
+      "@kbn/files-management-plugin": ["src/plugins/files_management"],
+      "@kbn/files-management-plugin/*": ["src/plugins/files_management/*"],
       "@kbn/files-plugin": ["src/plugins/files"],
       "@kbn/files-plugin/*": ["src/plugins/files/*"],
       "@kbn/guided-onboarding-plugin": ["src/plugins/guided_onboarding"],
@@ -1207,8 +1213,10 @@
     "useUnknownInCatchVariables": false,
     // disabled for better IDE support, enabled when running the type_check script
     "composite": false,
-    // disabled for better IDE support, enabled when running the type_check script
-    "incremental": false,
+    // enabled for improved performance
+    "incremental": true,
+    // Do not check d.ts files ts ships by default
+    "skipDefaultLibCheck": true,
     // Do not check d.ts files by default
     "skipLibCheck": true,
     // enables "core language features"
@@ -1259,7 +1267,7 @@
       "@testing-library/jest-dom",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-storybook-types",
+      "@kbn/ambient-storybook-types"
     ]
-  }
+  },
 }
