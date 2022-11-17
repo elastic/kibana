@@ -27,3 +27,5 @@ The new terms rule type reuses the singleSearchAfter function which implements t
 ## Limitations and future enhancements
 
 - Value list exceptions are not supported at the moment. Commit ead04ce removes an experimental method I tried for evaluating value list exceptions.
+- Runtime field supports only 100 emitted values. So for large arrays or combination of values greater than 100, results may not be exhaustive. This applies only to new terms with multiple fields.
+As there is limit in 100 alerts per rule execution, it should not be an issue at this moment.
