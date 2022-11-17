@@ -43,8 +43,8 @@ export function useTags({
 
   const updateTagClauseGetter = useCallback(
     (queryUpdater: QueryUpdater) =>
-      (tag: Tag, q?: Query, doUpdate: boolean = true) => {
-        const updatedQuery = queryUpdater(q !== undefined ? q : query, tag);
+      (tag: Tag, q: Query = query, doUpdate: boolean = true) => {
+        const updatedQuery = queryUpdater(q, tag);
         if (doUpdate) {
           updateQuery(updatedQuery);
         }
