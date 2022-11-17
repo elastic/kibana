@@ -46,7 +46,7 @@ describe('MappingInfoPanel', () => {
     const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
 
     // Name input validation
-    const { value: nameInputValue, readOnly: nameInputReadOnly } = findTestSubject(
+    const { value: nameInputValue, disabled: nameInputDisabled } = findTestSubject(
       wrapper,
       'roleMappingFormNameInput'
     )
@@ -54,7 +54,7 @@ describe('MappingInfoPanel', () => {
       .props();
 
     expect(nameInputValue).toEqual(props.roleMapping.name);
-    expect(nameInputReadOnly).toEqual(false);
+    expect(nameInputDisabled).toEqual(false);
 
     // Enabled switch validation
     const { checked: enabledInputValue } = wrapper
@@ -226,7 +226,7 @@ describe('MappingInfoPanel', () => {
     const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
 
     // Name input validation
-    const { value: nameInputValue, readOnly: nameInputReadOnly } = findTestSubject(
+    const { value: nameInputValue, disabled: nameInputDisabled } = findTestSubject(
       wrapper,
       'roleMappingFormNameInput'
     )
@@ -234,6 +234,6 @@ describe('MappingInfoPanel', () => {
       .props();
 
     expect(nameInputValue).toEqual(props.roleMapping.name);
-    expect(nameInputReadOnly).toEqual(true);
+    expect(nameInputDisabled).toEqual(true);
   });
 });
