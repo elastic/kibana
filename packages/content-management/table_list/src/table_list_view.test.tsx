@@ -52,9 +52,7 @@ const requiredProps: TableListViewProps = {
   urlStateEnabled: false,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/145267
-// Note: I will unskip as part of https://github.com/elastic/kibana/pull/145618
-describe.skip('TableListView', () => {
+describe('TableListView', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
@@ -274,16 +272,14 @@ describe.skip('TableListView', () => {
       references: [],
     }));
 
-    const props = {
-      initialPageSize,
-      findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
-    };
-
     test('should limit the number of row to the `initialPageSize` provided', async () => {
       let testBed: TestBed;
 
       await act(async () => {
-        testBed = await setup(props);
+        testBed = await setup({
+          initialPageSize,
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+        });
       });
 
       const { component, table } = testBed!;
@@ -303,7 +299,10 @@ describe.skip('TableListView', () => {
       let testBed: TestBed;
 
       await act(async () => {
-        testBed = await setup(props);
+        testBed = await setup({
+          initialPageSize,
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+        });
       });
 
       const { component, table } = testBed!;
