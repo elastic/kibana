@@ -6,8 +6,12 @@
  */
 
 import { set } from 'lodash';
+import { getQueryStringFilter } from './get_query_string_filter';
 import { QueryContext } from './query_context';
-import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../../common/constants/client_defaults';
+import {
+  EXCLUDE_RUN_ONCE_FILTER,
+  SUMMARY_FILTER,
+} from '../../../../../common/constants/client_defaults';
 
 /**
  * This is the first phase of the query. In it, we find all monitor IDs that have ever matched the given filters.
@@ -52,29 +56,17 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
     filters.push({ match: { 'monitor.status': queryContext.statusFilter } });
   }
 
-  filters.push({ exists: { field: 'summary' } });
+  filters.push(SUMMARY_FILTER, EXCLUDE_RUN_ONCE_FILTER);
 
-  filters.push(EXCLUDE_RUN_ONCE_FILTER);
+  if (queryContext.query) {
+    filters.push(getQueryStringFilter(queryContext.query));
+  }
 
   const body = {
     size: 0,
     query: {
       bool: {
         filter: filters,
-        ...(queryContext.query
-          ? {
-              minimum_should_match: 1,
-              should: [
-                {
-                  multi_match: {
-                    query: escape(queryContext.query),
-                    type: 'phrase_prefix',
-                    fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
-                  },
-                },
-              ],
-            }
-          : {}),
       },
     },
     aggs: {
