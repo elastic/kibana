@@ -460,7 +460,14 @@ describe('Jira service', () => {
       // getIssueType mocks
       requestMock.mockImplementationOnce(() =>
         createAxiosResponse({
-          data: { id: '1', key: 'CK-1', fields: { summary: '[th!s^is()a-te+st-{~is*s|ue?or&and\\bye:}]', description: 'description' } },
+          data: {
+            id: '1',
+            key: 'CK-1',
+            fields: {
+              summary: '[th!s^is()a-te+st-{~is*s|ue?or&and\\bye:}]',
+              description: 'description',
+            },
+          },
         })
       );
 

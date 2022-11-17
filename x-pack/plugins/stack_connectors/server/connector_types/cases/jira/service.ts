@@ -136,7 +136,8 @@ export const createExternalService = (
     }, '');
   };
 
-  const escapeSpecialCharacters = (str: string) => str.replace(/[!^&*()+\-[\]\\/{}|:?~]/g, '\\\\$&')?.replace(/-/g, '\\\\x2d');
+  const escapeSpecialCharacters = (str: string) =>
+    str.replace(/[!^&*()+\-[\]\\/{}|:?~]/g, '\\\\$&')?.replace(/-/g, '\\\\x2d');
 
   const hasSupportForNewAPI = (capabilities: { capabilities?: {} }) =>
     createMetaCapabilities.every((c) => Object.keys(capabilities?.capabilities ?? {}).includes(c));
