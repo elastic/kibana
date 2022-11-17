@@ -1,9 +1,8 @@
-[role="xpack"]
 [[rule-types]]
 == Rule types
 
 A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the {stack} and rules registered by one of the {kib} apps.
-You can create most rules types in <<create-and-manage-rules,{stack-manage-app} > {rules-ui}>>. For information on creating security rules, refer to {security-guide}/rules-ui-create.html[Create a detection rule].
+You can create most rules types in <<create-and-manage-rules,{stack-manage-app} > {rac-ui}>>. For information on creating security rules, refer to {security-guide}/rules-ui-create.html[Create a detection rule].
 
 [NOTE]
 ==============================================
@@ -44,7 +43,7 @@ see {subscriptions}[the subscription page].
 [NOTE]
 ==============================================
 If you create a rule in the {observability} app, its alerts are not visible in
-*{stack-manage-app} > {rules-ui}*. They are visible only in the {observability} app.
+*{stack-manage-app} > {rac-ui}*. They are visible only in the {observability} app.
 ==============================================
 
 [cols="2*<"]
@@ -83,7 +82,7 @@ Security rules detect suspicious source events with pre-built or custom rules an
 [NOTE]
 ==============================================
 Alerts associated with security rules are visible only in the {security-app};
-they are not visible in *{stack-manage-app} > {rules-ui}*.
+they are not visible in *{stack-manage-app} > {rac-ui}*.
 ==============================================
 
 include::rule-types/index-threshold.asciidoc[]
