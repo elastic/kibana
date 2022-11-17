@@ -51,7 +51,7 @@ export const SUCCESSFULLY_CREATED_RULES = (ruleName: string) =>
     }
   );
 
-export const FROM_TIMELINE_ERROR_TITLE = i18n.translate(
+export const RULE_FROM_TIMELINE_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.fromTimelineErrorTitle',
   {
     defaultMessage: 'Error creating rule from saved timeline',

@@ -115,7 +115,7 @@ describe('useRuleFromTimelineId', () => {
     (resolveTimeline as jest.Mock).mockResolvedValue(fromTimeline);
   });
 
-  it('if no from timeline id, update false and loading false', async () => {
+  it('if no from timeline id, updated: false and loading: false', async () => {
     (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
       decodedParam: undefined,
     }));
@@ -129,7 +129,7 @@ describe('useRuleFromTimelineId', () => {
     });
   });
 
-  it('if from timeline id, update false and loading true', async () => {
+  it('if from timeline id, updated: false and loading: true', async () => {
     const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimelineId(defaults));
     const { onOpenTimeline, ...hookData } = result.current;
     expect(hookData).toEqual({
@@ -176,7 +176,7 @@ describe('useRuleFromTimelineId', () => {
     });
   });
 
-  it('when from timeline data view id ===  selected data view id and broswer fields is not empty, set rule data to match from timeline query', async () => {
+  it('when from timeline data view id === selected data view id and browser fields is not empty, set rule data to match from timeline query', async () => {
     (useDeepEqualSelector as jest.Mock).mockReturnValue({
       selectedDataView: {
         id: 'security-solution',

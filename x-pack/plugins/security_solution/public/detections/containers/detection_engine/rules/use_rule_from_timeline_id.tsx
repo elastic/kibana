@@ -86,7 +86,7 @@ export const useRuleFromTimelineId = (initialState: UseRuleFromTimelineId): Rule
       // the timeline data view is deleted, user must fix timeline to use with rule
       setLoading(false);
       toasts.addError('whoops', {
-        title: i18n.FROM_TIMELINE_ERROR_TITLE,
+        title: i18n.RULE_FROM_TIMELINE_ERROR_TITLE,
         toastMessage: (
           <>
             <FormattedMessage
