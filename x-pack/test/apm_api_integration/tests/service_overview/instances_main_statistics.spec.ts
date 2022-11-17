@@ -418,6 +418,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(javaStats).to.be(undefined);
           });
 
+          it('does not return metrics', () => {
+            const goAStats = body.currentPeriod.find(
+              (stat) => stat.serviceNodeName === 'go-instance-a'
+            );
+
+            expect(goAStats?.memoryUsage).to.be(undefined);
+            expect(goAStats?.cpuUsage).to.be(undefined);
+          });
+
           it('does not return data for missing service node name', () => {
             const missingNameStats = body.currentPeriod.find(
               (stat) => stat.serviceNodeName === SERVICE_NODE_NAME_MISSING
