@@ -44,6 +44,8 @@ export interface PutOutputRequest {
     disk_queue_enabled?: boolean;
     disk_queue_path?: string;
     disk_queue_max_size?: number;
+    disk_queue_encryption_enabled?: boolean;
+    loadbalance?: boolean;
   };
 }
 
@@ -66,6 +68,8 @@ export interface PostOutputRequest {
     disk_queue_enabled?: boolean;
     disk_queue_path?: string;
     disk_queue_max_size?: number;
+    disk_queue_encryption_enabled?: boolean;
+    loadbalance?: boolean;
   };
 }
 

@@ -30,6 +30,8 @@ export interface AdvancedOptionsSectionProps {
   diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
   diskQueuePathInput: ReturnType<typeof useInput>;
   diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
+  loadBalanceEnabledInput: ReturnType<typeof useSwitchInput>;
+  diskQueueEncryptionEnabled: ReturnType<typeof useSwitchInput>;
 }
 
 export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSectionProps> = ({
@@ -37,6 +39,8 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
   diskQueueEnabledInput,
   diskQueuePathInput,
   diskQueueMaxSizeInput,
+  loadBalanceEnabledInput,
+  diskQueueEncryptionEnabled,
 }) => {
   return enabled ? (
     <EuiAccordion
@@ -51,6 +55,33 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
     >
       <>
         <EuiSpacer size="m" />
+        <EuiFormRow fullWidth {...loadBalanceEnabledInput.formRowProps}>
+          <EuiFlexGroup alignItems="flexStart">
+            <EuiFlexItem>
+              <EuiSwitch
+                data-test-subj="editOutputFlyout.loadBalancingSwitch"
+                {...loadBalanceEnabledInput.props}
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.loadBalancingSwitchLabel"
+                    defaultMessage="Load Balancing"
+                  />
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.loadBalancingDescription"
+                  defaultMessage="Once enabled, the agents will balance the load across all the hosts defined for this output. This will increase the number of connections opened by the agent."
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+
+        <EuiHorizontalRule />
+
         <EuiFormRow fullWidth {...diskQueueEnabledInput.formRowProps}>
           <EuiFlexGroup alignItems="flexStart">
             <EuiFlexItem>
@@ -69,7 +100,33 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               <EuiText>
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.diskQueueSwitchDescription"
-                  defaultMessage="Once enabled events will be queued on disk when there's a requirement to cache them on the agents in the event of connection loss."
+                  defaultMessage="Once enabled, events will be queued on disk when there's a requirement to cache them on the agents in the event of connection loss."
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+
+        <EuiFormRow fullWidth {...diskQueueEncryptionEnabled.formRowProps}>
+          <EuiFlexGroup alignItems="flexStart">
+            <EuiFlexItem>
+              <EuiSwitch
+                data-test-subj="editOutputFlyout.diskQueueEncryption"
+                {...diskQueueEncryptionEnabled.props}
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.diskQueueEncryptionLabel"
+                    defaultMessage="Encryption"
+                  />
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.diskQueueEncryptionDescription"
+                  defaultMessage="Enable encryption of data at rest."
                 />
               </EuiText>
             </EuiFlexItem>
@@ -87,6 +144,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
           {...diskQueuePathInput.formRowProps}
         >
           <EuiFieldText
+            fullWidth
             data-test-subj="settingsOutputsFlyout.diskQueuePath"
             {...diskQueuePathInput.props}
             placeholder={i18n.translate(

@@ -57,6 +57,7 @@ const OutputBaseSchema = {
   disk_queue_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
   disk_queue_path: schema.maybe(schema.string()),
   disk_queue_max_size: schema.maybe(schema.number()),
+  loadbalance: schema.maybe(schema.boolean({ defaultValue: false })),
 };
 
 export const NewOutputSchema = schema.object({ ...OutputBaseSchema });
@@ -76,6 +77,7 @@ export const UpdateOutputSchema = schema.object({
   is_default_monitoring: schema.maybe(schema.boolean()),
   ca_sha256: schema.maybe(schema.string()),
   ca_trusted_fingerprint: schema.maybe(schema.string()),
+  config_yaml: schema.maybe(schema.string()),
   ssl: schema.maybe(
     schema.object({
       certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
@@ -83,10 +85,11 @@ export const UpdateOutputSchema = schema.object({
       key: schema.maybe(schema.string()),
     })
   ),
-  config_yaml: schema.maybe(schema.string()),
   disk_queue_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
   disk_queue_path: schema.maybe(schema.string()),
   disk_queue_max_size: schema.maybe(schema.number()),
+  disk_queue_encryption_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
+  loadbalance: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
 export const OutputSchema = schema.object({

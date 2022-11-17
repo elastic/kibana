@@ -370,6 +370,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             diskQueueEnabledInput={inputs.diskQueueEnabledInput}
             diskQueuePathInput={inputs.diskQueuePathInput}
             diskQueueMaxSizeInput={inputs.diskQueueMaxSizeInput}
+            loadBalanceEnabledInput={inputs.loadBalanceEnabledInput}
+            diskQueueEncryptionEnabled={inputs.diskQueueEncryptionEnabled}
           />
         </EuiForm>
       </EuiFlyoutBody>

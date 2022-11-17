@@ -140,6 +140,8 @@ const getSavedObjectTypes = (
         disk_queue_enabled: { type: 'boolean', index: false },
         disk_queue_path: { type: 'keyword', index: false },
         disk_queue_max_size: { type: 'integer', index: false },
+        disk_queue_encryption_enabled: { type: 'boolean', index: false },
+        loadbalance: { type: 'boolean' },
       },
     },
     migrations: {

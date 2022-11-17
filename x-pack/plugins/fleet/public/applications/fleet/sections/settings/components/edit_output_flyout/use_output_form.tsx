@@ -42,6 +42,7 @@ export interface OutputFormInputs {
   diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
   diskQueuePathInput: ReturnType<typeof useInput>;
   diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
+  diskQueueEncryptionEnabled: ReturnType<typeof useSwitchInput>;
   logstashHostsInput: ReturnType<typeof useComboInput>;
   additionalYamlConfigInput: ReturnType<typeof useInput>;
   defaultOutputInput: ReturnType<typeof useSwitchInput>;
@@ -50,6 +51,7 @@ export interface OutputFormInputs {
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+  loadBalanceEnabledInput: ReturnType<typeof useSwitchInput>;
 }
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
@@ -106,6 +108,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const diskQueueMaxSizeInput = useNumberInput(
     output?.disk_queue_max_size ?? DEFAULT_QUEUE_MAX_SIZE
   );
+  const diskQueueEncryptionEnabled = useSwitchInput(output?.disk_queue_encryption_enabled ?? false);
+  const loadBalanceEnabledInput = useSwitchInput(output?.disk_queue_enabled ?? false);
 
   // Logstash inputs
   const logstashHostsInput = useComboInput(
@@ -136,6 +140,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     elasticsearchUrlInput,
     diskQueueEnabledInput,
     diskQueuePathInput,
+    diskQueueEncryptionEnabled,
     diskQueueMaxSizeInput,
     logstashHostsInput,
     additionalYamlConfigInput,
@@ -145,6 +150,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     sslCertificateInput,
     sslKeyInput,
     sslCertificateAuthoritiesInput,
+    loadBalanceEnabledInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -224,6 +230,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
             disk_queue_enabled: diskQueueEnabledInput.value,
             disk_queue_path: diskQueuePathInput.value,
             disk_queue_max_size: diskQueueMaxSizeInput.value,
+            disk_queue_encryption_enabled: diskQueueEncryptionEnabled.value,
+            loadbalance: loadBalanceEnabledInput.value,
           };
 
       if (output) {
@@ -272,6 +280,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     diskQueueEnabledInput.value,
     diskQueuePathInput.value,
     diskQueueMaxSizeInput.value,
+    diskQueueEncryptionEnabled.value,
+    loadBalanceEnabledInput.value,
     output,
     onSucess,
     confirm,
