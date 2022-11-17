@@ -7,11 +7,13 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import { codeEditorPlaceholderContainerStyles } from './editor.styles';
 
 export class PlaceholderWidget implements monaco.editor.IContentWidget {
   constructor(
     private readonly placeholderText: string,
-    private readonly editor: monaco.editor.ICodeEditor
+    private readonly editor: monaco.editor.ICodeEditor,
+    private readonly textColor: string
   ) {
     editor.addContentWidget(this);
   }
@@ -26,7 +28,7 @@ export class PlaceholderWidget implements monaco.editor.IContentWidget {
     if (!this.domNode) {
       const domNode = document.createElement('div');
       domNode.innerText = this.placeholderText;
-      domNode.className = 'kibanaCodeEditor__placeholderContainer';
+      domNode.style.cssText += codeEditorPlaceholderContainerStyles(this.textColor);
       this.editor.applyFontInfo(domNode);
       this.domNode = domNode;
     }

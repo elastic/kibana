@@ -169,7 +169,7 @@ export const CodeEditor: React.FC<Props> = ({
   const isReadOnly = options?.readOnly ?? false;
 
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const _placeholderWidget = useRef<monaco.editor.ICodeEditor | null>(null);
+  const _placeholderWidget = useRef<PlaceholderWidget | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
@@ -407,10 +407,11 @@ export const CodeEditor: React.FC<Props> = ({
   useEffect(() => {
     if (placeholder && !value && _editor.current) {
       // Mounts editor inside constructor
-      // @ts-ignore
-      _placeholderWidget.current = new PlaceholderWidget({
-        placeholderText: placeholder,
-      });
+      _placeholderWidget.current = new PlaceholderWidget(
+        placeholder,
+        _editor.current,
+        euiTheme.colors.subduedText
+      );
     }
     return () => {
       _placeholderWidget.current?.dispose();
