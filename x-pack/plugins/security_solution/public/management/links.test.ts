@@ -201,4 +201,66 @@ describe('links', () => {
       });
     });
   });
+
+  // this can be removed after removing endpointRbacEnabled feature flag
+  describe('without endpointRbacEnabled', () => {
+    beforeAll(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: false },
+      });
+    });
+
+    it('shows Trusted Applications for non-superuser, too', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
+        canIsolateHost: true,
+        canUnIsolateHost: true,
+        canAccessEndpointManagement: true,
+        canReadActionsLogManagement: true,
+        canReadHostIsolationExceptions: true,
+      });
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+      expect(filteredLinks).toEqual(links);
+    });
+  });
+
+  // this can be the default after removing endpointRbacEnabled feature flag
+  describe('with endpointRbacEnabled', () => {
+    beforeAll(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
+      });
+    });
+
+    it('hides Trusted Applications for user without privilege', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
+        canIsolateHost: true,
+        canUnIsolateHost: true,
+        canAccessEndpointManagement: true,
+        canReadActionsLogManagement: true,
+        canReadTrustedApplications: false,
+        canReadHostIsolationExceptions: true,
+      });
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+      expect(filteredLinks).toEqual({
+        ...links,
+        links: links.links?.filter((link) => link.id !== SecurityPageName.trustedApps),
+      });
+    });
+
+    it('shows Trusted Applications for user with privilege', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
+        canIsolateHost: true,
+        canUnIsolateHost: true,
+        canAccessEndpointManagement: true,
+        canReadActionsLogManagement: true,
+        canReadTrustedApplications: true,
+        canReadHostIsolationExceptions: true,
+      });
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+      expect(filteredLinks).toEqual(links);
+    });
+  });
 });
