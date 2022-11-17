@@ -200,7 +200,7 @@ for a specific duration. In 8.4, you can also schedule these single or recurring
 downtimes to start and end at specific dates and times.
 
 [role="screenshot"]
-image::images/highlights-snooze-schedule.png[Snooze notifications for a rule in {stack-manage-app} > {rules-ui} ]
+image::images/highlights-snooze-schedule.png[Snooze notifications for a rule in {stack-manage-app} > {rac-ui} ]
 
 [discrete]
 ==== New metrics for rules and actions
