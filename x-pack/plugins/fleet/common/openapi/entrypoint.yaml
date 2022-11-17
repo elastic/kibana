@@ -77,6 +77,10 @@ paths:
     $ref: 'paths/agents@bulk_update_tags.yaml'
   /agents/tags:
     $ref: paths/agent_tags.yaml
+  '/agents/{agentId}/request_diagnostics':
+    $ref: 'paths/agents@{agent_id}@request_diagnostics.yaml'
+  /agents/bulk_request_diagnostics:
+    $ref: 'paths/agents@bulk_request_diagnostics.yaml'
   #  Agent policies endpoints
   /agent_policies:
     $ref: paths/agent_policies.yaml
