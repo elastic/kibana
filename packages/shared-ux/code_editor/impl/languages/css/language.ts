@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @kbn/eslint/module_migration */
-// @ts-ignore d.ts file for export
-import { conf, language } from 'monaco-editor/esm/vs/basic-languages/css/css';
+import { cssConf, cssLanguage } from '@kbn/shared-ux-code-editor-types';
 
-export { conf as languageConfiguration, language as lexerRules };
+export { cssConf as languageConfiguration, cssLanguage as lexerRules };
