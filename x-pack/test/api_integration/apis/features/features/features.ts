@@ -100,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
             'dev_tools',
             'actions',
             'enterpriseSearch',
+            'filesManagement',
             'advancedSettings',
             'indexPatterns',
             'graph',

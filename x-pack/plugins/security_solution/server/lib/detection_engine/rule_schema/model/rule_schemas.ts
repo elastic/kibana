@@ -284,7 +284,7 @@ export const allRuleTypes = t.union([
   t.literal(NEW_TERMS_RULE_TYPE_ID),
 ]);
 
-export const internalRuleCreate = t.type({
+const internalRuleCreateRequired = t.type({
   name: RuleName,
   tags: RuleTagArray,
   alertTypeId: allRuleTypes,
@@ -295,12 +295,18 @@ export const internalRuleCreate = t.type({
   enabled: IsRuleEnabled,
   actions: RuleActionArrayCamel,
   params: ruleParams,
+});
+const internalRuleCreateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
   notifyWhen,
 });
+export const internalRuleCreate = t.intersection([
+  internalRuleCreateOptional,
+  internalRuleCreateRequired,
+]);
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
 
-export const internalRuleUpdate = t.type({
+const internalRuleUpdateRequired = t.type({
   name: RuleName,
   tags: RuleTagArray,
   schedule: t.type({
@@ -308,7 +314,13 @@ export const internalRuleUpdate = t.type({
   }),
   actions: RuleActionArrayCamel,
   params: ruleParams,
+});
+const internalRuleUpdateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
   notifyWhen,
 });
+export const internalRuleUpdate = t.intersection([
+  internalRuleUpdateOptional,
+  internalRuleUpdateRequired,
+]);
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
