@@ -187,7 +187,7 @@ export class EndpointAppContextService {
 
     const hasExceptionsListItems = !isPlatinumPlus
       ? await doesArtifactHaveData(listClient, ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID)
-      : false;
+      : true;
 
     return calculateEndpointAuthz(
       this.getLicenseService(),
