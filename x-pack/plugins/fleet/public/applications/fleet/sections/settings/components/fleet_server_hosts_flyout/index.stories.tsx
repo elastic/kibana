@@ -32,7 +32,7 @@ const fleetServerHost = {
 export const FleetServerHostsFlyout = ({ width }: Args) => {
   return (
     <div style={{ width }}>
-      <Component onClose={() => {}} fleetServerHost={fleetServerHost} />
+      <Component proxies={[]} onClose={() => {}} fleetServerHost={fleetServerHost} />
     </div>
   );
 };

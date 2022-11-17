@@ -23,6 +23,7 @@ import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { frequencyStr } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { MonitorTags } from './monitor_tags';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
@@ -43,7 +44,7 @@ export const MonitorDetailsPanel = () => {
 
   if (
     (latestPing && latestPing?.config_id !== monitorId) ||
-    (monitor && monitor.id !== monitorId)
+    (monitor && monitor[ConfigKey.CONFIG_ID] !== monitorId)
   ) {
     return <EuiLoadingContent lines={6} />;
   }
@@ -81,7 +82,9 @@ export const MonitorDetailsPanel = () => {
             <EuiBadge>{capitalize(monitor?.type)}</EuiBadge>
           </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>Every 10 mins</EuiDescriptionListDescription>
+          <EuiDescriptionListDescription>
+            {monitor && frequencyStr(monitor[ConfigKey.SCHEDULE])}
+          </EuiDescriptionListDescription>
           <EuiDescriptionListTitle>{LOCATIONS_LABEL}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
             <LocationsStatus />
