@@ -192,14 +192,19 @@ export const DetailsItems: FC<{
     ) {
       items.push({
         title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.upperBoundsTitle', {
-          defaultMessage: 'Upper bounds',
+          defaultMessage: 'Upper bound',
         }),
-        description: formatValue(anomaly.typical, source.function, undefined, source),
+        description: formatValue(
+          anomaly.source.anomaly_score_explanation?.upper_confidence_bound,
+          source.function,
+          undefined,
+          source
+        ),
       });
 
       items.push({
         title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.lowerBoundsTitle', {
-          defaultMessage: 'Lower bounds',
+          defaultMessage: 'Lower bound',
         }),
         description: formatValue(
           anomaly.source.anomaly_score_explanation?.lower_confidence_bound,
