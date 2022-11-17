@@ -24,9 +24,7 @@ export const Description: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title}>
-        <>{children}</>
-      </EuiFormRow>
+      {children}
     </EuiDescribedFormGroup>
   );
 });
