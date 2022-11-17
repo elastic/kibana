@@ -1,0 +1,43 @@
+{
+  "journeyName": "GET dataViews plugin bundle",
+  "kibanaVersion": "8.6.0-SNAPSHOT",
+  "scalabilitySetup": {
+    "warmup": [
+      {
+        "action": "constantUsersPerSec",
+        "userCount": 10,
+        "duration": "30s"
+      }
+    ],
+    "test": [
+      {
+        "action": "incrementUsersPerSec",
+        "userCount": 20,
+        "times": 25,
+        "duration": "5s"
+      }
+    ],
+    "maxDuration": "10m"
+  },
+  "testData": {
+    "esArchives": [],
+    "kbnArchives": []
+  },
+  "streams": [
+    {
+      "requests": [
+        {
+          "date": "2022-11-14T09:31:49.963Z",
+          "http": {
+            "method": "GET",
+            "path": "/9007199254740991/bundles/plugin/dataViews/kibana/dataViews.plugin.js",
+            "headers": {
+              "Accept-Encoding": "gzip, deflate, br"
+            },
+            "statusCode": 200
+          }
+        }
+      ]
+    }
+  ]
+}
