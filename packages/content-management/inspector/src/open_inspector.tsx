@@ -18,20 +18,32 @@ export type OpenInspectorParams = Pick<
   'item' | 'onSave' | 'isReadonly' | 'entityName'
 >;
 
-export function useOpenInspector() {
+export function useOpenInspector(postSaveHandler?: () => void | Promise<void>) {
   const services = useServices();
   const { openFlyout } = services;
   const flyout = useRef<OverlayRef | null>(null);
 
+  const closeFlyout = useCallback(() => {
+    flyout.current?.close();
+  }, []);
+
   return useCallback(
-    (args: OpenInspectorParams) => {
+    ({ onSave: onSaveOriginal, ...args }: OpenInspectorParams) => {
       // Validate arguments
-      if (args.isReadonly === false && args.onSave === undefined) {
+      if (args.isReadonly === false && onSaveOriginal === undefined) {
         throw new Error(`A value for [onSave()] must be provided when [isReadonly] is false.`);
       }
 
+      const onSave: OpenInspectorParams['onSave'] =
+        onSaveOriginal &&
+        (async (...onSaveArgs) => {
+          await onSaveOriginal(...onSaveArgs);
+          await postSaveHandler?.();
+          closeFlyout();
+        });
+
       flyout.current = openFlyout(
-        <InspectorLoader {...args} onCancel={() => flyout.current?.close()} services={services} />,
+        <InspectorLoader {...args} onSave={onSave} onCancel={closeFlyout} services={services} />,
         {
           maxWidth: 600,
           size: 'm',
@@ -40,6 +52,6 @@ export function useOpenInspector() {
         }
       );
     },
-    [openFlyout, services]
+    [closeFlyout, openFlyout, postSaveHandler, services]
   );
 }

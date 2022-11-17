@@ -166,8 +166,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
   } = useServices();
 
-  const openInspector = useOpenInspector();
-
   const reducer = useMemo(() => {
     return getReducer<T>();
   }, []);
@@ -217,6 +215,46 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const pageDataTestSubject = `${entityName}LandingPage`;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
+
+  const fetchItems = useCallback(async () => {
+    dispatch({ type: 'onFetchItems' });
+
+    try {
+      const idx = ++fetchIdx.current;
+
+      const {
+        searchQuery: searchQueryParsed,
+        references,
+        referencesToExclude,
+      } = searchQueryParser?.(searchQuery.text) ?? {
+        searchQuery: searchQuery.text,
+        references: undefined,
+        referencesToExclude: undefined,
+      };
+
+      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
+
+      if (!isMounted.current) {
+        return;
+      }
+
+      if (idx === fetchIdx.current) {
+        dispatch({
+          type: 'onFetchItemsSuccess',
+          data: {
+            response,
+          },
+        });
+      }
+    } catch (err) {
+      dispatch({
+        type: 'onFetchItemsError',
+        data: err,
+      });
+    }
+  }, [searchQueryParser, findItems, searchQuery.text]);
+
+  const openInspector = useOpenInspector(fetchItems);
 
   const updateQuery = useCallback((query: Query) => {
     dispatch({
@@ -388,42 +426,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   // ------------
   // Callbacks
   // ------------
-  const fetchItems = useCallback(async () => {
-    dispatch({ type: 'onFetchItems' });
-
-    try {
-      const idx = ++fetchIdx.current;
-
-      const {
-        searchQuery: searchQueryParsed,
-        references,
-        referencesToExclude,
-      } = searchQueryParser
-        ? searchQueryParser(searchQuery.text)
-        : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
-
-      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
-
-      if (!isMounted.current) {
-        return;
-      }
-
-      if (idx === fetchIdx.current) {
-        dispatch({
-          type: 'onFetchItemsSuccess',
-          data: {
-            response,
-          },
-        });
-      }
-    } catch (err) {
-      dispatch({
-        type: 'onFetchItemsError',
-        data: err,
-      });
-    }
-  }, [searchQueryParser, searchQuery, findItems]);
-
   const onSortChange = useCallback((field: SortColumnField, direction: Direction) => {
     dispatch({
       type: 'onTableSortChange',
