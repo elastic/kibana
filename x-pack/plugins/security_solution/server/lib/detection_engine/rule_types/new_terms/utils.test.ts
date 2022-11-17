@@ -288,7 +288,7 @@ describe('createFieldValuesMap', () => {
     });
   });
 
-  it('should not put value in map if it is a number', () => {
+  it('should put value in map if it is a number', () => {
     expect(
       createFieldValuesMap(
         ['source.host', 'source.id'],
