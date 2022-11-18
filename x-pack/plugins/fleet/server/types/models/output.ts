@@ -54,6 +54,7 @@ const OutputBaseSchema = {
       key: schema.maybe(schema.string()),
     })
   ),
+  proxy_id: schema.nullable(schema.string()),
 };
 
 export const NewOutputSchema = schema.object({ ...OutputBaseSchema });
@@ -81,6 +82,7 @@ export const UpdateOutputSchema = schema.object({
       key: schema.maybe(schema.string()),
     })
   ),
+  proxy_id: schema.nullable(schema.string()),
 });
 
 export const OutputSchema = schema.object({
