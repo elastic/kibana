@@ -25,6 +25,9 @@ const getDownloadBaseUrl = (reporting: ReportingCore) => {
   return config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
 };
 
+/**
+ * Handles parts of requests to generate a report
+ */
 export class RequestHandler {
   constructor(
     private reporting: ReportingCore,

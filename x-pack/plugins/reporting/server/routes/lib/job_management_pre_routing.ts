@@ -15,12 +15,12 @@ import { ReportingUser } from '../../types';
 import type { Counters } from './get_counter';
 
 /**
- * Type for callback
+ * The body of a route handler to call via callback
  */
 type JobManagementResponseHandler = (doc: ReportApiJSON) => Promise<IKibanaResponse<object>>;
 
 /**
- * Helper function for API routes that manage (download, delete) report jobs
+ * Handles parts of requests to manage (download and delete) reports
  */
 export const jobManagementPreRouting = async (
   reporting: ReportingCore,
