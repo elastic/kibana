@@ -1161,11 +1161,13 @@ describe('Jira service', () => {
     });
 
     test('it should return correct issue when special characters are used', async () => {
-      const specialCharacterIssuesResponse = [{
-        id: '77145',
-        key: 'RJ-5696',
-        fields: { summary: '[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]' },
-      }];
+      const specialCharacterIssuesResponse = [
+        {
+          id: '77145',
+          key: 'RJ-5696',
+          fields: { summary: '[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]' },
+        },
+      ];
       requestMock.mockImplementation(() =>
         createAxiosResponse({
           data: {
@@ -1205,11 +1207,13 @@ describe('Jira service', () => {
     });
 
     test('it should escape JQL special characters', async () => {
-      const specialCharacterIssuesResponse = [{
-        id: '77145',
-        key: 'RJ-5696',
-        fields: { summary: '[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]' },
-      }];
+      const specialCharacterIssuesResponse = [
+        {
+          id: '77145',
+          key: 'RJ-5696',
+          fields: { summary: '[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]' },
+        },
+      ];
       requestMock.mockImplementation(() =>
         createAxiosResponse({
           data: {
@@ -1243,7 +1247,14 @@ describe('Jira service', () => {
     test('it should throw an error when only one double quote is used', async () => {
       requestMock.mockImplementation(() => {
         const error: ResponseError = new Error('An error has occurred');
-        error.response = { data: { errors: { issuestypes: 'Error in the JQL Query: The quoted string has not been completed. (line 1, character 34)' } } };
+        error.response = {
+          data: {
+            errors: {
+              issuestypes:
+                'Error in the JQL Query: The quoted string has not been completed. (line 1, character 34)',
+            },
+          },
+        };
         throw error;
       });
 
