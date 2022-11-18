@@ -153,12 +153,6 @@ export const links: LinkItem = {
       landingIcon: IconExceptionLists,
       path: '',
       skipUrlState: true,
-      hideTimeline: true,
-      globalSearchKeywords: [
-        i18n.translate('xpack.securitySolution.appLinks.sharedListDetails', {
-          defaultMessage: 'Shared list details',
-        }),
-      ],
     },
     {
       id: SecurityPageName.endpoints,
