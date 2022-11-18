@@ -7,7 +7,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { difference, isEqual } from 'lodash';
+import { difference } from 'lodash';
 import type { CaseUpdateRequest } from '../../../../common/ui';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import type { Case } from '../../../../common';
@@ -34,25 +34,31 @@ export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActi
     [onAction]
   );
 
+  const areTagsEqual = (originalTags: string[], tagsToUpdate: Set<string>): boolean => {
+    if (originalTags.length !== tagsToUpdate.size) {
+      return false;
+    }
+
+    return originalTags.every((tag) => tagsToUpdate.has(tag));
+  };
+
   const onSaveTags = useCallback(
     (tagsSelection: TagsSelectionState) => {
       onAction();
       onFlyoutClosed();
 
       const casesToUpdate = selectedCasesToEditTags.reduce((acc, theCase) => {
-        const tags = difference(theCase.tags, tagsSelection.unSelectedTags);
-        const uniqueTags = new Set([...tags, ...tagsSelection.selectedTags]);
-        const uniqueTagsAsArray = Array.from(uniqueTags.values());
+        const tagsWithoutUnselectedTags = difference(theCase.tags, tagsSelection.unSelectedTags);
+        const uniqueTags = new Set([...tagsWithoutUnselectedTags, ...tagsSelection.selectedTags]);
 
-        if (isEqual(theCase.tags, uniqueTagsAsArray)) {
-          onActionSuccess();
+        if (areTagsEqual(theCase.tags, uniqueTags)) {
           return acc;
         }
 
         return [
           ...acc,
           {
-            tags: uniqueTagsAsArray,
+            tags: Array.from(uniqueTags.values()),
             id: theCase.id,
             version: theCase.version,
           },
