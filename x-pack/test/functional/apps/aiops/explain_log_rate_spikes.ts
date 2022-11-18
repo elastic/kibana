@@ -30,7 +30,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the saved search selection page`
       );
-      await aiops.explainLogRateSpikes.navigateToIndexPatternSelection();
+      await aiops.explainLogRateSpikesPage.navigateToIndexPatternSelection();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the explain log rate spikes page`
@@ -42,10 +42,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it(`${testData.suiteTitle} displays index details`, async () => {
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
-      await aiops.explainLogRateSpikes.assertTimeRangeSelectorSectionExists();
+      await aiops.explainLogRateSpikesPage.assertTimeRangeSelectorSectionExists();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
-      await aiops.explainLogRateSpikes.clickUseFullDataButton(
+      await aiops.explainLogRateSpikesPage.clickUseFullDataButton(
         testData.expected.totalDocCountFormatted
       );
       await headerPage.waitUntilLoadingHasFinished();
@@ -53,53 +53,53 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the doc count panel correctly`
       );
-      await aiops.explainLogRateSpikes.assertTotalDocCountHeaderExists();
-      await aiops.explainLogRateSpikes.assertTotalDocCountChartExists();
+      await aiops.explainLogRateSpikesPage.assertTotalDocCountHeaderExists();
+      await aiops.explainLogRateSpikesPage.assertTotalDocCountChartExists();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the page correctly`
       );
-      await aiops.explainLogRateSpikes.assertSearchPanelExists();
+      await aiops.explainLogRateSpikesPage.assertSearchPanelExists();
 
       await ml.testExecution.logTestStep('displays empty prompt');
-      await aiops.explainLogRateSpikes.assertNoWindowParametersEmptyPromptExists();
+      await aiops.explainLogRateSpikesPage.assertNoWindowParametersEmptyPromptExists();
 
       await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
-      await aiops.explainLogRateSpikes.clickDocumentCountChart();
-      await aiops.explainLogRateSpikes.assertAnalysisSectionExists();
+      await aiops.explainLogRateSpikesPage.clickDocumentCountChart();
+      await aiops.explainLogRateSpikesPage.assertAnalysisSectionExists();
 
       await ml.testExecution.logTestStep('displays the no results found prompt');
-      await aiops.explainLogRateSpikes.assertNoResultsFoundEmptyPromptExists();
+      await aiops.explainLogRateSpikesPage.assertNoResultsFoundEmptyPromptExists();
 
       await ml.testExecution.logTestStep('adjusts the brushes to get analysis results');
-      await aiops.explainLogRateSpikes.assertRerunAnalysisButtonExists(false);
+      await aiops.explainLogRateSpikesPage.assertRerunAnalysisButtonExists(false);
 
       // Get the current width of the deviation brush for later comparison.
-      const brushSelectionWidthBefore = await aiops.explainLogRateSpikes.getBrushSelectionWidth(
+      const brushSelectionWidthBefore = await aiops.explainLogRateSpikesPage.getBrushSelectionWidth(
         'aiopsBrushDeviation'
       );
 
       // Get the px values for the timestamp we want to move the brush to.
-      const { targetPx, intervalPx } = await aiops.explainLogRateSpikes.getPxForTimestamp(
+      const { targetPx, intervalPx } = await aiops.explainLogRateSpikesPage.getPxForTimestamp(
         testData.brushTargetTimestamp
       );
 
       // Adjust the right brush handle
-      await aiops.explainLogRateSpikes.adjustBrushHandler(
+      await aiops.explainLogRateSpikesPage.adjustBrushHandler(
         'aiopsBrushDeviation',
         'handle--e',
         targetPx + intervalPx
       );
 
       // Adjust the left brush handle
-      await aiops.explainLogRateSpikes.adjustBrushHandler(
+      await aiops.explainLogRateSpikesPage.adjustBrushHandler(
         'aiopsBrushDeviation',
         'handle--w',
         targetPx
       );
 
       // Get the new brush selection width for later comparison.
-      const brushSelectionWidthAfter = await aiops.explainLogRateSpikes.getBrushSelectionWidth(
+      const brushSelectionWidthAfter = await aiops.explainLogRateSpikesPage.getBrushSelectionWidth(
         'aiopsBrushDeviation'
       );
 
@@ -110,18 +110,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       expect(brushSelectionWidthBefore).not.to.be(brushSelectionWidthAfter);
       expect(brushSelectionWidthAfter).not.to.be.greaterThan(intervalPx * 2);
 
-      await aiops.explainLogRateSpikes.assertRerunAnalysisButtonExists(true);
+      await aiops.explainLogRateSpikesPage.assertRerunAnalysisButtonExists(true);
 
       await ml.testExecution.logTestStep('rerun the analysis with adjusted settings');
 
-      await aiops.explainLogRateSpikes.clickRerunAnalysisButton(true);
-      await aiops.explainLogRateSpikes.assertProgressTitle('Progress: 100% — Done.');
+      await aiops.explainLogRateSpikesPage.clickRerunAnalysisButton(true);
+      await aiops.explainLogRateSpikesPage.assertProgressTitle('Progress: 100% — Done.');
 
       // The group switch should be disabled by default
-      await aiops.explainLogRateSpikes.assertSpikeAnalysisGroupSwitchExists(false);
+      await aiops.explainLogRateSpikesPage.assertSpikeAnalysisGroupSwitchExists(false);
 
       // Enabled grouping
-      await aiops.explainLogRateSpikes.clickSpikeAnalysisGroupSwitch(false);
+      await aiops.explainLogRateSpikesPage.clickSpikeAnalysisGroupSwitch(false);
 
       await aiops.explainLogRateSpikesAnalysisGroupsTable.assertSpikeAnalysisTableExists();
 
