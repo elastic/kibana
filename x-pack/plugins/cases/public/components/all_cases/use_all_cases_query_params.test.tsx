@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import { TestProviders } from '../../common/mock';
 import {
@@ -37,6 +37,7 @@ jest.mock('react-router-dom', () => ({
   }),
   useHistory: jest.fn().mockReturnValue({
     replace: jest.fn(),
+    push: jest.fn(),
     location: {
       search: '',
     },
@@ -112,6 +113,22 @@ describe('useAllCasesQueryParams', () => {
     expect(useHistory().replace).toHaveBeenCalledWith({
       search: stringify(expectedUrl),
     });
+  });
+
+  it('calls history.replace on first run and history.push onwards', () => {
+    const { result } = renderHook(() => useAllCasesQueryParams(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(useHistory().replace).toHaveBeenCalled();
+    expect(useHistory().push).toHaveBeenCalledTimes(0);
+
+    act(() => {
+      result.current.setQueryParams({ perPage: DEFAULT_TABLE_LIMIT + 10 });
+    });
+
+    expect(useHistory().replace).toHaveBeenCalled();
+    expect(useHistory().push).toHaveBeenCalledTimes(1);
   });
 
   it('preserves other url parameters', () => {
