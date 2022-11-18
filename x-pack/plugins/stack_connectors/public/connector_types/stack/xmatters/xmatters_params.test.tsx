@@ -62,7 +62,7 @@ describe('XmattersParamsFields renders', () => {
     );
   });
 
-  test('defaults', () => {
+  test('default params for testing', () => {
     const actionParams = {};
     const editAction = jest.fn();
 
