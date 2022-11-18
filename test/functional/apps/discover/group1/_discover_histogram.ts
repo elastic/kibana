@@ -148,8 +148,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(canvasExists).to.be(true);
       await testSubjects.click('unifiedHistogramChartOptionsToggle');
       await testSubjects.click('unifiedHistogramChartToggle');
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(false);
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(false);
+      });
       // histogram is hidden, when reloading the page it should remain hidden
       await browser.refresh();
       canvasExists = await elasticChart.canvasExists();
@@ -157,8 +159,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('unifiedHistogramChartOptionsToggle');
       await testSubjects.click('unifiedHistogramChartToggle');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(true);
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(true);
+      });
     });
     it('should allow hiding the histogram, persisted in saved search', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
@@ -169,8 +173,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // close chart for saved search
       await testSubjects.click('unifiedHistogramChartOptionsToggle');
       await testSubjects.click('unifiedHistogramChartToggle');
-      let canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(false);
+      let canvasExists: boolean;
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(false);
+      });
 
       // save search
       await PageObjects.discover.saveSearch(savedSearch);
@@ -212,8 +219,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // close chart
       await testSubjects.click('unifiedHistogramChartOptionsToggle');
       await testSubjects.click('unifiedHistogramChartToggle');
-      let canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(false);
+      let canvasExists: boolean;
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(false);
+      });
 
       // save search
       await PageObjects.discover.saveSearch('persisted hidden histogram');
@@ -222,8 +232,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // open chart
       await testSubjects.click('unifiedHistogramChartOptionsToggle');
       await testSubjects.click('unifiedHistogramChartToggle');
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(true);
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(true);
+      });
 
       // go to dashboard
       await PageObjects.common.navigateToApp('dashboard');
@@ -238,8 +250,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // close chart
       await testSubjects.click('unifiedHistogramChartOptionsToggle');
       await testSubjects.click('unifiedHistogramChartToggle');
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(false);
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(false);
+      });
     });
   });
 }
