@@ -40,7 +40,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
       paddingSize="s"
       selectable={{
         isSelected,
-        onClick: () => (isSelected ? state.unselectFile(file.id) : state.selectFile(file.id)),
+        onClick: () => (isSelected ? state.unselectFile(file.id) : state.selectFile(file)),
       }}
       image={
         <div
@@ -59,6 +59,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
               `}
               meta={file.meta as FileImageMetadata}
               src={client.getDownloadHref({ id: file.id, fileKind: kind })}
+              loading={'lazy'}
             />
           ) : (
             <div

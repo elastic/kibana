@@ -10,28 +10,31 @@
  * The strings contain all of the values chosen for the given field (which is also the key value).
  * Reduce the list of query strings to a singular string, with AND operators between.
  */
-export const stringifyKueries = (kueries: Map<string, Array<number | string>>): string =>
-  Array.from(kueries.keys())
+
+export const stringifyKueries = (
+  kueries: Map<string, Array<number | string>>,
+  logicalANDForTag?: boolean
+): string => {
+  const defaultCondition = 'OR';
+
+  return Array.from(kueries.keys())
     .map((key) => {
-      const value = kueries.get(key);
+      let condition = defaultCondition;
+      if (key === 'tags' && logicalANDForTag) {
+        condition = 'AND';
+      }
+      const value = kueries.get(key)?.filter((v) => v !== '');
       if (!value || value.length === 0) return '';
-      return value.reduce(
-        (prev: string, cur: string | number, index: number, array: Array<number | string>) => {
-          let expression: string = `${key}:${cur}`;
-          if (typeof cur !== 'number' && (cur.indexOf(' ') >= 0 || cur.indexOf(':') >= 0)) {
-            expression = `${key}:"${cur}"`;
-          }
-          if (array.length === 1) {
-            return expression;
-          } else if (array.length > 1 && index === 0) {
-            return `(${expression}`;
-          } else if (index + 1 === array.length) {
-            return `${prev} or ${expression})`;
-          }
-          return `${prev} or ${expression}`;
-        },
-        ''
-      );
+
+      if (value.length === 1) {
+        return isAlphaNumeric(value[0] as string) ? `${key}: ${value[0]}` : `${key}: "${value[0]}"`;
+      }
+
+      const values = value
+        .map((v) => (isAlphaNumeric(v as string) ? v : `"${v}"`))
+        .join(` ${condition} `);
+
+      return `${key}: (${values})`;
     })
     .reduce((prev, cur, index, array) => {
       if (array.length === 1 || index === 0) {
@@ -41,5 +44,11 @@ export const stringifyKueries = (kueries: Map<string, Array<number | string>>): 
       } else if (prev === '' && !!cur) {
         return cur;
       }
-      return `${prev} and ${cur}`;
+      return `${prev} AND ${cur}`;
     }, '');
+};
+
+const isAlphaNumeric = (str: string) => {
+  const format = /[ `!@#$%^&*()_+=\[\]{};':"\\|,.<>\/?~]/;
+  return !format.test(str);
+};

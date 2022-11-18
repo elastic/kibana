@@ -22,6 +22,9 @@ import {
 } from '../../../common/mock';
 import { mockTheme } from './mock';
 import { dataTableReducer } from '../../../common/store/data_table/reducer';
+import { createKibanaContextProviderMock } from '../../../common/lib/kibana/kibana_react.mock';
+
+const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 jest.mock('../../../common/lib/kibana');
 
@@ -53,7 +56,9 @@ describe('CtiDisabledModule', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiDisabledModule />
+            <MockKibanaContextProvider>
+              <CtiDisabledModule />
+            </MockKibanaContextProvider>
           </ThemeProvider>
         </I18nProvider>
       </Provider>

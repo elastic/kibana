@@ -73,7 +73,8 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
   it('should return the default spec for non-outliers without a legend', () => {
     const data = [{ x: 1, y: 1 }];
 
-    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, ['x', 'y'], euiThemeLight);
+    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, [], ['x', 'y'], euiThemeLight);
+    const specForegroundLayer = vegaLiteSpec.spec.layer[0];
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
     expect(() => compile(vegaLiteSpec)).not.toThrow();
@@ -82,17 +83,17 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       column: ['x', 'y'],
       row: ['y', 'x'],
     });
-    expect(vegaLiteSpec.spec.data.values).toEqual(data);
-    expect(vegaLiteSpec.spec.mark).toEqual({
+    expect(specForegroundLayer.data.values).toEqual(data);
+    expect(specForegroundLayer.mark).toEqual({
       opacity: 0.75,
       size: 8,
       type: 'circle',
     });
-    expect(vegaLiteSpec.spec.encoding.color).toEqual({
+    expect(specForegroundLayer.encoding.color).toEqual({
       condition: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
       value: COLOR_BLUR,
     });
-    expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
+    expect(specForegroundLayer.encoding.tooltip).toEqual([
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
     ]);
@@ -101,7 +102,14 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
   it('should return the spec for outliers', () => {
     const data = [{ x: 1, y: 1 }];
 
-    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, ['x', 'y'], euiThemeLight, 'ml');
+    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
+      data,
+      [],
+      ['x', 'y'],
+      euiThemeLight,
+      'ml'
+    );
+    const specForegroundLayer = vegaLiteSpec.spec.layer[0];
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
     expect(() => compile(vegaLiteSpec)).not.toThrow();
@@ -110,13 +118,13 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       column: ['x', 'y'],
       row: ['y', 'x'],
     });
-    expect(vegaLiteSpec.spec.data.values).toEqual(data);
-    expect(vegaLiteSpec.spec.mark).toEqual({
+    expect(specForegroundLayer.data.values).toEqual(data);
+    expect(specForegroundLayer.mark).toEqual({
       opacity: 0.75,
       size: 8,
       type: 'circle',
     });
-    expect(vegaLiteSpec.spec.encoding.color).toEqual({
+    expect(specForegroundLayer.encoding.color).toEqual({
       condition: {
         selection: USER_SELECTION,
         field: 'is_outlier',
@@ -127,7 +135,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       },
       value: COLOR_BLUR,
     });
-    expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
+    expect(specForegroundLayer.encoding.tooltip).toEqual([
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
       {
@@ -144,12 +152,14 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
 
     const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
       data,
+      [],
       ['x', 'y'],
       euiThemeLight,
       undefined,
       'the-color-field',
       LEGEND_TYPES.NOMINAL
     );
+    const specForegroundLayer = vegaLiteSpec.spec.layer[0];
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
     expect(() => compile(vegaLiteSpec)).not.toThrow();
@@ -158,13 +168,13 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       column: ['x', 'y'],
       row: ['y', 'x'],
     });
-    expect(vegaLiteSpec.spec.data.values).toEqual(data);
-    expect(vegaLiteSpec.spec.mark).toEqual({
+    expect(specForegroundLayer.data.values).toEqual(data);
+    expect(specForegroundLayer.mark).toEqual({
       opacity: 0.75,
       size: 8,
       type: 'circle',
     });
-    expect(vegaLiteSpec.spec.encoding.color).toEqual({
+    expect(specForegroundLayer.encoding.color).toEqual({
       condition: {
         selection: USER_SELECTION,
         field: 'the-color-field',
@@ -175,7 +185,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       },
       value: COLOR_BLUR,
     });
-    expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
+    expect(specForegroundLayer.encoding.tooltip).toEqual([
       { field: 'the-color-field', type: 'nominal' },
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
@@ -187,12 +197,14 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
 
     const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
       data,
+      [],
       ['x.a', 'y[a]'],
       euiThemeLight,
       undefined,
       'the-color-field',
       LEGEND_TYPES.NOMINAL
     );
+    const specForegroundLayer = vegaLiteSpec.spec.layer[0];
 
     // column values should be escaped
     expect(vegaLiteSpec.repeat).toEqual({
@@ -200,6 +212,6 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       row: ['y\\[a\\]', 'x\\.a'],
     });
     // raw data should not be escaped
-    expect(vegaLiteSpec.spec.data.values).toEqual(data);
+    expect(specForegroundLayer.data.values).toEqual(data);
   });
 });

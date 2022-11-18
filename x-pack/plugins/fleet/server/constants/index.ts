@@ -67,6 +67,8 @@ export {
   // Fleet server host
   DEFAULT_FLEET_SERVER_HOST_ID,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  // Proxy
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
   // Authz
   ENDPOINT_PRIVILEGES,
 } from '../../common/constants';
@@ -83,3 +85,5 @@ export {
   FLEET_INSTALL_FORMAT_VERSION,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
 } from './fleet_es_assets';
+export { FILE_STORAGE_DATA_AGENT_INDEX } from './fleet_es_assets';
+export { FILE_STORAGE_METADATA_AGENT_INDEX } from './fleet_es_assets';

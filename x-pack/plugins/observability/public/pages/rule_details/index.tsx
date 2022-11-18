@@ -46,6 +46,7 @@ import {
   ALERTS_TAB,
   RULE_DETAILS_PAGE_ID,
   RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
+  URL_STORAGE_KEY,
 } from './constants';
 import { RuleDetailsPathParams, TabId } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -91,9 +92,10 @@ export function RuleDetailsPage() {
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
   });
-  const [tabId, setTabId] = useState<TabId>(
-    (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB
-  );
+  const [tabId, setTabId] = useState<TabId>(() => {
+    const urlTabId = (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB;
+    return [EXECUTION_TAB, ALERTS_TAB].includes(urlTabId) ? urlTabId : EXECUTION_TAB;
+  });
   const [features, setFeatures] = useState<string>('');
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
@@ -106,12 +108,18 @@ export function RuleDetailsPage() {
   ] as Query[]);
 
   const updateUrl = (nextQuery: { tabId: TabId }) => {
-    history.push({
+    const newTabId = nextQuery.tabId;
+    const nextSearch =
+      newTabId === ALERTS_TAB
+        ? {
+            ...toQuery(location.search),
+            ...nextQuery,
+          }
+        : { tabId: EXECUTION_TAB };
+
+    history.replace({
       ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        ...nextQuery,
-      }),
+      search: fromQuery(nextSearch),
     });
   };
 
@@ -216,12 +224,13 @@ export function RuleDetailsPage() {
           <ObservabilityAlertSearchbarWithUrlSync
             appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
             setEsQuery={setEsQuery}
+            urlStorageKey={URL_STORAGE_KEY}
             queries={ruleQuery.current}
           />
           <EuiSpacer size="s" />
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
-              {esQuery && (
+              {esQuery && features && (
                 <AlertsStateTable
                   alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                   configurationId={observabilityFeatureId}

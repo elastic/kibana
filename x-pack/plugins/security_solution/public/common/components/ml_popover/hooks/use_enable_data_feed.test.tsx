@@ -130,7 +130,7 @@ describe('useSecurityJobsHelpers', () => {
   });
 
   it('calls startDatafeeds with 2 weeks old start date', async () => {
-    jest.useFakeTimers('modern').setSystemTime(new Date('1989-03-07'));
+    jest.useFakeTimers().setSystemTime(new Date('1989-03-07'));
 
     const { result } = renderHook(() => useEnableDataFeed(), {
       wrapper,
