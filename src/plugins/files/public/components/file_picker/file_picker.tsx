@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import type { DoneNotification } from '../upload_file';
 import { useBehaviorSubject } from '../use_behavior_subject';
 import { useFilePickerContext, FilePickerContext } from './context';
@@ -84,6 +85,9 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
       className="filesFilePicker filesFilePicker--fixed"
       maxWidth="75vw"
       onClose={onClose}
+      css={css`
+        height: 75vw; // Always be max height for the file picker
+      `}
     >
       <EuiModalHeader>
         <Title multiple={multiple} />
