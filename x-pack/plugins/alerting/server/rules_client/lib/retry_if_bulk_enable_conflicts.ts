@@ -8,20 +8,23 @@
 import pMap from 'p-map';
 import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkOperationError } from '../rules_client';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
+import { RawRule } from '../../types';
 
 const MAX_RULES_IDS_IN_RETRY = 1000;
 
 export type BulkEnableOperation = (filter: KueryNode | null) => Promise<{
   errors: BulkOperationError[];
+  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   taskIdsToEnable: string[];
 }>;
 
 interface ReturnRetry {
   errors: BulkOperationError[];
+  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   taskIdsToEnable: string[];
 }
 
@@ -34,6 +37,7 @@ interface ReturnRetry {
  * @param filter - KueryNode filter
  * @param retries - number of retries left
  * @param accErrors - accumulated conflict errors
+ * @param accRules - accumulated enabled rules
  * @param accTaskIdsToEnable - accumulated task ids
  * @returns Promise<ReturnRetry>
  */
@@ -44,12 +48,17 @@ export const retryIfBulkEnableConflicts = async (
   filter: KueryNode | null,
   retries: number = RETRY_IF_CONFLICTS_ATTEMPTS,
   accErrors: BulkOperationError[] = [],
+  accRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [],
   accTaskIdsToEnable: string[] = []
 ): Promise<ReturnRetry> => {
   try {
-    const { errors: currentErrors, taskIdsToEnable: currentTaskIdsToEnable } =
-      await bulkEnableOperation(filter);
+    const {
+      errors: currentErrors,
+      rules: currentRules,
+      taskIdsToEnable: currentTaskIdsToEnable,
+    } = await bulkEnableOperation(filter);
 
+    const rules = [...accRules, ...currentRules];
     const taskIdsToEnable = [...accTaskIdsToEnable, ...currentTaskIdsToEnable];
     const errors =
       retries <= 0
@@ -66,6 +75,7 @@ export const retryIfBulkEnableConflicts = async (
     if (ruleIdsWithConflictError.length === 0) {
       return {
         errors,
+        rules,
         taskIdsToEnable,
       };
     }
@@ -75,6 +85,7 @@ export const retryIfBulkEnableConflicts = async (
 
       return {
         errors,
+        rules,
         taskIdsToEnable,
       };
     }
@@ -98,6 +109,7 @@ export const retryIfBulkEnableConflicts = async (
             convertRuleIdsToKueryNode(queryIds),
             retries - 1,
             errors,
+            rules,
             taskIdsToEnable
           ),
         {
@@ -108,10 +120,11 @@ export const retryIfBulkEnableConflicts = async (
       (acc, item) => {
         return {
           errors: [...acc.errors, ...item.errors],
+          rules: [...acc.rules, ...item.rules],
           taskIdsToEnable: [...acc.taskIdsToEnable, ...item.taskIdsToEnable],
         };
       },
-      { errors: [], taskIdsToEnable: [] }
+      { errors: [], rules: [], taskIdsToEnable: [] }
     );
   } catch (err) {
     throw err;
