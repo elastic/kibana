@@ -10,7 +10,21 @@ import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public
 
 import { DashboardContainer } from '../../dashboard_container';
 import { pluginServices } from '../../../../services/plugin_services';
+import { DashboardContainerByValueInput } from '../../../../../common';
 import { DashboardCreationOptions } from '../../dashboard_container_factory';
+
+/**
+ * input keys that will not cause a new session to be created.
+ */
+const noRefetchKeys: Readonly<Array<keyof DashboardContainerByValueInput>> = [
+  'title',
+  'panels',
+  'viewMode',
+  'useMargins',
+  'description',
+  'searchSessionId', // ignoring search session ID because this function will change it
+  'isEmbeddedExternally',
+] as const;
 
 /**
  * Enables dashboard search sessions.
@@ -23,8 +37,13 @@ export function startDashboardSearchSessionIntegration(
   if (!searchSessionSettings) {
     throw new Error('Cannot start search sessions integration without settings');
   }
-  const { createSessionRestorationDataProvider, sessionIdToRestore, sessionIdChangeObservable } =
-    searchSessionSettings;
+  const {
+    createSessionRestorationDataProvider,
+    sessionIdUrlChangeObservable,
+    getSearchSessionIdFromURL,
+    removeSessionIdFromUrl,
+    sessionIdToRestore,
+  } = searchSessionSettings;
 
   const {
     data: {
@@ -56,12 +75,49 @@ export function startDashboardSearchSessionIntegration(
           },
   });
 
-  const searchSessionIdChangeSubscription = sessionIdChangeObservable?.subscribe(() =>
+  // force refresh when the session id in the URL changes.
+  const searchSessionIdChangeSubscription = sessionIdUrlChangeObservable?.subscribe(() =>
     this.forceRefresh()
   );
 
+  const handleSearchSessionChange = (changedKeys: Array<keyof DashboardContainerByValueInput>) => {
+    const {
+      getState,
+      dispatch,
+      actions: { setSearchSessionId },
+    } = this.getReduxEmbeddableTools();
+    const currentSearchSessionId = getState().explicitInput.searchSessionId;
+
+    const shouldRefetch = changedKeys.some((changeKey) => !noRefetchKeys.includes(changeKey));
+    if (!shouldRefetch) return;
+
+    const updatedSearchSessionId: string | undefined = (() => {
+      // do not update session id if this is irrelevant state change to prevent excessive searches
+      if (!shouldRefetch) return;
+
+      let searchSessionIdFromURL = getSearchSessionIdFromURL();
+      if (searchSessionIdFromURL) {
+        if (session.isRestore() && session.isCurrentSession(searchSessionIdFromURL)) {
+          // we had previously been in a restored session but have now changed state so remove the session id from the URL.
+          removeSessionIdFromUrl();
+          searchSessionIdFromURL = undefined;
+        } else {
+          session.restore(searchSessionIdFromURL);
+        }
+      }
+      return searchSessionIdFromURL ?? session.start();
+    })();
+
+    if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
+      dispatch(setSearchSessionId(updatedSearchSessionId));
+    }
+  };
+
   return {
     initialSearchSessionId,
-    stopSyncingDashboardSearchSessions: () => searchSessionIdChangeSubscription?.unsubscribe(),
+    handleSearchSessionChange,
+    stopSyncingDashboardSearchSessions: () => {
+      searchSessionIdChangeSubscription?.unsubscribe();
+    },
   };
 }

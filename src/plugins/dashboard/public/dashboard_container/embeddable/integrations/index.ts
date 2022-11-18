@@ -8,8 +8,8 @@
 
 export {
   getUnsavedChanges,
-  getHasUnsavedChanges,
   startDiffingDashboardState,
+  keysNotConsideredUnsavedChanges,
 } from './diff_state/dashboard_diffing_integration';
 
 export {

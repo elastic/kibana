@@ -103,7 +103,4 @@ export const dashboardDiffingFunctions: DashboardDiffFunctions = {
     persistableControlGroupInputIsEqual(currentValue, lastValue),
 
   viewMode: () => false, // When compared view mode is always considered unequal so that it gets backed up.
-  timeslice: () => true, // Time slice is only in input to be passed down to children. It should always be considered equal.
-  lastReloadRequestTime: () => true, // last reload request time is only in input to force children to rerender
-  searchSessionId: () => true,
 };

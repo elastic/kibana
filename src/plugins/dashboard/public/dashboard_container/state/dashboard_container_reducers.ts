@@ -73,6 +73,13 @@ export const dashboardContainerReducers = {
     state.explicitInput.title = action.payload;
   },
 
+  setSearchSessionId: (
+    state: DashboardReduxState,
+    action: PayloadAction<DashboardContainerByValueInput['searchSessionId']>
+  ) => {
+    state.explicitInput.searchSessionId = action.payload;
+  },
+
   // ------------------------------------------------------------------------------
   // Unsaved Changes Reducers
   // ------------------------------------------------------------------------------
@@ -126,6 +133,10 @@ export const dashboardContainerReducers = {
   ) => {
     state.explicitInput.filters = action.payload.filters;
     state.explicitInput.query = action.payload.query;
+  },
+
+  setLastReloadRequestTimeToNow: (state: DashboardReduxState) => {
+    state.explicitInput.lastReloadRequestTime = new Date().getTime();
   },
 
   setFilters: (

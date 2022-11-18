@@ -21,6 +21,12 @@ import {
   loadAndRemoveDashboardState,
   startSyncingDashboardUrlState,
 } from './url/sync_dashboard_url_state';
+import {
+  getSessionURLObservable,
+  getSearchSessionIdFromURL,
+  removeSearchSessionIdFromURL,
+  createSessionRestorationDataProvider,
+} from './url/search_sessions_integration';
 import { DASHBOARD_APP_ID } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
@@ -28,11 +34,6 @@ import type { DashboardContainer } from '../dashboard_container';
 import { type DashboardEmbedSettings, DashboardRedirect } from './types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
-import {
-  createSessionRestorationDataProvider,
-  getSearchSessionIdFromURL,
-  getSessionURLObservable,
-} from './url/search_sessions_integration';
 import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
@@ -128,7 +129,9 @@ export function DashboardApp({
       searchSessionSettings: {
         createSessionRestorationDataProvider,
         sessionIdToRestore: searchSessionIdFromURL,
-        sessionIdChangeObservable: getSessionURLObservable(history),
+        sessionIdUrlChangeObservable: getSessionURLObservable(history),
+        getSearchSessionIdFromURL: () => getSearchSessionIdFromURL(history),
+        removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
       },
 
       // Override all state with URL + Locator input

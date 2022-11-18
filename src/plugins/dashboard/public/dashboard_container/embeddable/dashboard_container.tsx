@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 
 import {
@@ -50,13 +50,14 @@ import {
   DashboardContainerByValueInput,
 } from '../../../common';
 import {
-  getHasUnsavedChanges,
   startDiffingDashboardState,
   startControlGroupIntegration,
   startUnifiedSearchIntegration,
   startSyncingDashboardDataViews,
   startDashboardSearchSessionIntegration,
   combineDashboardFiltersWithControlGroupFilters,
+  getUnsavedChanges,
+  keysNotConsideredUnsavedChanges,
 } from './integrations';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { createPanelState } from '../component/panel';
@@ -276,12 +277,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
 
     // start search sessions integration
+    let handleSearchSessionChange;
     if (creationOptions?.useSearchSessionsIntegration) {
-      const { initialSearchSessionId, stopSyncingDashboardSearchSessions } =
-        startDashboardSearchSessionIntegration.bind(this)(
-          creationOptions?.searchSessionSettings,
-          incomingEmbeddable
-        );
+      const {
+        initialSearchSessionId,
+        stopSyncingDashboardSearchSessions,
+        handleSearchSessionChange: sessionChangeFunction,
+      } = startDashboardSearchSessionIntegration.bind(this)(
+        creationOptions?.searchSessionSettings,
+        incomingEmbeddable
+      );
+      handleSearchSessionChange = sessionChangeFunction;
       initialInput.searchSessionId = initialSearchSessionId;
       this.stopSyncingDashboardSearchSessions = stopSyncingDashboardSearchSessions;
     }
@@ -300,6 +306,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     // start diffing dashboard state
     const diffingMiddleware = startDiffingDashboardState.bind(this)({
       initialInput,
+      handleSearchSessionChange,
       initialLastSavedInput: inputFromSavedObject,
       useSessionBackup: creationOptions?.useSessionStorageIntegration,
       setCleanupFunction: (cleanup) => {
@@ -366,7 +373,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public async getExplicitInputIsEqual(lastExplicitInput: DashboardContainerByValueInput) {
-    return await getHasUnsavedChanges.bind(this)(lastExplicitInput);
+    return (
+      omit(
+        Object.keys(await getUnsavedChanges.bind(this)(lastExplicitInput)),
+        keysNotConsideredUnsavedChanges
+      ).length > 0
+    );
   }
 
   public getReduxEmbeddableTools() {
@@ -419,6 +431,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     if (this.controlGroup) {
       combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
     }
+    console.log('inheriting input', {
+      refreshConfig: refreshInterval,
+      filters: combinedFilters,
+      hidePanelTitles,
+      searchSessionId,
+      executionContext,
+      syncTooltips,
+      syncColors,
+      timeRange,
+      timeslice,
+      viewMode,
+      query,
+      id,
+    });
     return {
       refreshConfig: refreshInterval,
       filters: combinedFilters,
@@ -488,9 +514,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
   public forceRefresh() {
-    this.updateInput({
-      lastReloadRequestTime: new Date().getTime(),
-    });
+    const {
+      dispatch,
+      actions: { setLastReloadRequestTimeToNow },
+    } = this.getReduxEmbeddableTools();
+    dispatch(setLastReloadRequestTimeToNow({}));
+    this.controlGroup?.reload();
   }
 
   public onDataViewsUpdate$ = new Subject<DataView[]>();

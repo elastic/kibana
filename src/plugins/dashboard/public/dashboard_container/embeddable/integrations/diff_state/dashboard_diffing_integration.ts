@@ -23,8 +23,25 @@ import { dashboardContainerReducers } from '../../../state/dashboard_container_r
 const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
   'setTimeslice',
   'setFullScreenMode',
+  'setSearchSessionId',
   'setExpandedPanelId',
   'setHasUnsavedChanges',
+];
+
+const keysToOmitFromSessionStorage: Array<keyof DashboardContainerByValueInput> = [
+  'lastReloadRequestTime',
+  'searchSessionId',
+  'timeslice',
+
+  'timeRange', // Current behaviour expects time range not to be backed up. Revisit this?
+  'refreshInterval',
+];
+
+export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerByValueInput> = [
+  'lastReloadRequestTime',
+  'searchSessionId',
+  'timeslice',
+  'viewMode',
 ];
 
 /**
@@ -38,11 +55,13 @@ export function startDiffingDashboardState(
     useSessionBackup,
     setCleanupFunction,
     initialLastSavedInput,
+    handleSearchSessionChange,
   }: {
     useSessionBackup?: boolean;
     initialInput: DashboardContainerByValueInput;
     initialLastSavedInput: DashboardContainerByValueInput;
     setCleanupFunction: (cleanupFunction: () => void) => void;
+    handleSearchSessionChange?: (changedKeys: Array<keyof DashboardContainerByValueInput>) => void;
   }
 ) {
   const { dashboardSessionStorage } = pluginServices.getServices();
@@ -51,23 +70,19 @@ export function startDiffingDashboardState(
     currentState?: DashboardContainerByValueInput,
     lastState?: DashboardContainerByValueInput
   ): Promise<boolean> => {
-    if (useSessionBackup) {
-      const unsavedChanges = await getUnsavedChanges.bind(this)(lastState, currentState);
+    const unsavedChanges = await getUnsavedChanges.bind(this)(lastState, currentState);
 
-      /**
-       * Current behaviour expects time range not to be backed up.
-       * TODO: Revisit this. It seems like we should treat all state the same.
-       */
+    if (useSessionBackup) {
       dashboardSessionStorage.setState(
         this.getDashboardSavedObjectId(),
-        omit(unsavedChanges, ['timeRange', 'refreshInterval'])
+        omit(unsavedChanges, keysToOmitFromSessionStorage)
       );
-
-      return Object.keys(omit(unsavedChanges, 'viewMode')).length > 0; // omit view mode because it is always backed up
-    } else {
-      // use `getHasUnsavedChanges` here. It is faster because it returns early when it encounters any difference.
-      return await getHasUnsavedChanges.bind(this)(lastState, currentState);
     }
+
+    handleSearchSessionChange?.(
+      Object.keys(unsavedChanges) as Array<keyof DashboardContainerByValueInput>
+    );
+    return Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0; // omit view mode because it is always backed up
   };
 
   const checkForUnsavedChangesSubject$ = new Subject<null>();
@@ -189,49 +204,4 @@ export async function getUnsavedChanges(
     {} as Partial<DashboardContainerByValueInput>
   );
   return unsavedChanges;
-}
-
-/**
- * Diffs each key of the dashboard by value input to determine if there are any changes.
- * @returns early if any differences are encountered.
- */
-export async function getHasUnsavedChanges(
-  this: DashboardContainer,
-  initialLastSavedInput?: DashboardContainerByValueInput,
-  initialInput?: DashboardContainerByValueInput
-) {
-  const { lastInput, input } = getCurrentAndLastSavedInput(
-    this,
-    initialInput,
-    initialLastSavedInput
-  );
-  const keysToCompare = [
-    ...new Set([
-      ...Object.keys(omit(lastInput, 'viewMode')), // do not compare view mode because it will always be different
-      ...Object.keys(omit(input, 'viewMode')),
-    ]),
-  ] as Array<keyof DashboardContainerByValueInput>;
-  const keyComparePromises = keysToCompare.map(
-    (key) =>
-      new Promise<boolean>((resolve, reject) =>
-        isKeyEqual(key, {
-          container: this,
-
-          currentValue: input[key],
-          currentInput: input,
-
-          lastValue: lastInput[key],
-          lastInput,
-        }).then((hasUnsavedChanges) => {
-          if (hasUnsavedChanges) {
-            resolve(true);
-            return;
-          }
-          reject();
-        })
-      )
-  );
-
-  // If any promise resolves, return false. The catch here is only called if all promises reject which means no keys have changed.
-  return await Promise.any(keyComparePromises).catch(() => true);
 }
