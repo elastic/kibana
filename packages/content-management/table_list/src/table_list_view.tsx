@@ -273,7 +273,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
   }, [searchQueryParser, findItems, searchQuery.text]);
 
-  const openInspector = useOpenInspector(fetchItems);
+  const openInspector = useOpenInspector();
 
   const updateQuery = useCallback((query: Query) => {
     dispatch({
@@ -299,7 +299,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
       });
 
-      openInspector({
+      const close = openInspector({
         item: {
           id: item.id,
           title: item.attributes.title,
@@ -308,9 +308,17 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         },
         entityName,
         ...inspector,
+        onSave:
+          inspector.onSave &&
+          (async (args) => {
+            await inspector.onSave!(args);
+            await fetchItems();
+
+            close();
+          }),
       });
     },
-    [openInspector, inspector, getTagIdsFromReferences, entityName]
+    [getTagIdsFromReferences, openInspector, entityName, inspector, fetchItems]
   );
 
   const tableColumns = useMemo(() => {

@@ -18,32 +18,24 @@ export type OpenInspectorParams = Pick<
   'item' | 'onSave' | 'isReadonly' | 'entityName' | 'checkForDuplicateTitle'
 >;
 
-export function useOpenInspector(postSaveHandler?: () => void | Promise<void>) {
+export function useOpenInspector() {
   const services = useServices();
   const { openFlyout } = services;
   const flyout = useRef<OverlayRef | null>(null);
 
-  const closeFlyout = useCallback(() => {
-    flyout.current?.close();
-  }, []);
-
   return useCallback(
-    ({ onSave: onSaveOriginal, ...args }: OpenInspectorParams) => {
+    ({ ...args }: OpenInspectorParams) => {
       // Validate arguments
-      if (args.isReadonly === false && onSaveOriginal === undefined) {
+      if (args.isReadonly === false && args.onSave === undefined) {
         throw new Error(`A value for [onSave()] must be provided when [isReadonly] is false.`);
       }
 
-      const onSave: OpenInspectorParams['onSave'] =
-        onSaveOriginal &&
-        (async (...onSaveArgs) => {
-          await onSaveOriginal(...onSaveArgs);
-          await postSaveHandler?.();
-          closeFlyout();
-        });
+      const closeFlyout = () => {
+        flyout.current?.close();
+      };
 
       flyout.current = openFlyout(
-        <InspectorLoader {...args} onSave={onSave} onCancel={closeFlyout} services={services} />,
+        <InspectorLoader {...args} onCancel={closeFlyout} services={services} />,
         {
           maxWidth: 600,
           size: 'm',
@@ -51,7 +43,9 @@ export function useOpenInspector(postSaveHandler?: () => void | Promise<void>) {
           hideCloseButton: true,
         }
       );
+
+      return closeFlyout;
     },
-    [closeFlyout, openFlyout, postSaveHandler, services]
+    [openFlyout, services]
   );
 }
