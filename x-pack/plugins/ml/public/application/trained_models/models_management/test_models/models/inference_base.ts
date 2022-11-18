@@ -111,7 +111,7 @@ export abstract class InferenceBase<TInferResponse> {
     );
   }
 
-  private initializePipeline(additionalChanges?: Array<Observable<any>>) {
+  private initializePipeline(additionalChanges?: Array<Observable<unknown>>) {
     const formObservables$: Array<Observable<unknown>> = [
       this.inputField$.asObservable(),
       ...(additionalChanges ? additionalChanges : []),
