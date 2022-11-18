@@ -241,7 +241,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               })
             : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceNotAvailable', {
                 defaultMessage:
-                  'To visualize this field, drag it directly to the layer pane. Drag-and-drop to the workspace is unsupported.',
+                  'To visualize this field, please add it directly to the desired layer. Adding this field to the workspace is not supported based on your current configuration.',
               });
 
           return (
