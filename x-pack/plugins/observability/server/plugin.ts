@@ -32,7 +32,7 @@ import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId } from '../common';
 import { slo } from './saved_objects';
-import { OBSERVABILITY_FEATURE_ID } from './common/constants';
+import { OBSERVABILITY_FEATURE_ID, RULE_REGISTRATION_CONTEXT } from './common/constants';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -155,7 +155,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
       const ruleDataClient = ruleDataService.initializeIndex({
         feature: OBSERVABILITY_FEATURE_ID,
-        registrationContext: 'observability.slo',
+        registrationContext: RULE_REGISTRATION_CONTEXT,
         dataset: Dataset.alerts,
         componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
         componentTemplates: [

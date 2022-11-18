@@ -12,7 +12,6 @@ import type {
 } from '@kbn/core/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import { OBSERVABILITY_FEATURE_ID } from './common/constants';
 
 export type {
   ObservabilityRouteCreateOptions,
@@ -21,8 +20,6 @@ export type {
   ObservabilityServerRouteRepository,
   ObservabilityAPIReturnType,
 } from './routes/types';
-
-export type ObservabilityFeatureId = typeof OBSERVABILITY_FEATURE_ID;
 
 /**
  * @internal
