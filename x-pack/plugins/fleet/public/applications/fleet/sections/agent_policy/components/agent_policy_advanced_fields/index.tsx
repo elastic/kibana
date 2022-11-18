@@ -18,6 +18,7 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiSuperSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -70,6 +71,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
 
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();
+
+  const hasManagedPackagePolicy =
+    'package_policies' in agentPolicy &&
+    agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
 
   return (
     <>
@@ -474,16 +479,28 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               >
                 {(deleteAgentPolicyPrompt) => {
                   return (
-                    <EuiButton
-                      data-test-subj="agentPolicyForm.downloadSource.deleteBtn"
-                      color="danger"
-                      onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
+                    <EuiToolTip
+                      content={
+                        hasManagedPackagePolicy ? (
+                          <FormattedMessage
+                            id="xpack.fleet.policyForm.deletePolicyActionText.disabled"
+                            defaultMessage="Agent policy with managed package policies cannot be deleted."
+                          />
+                        ) : undefined
+                      }
                     >
-                      <FormattedMessage
-                        id="xpack.fleet.policyForm.deletePolicyActionText"
-                        defaultMessage="Delete policy"
-                      />
-                    </EuiButton>
+                      <EuiButton
+                        data-test-subj="agentPolicyForm.downloadSource.deleteBtn"
+                        color="danger"
+                        onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
+                        isDisabled={hasManagedPackagePolicy}
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.policyForm.deletePolicyActionText"
+                          defaultMessage="Delete policy"
+                        />
+                      </EuiButton>
+                    </EuiToolTip>
                   );
                 }}
               </AgentPolicyDeleteProvider>
