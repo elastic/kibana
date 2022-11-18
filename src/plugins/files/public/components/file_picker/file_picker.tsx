@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiFlexGroup,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -67,6 +68,7 @@ type InnerProps = Required<Pick<Props, 'onClose' | 'onDone' | 'onUpload' | 'mult
 
 const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, multiple }) => {
   const { state, kind } = useFilePickerContext();
+  const { euiTheme } = useEuiTheme();
 
   const hasFiles = useBehaviorSubject(state.hasFiles$);
   const hasQuery = useBehaviorSubject(state.hasQuery$);
@@ -86,7 +88,9 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
       maxWidth="75vw"
       onClose={onClose}
       css={css`
-        height: 75vw; // Always be max height for the file picker
+        @media (min-width: ${euiTheme.breakpoint.l}) {
+          height: 75vh; // Always be max height for the file picker
+        }
       `}
     >
       <EuiModalHeader>
