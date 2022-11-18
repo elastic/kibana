@@ -29,7 +29,8 @@
     "kibanaReact",
     "ml",
     "embeddable",
-    "controls"
+    "controls",
+    "presentationUtil"
   ],
   "owner": {
     "name": "Logs and Metrics UI",

@@ -6,7 +6,7 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { debounce } from 'lodash';
@@ -16,6 +16,11 @@ import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefi
 import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_hosts_url_state';
 
 export const useUnifiedSearch = () => {
+  // For now the control filters won't be passed to the URL
+  // that's why they will be set to a separate state variable
+  // used only in buildQuery to update the table results
+
+  const [controlFilters, setControlFilters] = useState<Filter[]>([]);
   const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
   const { metricsDataView } = useMetricsDataViewContext();
   const { services } = useKibana<InfraClientStartDeps>();
@@ -87,8 +92,8 @@ export const useUnifiedSearch = () => {
     if (!metricsDataView) {
       return null;
     }
-    return buildEsQuery(metricsDataView, state.query, state.filters);
-  }, [metricsDataView, state.filters, state.query]);
+    return buildEsQuery(metricsDataView, state.query, [...state.filters, ...controlFilters]);
+  }, [metricsDataView, state.filters, state.query, controlFilters]);
 
   return {
     dateRangeTimestamp: state.dateRangeTimestamp,
@@ -99,6 +104,7 @@ export const useUnifiedSearch = () => {
     unifiedSearchQuery: state.query,
     unifiedSearchDateRange: getTime(),
     unifiedSearchFilters: state.filters,
+    setControlFilters,
   };
 };
 
