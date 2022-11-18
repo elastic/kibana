@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
           aggregatable: true,
           loading: false,
           exampleCount: 11,
-          docCountFormatted: '5000 (100%)',
+          docCountFormatted: '86,274 (100%)',
           viewableInLens: true,
           hasActionMenu: true,
         },
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
-          docCountFormatted: '5000 (100%)',
+          docCountFormatted: '86,274 (100%)',
           statsMaxDecimalPlaces: 3,
           topValuesCount: 11,
           viewableInLens: true,
@@ -153,7 +153,6 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     await ml.dataVisualizerTable.assertSearchPanelExist();
-    await ml.dataVisualizerTable.assertSampleSizeInputExists();
     await ml.dataVisualizerTable.assertFieldTypeInputExists();
     await ml.dataVisualizerTable.assertFieldNameInputExists();
 
@@ -172,8 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
     await ml.dataVisualizerIndexBased.assertTotalFieldsCount(testData.expected.totalFieldsCount);
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/143007
-  describe.skip('data view management', function () {
+  describe('data view management', function () {
     this.tags(['ml']);
     const indexPatternTitle = 'ft_farequote';
     before(async () => {

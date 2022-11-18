@@ -363,6 +363,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         body: schema.object({
           frequency: schema.number(),
           unit: schema.string(),
+          use_connector_schedule: schema.boolean(),
         }),
         params: schema.object({
           indexName: schema.string(),

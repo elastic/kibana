@@ -22,6 +22,7 @@ interface Props {
   scopeId: string;
   value: string[] | undefined;
   onFilterAdded?: () => void;
+  closeCellPopover?: () => void;
 }
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
@@ -40,6 +41,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
   onFilterAdded,
   scopeId,
   value,
+  closeCellPopover,
 }) => {
   const {
     timelines,
@@ -99,6 +101,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
             size: 's',
             showTooltip: false,
             value,
+            onClick: closeCellPopover,
           })}
         </EuiFlexItem>
         <EuiFlexItem>
@@ -111,6 +114,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
             size: 's',
             showTooltip: false,
             value,
+            onClick: closeCellPopover,
           })}
         </EuiFlexItem>
       </StyledFlexGroup>

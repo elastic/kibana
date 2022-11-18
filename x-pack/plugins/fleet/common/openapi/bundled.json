@@ -2127,6 +2127,109 @@
         "operationId": "get-agent-tags"
       }
     },
+    "/agents/{agentId}/request_diagnostics": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Agent - Request Diagnostics",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "request-diagnostics-agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
+    "/agents/bulk_request_diagnostics": {
+      "post": {
+        "summary": "Agent - Bulk Request Diagnostics",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-request-diagnostics",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "batchSize": {
+                    "type": "number"
+                  },
+                  "agents": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "description": "KQL query string, leave empty to action all agents"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "list of agent IDs"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "agents"
+                ]
+              },
+              "example": {
+                "agents": "fleet-agents.policy_id : (\"policy1\" or \"policy2\")"
+              }
+            }
+          }
+        }
+      }
+    },
     "/agent_policies": {
       "get": {
         "summary": "Agent policies - List",
@@ -3991,6 +4094,242 @@
           }
         ]
       }
+    },
+    "/proxies": {
+      "get": {
+        "summary": "Fleet Proxies - List",
+        "description": "Return a list of Proxies",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/proxies"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-fleet-proxies"
+      },
+      "post": {
+        "summary": "Fleet Proxies - Create",
+        "description": "Create a new Fleet Server Host",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/proxies"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "proxy_headers": {
+                    "type": "object"
+                  },
+                  "certificate_authorities": {
+                    "type": "string"
+                  },
+                  "certificate": {
+                    "type": "string"
+                  },
+                  "certificate_key": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "url"
+                ]
+              }
+            }
+          }
+        },
+        "operationId": "post-fleet-proxies"
+      }
+    },
+    "/proxies/{itemId}": {
+      "get": {
+        "summary": "Fleet Proxies - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/proxies"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-one-fleet-proxies"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "itemId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "delete": {
+        "summary": "Fleet Proxies - Delete",
+        "operationId": "delete-fleet-proxies",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
+      "put": {
+        "summary": "Fleet Proxies - Update",
+        "operationId": "update-fleet-proxies",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "proxy_headers": {
+                    "type": "object"
+                  },
+                  "certificate_authorities": {
+                    "type": "string"
+                  },
+                  "certificate": {
+                    "type": "string"
+                  },
+                  "certificate_key": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/proxies"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -4263,6 +4602,7 @@
             "type": "boolean"
           },
           "fleet_server_hosts": {
+            "deprecated": true,
             "type": "array",
             "items": {
               "type": "string"
@@ -5805,6 +6145,37 @@
           "is_default",
           "is_preconfigured",
           "host_urls"
+        ]
+      },
+      "proxies": {
+        "title": "Fleet Proxy",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "proxy_headers": {
+            "type": "object"
+          },
+          "certificate_authorities": {
+            "type": "string"
+          },
+          "certificate": {
+            "type": "string"
+          },
+          "certificate_key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url"
         ]
       }
     }
