@@ -267,7 +267,10 @@ export class ExecutionHandler<
           continue;
         }
 
-        if (action.group === actionGroup && this.isAlertExecutable({ alertId, alert, recovered })) {
+        if (
+          (action.group === actionGroup || action.frequency?.summary) &&
+          this.isAlertExecutable({ alertId, alert, action, recovered })
+        ) {
           const state = recovered ? {} : alert.getScheduledActionOptions()?.state!;
 
           executables.push({
@@ -369,18 +372,18 @@ export class ExecutionHandler<
   private isAlertExecutable({
     alertId,
     alert,
+    action,
     recovered,
   }: {
     alertId: string;
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+    action: RuleAction;
     recovered: boolean;
   }) {
-    const {
-      rule: { throttle, notifyWhen },
-      ruleLabel,
-      logger,
-      mutedAlertIdsSet,
-    } = this;
+    const { rule, ruleLabel, logger, mutedAlertIdsSet } = this;
+
+    const notifyWhen = action.frequency?.notifyWhen || rule.notifyWhen;
+    const throttle = action.frequency?.throttle || rule.throttle;
 
     const muted = mutedAlertIdsSet!.has(alertId);
     const throttled = alert.isThrottled(throttle ?? null);
