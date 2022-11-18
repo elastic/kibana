@@ -162,7 +162,7 @@ export function Histogram({
   );
 }
 
-const getLensProps = ({
+export const getLensProps = ({
   timeRange,
   attributes,
   request,
