@@ -15,7 +15,7 @@ import { RuleActionsOverflow } from '.';
 import { mockRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { TestProviders } from '../../../../common/mock';
 
-const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
+const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(false);
 
 jest.mock(
   '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action'
