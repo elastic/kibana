@@ -510,7 +510,7 @@ class BrowserService extends FtrService {
    * @param {string} key
    * @return {Promise<string>}
    */
-  public async getLocalStorageItem(key: string): Promise<string> {
+  public async getLocalStorageItem(key: string): Promise<string | null> {
     return await this.driver.executeScript<string>(`return window.localStorage.getItem("${key}");`);
   }
 
