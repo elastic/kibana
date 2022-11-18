@@ -481,6 +481,46 @@ export type NewTermsPatchParams = t.TypeOf<typeof NewTermsPatchParams>;
 export const NewTermsPatchParams = newTermsSchema.patch;
 
 // -------------------------------------------------------------------------------------------------
+// Threat Marker rule schema
+
+const threatMarkerSchema = buildRuleSchemas({
+  required: {
+    type: t.literal('threat_marker'),
+  },
+  optional: {
+    index: IndexPatternArray,
+    threat_index: IndexPatternArray,
+    data_view_id: DataViewId,
+    filters: RuleFilterArray,
+  },
+  defaultable: {},
+});
+
+export type ThreatMarkerRule = t.TypeOf<typeof ThreatMarkerRule>;
+export const ThreatMarkerRule = t.intersection([SharedResponseProps, threatMarkerSchema.response]);
+
+export type ThreatMarkerRuleCreateProps = t.TypeOf<typeof ThreatMarkerRuleCreateProps>;
+export const ThreatMarkerRuleCreateProps = t.intersection([
+  SharedCreateProps,
+  threatMarkerSchema.create,
+]);
+
+export type ThreatMarkerRuleUpdateProps = t.TypeOf<typeof ThreatMarkerRuleUpdateProps>;
+export const ThreatMarkerRuleUpdateProps = t.intersection([
+  SharedUpdateProps,
+  threatMarkerSchema.create,
+]);
+
+export type ThreatMarkerRulePatchProps = t.TypeOf<typeof ThreatMarkerRulePatchProps>;
+export const ThreatMarkerRulePatchProps = t.intersection([
+  SharedPatchProps,
+  threatMarkerSchema.patch,
+]);
+
+export type ThreatMarkerPatchParams = t.TypeOf<typeof ThreatMarkerPatchParams>;
+export const ThreatMarkerPatchParams = threatMarkerSchema.patch;
+
+// -------------------------------------------------------------------------------------------------
 // Combined type specific schemas
 
 export type TypeSpecificCreateProps = t.TypeOf<typeof TypeSpecificCreateProps>;
@@ -492,6 +532,7 @@ export const TypeSpecificCreateProps = t.union([
   thresholdSchema.create,
   machineLearningSchema.create,
   newTermsSchema.create,
+  threatMarkerSchema.create,
 ]);
 
 export type TypeSpecificPatchProps = t.TypeOf<typeof TypeSpecificPatchProps>;
@@ -503,6 +544,7 @@ export const TypeSpecificPatchProps = t.union([
   thresholdSchema.patch,
   machineLearningSchema.patch,
   newTermsSchema.patch,
+  threatMarkerSchema.patch,
 ]);
 
 export type TypeSpecificResponse = t.TypeOf<typeof TypeSpecificResponse>;
@@ -514,6 +556,7 @@ export const TypeSpecificResponse = t.union([
   thresholdSchema.response,
   machineLearningSchema.response,
   newTermsSchema.response,
+  threatMarkerSchema.response,
 ]);
 
 // -------------------------------------------------------------------------------------------------

@@ -12,6 +12,7 @@ import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indi
 import { DateFormatter } from '../../../../components/date_formatter';
 import { unwrapValue } from '../../utils';
 import { TLPBadge } from '../tlp_badge';
+import { DiscoverButton } from '../discover_matches_button';
 
 export interface IndicatorFieldValueProps {
   /**
@@ -31,6 +32,13 @@ export interface IndicatorFieldValueProps {
 export const IndicatorFieldValue: VFC<IndicatorFieldValueProps> = ({ indicator, field }) => {
   const fieldType = useFieldTypes()[field];
   const value = unwrapValue(indicator, field as RawIndicatorFieldId);
+
+  if (field === RawIndicatorFieldId.DetectionMatches) {
+    if (!value) {
+      return <>0</>;
+    }
+    return <DiscoverButton label={`~${value}`} value={Number(value)} id={indicator._id} />;
+  }
 
   if (field === RawIndicatorFieldId.MarkingTLP) {
     return <TLPBadge value={value} />;

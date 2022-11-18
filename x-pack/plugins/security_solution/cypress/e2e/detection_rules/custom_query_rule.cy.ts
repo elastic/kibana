@@ -358,6 +358,7 @@ describe('Custom query rules', () => {
         deleteAlertsAndRules();
         deleteConnectors();
         createCustomRuleEnabled(getExistingRule(), 'rule1');
+        deleteConnectors();
       });
       beforeEach(() => {
         visit(DETECTIONS_RULE_MANAGEMENT_URL);

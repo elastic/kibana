@@ -24,4 +24,18 @@ export const createRuntimeMappings = () => ({
       source: threatIndicatorNamesOriginScript(),
     },
   },
+  // Default value can only be achieved with a runtime field, it seems
+  [RawIndicatorFieldId.DetectionMatches]: {
+    type: 'long',
+    script: {
+      source: `
+        def threat = params._source['threat'];
+
+        if (threat!=null&&threat.detection!=null) {
+          emit(threat.detection.matches);
+        } else {
+          emit(0);
+        }`,
+    },
+  },
 });

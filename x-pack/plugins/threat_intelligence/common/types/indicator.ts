@@ -8,6 +8,9 @@
 /**
  * Enum of indicator fields supported by the Threat Intelligence plugin.
  */
+/**
+ * Enum of indicator fields supported by the Threat Intelligence plugin.
+ */
 export enum RawIndicatorFieldId {
   Type = 'threat.indicator.type',
   Confidence = 'threat.indicator.confidence',
@@ -48,6 +51,10 @@ export enum RawIndicatorFieldId {
   Name = 'threat.indicator.name',
   Description = 'threat.indicator.description',
   NameOrigin = 'threat.indicator.name_origin',
+  DetectionMatches = 'threat.detection.matches',
+  DetectionLastScan = 'threat.detection.last_scan',
+  DetectionNextScan = 'threat.detection.next_scan',
+  DetectionScans = 'threat.detection.scans',
 }
 
 /**

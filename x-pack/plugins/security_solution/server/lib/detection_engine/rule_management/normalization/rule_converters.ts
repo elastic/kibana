@@ -36,6 +36,7 @@ import {
   SavedQueryPatchParams,
   ThreatMatchPatchParams,
   ThresholdPatchParams,
+  ThreatMarkerPatchParams,
 } from '../../../../../common/detection_engine/rule_schema';
 
 import {
@@ -73,6 +74,8 @@ import type {
   InternalRuleUpdate,
   NewTermsRuleParams,
   NewTermsSpecificRuleParams,
+  ThreatMarkerRuleParams,
+  ThreatMarkerSpecificRuleParams,
 } from '../../rule_schema';
 import {
   transformActions,
@@ -181,6 +184,15 @@ export const typeSpecificSnakeToCamel = (
         index: params.index,
         filters: params.filters,
         language: params.language ?? 'kuery',
+        dataViewId: params.data_view_id,
+      };
+    }
+    case 'threat_marker': {
+      return {
+        type: params.type,
+        index: params.index,
+        threatIndex: params.threat_index,
+        filters: params.filters,
         dataViewId: params.data_view_id,
       };
     }
@@ -315,6 +327,19 @@ const patchNewTermsParams = (
   };
 };
 
+const patchThreatMarkerParams = (
+  params: ThreatMarkerPatchParams,
+  existingRule: ThreatMarkerRuleParams
+): ThreatMarkerSpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    index: params.index ?? existingRule.index,
+    threatIndex: params.threat_index ?? existingRule.threatIndex,
+    dataViewId: params.data_view_id ?? existingRule.dataViewId,
+    filters: params.filters ?? existingRule.filters,
+  };
+};
+
 const parseValidationError = (error: string | null): BadRequestError => {
   if (error != null) {
     return new BadRequestError(error);
@@ -381,6 +406,13 @@ export const patchTypeSpecificSnakeToCamel = (
         throw parseValidationError(error);
       }
       return patchNewTermsParams(validated, existingRule);
+    }
+    case 'threat_marker': {
+      const [validated, error] = validateNonExact(params, ThreatMarkerPatchParams);
+      if (validated == null) {
+        throw parseValidationError(error);
+      }
+      return patchThreatMarkerParams(validated, existingRule);
     }
     default: {
       return assertUnreachable(existingRule);
@@ -620,6 +652,15 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): TypeSp
         index: params.index,
         filters: params.filters,
         language: params.language,
+        data_view_id: params.dataViewId,
+      };
+    }
+    case 'threat_marker': {
+      return {
+        type: params.type,
+        index: params.index,
+        threat_index: params.threatIndex,
+        filters: params.filters,
         data_view_id: params.dataViewId,
       };
     }

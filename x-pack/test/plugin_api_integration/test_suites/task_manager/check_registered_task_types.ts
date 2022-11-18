@@ -95,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:siem.notifications',
         'alerting:siem.queryRule',
         'alerting:siem.savedQueryRule',
+        'alerting:siem.threatMarkerRule',
         'alerting:siem.thresholdRule',
         'alerting:transform_health',
         'alerting:xpack.ml.anomaly_detection_alert',

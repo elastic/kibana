@@ -130,6 +130,9 @@ export const mockedServices = {
         return <>{children}</>;
       },
   },
+  discover: {
+    locator: { getUrl: jest.fn() },
+  },
 };
 
 export const TestProvidersComponent: FC = ({ children }) => (

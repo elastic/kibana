@@ -19,6 +19,7 @@ export const DEFAULT_COLUMNS: EuiDataGridColumn[] = [
   RawIndicatorFieldId.Feed,
   RawIndicatorFieldId.FirstSeen,
   RawIndicatorFieldId.LastSeen,
+  RawIndicatorFieldId.DetectionMatches,
 ].map((field) => ({
   id: field,
   displayAsText: translateFieldLabel(field),

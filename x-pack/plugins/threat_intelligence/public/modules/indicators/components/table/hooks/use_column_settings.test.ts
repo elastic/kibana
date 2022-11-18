@@ -46,6 +46,10 @@ describe('useColumnSettings()', () => {
               "displayAsText": "Last seen",
               "id": "threat.indicator.last_seen",
             },
+            Object {
+              "displayAsText": "Matches",
+              "id": "threat.detection.matches",
+            },
           ]
         `);
 
@@ -57,6 +61,7 @@ describe('useColumnSettings()', () => {
             "threat.feed.name",
             "threat.indicator.first_seen",
             "threat.indicator.last_seen",
+            "threat.detection.matches",
           ]
         `);
 
@@ -159,6 +164,7 @@ describe('useColumnSettings()', () => {
           "threat.feed.name",
           "threat.indicator.first_seen",
           "threat.indicator.last_seen",
+          "threat.detection.matches",
         ]
       `);
       expect(result.current.columns).toMatchInlineSnapshot(`
@@ -187,6 +193,10 @@ describe('useColumnSettings()', () => {
             "displayAsText": "Last seen",
             "id": "threat.indicator.last_seen",
           },
+          Object {
+            "displayAsText": "Matches",
+            "id": "threat.detection.matches",
+          },
         ]
       `);
 
@@ -202,6 +212,7 @@ describe('useColumnSettings()', () => {
           "threat.feed.name",
           "threat.indicator.first_seen",
           "threat.indicator.last_seen",
+          "threat.detection.matches",
           "justATestColumn",
         ]
       `);
@@ -232,6 +243,10 @@ describe('useColumnSettings()', () => {
             "id": "threat.indicator.last_seen",
           },
           Object {
+            "displayAsText": "Matches",
+            "id": "threat.detection.matches",
+          },
+          Object {
             "displayAsText": "justATestColumn",
             "id": "justATestColumn",
           },
@@ -250,6 +265,7 @@ describe('useColumnSettings()', () => {
           "threat.feed.name",
           "threat.indicator.first_seen",
           "threat.indicator.last_seen",
+          "threat.detection.matches",
         ]
       `);
       expect(result.current.columns).toMatchInlineSnapshot(`
@@ -277,6 +293,10 @@ describe('useColumnSettings()', () => {
           Object {
             "displayAsText": "Last seen",
             "id": "threat.indicator.last_seen",
+          },
+          Object {
+            "displayAsText": "Matches",
+            "id": "threat.detection.matches",
           },
         ]
       `);

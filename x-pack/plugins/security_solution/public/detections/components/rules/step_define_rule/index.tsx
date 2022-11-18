@@ -69,6 +69,7 @@ import {
   isThreatMatchRule,
   isThresholdRule,
   isQueryRule,
+  isThreatMarkerRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
@@ -411,11 +412,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     // more details here: https://github.com/elastic/kibana/issues/144322#issuecomment-1321838136
     // wrapping in setTimeout is a workaround until solution within forms-lib can be found
     const isValid = await new Promise<boolean>((resolve) => {
-      setTimeout(async () => {
+      const waitForStableValidationResult = async () => {
         const valid = await validate();
-        resolve(valid);
-      }, 0);
+        if (typeof valid !== 'undefined') {
+          return resolve(valid);
+        }
+        setTimeout(waitForStableValidationResult, 0);
+      };
+
+      waitForStableValidationResult();
     });
+
     return {
       isValid,
       data: {
@@ -770,7 +777,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               )}
             </>
           </RuleTypeEuiFormRow>
-
           {isQueryRule(ruleType) && (
             <>
               <EuiSpacer size="s" />
@@ -795,7 +801,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </RuleTypeEuiFormRow>
             </>
           )}
-
           <RuleTypeEuiFormRow $isVisible={isQueryRule(ruleType)}>
             <UseField
               path="groupByFields"
@@ -808,7 +813,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               }}
             />
           </RuleTypeEuiFormRow>
-
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField
@@ -854,7 +858,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
           <RuleTypeEuiFormRow
-            $isVisible={isThreatMatchRule(ruleType)}
+            $isVisible={isThreatMatchRule(ruleType) || isThreatMarkerRule(ruleType)}
             data-test-subj="threatMatchInput"
             fullWidth
           >

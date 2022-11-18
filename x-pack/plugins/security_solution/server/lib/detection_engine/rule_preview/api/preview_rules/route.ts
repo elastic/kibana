@@ -54,6 +54,7 @@ import {
   createQueryAlertType,
   createThresholdAlertType,
   createNewTermsAlertType,
+  createThreatMarkerAlertType,
 } from '../../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../../rule_types/create_security_rule_type_wrapper';
 import { assertUnreachable } from '../../../../../../common/utility_types';
@@ -425,6 +426,26 @@ export const previewRulesRoute = async (
               newTermsAlertType.executor,
               newTermsAlertType.id,
               newTermsAlertType.name,
+              previewRuleParams,
+              () => true,
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
+            );
+            break;
+          case 'threat_marker':
+            const threatMarkerAlertType = previewRuleTypeWrapper(
+              createThreatMarkerAlertType(ruleOptions)
+            );
+            await runExecutors(
+              threatMarkerAlertType.executor,
+              threatMarkerAlertType.id,
+              threatMarkerAlertType.name,
               previewRuleParams,
               () => true,
               {

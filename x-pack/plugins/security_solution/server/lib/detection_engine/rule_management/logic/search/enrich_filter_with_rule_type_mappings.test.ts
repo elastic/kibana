@@ -12,6 +12,7 @@ import {
   NEW_TERMS_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
+  THREAT_MARKER_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
@@ -23,7 +24,8 @@ const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${SAVED_QUERY_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${INDICATOR_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${THRESHOLD_RULE_TYPE_ID}
- OR alert.attributes.alertTypeId: ${NEW_TERMS_RULE_TYPE_ID})`.replace(/[\n\r]/g, '');
+ OR alert.attributes.alertTypeId: ${NEW_TERMS_RULE_TYPE_ID}
+ OR alert.attributes.alertTypeId: ${THREAT_MARKER_RULE_TYPE_ID})`.replace(/[\n\r]/g, '');
 
 describe('enrichFilterWithRuleTypeMapping', () => {
   test('it returns a full filter with an AND if sent down', () => {

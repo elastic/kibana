@@ -36,14 +36,16 @@ export const cellRendererFactory = (from: number) => {
     const indicator: Indicator | undefined = indicators[rowIndex - from];
 
     useEffect(() => {
-      if (expanded && indicator && expanded._id === indicator._id) {
-        setCellProps({
+      if (!indicator || !expanded) {
+        return setCellProps({ style: undefined });
+      }
+
+      if (expanded && expanded._id === indicator._id) {
+        return setCellProps({
           style: {
             backgroundColor: darkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
           },
         });
-      } else {
-        setCellProps({ style: undefined });
       }
     }, [darkMode, expanded, indicator, setCellProps]);
 

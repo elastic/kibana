@@ -23,6 +23,7 @@ import { DataProvider } from '@kbn/timelines-plugin/common';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public/types';
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: Array<FieldSpec & DataViewField>;
@@ -54,6 +55,7 @@ export type Services = {
   timelines: TimelinesUIStart;
   securityLayout: any;
   inspector: InspectorPluginStart;
+  discover: DiscoverStart;
 } & CoreStart;
 
 export interface LicenseAware {

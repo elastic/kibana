@@ -140,3 +140,10 @@ export const ALERT_SUPPRESSION_TECHNICAL_PREVIEW = i18n.translate(
     defaultMessage: 'Technical Preview',
   }
 );
+
+export const THREAT_MARKER_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.threatMarkerRuleTypeDescription',
+  {
+    defaultMessage: 'Threat Marker',
+  }
+);

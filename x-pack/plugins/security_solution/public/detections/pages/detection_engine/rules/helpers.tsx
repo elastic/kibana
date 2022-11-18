@@ -411,6 +411,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
       return thresholdRuleParams;
     case 'new_terms':
     case 'threat_match':
+    case 'threat_marker':
     case 'query':
     case 'saved_query':
     case 'eql':

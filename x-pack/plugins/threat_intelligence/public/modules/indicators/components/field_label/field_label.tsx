@@ -65,6 +65,11 @@ export const translateFieldLabel = (field: string) => {
         defaultMessage: 'TLP Marking',
       });
     }
+    case RawIndicatorFieldId.DetectionMatches: {
+      return i18n.translate('xpack.threatIntelligence.field.threat.indicator.matches', {
+        defaultMessage: 'Matches',
+      });
+    }
     default:
       return field;
   }
