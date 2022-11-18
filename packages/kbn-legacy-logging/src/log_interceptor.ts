@@ -61,8 +61,14 @@ function downgradeIfErrorType(errorType: string, event: AnyEvent) {
 }
 
 // generic method to convert the given event into the log level provided
-function downgradeIfErrorMessage(level: string, event: AnyEvent) {
+function downgradeIfErrorMessage(match: RegExp | string, level: string, event: AnyEvent) {
+  const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
   const errorMessage = get(event, 'error.message');
+  const matchesErrorMessage = isClientError && doesMessageMatch(errorMessage, match);
+  if (!matchesErrorMessage) {
+    return null;
+  }
+
   return {
     event: 'log',
     pid: event.pid,
@@ -138,14 +144,7 @@ export class LogInterceptor extends Stream.Transform {
    *  @param {object} - log event
    */
   downgradeIfHTTPWhenHTTPS(event: AnyEvent) {
-    const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
-    const errorMessage = get(event, 'error.message');
-    const matchesErrorMessage =
-      isClientError && doesMessageMatch(errorMessage, OPENSSL_GET_RECORD_REGEX);
-    if (!matchesErrorMessage) {
-      return null;
-    }
-    return downgradeIfErrorMessage('debug', event);
+    return downgradeIfErrorMessage(OPENSSL_GET_RECORD_REGEX, 'debug', event);
   }
   /**
    * When Kibana has HTTPS enabled and Kibana doesn't trust the certificate,
@@ -159,14 +158,7 @@ export class LogInterceptor extends Stream.Transform {
    *  @param {object} - log event
    */
   downgradeIfCertUntrusted(event: AnyEvent) {
-    const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
-    const errorMessage = get(event, 'error.message');
-    const matchesErrorMessage =
-      isClientError && doesMessageMatch(errorMessage, OPENSSL_READ_RECORD_REGEX);
-    if (!matchesErrorMessage) {
-      return null;
-    }
-    return downgradeIfErrorMessage('info', event);
+    return downgradeIfErrorMessage(OPENSSL_READ_RECORD_REGEX, 'info', event);
   }
 
   _transform(event: AnyEvent, enc: string, next: Stream.TransformCallback) {
