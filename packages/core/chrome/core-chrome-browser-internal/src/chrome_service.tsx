@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, setEuiDevProviderWarning } from '@elastic/eui';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -103,6 +103,8 @@ export class ChromeService {
     notifications,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
+
+    setEuiDevProviderWarning('error');
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
