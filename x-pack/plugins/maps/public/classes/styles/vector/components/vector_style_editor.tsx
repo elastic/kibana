@@ -306,8 +306,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         <EuiSpacer size="m" />
 
         <LabelPositionEditor
-          disabled={!hasLabel}
-          disabledBy={VECTOR_STYLES.LABEL_TEXT}
+          hasLabel={hasLabel}
           handlePropertyChange={this.props.handlePropertyChange}
           styleProperty={
             this.props.styleProperties[VECTOR_STYLES.LABEL_POSITION] as LabelPositionProperty

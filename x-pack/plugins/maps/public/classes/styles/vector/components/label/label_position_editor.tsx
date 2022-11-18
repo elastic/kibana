@@ -36,8 +36,7 @@ const options = [
 ];
 
 interface Props {
-  disabled: boolean;
-  disabledBy: VECTOR_STYLES;
+  hasLabel: boolean;
   handlePropertyChange: (
     propertyName: VECTOR_STYLES,
     stylePropertyDescriptor: LabelPositionStylePropertyDescriptor
@@ -46,8 +45,7 @@ interface Props {
 }
 
 export function LabelPositionEditor({
-  disabled,
-  disabledBy,
+  hasLabel,
   handlePropertyChange,
   styleProperty,
 }: Props) {
@@ -57,6 +55,8 @@ export function LabelPositionEditor({
     });
   }
 
+  const disabled = !hasLabel || styleProperty.isDisabled();
+
   const form = (
     <EuiFormRow
       label={getVectorStyleLabel(VECTOR_STYLES.LABEL_POSITION)}
@@ -64,7 +64,7 @@ export function LabelPositionEditor({
       <EuiSelect
         disabled={disabled}
         options={options}
-        value={styleProperty.getOptions().position}
+        value={disabled ? LABEL_POSITIONS.CENTER : styleProperty.getOptions().position}
         onChange={onChange}
         aria-label={i18n.translate('xpack.maps.styles.labelPositionSelect.ariaLabel', {
           defaultMessage: 'Select label position',
@@ -74,14 +74,12 @@ export function LabelPositionEditor({
     </EuiFormRow>
   );
 
-  const isIconSizeSupported = styleProperty.isIconSizeSupported();
-
-  return isIconSizeSupported && !disabled ? (
+  return !disabled ? (
     form
   ) : (
     <EuiToolTip
       anchorClassName="mapStyleFormDisabledTooltip"
-      content={disabled ? getDisabledByMessage(disabledBy) : styleProperty.getIconSizeNotSupportedMsg()}
+      content={!hasLabel ? getDisabledByMessage(VECTOR_STYLES.LABEL_TEXT) : styleProperty.getDisabledReason()}
     >
       {form}
     </EuiToolTip>

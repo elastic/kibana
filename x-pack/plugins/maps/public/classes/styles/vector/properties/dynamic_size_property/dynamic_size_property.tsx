@@ -14,6 +14,7 @@ import { makeMbClampedNumberExpression } from '../../style_util';
 import {
   FieldFormatter,
   HALF_MAKI_ICON_SIZE,
+  MB_LOOKUP_FUNCTION,
   VECTOR_STYLES,
 } from '../../../../../../common/constants';
 import type { SizeDynamicOptions } from '../../../../../../common/descriptor_types';
@@ -76,7 +77,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   /*
    * Returns interpolation expression linearly translating domain values [minValue, maxValue] to display range [minSize, maxSize]
    */
-  getMbSizeExpression() {
+  getMbSizeExpression(forceFeatureProperties?: boolean) {
     const rangeFieldMeta = this.getRangeFieldMeta();
     if (!this.isSizeDynamicConfigComplete() || !rangeFieldMeta) {
       // return min of size to avoid flashing
@@ -126,7 +127,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     const stops = rangeFieldMeta.min === rangeFieldMeta.max ? getStopsWithoutRange() : getStops();
 
     const valueExpression = makeMbClampedNumberExpression({
-      lookupFunction: this.getMbLookupFunction(),
+      lookupFunction: forceFeatureProperties ? MB_LOOKUP_FUNCTION.GET : this.getMbLookupFunction(),
       maxValue: rangeFieldMeta.max,
       minValue: rangeFieldMeta.min,
       fieldName: this.getMbFieldName(),

@@ -15,6 +15,7 @@ import { DEFAULT_ICON_SIZE, DEFAULT_LABEL_SIZE } from '../vector_style_defaults'
 import { StaticSizeProperty } from './static_size_property';
 import { DynamicSizeProperty } from './dynamic_size_property';
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
+import { FIXED_LABEL, BY_VALUE_LABEL } from '../components/style_prop_editor.tsx';
 
 export class LabelPositionProperty extends AbstractStyleProperty<
   LabelPositionStylePropertyDescriptor['options']
@@ -33,12 +34,15 @@ export class LabelPositionProperty extends AbstractStyleProperty<
     this._labelSizeProperty = labelSizeProperty;
   }
 
-  // Returns true when icon size property can be used to set label position.
-  // Returns false when icon size property can not be used to set label position.
-  isIconSizeSupported() {
+  isDisabled() {
+    if (this._labelSizeProperty.isDynamic()) {
+      // dynamic label size not supported
+      return true;
+    }
+
     if (!this._iconSizeProperty.isDynamic() || !this._iconSizeProperty.isComplete()) {
       // icon size is static so there are no concerns with using layout propery and feature-state
-      return true;
+      return false;
     }
 
     // Label position can not be used in concunction with dynamic icon size from joins.
@@ -47,27 +51,36 @@ export class LabelPositionProperty extends AbstractStyleProperty<
     //   Label position sets a layout property to the interpolate expression from dynamic icon size property
     //   This means that style data for dynamic icon size property can only be retrieved from feature.properties
     //
-    return !this._isIconSizeFromJoin();
+    return this._isIconSizeFromJoin();
   }
 
-  getIconSizeNotSupportedMsg() {
-    if (!this._iconSizeProperty.isDynamic() || !this._iconSizeProperty.isComplete()) {
-      return '';
+  getDisabledReason() {
+    if (this._labelSizeProperty.isDynamic()) {
+      return i18n.translate('xpack.maps.labelPosition.dynamicLabelSizeNotSupported', {
+        defaultMessage: `{labelPositionPropertyLabel} is not supported with '{byValueLabel}' {labelSizePropertyLabel}. Set {labelSizePropertyLabel} to '{fixedLabel}' to enable.`,
+        values: {
+          byValueLabel: BY_VALUE_LABEL.toLowerCase(),
+          fixedLabel: FIXED_LABEL.toLowerCase(),
+          labelSizePropertyLabel: getVectorStyleLabel(VECTOR_STYLES.LABEL_SIZE).toLowerCase(),
+          labelPositionPropertyLabel: getVectorStyleLabel(VECTOR_STYLES.LABEL_POSITION),
+        }
+      });
     }
 
     return this._isIconSizeFromJoin()
       ? i18n.translate('xpack.maps.labelPosition.iconSizeJoinFieldNotSupportMsg', {
-        defaultMessage: '{iconSizePropertyLabel} uses join field {iconSizeFieldName}. {iconSizePropertyLabel} join fields are not supported.',
+        defaultMessage: '{labelPositionPropertyLabel} is not supported with {iconSizePropertyLabel} join field {iconSizeFieldName}. Set {iconSizePropertyLabel} to source field to enable.',
         values: {
           iconSizePropertyLabel: getVectorStyleLabel(VECTOR_STYLES.ICON_SIZE),
           iconSizeFieldName: (this._iconSizeProperty as DynamicSizeProperty).getFieldName(),
+          labelPositionPropertyLabel: getVectorStyleLabel(VECTOR_STYLES.LABEL_POSITION),
         }
       })
       : '';
   }
 
   syncLabelPositionWithMb(mbLayerId: string, mbMap: MbMap) {
-    if (this._options.position === LABEL_POSITIONS.CENTER) {
+    if (this._options.position === LABEL_POSITIONS.CENTER || this.isDisabled()) {
       mbMap.setLayoutProperty(mbLayerId, 'text-offset', [0, 0]);
       mbMap.setLayoutProperty(mbLayerId, 'text-anchor', 'center');
       return;
@@ -89,7 +102,7 @@ export class LabelPositionProperty extends AbstractStyleProperty<
       const dynamicIconSizeOptions = (this._iconSizeProperty as DynamicSizeProperty).getOptions();
       const interpolateExpression = (
         this._iconSizeProperty as DynamicSizeProperty
-      ).getMbSizeExpression();
+      ).getMbSizeExpression(true);
       interpolateExpression[4] = [
         'literal',
         this._getTextOffset(dynamicIconSizeOptions.minSize, labelSize),
@@ -117,15 +130,6 @@ export class LabelPositionProperty extends AbstractStyleProperty<
   }
 
   _getLabelSize() {
-    if (
-      this._labelSizeProperty.isDynamic() &&
-      this._labelSizeProperty.isComplete() &&
-      (this._labelSizeProperty as DynamicSizeProperty).isSizeDynamicConfigComplete()
-    ) {
-      const dynamicSizeOptions = (this._labelSizeProperty as DynamicSizeProperty).getOptions();
-      return (dynamicSizeOptions.maxSize - dynamicSizeOptions.minSize) / 2;
-    }
-
     return !this._labelSizeProperty.isDynamic()
       ? (this._labelSizeProperty as StaticSizeProperty).getOptions().size
       : DEFAULT_LABEL_SIZE;
