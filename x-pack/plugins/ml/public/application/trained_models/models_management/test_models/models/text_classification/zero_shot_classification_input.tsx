@@ -54,7 +54,7 @@ const ClassNameInput: FC<{
         helpText={i18n.translate(
           'xpack.ml.trainedModels.testModelsFlyout.textClassification.multiLabelHelpText',
           {
-            defaultMessage: 'Is there a possibility of more than one correct label',
+            defaultMessage: 'Enable the input text to match more than one label.',
           }
         )}
       >
