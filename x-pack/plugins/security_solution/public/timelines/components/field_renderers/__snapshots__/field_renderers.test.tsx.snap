@@ -15,10 +15,10 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class=""
@@ -53,12 +53,12 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       /
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class=""
@@ -231,10 +231,10 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class=""
@@ -270,7 +270,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
     </div>
     , 
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class=""
