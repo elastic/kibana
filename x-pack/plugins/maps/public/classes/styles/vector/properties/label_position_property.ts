@@ -102,15 +102,17 @@ export class LabelPositionProperty extends AbstractStyleProperty<
       const dynamicIconSizeOptions = (this._iconSizeProperty as DynamicSizeProperty).getOptions();
       const interpolateExpression = (
         this._iconSizeProperty as DynamicSizeProperty
-      ).getMbSizeExpression(true);
-      interpolateExpression[4] = [
-        'literal',
-        this._getTextOffset(dynamicIconSizeOptions.minSize, labelSize),
-      ];
-      interpolateExpression[6] = [
-        'literal',
-        this._getTextOffset(dynamicIconSizeOptions.maxSize, labelSize),
-      ];
+      ).getMbSizeExpression({
+        forceFeatureProperties: true,
+        maxStopOutput: [
+          'literal',
+          this._getTextOffset(dynamicIconSizeOptions.maxSize, labelSize),
+        ],
+        minStopOutput: [
+          'literal',
+          this._getTextOffset(dynamicIconSizeOptions.minSize, labelSize),
+        ]
+      });
       mbMap.setLayoutProperty(mbLayerId, 'text-offset', interpolateExpression);
       return;
     }
