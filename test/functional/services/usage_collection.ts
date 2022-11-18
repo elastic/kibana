@@ -28,9 +28,7 @@ export class UsageCollectionService extends FtrService {
       if (rawValue) {
         const { uiCounter } = JSON.parse(rawValue) ?? {};
 
-        if (Object.keys(uiCounter)) {
-          return Object.values(uiCounter);
-        }
+        return Object.values(uiCounter);
       }
     } catch (e) {
       // nothing to be here
