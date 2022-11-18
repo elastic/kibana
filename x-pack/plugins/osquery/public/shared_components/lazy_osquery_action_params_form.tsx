@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import type {
   ArrayItem,
   ValidationError,
@@ -32,18 +32,34 @@ export const getLazyOsqueryResponseActionTypeForm =
   () => (props: LazyOsqueryActionParamsFormProps) => {
     const { item, formRef } = props;
 
+    // Not sure why, but useMountedState or useIsMounted did not work - returning false all the time
+    const [isMounted, setMounted] = useState(false);
+    useEffect(() => {
+      setMounted(true);
+    }, []);
+
+    if (isMounted) {
+      return (
+        <>
+          <UseField
+            path={`${item.path}.params`}
+            component={GhostFormField}
+            readDefaultValueOnForm={!item.isNew}
+          />
+          <Suspense fallback={null}>
+            <QueryClientProvider client={queryClient}>
+              <OsqueryResponseActionParamsForm item={item} ref={formRef} />
+            </QueryClientProvider>
+          </Suspense>
+        </>
+      );
+    }
+
     return (
-      <>
-        <UseField
-          path={`${item.path}.params`}
-          component={GhostFormField}
-          readDefaultValueOnForm={!item.isNew}
-        />
-        <Suspense fallback={null}>
-          <QueryClientProvider client={queryClient}>
-            <OsqueryResponseActionParamsForm item={item} ref={formRef} />
-          </QueryClientProvider>
-        </Suspense>
-      </>
+      <UseField
+        path={`${item.path}.params`}
+        component={GhostFormField}
+        readDefaultValueOnForm={!item.isNew}
+      />
     );
   };
