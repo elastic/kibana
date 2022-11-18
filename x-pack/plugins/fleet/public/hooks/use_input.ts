@@ -85,6 +85,7 @@ export function useInput(
 export function useSwitchInput(defaultValue = false, disabled = false) {
   const [value, setValue] = useState<boolean>(defaultValue);
   const [hasChanged, setHasChanged] = useState(false);
+  const validate = useCallback(() => true, []);
 
   useEffect(() => {
     if (hasChanged) {
@@ -107,6 +108,7 @@ export function useSwitchInput(defaultValue = false, disabled = false) {
       checked: value,
       disabled,
     },
+    validate,
     formRowProps: {},
     setValue,
     hasChanged,
