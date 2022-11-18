@@ -28,6 +28,7 @@ describe('saved_searches_utils', () => {
         grid: {},
         hideChart: true,
         isTextBasedQuery: false,
+        isOfAdHocDataView: false,
       };
 
       expect(
@@ -49,6 +50,7 @@ describe('saved_searches_utils', () => {
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
+          "isOfAdHocDataView": undefined,
           "isTextBasedQuery": false,
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -133,6 +135,7 @@ describe('saved_searches_utils', () => {
           "grid": Object {},
           "hideAggregatedPreview": undefined,
           "hideChart": true,
+          "isOfAdHocDataView": false,
           "isTextBasedQuery": true,
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
