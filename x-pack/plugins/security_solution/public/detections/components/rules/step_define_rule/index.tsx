@@ -111,12 +111,6 @@ MyLabelButton.defaultProps = {
   flush: 'right',
 };
 
-const SourcererFlex = styled(EuiFlexItem)`
-  align-items: flex-end;
-`;
-
-SourcererFlex.displayName = 'SourcererFlex';
-
 const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ $isVisible }) => ({
   style: {
     display: $isVisible ? 'flex' : 'none',
