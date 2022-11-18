@@ -25,12 +25,12 @@ interface ResponseActionValidatorRef {
 }
 
 const GhostFormField = () => <></>;
+const OsqueryResponseActionParamsForm = lazy(() => import('./osquery_response_action_type'));
 
 export const getLazyOsqueryResponseActionTypeForm =
   // eslint-disable-next-line react/display-name
   () => (props: LazyOsqueryActionParamsFormProps) => {
     const { item, formRef } = props;
-    const OsqueryResponseActionParamsForm = lazy(() => import('./osquery_response_action_type'));
 
     return (
       <>

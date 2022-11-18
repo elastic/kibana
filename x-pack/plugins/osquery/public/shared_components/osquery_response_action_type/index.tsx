@@ -49,7 +49,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
   ResponseActionValidatorRef,
   OsqueryResponseActionsParamsFormProps
 >(({ item }, ref) => {
-  const { updateFieldValues, validate } = useFormContext();
+  const { updateFieldValues } = useFormContext();
   const [data] = useFormData({ watch: [item.path] });
   const { params: defaultParams } = get(data, item.path);
   const uniqueId = useMemo(() => uuid.v4(), []);
@@ -66,7 +66,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
         },
   });
 
-  const { watch, register, formState, handleSubmit, reset } = hooksForm;
+  const { watch, register, formState, handleSubmit, reset, trigger } = hooksForm;
   const { errors, isValid } = formState;
 
   const watchedValues = watch();
@@ -74,7 +74,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
     packId: watchedValues?.packId?.[0],
     skip: !watchedValues?.packId?.[0],
   });
-  const [queryType, setQueryType] = useState<string>(defaultParams.packId ? 'pack' : 'query');
+  const [queryType, setQueryType] = useState<string>(defaultParams?.packId ? 'pack' : 'query');
 
   const onSubmit = useCallback(
     async (formData) => {
@@ -113,7 +113,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
     if (ref && ref.current) {
       // @ts-expect-error update types
       ref.current.validation[item.id] = async () => {
-        await validate();
+        await trigger();
 
         return {
           errors,
@@ -121,7 +121,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
         };
       };
     }
-  }, [errors, handleSubmit, isValid, item.id, item.path, onSubmit, ref, validate, watchedValues]);
+  }, [errors, handleSubmit, isValid, item.id, item.path, onSubmit, trigger, ref, watchedValues]);
 
   useEffect(() => {
     register('savedQueryId');

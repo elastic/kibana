@@ -60,31 +60,35 @@ export const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }
             const response = await validation();
             const paramsErrors: Array<ValidationError<string>> = [];
 
-            map(response.errors, (error) => {
-              if (!isEmpty(error)) {
-                const message = !isEmpty(error.message)
-                  ? error.message
-                  : getCustomErrorMessage(error.ref.name);
-                const errorObject = {
-                  code: 'ERR_FIELD_MISSING',
-                  path: `${response.path}.params`,
-                  message: `**ResponseActions:** \n ${message}\n `,
-                };
+            if (isEmpty(response.errors)) {
+              fields[`${response.path}.params`]?.clearErrors('field');
+            } else {
+              map(response.errors, (error) => {
+                if (!isEmpty(error)) {
+                  const message = !isEmpty(error.message)
+                    ? error.message
+                    : getCustomErrorMessage(error.ref.name);
+                  const errorObject = {
+                    code: 'ERR_FIELD_MISSING',
+                    path: `${response.path}.params`,
+                    message: `**ResponseActions:** \n ${message}\n `,
+                  };
 
-                fields[`${response.path}.params`]?.setErrors([errorObject]);
-                paramsErrors.push(errorObject);
-                const errorsString = paramsErrors
-                  ?.map((paramsError) => paramsError?.message)
-                  .join('\n');
-                setUIFieldErrors(errorsString);
-              } else {
-                setUIFieldErrors(null);
-              }
-            });
+                  fields[`${response.path}.params`]?.setErrors([errorObject]);
+                  paramsErrors.push(errorObject);
+                  const errorsString = paramsErrors
+                    ?.map((paramsError) => paramsError?.message)
+                    .join('\n');
+                  setUIFieldErrors(errorsString);
+                } else {
+                  setUIFieldErrors(null);
+                }
+              });
+            }
           })
         );
       } else {
-        // Response Action Item created in UseArray, but not yet initialized (has no params)
+        // Response Action Item created in UseArray, but not yet initialized (has no params) - eg. Osquery response action without permissions
         const errorStrings = validateForEmptyParams(formData.responseActions, fields);
 
         setUIFieldErrors(errorStrings);
@@ -93,7 +97,6 @@ export const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }
       setUIFieldErrors(null);
     }
   }, [fields, formData.responseActions, validate]);
-
   useEffect(() => {
     if (saveClickRef && saveClickRef.current) {
       saveClickRef.current.onSaveClick = () => {
