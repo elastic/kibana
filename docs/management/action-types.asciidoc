@@ -1,4 +1,3 @@
-[role="xpack"]
 [[action-types]]
 == Connectors
 
@@ -76,7 +75,7 @@ Rules use *Connectors* to route actions to different destinations like log files
 For more information on connectors and the types of actions available see <<action-types>>.
 
 [role="screenshot"]
-image::images/connector-listing.png[Example connector listing in the Rules and Connectors UI]
+image::images/connector-listing.png[Example connector listing in the {rac-ui} UI]
 
 [float]
 === Required permissions
