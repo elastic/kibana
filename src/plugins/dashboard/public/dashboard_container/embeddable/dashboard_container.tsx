@@ -30,7 +30,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 
@@ -50,12 +49,11 @@ import {
   DashboardContainerByValueInput,
 } from '../../../common';
 import {
-  syncDataViews,
   getHasUnsavedChanges,
   startDiffingDashboardState,
   startControlGroupIntegration,
   startUnifiedSearchIntegration,
-  applySavedFiltersToUnifiedSearch,
+  startSyncingDashboardDataViews,
   startDashboardSearchSessionIntegration,
   combineDashboardFiltersWithControlGroupFilters,
 } from './integrations';
@@ -96,13 +94,13 @@ export interface InheritedChildInput {
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
+  public controlGroup?: ControlGroupContainer;
 
   // Dashboard State
   private onDestroyControlGroup?: () => void;
   private subscriptions: Subscription = new Subscription();
 
   private initialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-
   private initialSavedDashboardId?: string;
 
   private reduxEmbeddableTools?: ReduxEmbeddableTools<
@@ -110,13 +108,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     typeof dashboardContainerReducers
   >;
 
-  public controlGroup?: ControlGroupContainer;
-
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
   private allDataViews: DataView[] = [];
 
   // Services that are used in the Dashboard container code
+  private creationOptions?: DashboardCreationOptions;
   private analyticsService: DashboardAnalyticsService;
   private dashboardSavedObjectService: DashboardSavedObjectService;
   private theme$;
@@ -155,6 +152,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.initialSavedDashboardId = dashboardContainerInputIsByValue(this.input)
       ? undefined
       : this.input.savedObjectId;
+    this.creationOptions = creationOptions;
     this.initializeDashboard(readyToInitializeChildren$, creationOptions);
   }
 
@@ -172,9 +170,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     return this.getInput() as DashboardContainerByValueInput;
   };
 
-  private async unwrapDashboardContainerInput(
-    creationOptions?: DashboardCreationOptions
-  ): Promise<DashboardContainerByValueInput | undefined> {
+  private async unwrapDashboardContainerInput(): Promise<
+    DashboardContainerByValueInput | undefined
+  > {
     if (dashboardContainerInputIsByValue(this.input)) {
       return this.input;
     }
@@ -183,8 +181,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     });
     this.updateInput({ savedObjectId: undefined });
     if (
-      !creationOptions?.validateLoadedSavedObject ||
-      creationOptions.validateLoadedSavedObject(unwrapResult)
+      !this.creationOptions?.validateLoadedSavedObject ||
+      this.creationOptions.validateLoadedSavedObject(unwrapResult)
     ) {
       return unwrapResult.dashboardInput;
     }
@@ -200,7 +198,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     const reduxEmbeddablePackagePromise = lazyLoadReduxEmbeddablePackage();
     const defaultDataViewAssignmentPromise = dataViews.getDefaultDataView();
-    const dashboardStateUnwrapPromise = this.unwrapDashboardContainerInput(creationOptions);
+    const dashboardStateUnwrapPromise = this.unwrapDashboardContainerInput();
 
     const [reduxEmbeddablePackage, inputFromSavedObject, defaultDataView] = await Promise.all([
       reduxEmbeddablePackagePromise,
@@ -234,11 +232,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     });
 
     // set up unified search integration
-    if (creationOptions?.useUnifiedSearchIntegration) {
-      const kbnUrlStateStorage = creationOptions.unifiedSearchSettings?.kbnUrlStateStorage;
-      this.kbnUrlStateStorage = kbnUrlStateStorage;
-      const initialTimeRange = this.startUnifiedSearchIntegration({
+    if (
+      creationOptions?.useUnifiedSearchIntegration &&
+      creationOptions.unifiedSearchSettings?.kbnUrlStateStorage
+    ) {
+      const { kbnUrlStateStorage } = creationOptions.unifiedSearchSettings;
+      const initialTimeRange = startUnifiedSearchIntegration.bind(this)({
         initialInput,
+        kbnUrlStateStorage,
         setCleanupFunction: (cleanup) => {
           this.stopSyncingWithUnifiedSearch = cleanup;
         },
@@ -290,11 +291,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     // build Control Group
     if (creationOptions?.useControlGroupIntegration) {
-      this.controlGroup = await this.startControlGroupIntegration(initialInput);
+      this.controlGroup = await startControlGroupIntegration.bind(this)(initialInput);
     }
 
     // start diffing dashboard state
-    const diffingMiddleware = this.startDiffingDashboardState({
+    const diffingMiddleware = startDiffingDashboardState.bind(this)({
       initialInput,
       initialLastSavedInput: inputFromSavedObject,
       useSessionBackup: creationOptions?.useSessionStorageIntegration,
@@ -304,7 +305,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     });
 
     // set up data views integration
-    this.dataViewsChangeSubscription = this.syncDataViews();
+    this.dataViewsChangeSubscription = startSyncingDashboardDataViews.bind(this)();
 
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
@@ -362,7 +363,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public async getExplicitInputIsEqual(lastExplicitInput: DashboardContainerByValueInput) {
-    return await this.getHasUnsavedChanges(lastExplicitInput);
+    return await getHasUnsavedChanges.bind(this)(lastExplicitInput);
   }
 
   public getReduxEmbeddableTools() {
@@ -429,6 +430,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     };
   }
 
+  // ------------------------------------------------------------------------------------------------------
+  // Cleanup
+  // ------------------------------------------------------------------------------------------------------
+  private stopDiffingDashboardState?: () => void;
+  private stopSyncingWithUnifiedSearch?: () => void;
+  private dataViewsChangeSubscription?: Subscription = undefined;
+  private stopSyncingDashboardSearchSessions: (() => void) | undefined;
+
   public destroy() {
     super.destroy();
     this.onDestroyControlGroup?.();
@@ -440,6 +449,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.dataViewsChangeSubscription?.unsubscribe();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
+
+  // ------------------------------------------------------------------------------------------------------
+  // Dashboard API
+  // ------------------------------------------------------------------------------------------------------
 
   /**
    * Sometimes when the ID changes, it's due to a clone operation, or a save as operation. In these cases,
@@ -457,43 +470,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       this.expectingIdChange = false;
     }, 1); // turn this off after the next update.
   }
-
-  // ------------------------------------------------------------------------------------------------------
-  // Integrations
-  // ------------------------------------------------------------------------------------------------------
-
-  /**
-   * Unified Search
-   */
-  public applySavedFiltersToUnifiedSearch = applySavedFiltersToUnifiedSearch;
-  public kbnUrlStateStorage?: IKbnUrlStateStorage;
-
-  private startUnifiedSearchIntegration = startUnifiedSearchIntegration;
-  private stopSyncingWithUnifiedSearch?: () => void;
-
-  /**
-   * Data Views
-   */
-  private syncDataViews = syncDataViews;
-  private dataViewsChangeSubscription?: Subscription = undefined;
-
-  /**
-   * Unsaved Changes
-   */
-  private getHasUnsavedChanges = getHasUnsavedChanges;
-  private startDiffingDashboardState = startDiffingDashboardState;
-  private stopDiffingDashboardState?: () => void;
-
-  /**
-   * Control Group
-   */
-  private startControlGroupIntegration = startControlGroupIntegration;
-
-  private stopSyncingDashboardSearchSessions: (() => void) | undefined;
-
-  // ------------------------------------------------------------------------------------------------------
-  // Dashboard API
-  // ------------------------------------------------------------------------------------------------------
 
   public runClone = runClone;
   public runSaveAs = runSaveAs;
@@ -528,8 +504,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       },
     } = getState();
 
-    // if we are syncing with unified search, we need to force reset the time picker.
-    if (this.kbnUrlStateStorage && lastSavedTimeRestore) {
+    // if we are using the unified search integration, we need to force reset the time picker.
+    if (this.creationOptions?.useUnifiedSearchIntegration && lastSavedTimeRestore) {
       const {
         data: {
           query: {

@@ -16,7 +16,7 @@ import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardContainer } from '../../dashboard_container';
 
-export function syncDataViews(this: DashboardContainer) {
+export function startSyncingDashboardDataViews(this: DashboardContainer) {
   const {
     data: { dataViews },
   } = pluginServices.getServices();

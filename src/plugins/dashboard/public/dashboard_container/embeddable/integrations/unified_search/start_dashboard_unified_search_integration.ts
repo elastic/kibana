@@ -8,6 +8,8 @@
 
 import { cloneDeep } from 'lodash';
 
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+
 import { DashboardContainer } from '../../dashboard_container';
 import { syncUnifiedSearchState } from './sync_dashboard_unified_search_state';
 import { pluginServices } from '../../../../services/plugin_services';
@@ -21,15 +23,15 @@ import { DashboardContainerByValueInput } from '../../../../../common';
 export function startUnifiedSearchIntegration(
   this: DashboardContainer,
   {
-    setCleanupFunction,
     initialInput,
+    setCleanupFunction,
+    kbnUrlStateStorage,
   }: {
+    kbnUrlStateStorage: IKbnUrlStateStorage;
     initialInput: DashboardContainerByValueInput;
     setCleanupFunction: (cleanupFunction: () => void) => void;
   }
 ) {
-  if (!this.kbnUrlStateStorage) return;
-
   const {
     data: { query: queryService },
   } = pluginServices.getServices();
@@ -38,11 +40,11 @@ export function startUnifiedSearchIntegration(
   } = queryService;
 
   // apply initial dashboard saved filters, query, and time range to the query bar.
-  this.applySavedFiltersToUnifiedSearch(initialInput);
+  applySavedFiltersToUnifiedSearch.bind(this)(initialInput);
 
   const initialTimeRange = initialInput.timeRestore ? undefined : timefilterService.getTime();
   this.untilInitialized().then(() => {
-    const stopSyncingUnifiedSearchState = syncUnifiedSearchState.bind(this)();
+    const stopSyncingUnifiedSearchState = syncUnifiedSearchState.bind(this)(kbnUrlStateStorage);
     setCleanupFunction(() => {
       stopSyncingUnifiedSearchState?.();
     });
@@ -54,8 +56,6 @@ export function applySavedFiltersToUnifiedSearch(
   this: DashboardContainer,
   initialInput?: DashboardContainerByValueInput
 ) {
-  if (!this.kbnUrlStateStorage) return;
-
   const {
     data: {
       query: { filterManager, queryString, timefilter },

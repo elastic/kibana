@@ -22,5 +22,5 @@ export {
   combineDashboardFiltersWithControlGroupFilters,
 } from './controls/dashboard_control_group_integration';
 
-export { syncDataViews } from './data_views/sync_dashboard_data_views';
+export { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 export { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
