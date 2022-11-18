@@ -60,5 +60,5 @@ const canShowFieldInTable = (
   }
 
   const parentName = subTypeMulti?.multi?.parent;
-  return Boolean(parentName && !fields.includes(parentName));
+  return Boolean(parentName && !fields.includes(parentName)); // TODO: how to optimize this check? is it still relevant?
 };
