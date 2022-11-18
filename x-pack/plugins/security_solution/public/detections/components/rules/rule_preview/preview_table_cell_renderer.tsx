@@ -13,48 +13,11 @@ import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/hel
 import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import { columnRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { getColumnRenderer } from '../../../../timelines/components/timeline/body/renderers/get_column_renderer';
+import { RenderCellValue } from '../../../configurations/security_solution_detections';
 
 export const PreviewRenderCellValue: React.FC<
   EuiDataGridCellValueElementProps & CellValueElementProps
-> = ({
-  columnId,
-  data,
-  ecsData,
-  eventId,
-  globalFilters,
-  header,
-  isDetails,
-  isDraggable,
-  isExpandable,
-  isExpanded,
-  linkValues,
-  rowIndex,
-  colIndex,
-  rowRenderers,
-  setCellProps,
-  scopeId,
-  truncate,
-}) => (
-  <PreviewTableCellRenderer
-    columnId={columnId}
-    data={data}
-    ecsData={ecsData}
-    eventId={eventId}
-    globalFilters={globalFilters}
-    header={header}
-    isDetails={isDetails}
-    isDraggable={isDraggable}
-    isExpandable={isExpandable}
-    isExpanded={isExpanded}
-    linkValues={linkValues}
-    rowIndex={rowIndex}
-    colIndex={colIndex}
-    rowRenderers={rowRenderers}
-    setCellProps={setCellProps}
-    scopeId={scopeId}
-    truncate={truncate}
-  />
-);
+> = (props) => RenderCellValue({ ...props, enableActions: false });
 
 export const PreviewTableCellRenderer: React.FC<CellValueElementProps> = ({
   data,
