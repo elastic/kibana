@@ -41,6 +41,7 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -140,17 +141,19 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.IMPORT_RULE}
                 </EuiButton>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SecuritySolutionLinkButton
-                  data-test-subj="create-new-rule"
-                  fill
-                  iconType="plusInCircle"
-                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                  deepLinkId={SecurityPageName.rulesCreate}
-                >
-                  {i18n.ADD_NEW_RULE}
-                </SecuritySolutionLinkButton>
-              </EuiFlexItem>
+              <RulesPageTourComponent>
+                <EuiFlexItem grow={false}>
+                  <SecuritySolutionLinkButton
+                    data-test-subj="create-new-rule"
+                    fill
+                    iconType="plusInCircle"
+                    isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                    deepLinkId={SecurityPageName.rulesCreate}
+                  >
+                    {i18n.ADD_NEW_RULE}
+                  </SecuritySolutionLinkButton>
+                </EuiFlexItem>
+              </RulesPageTourComponent>
             </EuiFlexGroup>
           </HeaderPage>
           {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
