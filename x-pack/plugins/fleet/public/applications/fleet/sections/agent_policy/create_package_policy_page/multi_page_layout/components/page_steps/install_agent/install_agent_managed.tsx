@@ -32,6 +32,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     agentPolicy,
     enrollmentAPIKey,
     fleetServerHosts,
+    fleetProxy,
     enrolledAgentIds,
   } = props;
 
@@ -61,11 +62,12 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const isK8s =
     props.packageInfo.name === 'kubernetes' ? 'IS_KUBERNETES_MULTIPAGE' : 'IS_NOT_KUBERNETES';
 
-  const installManagedCommands = ManualInstructions(
-    enrollmentAPIKey.api_key,
+  const installManagedCommands = ManualInstructions({
+    apiKey: enrollmentAPIKey.api_key,
+    fleetProxy,
     fleetServerHosts,
-    kibanaVersion
-  );
+    kibanaVersion,
+  });
 
   const steps = [
     InstallManagedAgentStep({
