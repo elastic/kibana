@@ -270,21 +270,22 @@ export const createLifecycleExecutor =
           isActive,
           trackedAlertRecoveredIds
         );
-        const isCurrentlyFlapping = !isNew
-          ? state.trackedAlerts[alertId]
-            ? state.trackedAlerts[alertId].flapping
-            : state.trackedAlertsRecovered[alertId].flapping
-          : false;
-        const flapping = isFlapping(flappingHistory, isCurrentlyFlapping);
 
-        const { alertUuid, started } = !isNew
+        const {
+          alertUuid,
+          started,
+          flapping: isCurrentlyFlapping,
+        } = !isNew
           ? state.trackedAlerts[alertId]
             ? state.trackedAlerts[alertId]
             : state.trackedAlertsRecovered[alertId]
           : {
               alertUuid: lifecycleAlertServices.getAlertUuid(alertId),
               started: commonRuleFields[TIMESTAMP],
+              flapping: false,
             };
+
+        const flapping = isFlapping(flappingHistory, isCurrentlyFlapping);
 
         const event: ParsedTechnicalFields & ParsedExperimentalFields = {
           ...alertData?.fields,
