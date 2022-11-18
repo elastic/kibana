@@ -175,19 +175,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         }),
       });
 
-      await es.index({
-        index: ES_INDEX,
-        body: {
-          '@timestamp': '2016-02-09T16:19:59.000Z',
-          '@version': 101,
-          airline: 'UAL',
-          custom_field: 'deviation',
-          responsetime: 10,
-          type: 'farequote',
-        },
-        refresh: 'wait_for',
-      });
-
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
