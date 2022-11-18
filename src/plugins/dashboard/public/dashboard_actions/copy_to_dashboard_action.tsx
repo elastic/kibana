@@ -86,7 +86,7 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
         <CopyToDashboardModal
           PresentationUtilContext={this.PresentationUtilContext}
           closeModal={() => session.close()}
-          dashboardId={(embeddable.parent as DashboardContainer).getInput().id}
+          dashboardId={(embeddable.parent as DashboardContainer).getDashboardSavedObjectId()}
           embeddable={embeddable}
         />,
         { theme$: this.theme$ }

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -16,7 +17,7 @@ import {
   EmbeddableFactoryDefinition,
   EmbeddablePackageState,
 } from '@kbn/embeddable-plugin/public';
-
+import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
@@ -38,12 +39,26 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 
 export interface DashboardCreationOptions {
-  useControlGroupIntegration?: boolean;
-  backupStateToSessionStorage?: boolean;
-  incomingEmbeddable?: EmbeddablePackageState;
   initialInput?: Partial<DashboardContainerInput>;
   overrideInput?: Partial<DashboardContainerByValueInput>;
+
+  incomingEmbeddable?: EmbeddablePackageState;
+
+  useSearchSessionsIntegration?: boolean;
+  searchSessionSettings?: {
+    sessionIdToRestore?: string;
+    sessionIdChangeObservable?: Observable<string | null>;
+    createSessionRestorationDataProvider: (
+      container: DashboardContainer
+    ) => SearchSessionInfoProvider;
+  };
+
+  useControlGroupIntegration?: boolean;
+  useSessionStorageIntegration?: boolean;
+
+  useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
+
   validateLoadedSavedObject?: (result: LoadDashboardFromSavedObjectReturn) => boolean;
 }
 

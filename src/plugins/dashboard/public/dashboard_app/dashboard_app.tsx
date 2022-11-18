@@ -7,26 +7,35 @@
  */
 
 import { History } from 'history';
+import useMount from 'react-use/lib/useMount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
+import {
+  DashboardAppNoDataPage,
+  isDashboardAppInNoDataState,
+} from './no_data/dashboard_app_no_data';
+import {
+  loadAndRemoveDashboardState,
+  startSyncingDashboardUrlState,
+} from './url/sync_dashboard_url_state';
 import { DASHBOARD_APP_ID } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
 import type { DashboardContainer } from '../dashboard_container';
-import { DashboardAppNoDataPage } from './no_data/dashboard_app_no_data';
 import { type DashboardEmbedSettings, DashboardRedirect } from './types';
-import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
-import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
-import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
-import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
+import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import {
-  loadAndRemoveDashboardState,
-  startSyncingDashboardUrlState,
-} from './url_state/sync_dashboard_url_state';
+  createSessionRestorationDataProvider,
+  getSearchSessionIdFromURL,
+  getSessionURLObservable,
+} from './url/search_sessions_integration';
+import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
+import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
+import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 
 export interface DashboardAppProps {
   history: History;
@@ -42,6 +51,10 @@ export function DashboardApp({
   history,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  useMount(() => {
+    (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
+  });
+
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer | undefined>(
     undefined
   );
@@ -98,23 +111,36 @@ export function DashboardApp({
    * Create options to pass into the dashboard renderer
    */
   const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
-  const getCreationOptions = useCallback(() => {
+  const getCreationOptions = useCallback((): DashboardCreationOptions => {
     const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
+    const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
     return {
+      incomingEmbeddable,
+
+      // integrations
+      useControlGroupIntegration: true,
+      useSessionStorageIntegration: true,
+      useUnifiedSearchIntegration: true,
       unifiedSearchSettings: {
         kbnUrlStateStorage,
       },
+      useSearchSessionsIntegration: true,
+      searchSessionSettings: {
+        createSessionRestorationDataProvider,
+        sessionIdToRestore: searchSessionIdFromURL,
+        sessionIdChangeObservable: getSessionURLObservable(history),
+      },
+
+      // Override all state with URL + Locator input
       overrideInput: {
         // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
         ...initialUrlState,
         ...stateFromLocator,
       },
-      incomingEmbeddable,
-      useControlGroupIntegration: true,
-      backupStateToSessionStorage: true,
+
       validateLoadedSavedObject: validateOutcome,
-    } as DashboardCreationOptions;
-  }, [incomingEmbeddable, kbnUrlStateStorage, validateOutcome, stateFromLocator]);
+    };
+  }, [kbnUrlStateStorage, history, stateFromLocator, incomingEmbeddable, validateOutcome]);
 
   /**
    * Get the redux wrapper from the dashboard container. This is used to wrap the top nav so it can interact with the

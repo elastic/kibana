@@ -31,7 +31,7 @@ const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
  * Does an initial diff between @param initialInput and @param initialLastSavedInput, and created a middleware
  * which listens to the redux store and checks for & publishes the unsaved changes on dispatches.
  */
-export async function startDiffingDashboardState(
+export function startDiffingDashboardState(
   this: DashboardContainer,
   {
     initialInput,
@@ -113,12 +113,20 @@ export async function startDiffingDashboardState(
     setCleanupFunction(() => getHasUnsavedChangesSubscription.unsubscribe());
   });
 
-  const initialUnsavedChanges = await checkForUnsavedChanges(initialInput, initialLastSavedInput);
+  // set initial unsaved changes
+  checkForUnsavedChanges(initialInput, initialLastSavedInput).then(
+    async (initialUnsavedChanges) => {
+      await this.untilInitialized();
+      if (!initialUnsavedChanges) return; // early return because we know hasUnsavedChanges has been initialized to false
+      const {
+        dispatch,
+        actions: { setHasUnsavedChanges },
+      } = this.getReduxEmbeddableTools();
+      dispatch(setHasUnsavedChanges(initialUnsavedChanges));
+    }
+  );
 
-  return {
-    diffingMiddleware,
-    initialUnsavedChanges,
-  };
+  return diffingMiddleware;
 }
 
 const getCurrentAndLastSavedInput = (

@@ -23,6 +23,7 @@ import { DashboardContainer } from '../../dashboard_container';
 import { pluginServices } from '../../services/plugin_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
+import { migrateLegacyQuery } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.
@@ -58,14 +59,15 @@ export const loadAndRemoveDashboardState = (
     }
   }
 
-  const nextUrl = replaceUrlHashQuery(window.location.href, (query) => {
-    delete query[DASHBOARD_STATE_STORAGE_KEY];
-    return query;
+  const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
+    delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];
+    return hashQuery;
   });
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
   const partialState: Partial<DashboardContainerByValueInput> = {
-    ..._.omit(rawAppStateInUrl, ['panels']),
+    ..._.omit(rawAppStateInUrl, ['panels', 'query']),
     ...(panelsMap ? { panels: panelsMap } : {}),
+    ...(rawAppStateInUrl.query ? { query: migrateLegacyQuery(rawAppStateInUrl.query) } : {}),
   };
 
   return partialState;

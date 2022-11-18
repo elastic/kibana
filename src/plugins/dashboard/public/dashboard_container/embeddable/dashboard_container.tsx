@@ -56,6 +56,7 @@ import {
   startControlGroupIntegration,
   startUnifiedSearchIntegration,
   applySavedFiltersToUnifiedSearch,
+  startDashboardSearchSessionIntegration,
   combineDashboardFiltersWithControlGroupFilters,
 } from './integrations';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
@@ -193,13 +194,23 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     readyToInitializeChildren$: Subject<DashboardContainerInput>,
     creationOptions?: DashboardCreationOptions
   ) {
+    const {
+      data: { dataViews },
+    } = pluginServices.getServices();
+
     const reduxEmbeddablePackagePromise = lazyLoadReduxEmbeddablePackage();
+    const defaultDataViewAssignmentPromise = dataViews.getDefaultDataView();
     const dashboardStateUnwrapPromise = this.unwrapDashboardContainerInput(creationOptions);
 
-    const [reduxEmbeddablePackage, inputFromSavedObject] = await Promise.all([
+    const [reduxEmbeddablePackage, inputFromSavedObject, defaultDataView] = await Promise.all([
       reduxEmbeddablePackagePromise,
       dashboardStateUnwrapPromise,
+      defaultDataViewAssignmentPromise,
     ]);
+
+    if (!defaultDataView) {
+      throw new Error('Dashboard requires at least one data view before it can be initialized.');
+    }
 
     // inputFromSavedObject will only be undefined if the provided valiation function returns false.
     if (!inputFromSavedObject) {
@@ -209,7 +220,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     // Gather input from session storage if integration is used
     let sessionStorageInput: Partial<DashboardContainerByValueInput> = {};
-    if (creationOptions?.backupStateToSessionStorage) {
+    if (creationOptions?.useSessionStorageIntegration) {
       const { dashboardSessionStorage } = pluginServices.getServices();
       const sessionInput = dashboardSessionStorage.getState(this.initialSavedDashboardId);
       if (sessionInput) sessionStorageInput = sessionInput;
@@ -223,8 +234,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     });
 
     // set up unified search integration
-    if (creationOptions?.unifiedSearchSettings) {
-      const { kbnUrlStateStorage } = creationOptions.unifiedSearchSettings;
+    if (creationOptions?.useUnifiedSearchIntegration) {
+      const kbnUrlStateStorage = creationOptions.unifiedSearchSettings?.kbnUrlStateStorage;
       this.kbnUrlStateStorage = kbnUrlStateStorage;
       const initialTimeRange = this.startUnifiedSearchIntegration({
         initialInput,
@@ -235,7 +246,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       if (initialTimeRange) initialInput.timeRange = initialTimeRange;
     }
 
-    // deal with the incoming embeddable if there is one
+    // place the incoming embeddable if there is one
     const incomingEmbeddable = creationOptions?.incomingEmbeddable;
     if (incomingEmbeddable) {
       initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
@@ -244,6 +255,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         Boolean(initialInput.panels[incomingEmbeddable.embeddableId])
       ) {
         // this embeddable already exists, we will update the explicit input.
+        initialInput.panels[incomingEmbeddable.embeddableId].type = incomingEmbeddable.type;
         initialInput.panels[incomingEmbeddable.embeddableId].explicitInput = {
           ...incomingEmbeddable.input,
           id: incomingEmbeddable.embeddableId,
@@ -259,22 +271,33 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       }
     }
 
+    // start search sessions integration
+    if (creationOptions?.useSearchSessionsIntegration) {
+      const { initialSearchSessionId, stopSyncingDashboardSearchSessions } =
+        startDashboardSearchSessionIntegration.bind(this)(
+          creationOptions?.searchSessionSettings,
+          incomingEmbeddable
+        );
+      initialInput.searchSessionId = initialSearchSessionId;
+      this.stopSyncingDashboardSearchSessions = stopSyncingDashboardSearchSessions;
+    }
+
     // update input so the redux embeddable tools get the unwrapped, initial input
     this.updateInput({ ...initialInput });
+
+    // now that the input with the initial panel state has been set, we can tell the container class it's time to start loading children.
+    readyToInitializeChildren$.next(initialInput);
 
     // build Control Group
     if (creationOptions?.useControlGroupIntegration) {
       this.controlGroup = await this.startControlGroupIntegration(initialInput);
     }
 
-    // now that the input with the initial panel state has been set, we can tell the container class it's time to start loading children.
-    readyToInitializeChildren$.next(initialInput);
-
-    // start diffing dashboard state - note that this has to happen after readyToInitializeChildren$.next().
-    const { diffingMiddleware, initialUnsavedChanges } = await this.startDiffingDashboardState({
+    // start diffing dashboard state
+    const diffingMiddleware = this.startDiffingDashboardState({
       initialInput,
       initialLastSavedInput: inputFromSavedObject,
-      useSessionBackup: creationOptions?.backupStateToSessionStorage,
+      useSessionBackup: creationOptions?.useSessionStorageIntegration,
       setCleanupFunction: (cleanup) => {
         this.stopDiffingDashboardState = cleanup;
       },
@@ -293,7 +316,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       additionalMiddleware: [diffingMiddleware],
       initialComponentState: {
         lastSavedInput: inputFromSavedObject,
-        hasUnsavedChanges: initialUnsavedChanges,
+        hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
         lastSavedId: this.initialSavedDashboardId,
       },
     });
@@ -413,6 +436,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.stopDiffingDashboardState?.();
     this.reduxEmbeddableTools?.cleanup();
     this.stopSyncingWithUnifiedSearch?.();
+    this.stopSyncingDashboardSearchSessions?.();
     this.dataViewsChangeSubscription?.unsubscribe();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
@@ -464,6 +488,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
    * Control Group
    */
   private startControlGroupIntegration = startControlGroupIntegration;
+
+  private stopSyncingDashboardSearchSessions: (() => void) | undefined;
 
   // ------------------------------------------------------------------------------------------------------
   // Dashboard API
