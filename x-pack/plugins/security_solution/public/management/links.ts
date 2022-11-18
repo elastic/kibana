@@ -37,6 +37,7 @@ import {
   EVENT_FILTERS,
   EXCEPTIONS,
   HOST_ISOLATION_EXCEPTIONS,
+  LIST_DETAILS,
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
@@ -141,6 +142,14 @@ export const links: LinkItem = {
         i18n.translate('xpack.securitySolution.appLinks.exceptions', {
           defaultMessage: 'Exception lists',
         }),
+      ],
+      links: [
+        {
+          id: SecurityPageName.exceptionListDetails,
+          title: LIST_DETAILS,
+          path: '',
+          skipUrlState: true,
+        },
       ],
     },
     {

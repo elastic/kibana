@@ -35,7 +35,7 @@ const ExceptionsListDetailRoute = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.exceptionListDetails}>
       <ListsDetailView />
-      <SpyRoute pageName={SecurityPageName.exceptions} />
+      <SpyRoute pageName={SecurityPageName.exceptionListDetails} />
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
