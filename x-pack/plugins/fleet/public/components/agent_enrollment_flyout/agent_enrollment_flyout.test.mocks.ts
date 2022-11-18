@@ -27,6 +27,11 @@ jest.mock('../../hooks/use_request', () => {
         ],
       },
     }),
+    useGetFleetProxies: jest.fn().mockReturnValue({
+      data: { items: [] },
+      isLoading: false,
+      isInitialRequest: false,
+    }),
     useGetSettings: jest.fn().mockReturnValue({
       data: { item: { fleet_server_hosts: ['test'] } },
     }),
