@@ -323,6 +323,7 @@ export const generateAlertInstance = (
         group: 'default',
       },
       flappingHistory,
+      flapping: false,
     },
     state: {
       bar: false,

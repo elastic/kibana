@@ -342,11 +342,12 @@ describe('toJSON', () => {
             group: 'default',
           },
           flappingHistory: [false, true],
+          flapping: false,
         },
       }
     );
     expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"},"flappingHistory":[false,true]}}'
+      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"},"flappingHistory":[false,true],"flapping":false}}'
     );
   });
 });
@@ -379,6 +380,7 @@ describe('toRaw', () => {
           group: 'default',
         },
         flappingHistory: [false, true, true],
+        flapping: false,
       },
     };
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
@@ -388,6 +390,7 @@ describe('toRaw', () => {
     expect(alertInstance.toRaw(true)).toEqual({
       meta: {
         flappingHistory: [false, true, true],
+        flapping: false,
       },
     });
   });
@@ -403,14 +406,55 @@ describe('setFlappingHistory', () => {
     );
     alertInstance.setFlappingHistory([false]);
     expect(alertInstance.getFlappingHistory()).toEqual([false]);
+    expect(alertInstance.toRaw()).toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "flappingHistory": Array [
+            false,
+          ],
+        },
+        "state": Object {},
+      }
+    `);
   });
 });
 
 describe('getFlappingHistory', () => {
-  test('correctly sets flappingHistory in constructor', () => {
+  test('correctly sets flappingHistory', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: { flappingHistory: [false, false] },
     });
     expect(alert.getFlappingHistory()).toEqual([false, false]);
+  });
+});
+
+describe('setFlapping', () => {
+  test('sets flapping', () => {
+    const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
+      '1',
+      {
+        meta: { flapping: true },
+      }
+    );
+    alertInstance.setFlapping(false);
+    expect(alertInstance.getFlapping()).toEqual(false);
+    expect(alertInstance.toRaw()).toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "flapping": false,
+          "flappingHistory": Array [],
+        },
+        "state": Object {},
+      }
+    `);
+  });
+});
+
+describe('getFlapping', () => {
+  test('correctly sets flapping', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { flapping: true },
+    });
+    expect(alert.getFlapping()).toEqual(true);
   });
 });

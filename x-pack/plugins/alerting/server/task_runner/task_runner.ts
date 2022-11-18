@@ -418,10 +418,9 @@ export class TaskRunner<
           setFlapping: true,
         });
 
-        // the flapping flag will only be determined for active alerts
-        // flapping for recovered alerts will always be set to false
-        const processedFlappingAlertIds = determineFlapping<State, Context, ActionGroupIds>(
-          processedAlertsActive
+        determineFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+          processedAlertsActive,
+          processedAlertsRecovered
         );
 
         logAlerts({
@@ -434,7 +433,6 @@ export class TaskRunner<
           ruleRunMetricsStore,
           canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
           shouldPersistAlerts: this.shouldLogAndScheduleActionsForAlerts(),
-          flappingAlertIds: processedFlappingAlertIds,
         });
 
         return {

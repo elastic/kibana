@@ -22,10 +22,21 @@ export function updateFlappingHistory(flappingHistory: boolean[], state: boolean
   return flappingHistory;
 }
 
-export function isFlapping(flappingHistory: boolean[]): boolean {
-  // an alert is determined flapping if the number of state changes in flappingHistory array >= the max flapping count
+export function isFlapping(
+  flappingHistory: boolean[],
+  isCurrentlyFlapping: boolean = false
+): boolean {
   const numStateChanges = flappingHistory.filter((f) => f).length;
-  return numStateChanges >= MAX_FLAP_COUNT;
+  if (isCurrentlyFlapping) {
+    // if an alert is currently flapping,
+    // it will return false if the flappingHistory array is at capacity and there are 0 state changes
+    // else it will return true
+    return !(atCapacity(flappingHistory) && numStateChanges === 0);
+  } else {
+    // if an alert is not currently flapping,
+    // it will return true if the number of state changes in flappingHistory array >= the max flapping count
+    return numStateChanges >= MAX_FLAP_COUNT;
+  }
 }
 
 export function atCapacity(flappingHistory: boolean[] = []): boolean {

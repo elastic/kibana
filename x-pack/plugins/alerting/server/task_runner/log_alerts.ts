@@ -28,7 +28,6 @@ export interface LogAlertsParams<
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
   shouldPersistAlerts: boolean;
-  flappingAlertIds: Set<string>;
 }
 
 export function logAlerts<
@@ -46,7 +45,6 @@ export function logAlerts<
   ruleRunMetricsStore,
   canSetRecoveryContext,
   shouldPersistAlerts,
-  flappingAlertIds,
 }: LogAlertsParams<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
   const newAlertIds = Object.keys(newAlerts);
   const activeAlertIds = Object.keys(activeAlerts);
@@ -92,7 +90,6 @@ export function logAlerts<
     ruleRunMetricsStore.setNumberOfNewAlerts(newAlertIds.length);
     ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
     ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
-
     for (const id of recoveredAlertIds) {
       const { group: actionGroup } = recoveredAlerts[id].getLastScheduledActions() ?? {};
       const state = recoveredAlerts[id].getState();
@@ -103,7 +100,7 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: false,
+        flapping: recoveredAlerts[id].getFlapping(),
       });
     }
 
@@ -125,14 +122,13 @@ export function logAlerts<
       const { actionGroup } = activeAlerts[id].getScheduledActionOptions() ?? {};
       const state = activeAlerts[id].getState();
       const message = `${ruleLogPrefix} active alert: '${id}' in actionGroup: '${actionGroup}'`;
-      const flapping = flappingAlertIds.has(id);
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.activeInstance,
         id,
         group: actionGroup,
         message,
         state,
-        flapping,
+        flapping: activeAlerts[id].getFlapping(),
       });
     }
   }

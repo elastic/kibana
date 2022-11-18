@@ -37,7 +37,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      flappingAlertIds: new Set<string>(),
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(1);
@@ -63,7 +62,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      flappingAlertIds: new Set<string>(),
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -96,7 +94,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
       shouldPersistAlerts: true,
-      flappingAlertIds: new Set<string>(),
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -121,7 +118,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
       shouldPersistAlerts: true,
-      flappingAlertIds: new Set<string>(),
     });
 
     expect(logger.debug).not.toHaveBeenCalled();
@@ -149,7 +145,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      flappingAlertIds: new Set<string>(),
     });
 
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(1);
@@ -238,7 +233,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: false,
-      flappingAlertIds: new Set<string>(),
     });
 
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(0);
@@ -256,13 +250,13 @@ describe('logAlerts', () => {
         '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
       },
       activeAlerts: {
-        '1': new Alert<{}, {}, DefaultActionGroupId>('1'),
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1', { meta: { flapping: true } }),
         '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
         '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
       },
       recoveredAlerts: {
         '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
-        '8': new Alert<{}, {}, DefaultActionGroupId>('8'),
+        '8': new Alert<{}, {}, DefaultActionGroupId>('8', { meta: { flapping: true } }),
         '9': new Alert<{}, {}, DefaultActionGroupId>('9'),
         '10': new Alert<{}, {}, DefaultActionGroupId>('10'),
       },
@@ -270,7 +264,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      flappingAlertIds: new Set(['2', '1']),
     });
 
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {
@@ -285,7 +278,7 @@ describe('logAlerts', () => {
       id: '8',
       message: "test-rule-type-id:123: 'test rule' alert '8' has recovered",
       state: {},
-      flapping: false,
+      flapping: true,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
       action: 'recovered-instance',
@@ -320,7 +313,7 @@ describe('logAlerts', () => {
       id: '2',
       message: "test-rule-type-id:123: 'test rule' active alert: '2' in actionGroup: 'undefined'",
       state: {},
-      flapping: true,
+      flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(8, {
       action: 'active-instance',

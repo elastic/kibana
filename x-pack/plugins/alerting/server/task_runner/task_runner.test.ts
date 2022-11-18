@@ -1350,6 +1350,7 @@ describe('Task Runner', () => {
         duration: MOCK_DURATION,
         start: DATE_1969,
         flappingHistory: [false],
+        flapping: false,
       })
     );
 
@@ -2420,6 +2421,7 @@ describe('Task Runner', () => {
                 group: 'default',
               },
               flappingHistory: [true],
+              flapping: false,
             },
             state: {
               duration: '0',
@@ -2583,6 +2585,7 @@ describe('Task Runner', () => {
                 group: 'default',
               },
               flappingHistory: [true],
+              flapping: false,
             },
             state: {
               duration: '0',
@@ -2596,6 +2599,7 @@ describe('Task Runner', () => {
                 group: 'default',
               },
               flappingHistory: [true],
+              flapping: false,
             },
             state: {
               duration: '0',

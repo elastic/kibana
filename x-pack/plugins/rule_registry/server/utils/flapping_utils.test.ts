@@ -56,19 +56,43 @@ describe('atCapacity and getCapacityDiff functions', () => {
 });
 
 describe('isFlapping', () => {
-  test('returns true if at capacity and flap count exceeds the threshold', () => {
-    const flappingHistory = [true, true, true, true].concat(new Array(16).fill(false));
-    expect(isFlapping(flappingHistory)).toEqual(true);
+  describe('not currently flapping', () => {
+    test('returns true if at capacity and flap count exceeds the threshold', () => {
+      const flappingHistory = [true, true, true, true].concat(new Array(16).fill(false));
+      expect(isFlapping(flappingHistory)).toEqual(true);
+    });
+
+    test("returns false if at capacity and flap count doesn't exceed the threshold", () => {
+      const flappingHistory = [true, true].concat(new Array(20).fill(false));
+      expect(isFlapping(flappingHistory)).toEqual(false);
+    });
+
+    test('returns true if not at capacity', () => {
+      const flappingHistory = new Array(5).fill(true);
+      expect(isFlapping(flappingHistory)).toEqual(true);
+    });
   });
 
-  test("returns false if at capacity and flap count doesn't exceed the threshold", () => {
-    const flappingHistory = [true, true].concat(new Array(20).fill(false));
-    expect(isFlapping(flappingHistory)).toEqual(false);
-  });
+  describe('currently flapping', () => {
+    test('returns true if at capacity and the flap count exceeds the threshold', () => {
+      const flappingHistory = new Array(16).fill(false).concat([true, true, true, true]);
+      expect(isFlapping(flappingHistory, true)).toEqual(true);
+    });
 
-  test('returns true if not at capacity', () => {
-    const flappingHistory = new Array(5).fill(true);
-    expect(isFlapping(flappingHistory)).toEqual(true);
+    test("returns true if not at capacity and the flap count doesn't exceed the threshold", () => {
+      const flappingHistory = new Array(16).fill(false);
+      expect(isFlapping(flappingHistory, true)).toEqual(true);
+    });
+
+    test('returns true if not at capacity and the flap count exceeds the threshold', () => {
+      const flappingHistory = new Array(10).fill(false).concat([true, true, true, true]);
+      expect(isFlapping(flappingHistory, true)).toEqual(true);
+    });
+
+    test("returns false if at capacity and the flap count doesn't exceed the threshold", () => {
+      const flappingHistory = new Array(20).fill(false);
+      expect(isFlapping(flappingHistory, true)).toEqual(false);
+    });
   });
 });
 
@@ -99,6 +123,7 @@ describe('getFlappingHistory', () => {
           alertUuid: 'TEST_ALERT_0_UUID',
           started: '2020-01-01T12:00:00.000Z',
           flappingHistory: [],
+          flapping: false,
         },
       },
       trackedAlertsRecovered: {},
@@ -120,6 +145,7 @@ describe('getFlappingHistory', () => {
           alertUuid: 'TEST_ALERT_0_UUID',
           started: '2020-01-01T12:00:00.000Z',
           flappingHistory: [],
+          flapping: false,
         },
       },
       trackedAlerts: {},
@@ -143,6 +169,7 @@ describe('getFlappingHistory', () => {
           alertUuid: 'TEST_ALERT_0_UUID',
           started: '2020-01-01T12:00:00.000Z',
           flappingHistory: [],
+          flapping: false,
         },
       },
       trackedAlertsRecovered: {},
@@ -167,6 +194,7 @@ describe('getFlappingHistory', () => {
           alertUuid: 'TEST_ALERT_0_UUID',
           started: '2020-01-01T12:00:00.000Z',
           flappingHistory: [],
+          flapping: false,
         },
       },
     };

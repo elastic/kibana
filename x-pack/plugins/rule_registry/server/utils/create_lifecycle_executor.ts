@@ -101,6 +101,8 @@ const trackedAlertStateRt = rt.type({
   // true - alert has changed from active/recovered
   // false - alert is new or the status has remained either active or recovered
   flappingHistory: rt.array(rt.boolean),
+  // flapping flag that indicates whether the alert is flapping
+  flapping: rt.boolean,
 });
 
 export type TrackedLifecycleAlertState = rt.TypeOf<typeof trackedAlertStateRt>;
@@ -268,6 +270,12 @@ export const createLifecycleExecutor =
           isActive,
           trackedAlertRecoveredIds
         );
+        const isCurrentlyFlapping = !isNew
+          ? state.trackedAlerts[alertId]
+            ? state.trackedAlerts[alertId].flapping
+            : state.trackedAlertsRecovered[alertId].flapping
+          : false;
+        const flapping = isFlapping(flappingHistory, isCurrentlyFlapping);
 
         const { alertUuid, started } = !isNew
           ? state.trackedAlerts[alertId]
@@ -298,8 +306,7 @@ export const createLifecycleExecutor =
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
           [TAGS]: options.rule.tags,
           [VERSION]: ruleDataClient.kibanaVersion,
-          // set ALERT_FLAPPING to false for all recovered alerts
-          [ALERT_FLAPPING]: isFlapping(flappingHistory) && !isRecovered,
+          [ALERT_FLAPPING]: flapping,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };
 
@@ -307,6 +314,7 @@ export const createLifecycleExecutor =
           indexName: alertData?.indexName,
           event,
           flappingHistory,
+          flapping,
         };
       });
 
@@ -343,27 +351,27 @@ export const createLifecycleExecutor =
     const nextTrackedAlerts = Object.fromEntries(
       allEventsToIndex
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
-        .map(({ event, flappingHistory }) => {
+        .map(({ event, flappingHistory, flapping }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
-          return [alertId, { alertId, alertUuid, started, flappingHistory }];
+          return [alertId, { alertId, alertUuid, started, flappingHistory, flapping }];
         })
     );
 
     const nextTrackedAlertsRecovered = Object.fromEntries(
       [...allEventsToIndex, ...trackedRecoveredEventsToIndex]
         .filter(
-          ({ event, flappingHistory }) =>
+          ({ event, flappingHistory, flapping }) =>
             // return recovered alerts if they are flapping or if the flapping array is not at capacity
             event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
-            (isFlapping(flappingHistory) || !atCapacity(flappingHistory))
+            (flapping || !atCapacity(flappingHistory))
         )
-        .map(({ event, flappingHistory }) => {
+        .map(({ event, flappingHistory, flapping }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
-          return [alertId, { alertId, alertUuid, started, flappingHistory }];
+          return [alertId, { alertId, alertUuid, started, flappingHistory, flapping }];
         })
     );
 

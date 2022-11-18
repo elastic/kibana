@@ -22,6 +22,8 @@ const metaSchema = t.partial({
   // true - alert has changed from active/recovered
   // false - alert is new or the status has remained either active or recovered
   flappingHistory: t.array(t.boolean),
+  // flapping flag that indicates whether the alert is flapping
+  flapping: t.boolean,
 });
 export type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
 

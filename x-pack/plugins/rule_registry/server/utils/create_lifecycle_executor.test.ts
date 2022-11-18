@@ -196,12 +196,14 @@ describe('createLifecycleExecutor', () => {
               alertUuid: 'TEST_ALERT_0_UUID',
               started: '2020-01-01T12:00:00.000Z',
               flappingHistory: [],
+              flapping: false,
             },
             TEST_ALERT_1: {
               alertId: 'TEST_ALERT_1',
               alertUuid: 'TEST_ALERT_1_UUID',
               started: '2020-01-02T12:00:00.000Z',
               flappingHistory: [],
+              flapping: false,
             },
           },
           trackedAlertsRecovered: {},
@@ -315,12 +317,14 @@ describe('createLifecycleExecutor', () => {
               alertUuid: 'TEST_ALERT_0_UUID',
               started: '2020-01-01T12:00:00.000Z',
               flappingHistory: [],
+              flapping: false,
             },
             TEST_ALERT_1: {
               alertId: 'TEST_ALERT_1',
               alertUuid: 'TEST_ALERT_1_UUID',
               started: '2020-01-02T12:00:00.000Z',
               flappingHistory: [],
+              flapping: false,
             },
           },
           trackedAlertsRecovered: {},
@@ -541,12 +545,14 @@ describe('createLifecycleExecutor', () => {
                 alertUuid: 'TEST_ALERT_0_UUID',
                 started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: [],
+                flapping: false,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
                 alertUuid: 'TEST_ALERT_1_UUID',
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: [],
+                flapping: false,
               },
             },
             trackedAlertsRecovered: {},
@@ -647,12 +653,14 @@ describe('createLifecycleExecutor', () => {
                 alertUuid: 'TEST_ALERT_0_UUID',
                 started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: [],
+                flapping: false,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
                 alertUuid: 'TEST_ALERT_1_UUID',
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: [],
+                flapping: false,
               },
             },
             trackedAlerts: {},
@@ -748,12 +756,14 @@ describe('createLifecycleExecutor', () => {
                 alertUuid: 'TEST_ALERT_0_UUID',
                 started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: [],
+                flapping: false,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
                 alertUuid: 'TEST_ALERT_1_UUID',
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: [],
+                flapping: false,
               },
             },
             trackedAlertsRecovered: {},
@@ -850,6 +860,7 @@ describe('createLifecycleExecutor', () => {
                 alertUuid: 'TEST_ALERT_1_UUID',
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: [],
+                flapping: false,
               },
             },
             trackedAlertsRecovered: {
@@ -858,6 +869,7 @@ describe('createLifecycleExecutor', () => {
                 alertUuid: 'TEST_ALERT_0_UUID',
                 started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: [],
+                flapping: false,
               },
             },
           },
@@ -890,6 +902,7 @@ describe('createLifecycleExecutor', () => {
 
   describe('set flapping on the document', () => {
     const flapping = new Array(16).fill(false).concat([true, true, true, true]);
+    const notFlapping = new Array(20).fill(false);
 
     it('updates documents with flapping for active alerts', async () => {
       const logger = loggerMock.create();
@@ -911,7 +924,6 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                 [ALERT_WORKFLOW_STATUS]: 'closed',
                 [SPACE_IDS]: ['fake-space-id'],
-                labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
               },
             },
             {
@@ -928,7 +940,38 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                 [ALERT_WORKFLOW_STATUS]: 'open',
                 [SPACE_IDS]: ['fake-space-id'],
-                labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
+              },
+            },
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
+                [ALERT_UUID]: 'ALERT_2_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [ALERT_WORKFLOW_STATUS]: 'open',
+                [SPACE_IDS]: ['fake-space-id'],
+              },
+            },
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
+                [ALERT_UUID]: 'ALERT_3_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [ALERT_WORKFLOW_STATUS]: 'open',
+                [SPACE_IDS]: ['fake-space-id'],
               },
             },
           ],
@@ -946,6 +989,14 @@ describe('createLifecycleExecutor', () => {
           id: 'TEST_ALERT_1',
           fields: {},
         });
+        services.alertWithLifecycle({
+          id: 'TEST_ALERT_2',
+          fields: {},
+        });
+        services.alertWithLifecycle({
+          id: 'TEST_ALERT_3',
+          fields: {},
+        });
 
         return state;
       });
@@ -961,13 +1012,29 @@ describe('createLifecycleExecutor', () => {
                 alertId: 'TEST_ALERT_0',
                 alertUuid: 'TEST_ALERT_0_UUID',
                 started: '2020-01-01T12:00:00.000Z',
-                flappingHistory: [false, false],
+                flappingHistory: flapping,
+                flapping: false,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
                 alertUuid: 'TEST_ALERT_1_UUID',
                 started: '2020-01-02T12:00:00.000Z',
+                flappingHistory: [false, false],
+                flapping: false,
+              },
+              TEST_ALERT_2: {
+                alertId: 'TEST_ALERT_2',
+                alertUuid: 'TEST_ALERT_2_UUID',
+                started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: flapping,
+                flapping: true,
+              },
+              TEST_ALERT_3: {
+                alertId: 'TEST_ALERT_3',
+                alertUuid: 'TEST_ALERT_3_UUID',
+                started: '2020-01-02T12:00:00.000Z',
+                flappingHistory: [false, false],
+                flapping: true,
               },
             },
             trackedAlertsRecovered: {},
@@ -985,15 +1052,31 @@ describe('createLifecycleExecutor', () => {
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_WORKFLOW_STATUS]: 'closed',
               [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-              [ALERT_FLAPPING]: false,
-              labels: { LABEL_0_KEY: 'LABEL_0_VALUE' },
-
+              [ALERT_FLAPPING]: true,
               [EVENT_ACTION]: 'active',
               [EVENT_KIND]: 'signal',
             }),
             { index: { _id: 'TEST_ALERT_1_UUID' } },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [EVENT_ACTION]: 'active',
+              [EVENT_KIND]: 'signal',
+              [ALERT_FLAPPING]: false,
+            }),
+            { index: { _id: 'TEST_ALERT_2_UUID' } },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [EVENT_ACTION]: 'active',
+              [EVENT_KIND]: 'signal',
+              [ALERT_FLAPPING]: true,
+            }),
+            { index: { _id: 'TEST_ALERT_3_UUID' } },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
               [ALERT_WORKFLOW_STATUS]: 'open',
               [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
               [EVENT_ACTION]: 'active',
@@ -1024,7 +1107,6 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_RULE_UUID]: 'RULE_UUID',
                 [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                 [SPACE_IDS]: ['fake-space-id'],
-                labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
               },
             },
             {
@@ -1040,7 +1122,36 @@ describe('createLifecycleExecutor', () => {
                 [ALERT_RULE_UUID]: 'RULE_UUID',
                 [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                 [SPACE_IDS]: ['fake-space-id'],
-                labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
+              },
+            },
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
+                [ALERT_UUID]: 'ALERT_2_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: ['fake-space-id'],
+              },
+            },
+            {
+              _source: {
+                '@timestamp': '',
+                [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
+                [ALERT_UUID]: 'ALERT_3_UUID',
+                [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+                [ALERT_RULE_CONSUMER]: 'CONSUMER',
+                [ALERT_RULE_NAME]: 'NAME',
+                [ALERT_RULE_PRODUCER]: 'PRODUCER',
+                [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+                [ALERT_RULE_UUID]: 'RULE_UUID',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: ['fake-space-id'],
               },
             },
           ],
@@ -1050,12 +1161,6 @@ describe('createLifecycleExecutor', () => {
         logger,
         ruleDataClientMock
       )<{}, TestRuleState, never, never, never>(async ({ services, state }) => {
-        // TEST_ALERT_0 has recovered
-        services.alertWithLifecycle({
-          id: 'TEST_ALERT_1',
-          fields: {},
-        });
-
         return state;
       });
 
@@ -1070,13 +1175,29 @@ describe('createLifecycleExecutor', () => {
                 alertId: 'TEST_ALERT_0',
                 alertUuid: 'TEST_ALERT_0_UUID',
                 started: '2020-01-01T12:00:00.000Z',
-                flappingHistory: flapping,
+                flappingHistory: [true, true, true, true],
+                flapping: false,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
                 alertUuid: 'TEST_ALERT_1_UUID',
                 started: '2020-01-02T12:00:00.000Z',
-                flappingHistory: [false, false, false],
+                flappingHistory: notFlapping,
+                flapping: false,
+              },
+              TEST_ALERT_2: {
+                alertId: 'TEST_ALERT_2',
+                alertUuid: 'TEST_ALERT_2_UUID',
+                started: '2020-01-02T12:00:00.000Z',
+                flappingHistory: [true, true],
+                flapping: true,
+              },
+              TEST_ALERT_3: {
+                alertId: 'TEST_ALERT_3',
+                alertUuid: 'TEST_ALERT_3_UUID',
+                started: '2020-01-02T12:00:00.000Z',
+                flappingHistory: notFlapping,
+                flapping: false,
               },
             },
             trackedAlertsRecovered: {},
@@ -1093,16 +1214,31 @@ describe('createLifecycleExecutor', () => {
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
-              labels: { LABEL_0_KEY: 'LABEL_0_VALUE' },
               [EVENT_ACTION]: 'close',
               [EVENT_KIND]: 'signal',
-              [ALERT_FLAPPING]: false,
+              [ALERT_FLAPPING]: true,
             }),
             { index: { _id: 'TEST_ALERT_1_UUID' } },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
-              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-              [EVENT_ACTION]: 'active',
+              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+              [EVENT_ACTION]: 'close',
+              [EVENT_KIND]: 'signal',
+              [ALERT_FLAPPING]: false,
+            }),
+            { index: { _id: 'TEST_ALERT_2_UUID' } },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
+              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+              [EVENT_ACTION]: 'close',
+              [EVENT_KIND]: 'signal',
+              [ALERT_FLAPPING]: true,
+            }),
+            { index: { _id: 'TEST_ALERT_3_UUID' } },
+            expect.objectContaining({
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
+              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+              [EVENT_ACTION]: 'close',
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: false,
             }),

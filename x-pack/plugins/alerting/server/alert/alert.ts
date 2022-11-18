@@ -176,8 +176,10 @@ export class Alert<
     return recovered
       ? {
           // for a recovered alert, we only care to track the flappingHistory
+          // and the flapping flag
           meta: {
             flappingHistory: this.meta.flappingHistory,
+            flapping: this.meta.flapping,
           },
         }
       : {
@@ -192,5 +194,13 @@ export class Alert<
 
   getFlappingHistory() {
     return this.meta.flappingHistory;
+  }
+
+  setFlapping(f: boolean) {
+    this.meta.flapping = f;
+  }
+
+  getFlapping() {
+    return this.meta.flapping || false;
   }
 }
