@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { ActorRef } from 'xstate';
 import { LogView, logViewRT, ResolvedLogView } from '../../../../common/log_views';
 
 export const logViewContextWithIdRT = rt.type({
@@ -29,7 +30,7 @@ export interface LogViewContextWithError {
 export type LogViewTypestate =
   | {
       value: 'uninitialized';
-      context: {};
+      context: LogViewContextWithId;
     }
   | {
       value: 'loading';
@@ -81,3 +82,5 @@ export type LogViewEvent =
   | {
       type: 'reloadLogView';
     };
+
+export type LogViewActor = ActorRef<LogViewEvent>;

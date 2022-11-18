@@ -6,7 +6,7 @@
  */
 
 import { createMachine, assign, spawn } from 'xstate';
-import { LogStreamPageContext, LogStreamPageEvent } from './types';
+import { LogStreamPageEvent, LogStreamPageTypestate } from './types';
 import { createLogViewStateMachine, createListeners } from '../../../log_view_state';
 import { ILogViewsClient } from '../../../../services/log_views';
 
@@ -19,21 +19,10 @@ export const createLogStreamPageStateMachine = ({
   logViews: ILogViewsClient;
   logViewId: string;
 }) => {
-  return createMachine(
+  return createMachine<{}, LogStreamPageEvent, LogStreamPageTypestate>(
     {
       id: MACHINE_ID,
-      schema: {
-        context: {} as LogStreamPageContext,
-        events: {} as LogStreamPageEvent,
-      },
       initial: 'uninitialized',
-      context: {
-        logViewMachineRef: null,
-        logView: null, // Duplicate here or access through context ref?
-        resolvedLogView: null,
-        logViewStatus: null,
-        logViewError: null,
-      },
       states: {
         uninitialized: {
           entry: ['spawnLogViewMachine'],
@@ -112,7 +101,7 @@ export const createLogStreamPageStateMachine = ({
             ),
         }),
         assignLogViewError: assign({
-          logViewError: (context, event) => event.logViewError,
+          logViewError: (context, event) => event.error,
         }),
         resetLogViewError: assign({
           logViewError: null,

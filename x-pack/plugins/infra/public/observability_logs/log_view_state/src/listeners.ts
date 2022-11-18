@@ -17,6 +17,10 @@ export type ListenerEvents =
   | {
       type: 'loadedLogView';
       resolvedLogView: ResolvedLogView;
+    }
+  | {
+      type: 'failedLoadingLogView';
+      error: Error;
     };
 
 export const createListeners = (target: ActorRef<ListenerEvents> | string) => {

@@ -47,6 +47,7 @@ export const createPureLogViewStateMachine = () =>
           invoke: {
             src: 'resolveLogView',
           },
+          entry: 'notifyLoading', // Parents / consumers don't need to differentiate between loading / resolving, respond to the one event?
           on: {
             resolutionSucceeded: {
               target: 'resolved',
