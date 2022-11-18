@@ -200,7 +200,6 @@ export async function getFullAgentPolicy(
         return;
       }
     );
-
     if (fleetServerHost) {
       fullAgentPolicy.fleet = {
         hosts: fleetServerHost.host_urls,
@@ -214,16 +213,22 @@ export function transformOutputToFullPolicyOutput(
   output: Output,
   standalone = false
 ): FullAgentPolicyOutput {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  /* eslint-disable @typescript-eslint/naming-convention */
   const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl } = output;
+  /* eslint-enable @typescript-eslint/naming-convention */
+
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
-  //  what happens to the old configs (mem_queue), should be filtered out?
-  // if (configJs?.shipper || configJs.shipper?.enabled) {
-  //   // use the new configurations and write them to the agent policy
-  // }
+
+  // build logic to read config_yaml and transform it with the new shipper data
+  const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
+  let shipperData = {};
+  if (!isShipperDisabled) {
+    shipperData = buildShipperQueueData(output);
+  }
 
   const newOutput: FullAgentPolicyOutput = {
     ...configJs,
+    ...shipperData,
     type,
     hosts,
     ...(ca_sha256 ? { ca_sha256 } : {}),
@@ -250,3 +255,27 @@ function getOutputIdForAgentPolicy(output: Output) {
 
   return output.id;
 }
+
+/* eslint-disable @typescript-eslint/naming-convention */
+function buildShipperQueueData(output: Output) {
+  const {
+    disk_queue_enabled,
+    disk_queue_path,
+    disk_queue_max_size,
+    disk_queue_compression_enabled,
+  } = output;
+  if (!disk_queue_enabled) return {};
+
+  return {
+    shipper: {
+      queue: {
+        disk: {
+          path: disk_queue_path,
+          max_size: disk_queue_max_size,
+          use_compression: disk_queue_compression_enabled,
+        },
+      },
+    },
+  };
+}
+/* eslint-enable @typescript-eslint/naming-convention */

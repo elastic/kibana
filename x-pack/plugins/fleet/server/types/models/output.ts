@@ -58,6 +58,9 @@ const OutputBaseSchema = {
   disk_queue_path: schema.maybe(schema.string()),
   disk_queue_max_size: schema.maybe(schema.number()),
   loadbalance: schema.maybe(schema.boolean({ defaultValue: false })),
+  mem_queue_size: schema.maybe(schema.number()),
+  queue_flush_timeout: schema.maybe(schema.number()),
+  max_batch_size: schema.maybe(schema.number()),
 };
 
 export const NewOutputSchema = schema.object({ ...OutputBaseSchema });

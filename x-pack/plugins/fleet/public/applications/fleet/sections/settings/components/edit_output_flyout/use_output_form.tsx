@@ -8,6 +8,7 @@
 import { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { safeLoad } from 'js-yaml';
 
 import {
   sendPostOutput,
@@ -107,8 +108,26 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
   // Shipper inputs - disk queue inputs are under this as well
 
-  // Handle case where shipper.disabled: true
-  const isShipperEnabled = !!output?.config_yaml?.includes('shipper');
+  /*
+  Shipper feature flag - currently depends on the content of the yaml
+  # Enables the shipper:
+  shipper: {}
+
+  # Also enables the shipper:
+  shipper:
+    enabled: true
+
+  # Yet another way of enabling it:
+  shipper:
+    queue:
+      ...
+
+  # Disables the shipper
+  shipper:
+    enabled: false
+  */
+  const configJs = output?.config_yaml ? safeLoad(output?.config_yaml) : {};
+  const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
   const diskQueueEnabledInput = useSwitchInput(output?.disk_queue_enabled ?? false);
   const diskQueuePathInput = useInput(
@@ -244,7 +263,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       setIsloading(true);
 
       let shipperParams = {};
-      if (!isLogstash) {
+      if (!isLogstash && !isShipperDisabled) {
         shipperParams = {
           disk_queue_enabled: diskQueueEnabledInput.value,
           disk_queue_path:
@@ -260,9 +279,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
             ? Number(compressionLevelInput.value)
             : 0,
           loadbalance: loadBalanceEnabledInput.value,
-          mem_queue_size: Number(memQueueSize.value),
-          queue_flush_timeout: Number(queueFlushTimeout.value),
-          max_batch_size: Number(maxBatchSize.value),
+          mem_queue_size: memQueueSize.value ? Number(memQueueSize.value) : 0,
+          queue_flush_timeout: queueFlushTimeout.value ? Number(queueFlushTimeout.value) : 0,
+          max_batch_size: maxBatchSize.value ? Number(maxBatchSize.value) : 0,
         };
       }
 
@@ -325,6 +344,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   }, [
     validate,
     isLogstash,
+    isShipperDisabled,
     nameInput.value,
     typeInput.value,
     logstashHostsInput.value,
@@ -336,6 +356,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     sslCertificateAuthoritiesInput.value,
     elasticsearchUrlInput.value,
     caTrustedFingerprintInput.value,
+    output,
+    onSucess,
     diskQueueEnabledInput.value,
     diskQueuePathInput.value,
     diskQueueMaxSizeInput.value,
@@ -346,8 +368,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     memQueueSize.value,
     queueFlushTimeout.value,
     maxBatchSize.value,
-    output,
-    onSucess,
     confirm,
     notifications.toasts,
   ]);
@@ -357,7 +377,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     submit,
     isLoading,
     hasEncryptedSavedObjectConfigured,
-    isShipperEnabled,
+    isShipperEnabled: !isShipperDisabled,
     isDisabled:
       isLoading ||
       isPreconfigured ||
