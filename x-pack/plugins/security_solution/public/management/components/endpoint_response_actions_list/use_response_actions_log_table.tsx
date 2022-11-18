@@ -50,11 +50,11 @@ const customDescriptionListCss = css`
     > .euiDescriptionList__title {
       color: ${(props) => props.theme.eui.euiColorDarkShade};
       font-size: ${(props) => props.theme.eui.euiFontSizeXS};
-      margin-top: ${(props) => props.theme.eui.euiSizeS};
     }
 
+    > .euiDescriptionList__title,
     > .euiDescriptionList__description {
-      font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
+      font-weight: ${(props) => props.theme.eui.euiFontWeightRegular};
       margin-top: ${(props) => props.theme.eui.euiSizeS};
     }
   }
