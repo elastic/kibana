@@ -303,12 +303,14 @@ export const getGroupByObject = (
   if (groupBy) {
     resultGroupSet.forEach((groupSet) => {
       const groupSetKeys = groupSet.split(',');
-      groupByKeysObjectMapping[groupSet] = unflattenObject(Array.isArray(groupBy)
-        ? groupBy.reduce((result, groupBy, index) => {
-          return { ...result, [groupBy]: groupSetKeys[index] };
-        }, {})
-        : { [groupBy]: groupSet });
+      groupByKeysObjectMapping[groupSet] = unflattenObject(
+        Array.isArray(groupBy)
+          ? groupBy.reduce((result, groupBy, index) => {
+              return { ...result, [groupBy]: groupSetKeys[index] };
+            }, {})
+          : { [groupBy]: groupSet }
+      );
     });
   }
   return groupByKeysObjectMapping;
-}
+};
