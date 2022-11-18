@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const createNewLens = async () => {
     await PageObjects.visualize.navigateToNewVisualization();
     await PageObjects.visualize.clickVisType('lens');
-    await PageObjects.lens.goToTimeRange();
 
     await PageObjects.lens.configureDimension({
       dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -47,7 +46,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
     await find.clickByButtonText('lnsXYvis');
     await dashboardAddPanel.closeAddPanel();
-    await PageObjects.lens.goToTimeRange();
 
     await PageObjects.dashboard.saveDashboard(dashboardName);
     await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -58,7 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.visualize.gotoVisualizationLandingPage();
     await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
     await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-    await PageObjects.lens.goToTimeRange();
     await PageObjects.lens.waitForVisualization('legacyMtrVis');
     await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
   };
@@ -240,7 +237,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should add a Lens heatmap to the dashboard', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -293,7 +289,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should not display add-to-dashboard options', async () => {
           await PageObjects.visualize.navigateToNewVisualization();
           await PageObjects.visualize.clickVisType('lens');
-          await PageObjects.lens.goToTimeRange();
 
           await PageObjects.lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -339,7 +334,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should not display add-to-dashboard options', async () => {
           await PageObjects.visualize.navigateToNewVisualization();
           await PageObjects.visualize.clickVisType('lens');
-          await PageObjects.lens.goToTimeRange();
 
           await PageObjects.lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
