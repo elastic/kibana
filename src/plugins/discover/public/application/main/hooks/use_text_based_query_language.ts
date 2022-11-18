@@ -67,14 +67,22 @@ export function useTextBasedQueryLanguage({
       const initialFetch = !prev.current.columns.length;
 
       if (isTextBasedQueryLang) {
+        const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
+        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
         if (hasResults) {
           // check if state needs to contain column transformation due to a different columns in the resultset
           const firstRow = next.result![0];
           const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
           if (
-            // !isEqual(firstRowColumns, prev.current.columns) &&
-            !isEqual(query, prev.current.query)
+            !isEqual(firstRowColumns, prev.current.columns) &&
+            !isEqual(query, prev.current.query) &&
+            dataViewObj
           ) {
+            prev.current = { columns: firstRowColumns, query };
+            nextColumns = firstRowColumns;
+          }
+
+          if (!isEqual(query, prev.current.query) && !dataViewObj) {
             prev.current = { columns: firstRowColumns, query };
             nextColumns = firstRowColumns;
           }
@@ -82,8 +90,6 @@ export function useTextBasedQueryLanguage({
             prev.current = { columns: firstRowColumns, query };
           }
         }
-        const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
         if (dataViewObj) {
           // don't set the columns on initial fetch, to prevent overwriting existing state

@@ -85,7 +85,7 @@ export async function getStateFromAggregateQuery(
       : await dataViews.create({
           title: indexPattern,
         });
-    if (!dataView.isPersisted()) {
+    if (!index && !dataView.isPersisted()) {
       if (dataView.fields.getByName('@timestamp')?.type === 'date') {
         dataView.timeFieldName = '@timestamp';
       }
