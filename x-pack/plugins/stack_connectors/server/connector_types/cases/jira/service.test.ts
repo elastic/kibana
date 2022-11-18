@@ -1160,6 +1160,31 @@ describe('Jira service', () => {
       ]);
     });
 
+    test('it should return correct issue when special characters are used', async () => {
+      const specialCharacterIssuesResponse = [{
+        id: '77145',
+        key: 'RJ-5696',
+        fields: { summary: '[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]' },
+      }];
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            issues: specialCharacterIssuesResponse,
+          },
+        })
+      );
+
+      const res = await service.getIssues('[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]');
+
+      expect(res).toEqual([
+        {
+          id: '77145',
+          key: 'RJ-5696',
+          title: '[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]',
+        },
+      ]);
+    });
+
     test('it should call request with correct arguments', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({
@@ -1179,6 +1204,30 @@ describe('Jira service', () => {
       });
     });
 
+    test('it should escape JQL special characters', async () => {
+      const specialCharacterIssuesResponse = [{
+        id: '77145',
+        key: 'RJ-5696',
+        fields: { summary: '[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]' },
+      }];
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            issues: specialCharacterIssuesResponse,
+          },
+        })
+      );
+
+      await service.getIssues('[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]');
+      expect(requestMock).toHaveBeenLastCalledWith({
+        axios,
+        logger,
+        method: 'get',
+        configurationUtilities,
+        url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22%5C%5C%5Bth%5C%5C!s%5C%5C%5Eis%5C%5C(%5C%5C)a%5C%5C-te%5C%5C%2Bst%5C%5C-%5C%5C%7B%5C%5C~is%5C%5C*s%5C%5C%26ue%5C%5C%3For%5C%5C%7Cand%5C%5C%5Cbye%5C%5C%3A%5C%5C%7D%5C%5C%5D%22%5C%5C%7D%5C%5C%5D%22`,
+      });
+    });
+
     test('it should throw an error', async () => {
       requestMock.mockImplementation(() => {
         const error: ResponseError = new Error('An error has occurred');
@@ -1188,6 +1237,18 @@ describe('Jira service', () => {
 
       await expect(service.getIssues('Test title')).rejects.toThrow(
         '[Action][Jira]: Unable to get issues. Error: An error has occurred. Reason: Could not get issue types'
+      );
+    });
+
+    test('it should throw an error when only one double quote is used', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('An error has occurred');
+        error.response = { data: { errors: { issuestypes: 'Error in the JQL Query: The quoted string has not been completed. (line 1, character 34)' } } };
+        throw error;
+      });
+
+      await expect(service.getIssues('<hj>"')).rejects.toThrow(
+        '[Action][Jira]: Unable to get issues. Error: An error has occurred. Reason: Error in the JQL Query: The quoted string has not been completed. (line 1, character 34)'
       );
     });
 

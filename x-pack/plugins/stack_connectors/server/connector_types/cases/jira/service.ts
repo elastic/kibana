@@ -40,6 +40,9 @@ const CAPABILITIES_URL = `rest/capabilities`;
 
 const VIEW_INCIDENT_URL = `browse`;
 
+// These characters need to be escaped per Jira's search syntax, see for more details: https://confluence.atlassian.com/jirasoftwareserver/search-syntax-for-text-fields-939938747.html
+const JQL_SPECIAL_CHARACTERS_REGEX = /[!^&*()+\-[\]\\/{}|:?~]/;
+
 const createMetaCapabilities = ['list-project-issuetypes', 'list-issuetype-fields'];
 
 export const createExternalService = (
@@ -136,8 +139,11 @@ export const createExternalService = (
     }, '');
   };
 
-  const escapeSpecialCharacters = (str: string) =>
-    str.replace(/[!^&*()+\-[\]\\/{}|:?~]/g, '\\\\$&')?.replace(/-/g, '\\\\x2d');
+  const escapeJqlSpecialCharacters = (str: string) => {
+    const doubleBackSlashRegExp = '\\\\$&';
+
+    return str.replace(new RegExp(JQL_SPECIAL_CHARACTERS_REGEX,'g'), doubleBackSlashRegExp);
+  };
 
   const hasSupportForNewAPI = (capabilities: { capabilities?: {} }) =>
     createMetaCapabilities.every((c) => Object.keys(capabilities?.capabilities ?? {}).includes(c));
@@ -501,9 +507,9 @@ export const createExternalService = (
   };
 
   const getIssues = async (title: string) => {
-    const modifiedTitle = escapeSpecialCharacters(title ?? '');
+    const jqlEscapedTitle = escapeJqlSpecialCharacters(title);
     const query = `${searchUrl}?jql=${encodeURIComponent(
-      `project="${projectKey}" and summary ~"${modifiedTitle}"`
+      `project="${projectKey}" and summary ~"${jqlEscapedTitle}"`
     )}`;
 
     try {
