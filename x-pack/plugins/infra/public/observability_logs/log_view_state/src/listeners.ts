@@ -11,22 +11,22 @@ import { logViewContextWithIdRT } from './types';
 
 export type ListenerEvents =
   | {
-      type: 'loading';
+      type: 'loadingLogView';
       logViewId: string;
     }
   | {
-      type: 'loaded';
+      type: 'loadedLogView';
       resolvedLogView: ResolvedLogView;
     };
 
-export const createListeners = (target: ActorRef<ListenerEvents>) => {
+export const createListeners = (target: ActorRef<ListenerEvents> | string) => {
   return {
     notifyLoading: actions.pure((context) =>
       logViewContextWithIdRT.is(context)
         ? [
             actions.send(
               {
-                type: 'loading',
+                type: 'loadingLogView',
                 logViewId: context.logViewId,
               } as ListenerEvents,
               { to: target }

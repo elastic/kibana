@@ -6,3 +6,4 @@
  */
 
 export { createLogViewStateMachine } from './src';
+export { createListeners } from './src';

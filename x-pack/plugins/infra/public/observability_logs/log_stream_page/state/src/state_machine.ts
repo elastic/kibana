@@ -7,38 +7,21 @@
 
 import { createMachine, assign, spawn } from 'xstate';
 import { LogStreamPageContext, LogStreamPageEvent } from './types';
-import { createLogViewStateMachine } from '../../../log_view_state';
+import { createLogViewStateMachine, createListeners } from '../../../log_view_state';
+import { ILogViewsClient } from '../../../../services/log_views';
 
-const testLogViewActor = (callback, receive) => {
-  callback({ type: 'loadingLogView' });
+const MACHINE_ID = 'logStreamPageState';
 
-  setTimeout(() => {
-    callback({
-      type: 'loadedAndResolvedLogViewWithStatus',
-      logViewStatus: {
-        index: 'available',
-      },
-    });
-  }, 5000);
-
-  setTimeout(() => {
-    callback({
-      type: 'loadingLogViewFailed',
-      error: 'Uh oh',
-    });
-  }, 15000);
-
-  // Parent to child
-  receive((event) => {});
-
-  return () => {
-    // Cleanup
-  };
-};
-
-export const createLogStreamPageStateMachine = () =>
-  createMachine(
+export const createLogStreamPageStateMachine = ({
+  logViews,
+  logViewId,
+}: {
+  logViews: ILogViewsClient;
+  logViewId: string;
+}) => {
+  return createMachine(
     {
+      id: MACHINE_ID,
       schema: {
         context: {} as LogStreamPageContext,
         events: {} as LogStreamPageEvent,
@@ -116,7 +99,17 @@ export const createLogStreamPageStateMachine = () =>
       actions: {
         spawnLogViewMachine: assign({
           // Assigned to context for the lifetime of this machine
-          logViewMachineRef: () => spawn(createLogViewStateMachine(), 'logViewMachine'),
+          logViewMachineRef: () =>
+            spawn(
+              createLogViewStateMachine({ logViews })
+                .withConfig({
+                  actions: createListeners(MACHINE_ID), // Uses a string to match the ID as I don't think we can access a ref to the parent here? Related: https://github.com/statelyai/xstate/discussions/2715
+                })
+                .withContext({
+                  logViewId,
+                }),
+              'logViewMachine'
+            ),
         }),
         assignLogViewError: assign({
           logViewError: (context, event) => event.logViewError,
@@ -127,3 +120,4 @@ export const createLogStreamPageStateMachine = () =>
       },
     }
   );
+};

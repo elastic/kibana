@@ -6,7 +6,7 @@
  */
 
 import { catchError, from, map, of, throwError } from 'rxjs';
-import { createMachine, actions } from 'xstate';
+import { createMachine, actions, assign } from 'xstate';
 import { ILogViewsClient } from '../../../services/log_views';
 import { createTypestateHelpers } from '../../xstate_helpers';
 import {
@@ -119,6 +119,9 @@ export const createPureLogViewStateMachine = () =>
             resolvedLogView: event.resolvedLogView,
           })
         ),
+        storeError: assign({
+          error: (context, event) => event.error,
+        }),
       },
     }
   );

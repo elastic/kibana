@@ -9,6 +9,8 @@ import { useInterpret } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { useSourceId } from '../../../containers/source_id';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogViewContext } from '../../../hooks/use_log_view';
@@ -16,6 +18,7 @@ import { LogsPageTemplate } from '../page_template';
 import { LogsPageLogsContent } from './page_logs_content';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { createLogStreamPageStateMachine } from '../../../observability_logs/log_stream_page/state';
+
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',
 });
@@ -30,10 +33,18 @@ export const StreamPageContent: React.FunctionComponent = () => {
     logViewStatus,
   } = useLogViewContext();
 
+  const [sourceId] = useSourceId();
+
+  const {
+    services: {
+      logViews: { client },
+    },
+  } = useKibanaContextForPlugin();
+
   // TODO: Remove and move to a proper provider
   const machine = useMemo(() => {
-    return createLogStreamPageStateMachine();
-  }, []);
+    return createLogStreamPageStateMachine({ logViews: client, logViewId: sourceId });
+  }, [client, sourceId]);
 
   const LogStreamPageStateService = useInterpret(machine, undefined, (state) => {
     console.log(state);
