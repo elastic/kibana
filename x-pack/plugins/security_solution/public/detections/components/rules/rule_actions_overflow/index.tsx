@@ -48,7 +48,7 @@ interface RuleActionsOverflowComponentProps {
   rule: Rule | null;
   userHasPermissions: boolean;
   canDuplicateRuleWithActions: boolean;
-  showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
+  showBulkDuplicateExceptionsConfirmation: () => Promise<string | boolean>;
 }
 
 /**
@@ -88,7 +88,7 @@ const RuleActionsOverflowComponent = ({
                 closePopover();
                 const modalDuplicationConfirmationResult =
                   await showBulkDuplicateExceptionsConfirmation();
-                if (modalDuplicationConfirmationResult === null) {
+                if (!modalDuplicationConfirmationResult) {
                   return;
                 }
                 const result = await executeBulkAction({

@@ -47,7 +47,7 @@ interface UseBulkActionsArgs {
     result: DryRunResult | undefined,
     action: BulkActionForConfirmation
   ) => Promise<boolean>;
-  showBulkDuplicateConfirmation: () => Promise<string | null>;
+  showBulkDuplicateConfirmation: () => Promise<string | boolean>;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
@@ -129,7 +129,7 @@ export const useBulkActions = ({
         closePopover();
 
         const modalDuplicationConfirmationResult = await showBulkDuplicateConfirmation();
-        if (modalDuplicationConfirmationResult === null) {
+        if (!modalDuplicationConfirmationResult) {
           return;
         }
         await executeBulkAction({

@@ -27,7 +27,7 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 export const useRulesTableActions = ({
   showExceptionsDuplicateConfirmation,
 }: {
-  showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+  showExceptionsDuplicateConfirmation: () => Promise<string | boolean>;
 }): Array<DefaultItemAction<Rule>> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
@@ -69,7 +69,7 @@ export const useRulesTableActions = ({
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
         const modalDuplicationConfirmationResult = await showExceptionsDuplicateConfirmation();
-        if (modalDuplicationConfirmationResult === null) {
+        if (!modalDuplicationConfirmationResult) {
           return;
         }
         const result = await executeBulkAction({
