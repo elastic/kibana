@@ -43,7 +43,7 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
 
     this.initialize(
       [this.labelsText$.pipe(map((labelsText) => labelsText !== ''))],
-      [this.labelsText$, this.multiLabel$.asObservable()]
+      [this.labelsText$, this.multiLabel$]
     );
   }
 
