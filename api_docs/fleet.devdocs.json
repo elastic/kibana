@@ -3676,6 +3676,68 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.settings_create_fleet_proxy",
+            "type": "Function",
+            "tags": [],
+            "label": "settings_create_fleet_proxy",
+            "description": [],
+            "signature": [
+              "() => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.settings_edit_fleet_proxy",
+            "type": "Function",
+            "tags": [],
+            "label": "settings_edit_fleet_proxy",
+            "description": [],
+            "signature": [
+              "({ itemId }: ",
+              {
+                "pluginId": "fleet",
+                "scope": "public",
+                "docId": "kibFleetPluginApi",
+                "section": "def-public.DynamicPagePathValues",
+                "text": "DynamicPagePathValues"
+              },
+              ") => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.pagePathGetters.settings_edit_fleet_proxy.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ itemId }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "public",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-public.DynamicPagePathValues",
+                    "text": "DynamicPagePathValues"
+                  }
+                ],
+                "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.pagePathGetters.settings_edit_outputs",
             "type": "Function",
             "tags": [],
@@ -11641,7 +11703,9 @@
             "label": "experimental_data_stream_features",
             "description": [],
             "signature": [
-              "{ data_stream: string; features: Record<\"synthetic_source\", boolean>; }[] | undefined"
+              "{ data_stream: string; features: Record<",
+              "ExperimentalIndexingFeature",
+              ", boolean>; }[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -12286,6 +12350,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewOutput.proxy_id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "proxy_id",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12666,7 +12744,7 @@
             "label": "data_stream",
             "description": [],
             "signature": [
-              "{ dataset: string; type: string; elasticsearch?: { privileges?: { indices?: string[] | undefined; } | undefined; } | undefined; }"
+              "{ dataset: string; type: string; elasticsearch?: { privileges?: { indices?: string[] | undefined; } | undefined; index_mode?: string | undefined; } | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
@@ -13920,6 +13998,20 @@
             "description": [],
             "signature": [
               "\"default\" | \"synthetic\" | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryElasticsearch.index_mode",
+            "type": "string",
+            "tags": [],
+            "label": "index_mode",
+            "description": [],
+            "signature": [
+              "\"time_series\" | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
