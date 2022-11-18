@@ -145,6 +145,10 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.sortDescription', {
         defaultMessage: 'Select a sorting strategy',
       }),
+    getSortDisabledTooltip: () =>
+      i18n.translate('controls.optionsList.popover.sortDisabledTooltip', {
+        defaultMessage: 'Sorting is ignored when "Show only selected" is true',
+      }),
   },
   controlAndPopover: {
     getExists: (negate: number = +false) =>

@@ -131,7 +131,11 @@ export const OptionsListPopoverActionBar = ({
                 button={
                   <EuiToolTip
                     position="top"
-                    content={OptionsListStrings.popover.getSortPopoverDescription()}
+                    content={
+                      showOnlySelected
+                        ? OptionsListStrings.popover.getSortDisabledTooltip()
+                        : OptionsListStrings.popover.getSortPopoverDescription()
+                    }
                   >
                     <EuiButtonIcon
                       iconType="sortable"
