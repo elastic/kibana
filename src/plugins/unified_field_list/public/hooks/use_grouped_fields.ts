@@ -333,13 +333,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 }
 
 function sortFields<T extends FieldListItem>(fieldA: T, fieldB: T) {
-  return (fieldA.displayName || fieldA.name).localeCompare(
-    fieldB.displayName || fieldB.name,
-    undefined,
-    {
-      sensitivity: 'base',
-    }
-  );
+  return (fieldA.displayName || fieldA.name).localeCompare(fieldB.displayName || fieldB.name);
 }
 
 function hasFieldDataByDefault(): boolean {
