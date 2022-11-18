@@ -111,7 +111,7 @@ const PolicyEmptyState = React.memo<{
                   />
                 </EuiLink>
               </EuiText>
-              <EuiSpacer size="m"/>
+              <EuiSpacer size="m" />
               {additionalInfo}
               {!actionHidden && (
                 <>

@@ -71,6 +71,7 @@ import { BackToExternalAppButton } from '../../../components/back_to_external_ap
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
+import { NoPrivileges } from '../../../../common/components/no_privileges';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -181,7 +182,7 @@ export const EndpointList = () => {
 
   const missingFleetAccessInfo = useMemo(() => {
     return (
-      <EuiText size="s" color="subdued">
+      <EuiText size="s" color="subdued" data-test-subj="noFleetAccess">
         <FormattedMessage
           id="xpack.securitySolution.endpoint.onboarding.enableFleetAccess"
           defaultMessage="Deploying Agents for the first time requires Fleet access. For more information, "
@@ -568,6 +569,13 @@ export const EndpointList = () => {
           onChange={onTableChange}
           loading={loading}
           rowProps={setTableRowProps}
+        />
+      );
+    } else if (!canReadEndpointList) {
+      return (
+        <NoPrivileges
+          pageName={SecurityPageName.endpoints}
+          documentationUrl={services?.docLinks.links.securitySolution.privileges}
         />
       );
     } else if (canReadEndpointList && !canAccessFleet) {

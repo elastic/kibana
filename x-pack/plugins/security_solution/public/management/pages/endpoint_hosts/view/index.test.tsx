@@ -1386,7 +1386,7 @@ describe('when on the endpoint list page', () => {
       const noPrivilegesPage = await renderResult.findByTestId('noPrivilegesPage');
       expect(noPrivilegesPage).not.toBeNull();
     });
-    it('user has endpoint list ALL/READ and fleet NONE and cannot view entire onboarding screen', async () => {
+    it('user has endpoint list ALL/READ and fleet NONE and can view a modified onboarding screen with no actions link to fleet', async () => {
       mockUserPrivileges.mockReturnValue({
         ...initialUserPrivilegesState(),
         endpointPrivileges: getEndpointPrivilegesInitialStateMock({
@@ -1398,8 +1398,12 @@ describe('when on the endpoint list page', () => {
       await reactTestingLibrary.act(async () => {
         await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
       });
-      const noPrivilegesPage = await renderResult.findByTestId('noPrivilegesPage');
+      const onboardingSteps = await renderResult.findByTestId('policyOnboardingInstructions');
+      expect(onboardingSteps).not.toBeNull();
+      const noPrivilegesPage = await renderResult.findByTestId('noFleetAccess');
       expect(noPrivilegesPage).not.toBeNull();
+      const startButton = renderResult.queryByTestId('onboardingStartButton');
+      expect(startButton).toBeNull();
     });
     it('user has endpoint list NONE and fleet NONE and cannot view entire onboarding screen', async () => {
       mockUserPrivileges.mockReturnValue({
