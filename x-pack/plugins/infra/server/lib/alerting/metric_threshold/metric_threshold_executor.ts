@@ -36,6 +36,7 @@ import {
   hasAdditionalContext,
   validGroupByForContext,
   flattenAdditionalContext,
+  getGroupByObject,
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
@@ -187,6 +188,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
     }
 
+    const groupByKeysObjectMapping = getGroupByObject(params.groupBy, resultGroupSet);
     const groups = [...resultGroupSet];
     const nextMissingGroups = new Set<MissingGroupsRecord>();
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
@@ -277,6 +279,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
           alertState: stateToAlertMessage[nextState],
           group,
+          groupByKeys: groupByKeysObjectMapping[group],
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
           reason,
           threshold: mapToConditionsLookup(

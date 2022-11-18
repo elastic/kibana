@@ -18,6 +18,7 @@ import {
   cloudActionVariableDescription,
   containerActionVariableDescription,
   groupActionVariableDescription,
+  groupByKeysActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   metricActionVariableDescription,
@@ -106,6 +107,7 @@ export async function registerMetricThresholdRuleType(
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
+        { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
         ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
           ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
           : []),
