@@ -14,7 +14,7 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
   const { httpSetup, setDelayResponse, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
