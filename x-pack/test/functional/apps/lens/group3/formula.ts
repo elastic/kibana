@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
+      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
@@ -41,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should update and delete a formula', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       await PageObjects.lens.configureDimension({
@@ -61,6 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should insert single quotes and escape when needed to create valid KQL', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       await PageObjects.lens.configureDimension({
@@ -92,6 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should insert single quotes and escape when needed to create valid field name', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await PageObjects.lens.clickAddField();
       await fieldEditor.setName(`ab' "'`, true, true);
@@ -122,6 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should persist a broken formula on close', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       // Close immediately
@@ -137,6 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should keep the formula when entering expanded mode', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       await PageObjects.lens.configureDimension({
@@ -155,6 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow an empty formula combined with a valid formula', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       await PageObjects.lens.configureDimension({
@@ -174,6 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should duplicate a moving average formula and be a valid table with conditional coloring', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       await PageObjects.lens.configureDimension({
@@ -208,6 +216,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should keep the formula if the user does not fully transition to a quick function', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       await PageObjects.lens.configureDimension({
@@ -230,6 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should keep the formula if the user does not fully transition to a static value', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -258,6 +268,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow numeric only formulas', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       await PageObjects.lens.configureDimension({
@@ -277,6 +288,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should apply a global filter to the current formula', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       await PageObjects.lens.configureDimension({

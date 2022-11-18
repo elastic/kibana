@@ -39,6 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should add manual annotation layer with static date and allow edition', async () => {
       await PageObjects.lens.removeLayer();
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
 
       await PageObjects.lens.createLayer('annotations');
