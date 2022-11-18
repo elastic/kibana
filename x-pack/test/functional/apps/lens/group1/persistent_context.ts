@@ -42,7 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         before(async () => {
           await PageObjects.visualize.navigateToNewVisualization();
           await PageObjects.visualize.clickVisType('lens');
-          await PageObjects.lens.goToTimeRange();
           await PageObjects.navigationalSearch.focus();
           await PageObjects.navigationalSearch.searchFor('type:lens lnsTableVis');
           await PageObjects.navigationalSearch.clickOnOption(0);
@@ -78,7 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.visualize.gotoVisualizationLandingPage();
           await listingTable.searchForItemWithName('lnsTableVis');
           await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
-          await PageObjects.lens.goToTimeRange();
           await PageObjects.navigationalSearch.focus();
           await PageObjects.navigationalSearch.searchFor('type:application lens');
           await PageObjects.navigationalSearch.clickOnOption(0);
@@ -113,7 +111,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsTableVis');
         await PageObjects.lens.clickVisualizeListItemTitle('lnsTableVis');
-        await PageObjects.lens.goToTimeRange();
         // go to empty vis
         await PageObjects.lens.goToListingPageViaBreadcrumbs();
         await PageObjects.visualize.clickNewVisualization();
@@ -156,7 +153,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should carry over time range and pinned filters to discover', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange(
         'Sep 6, 2015 @ 06:31:44.000',
         'Sep 18, 2025 @ 06:31:44.000'
       );
@@ -170,7 +166,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should remember time range and pinned filters from discover', async () => {
-      await PageObjects.lens.goToTimeRange(
         'Sep 7, 2015 @ 06:31:44.000',
         'Sep 19, 2025 @ 06:31:44.000'
       );

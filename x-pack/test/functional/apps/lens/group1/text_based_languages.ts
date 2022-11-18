@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   async function switchToTextBasedLanguage(language: string) {
     await PageObjects.visualize.navigateToNewVisualization();
     await PageObjects.visualize.clickVisType('lens');
-    await PageObjects.lens.goToTimeRange();
     await elasticChart.setNewChartUiDebugFlag(true);
     await PageObjects.lens.switchToTextBasedLanguage(language);
     await PageObjects.header.waitUntilLoadingHasFinished();

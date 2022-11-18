@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow creation of lens xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -60,7 +59,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Afancilenstest');
       await PageObjects.lens.clickVisualizeListItemTitle('Afancilenstest');
-      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.waitForVisualization('xyVisChart');
 
       expect(await PageObjects.lens.getTitle()).to.eql('Afancilenstest');
@@ -75,7 +73,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
       // Change the IP field to filters
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
@@ -94,7 +91,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('Maximum of bytes');
@@ -106,7 +102,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should transition from a multi-layer stacked bar to a multi-layer line chart and correctly remove all layers', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -147,7 +142,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
       await testSubjects.click('lnsXY_splitDimensionPanel > indexPattern-dimension-remove');
       await PageObjects.lens.switchToVisualization('line');
       await PageObjects.lens.configureDimension({
@@ -211,7 +205,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('bar');
 
       await PageObjects.lens.configureDimension({
@@ -286,7 +279,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -330,7 +322,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
       expect(await PageObjects.lens.hasChartSwitchWarning('donut')).to.eql(true);
       await PageObjects.lens.switchToVisualization('donut');
 
@@ -357,7 +348,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchLayerSeriesType('line');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
@@ -375,7 +365,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsPieVis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsPieVis');
-      await PageObjects.lens.goToTimeRange();
       expect(await PageObjects.lens.hasChartSwitchWarning('treemap')).to.eql(false);
       await PageObjects.lens.switchToVisualization('treemap');
       expect(
@@ -389,7 +378,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create a pie chart and switch to datatable', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('pie');
       await PageObjects.lens.configureDimension({
         dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
@@ -416,7 +404,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create a heatmap chart and transition to barchart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('heatmap', 'heat');
 
       await PageObjects.lens.configureDimension({
@@ -448,7 +435,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create a valid XY chart with references', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -483,7 +469,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow formatting on references', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
       await PageObjects.lens.configureDimension({
@@ -529,7 +514,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should handle edge cases in reference-based operations', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -562,7 +546,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should keep the field selection while transitioning to every reference-based operation', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -599,7 +582,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not leave an incomplete column in the visualization config with field-based operation', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -614,7 +596,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should revert to previous configuration and not leave an incomplete column in the visualization config with reference-based operations', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -650,7 +631,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should transition from unique count to last value', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -683,7 +663,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show a download button only when the configuration is valid', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('pie');
       await PageObjects.lens.configureDimension({
         dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
@@ -704,7 +683,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow filtering by legend on an xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -734,7 +712,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow filtering by legend on a pie chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('pie');
 
       await PageObjects.lens.configureDimension({

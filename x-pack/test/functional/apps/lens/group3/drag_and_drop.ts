@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should construct the basic split xy chart', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
-        await PageObjects.lens.goToTimeRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.dragFieldToWorkspace('@timestamp', xyChartContainer);
 
@@ -237,7 +236,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should drop a field to workspace', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
-        await PageObjects.lens.goToTimeRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.dragFieldWithKeyboard('@timestamp');
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
@@ -321,7 +319,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should always nest time dimension in categorical dimension', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
-        await PageObjects.lens.goToTimeRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.dragFieldToWorkspace('@timestamp', xyChartContainer);
         await PageObjects.lens.waitForVisualization(xyChartContainer);
@@ -355,7 +352,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsXYvis');
         await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-        await PageObjects.lens.goToTimeRange();
 
         await PageObjects.lens.createLayer('data');
 
@@ -434,7 +430,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsXYvis');
         await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-        await PageObjects.lens.goToTimeRange();
 
         await PageObjects.lens.createLayer('data');
         await PageObjects.lens.dragFieldToDimensionTrigger(

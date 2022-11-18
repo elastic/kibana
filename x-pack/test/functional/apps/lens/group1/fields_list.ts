@@ -36,7 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
 
           if (datasourceType !== 'ad-hoc-no-timefield') {
-            await PageObjects.lens.goToTimeRange();
           }
 
           await retry.try(async () => {
@@ -211,7 +210,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // remove the filter
             await filterBar.removeAllFilters();
             // tweak the time range to 17 Sept 2015 to 18 Sept 2015
-            await PageObjects.lens.goToTimeRange(
               'Sep 17, 2015 @ 06:31:44.000',
               'Sep 18, 2015 @ 06:31:44.000'
             );
