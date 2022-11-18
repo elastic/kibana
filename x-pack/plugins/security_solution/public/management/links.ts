@@ -143,16 +143,14 @@ export const links: LinkItem = {
           defaultMessage: 'Exception lists',
         }),
       ],
-    },
-    {
-      id: SecurityPageName.sharedExceptionListDetails,
-      title: SHARED_LIST_DETAILS,
-      description: i18n.translate('xpack.securitySolution.appLinks.sharedListDetailsDescription', {
-        defaultMessage: 'Manage shared exception list details',
-      }),
-      landingIcon: IconExceptionLists,
-      path: '',
-      skipUrlState: true,
+      links: [
+        {
+          id: SecurityPageName.sharedExceptionListDetails,
+          title: SHARED_LIST_DETAILS,
+          path: '',
+          skipUrlState: true,
+        },
+      ],
     },
     {
       id: SecurityPageName.endpoints,
