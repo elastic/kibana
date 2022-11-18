@@ -41,3 +41,7 @@ export const DESCRIPTION_LABEL = i18n.translate('xpack.enterpriseSearch.descript
 export const OPTIONAL_LABEL = i18n.translate('xpack.enterpriseSearch.optionalLabel', {
   defaultMessage: 'Optional',
 });
+
+export const LEARN_MORE_LINK = i18n.translate('xpack.enterpriseSearch.learnMore.link', {
+  defaultMessage: 'Learn more',
+});

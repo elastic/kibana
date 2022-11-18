@@ -78,6 +78,7 @@ class DocLinks {
   public languageAnalyzers: string;
   public languageClients: string;
   public licenseManagement: string;
+  public machineLearningStart: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
   public searchUIAppSearch: string;
@@ -190,6 +191,7 @@ class DocLinks {
     this.languageAnalyzers = '';
     this.languageClients = '';
     this.licenseManagement = '';
+    this.machineLearningStart = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
     this.searchUIAppSearch = '';
@@ -304,6 +306,7 @@ class DocLinks {
     this.languageAnalyzers = docLinks.links.enterpriseSearch.languageAnalyzers;
     this.languageClients = docLinks.links.enterpriseSearch.languageClients;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
+    this.machineLearningStart = docLinks.links.enterpriseSearch.machineLearningStart;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
