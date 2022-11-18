@@ -428,7 +428,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
             />
           </EuiFlexItem>
           {hasAllSpaceSwitch && areMultipleSpacesAccessible && (
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj="showAllSpacesSwitch">
               <EuiSwitch
                 label={ALL_SPACES_LABEL}
                 checked={showFromAllSpaces}
