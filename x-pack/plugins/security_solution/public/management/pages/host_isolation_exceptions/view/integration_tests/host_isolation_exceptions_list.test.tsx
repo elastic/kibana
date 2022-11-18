@@ -77,7 +77,7 @@ describe('When on the host isolation exceptions page', () => {
     );
   });
 
-  it('should hide the Create and Edit actions when host isolation authz is not allowed', async () => {
+  it('should hide the Create and Edit actions when host isolation exceptions write authz is not allowed, but HIE entries exist', async () => {
     // Use case: license downgrade scenario, where user still has entries defined, but no longer
     // able to create or edit them (only Delete them)
     const existingPrivileges = useUserPrivilegesMock();
@@ -86,6 +86,9 @@ describe('When on the host isolation exceptions page', () => {
       endpointPrivileges: {
         ...existingPrivileges.endpointPrivileges,
         canIsolateHost: false,
+        canWriteHostIsolationExceptions: false,
+        canReadHostIsolationExceptions: true,
+        canDeleteHostIsolationExceptions: true,
       },
     });
 
@@ -104,5 +107,49 @@ describe('When on the host isolation exceptions page', () => {
     expect(queryByTestId('hostIsolationExceptionsListPage-pageAddButton')).toBeNull();
     expect(getByTestId('hostIsolationExceptionsListPage-card-cardDeleteAction')).toBeTruthy();
     expect(queryByTestId('hostIsolationExceptionsListPage-card-cardEditAction')).toBeNull();
+  });
+
+  it('should allow Delete action', async () => {
+    // Use case: license downgrade scenario, where user still has entries defined, but no longer
+    // able to create or edit them (only Delete them)
+    const existingPrivileges = useUserPrivilegesMock();
+    useUserPrivilegesMock.mockReturnValue({
+      ...existingPrivileges,
+      endpointPrivileges: {
+        ...existingPrivileges.endpointPrivileges,
+        canIsolateHost: false,
+        canUnIsolateHost: true,
+      },
+    });
+
+    const { findAllByTestId, getByTestId } = await render();
+
+    await waitFor(async () => {
+      await expect(findAllByTestId('hostIsolationExceptionsListPage-card')).resolves.toHaveLength(
+        10
+      );
+    });
+    await getFirstCard(renderResult, {
+      showActions: true,
+      testId: 'hostIsolationExceptionsListPage',
+    });
+
+    const deleteButton = getByTestId('hostIsolationExceptionsListPage-card-cardDeleteAction');
+    expect(deleteButton).toBeTruthy();
+
+    userEvent.click(deleteButton);
+    const confirmDeleteButton = getByTestId(
+      'hostIsolationExceptionsListPage-deleteModal-submitButton'
+    );
+    userEvent.click(confirmDeleteButton);
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.exceptionDelete).toHaveReturnedWith(
+        expect.objectContaining({
+          namespace_type: 'agnostic',
+          os_types: ['windows'],
+          tags: ['policy:all'],
+        })
+      );
+    });
   });
 });

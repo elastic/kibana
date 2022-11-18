@@ -31,6 +31,7 @@ import { ModalFooter } from './components/modal_footer';
 
 import './file_picker.scss';
 import { ClearFilterButton } from './components/clear_filter_button';
+import type { FileJSON } from '../../../common';
 
 export interface Props<Kind extends string = string> {
   /**
@@ -44,9 +45,9 @@ export interface Props<Kind extends string = string> {
   /**
    * Will be called after a user has a selected a set of files
    */
-  onDone: (fileIds: string[]) => void;
+  onDone: (files: FileJSON[]) => void;
   /**
-   * When a user has succesfully uploaded some files this callback will be called
+   * When a user has successfully uploaded some files this callback will be called
    */
   onUpload?: (done: DoneNotification[]) => void;
   /**

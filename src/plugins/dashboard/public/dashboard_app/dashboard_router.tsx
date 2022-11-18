@@ -68,11 +68,13 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     chrome: { setBadge, docTitle, setHelpExtension },
     dashboardCapabilities: { showWriteControls },
     documentationLinks: { dashboardDocLink },
-    data: dataStart,
-    embeddable,
-    notifications,
-    savedObjectsTagging,
     settings: { uiSettings },
+    savedObjectsTagging,
+    data: dataStart,
+    notifications,
+    embeddable,
+    overlays,
+    http,
   } = pluginServices.getServices();
 
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
@@ -172,6 +174,8 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
               core: {
                 application: application as TableListViewApplicationService,
                 notifications,
+                overlays,
+                http,
               },
               toMountPoint,
               savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved

@@ -10,12 +10,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
-import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import type { TGridCellAction, BulkActionsProp } from '@kbn/timelines-plugin/common/types';
 import type { ControlColumnProps, TableId } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
-import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
-import type { inputsModel, State } from '../../store';
+import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { APP_UI_ID } from '../../../../common/constants';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -65,6 +64,7 @@ export interface Props {
   additionalFilters?: React.ReactNode;
   hasAlertsCrud?: boolean;
   unit?: (n: number) => string;
+  bulkActions: boolean | BulkActionsProp;
 }
 
 /**
@@ -87,15 +87,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   start,
   scopeId,
   additionalFilters,
-  hasAlertsCrud = false,
   unit,
+  bulkActions,
 }) => {
   const dispatch = useDispatch();
   const {
     filters,
     input,
     query,
-    globalQueries,
     dataTable: {
       columns,
       defaultColumns,
@@ -110,6 +109,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const { timelines: timelinesUi } = useKibana().services;
+
   const {
     browserFields,
     dataViewId,
@@ -184,21 +184,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     [dispatch, tableId]
   );
 
-  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-  };
-
-  const addToCaseBulkActions = useBulkAddToCaseActions();
-  const bulkActions = useMemo(
-    () => ({
-      onAlertStatusActionSuccess: () => {
-        refetchQuery(globalQueries);
-      },
-      customBulkActions: addToCaseBulkActions,
-    }),
-    [addToCaseBulkActions, globalQueries]
-  );
-
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope: scopeId,
     editorActionsRef,
@@ -231,7 +216,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             globalFullScreen,
             graphEventId,
             graphOverlay,
-            hasAlertsCrud,
             id: tableId,
             indexNames: selectedPatterns,
             indexPattern,

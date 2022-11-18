@@ -9,6 +9,15 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn(),
+}));
+
+beforeEach(() => {
+  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+});
 
 const onChangeMock = jest.fn();
 

@@ -19,6 +19,7 @@ export type StaticPage =
   | 'settings_create_outputs'
   | 'settings_create_download_sources'
   | 'settings_create_fleet_server_hosts'
+  | 'settings_create_fleet_proxy'
   | 'debug';
 
 export type DynamicPage =
@@ -41,9 +42,11 @@ export type DynamicPage =
   | 'agent_list'
   | 'agent_details'
   | 'agent_details_logs'
+  | 'agent_details_diagnostics'
   | 'settings_edit_outputs'
   | 'settings_edit_download_sources'
-  | 'settings_edit_fleet_server_hosts';
+  | 'settings_edit_fleet_server_hosts'
+  | 'settings_edit_fleet_proxy';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -61,6 +64,7 @@ export const FLEET_ROUTING_PATHS = {
   agents: '/agents',
   agent_details: '/agents/:agentId/:tabId?',
   agent_details_logs: '/agents/:agentId/logs',
+  agent_details_diagnostics: '/agents/:agentId/diagnostics',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
@@ -75,6 +79,8 @@ export const FLEET_ROUTING_PATHS = {
   settings_create_outputs: '/settings/create-outputs',
   settings_edit_outputs: '/settings/outputs/:outputId',
   settings_create_download_sources: '/settings/create-download-sources',
+  settings_create_fleet_proxy: '/settings/create-fleet-proxy',
+  settings_edit_fleet_proxy: '/settings/fleet-proxies/:itemId',
   settings_edit_download_sources: '/settings/downloadSources/:downloadSourceId',
   debug: '/_debug',
 
@@ -199,6 +205,7 @@ export const pagePathGetters: {
     `/agents/${agentId}${tabId ? `/${tabId}` : ''}${logQuery ? `?_q=${logQuery}` : ''}`,
   ],
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
+  agent_details_diagnostics: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/diagnostics`],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
   settings: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings],
@@ -209,6 +216,14 @@ export const pagePathGetters: {
   settings_create_fleet_server_hosts: () => [
     FLEET_BASE_PATH,
     FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts,
+  ],
+  settings_create_fleet_proxy: () => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_create_fleet_proxy,
+  ],
+  settings_edit_fleet_proxy: ({ itemId }) => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_edit_fleet_proxy.replace(':itemId', itemId.toString()),
   ],
   settings_edit_outputs: ({ outputId }) => [
     FLEET_BASE_PATH,

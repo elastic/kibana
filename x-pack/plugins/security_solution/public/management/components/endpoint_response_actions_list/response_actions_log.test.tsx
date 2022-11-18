@@ -119,6 +119,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 jest.mock('../../hooks/endpoint/use_get_endpoints_list');
 
+jest.mock('../../../common/experimental_features_service');
+
 jest.mock('../../../common/components/user_privileges');
 
 let mockUseGetFileInfo: {
@@ -136,7 +138,8 @@ jest.mock('../../hooks/response_actions/use_get_file_info', () => {
 
 const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 
-describe('Response actions history', () => {
+// FLAKY https://github.com/elastic/kibana/issues/145635
+describe.skip('Response actions history', () => {
   const useUserPrivilegesMock = _useUserPrivileges as jest.Mock<
     ReturnType<typeof _useUserPrivileges>
   >;
@@ -464,7 +467,7 @@ describe('Response actions history', () => {
       const downloadLink = getByTestId(`${testPrefix}-getFileDownloadLink`);
       expect(downloadLink).toBeTruthy();
       expect(downloadLink.textContent).toEqual(
-        'Click here to download(ZIP file passcode: elastic)'
+        'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
       );
     });
 
