@@ -39,7 +39,7 @@ export class RemovePanelAction implements Action<ActionContext> {
       // Casting to a type that has the method will do for now.
       (
         embeddable.parent as unknown as { getExpandedPanelId: () => string | undefined }
-      ).getExpandedPanelId?.() === embeddable.id;
+      )?.getExpandedPanelId?.() === embeddable.id;
 
     return Boolean(
       embeddable.parent && embeddable.getInput().viewMode === ViewMode.EDIT && !isPanelExpanded
