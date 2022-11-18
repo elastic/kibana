@@ -145,7 +145,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     schema,
   });
 
-  const { getFields, getFormData, reset, submit, validate } = form;
+  const { getFields, getFormData, reset, validate } = form;
   const [formData] = useFormData<DefineStepRule>({
     form,
     watch: [
@@ -391,18 +391,19 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [onSubmit]);
 
   const getData = useCallback(async () => {
-    // submit sometimes do not return correct validation state of form
-    // validate is called to ensure form validation state is up to date
-    const [result, isValid] = await Promise.all([submit(), validate()]);
+    // validate sometimes do not return correct validation state of form
+    // workaround is to call it twice
+    await validate();
+    const isValid = await validate();
+
     return {
       isValid,
       data: {
-        // when result.isValid === false, result.data might be empty, so getFormData is called
-        ...(result.isValid ? result.data : getFormData()),
+        ...getFormData(),
         eqlOptions: optionsSelected,
       },
     };
-  }, [getFormData, optionsSelected, submit, validate]);
+  }, [getFormData, optionsSelected, validate]);
 
   useEffect(() => {
     let didCancel = false;
