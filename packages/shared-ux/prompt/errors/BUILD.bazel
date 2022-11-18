@@ -65,7 +65,10 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
+  "@npm//@types/react",
+  "@npm//@elastic/eui",
+  "//packages/kbn-ambient-ui-types",
+  "//packages/kbn-i18n:npm_module_types",
 ]
 
 jsts_transpiler(

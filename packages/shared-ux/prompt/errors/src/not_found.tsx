@@ -35,7 +35,7 @@ interface NotFoundProps {
 
 export function NotFound({ actions }: NotFoundProps) {
   const { colorMode } = useEuiTheme();
-  const [errorImage, setErrorImage] = useState();
+  const [errorImage, setErrorImage] = useState<string>();
   const goBack = useCallback(() => history.back(), []);
 
   useEffect(() => {
