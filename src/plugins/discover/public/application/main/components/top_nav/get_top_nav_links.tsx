@@ -81,6 +81,7 @@ export const getTopNavLinks = ({
     run: async (anchorElement: HTMLElement) => {
       openAlertsPopover({
         I18nContext: services.core.i18n.Context,
+        theme$: services.core.theme.theme$,
         anchorElement,
         searchSource: savedSearch.searchSource,
         services,
