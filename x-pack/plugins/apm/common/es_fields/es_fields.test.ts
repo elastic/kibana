@@ -18,7 +18,6 @@ const fieldnames = {
   ...infraMetricsFieldnames,
 };
 
-console.log(apmFieldnames);
 describe('Transaction', () => {
   const transaction: AllowUnknownProperties<Transaction> = {
     '@timestamp': new Date().toString(),
