@@ -111,7 +111,6 @@ import {
   validateOperationOnAttributes,
   retryIfBulkEditConflicts,
   retryIfBulkDeleteConflicts,
-  retryIfBulkEnableConflicts,
   retryIfBulkConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
