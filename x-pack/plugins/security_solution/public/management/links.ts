@@ -41,7 +41,6 @@ import {
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   RULES,
-  LIST_DETAILS,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
@@ -142,14 +141,6 @@ export const links: LinkItem = {
         i18n.translate('xpack.securitySolution.appLinks.exceptions', {
           defaultMessage: 'Exception lists',
         }),
-      ],
-      links: [
-        {
-          id: SecurityPageName.exceptionListDetails,
-          title: LIST_DETAILS,
-          path: '',
-          skipUrlState: true,
-        },
       ],
     },
     {
