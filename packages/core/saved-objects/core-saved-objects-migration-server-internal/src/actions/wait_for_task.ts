@@ -13,7 +13,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 
 /** @internal */

@@ -112,10 +112,7 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object
 export const HostIsolationExceptionsList = memo(() => {
   const http = useHttp();
   const apiClient = HostIsolationExceptionsApiClient.getInstance(http);
-  // There is a flow when the Host Isolation Exceptions page is accessible to the user, even
-  // though they might not have authz to isolate hosts - in a downgrade scenario when entries
-  // still exist. The only thing the user can do is view and delete entries.
-  const canIsolate = useUserPrivileges().endpointPrivileges.canIsolateHost;
+  const { canWriteHostIsolationExceptions } = useUserPrivileges().endpointPrivileges;
 
   return (
     <ArtifactListPage
@@ -124,8 +121,8 @@ export const HostIsolationExceptionsList = memo(() => {
       labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
       data-test-subj="hostIsolationExceptionsListPage"
       searchableFields={SEARCHABLE_FIELDS}
-      allowCardCreateAction={canIsolate}
-      allowCardEditAction={canIsolate}
+      allowCardCreateAction={canWriteHostIsolationExceptions}
+      allowCardEditAction={canWriteHostIsolationExceptions}
     />
   );
 });
