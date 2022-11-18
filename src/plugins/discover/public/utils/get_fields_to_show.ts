@@ -23,15 +23,17 @@ export const getShouldShowFieldHandler = (
   dataView: DataView,
   showMultiFields: boolean
 ): ShouldShowFieldInTableHandler => {
+  const showUnmapped = true;
   const fieldsToShowMap = new Map<string, boolean>();
 
   fields.forEach((fieldName) => {
-    if (canShowFieldInTable(fieldName, fields, dataView, showMultiFields)) {
-      fieldsToShowMap.set(fieldName, true);
-    }
+    fieldsToShowMap.set(
+      fieldName,
+      canShowFieldInTable(fieldName, fields, dataView, showMultiFields)
+    );
   });
 
-  return (fieldName: string) => fieldsToShowMap.get(fieldName) ?? false;
+  return (fieldName: string) => fieldsToShowMap.get(fieldName) ?? showUnmapped;
 };
 
 const canShowFieldInTable = (
