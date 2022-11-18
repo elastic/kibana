@@ -26,7 +26,7 @@ export class Artifact implements IArtifact {
   public async start(receiver: ITelemetryReceiver) {
     this.receiver = receiver;
     this.esClusterInfo = await this.receiver.fetchClusterInfo();
-    if (this.esClusterInfo.version) {
+    if (this.esClusterInfo?.version?.number) {
       const version =
         this.esClusterInfo.version.number.substring(
           0,
