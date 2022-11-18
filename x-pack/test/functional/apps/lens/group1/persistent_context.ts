@@ -153,6 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should carry over time range and pinned filters to discover', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange(
         'Sep 6, 2015 @ 06:31:44.000',
         'Sep 18, 2025 @ 06:31:44.000'
       );
