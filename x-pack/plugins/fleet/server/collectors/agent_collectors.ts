@@ -52,7 +52,11 @@ export const getAgentUsage = async (
 
 export interface AgentData {
   agent_versions: string[];
-  agent_last_checkin_status: {
+  agent_checkin_status: {
+    error: number;
+    degraded: number;
+  };
+  agent_checkin_status_last_1h: {
     error: number;
     degraded: number;
   };
@@ -60,7 +64,8 @@ export interface AgentData {
 
 const DEFAULT_AGENT_DATA = {
   agent_versions: [],
-  agent_last_checkin_status: { error: 0, degraded: 0 },
+  agent_checkin_status: { error: 0, degraded: 0 },
+  agent_checkin_status_last_1h: { error: 0, degraded: 0 },
 };
 
 export const getAgentData = async (esClient?: ElasticsearchClient): Promise<AgentData> => {
@@ -68,6 +73,14 @@ export const getAgentData = async (esClient?: ElasticsearchClient): Promise<Agen
     return DEFAULT_AGENT_DATA;
   }
   try {
+    const transformLastCheckinStatusBuckets = (resp: any) =>
+      ((resp?.aggregations?.last_checkin_status as any).buckets ?? []).reduce(
+        (acc: any, bucket: any) => {
+          if (acc[bucket.key] !== undefined) acc[bucket.key] = bucket.doc_count;
+          return acc;
+        },
+        { error: 0, degraded: 0 }
+      );
     const response = await esClient.search({
       index: AGENTS_INDEX,
       size: 0,
@@ -83,16 +96,43 @@ export const getAgentData = async (esClient?: ElasticsearchClient): Promise<Agen
     const versions = ((response?.aggregations?.versions as any).buckets ?? []).map(
       (bucket: any) => bucket.key
     );
-    const statuses = ((response?.aggregations?.last_checkin_status as any).buckets ?? []).reduce(
-      (acc: any, bucket: any) => {
-        if (acc[bucket.key] !== undefined) acc[bucket.key] = bucket.doc_count;
-        return acc;
+    const statuses = transformLastCheckinStatusBuckets(response);
+
+    const responseLast1h = await esClient.search({
+      index: AGENTS_INDEX,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                must: [
+                  {
+                    range: {
+                      last_checkin: {
+                        gte: 'now-1h/h',
+                        lt: 'now/h',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
       },
-      { error: 0, degraded: 0 }
-    );
+      aggs: {
+        last_checkin_status: {
+          terms: { field: 'last_checkin_status' },
+        },
+      },
+    });
+    const statusesLast1h = transformLastCheckinStatusBuckets(responseLast1h);
+
     return {
       agent_versions: versions,
-      agent_last_checkin_status: statuses,
+      agent_checkin_status: statuses,
+      agent_checkin_status_last_1h: statusesLast1h,
     };
   } catch (error) {
     if (error.statusCode === 404) {

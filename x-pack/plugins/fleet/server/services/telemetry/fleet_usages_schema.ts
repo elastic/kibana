@@ -164,7 +164,23 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
-  agent_last_checkin_status: {
+  agent_checkin_status: {
+    properties: {
+      error: {
+        type: 'long',
+        _meta: {
+          description: 'Count of agent last checkin status error',
+        },
+      },
+      degraded: {
+        type: 'long',
+        _meta: {
+          description: 'Count of agent last checkin status degraded',
+        },
+      },
+    },
+  },
+  agent_checkin_status_last_1h: {
     properties: {
       error: {
         type: 'long',
