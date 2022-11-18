@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`groupAndBulkCreate utils buildBucketHistoryFilter should create the expected query 1`] = `
+Array [
+  Object {
+    "bool": Object {
+      "must_not": Array [
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "host.name": "host-0",
+                },
+              },
+              Object {
+                "term": Object {
+                  "source.ip": "127.0.0.1",
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2022-11-01T11:30:00.000Z",
+                    "lte": "2022-11-01T12:00:00Z",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "host.name": "host-1",
+                },
+              },
+              Object {
+                "term": Object {
+                  "source.ip": "192.0.0.1",
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2022-11-01T11:30:00.000Z",
+                    "lte": "2022-11-01T12:05:00Z",
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+]
+`;
