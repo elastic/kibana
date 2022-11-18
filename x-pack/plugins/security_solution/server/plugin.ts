@@ -56,6 +56,7 @@ import {
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
+import { registerEventFiltersFieldsSuggestionsRoutes } from './endpoint/routes/event_filters_fields_suggestions';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from './endpoint/types';
@@ -102,6 +103,7 @@ import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
+import { eventFiltersFieldsProvider } from './search_strategy/event_filters_fields';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -301,7 +303,12 @@ export class Plugin implements ISecuritySolutionPlugin {
       previewRuleDataClient,
       this.telemetryReceiver
     );
+
     registerEndpointRoutes(router, endpointContext);
+    registerEventFiltersFieldsSuggestionsRoutes(
+      router,
+      plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create()
+    );
     registerLimitedConcurrencyRoutes(core);
     registerPolicyRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
@@ -348,6 +355,11 @@ export class Plugin implements ISecuritySolutionPlugin {
         getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
         config,
       });
+
+      const eventFiltersFieldsStrategy = eventFiltersFieldsProvider();
+
+      // TODO: Should we move this inside the securitySolutionSearchStrategy?
+      plugins.data.search.registerSearchStrategy('eventFiltersFields', eventFiltersFieldsStrategy);
 
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,

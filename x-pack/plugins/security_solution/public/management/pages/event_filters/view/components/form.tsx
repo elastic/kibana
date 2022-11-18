@@ -27,6 +27,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
+import type { QuerySuggestionGetFn } from '@kbn/unified-search-plugin/public';
+import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { useFetchIndex } from '../../../../../common/containers/source';
@@ -103,6 +105,12 @@ const cleanupEntries = (
   );
 };
 
+interface EventFiltersAutocompleteService {
+  getQuerySuggestions: QuerySuggestionGetFn;
+  hasQuerySuggestions: (language: string) => boolean;
+  getValueSuggestions: ValueSuggestionsGetFn;
+}
+
 type EventFilterItemEntries = Array<{
   field: string;
   value: string;
@@ -113,7 +121,22 @@ type EventFilterItemEntries = Array<{
 export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
   memo(({ allowSelectOs = true, item: exception, policies, policiesIsLoading, onChange, mode }) => {
     const getTestId = useTestIdGenerator('eventFilters-form');
-    const { http, unifiedSearch } = useKibana().services;
+    const { http } = useKibana().services;
+
+    const autocomplete: EventFiltersAutocompleteService = useMemo(
+      () => ({
+        getQuerySuggestions: () => undefined,
+        hasQuerySuggestions: (_) => false,
+        getValueSuggestions: ({ field, query }) => {
+          // TODO: Move this to the artifacts api client
+          const res: Promise<string[]> = http.post('/api/endpoint/eventFiltersFieldsSuggestions', {
+            body: JSON.stringify({ field: field.name, query }),
+          });
+          return Promise.resolve(res);
+        },
+      }),
+      [http]
+    );
 
     const [hasFormChanged, setHasFormChanged] = useState(false);
     const [hasNameError, toggleHasNameError] = useState<boolean>(!exception.name);
@@ -130,7 +153,12 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
-    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(indexNames);
+    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
+      indexNames,
+      undefined,
+      'eventFiltersFields'
+    );
+
     const [areConditionsValid, setAreConditionsValid] = useState(
       !!exception.entries.length || false
     );
@@ -416,7 +444,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         getExceptionBuilderComponentLazy({
           allowLargeValueLists: false,
           httpService: http,
-          autocompleteService: unifiedSearch.autocomplete,
+          autocompleteService: autocomplete,
           exceptionListItems: [eventFilterItem as ExceptionListItemSchema],
           listType: EVENT_FILTER_LIST_TYPE,
           listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -434,7 +462,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           operatorsList: EVENT_FILTERS_OPERATORS,
           osTypes: exception.os_types,
         }),
-      [unifiedSearch, handleOnBuilderChange, http, indexPatterns, exception, eventFilterItem]
+      [autocomplete, handleOnBuilderChange, http, indexPatterns, exception, eventFilterItem]
     );
 
     // conditions
