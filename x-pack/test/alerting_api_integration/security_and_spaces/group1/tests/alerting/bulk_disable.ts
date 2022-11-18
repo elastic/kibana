@@ -31,11 +31,10 @@ const getDefaultRules = (response: any) => ({
   updatedAt: response.body.rules[0].updatedAt,
   createdAt: response.body.rules[0].createdAt,
   scheduledTaskId: response.body.rules[0].scheduledTaskId,
-  executionStatus: {
-    lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
-    status: 'pending',
-  },
+  executionStatus: response.body.rules[0].executionStatus,
   monitoring: response.body.rules[0].monitoring,
+  ...(response.body.rules[0].nextRun ? { nextRun: response.body.rules[0].nextRun } : {}),
+  ...(response.body.rules[0].lastRun ? { lastRun: response.body.rules[0].lastRun } : {}),
 });
 
 const getDefaultResponse = (response: any) => ({
