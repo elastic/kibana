@@ -156,9 +156,6 @@ export const THREAT_INTELLIGENCE = i18n.translate(
   }
 );
 
-export const SHARED_LIST_DETAILS = i18n.translate(
-  'xpack.securitySolution.navigation.shared_list_details',
-  {
-    defaultMessage: 'Shared list details',
-  }
-);
+export const LIST_DETAILS = i18n.translate('xpack.securitySolution.navigation.list_details', {
+  defaultMessage: 'List Details',
+});

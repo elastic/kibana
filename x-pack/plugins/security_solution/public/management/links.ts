@@ -41,7 +41,7 @@ import {
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   RULES,
-  SHARED_LIST_DETAILS,
+  LIST_DETAILS,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
@@ -146,7 +146,7 @@ export const links: LinkItem = {
       links: [
         {
           id: SecurityPageName.sharedExceptionListDetails,
-          title: SHARED_LIST_DETAILS,
+          title: LIST_DETAILS,
           path: '',
           skipUrlState: true,
         },

@@ -13,7 +13,7 @@ import * as i18n from './translations';
 import {
   EXCEPTIONS_PATH,
   SecurityPageName,
-  SHARED_EXCEPTION_LIST_DETAIL_PATH,
+  EXCEPTION_LIST_DETAIL_PATH,
 } from '../../common/constants';
 
 import { SharedLists, ListsDetailView } from './pages';
@@ -46,7 +46,7 @@ const ExceptionsContainerComponent: React.FC = () => {
   return (
     <Switch>
       <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />
-      <Route path={SHARED_EXCEPTION_LIST_DETAIL_PATH} component={ExceptionsListDetailRoute} />
+      <Route path={EXCEPTION_LIST_DETAIL_PATH} component={ExceptionsListDetailRoute} />
       <Route component={NotFoundPage} />
     </Switch>
   );

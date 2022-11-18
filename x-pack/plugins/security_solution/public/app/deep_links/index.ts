@@ -48,7 +48,7 @@ import {
   TIMELINES,
   TRUSTED_APPLICATIONS,
   USERS,
-  SHARED_LIST_DETAILS,
+  LIST_DETAILS,
 } from '../translations';
 import {
   ALERTS_PATH,
@@ -74,7 +74,7 @@ import {
   TIMELINES_PATH,
   TRUSTED_APPS_PATH,
   USERS_PATH,
-  SHARED_EXCEPTION_LIST_DETAIL_PATH,
+  EXCEPTION_LIST_DETAIL_PATH,
 } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { hasCapabilities, subscribeAppLinks } from '../../common/links';
@@ -239,8 +239,8 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         deepLinks: [
           {
             id: SecurityPageName.sharedExceptionListDetails,
-            title: SHARED_LIST_DETAILS,
-            path: SHARED_EXCEPTION_LIST_DETAIL_PATH,
+            title: LIST_DETAILS,
+            path: EXCEPTION_LIST_DETAIL_PATH,
             navLinkStatus: AppNavLinkStatus.hidden,
             searchable: false,
           },
