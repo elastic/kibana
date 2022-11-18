@@ -370,7 +370,7 @@ describe('toRaw', () => {
     expect(alertInstance.toRaw()).toEqual(raw);
   });
 
-  test('returns unserialised underlying partial meta is recovered is true', () => {
+  test('returns unserialised underlying partial meta if recovered is true', () => {
     const raw = {
       state: { foo: true },
       meta: {
