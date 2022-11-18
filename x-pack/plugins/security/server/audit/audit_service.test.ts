@@ -25,7 +25,7 @@ import {
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 const logger = loggingSystemMock.createLogger();
 const license = licenseMock.create();

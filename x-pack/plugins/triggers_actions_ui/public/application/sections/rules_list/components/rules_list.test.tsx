@@ -898,7 +898,7 @@ describe('rules_list component with items', () => {
   describe('render table of rules', () => {
     beforeAll(async () => {
       // Use fake timers so we don't have to wait for the EuiToolTip timeout
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
       await setup();
     });
 

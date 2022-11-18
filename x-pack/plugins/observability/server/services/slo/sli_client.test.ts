@@ -441,7 +441,7 @@ describe('SLIClient', () => {
 
         const result = await sliClient.fetchSLIDataFrom(slo, lookbackWindows);
 
-        expect(esClientMock.search.mock.lastCall[0]).toMatchObject({
+        expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
             [LONG_WINDOW]: {
               date_range: {
@@ -531,7 +531,7 @@ describe('SLIClient', () => {
 
         const result = await sliClient.fetchSLIDataFrom(slo, lookbackWindows);
 
-        expect(esClientMock.search.mock.lastCall[0]).toMatchObject({
+        expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
             [LONG_WINDOW]: {
               date_range: {

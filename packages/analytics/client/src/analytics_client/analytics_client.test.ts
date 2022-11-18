@@ -21,7 +21,7 @@ describe('AnalyticsClient', () => {
   let logger: MockedLogger;
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     logger = loggerMock.create();
     analyticsClient = new AnalyticsClient({
       logger,
