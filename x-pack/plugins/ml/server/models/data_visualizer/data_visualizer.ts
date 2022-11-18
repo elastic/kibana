@@ -656,20 +656,7 @@ export class DataVisualizer {
         },
       };
 
-      // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
-      // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
-      if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-        aggs[`${safeFieldName}_top`] = {
-          sampler: {
-            shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-          },
-          aggs: {
-            top,
-          },
-        };
-      } else {
-        aggs[`${safeFieldName}_top`] = top;
-      }
+      aggs[`${safeFieldName}_top`] = top;
     });
 
     const searchBody = {
@@ -782,20 +769,7 @@ export class DataVisualizer {
         },
       };
 
-      // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
-      // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
-      if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-        aggs[`${safeFieldName}_top`] = {
-          sampler: {
-            shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-          },
-          aggs: {
-            top,
-          },
-        };
-      } else {
-        aggs[`${safeFieldName}_top`] = top;
-      }
+      aggs[`${safeFieldName}_top`] = top;
     });
 
     const searchBody = {
