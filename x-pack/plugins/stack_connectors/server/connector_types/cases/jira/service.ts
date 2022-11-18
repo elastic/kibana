@@ -125,7 +125,7 @@ export const createExternalService = (
 
     const { errorMessages, errors } = errorResponse;
 
-    if (isEmpty(errors) && Array.isArray(errorMessages) && errorMessages.length > 0) {
+    if (Array.isArray(errorMessages) && errorMessages.length > 0) {
       return `${errorMessages.join(', ')}`;
     }
 

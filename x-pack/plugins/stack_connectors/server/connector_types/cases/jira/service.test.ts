@@ -16,7 +16,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
-  response?: { data: { errors: Record<string, string> } };
+  response?: { data: { errors: Record<string, string>, errorMessages?: string[] } };
 }
 
 jest.mock('axios');
@@ -1244,22 +1244,23 @@ describe('Jira service', () => {
       );
     });
 
-    test('it should throw an error when only one double quote is used', async () => {
+    test('it should show an error from errorMessages', async () => {
       requestMock.mockImplementation(() => {
         const error: ResponseError = new Error('An error has occurred');
         error.response = {
           data: {
             errors: {
               issuestypes:
-                'Error in the JQL Query: The quoted string has not been completed. (line 1, character 34)',
+                'My second error',
             },
+            errorMessages: ['My first error']
           },
         };
         throw error;
       });
 
       await expect(service.getIssues('<hj>"')).rejects.toThrow(
-        '[Action][Jira]: Unable to get issues. Error: An error has occurred. Reason: Error in the JQL Query: The quoted string has not been completed. (line 1, character 34)'
+        '[Action][Jira]: Unable to get issues. Error: An error has occurred. Reason: My first error'
       );
     });
 
