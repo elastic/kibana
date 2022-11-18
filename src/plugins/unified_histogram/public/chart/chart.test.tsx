@@ -19,10 +19,12 @@ import { of } from 'rxjs';
 import { HitsCounter } from '../hits_counter';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
+import { BreakdownFieldSelector } from './breakdown_field_selector';
 
 async function mountComponent({
   noChart,
   noHits,
+  noBreakdown,
   chartHidden = false,
   appendHistogram,
   onEditVisualization = jest.fn(),
@@ -30,6 +32,7 @@ async function mountComponent({
 }: {
   noChart?: boolean;
   noHits?: boolean;
+  noBreakdown?: boolean;
   chartHidden?: boolean;
   appendHistogram?: ReactElement;
   dataView?: DataView;
@@ -68,6 +71,7 @@ async function mountComponent({
             scale: 2,
           },
         },
+    breakdown: noBreakdown ? undefined : { field: undefined },
     appendHistogram,
     onEditVisualization: onEditVisualization || undefined,
     onResetChartHeight: jest.fn(),
@@ -166,5 +170,20 @@ describe('Chart', () => {
   it('should render chart if data view is time based', async () => {
     const component = await mountComponent();
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
+  });
+
+  it('should render BreakdownFieldSelector when chart is visible and breakdown is defined', async () => {
+    const component = await mountComponent();
+    expect(component.find(BreakdownFieldSelector).exists()).toBeTruthy();
+  });
+
+  it('should not render BreakdownFieldSelector when chart is hidden', async () => {
+    const component = await mountComponent({ chartHidden: true });
+    expect(component.find(BreakdownFieldSelector).exists()).toBeFalsy();
+  });
+
+  it('should not render BreakdownFieldSelector when chart is visible and breakdown is undefined', async () => {
+    const component = await mountComponent({ noBreakdown: true });
+    expect(component.find(BreakdownFieldSelector).exists()).toBeFalsy();
   });
 });

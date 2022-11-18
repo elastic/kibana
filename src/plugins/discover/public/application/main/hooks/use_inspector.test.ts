@@ -10,15 +10,23 @@ import { renderHook } from '@testing-library/react-hooks';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useInspector } from './use_inspector';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import { OverlayRef } from '@kbn/core/public';
+import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 
 describe('test useInspector', () => {
   test('inspector open function is executed, expanded doc is closed', async () => {
     const setExpandedDoc = jest.fn();
-
+    let adapters: Adapters | undefined;
+    jest.spyOn(discoverServiceMock.inspector, 'open').mockImplementation((localAdapters) => {
+      adapters = localAdapters;
+      return {} as OverlayRef;
+    });
+    const requests = new RequestAdapter();
+    const lensRequests = new RequestAdapter();
     const { result } = renderHook(() => {
       return useInspector({
-        inspectorAdapters: { requests: new RequestAdapter() },
+        inspectorAdapters: { requests, lensRequests },
         savedSearch: savedSearchMock,
         inspector: discoverServiceMock.inspector,
         setExpandedDoc,
@@ -27,5 +35,10 @@ describe('test useInspector', () => {
     result.current();
     expect(setExpandedDoc).toHaveBeenCalledWith(undefined);
     expect(discoverServiceMock.inspector.open).toHaveBeenCalled();
+    expect(adapters?.requests).toBeInstanceOf(AggregateRequestAdapter);
+    expect(adapters?.requests?.getRequests()).toEqual([
+      ...requests.getRequests(),
+      ...lensRequests.getRequests(),
+    ]);
   });
 });

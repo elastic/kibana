@@ -12,6 +12,7 @@ export type { UnifiedHistogramLayoutProps } from './layout';
 export { UnifiedHistogramLayout } from './layout';
 export type {
   UnifiedHistogramServices,
+  UnifiedHistogramRequestContext,
   UnifiedHistogramHitsContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramBreakdownContext,

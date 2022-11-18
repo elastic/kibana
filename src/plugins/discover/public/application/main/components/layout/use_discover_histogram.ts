@@ -167,7 +167,7 @@ export const useDiscoverHistogram = ({
     (status: UnifiedHistogramFetchStatus, result?: number | Error) => {
       if (result instanceof Error) {
         // Display the error and set totalHits$ to an error state
-        sendErrorTo(data, savedSearchData$.totalHits$);
+        sendErrorTo(data, savedSearchData$.totalHits$)(result);
         return;
       }
 
