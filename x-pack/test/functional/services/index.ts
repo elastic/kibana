@@ -68,7 +68,6 @@ import {
 } from './dashboard';
 import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
-// import { CompareImagesProvider } from './compare_images';
 import { CasesServiceProvider } from './cases';
 import { ActionsServiceProvider } from './actions';
 import { RulesServiceProvider } from './rules';
