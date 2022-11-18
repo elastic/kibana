@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { getImageMetadata, isImage, fitToBox } from './image_metadata';
+export { getImageMetadata, isImage, fitToBox, getBlurhashSrc } from './image_metadata';
 export type { ImageMetadataFactory } from './image_metadata';
