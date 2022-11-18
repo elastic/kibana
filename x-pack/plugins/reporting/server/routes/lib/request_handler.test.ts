@@ -51,7 +51,7 @@ const mockJobParams: JobParamsPDFDeprecated = {
 
 const mockCounters = {
   usageCounter: jest.fn(),
-  handleError: jest.fn(),
+  errorCounter: jest.fn(),
 };
 
 describe('Handle request to generate', () => {

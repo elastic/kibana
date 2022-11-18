@@ -8,14 +8,15 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
+import { promisify } from 'util';
 import { ReportingCore } from '../..';
-import { API_BASE_URL } from '../../../common/constants';
+import { ALLOWED_JOB_CONTENT_TYPES, API_BASE_URL } from '../../../common/constants';
+import { getContentStream } from '../../lib';
 import {
   authorizedUserPreRouting,
-  deleteJobResponseHandler,
-  downloadJobResponseHandler,
   getCounters,
   handleUnavailable,
+  jobManagementPreRouting,
   jobsQueryFactory,
 } from '../lib';
 
@@ -183,11 +184,26 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }
 
         const { docId } = req.params;
-        const {
-          management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
 
-        return downloadJobResponseHandler(reporting, res, jobTypes, user, { docId }, counters);
+        return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
+          const payload = await jobsQuery.getDocumentPayload(doc);
+
+          if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
+            return res.badRequest({
+              body: `Unsupported content-type of ${payload.contentType} specified by job output`,
+            });
+          }
+
+          return res.custom({
+            body:
+              typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
+            statusCode: payload.statusCode,
+            headers: {
+              ...payload.headers,
+              'content-type': payload.contentType,
+            },
+          });
+        });
       })
     );
   };
@@ -214,11 +230,19 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }
 
         const { docId } = req.params;
-        const {
-          management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
 
-        return deleteJobResponseHandler(reporting, res, jobTypes, user, { docId }, counters);
+        return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
+          const docIndex = doc.index;
+          const stream = await getContentStream(reporting, { id: docId, index: docIndex });
+
+          /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
+          await promisify(stream.end.bind(stream, '', 'utf8'))();
+          await jobsQuery.delete(docIndex, docId);
+
+          return res.ok({
+            body: { deleted: true },
+          });
+        });
       })
     );
   };

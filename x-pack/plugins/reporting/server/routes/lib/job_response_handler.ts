@@ -5,111 +5,77 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from '@kbn/core/server';
-import { promisify } from 'util';
-import { ReportingCore } from '../..';
-import { ALLOWED_JOB_CONTENT_TYPES } from '../../../common/constants';
-import { getContentStream } from '../../lib';
-import { ReportingUser } from '../../types';
+import Boom from '@hapi/boom';
+import { IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { jobsQueryFactory } from '.';
+import { ReportingCore } from '../..';
+import { ReportApiJSON } from '../../lib/store/report';
+import { ReportingUser } from '../../types';
 import type { Counters } from './get_counter';
-import { getDocumentPayloadFactory } from './get_document_payload';
 
-interface JobResponseHandlerParams {
-  docId: string;
-}
+/**
+ * Type for callback
+ */
+type JobManagementResponseHandler = (doc: ReportApiJSON) => Promise<IKibanaResponse<object>>;
 
-export async function downloadJobResponseHandler(
+/**
+ * Helper function for API routes that manage (download, delete) report jobs
+ */
+export const jobManagementPreRouting = async (
   reporting: ReportingCore,
   res: typeof kibanaResponseFactory,
-  validJobTypes: string[],
+  docId: string,
   user: ReportingUser,
-  params: JobResponseHandlerParams,
-  counters: Counters
-) {
-  const jobsQuery = jobsQueryFactory(reporting);
-  const getDocumentPayload = getDocumentPayloadFactory(reporting);
-  try {
-    const { docId } = params;
+  counters: Counters,
+  cb: JobManagementResponseHandler
+) => {
+  const licenseInfo = await reporting.getLicenseInfo();
+  const {
+    management: { jobTypes = [] },
+  } = licenseInfo;
 
-    const doc = await jobsQuery.get(user, docId);
-    if (!doc) {
-      return res.notFound();
-    }
-
-    if (!validJobTypes.includes(doc.jobtype)) {
-      return res.unauthorized({
-        body: `Sorry, you are not authorized to download ${doc.jobtype} reports`,
-      });
-    }
-
-    const payload = await getDocumentPayload(doc);
-
-    if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
-      return res.badRequest({
-        body: `Unsupported content-type of ${payload.contentType} specified by job output`,
-      });
-    }
-
-    counters.usageCounter();
-
-    return res.custom({
-      body: typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
-      statusCode: payload.statusCode,
-      headers: {
-        ...payload.headers,
-        'content-type': payload.contentType,
-      },
-    });
-  } catch (err) {
-    const { logger } = reporting.getPluginSetupDeps();
-    logger.error(err);
-    throw err;
-  }
-}
-
-export async function deleteJobResponseHandler(
-  reporting: ReportingCore,
-  res: typeof kibanaResponseFactory,
-  validJobTypes: string[],
-  user: ReportingUser,
-  params: JobResponseHandlerParams,
-  counters: Counters
-) {
   const jobsQuery = jobsQueryFactory(reporting);
 
-  const { docId } = params;
   const doc = await jobsQuery.get(user, docId);
-
   if (!doc) {
     return res.notFound();
   }
 
-  const { jobtype: jobType } = doc;
-
-  if (!validJobTypes.includes(jobType)) {
+  if (!jobTypes.includes(doc.jobtype)) {
     return res.unauthorized({
-      body: `Sorry, you are not authorized to delete ${jobType} reports`,
+      body: i18n.translate('xpack.reporting.jobResponse.errorHandler.notAuthorized', {
+        defaultMessage: `Sorry, you are not authorized to download or delete {jobtype} reports`,
+        values: { jobtype: doc.jobtype },
+      }),
     });
   }
 
-  const docIndex = doc.index;
-  const stream = await getContentStream(reporting, { id: docId, index: docIndex });
+  // Count usage once allowing the request
+  counters.usageCounter();
 
   try {
-    /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
-    await promisify(stream.end.bind(stream, '', 'utf8'))();
-    await jobsQuery.delete(docIndex, docId);
+    return cb(doc);
+  } catch (err) {
+    const { logger } = reporting.getPluginSetupDeps();
+    logger.error(err);
+    if (err instanceof Boom.Boom) {
+      const statusCode = err.output.statusCode;
+      counters?.errorCounter(statusCode);
+      return res.customError({
+        statusCode,
+        body: err.output.payload.message,
+      });
+    }
 
-    counters.usageCounter();
-
-    return res.ok({
-      body: { deleted: true },
-    });
-  } catch (error) {
+    counters?.errorCounter(500);
     return res.customError({
-      statusCode: error.statusCode,
-      body: error.message,
+      statusCode: 500,
+      body:
+        err?.message ||
+        i18n.translate('xpack.reporting.jobResponse.errorHandler.unknownError', {
+          defaultMessage: 'Unknown error',
+        }),
     });
   }
-}
+};

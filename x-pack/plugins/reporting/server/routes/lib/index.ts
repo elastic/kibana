@@ -6,8 +6,8 @@
  */
 
 export { authorizedUserPreRouting } from './authorized_user_pre_routing';
-export { deleteJobResponseHandler, downloadJobResponseHandler } from './job_response_handler';
-export { handleUnavailable } from './request_handler';
 export { getCounters } from './get_counter';
+export type { Counters } from './get_counter';
 export { jobsQueryFactory } from './jobs_query';
-export { RequestHandler } from './request_handler';
+export { jobManagementPreRouting } from './job_response_handler';
+export { handleUnavailable, RequestHandler } from './request_handler';
