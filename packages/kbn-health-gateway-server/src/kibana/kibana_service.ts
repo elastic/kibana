@@ -9,6 +9,7 @@
 import type { IConfigService } from '@kbn/config';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ServerStart } from '../server';
+import { KibanaConfig } from './kibana_config';
 import { RootRoute } from './routes';
 
 interface KibanaServiceStartDependencies {
@@ -25,15 +26,15 @@ interface KibanaServiceDependencies {
  */
 export class KibanaService {
   private readonly logger: Logger;
-  private readonly config: IConfigService;
+  private readonly kibanaConfig: KibanaConfig;
 
   constructor({ logger, config }: KibanaServiceDependencies) {
     this.logger = logger.get('kibana-service');
-    this.config = config;
+    this.kibanaConfig = new KibanaConfig({ config, logger: this.logger });
   }
 
   async start({ server }: KibanaServiceStartDependencies) {
-    server.addRoute(new RootRoute({ config: this.config, logger: this.logger }));
+    server.addRoute(new RootRoute(this.kibanaConfig, this.logger));
   }
 
   stop() {

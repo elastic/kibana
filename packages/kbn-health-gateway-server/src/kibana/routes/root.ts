@@ -11,14 +11,8 @@ import { Agent, AgentOptions } from 'https';
 import { URL } from 'url';
 import type { Request, ResponseObject, ResponseToolkit, ServerRoute } from '@hapi/hapi';
 import nodeFetch, { Response } from 'node-fetch';
-import type { IConfigService } from '@kbn/config';
 import type { Logger } from '@kbn/logging';
-import { KibanaConfig } from '../kibana_config';
-
-interface RootRouteDependencies {
-  logger: Logger;
-  config: IConfigService;
-}
+import type { KibanaConfig } from '../kibana_config';
 
 type Status = 'healthy' | 'unhealthy' | 'failure' | 'timeout';
 
@@ -58,12 +52,7 @@ export class RootRoute implements ServerRoute {
   readonly method = 'GET';
   readonly path = '/';
 
-  private kibanaConfig: KibanaConfig;
-  private logger: Logger;
-
-  constructor({ logger, config }: RootRouteDependencies) {
-    this.kibanaConfig = new KibanaConfig({ config, logger });
-    this.logger = logger;
+  constructor(private kibanaConfig: KibanaConfig, private logger: Logger) {
     this.handler = this.handler.bind(this);
 
     return pick(this, ['method', 'path', 'handler']) as RootRoute;
