@@ -23,42 +23,38 @@ export const getShouldShowFieldHandler = (
   dataView: DataView,
   showMultiFields: boolean
 ): ShouldShowFieldInTableHandler => {
-  const showUnmapped = true;
-  const fieldsToShowMap = new Map<string, boolean>();
+  if (showMultiFields) {
+    return () => true;
+  }
+
+  const fieldsToShowMap = new Map<string, { parentName?: string; show: boolean }>();
 
   fields.forEach((fieldName) => {
-    fieldsToShowMap.set(
-      fieldName,
-      canShowFieldInTable(fieldName, fields, dataView, showMultiFields)
-    );
+    fieldsToShowMap.set(fieldName, canShowFieldInTable(fieldName, dataView));
   });
 
-  return (fieldName: string) => fieldsToShowMap.get(fieldName) ?? showUnmapped;
+  return (fieldName: string) => {
+    const result = fieldsToShowMap.get(fieldName);
+    if (!result) {
+      return true; // for unmapped
+    }
+    // if the parent of the multi field was not in `fields` array then show the multi field too
+    return result.show || (!!result.parentName && !fieldsToShowMap.has(result.parentName));
+  };
 };
 
 const canShowFieldInTable = (
   fieldName: string,
-  fields: string[],
-  dataView: DataView,
-  showMultiFields: boolean
-): boolean => {
-  if (showMultiFields) {
-    return true;
-  }
-
+  dataView: DataView
+): { parentName?: string; show: boolean } => {
   const mapped = dataView.fields.getByName(fieldName);
 
   if (!mapped) {
-    return true;
+    return { show: true };
   }
 
   const subTypeMulti = getFieldSubtypeMulti(mapped.spec);
   const isMultiField = Boolean(subTypeMulti?.multi);
 
-  if (!isMultiField) {
-    return true;
-  }
-
-  const parentName = subTypeMulti?.multi?.parent;
-  return Boolean(parentName && !fields.includes(parentName)); // TODO: how to optimize this check? is it still relevant?
+  return { show: !isMultiField, parentName: subTypeMulti?.multi?.parent };
 };
