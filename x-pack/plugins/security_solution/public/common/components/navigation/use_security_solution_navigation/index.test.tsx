@@ -15,7 +15,6 @@ import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { TestProviders } from '../../../mock';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
-import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 import { useTourContext } from '../../guided_onboarding_tour';
 import { useUserPrivileges } from '../../user_privileges';
 import {
@@ -24,6 +23,8 @@ import {
   readCasesPermissions,
 } from '../../../../cases_test_utils';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
+import { getUserPrivilegesMockDefaultValue } from '../../user_privileges/__mocks__';
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
@@ -37,7 +38,6 @@ mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCa
 jest.mock('../../../hooks/use_selector');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
-jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
 jest.mock('../../guided_onboarding_tour');
 jest.mock('../../user_privileges');
 
@@ -59,10 +59,7 @@ describe('useSecuritySolutionNavigation', () => {
   beforeEach(() => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
-    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
-    mockUseUserPrivileges.mockImplementation(() => ({
-      endpointPrivileges: { canReadActionsLogManagement: true },
-    }));
+    mockUseUserPrivileges.mockImplementation(getUserPrivilegesMockDefaultValue);
     (useTourContext as jest.Mock).mockReturnValue({ isTourShown: false });
 
     const cases = mockCasesContract();
@@ -113,8 +110,12 @@ describe('useSecuritySolutionNavigation', () => {
     expect(result?.current?.items?.[1].items?.[4].id).toEqual(SecurityPageName.kubernetes);
   });
 
-  it('should omit host isolation exceptions if hook reports false', () => {
-    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(false);
+  it('should omit host isolation exceptions if no authz', () => {
+    mockUseUserPrivileges.mockImplementation(() => ({
+      endpointPrivileges: getEndpointAuthzInitialStateMock({
+        canReadHostIsolationExceptions: false,
+      }),
+    }));
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
@@ -130,7 +131,7 @@ describe('useSecuritySolutionNavigation', () => {
 
   it('should omit response actions history if hook reports false', () => {
     mockUseUserPrivileges.mockImplementation(() => ({
-      endpointPrivileges: { canReadActionsLogManagement: false },
+      endpointPrivileges: getEndpointAuthzInitialStateMock({ canReadActionsLogManagement: false }),
     }));
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
       () => useSecuritySolutionNavigation(),
