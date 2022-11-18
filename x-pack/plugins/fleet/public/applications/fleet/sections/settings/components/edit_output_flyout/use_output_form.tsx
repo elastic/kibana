@@ -13,6 +13,7 @@ import {
   sendPostOutput,
   useComboInput,
   useInput,
+  useNumberInput,
   useSelectInput,
   useSwitchInput,
   useStartServices,
@@ -41,7 +42,7 @@ export interface OutputFormInputsType {
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
   diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
   diskQueuePathInput: ReturnType<typeof useInput>;
-  diskQueueMaxSizeInput: ReturnType<typeof useInput>;
+  diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
   diskQueueEncryptionEnabled: ReturnType<typeof useSwitchInput>;
   diskQueueCompressionEnabled: ReturnType<typeof useSwitchInput>;
   compressionLevelInput: ReturnType<typeof useSelectInput>;
@@ -54,9 +55,9 @@ export interface OutputFormInputsType {
   sslKeyInput: ReturnType<typeof useInput>;
   sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
   loadBalanceEnabledInput: ReturnType<typeof useSwitchInput>;
-  memQueueSize: ReturnType<typeof useInput>;
-  queueFlushTimeout: ReturnType<typeof useInput>;
-  maxBatchSize: ReturnType<typeof useInput>;
+  memQueueSize: ReturnType<typeof useNumberInput>;
+  queueFlushTimeout: ReturnType<typeof useNumberInput>;
+  maxBatchSize: ReturnType<typeof useNumberInput>;
 }
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
@@ -110,11 +111,20 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const isShipperEnabled = !!output?.config_yaml?.includes('shipper');
 
   const diskQueueEnabledInput = useSwitchInput(output?.disk_queue_enabled ?? false);
-  const diskQueuePathInput = useInput(output?.disk_queue_path ?? '');
-  const diskQueueMaxSizeInput = useInput(
-    `${output?.disk_queue_max_size}` ?? `${DEFAULT_QUEUE_MAX_SIZE}`
+  const diskQueuePathInput = useInput(
+    output?.disk_queue_path ?? '',
+    undefined,
+    !diskQueueEnabledInput.value ?? false
   );
-  const diskQueueEncryptionEnabled = useSwitchInput(output?.disk_queue_encryption_enabled ?? false);
+  const diskQueueMaxSizeInput = useNumberInput(
+    output?.disk_queue_max_size ?? DEFAULT_QUEUE_MAX_SIZE,
+    undefined,
+    !diskQueueEnabledInput.value ?? false
+  );
+  const diskQueueEncryptionEnabled = useSwitchInput(
+    output?.disk_queue_encryption_enabled ?? false,
+    !diskQueueEnabledInput.value ?? false
+  );
   const loadBalanceEnabledInput = useSwitchInput(output?.disk_queue_enabled ?? false);
   const diskQueueCompressionEnabled = useSwitchInput(
     output?.disk_queue_compression_enabled ?? false
@@ -132,9 +142,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   // These three parameters are yet tbd
-  const memQueueSize = useInput(`${output?.mem_queue_size}`);
-  const queueFlushTimeout = useInput(`${output?.queue_flush_timeout}`);
-  const maxBatchSize = useInput(`${output?.max_batch_size}`);
+  const memQueueSize = useNumberInput(output?.mem_queue_size);
+  const queueFlushTimeout = useNumberInput(output?.queue_flush_timeout);
+  const maxBatchSize = useNumberInput(output?.max_batch_size);
 
   // Logstash inputs
   const logstashHostsInput = useComboInput(
@@ -232,38 +242,28 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         return;
       }
       setIsloading(true);
-      console.log('memQueueSize', memQueueSize.value ? 'true' : 'false');
-      console.log(queueFlushTimeout.value);
 
       let shipperParams = {};
       if (!isLogstash) {
         shipperParams = {
-          ...(diskQueueEnabledInput.value
-            ? { disk_queue_enabled: diskQueueEnabledInput.value }
-            : null),
-          ...(diskQueuePathInput.value ? { disk_queue_path: diskQueuePathInput.value } : null),
-          ...(diskQueueMaxSizeInput.value
-            ? { disk_queue_max_size: diskQueueMaxSizeInput.value }
-            : null),
-          ...(diskQueueEncryptionEnabled.value
-            ? { disk_queue_encryption_enabled: diskQueueEncryptionEnabled.value }
-            : null),
-          ...(diskQueueCompressionEnabled.value
-            ? { disk_queue_compression_enabled: diskQueueCompressionEnabled.value }
-            : null),
-          ...(diskQueueCompressionEnabled.value && compressionLevelInput.value
-            ? { compression_level: Number(compressionLevelInput.value) }
-            : null),
-          ...(loadBalanceEnabledInput.value
-            ? { loadbalance: loadBalanceEnabledInput.value }
-            : null),
-          ...(memQueueSize.value ? { mem_queue_size: Number(memQueueSize.value) } : null),
-          ...(queueFlushTimeout.value
-            ? { queue_flush_timeout: Number(queueFlushTimeout.value) }
-            : null),
-          ...(maxBatchSize.value ? { max_batch_size: Number(maxBatchSize.value) } : null),
+          disk_queue_enabled: diskQueueEnabledInput.value,
+          disk_queue_path:
+            diskQueueEnabledInput.value && diskQueuePathInput.value ? diskQueuePathInput.value : '',
+          disk_queue_max_size:
+            diskQueueEnabledInput.value && diskQueueMaxSizeInput.value
+              ? diskQueueMaxSizeInput.value
+              : 0,
+          disk_queue_encryption_enabled:
+            diskQueueEnabledInput.value && diskQueueEncryptionEnabled.value,
+          disk_queue_compression_enabled: diskQueueCompressionEnabled.value,
+          compression_level: diskQueueCompressionEnabled.value
+            ? Number(compressionLevelInput.value)
+            : 0,
+          loadbalance: loadBalanceEnabledInput.value,
+          mem_queue_size: Number(memQueueSize.value),
+          queue_flush_timeout: Number(queueFlushTimeout.value),
+          max_batch_size: Number(maxBatchSize.value),
         };
-        console.log(shipperParams);
       }
 
       const data: PostOutputRequest['body'] = isLogstash

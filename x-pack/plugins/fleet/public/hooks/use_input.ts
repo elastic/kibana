@@ -170,11 +170,11 @@ export function useComboInput(
 }
 
 export function useNumberInput(
-  defaultValue = 0,
+  defaultValue: number | undefined,
   validate?: (value: number) => number[] | undefined,
   disabled: boolean = false
 ) {
-  const [value, setValue] = useState<number>(defaultValue);
+  const [value, setValue] = useState<number | undefined>(defaultValue);
   const [errors, setErrors] = useState<number[] | undefined>();
   const [hasChanged, setHasChanged] = useState(false);
 
@@ -217,7 +217,7 @@ export function useNumberInput(
       setValue(0);
     },
     validate: () => {
-      if (validate) {
+      if (validate && value) {
         const newErrors = validate(value);
         setErrors(newErrors);
         return newErrors === undefined;
