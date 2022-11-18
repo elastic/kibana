@@ -26,7 +26,7 @@ beforeEach(() => {
 
 describe('bulkEnableRulesRoute', () => {
   const bulkEnableRequest = { filter: '' };
-  const bulkEnableResult = { errors: [], total: 1, taskIdsFailedToBeEnabled: [] };
+  const bulkEnableResult = { errors: [], rules: [], total: 1, taskIdsFailedToBeEnabled: [] };
 
   it('should enable rules with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
