@@ -983,5 +983,55 @@ describe('TableListView', () => {
         ['Item 2tag-2', twoDaysAgoToString],
       ]);
     });
+
+    test('should update the URL when changing the sort from the dropdown', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, table, find } = testBed!;
+      component.update();
+
+      const openSortSelect = () => {
+        act(() => {
+          testBed.find('tableSortSelectBtn').at(0).simulate('click');
+        });
+        component.update();
+      };
+
+      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      // Initial state
+      expect(router?.history.location?.search).toBe('');
+      expect(tableCellsValues).toEqual([
+        ['Item 1tag-1', yesterdayToString],
+        ['Item 2tag-2', twoDaysAgoToString],
+      ]);
+
+      // Change sort with dropdown
+      openSortSelect();
+      const filterOptions = find('sortSelect').find('li');
+
+      // Click 'Name Z-A'
+      act(() => {
+        filterOptions.at(1).simulate('click');
+      });
+      component.update();
+
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      // Updated state
+      expect(tableCellsValues).toEqual([
+        ['Item 2tag-2', twoDaysAgoToString],
+        ['Item 1tag-1', yesterdayToString],
+      ]);
+      expect(router?.history.location?.search).toBe('?sort=title&sortdir=desc');
+    });
   });
 });
