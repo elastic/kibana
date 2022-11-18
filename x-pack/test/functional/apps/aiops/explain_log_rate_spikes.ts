@@ -139,7 +139,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/140848
   describe('explain log rate spikes', function () {
     this.tags(['aiops']);
     before(async () => {
