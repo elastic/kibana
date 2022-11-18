@@ -187,6 +187,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           savedObjectsClient: soClient,
           pkgName: packagePolicy.package.name,
           pkgVersion: packagePolicy.package.version,
+          prerelease: true,
         }));
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
@@ -508,6 +509,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
+        prerelease: true,
       });
 
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
@@ -706,35 +708,37 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const { statuses } = await soClient.bulkDelete(
-      idsToDelete.map((id) => ({ id, type: SAVED_OBJECT_TYPE }))
-    );
+    if (idsToDelete.length > 0) {
+      const { statuses } = await soClient.bulkDelete(
+        idsToDelete.map((id) => ({ id, type: SAVED_OBJECT_TYPE }))
+      );
 
-    statuses.forEach(({ id, success, error }) => {
-      const packagePolicy = packagePolicies.find((p) => p.id === id);
-      if (success && packagePolicy) {
-        result.push({
-          id,
-          name: packagePolicy.name,
-          success: true,
-          package: {
-            name: packagePolicy.package?.name || '',
-            title: packagePolicy.package?.title || '',
-            version: packagePolicy.package?.version || '',
-          },
-          policy_id: packagePolicy.policy_id,
-        });
-      } else if (!success && error) {
-        result.push({
-          id,
-          success: false,
-          statusCode: error.statusCode,
-          body: {
-            message: error.message,
-          },
-        });
-      }
-    });
+      statuses.forEach(({ id, success, error }) => {
+        const packagePolicy = packagePolicies.find((p) => p.id === id);
+        if (success && packagePolicy) {
+          result.push({
+            id,
+            name: packagePolicy.name,
+            success: true,
+            package: {
+              name: packagePolicy.package?.name || '',
+              title: packagePolicy.package?.title || '',
+              version: packagePolicy.package?.version || '',
+            },
+            policy_id: packagePolicy.policy_id,
+          });
+        } else if (!success && error) {
+          result.push({
+            id,
+            success: false,
+            statusCode: error.statusCode,
+            body: {
+              message: error.message,
+            },
+          });
+        }
+      });
+    }
 
     if (!options?.skipUnassignFromAgentPolicies) {
       const uniquePolicyIdsR = [
@@ -801,6 +805,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectsClient: soClient,
         pkgName: packagePolicy!.package!.name,
         pkgVersion: pkgVersion ?? '',
+        prerelease: !!pkgVersion, // using prerelease only if version is specified
       });
     }
 
@@ -1129,6 +1134,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       pkgName,
       pkgVersion,
       skipArchive: true,
+      prerelease: true,
     });
     if (packageInfo) {
       return packageToPackagePolicy(packageInfo, '');
@@ -1146,6 +1152,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectsClient: soClient,
         pkgName: pkgInstall.name,
         pkgVersion: pkgInstall.version,
+        prerelease: true,
       });
 
       if (packageInfo) {
@@ -1594,6 +1601,7 @@ async function getPackageInfoForPackagePolicies(
         savedObjectsClient: soClient,
         pkgName: pkgInfo.name,
         pkgVersion: pkgInfo.version,
+        prerelease: true,
       });
 
       resultMap.set(pkgKey, pkgInfoData);

@@ -31,7 +31,7 @@ import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { hostsActions } from '../../../../hosts/store';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
-import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
+import { StyledBasicTable } from '../common/styled_basic_table';
 import { RISKY_HOSTS_DOC_LINK, RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
 import { RiskScoreHeaderTitle } from '../../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../risk_score/components/risk_score_onboarding/risk_score_no_data_detected';
@@ -42,6 +42,7 @@ import * as commonI18n from '../common/translations';
 import { usersActions } from '../../../../users/store';
 import { useNavigateToTimeline } from '../../detection_response/hooks/use_navigate_to_timeline';
 import type { TimeRange } from '../../../../common/store/inputs/model';
+import { openAlertsFilter } from '../../detection_response/utils';
 
 const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
@@ -110,7 +111,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
         field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
         value: entityName,
       };
-      openTimelineWithFilters([[filter]], timeRange);
+      openTimelineWithFilters([[filter, openAlertsFilter]], timeRange);
     },
     [riskEntity, openTimelineWithFilters]
   );
@@ -272,12 +273,15 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
               <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <BasicTableWithoutBorderBottom
+              <StyledBasicTable
                 responsive={false}
                 items={data ?? []}
                 columns={columns}
                 loading={isTableLoading}
                 id={entity.tableQueryId}
+                rowProps={{
+                  className: 'EntityAnalyticsTableHoverActions',
+                }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

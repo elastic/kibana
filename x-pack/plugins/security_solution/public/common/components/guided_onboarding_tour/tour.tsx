@@ -11,16 +11,17 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
 import { useLocation } from 'react-router-dom';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { isDetectionsPath } from '../../../helpers';
+import { isTourPath } from '../../../helpers';
 import { useKibana } from '../../lib/kibana';
+import type { AlertsCasesTourSteps } from './tour_config';
 import { securityTourConfig, SecurityStepId } from './tour_config';
 
 export interface TourContextValue {
   activeStep: number;
-  endTourStep: (stepId: SecurityStepId) => void;
-  incrementStep: (stepId: SecurityStepId, step?: number) => void;
-  isTourShown: (stepId: SecurityStepId) => boolean;
+  endTourStep: (tourId: SecurityStepId) => void;
+  incrementStep: (tourId: SecurityStepId) => void;
+  isTourShown: (tourId: SecurityStepId) => boolean;
+  setStep: (tourId: SecurityStepId, step: AlertsCasesTourSteps) => void;
 }
 
 const initialState: TourContextValue = {
@@ -28,6 +29,7 @@ const initialState: TourContextValue = {
   endTourStep: () => {},
   incrementStep: () => {},
   isTourShown: () => false,
+  setStep: () => {},
 };
 
 const TourContext = createContext<TourContextValue>(initialState);
@@ -60,21 +62,18 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     [isRulesTourActive, isAlertsCasesTourActive]
   );
 
-  const isTourShown = useCallback((stepId: SecurityStepId) => tourStatus[stepId], [tourStatus]);
+  const isTourShown = useCallback((tourId: SecurityStepId) => tourStatus[tourId], [tourStatus]);
   const [activeStep, _setActiveStep] = useState<number>(1);
 
-  const incrementStep = useCallback((stepId: SecurityStepId) => {
+  const incrementStep = useCallback((tourId: SecurityStepId) => {
     _setActiveStep(
-      (prevState) => (prevState >= securityTourConfig[stepId].length ? 0 : prevState) + 1
+      (prevState) => (prevState >= securityTourConfig[tourId].length ? 0 : prevState) + 1
     );
   }, []);
 
-  // TODO: @Steph figure out if we're allowing user to skip tour or not, implement this if so
-  // const onSkipTour = useCallback((stepId: SecurityStepId) => {
-  //   // active state means the user is on this step but has not yet begun. so when the user hits skip,
-  //   // the tour will go back to this step until they "re-start it"
-  //   // guidedOnboardingApi.idkSetStepTo(stepId, 'active')
-  // }, []);
+  const setStep = useCallback((tourId: SecurityStepId, step: number) => {
+    if (step <= securityTourConfig[tourId].length) _setActiveStep(step);
+  }, []);
 
   const [completeStep, setCompleteStep] = useState<null | SecurityStepId>(null);
 
@@ -96,8 +95,8 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     };
   }, [completeStep, guidedOnboardingApi]);
 
-  const endTourStep = useCallback((stepId: SecurityStepId) => {
-    setCompleteStep(stepId);
+  const endTourStep = useCallback((tourId: SecurityStepId) => {
+    setCompleteStep(tourId);
   }, []);
 
   const context = {
@@ -105,6 +104,7 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     endTourStep,
     incrementStep,
     isTourShown,
+    setStep,
   };
 
   return <TourContext.Provider value={context}>{children}</TourContext.Provider>;
@@ -112,13 +112,13 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
 
 export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   const { pathname } = useLocation();
-  const isTourEnabled = useIsExperimentalFeatureEnabled('guidedOnboarding');
 
-  if (isDetectionsPath(pathname) && isTourEnabled) {
-    return <RealTourContextProvider>{children}</RealTourContextProvider>;
-  }
+  const ContextProvider = useMemo(
+    () => (isTourPath(pathname) ? RealTourContextProvider : TourContext.Provider),
+    [pathname]
+  );
 
-  return <TourContext.Provider value={initialState}>{children}</TourContext.Provider>;
+  return <ContextProvider value={initialState}>{children}</ContextProvider>;
 };
 
 export const useTourContext = (): TourContextValue => {

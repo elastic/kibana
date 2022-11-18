@@ -24,13 +24,14 @@ import { useFilePickerContext, FilePickerContext } from './context';
 
 import { Title } from './components/title';
 import { ErrorContent } from './components/error_content';
-import { UploadFilesPrompt } from './components/upload_files';
+import { EmptyPrompt } from './components/empty_prompt';
 import { FileGrid } from './components/file_grid';
 import { SearchField } from './components/search_field';
 import { ModalFooter } from './components/modal_footer';
 
 import './file_picker.scss';
 import { ClearFilterButton } from './components/clear_filter_button';
+import type { FileJSON } from '../../../common';
 
 export interface Props<Kind extends string = string> {
   /**
@@ -44,18 +45,26 @@ export interface Props<Kind extends string = string> {
   /**
    * Will be called after a user has a selected a set of files
    */
-  onDone: (fileIds: string[]) => void;
+  onDone: (files: FileJSON[]) => void;
   /**
-   * When a user has succesfully uploaded some files this callback will be called
+   * When a user has successfully uploaded some files this callback will be called
    */
   onUpload?: (done: DoneNotification[]) => void;
   /**
    * The number of results to show per page.
    */
   pageSize?: number;
+  /**
+   * Whether you can select one or more files
+   *
+   * @default false
+   */
+  multiple?: boolean;
 }
 
-const Component: FunctionComponent<Props> = ({ onClose, onDone, onUpload }) => {
+type InnerProps = Required<Pick<Props, 'onClose' | 'onDone' | 'onUpload' | 'multiple'>>;
+
+const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, multiple }) => {
   const { state, kind } = useFilePickerContext();
 
   const hasFiles = useBehaviorSubject(state.hasFiles$);
@@ -65,7 +74,9 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone, onUpload }) => {
 
   useObservable(state.files$);
 
-  const renderFooter = () => <ModalFooter kind={kind} onDone={onDone} onUpload={onUpload} />;
+  const renderFooter = () => (
+    <ModalFooter kind={kind} onDone={onDone} onUpload={onUpload} multiple={multiple} />
+  );
 
   return (
     <EuiModal
@@ -75,7 +86,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone, onUpload }) => {
       onClose={onClose}
     >
       <EuiModalHeader>
-        <Title />
+        <Title multiple={multiple} />
         <SearchField />
       </EuiModalHeader>
       {isLoading ? (
@@ -93,7 +104,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone, onUpload }) => {
         </EuiModalBody>
       ) : !hasFiles && !hasQuery ? (
         <EuiModalBody>
-          <UploadFilesPrompt kind={kind} />
+          <EmptyPrompt multiple={multiple} kind={kind} />
         </EuiModalBody>
       ) : (
         <>
@@ -109,9 +120,15 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone, onUpload }) => {
   );
 };
 
-export const FilePicker: FunctionComponent<Props> = (props) => (
-  <FilePickerContext pageSize={props.pageSize ?? 20} kind={props.kind}>
-    <Component {...props} />
+export const FilePicker: FunctionComponent<Props> = ({
+  pageSize = 20,
+  kind,
+  multiple = false,
+  onUpload = () => {},
+  ...rest
+}) => (
+  <FilePickerContext pageSize={pageSize} kind={kind} multiple={multiple}>
+    <Component {...rest} {...{ pageSize, kind, multiple, onUpload }} />
   </FilePickerContext>
 );
 

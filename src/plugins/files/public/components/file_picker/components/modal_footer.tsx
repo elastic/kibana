@@ -22,9 +22,10 @@ interface Props {
   kind: string;
   onDone: SelectButtonProps['onClick'];
   onUpload?: FilePickerProps['onUpload'];
+  multiple: boolean;
 }
 
-export const ModalFooter: FunctionComponent<Props> = ({ kind, onDone, onUpload }) => {
+export const ModalFooter: FunctionComponent<Props> = ({ kind, onDone, onUpload, multiple }) => {
   const { state } = useFilePickerContext();
   const onUploadStart = useCallback(() => state.setIsUploading(true), [state]);
   const onUploadEnd = useCallback(() => state.setIsUploading(false), [state]);
@@ -45,7 +46,7 @@ export const ModalFooter: FunctionComponent<Props> = ({ kind, onDone, onUpload }
         >
           <UploadFile
             onDone={(n) => {
-              state.selectFile(n.map(({ id }) => id));
+              state.selectFile(n.map(({ fileJSON }) => fileJSON));
               state.resetFilters();
               onUpload?.(n);
             }}
@@ -53,7 +54,7 @@ export const ModalFooter: FunctionComponent<Props> = ({ kind, onDone, onUpload }
             onUploadEnd={onUploadEnd}
             kind={kind}
             initialPromptText={i18nTexts.uploadFilePlaceholderText}
-            multiple
+            multiple={multiple}
             compressed
           />
         </div>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Pagination, UpdatableFileMetadata } from '../../common/types';
+import type { FileMetadata, Pagination, UpdatableFileMetadata } from '../../common/types';
 
 /**
  * Arguments to create a new file.
@@ -32,6 +32,10 @@ export interface CreateFileArgs<Meta = unknown> {
    * The MIME type of the file.
    */
   mime?: string;
+  /**
+   * User data associated with this file
+   */
+  user?: FileMetadata['user'];
 }
 
 /**
@@ -42,10 +46,6 @@ export interface UpdateFileArgs {
    * File ID.
    */
   id: string;
-  /**
-   * File kind, must correspond to a registered {@link FileKind}.
-   */
-  fileKind: string;
   /**
    * Attributes to update.
    */
@@ -60,10 +60,6 @@ export interface DeleteFileArgs {
    * File ID.
    */
   id: string;
-  /**
-   * File kind, must correspond to a registered {@link FileKind}.
-   */
-  fileKind: string;
 }
 
 /**
@@ -74,10 +70,6 @@ export interface GetByIdArgs {
    * File ID.
    */
   id: string;
-  /**
-   * File kind, must correspond to a registered {@link FileKind}.
-   */
-  fileKind: string;
 }
 
 /**

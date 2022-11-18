@@ -48,6 +48,8 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
@@ -67,22 +69,7 @@ import {
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
-import {
-  registerEPMRoutes,
-  registerPackagePolicyRoutes,
-  registerDataStreamRoutes,
-  registerAgentPolicyRoutes,
-  registerSetupRoutes,
-  registerAgentAPIRoutes,
-  registerEnrollmentApiKeyRoutes,
-  registerOutputRoutes,
-  registerSettingsRoutes,
-  registerAppRoutes,
-  registerPreconfigurationRoutes,
-  registerDownloadSourcesRoutes,
-  registerHealthCheckRoutes,
-  registerFleetServerHostRoutes,
-} from './routes';
+import { registerRoutes } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
 import type {
@@ -111,6 +98,7 @@ import { BulkActionsResolver } from './services/agents';
 import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
+import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -220,6 +208,7 @@ export class FleetPlugin
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
   private bulkActionsResolver?: BulkActionsResolver;
   private fleetUsageSender?: FleetUsageSender;
+  private checkDeletedFilesTask?: CheckDeletedFilesTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -369,7 +358,7 @@ export class FleetPlugin
             get internalSoClient() {
               return appContextService
                 .getSavedObjects()
-                .getScopedClient(request, { excludedWrappers: ['security'] });
+                .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
             },
           },
           get spaceId() {
@@ -400,32 +389,15 @@ export class FleetPlugin
       makeRouterWithFleetAuthz(router);
 
     core.http.registerOnPostAuth(fleetAuthzOnPostAuthHandler);
-
-    // Always register app routes for permissions checking
-    registerAppRoutes(fleetAuthzRouter);
-
-    // The upload package route is only authorized for the superuser
-    registerEPMRoutes(fleetAuthzRouter);
-
-    registerSetupRoutes(fleetAuthzRouter, config);
-    registerAgentPolicyRoutes(fleetAuthzRouter);
-    registerPackagePolicyRoutes(fleetAuthzRouter);
-    registerOutputRoutes(fleetAuthzRouter);
-    registerSettingsRoutes(fleetAuthzRouter);
-    registerDataStreamRoutes(fleetAuthzRouter);
-    registerPreconfigurationRoutes(fleetAuthzRouter);
-    registerFleetServerHostRoutes(fleetAuthzRouter);
-    registerDownloadSourcesRoutes(fleetAuthzRouter);
-    registerHealthCheckRoutes(fleetAuthzRouter);
-
-    // Conditional config routes
-    if (config.agents.enabled) {
-      registerAgentAPIRoutes(fleetAuthzRouter, config);
-      registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
-    }
+    registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
+    this.checkDeletedFilesTask = new CheckDeletedFilesTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
@@ -457,6 +429,7 @@ export class FleetPlugin
     this.telemetryEventsSender.start(plugins.telemetry, core);
     this.bulkActionsResolver?.start(plugins.taskManager);
     this.fleetUsageSender?.start(plugins.taskManager);
+    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
     startFleetUsageLogger(plugins.taskManager);
 
     const logger = appContextService.getLogger();
@@ -572,7 +545,7 @@ export class FleetPlugin
       internalSoClient,
       this.getLogger()
     );
-    return this.packageService;
+    return this.packageService!;
   }
 
   private getLogger(): Logger {
