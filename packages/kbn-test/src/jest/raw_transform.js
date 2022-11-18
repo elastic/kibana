@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { Img } from './img';
-export type { Props as ImgProps } from './img';
-export { Blurhash } from './blurhash';
+module.exports = {
+  process(sourceText) {
+    return {
+      code: `module.exports = ${JSON.stringify(sourceText)}`,
+    };
+  },
+};
