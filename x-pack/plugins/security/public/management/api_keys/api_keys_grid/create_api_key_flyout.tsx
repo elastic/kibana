@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { ApiKeyRoleDescriptors } from '../../../../common/model';
+import type { ApiKey, ApiKeyRoleDescriptors } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
 import type { FormFlyoutProps } from '../../../components/form_flyout';
 import { FormFlyout } from '../../../components/form_flyout';
@@ -38,7 +38,12 @@ import type { ValidationErrors } from '../../../components/use_form';
 import { useInitialFocus } from '../../../components/use_initial_focus';
 import { RolesAPIClient } from '../../roles/roles_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
-import type { CreateApiKeyRequest, CreateApiKeyResponse } from '../api_keys_api_client';
+import type {
+  CreateApiKeyRequest,
+  CreateApiKeyResponse,
+  UpdateApiKeyRequest,
+  UpdateApiKeyResponse,
+} from '../api_keys_api_client';
 
 export interface ApiKeyFormValues {
   name: string;
@@ -52,8 +57,12 @@ export interface ApiKeyFormValues {
 
 export interface CreateApiKeyFlyoutProps {
   defaultValues?: ApiKeyFormValues;
-  onSuccess?: (apiKey: CreateApiKeyResponse) => void;
+  onSuccess?: (
+    createdApiKeyResponse: CreateApiKeyResponse | undefined,
+    updateApiKeyResponse: UpdateApiKeyResponse | undefined
+  ) => void;
   onCancel: FormFlyoutProps['onCancel'];
+  apiKeyUnderEdit?: ApiKey;
 }
 
 const defaultDefaultValues: ApiKeyFormValues = {
@@ -70,18 +79,51 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
   onSuccess,
   onCancel,
   defaultValues = defaultDefaultValues,
+  apiKeyUnderEdit,
 }) => {
+  let formTitle = 'Create API key';
+  let inProgressButtonText = 'Creating API key…';
+
+  if (apiKeyUnderEdit) {
+    defaultValues = {
+      name: apiKeyUnderEdit.name,
+      expiration: apiKeyUnderEdit.expiration?.toString() ?? '',
+      customExpiration: !!apiKeyUnderEdit.expiration,
+      customPrivileges: true,
+      includeMetadata: !!apiKeyUnderEdit.metadata,
+      role_descriptors: '{}',
+      metadata: JSON.stringify(apiKeyUnderEdit.metadata),
+    };
+
+    formTitle = 'Update API Key';
+    inProgressButtonText = 'Updating API key…';
+  }
+
   const { services } = useKibana();
+
   const { value: currentUser, loading: isLoadingCurrentUser } = useCurrentUser();
+
   const [{ value: roles, loading: isLoadingRoles }, getRoles] = useAsyncFn(
     () => new RolesAPIClient(services.http!).getRoles(),
     [services.http]
   );
+
   const [form, eventHandlers] = useForm({
     onSubmit: async (values) => {
       try {
-        const apiKey = await new APIKeysAPIClient(services.http!).createApiKey(mapValues(values));
-        onSuccess?.(apiKey);
+        if (apiKeyUnderEdit) {
+          const updateApiKeyResponse = await new APIKeysAPIClient(services.http!).updateApiKey(
+            mapUpdateApiKeyValues(apiKeyUnderEdit.id, values)
+          );
+
+          onSuccess?.(undefined, updateApiKeyResponse);
+        } else {
+          const createApiKeyResponse = await new APIKeysAPIClient(services.http!).createApiKey(
+            mapCreateApiKeyValues(values)
+          );
+
+          onSuccess?.(createApiKeyResponse, undefined);
+        }
       } catch (error) {
         throw error;
       }
@@ -89,6 +131,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
     validate,
     defaultValues,
   });
+
   const isLoading = isLoadingCurrentUser || isLoadingRoles;
 
   useEffect(() => {
@@ -118,14 +161,14 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
   return (
     <FormFlyout
       title={i18n.translate('xpack.security.accountManagement.createApiKey.title', {
-        defaultMessage: 'Create API key',
+        defaultMessage: formTitle,
       })}
       onCancel={onCancel}
       onSubmit={form.submit}
       submitButtonText={i18n.translate(
         'xpack.security.accountManagement.createApiKey.submitButton',
         {
-          defaultMessage: '{isSubmitting, select, true{Creating API key…} other{Create API key}}',
+          defaultMessage: `{isSubmitting, select, true{${inProgressButtonText}} other{${formTitle}}}`,
           values: { isSubmitting: form.isSubmitting },
         }
       )}
@@ -201,6 +244,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               defaultValue={form.values.name}
               isInvalid={form.touched.name && !!form.errors.name}
               inputRef={firstFieldRef}
+              disabled={!!apiKeyUnderEdit}
               fullWidth
               data-test-subj="apiKeyNameInput"
             />
@@ -259,6 +303,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               )}
               checked={!!form.values.customExpiration}
               onChange={(e) => form.setValue('customExpiration', e.target.checked)}
+              disabled={!!apiKeyUnderEdit}
               data-test-subj="apiKeyCustomExpirationSwitch"
             />
             {form.values.customExpiration && (
@@ -285,6 +330,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
                     min={0}
                     defaultValue={form.values.expiration}
                     isInvalid={form.touched.expiration && !!form.errors.expiration}
+                    disabled={!!apiKeyUnderEdit}
                     fullWidth
                     data-test-subj="apiKeyCustomExpirationInput"
                   />
@@ -412,10 +458,21 @@ export function validate(values: ApiKeyFormValues) {
   return errors;
 }
 
-export function mapValues(values: ApiKeyFormValues): CreateApiKeyRequest {
+export function mapCreateApiKeyValues(values: ApiKeyFormValues): CreateApiKeyRequest {
   return {
     name: values.name,
     expiration: values.customExpiration && values.expiration ? `${values.expiration}d` : undefined,
+    role_descriptors:
+      values.customPrivileges && values.role_descriptors
+        ? JSON.parse(values.role_descriptors)
+        : undefined,
+    metadata: values.includeMetadata && values.metadata ? JSON.parse(values.metadata) : undefined,
+  };
+}
+
+export function mapUpdateApiKeyValues(id: string, values: ApiKeyFormValues): UpdateApiKeyRequest {
+  return {
+    id,
     role_descriptors:
       values.customPrivileges && values.role_descriptors
         ? JSON.parse(values.role_descriptors)

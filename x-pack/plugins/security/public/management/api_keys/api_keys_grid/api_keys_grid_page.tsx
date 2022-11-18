@@ -15,6 +15,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -36,7 +37,11 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
-import type { APIKeysAPIClient, CreateApiKeyResponse } from '../api_keys_api_client';
+import type {
+  APIKeysAPIClient,
+  CreateApiKeyResponse,
+  UpdateApiKeyResponse,
+} from '../api_keys_api_client';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
 import type { InvalidateApiKeys } from './invalidate_provider';
@@ -61,6 +66,9 @@ interface State {
   selectedItems: ApiKey[];
   error: any;
   createdApiKey?: CreateApiKeyResponse;
+  apiKeyUnderEdit?: ApiKey;
+  updatedApiKey?: UpdateApiKeyResponse;
+  lastUpdatedApiKeyName?: string;
 }
 
 const DATE_FORMAT = 'MMMM Do YYYY HH:mm:ss';
@@ -81,6 +89,9 @@ export class APIKeysGridPage extends Component<Props, State> {
       apiKeys: undefined,
       selectedItems: [],
       error: undefined,
+      apiKeyUnderEdit: undefined,
+      updatedApiKey: undefined,
+      lastUpdatedApiKeyName: undefined,
     };
   }
 
@@ -99,12 +110,21 @@ export class APIKeysGridPage extends Component<Props, State> {
             href="/create"
           >
             <CreateApiKeyFlyout
-              onSuccess={(apiKey) => {
+              onSuccess={(createdApiKeyResponse, updateApiKeyResponse) => {
                 this.props.history.push({ pathname: '/' });
                 this.reloadApiKeys();
-                this.setState({ createdApiKey: apiKey });
+                this.setState({
+                  createdApiKey: createdApiKeyResponse,
+                  updatedApiKey: updateApiKeyResponse,
+                  lastUpdatedApiKeyName: this.state.apiKeyUnderEdit?.name,
+                  apiKeyUnderEdit: undefined,
+                });
               }}
-              onCancel={() => this.props.history.push({ pathname: '/' })}
+              onCancel={() => {
+                this.props.history.push({ pathname: '/' });
+                this.setState({ apiKeyUnderEdit: undefined });
+              }}
+              apiKeyUnderEdit={this.state.apiKeyUnderEdit}
             />
           </Breadcrumb>
         </Route>
@@ -177,6 +197,8 @@ export class APIKeysGridPage extends Component<Props, State> {
 
     const description = this.determineDescription(isAdmin, this.props.readOnly ?? false);
 
+    const updatedApiKeyCallOut = this.shouldShowUpdatedApiKeyCallOut(this.state.updatedApiKey);
+
     return (
       <>
         <KibanaPageTemplate.Header
@@ -207,6 +229,8 @@ export class APIKeysGridPage extends Component<Props, State> {
                 ]
           }
         />
+
+        {updatedApiKeyCallOut}
 
         {this.state.createdApiKey && !this.state.isLoadingTable && (
           <>
@@ -475,6 +499,20 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage: 'Name',
         }),
         sortable: true,
+        render: (name: string, recordAP: ApiKey) => {
+          return (
+            <EuiText color="subdued" size="s">
+              <EuiLink
+                data-test-subj="roleRowName"
+                {...reactRouterNavigate(this.props.history, `/create`, () => {
+                  this.setState({ apiKeyUnderEdit: recordAP });
+                })}
+              >
+                {name}
+              </EuiLink>
+            </EuiText>
+          );
+        },
       },
     ]);
 
@@ -693,5 +731,43 @@ export class APIKeysGridPage extends Component<Props, State> {
         />
       );
     }
+  }
+
+  private shouldShowUpdatedApiKeyCallOut(updateApiKeyResponse?: UpdateApiKeyResponse) {
+    let result;
+
+    if (updateApiKeyResponse) {
+      if (updateApiKeyResponse.updated) {
+        result = (
+          <>
+            <EuiSpacer size="l" />
+            <EuiCallOut
+              color="success"
+              iconType="check"
+              title={i18n.translate('xpack.security.management.apiKeys.updateSuccessMessage', {
+                defaultMessage: "Updated API key '{name}'",
+                values: { name: this.state.lastUpdatedApiKeyName },
+              })}
+            />
+          </>
+        );
+      } else {
+        result = (
+          <>
+            <EuiSpacer size="l" />
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              title={i18n.translate('xpack.security.management.apiKeys.noUpdateMessage', {
+                defaultMessage: "No updates made for API key '{name}'",
+                values: { name: this.state.lastUpdatedApiKeyName },
+              })}
+            />
+          </>
+        );
+      }
+    }
+
+    return result;
   }
 }
