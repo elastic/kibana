@@ -6,33 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 
-import {
-  EuiText,
-  EuiCard,
-  EuiFieldSearch,
-  EuiPage,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageBody,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { AppMountParameters, IUiSettingsClient } from '@kbn/core/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { ControlsExampleStartDeps } from './plugin';
+import { ControlGroupExample } from './control_group_example';
 
 interface Props {
   dataView: DataView;
 }
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
-function ControlsExamples({ dataView }: Props) {
-  const [myControlGroup, setControlGroup] = useState<ControlGroupContainer>();
-
+const ControlsExamples = ({ dataView }: Props) => {
   return (
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header pageTitle="Controls Building Block" />
@@ -40,31 +28,20 @@ function ControlsExamples({ dataView }: Props) {
         <EuiText>
           <p>The following showcases how to use the control group as a building block.</p>
         </EuiText>
-      </KibanaPageTemplate.Section>
-      <KibanaPageTemplate.Section>
-        <EuiText>
-          This is a control group
-          <ControlGroupRenderer
-            onEmbeddableLoad={(controlGroup) => {
-              setControlGroup(controlGroup);
-              controlGroup.addDataControlFromField({
-                dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
-                fieldName: 'customer_first_name.keyword',
-              });
-            }}
-          />{' '}
-        </EuiText>
+        <EuiSpacer size="m" />
+        <ControlGroupExample dataView={dataView} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
-}
+};
 
 export const renderApp = async (
   { data }: ControlsExampleStartDeps,
   { element }: AppMountParameters
 ) => {
-  const dataView = await data.dataViews.getDefault();
-  if (dataView) ReactDOM.render(<ControlsExamples dataView={dataView} />, element);
-
+  const dataViews = await data.dataViews.find('kibana_sample_data_ecommerce');
+  if (dataViews.length > 0) {
+    ReactDOM.render(<ControlsExamples dataView={dataViews[0]} />, element);
+  }
   return () => ReactDOM.unmountComponentAtNode(element);
 };

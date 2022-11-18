@@ -14,18 +14,21 @@ import {
   Plugin,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+
 import img from './pikachu.jpeg';
 
 // import { ControlsPluginStart } from '@kbn/controls-plugin/public';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface ControlsExampleStartDeps {
   data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
 }
 
 // interface StartDeps {

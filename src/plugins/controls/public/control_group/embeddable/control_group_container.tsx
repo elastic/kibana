@@ -103,6 +103,7 @@ export class ControlGroupContainer extends Container<
     fieldName: string;
     title?: string;
   }) {
+    console.log('before', this.input);
     const dataView = await pluginServices.getServices().dataViews.get(dataViewId);
     const fieldRegistry = await getDataControlFieldRegistry(dataView);
     const field = fieldRegistry[fieldName];

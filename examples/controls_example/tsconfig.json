@@ -14,6 +14,7 @@
   "exclude": [],
   "kbn_references": [
     { "path": "../../src/plugins/data_views/tsconfig.json" },
+    { "path": "../../src/plugins/embeddable/tsconfig.json" },
     { "path": "../../src/plugins/data/tsconfig.json" },
     { "path": "../developer_examples/tsconfig.json" },
     { "path": "../presentation_util/tsconfig.json" },
