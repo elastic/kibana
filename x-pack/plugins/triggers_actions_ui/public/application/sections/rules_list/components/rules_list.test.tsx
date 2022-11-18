@@ -78,10 +78,7 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const {
-  loadRuleTypes,
-  loadRuleTags,
-} = jest.requireMock('../../../lib/rule_api');
+const { loadRuleTypes, loadRuleTags } = jest.requireMock('../../../lib/rule_api');
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
@@ -870,48 +867,5 @@ describe('rules_list component with items', () => {
     await setup();
     expect(wrapper.find('button.euiButtonIcon[disabled=true]').length).toEqual(8);
     hasExecuteActionsCapability.mockReturnValue(true);
-  });
-});
-
-describe.skip('rules_list component empty with show only capability', () => {
-  let wrapper: ReactWrapper<any>;
-
-  async function setup() {
-    loadRulesWithKueryFilter.mockResolvedValue({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
-    loadActionTypes.mockResolvedValue([
-      {
-        id: 'test',
-        name: 'Test',
-      },
-      {
-        id: 'test2',
-        name: 'Test2',
-      },
-    ]);
-    loadRuleTypes.mockResolvedValue([
-      { id: 'test_rule_type', name: 'some rule type', authorizedConsumers: {} },
-    ]);
-    loadAllActions.mockResolvedValue([]);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    wrapper = mountWithIntl(<RulesList />);
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-  }
-
-  it('not renders create rule button', async () => {
-    await setup();
-    expect(wrapper.find('[data-test-subj="createRuleButton"]')).toHaveLength(0);
   });
 });
