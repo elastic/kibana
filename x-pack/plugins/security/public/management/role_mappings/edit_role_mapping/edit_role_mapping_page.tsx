@@ -146,6 +146,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
         <EuiForm isInvalid={this.state.formError.isInvalid} error={this.state.formError.error}>
           <MappingInfoPanel
+            data-test-subj="roleMappingInfoPanel"
             roleMapping={this.state.roleMapping!}
             onChange={(roleMapping) => this.setState({ roleMapping })}
             mode={this.getInfoPanelMode()}
@@ -157,6 +158,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
           />
           <EuiSpacer />
           <RuleEditorPanel
+            data-test-subj="roleMappingRulePanel"
             rawRules={this.state.roleMapping!.rules}
             validateForm={this.state.validateForm}
             onValidityChange={this.onRuleValidityChange}
@@ -277,6 +279,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
             {(deleteRoleMappingsPrompt) => {
               return (
                 <EuiButtonEmpty
+                  data-test-subj="deleteRoleMappingButton"
                   onClick={() =>
                     deleteRoleMappingsPrompt([this.state.roleMapping!], () =>
                       this.backToRoleMappingsList()

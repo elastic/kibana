@@ -125,4 +125,83 @@ describe('RuleEditorPanel', () => {
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
   });
+
+  describe('can render a readonly view', () => {
+    it('with visual editor', () => {
+      const props = {
+        rawRules: {
+          field: { username: '*' },
+        },
+        onChange: jest.fn(),
+        onValidityChange: jest.fn(),
+        validateForm: false,
+        readOnly: true,
+      };
+      const wrapper = renderView(props);
+
+      // No mode toggle
+      expect(findTestSubject(wrapper, 'roleMappingsJSONRuleEditorButton')).toHaveLength(0);
+
+      // Visual editor is read-only
+      const { readOnly: visualEditorReadOnly } = wrapper
+        .find('VisualRuleEditor[data-test-subj="roleMappingsVisualRuleEditor"]')
+        .props();
+      expect(visualEditorReadOnly).toEqual(true);
+    });
+
+    it('with JSON editor', () => {
+      const props = {
+        rawRules: {
+          all: [
+            {
+              field: {
+                username: '*',
+              },
+            },
+            {
+              all: [
+                {
+                  field: {
+                    username: '*',
+                  },
+                },
+                {
+                  all: [
+                    {
+                      field: {
+                        username: '*',
+                      },
+                    },
+                    {
+                      all: [
+                        {
+                          field: {
+                            username: '*',
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        onChange: jest.fn(),
+        onValidityChange: jest.fn(),
+        validateForm: false,
+        readOnly: true,
+      };
+      const wrapper = renderView(props);
+
+      // No mode toggle
+      expect(findTestSubject(wrapper, 'roleMappingsJSONRuleEditorButton')).toHaveLength(0);
+
+      // JSON editor is read-only
+      const { readOnly: jsonEditorReadOnly } = wrapper
+        .find('JSONRuleEditor[data-test-subj="roleMappingsJSONRuleEditor"]')
+        .props();
+      expect(jsonEditorReadOnly).toEqual(true);
+    });
+  });
 });

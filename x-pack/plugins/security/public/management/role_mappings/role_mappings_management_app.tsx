@@ -95,6 +95,7 @@ export const roleMappingsManagementApp = Object.freeze({
               <KibanaThemeProvider theme$={theme$}>
                 <Router history={history}>
                   <ReadonlyBadge
+                    data-test-subj="readOnlyBadge"
                     featureId="role_mappings"
                     tooltip={i18n.translate(
                       'xpack.security.management.roleMappings.readonlyTooltip',

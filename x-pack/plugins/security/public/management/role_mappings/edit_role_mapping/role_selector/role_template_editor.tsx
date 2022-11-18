@@ -85,6 +85,7 @@ export const RoleTemplateEditor = ({
     return (
       <EuiFormRow label={returnsJsonLabel}>
         <EuiSwitch
+          data-test-subj="roleTemplateFormatSwitch"
           checked={roleTemplate.format === 'json'}
           label={returnsJsonLabel}
           showLabel={false}

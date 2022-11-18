@@ -159,6 +159,7 @@ export class MappingInfoPanel extends Component<Props, State> {
       >
         <EuiFormRow fullWidth={true} {...validationFunction()}>
           <RoleSelector
+            data-test-subj={'roleMappingFormRoleSelector'}
             rolesAPIClient={this.props.rolesAPIClient}
             roleMapping={this.props.roleMapping}
             mode={this.state.rolesMode}
@@ -237,6 +238,7 @@ export class MappingInfoPanel extends Component<Props, State> {
       >
         <EuiFormRow fullWidth={true} {...validationFunction()}>
           <RoleSelector
+            data-test-subj={'roleMappingFormTemplateSelector'}
             rolesAPIClient={this.props.rolesAPIClient}
             roleMapping={this.props.roleMapping}
             mode={this.state.rolesMode}

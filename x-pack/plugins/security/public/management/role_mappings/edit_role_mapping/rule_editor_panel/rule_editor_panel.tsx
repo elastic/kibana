@@ -221,6 +221,7 @@ export class RuleEditorPanel extends Component<Props, State> {
       case 'visual':
         return (
           <VisualRuleEditor
+            data-test-subj="roleMappingsVisualRuleEditor"
             rules={this.state.rules}
             maxDepth={this.state.maxDepth}
             onChange={this.onRuleChange}
@@ -231,6 +232,7 @@ export class RuleEditorPanel extends Component<Props, State> {
       case 'json':
         return (
           <JSONRuleEditor
+            data-test-subj="roleMappingsJSONRuleEditor"
             rules={this.state.rules}
             onChange={this.onRuleChange}
             onValidityChange={this.onValidityChange}

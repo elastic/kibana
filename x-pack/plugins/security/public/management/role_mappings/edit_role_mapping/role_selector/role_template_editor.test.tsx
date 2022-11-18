@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { EuiComboBox } from '@elastic/eui';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { RoleTemplateEditor } from './role_template_editor';
+import { RoleTemplateTypeSelect } from './role_template_type_select';
 
 describe('RoleTemplateEditor', () => {
   it('allows inline templates to be edited', () => {
@@ -115,5 +117,55 @@ describe('RoleTemplateEditor', () => {
     expect(findTestSubject(wrapper, 'roleMappingInvalidRoleTemplate')).toHaveLength(1);
     expect(findTestSubject(wrapper, 'roleTemplateSourceEditor')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'roleTemplateScriptIdEditor')).toHaveLength(0);
+  });
+
+  it('can render a readonly view', () => {
+    const props = {
+      roleTemplate: {
+        template: {
+          source: '{{username}}_foo',
+        },
+      },
+      onChange: jest.fn(),
+      onDelete: jest.fn(),
+      canUseStoredScripts: true,
+      canUseInlineScripts: true,
+      readOnly: true,
+    };
+
+    const wrapper = mountWithIntl(<RoleTemplateEditor {...props} />);
+
+    // Any/all Template type selectors are readonly
+    const typeSelectors = wrapper.find(RoleTemplateTypeSelect);
+    expect(typeSelectors).not.toHaveLength(0);
+    typeSelectors.map((typeSelector) => {
+      expect(typeSelector.props().readOnly).toBeTruthy();
+    });
+
+    // Any/all Template type combo boxes to be disabled
+    const typeCombos = wrapper.find(EuiComboBox);
+    expect(typeCombos).toHaveLength(typeSelectors.length);
+    typeCombos.map((typeCombo) => {
+      expect(typeCombo.props().isDisabled).toBeTruthy();
+    });
+
+    // Any/all JSON switches are disabled
+    const jsonSwitches = wrapper.find('EuiSwitch[data-test-subj="roleTemplateFormatSwitch"]');
+    expect(jsonSwitches).toHaveLength(typeSelectors.length);
+    jsonSwitches.map((jsonSwitch) => {
+      expect(jsonSwitch.props().disabled).toBeTruthy();
+    });
+
+    // Any/all template source inputs are disabled
+    const templateSourceInputs = wrapper.find(
+      'EuiFieldText[data-test-subj="roleTemplateSourceEditor"]'
+    );
+    expect(templateSourceInputs).toHaveLength(typeSelectors.length);
+    templateSourceInputs.map((templateSource) => {
+      expect(templateSource.props().disabled).toBeTruthy();
+    });
+
+    // No delete buttons
+    expect(findTestSubject(wrapper, 'deleteRoleTemplateButton')).toHaveLength(0);
   });
 });

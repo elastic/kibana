@@ -62,19 +62,21 @@ export class VisualRuleEditor extends Component<Props, {}> {
         }
         data-test-subj="roleMappingsNoRulesDefined"
         actions={
-          <EuiButton
-            color="primary"
-            iconType="plusInCircle"
-            data-test-subj="roleMappingsAddRuleButton"
-            onClick={() => {
-              this.props.onChange(new AllRule([new FieldRule('username', '*')]));
-            }}
-          >
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.addFirstRuleButton"
-              defaultMessage="Add rules"
-            />
-          </EuiButton>
+          !this.props.readOnly && (
+            <EuiButton
+              color="primary"
+              iconType="plusInCircle"
+              data-test-subj="roleMappingsAddRuleButton"
+              onClick={() => {
+                this.props.onChange(new AllRule([new FieldRule('username', '*')]));
+              }}
+            >
+              <FormattedMessage
+                id="xpack.security.management.editRoleMapping.addFirstRuleButton"
+                defaultMessage="Add rules"
+              />
+            </EuiButton>
+          )
         }
       />
     );

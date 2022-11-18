@@ -102,6 +102,28 @@ describe('roleMappingsManagementApp', () => {
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
 
+  it('mount() works for the `grid` page in read-only mode', async () => {
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp('/', '/', false);
+
+    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Role Mappings' }]);
+    expect(docTitle.change).toHaveBeenCalledWith('Role Mappings');
+    expect(docTitle.reset).not.toHaveBeenCalled();
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        Role Mappings Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"readOnly":true}
+      </div>
+    `);
+
+    act(() => {
+      unmount();
+    });
+
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
+
+    expect(container).toMatchInlineSnapshot(`<div />`);
+  });
+
   it('mount() works for the `create role mapping` page', async () => {
     const { setBreadcrumbs, container, unmount, docTitle } = await mountApp('/', '/edit');
 
@@ -145,6 +167,37 @@ describe('roleMappingsManagementApp', () => {
     expect(container).toMatchInlineSnapshot(`
       <div>
         Role Mapping Edit Page: {"action":"edit","name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}},"readOnly":false}
+      </div>
+    `);
+
+    act(() => {
+      unmount();
+    });
+
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
+
+    expect(container).toMatchInlineSnapshot(`<div />`);
+  });
+
+  it('mount() works for the `viewing role mapping` page', async () => {
+    const roleMappingName = 'role@mapping';
+
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp(
+      '/',
+      `/edit/${roleMappingName}`,
+      false
+    );
+
+    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      { href: '/', text: 'Role Mappings' },
+      { text: roleMappingName },
+    ]);
+    expect(docTitle.change).toHaveBeenCalledWith('Role Mappings');
+    expect(docTitle.reset).not.toHaveBeenCalled();
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        Role Mapping Edit Page: {"action":"edit","name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}},"readOnly":true}
       </div>
     `);
 

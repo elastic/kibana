@@ -62,6 +62,7 @@ export class RoleSelector extends React.Component<Props, State> {
     const { roles = [] } = this.props.roleMapping;
     return (
       <RoleComboBox
+        data-test-subj="roleMappingFormRolesCombo"
         placeholder={i18n.translate(
           'xpack.security.management.editRoleMapping.selectRolesPlaceholder',
           { defaultMessage: 'Select one or more roles' }
@@ -88,6 +89,7 @@ export class RoleSelector extends React.Component<Props, State> {
         {roleTemplates.map((rt, index) => (
           <Fragment key={index}>
             <RoleTemplateEditor
+              data-test-subj="roleMappingFormRoleTemplateEditor"
               canUseStoredScripts={this.props.canUseStoredScripts}
               canUseInlineScripts={this.props.canUseInlineScripts}
               roleTemplate={rt}

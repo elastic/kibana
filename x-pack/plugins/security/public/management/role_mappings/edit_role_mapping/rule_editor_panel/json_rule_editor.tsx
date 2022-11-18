@@ -65,7 +65,12 @@ export const JSONRuleEditor = (props: Props) => {
   function conditionallyRenderReformatButton() {
     if (!props.readOnly) {
       return (
-        <EuiButton iconType="broom" onClick={reformatRules} size="s">
+        <EuiButton
+          data-test-subj="roleMappingsJSONReformatButton"
+          iconType="broom"
+          onClick={reformatRules}
+          size="s"
+        >
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.autoFormatRuleText"
             defaultMessage="Reformat"
