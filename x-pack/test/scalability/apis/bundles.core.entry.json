@@ -12,9 +12,9 @@
     "test": [
       {
         "action": "incrementUsersPerSec",
-        "userCount": 20,
+        "userCount": 30,
         "times": 50,
-        "duration": "5s"
+        "duration": "3s"
       }
     ],
     "maxDuration": "15m"

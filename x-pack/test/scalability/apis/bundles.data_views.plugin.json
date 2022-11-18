@@ -12,7 +12,7 @@
     "test": [
       {
         "action": "incrementUsersPerSec",
-        "userCount": 20,
+        "userCount": 30,
         "times": 50,
         "duration": "3s"
       }
