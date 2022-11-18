@@ -74,6 +74,7 @@ import {
   TIMELINES_PATH,
   TRUSTED_APPS_PATH,
   USERS_PATH,
+  SHARED_EXCEPTION_LIST_DETAIL_PATH,
 } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { hasCapabilities, subscribeAppLinks } from '../../common/links';
@@ -239,7 +240,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           {
             id: SecurityPageName.sharedExceptionListDetails,
             title: SHARED_LIST_DETAILS,
-            path: '/exceptions/shared/:exceptionListId',
+            path: SHARED_EXCEPTION_LIST_DETAIL_PATH,
             navLinkStatus: AppNavLinkStatus.hidden,
             searchable: false,
           },
