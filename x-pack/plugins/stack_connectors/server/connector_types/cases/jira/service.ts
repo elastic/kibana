@@ -142,7 +142,7 @@ export const createExternalService = (
   const escapeJqlSpecialCharacters = (str: string) => {
     const doubleBackSlashRegExp = '\\\\$&';
 
-    return str.replace(new RegExp(JQL_SPECIAL_CHARACTERS_REGEX,'g'), doubleBackSlashRegExp);
+    return str.replace(new RegExp(JQL_SPECIAL_CHARACTERS_REGEX, 'g'), doubleBackSlashRegExp);
   };
 
   const hasSupportForNewAPI = (capabilities: { capabilities?: {} }) =>
