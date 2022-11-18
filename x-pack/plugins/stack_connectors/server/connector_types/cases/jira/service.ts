@@ -125,12 +125,12 @@ export const createExternalService = (
 
     const { errorMessages, errors } = errorResponse;
 
-    if (errors == null) {
-      return 'unknown: errorResponse.errors was null';
+    if (isEmpty(errors) && Array.isArray(errorMessages) && errorMessages.length > 0) {
+      return `${errorMessages.join(', ')}`;
     }
 
-    if (Array.isArray(errorMessages) && errorMessages.length > 0) {
-      return `${errorMessages.join(', ')}`;
+    if (errors == null) {
+      return 'unknown: errorResponse.errors was null';
     }
 
     return Object.entries(errors).reduce((errorMessage, [, value]) => {
