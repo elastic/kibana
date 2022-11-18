@@ -64,7 +64,7 @@ const IGNORE_PATTERNS = [
 
   // ignore any code in a .storybook directory, storybook loads ts-node (which is currently being installed by synthetics)
   // https://github.com/elastic/synthetics/issues/654
-  /[\/\\]\.storybook[\/\\]/,
+  /[\/\\](\.storybook[\/\\]|plugins[\/\\]controls[\/\\]storybook[\/\\]main\.ts)/,
 ];
 
 function getBabelOptions(path: string) {
