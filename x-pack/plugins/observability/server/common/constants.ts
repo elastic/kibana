@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const SLO_BURN_RATE_RULE_ID = 'slo.rules.burnRate';
-export const ALERT_STATUS_ALL = 'all';
+export const OBSERVABILITY_FEATURE_ID = 'observability';
+export const RULE_REGISTRATION_CONTEXT = 'observability.slo';
