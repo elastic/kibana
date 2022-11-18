@@ -13,6 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
+// @ts-ignore
 import { Beat } from '../../../components/beats/beat';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { BeatsTemplate } from './beats_template';

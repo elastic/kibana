@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+// @ts-ignore
 export { ElasticsearchOverview } from './overview';
