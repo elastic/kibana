@@ -973,7 +973,7 @@ export default ({ getService }: FtrProviderContext): void => {
             errors: [],
             exceptions_errors: [],
             exceptions_success: true,
-            exceptions_success_count: 2,
+            exceptions_success_count: 1,
           });
         });
 
@@ -1143,7 +1143,7 @@ export default ({ getService }: FtrProviderContext): void => {
             errors: [],
             exceptions_errors: [],
             exceptions_success: true,
-            exceptions_success_count: 2,
+            exceptions_success_count: 1,
           });
         });
 
@@ -1273,7 +1273,7 @@ export default ({ getService }: FtrProviderContext): void => {
             errors: [],
             exceptions_errors: [],
             exceptions_success: true,
-            exceptions_success_count: 2,
+            exceptions_success_count: 1,
           });
         });
       });

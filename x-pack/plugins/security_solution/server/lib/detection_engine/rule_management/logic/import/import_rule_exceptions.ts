@@ -43,7 +43,7 @@ export const importRuleExceptions = async ({
   const {
     errors,
     success,
-    success_count: successCount,
+    success_count_exception_list_items: successCount,
   } = await exceptionsClient.importExceptionListAndItemsAsArray({
     exceptionsToImport: exceptions,
     overwrite,
