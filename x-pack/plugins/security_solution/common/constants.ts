@@ -97,7 +97,7 @@ export enum SecurityPageName {
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
-  sharedExceptionListDetails = 'shared-exception-list-details',
+  exceptionListDetails = 'exception-list-details',
   exploreLanding = 'explore',
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
@@ -150,7 +150,7 @@ export const ALERTS_PATH = '/alerts' as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
-export const EXCEPTION_LIST_DETAIL_PATH = '/exceptions/details/:exceptionListId' as const;
+export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:exceptionListId` as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;

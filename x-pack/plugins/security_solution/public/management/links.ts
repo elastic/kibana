@@ -145,7 +145,7 @@ export const links: LinkItem = {
       ],
       links: [
         {
-          id: SecurityPageName.sharedExceptionListDetails,
+          id: SecurityPageName.exceptionListDetails,
           title: LIST_DETAILS,
           path: '',
           skipUrlState: true,
