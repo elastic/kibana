@@ -12,8 +12,8 @@ describe('util', () => {
     test('300x300', () => {
       expect(fitToBox(300, 300)).toMatchInlineSnapshot(`
         Object {
-          "height": 300,
-          "width": 300,
+          "height": 120,
+          "width": 120,
         }
       `);
     });
@@ -21,8 +21,8 @@ describe('util', () => {
     test('300x150', () => {
       expect(fitToBox(300, 150)).toMatchInlineSnapshot(`
         Object {
-          "height": 150,
-          "width": 300,
+          "height": 60,
+          "width": 120,
         }
       `);
     });
@@ -30,8 +30,8 @@ describe('util', () => {
     test('4500x9000', () => {
       expect(fitToBox(4500, 9000)).toMatchInlineSnapshot(`
         Object {
-          "height": 300,
-          "width": 150,
+          "height": 120,
+          "width": 60,
         }
       `);
     });
@@ -39,8 +39,8 @@ describe('util', () => {
     test('1000x300', () => {
       expect(fitToBox(1000, 300)).toMatchInlineSnapshot(`
         Object {
-          "height": 90,
-          "width": 300,
+          "height": 36,
+          "width": 120,
         }
       `);
     });
