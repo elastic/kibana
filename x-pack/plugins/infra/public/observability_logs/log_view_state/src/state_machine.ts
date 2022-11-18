@@ -9,15 +9,10 @@ import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
 import { ILogViewsClient } from '../../../services/log_views';
 import { createTypestateHelpers } from '../../xstate_helpers';
-import {
-  logViewContextWithIdRT,
-  logViewContextWithLogViewRT,
-  LogViewEvent,
-  LogViewTypestate,
-} from './types';
+import { LogViewContext, LogViewContextWithId, LogViewEvent, LogViewTypestate } from './types';
 
-export const createPureLogViewStateMachine = () =>
-  createMachine<{}, LogViewEvent, LogViewTypestate>(
+export const createPureLogViewStateMachine = (initialContext: LogViewContextWithId) =>
+  createMachine<LogViewContext, LogViewEvent, LogViewTypestate>(
     {
       id: 'LogView',
       initial: 'uninitialized',
@@ -31,7 +26,7 @@ export const createPureLogViewStateMachine = () =>
           invoke: {
             src: 'loadLogView',
           },
-          entry: 'notifyLoading',
+          entry: 'notifyLoadingStarted',
           on: {
             loadingSucceeded: {
               target: 'resolving',
@@ -47,7 +42,6 @@ export const createPureLogViewStateMachine = () =>
           invoke: {
             src: 'resolveLogView',
           },
-          entry: 'notifyLoading', // Parents / consumers don't need to differentiate between loading / resolving, respond to the one event?
           on: {
             resolutionSucceeded: {
               target: 'resolved',
@@ -60,6 +54,7 @@ export const createPureLogViewStateMachine = () =>
           },
         },
         resolved: {
+          entry: 'notifyLoadingSucceeded',
           on: {
             reloadLogView: {
               target: 'loading',
@@ -67,6 +62,7 @@ export const createPureLogViewStateMachine = () =>
           },
         },
         loadingFailed: {
+          entry: 'notifyLoadingFailed',
           on: {
             retry: {
               target: 'loading',
@@ -87,13 +83,15 @@ export const createPureLogViewStateMachine = () =>
           actions: 'storeLogViewId',
         },
       },
-      context: {},
+      context: initialContext,
       predictableActionArguments: true,
       preserveActionOrder: true,
     },
     {
       actions: {
-        notifyLoading: actions.pure(() => undefined),
+        notifyLoadingStarted: actions.pure(() => undefined),
+        notifyLoadingSucceeded: actions.pure(() => undefined),
+        notifyLoadingFailed: actions.pure(() => undefined),
         storeLogViewId: logViewStateMachineHelpers.assignOnTransition(
           null,
           'loading',
@@ -120,19 +118,25 @@ export const createPureLogViewStateMachine = () =>
             resolvedLogView: event.resolvedLogView,
           })
         ),
-        storeError: assign({
-          error: (context, event) => event.error,
-        }),
+        storeError: assign((context, event) =>
+          'error' in event ? { ...context, error: event.error } : context
+        ),
       },
     }
   );
 
-export const createLogViewStateMachine = ({ logViews }: { logViews: ILogViewsClient }) =>
-  createPureLogViewStateMachine().withConfig({
+export const createLogViewStateMachine = ({
+  initialContext,
+  logViews,
+}: {
+  initialContext: LogViewContextWithId;
+  logViews: ILogViewsClient;
+}) =>
+  createPureLogViewStateMachine(initialContext).withConfig({
     services: {
       loadLogView: (context) =>
         from(
-          logViewContextWithIdRT.is(context)
+          'logViewId' in context
             ? logViews.getLogView(context.logViewId)
             : throwError(() => new Error('Failed to load log view: No id found in context.'))
         ).pipe(
@@ -151,7 +155,7 @@ export const createLogViewStateMachine = ({ logViews }: { logViews: ILogViewsCli
         ),
       resolveLogView: (context) =>
         from(
-          logViewContextWithLogViewRT.is(context)
+          'logView' in context
             ? logViews.resolveLogView(context.logView.id, context.logView.attributes)
             : throwError(
                 () => new Error('Failed to resolve log view: No log view found in context.')

@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { ActorRef } from 'xstate';
-import { LogView, logViewRT, ResolvedLogView } from '../../../../common/log_views';
+import { LogView, ResolvedLogView } from '../../../../common/log_views';
 
-export const logViewContextWithIdRT = rt.type({
-  logViewId: rt.string,
-});
-export type LogViewContextWithId = rt.TypeOf<typeof logViewContextWithIdRT>;
+export interface LogViewContextWithId {
+  logViewId: string;
+}
 
-export const logViewContextWithLogViewRT = rt.type({
-  logView: logViewRT,
-});
-export type LogViewContextWithLogView = rt.TypeOf<typeof logViewContextWithLogViewRT>;
+export interface LogViewContextWithLogView {
+  logView: LogView;
+}
 
 export interface LogViewContextWithResolvedLogView {
   resolvedLogView: ResolvedLogView;
@@ -52,6 +49,8 @@ export type LogViewTypestate =
       value: 'resolutionFailed';
       context: LogViewContextWithId & LogViewContextWithLogView & LogViewContextWithError;
     };
+
+export type LogViewContext = LogViewTypestate['context'];
 
 export type LogViewStateValue = LogViewTypestate['value'];
 

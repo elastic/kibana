@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export * from './assign_action';
+export * from './assign_actions';
+export * from './send_actions';
 export * from './typestate';

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { createMachine, assign, spawn } from 'xstate';
+import { createMachine, assign, spawn, SpecialTargets } from 'xstate';
 import { LogStreamPageEvent, LogStreamPageTypestate } from './types';
-import { createLogViewStateMachine, createListeners } from '../../../log_view_state';
+import { createLogViewStateMachine, logViewListenerEventSelectors } from '../../../log_view_state';
 import { ILogViewsClient } from '../../../../services/log_views';
+import { sendIfDefined } from '../../../xstate_helpers';
 
 const MACHINE_ID = 'logStreamPageState';
 
@@ -27,9 +28,9 @@ export const createLogStreamPageStateMachine = ({
         uninitialized: {
           entry: ['spawnLogViewMachine'],
           on: {
-            loadingLogView: 'loadingLogView',
-            failedLoadingLogView: 'loadingLogViewFailed',
-            loadedAndResolvedLogViewWithStatus: [
+            loadingLogViewStarted: 'loadingLogView',
+            loadingLogViewFailed: 'loadingLogViewFailed',
+            loadingLogViewSucceeded: [
               {
                 target: 'hasLogViewIndices',
                 cond: 'hasLogViewIndices',
@@ -42,8 +43,8 @@ export const createLogStreamPageStateMachine = ({
         },
         loadingLogView: {
           on: {
-            failedLoadingLogView: 'loadingLogViewFailed',
-            loadedAndResolvedLogViewWithStatus: [
+            loadingLogViewFailed: 'loadingLogViewFailed',
+            loadingLogViewSucceeded: [
               {
                 target: 'hasLogViewIndices',
                 cond: 'hasLogViewIndices',
@@ -58,7 +59,7 @@ export const createLogStreamPageStateMachine = ({
           entry: ['assignLogViewError'],
           exit: ['resetLogViewError'],
           on: {
-            loadingLogView: 'loadingLogView',
+            loadingLogViewStarted: 'loadingLogView',
           },
         },
         hasLogViewIndices: {
@@ -83,20 +84,31 @@ export const createLogStreamPageStateMachine = ({
       services: {},
       guards: {
         hasLogViewIndices: (context, event) =>
-          ['available', 'empty'].includes(event.logViewStatus.index),
+          event.type === 'loadingLogViewSucceeded' && event.resolvedLogView.fields.length > 0, // TODO: replace with status check once implemented in log view state machine
       },
       actions: {
         spawnLogViewMachine: assign({
           // Assigned to context for the lifetime of this machine
           logViewMachineRef: () =>
             spawn(
-              createLogViewStateMachine({ logViews })
-                .withConfig({
-                  actions: createListeners(MACHINE_ID), // Uses a string to match the ID as I don't think we can access a ref to the parent here? Related: https://github.com/statelyai/xstate/discussions/2715
-                })
-                .withContext({
+              createLogViewStateMachine({
+                initialContext: {
                   logViewId,
-                }),
+                },
+                logViews,
+              }).withConfig({
+                actions: {
+                  notifyLoadingStarted: sendIfDefined(SpecialTargets.Parent)(
+                    logViewListenerEventSelectors.loadingLogViewStarted
+                  ),
+                  notifyLoadingSucceeded: sendIfDefined(SpecialTargets.Parent)(
+                    logViewListenerEventSelectors.loadingLogViewSucceeded
+                  ),
+                  notifyLoadingFailed: sendIfDefined(SpecialTargets.Parent)(
+                    logViewListenerEventSelectors.loadingLogViewFailed
+                  ),
+                },
+              }),
               'logViewMachine'
             ),
         }),

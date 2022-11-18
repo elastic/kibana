@@ -6,5 +6,5 @@
  */
 
 export { createLogViewStateMachine } from './src';
-export { createListeners, ListenerEvents } from './src';
+export { logViewListenerEventSelectors, ListenerEvents } from './src';
 export * from './src/types';

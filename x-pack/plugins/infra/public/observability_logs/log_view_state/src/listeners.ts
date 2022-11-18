@@ -5,38 +5,43 @@
  * 2.0.
  */
 
-import { actions, ActorRef } from 'xstate';
 import { ResolvedLogView } from '../../../../common/log_views';
-import { logViewContextWithIdRT } from './types';
+import { LogViewContext } from './types';
 
 export type ListenerEvents =
   | {
-      type: 'loadingLogView';
+      type: 'loadingLogViewStarted';
       logViewId: string;
     }
   | {
-      type: 'loadedLogView';
+      type: 'loadingLogViewSucceeded';
       resolvedLogView: ResolvedLogView;
     }
   | {
-      type: 'failedLoadingLogView';
+      type: 'loadingLogViewFailed';
       error: Error;
     };
 
-export const createListeners = (target: ActorRef<ListenerEvents> | string) => {
-  return {
-    notifyLoading: actions.pure((context) =>
-      logViewContextWithIdRT.is(context)
-        ? [
-            actions.send(
-              {
-                type: 'loadingLogView',
-                logViewId: context.logViewId,
-              } as ListenerEvents,
-              { to: target }
-            ),
-          ]
-        : undefined
-    ),
-  };
+export const logViewListenerEventSelectors = {
+  loadingLogViewStarted: (context: LogViewContext) =>
+    'logViewId' in context
+      ? {
+          type: 'loadingLogViewStarted',
+          logViewId: context.logViewId,
+        }
+      : undefined,
+  loadingLogViewSucceeded: (context: LogViewContext) =>
+    'resolvedLogView' in context
+      ? {
+          type: 'loadingLogViewStarted',
+          resolvedLogView: context.resolvedLogView,
+        }
+      : undefined,
+  loadingLogViewFailed: (context: LogViewContext) =>
+    'error' in context
+      ? {
+          type: 'loadingLogViewFailed',
+          error: context.error,
+        }
+      : undefined,
 };
