@@ -1,4 +1,3 @@
-[role="xpack"]
 [[alerting-common-issues]]
 === Common Issues
 
@@ -284,6 +283,6 @@ to 8.3.0 or 8.3.1. The following error occurs:
 *Solution*:
 
 Upgrade to 8.3.2 or later releases to avoid the problem. To fix failing rules,
-go to *{stack-manage-app} > {rules-ui}* and multi-select the rules. Choose
+go to *{stack-manage-app} > {rac-ui}* and multi-select the rules. Choose
 **Manage rules > Update API Keys** to generate new API keys. For more details
 about API key authorization, refer to <<alerting-authorization>>.
