@@ -411,6 +411,15 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         },
       ];
     }
+
+    case 'data_quality': {
+      return [
+        {
+          title: label,
+          description: i18n.DATA_QUALITY_TYPE_DESCRIPTION,
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }

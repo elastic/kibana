@@ -16,6 +16,7 @@ import {
   isQueryRule,
   isThreatMatchRule,
   isNewTermsRule,
+  isDataQualityRule,
 } from '../../../../../common/detection_engine/utils';
 import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
@@ -49,6 +50,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   const setThreshold = useCallback(() => setType('threshold'), [setType]);
   const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
   const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
+  const setDataQuality = useCallback(() => setType('data_quality'), [setType]);
 
   const eqlSelectableConfig = useMemo(
     () => ({
@@ -97,6 +99,14 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       isSelected: isNewTermsRule(ruleType),
     }),
     [ruleType, setNewTerms]
+  );
+
+  const dataQualitySelectableConfig = useMemo(
+    () => ({
+      onClick: setDataQuality,
+      isSelected: isDataQualityRule(ruleType),
+    }),
+    [ruleType, setDataQuality]
   );
 
   return (
@@ -182,6 +192,19 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               description={i18n.NEW_TERMS_TYPE_DESCRIPTION}
               icon={<EuiIcon size="l" type="magnifyWithPlus" />}
               selectable={newTermsSelectableConfig}
+              layout="horizontal"
+            />
+          </EuiFlexItem>
+        )}
+        {(!isUpdateView || dataQualitySelectableConfig.isSelected) && (
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="dataQualityRuleType"
+              title={i18n.DATA_QUALITY_TYPE_TITLE}
+              titleSize="xs"
+              description={i18n.DATA_QUALITY_TYPE_DESCRIPTION}
+              icon={<EuiIcon size="l" type="magnifyWithPlus" />}
+              selectable={dataQualitySelectableConfig}
               layout="horizontal"
             />
           </EuiFlexItem>

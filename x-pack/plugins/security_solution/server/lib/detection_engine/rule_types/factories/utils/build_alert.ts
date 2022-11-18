@@ -174,10 +174,12 @@ export const buildAlert = (
 
   const params = completeRule.ruleParams;
 
-  const originalTime = getValidDateFromDoc({
-    doc: docs[0],
-    primaryTimestamp: TIMESTAMP,
-  });
+  const originalTime = docs[0]
+    ? getValidDateFromDoc({
+        doc: docs[0],
+        primaryTimestamp: TIMESTAMP,
+      })
+    : undefined;
 
   return {
     [TIMESTAMP]: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),

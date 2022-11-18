@@ -92,3 +92,18 @@ export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Find documents with values appearing for the first time.',
   }
 );
+
+export const DATA_QUALITY_TYPE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.dataQualityTitle',
+  {
+    defaultMessage: 'Data Quality',
+  }
+);
+
+export const DATA_QUALITY_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.dataQualityDescription',
+  {
+    defaultMessage:
+      "POC: Scan user environment for threats and enrich IOC's with occurrence metadata",
+  }
+);

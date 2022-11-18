@@ -481,6 +481,46 @@ export type NewTermsPatchParams = t.TypeOf<typeof NewTermsPatchParams>;
 export const NewTermsPatchParams = newTermsSchema.patch;
 
 // -------------------------------------------------------------------------------------------------
+// Data Quality rule schema
+
+const dataQualitySchema = buildRuleSchemas({
+  required: {
+    type: t.literal('data_quality'),
+  },
+  optional: {
+    index: IndexPatternArray,
+    threat_index: IndexPatternArray,
+    data_view_id: DataViewId,
+    filters: RuleFilterArray,
+  },
+  defaultable: {},
+});
+
+export type DataQualityRule = t.TypeOf<typeof DataQualityRule>;
+export const DataQualityRule = t.intersection([SharedResponseProps, dataQualitySchema.response]);
+
+export type DataQualityRuleCreateProps = t.TypeOf<typeof DataQualityRuleCreateProps>;
+export const DataQualityRuleCreateProps = t.intersection([
+  SharedCreateProps,
+  dataQualitySchema.create,
+]);
+
+export type DataQualityRuleUpdateProps = t.TypeOf<typeof DataQualityRuleUpdateProps>;
+export const DataQualityRuleUpdateProps = t.intersection([
+  SharedUpdateProps,
+  dataQualitySchema.create,
+]);
+
+export type DataQualityRulePatchProps = t.TypeOf<typeof DataQualityRulePatchProps>;
+export const DataQualityRulePatchProps = t.intersection([
+  SharedPatchProps,
+  dataQualitySchema.patch,
+]);
+
+export type DataQualityPatchParams = t.TypeOf<typeof DataQualityPatchParams>;
+export const DataQualityPatchParams = dataQualitySchema.patch;
+
+// -------------------------------------------------------------------------------------------------
 // Combined type specific schemas
 
 export type TypeSpecificCreateProps = t.TypeOf<typeof TypeSpecificCreateProps>;
@@ -492,6 +532,7 @@ export const TypeSpecificCreateProps = t.union([
   thresholdSchema.create,
   machineLearningSchema.create,
   newTermsSchema.create,
+  dataQualitySchema.create,
 ]);
 
 export type TypeSpecificPatchProps = t.TypeOf<typeof TypeSpecificPatchProps>;
@@ -503,6 +544,7 @@ export const TypeSpecificPatchProps = t.union([
   thresholdSchema.patch,
   machineLearningSchema.patch,
   newTermsSchema.patch,
+  dataQualitySchema.patch,
 ]);
 
 export type TypeSpecificResponse = t.TypeOf<typeof TypeSpecificResponse>;
@@ -514,6 +556,7 @@ export const TypeSpecificResponse = t.union([
   thresholdSchema.response,
   machineLearningSchema.response,
   newTermsSchema.response,
+  dataQualitySchema.response,
 ]);
 
 // -------------------------------------------------------------------------------------------------

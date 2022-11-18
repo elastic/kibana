@@ -140,3 +140,10 @@ export const ALERT_SUPPRESSION_TECHNICAL_PREVIEW = i18n.translate(
     defaultMessage: 'Technical Preview',
   }
 );
+
+export const DATA_QUALITY_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.dataQualityRuleTypeDescription',
+  {
+    defaultMessage: 'Data Quality',
+  }
+);

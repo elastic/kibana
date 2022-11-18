@@ -121,6 +121,9 @@ export const getFilter = async ({
         'Unsupported Rule of type "machine_learning" supplied to getFilter'
       );
     }
+    case 'data_quality': {
+      throw new BadRequestError('Unsupported Rule of type "data_quality" supplied to getFilter');
+    }
     case 'eql': {
       throw new BadRequestError('Unsupported Rule of type "eql" supplied to getFilter');
     }

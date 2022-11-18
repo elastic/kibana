@@ -20,6 +20,7 @@ import {
   isEqlRule,
   isNewTermsRule,
   isQueryRule,
+  isDataQualityRule,
   isThreatMatchRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
@@ -131,7 +132,8 @@ export const schema: FormSchema<DefineStepRule> = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path, formData }] = args;
           const { query, filters, saved_id: savedId } = value as FieldValueQueryBar;
-          const needsValidation = !isMlRule(formData.ruleType);
+          const needsValidation =
+            !isMlRule(formData.ruleType) && !isDataQualityRule(formData.ruleType);
           if (!needsValidation) {
             return undefined;
           }
@@ -152,7 +154,8 @@ export const schema: FormSchema<DefineStepRule> = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path, formData }] = args;
           const { query } = value as FieldValueQueryBar;
-          const needsValidation = !isMlRule(formData.ruleType);
+          const needsValidation =
+            !isMlRule(formData.ruleType) && !isDataQualityRule(formData.ruleType);
           if (!needsValidation) {
             return;
           }

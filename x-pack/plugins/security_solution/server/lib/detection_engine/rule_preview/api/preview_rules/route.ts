@@ -54,6 +54,7 @@ import {
   createQueryAlertType,
   createThresholdAlertType,
   createNewTermsAlertType,
+  createDataQualityAlertType,
 } from '../../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../../rule_types/create_security_rule_type_wrapper';
 import { assertUnreachable } from '../../../../../../common/utility_types';
@@ -425,6 +426,26 @@ export const previewRulesRoute = async (
               newTermsAlertType.executor,
               newTermsAlertType.id,
               newTermsAlertType.name,
+              previewRuleParams,
+              () => true,
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
+            );
+            break;
+          case 'data_quality':
+            const dataQualityAlertType = previewRuleTypeWrapper(
+              createDataQualityAlertType(ruleOptions)
+            );
+            await runExecutors(
+              dataQualityAlertType.executor,
+              dataQualityAlertType.id,
+              dataQualityAlertType.name,
               previewRuleParams,
               () => true,
               {

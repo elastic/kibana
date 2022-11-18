@@ -33,6 +33,7 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
+  DATA_QUALITY_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
@@ -246,6 +247,20 @@ export const newTermsRuleParams = t.intersection([baseRuleParams, newTermsSpecif
 export type NewTermsSpecificRuleParams = t.TypeOf<typeof newTermsSpecificRuleParams>;
 export type NewTermsRuleParams = t.TypeOf<typeof newTermsRuleParams>;
 
+const dataQualitySpecificRuleParams = t.type({
+  type: t.literal('data_quality'),
+  index: t.union([IndexPatternArray, t.undefined]),
+  threatIndex: t.union([IndexPatternArray, t.undefined]),
+  filters: t.union([RuleFilterArray, t.undefined]),
+  dataViewId: t.union([DataViewId, t.undefined]),
+});
+export const dataQualityRuleParams = t.intersection([
+  baseRuleParams,
+  dataQualitySpecificRuleParams,
+]);
+export type DataQualitySpecificRuleParams = t.TypeOf<typeof dataQualitySpecificRuleParams>;
+export type DataQualityRuleParams = t.TypeOf<typeof dataQualityRuleParams>;
+
 export const typeSpecificRuleParams = t.union([
   eqlSpecificRuleParams,
   threatSpecificRuleParams,
@@ -254,6 +269,7 @@ export const typeSpecificRuleParams = t.union([
   thresholdSpecificRuleParams,
   machineLearningSpecificRuleParams,
   newTermsSpecificRuleParams,
+  dataQualitySpecificRuleParams,
 ]);
 export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 
@@ -282,6 +298,7 @@ export const allRuleTypes = t.union([
   t.literal(SAVED_QUERY_RULE_TYPE_ID),
   t.literal(THRESHOLD_RULE_TYPE_ID),
   t.literal(NEW_TERMS_RULE_TYPE_ID),
+  t.literal(DATA_QUALITY_RULE_TYPE_ID),
 ]);
 
 const internalRuleCreateRequired = t.type({

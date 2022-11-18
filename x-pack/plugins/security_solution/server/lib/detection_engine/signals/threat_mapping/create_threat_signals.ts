@@ -171,7 +171,7 @@ export const createThreatSignals = async ({
         `all successes are ${results.success}`
       );
       if (results.createdSignalsCount >= params.maxSignals) {
-        ruleExecutionLogger.debug(
+        ruleExecutionLogger.info(
           `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
         );
         break;
