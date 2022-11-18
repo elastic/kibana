@@ -255,7 +255,6 @@ export const KibanaInstances: React.FC<Props> = (props: Props) => {
     setupModeCallOut = (
       <ListingCallOut
         setupModeData={setupMode.data}
-        useNodeIdentifier={false}
         productName={KIBANA_SYSTEM_ID}
         customRenderer={() => {
           const customRenderResponse = {

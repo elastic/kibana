@@ -49,7 +49,7 @@ const createCharts = (series: unknown[], props: Partial<Props>) => {
   return series.map((data, index) => {
     return (
       <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
-        <MonitoringTimeseriesContainer {...props} series={data} />
+        <MonitoringTimeseriesContainer {...props} series={data as any} />
       </EuiFlexItem>
     );
   });

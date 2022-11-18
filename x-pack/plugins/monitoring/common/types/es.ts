@@ -368,7 +368,6 @@ export interface ElasticsearchLegacySource {
     read_exceptions?: Array<{
       exception?: {
         type?: string;
-        reason?: string;
       };
     }>;
     time_since_last_read_millis?: number;
@@ -453,7 +452,6 @@ export interface ElasticsearchMetricbeatSource {
       };
     };
     ccr?: {
-      shard_id?: number;
       leader?: {
         index?: string;
       };
@@ -472,7 +470,6 @@ export interface ElasticsearchMetricbeatSource {
       read_exceptions?: Array<{
         exception?: {
           type?: string;
-          reason?: string;
         };
       }>;
     };

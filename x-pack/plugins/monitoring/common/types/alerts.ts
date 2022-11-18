@@ -196,11 +196,11 @@ export interface AlertMissingData extends AlertNodeStats {
 export interface CCRReadExceptionsStats {
   remoteCluster: string;
   followerIndex: string;
-  shardId?: number;
+  shardId: number;
   leaderIndex: string;
-  lastReadException: { type?: string; reason?: string };
+  lastReadException: { type: string; reason: string };
   clusterUuid: string;
-  ccs?: string;
+  ccs: string;
 }
 
 export interface CCRReadExceptionsUIMeta extends CCRReadExceptionsStats {
