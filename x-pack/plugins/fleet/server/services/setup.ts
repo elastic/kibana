@@ -29,6 +29,10 @@ import {
   ensurePreconfiguredOutputs,
   getPreconfiguredOutputFromConfig,
 } from './preconfiguration/outputs';
+import {
+  ensurePreconfiguredFleetProxies,
+  getPreconfiguredFleetProxiesFromConfig,
+} from './preconfiguration/fleet_proxies';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
@@ -86,6 +90,13 @@ async function createSetupSideEffects(
   await migrateSettingsToFleetServerHost(soClient);
   logger.debug('Setting up Fleet download source');
   const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
+  // Need to be done before outputs and fleet server hosts as these object can reference a proxy
+  logger.debug('Setting up Proxy');
+  await ensurePreconfiguredFleetProxies(
+    soClient,
+    esClient,
+    getPreconfiguredFleetProxiesFromConfig(appContextService.getConfig())
+  );
 
   logger.debug('Setting up Fleet Sever Hosts');
   await ensurePreconfiguredFleetServerHosts(
