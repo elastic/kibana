@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 
 import { QueryBarDefineRule } from '.';
 import {
@@ -16,6 +15,7 @@ import {
 } from '../../../../common/mock';
 import { useGetAllTimeline, getAllTimeline } from '../../../../timelines/containers/all';
 import { mockHistory, Router } from '../../../../common/mock/router';
+import { render } from '@testing-library/react';
 
 jest.mock('../../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../../common/lib/kibana');
@@ -58,58 +58,50 @@ describe('QueryBarDefineRule', () => {
   });
 
   it('renders correctly', () => {
-    const Component = () => {
-      const field = useFormFieldMock();
+    const field = useFormFieldMock();
 
-      return (
-        <QueryBarDefineRule
-          browserFields={{}}
-          isLoading={false}
-          indexPattern={{ fields: [], title: 'title' }}
-          onCloseTimelineSearch={jest.fn()}
-          openTimelineSearch={true}
-          dataTestSubj="query-bar-define-rule"
-          idAria="idAria"
-          field={field}
-        />
-      );
-    };
-    const wrapper = mount(
+    const { getByTestId } = render(
       <TestProviders>
         <Router history={mockHistory}>
-          <Component />
+          <QueryBarDefineRule
+            browserFields={{}}
+            isLoading={false}
+            indexPattern={{ fields: [], title: 'title' }}
+            onCloseTimelineSearch={jest.fn()}
+            openTimelineSearch={true}
+            dataTestSubj="query-bar-define-rule"
+            idAria="idAria"
+            field={field}
+          />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="query-bar-define-rule"]').exists()).toBeTruthy();
+    expect(getByTestId('query-bar-define-rule')).toBeInTheDocument();
   });
 
-  it('renders import query from saved timeline modal actions hidden correctly', () => {
-    const Component = () => {
+  it('renders import query from saved timeline modal actions hidden correctly', async () => {
+    await (async () => {
       const field = useFormFieldMock();
 
-      return (
-        <QueryBarDefineRule
-          browserFields={{}}
-          isLoading={false}
-          indexPattern={{ fields: [], title: 'title' }}
-          onCloseTimelineSearch={jest.fn()}
-          openTimelineSearch={true}
-          dataTestSubj="query-bar-define-rule"
-          idAria="idAria"
-          field={field}
-        />
+      const { queryByTestId } = render(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <QueryBarDefineRule
+              browserFields={{}}
+              isLoading={false}
+              indexPattern={{ fields: [], title: 'title' }}
+              onCloseTimelineSearch={jest.fn()}
+              openTimelineSearch={true}
+              dataTestSubj="query-bar-define-rule"
+              idAria="idAria"
+              field={field}
+            />
+          </Router>
+        </TestProviders>
       );
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <Component />
-        </Router>
-      </TestProviders>
-    );
 
-    expect(wrapper.find('[data-test-subj="open-duplicate"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="create-from-template"]').exists()).toBeFalsy();
+      expect(queryByTestId('open-duplicate')).not.toBeInTheDocument();
+      expect(queryByTestId('create-from-template')).not.toBeInTheDocument();
+    });
   });
 });

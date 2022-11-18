@@ -32,7 +32,7 @@ import { useGetInitialUrlParamValue } from '../../../../common/utils/global_quer
 import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import * as i18n from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/translations';
+import * as i18n from './translations';
 
 export const RULE_FROM_TIMELINE_URL_PARAM = 'createRuleFromTimeline';
 
