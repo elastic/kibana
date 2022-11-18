@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObject,
+} from '@kbn/core/server';
 
 import { normalizeHostsForAgents } from '../../common/services';
 import {
@@ -25,6 +29,16 @@ import type {
 import { FleetServerHostUnauthorizedError } from '../errors';
 
 import { agentPolicyService } from './agent_policy';
+
+function savedObjectToFleetServerHost(so: SavedObject<FleetServerHostSOAttributes>) {
+  const data = { ...so.attributes };
+
+  if (data.proxy_id === null) {
+    delete data.proxy_id;
+  }
+
+  return { id: so.id, ...data };
+}
 
 export async function createFleetServerHost(
   soClient: SavedObjectsClientContract,
@@ -53,10 +67,7 @@ export async function createFleetServerHost(
     { id: options?.id, overwrite: options?.overwrite }
   );
 
-  return {
-    id: res.id,
-    ...res.attributes,
-  };
+  return savedObjectToFleetServerHost(res);
 }
 
 export async function getFleetServerHost(
@@ -68,10 +79,7 @@ export async function getFleetServerHost(
     id
   );
 
-  return {
-    id: res.id,
-    ...res.attributes,
-  };
+  return savedObjectToFleetServerHost(res);
 }
 
 export async function listFleetServerHosts(soClient: SavedObjectsClientContract) {
@@ -81,10 +89,7 @@ export async function listFleetServerHosts(soClient: SavedObjectsClientContract)
   });
 
   return {
-    items: res.saved_objects.map<FleetServerHost>((so) => ({
-      id: so.id,
-      ...so.attributes,
-    })),
+    items: res.saved_objects.map<FleetServerHost>(savedObjectToFleetServerHost),
     total: res.total,
     page: res.page,
     perPage: res.per_page,
@@ -181,10 +186,7 @@ export async function bulkGetFleetServerHosts(
         return undefined;
       }
 
-      return {
-        id: so.id,
-        ...so.attributes,
-      };
+      return savedObjectToFleetServerHost(so);
     })
     .filter(
       (fleetServerHostOrUndefined): fleetServerHostOrUndefined is FleetServerHost =>
@@ -223,10 +225,7 @@ export async function getDefaultFleetServerHost(
     return null;
   }
 
-  return {
-    id: res.saved_objects[0].id,
-    ...res.saved_objects[0].attributes,
-  };
+  return savedObjectToFleetServerHost(res.saved_objects[0]);
 }
 
 /**
