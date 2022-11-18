@@ -41,6 +41,9 @@ export class DeveloperExamplesPlugin implements Plugin<DeveloperExamplesSetup, v
     const api: DeveloperExamplesSetup = {
       register: (def) => {
         this.examplesRegistry.push(def);
+        this.examplesRegistry.sort(({ title: titleA }, { title: titleB }) =>
+          titleA > titleB ? 1 : -1
+        );
       },
     };
     return api;
