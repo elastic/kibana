@@ -16,7 +16,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
-  response?: { data: { errors: Record<string, string>, errorMessages?: string[] } };
+  response?: { data: { errors: Record<string, string>; errorMessages?: string[] } };
 }
 
 jest.mock('axios');
@@ -1250,10 +1250,9 @@ describe('Jira service', () => {
         error.response = {
           data: {
             errors: {
-              issuestypes:
-                'My second error',
+              issuestypes: 'My second error',
             },
-            errorMessages: ['My first error']
+            errorMessages: ['My first error'],
           },
         };
         throw error;
