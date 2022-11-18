@@ -82,9 +82,7 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
     const options = [
       {
         value: STYLE_TYPE.STATIC,
-        text: this.props.customStaticOptionLabel
-          ? this.props.customStaticOptionLabel
-          : FIXED_LABEL,
+        text: this.props.customStaticOptionLabel ? this.props.customStaticOptionLabel : FIXED_LABEL,
       },
       {
         value: STYLE_TYPE.DYNAMIC,

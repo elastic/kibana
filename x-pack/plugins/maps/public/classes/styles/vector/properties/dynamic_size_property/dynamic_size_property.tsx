@@ -103,20 +103,14 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     // shift values to be positive integers >= 1
     const valueShift = rangeFieldMeta.min < 1 ? Math.abs(rangeFieldMeta.min) + 1 : 0;
 
-    const maxStopInput = isArea
-      ? Math.sqrt(rangeFieldMeta.max + valueShift)
-      : rangeFieldMeta.max;
-    const minStopInput = isArea
-      ? Math.sqrt(rangeFieldMeta.min + valueShift)
-      : rangeFieldMeta.min;
+    const maxStopInput = isArea ? Math.sqrt(rangeFieldMeta.max + valueShift) : rangeFieldMeta.max;
+    const minStopInput = isArea ? Math.sqrt(rangeFieldMeta.min + valueShift) : rangeFieldMeta.min;
 
     const maxStopOutput = options?.maxStopOutput ? options.maxStopOutput : this.getMaxStopOutput();
     const minStopOutput = options?.minStopOutput ? options.minStopOutput : this.getMinStopOutput();
     const invert = this._options.invert === undefined ? false : this._options.invert;
     function getStopsWithoutRange() {
-      return invert
-        ? [maxStopInput, minStopOutput]
-        : [maxStopInput, maxStopOutput];
+      return invert ? [maxStopInput, minStopOutput] : [maxStopInput, maxStopOutput];
     }
     function getStops() {
       return invert
@@ -126,7 +120,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     const stops = rangeFieldMeta.min === rangeFieldMeta.max ? getStopsWithoutRange() : getStops();
 
     const valueExpression = makeMbClampedNumberExpression({
-      lookupFunction: options?.forceFeatureProperties ? MB_LOOKUP_FUNCTION.GET : this.getMbLookupFunction(),
+      lookupFunction: options?.forceFeatureProperties
+        ? MB_LOOKUP_FUNCTION.GET
+        : this.getMbLookupFunction(),
       maxValue: rangeFieldMeta.max,
       minValue: rangeFieldMeta.min,
       fieldName: this.getMbFieldName(),

@@ -44,11 +44,7 @@ interface Props {
   styleProperty: LabelPositionProperty;
 }
 
-export function LabelPositionEditor({
-  hasLabel,
-  handlePropertyChange,
-  styleProperty,
-}: Props) {
+export function LabelPositionEditor({ hasLabel, handlePropertyChange, styleProperty }: Props) {
   function onChange(e: ChangeEvent<HTMLSelectElement>) {
     handlePropertyChange(styleProperty.getStyleName(), {
       options: { position: e.target.value as LABEL_POSITIONS },
@@ -58,9 +54,7 @@ export function LabelPositionEditor({
   const disabled = !hasLabel || styleProperty.isDisabled();
 
   const form = (
-    <EuiFormRow
-      label={getVectorStyleLabel(VECTOR_STYLES.LABEL_POSITION)}
-    >
+    <EuiFormRow label={getVectorStyleLabel(VECTOR_STYLES.LABEL_POSITION)}>
       <EuiSelect
         disabled={disabled}
         options={options}
@@ -79,7 +73,11 @@ export function LabelPositionEditor({
   ) : (
     <EuiToolTip
       anchorClassName="mapStyleFormDisabledTooltip"
-      content={!hasLabel ? getDisabledByMessage(VECTOR_STYLES.LABEL_TEXT) : styleProperty.getDisabledReason()}
+      content={
+        !hasLabel
+          ? getDisabledByMessage(VECTOR_STYLES.LABEL_TEXT)
+          : styleProperty.getDisabledReason()
+      }
     >
       {form}
     </EuiToolTip>

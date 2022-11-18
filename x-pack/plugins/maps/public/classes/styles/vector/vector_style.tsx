@@ -283,8 +283,10 @@ export class VectorStyle implements IVectorStyle {
     this._labelPositionStyleProperty = new LabelPositionProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_POSITION].options,
       VECTOR_STYLES.LABEL_POSITION,
+      this._iconStyleProperty,
       this._iconSizeStyleProperty,
-      this._labelSizeStyleProperty
+      this._labelSizeStyleProperty,
+      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
     );
   }
 

@@ -8,30 +8,46 @@
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty } from './style_property';
-import { LABEL_POSITIONS } from '../../../../../common/constants';
+import {
+  HALF_MAKI_ICON_SIZE,
+  LABEL_POSITIONS,
+  MAKI_ICON_SIZE,
+} from '../../../../../common/constants';
 import { LabelPositionStylePropertyDescriptor } from '../../../../../common/descriptor_types';
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
 import { DEFAULT_ICON_SIZE, DEFAULT_LABEL_SIZE } from '../vector_style_defaults';
-import { StaticSizeProperty } from './static_size_property';
+import { DynamicIconProperty } from './dynamic_icon_property';
+import { StaticIconProperty } from './static_icon_property';
 import { DynamicSizeProperty } from './dynamic_size_property';
+import { StaticSizeProperty } from './static_size_property';
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import { FIXED_LABEL, BY_VALUE_LABEL } from '../components/style_prop_editor.tsx';
+import { FIXED_LABEL, BY_VALUE_LABEL } from '../components/style_prop_editor';
+
+const CENTER_ANCHORED_ICON_SCALE = (MAKI_ICON_SIZE + HALF_MAKI_ICON_SIZE) / MAKI_ICON_SIZE;
+const BOTTOM_ANCHORED_ICON_SCALE =
+  (2 * MAKI_ICON_SIZE + MAKI_ICON_SIZE + HALF_MAKI_ICON_SIZE) / MAKI_ICON_SIZE;
 
 export class LabelPositionProperty extends AbstractStyleProperty<
   LabelPositionStylePropertyDescriptor['options']
 > {
+  private readonly _iconProperty: StaticIconProperty | DynamicIconProperty;
   private readonly _iconSizeProperty: StaticSizeProperty | DynamicSizeProperty;
   private readonly _labelSizeProperty: StaticSizeProperty | DynamicSizeProperty;
+  private readonly _isSymbolizedAsIcon: boolean;
 
   constructor(
     options: LabelPositionStylePropertyDescriptor['options'],
     styleName: VECTOR_STYLES,
+    iconProperty: StaticIconProperty | DynamicIconProperty,
     iconSizeProperty: StaticSizeProperty | DynamicSizeProperty,
-    labelSizeProperty: StaticSizeProperty | DynamicSizeProperty
+    labelSizeProperty: StaticSizeProperty | DynamicSizeProperty,
+    isSymbolizedAsIcon: boolean
   ) {
     super(options, styleName);
+    this._iconProperty = iconProperty;
     this._iconSizeProperty = iconSizeProperty;
     this._labelSizeProperty = labelSizeProperty;
+    this._isSymbolizedAsIcon = isSymbolizedAsIcon;
   }
 
   isDisabled() {
@@ -63,19 +79,20 @@ export class LabelPositionProperty extends AbstractStyleProperty<
           fixedLabel: FIXED_LABEL.toLowerCase(),
           labelSizePropertyLabel: getVectorStyleLabel(VECTOR_STYLES.LABEL_SIZE).toLowerCase(),
           labelPositionPropertyLabel: getVectorStyleLabel(VECTOR_STYLES.LABEL_POSITION),
-        }
+        },
       });
     }
 
     return this._isIconSizeFromJoin()
       ? i18n.translate('xpack.maps.labelPosition.iconSizeJoinFieldNotSupportMsg', {
-        defaultMessage: '{labelPositionPropertyLabel} is not supported with {iconSizePropertyLabel} join field {iconSizeFieldName}. Set {iconSizePropertyLabel} to source field to enable.',
-        values: {
-          iconSizePropertyLabel: getVectorStyleLabel(VECTOR_STYLES.ICON_SIZE),
-          iconSizeFieldName: (this._iconSizeProperty as DynamicSizeProperty).getFieldName(),
-          labelPositionPropertyLabel: getVectorStyleLabel(VECTOR_STYLES.LABEL_POSITION),
-        }
-      })
+          defaultMessage:
+            '{labelPositionPropertyLabel} is not supported with {iconSizePropertyLabel} join field {iconSizeFieldName}. Set {iconSizePropertyLabel} to source field to enable.',
+          values: {
+            iconSizePropertyLabel: getVectorStyleLabel(VECTOR_STYLES.ICON_SIZE),
+            iconSizeFieldName: (this._iconSizeProperty as DynamicSizeProperty).getFieldName(),
+            labelPositionPropertyLabel: getVectorStyleLabel(VECTOR_STYLES.LABEL_POSITION),
+          },
+        })
       : '';
   }
 
@@ -104,14 +121,8 @@ export class LabelPositionProperty extends AbstractStyleProperty<
         this._iconSizeProperty as DynamicSizeProperty
       ).getMbSizeExpression({
         forceFeatureProperties: true,
-        maxStopOutput: [
-          'literal',
-          this._getTextOffset(dynamicIconSizeOptions.maxSize, labelSize),
-        ],
-        minStopOutput: [
-          'literal',
-          this._getTextOffset(dynamicIconSizeOptions.minSize, labelSize),
-        ]
+        maxStopOutput: ['literal', this._getTextOffset(dynamicIconSizeOptions.maxSize, labelSize)],
+        minStopOutput: ['literal', this._getTextOffset(dynamicIconSizeOptions.minSize, labelSize)],
       });
       mbMap.setLayoutProperty(mbLayerId, 'text-offset', interpolateExpression);
       return;
@@ -128,7 +139,23 @@ export class LabelPositionProperty extends AbstractStyleProperty<
     const ems = symbolSize / labelSize;
     // Positive values indicate right and down, while negative values indicate left and up
     const verticalTextOffset = this._options.position === LABEL_POSITIONS.BOTTOM ? ems : ems * -1;
-    return [0, verticalTextOffset];
+    return [0, verticalTextOffset * this._getIconScale()];
+  }
+
+  _getIconScale() {
+    if (!this._isSymbolizedAsIcon) {
+      return 1;
+    }
+
+    const iconAnchor = !this._iconProperty.isDynamic()
+      ? (this._iconProperty as StaticIconProperty).getSymbolAnchor()
+      : 'center';
+
+    if (iconAnchor === 'center') {
+      return CENTER_ANCHORED_ICON_SCALE;
+    }
+
+    return this._options.position === LABEL_POSITIONS.TOP ? BOTTOM_ANCHORED_ICON_SCALE : 0;
   }
 
   _getLabelSize() {
@@ -138,6 +165,9 @@ export class LabelPositionProperty extends AbstractStyleProperty<
   }
 
   _isIconSizeFromJoin() {
-    return this._iconSizeProperty.isDynamic() && (this._iconSizeProperty as DynamicSizeProperty).getFieldOrigin() === FIELD_ORIGIN.JOIN;
+    return (
+      this._iconSizeProperty.isDynamic() &&
+      (this._iconSizeProperty as DynamicSizeProperty).getFieldOrigin() === FIELD_ORIGIN.JOIN
+    );
   }
 }
