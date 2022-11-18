@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow creation of lens xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -61,6 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Afancilenstest');
       await PageObjects.lens.clickVisualizeListItemTitle('Afancilenstest');
+      await PageObjects.lens.goToTimeRange();
 
       expect(await PageObjects.lens.getTitle()).to.eql('Afancilenstest');
 
@@ -80,6 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow to switch from regular index to rollup index retaining config', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchDataPanelIndexPattern('lens_regular_data');
       await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
       await PageObjects.lens.configureDimension({

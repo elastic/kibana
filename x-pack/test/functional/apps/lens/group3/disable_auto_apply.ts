@@ -47,6 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should preserve apply-changes button with full-screen datasource', async () => {
+      await PageObjects.lens.goToTimeRange();
+
       await PageObjects.lens.disableAutoApply();
       await PageObjects.lens.closeSettingsMenu();
 

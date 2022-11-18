@@ -29,6 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add a reference layer with a static value in it', async () => {
+      await PageObjects.lens.goToTimeRange();
+
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',

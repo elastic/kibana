@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.switchDataPanelIndexPattern('epoch-millis*');
+      await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       const fieldList = await PageObjects.lens.findAllFields();
       expect(fieldList).to.contain('@timestamp');
