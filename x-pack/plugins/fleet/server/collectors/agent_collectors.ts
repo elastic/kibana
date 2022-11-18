@@ -68,10 +68,10 @@ const DEFAULT_AGENT_DATA = {
   agent_checkin_status_last_1h: { error: 0, degraded: 0 },
 };
 
-export const getAgentData = async (esClient?: ElasticsearchClient): Promise<AgentData> => {
-  if (!esClient) {
-    return DEFAULT_AGENT_DATA;
-  }
+export const getAgentData = async (
+  esClient: ElasticsearchClient,
+  abortController: AbortController
+): Promise<AgentData> => {
   try {
     const transformLastCheckinStatusBuckets = (resp: any) =>
       ((resp?.aggregations?.last_checkin_status as any).buckets ?? []).reduce(
@@ -81,52 +81,58 @@ export const getAgentData = async (esClient?: ElasticsearchClient): Promise<Agen
         },
         { error: 0, degraded: 0 }
       );
-    const response = await esClient.search({
-      index: AGENTS_INDEX,
-      size: 0,
-      aggs: {
-        versions: {
-          terms: { field: 'agent.version' },
-        },
-        last_checkin_status: {
-          terms: { field: 'last_checkin_status' },
+    const response = await esClient.search(
+      {
+        index: AGENTS_INDEX,
+        size: 0,
+        aggs: {
+          versions: {
+            terms: { field: 'agent.version' },
+          },
+          last_checkin_status: {
+            terms: { field: 'last_checkin_status' },
+          },
         },
       },
-    });
+      { signal: abortController.signal }
+    );
     const versions = ((response?.aggregations?.versions as any).buckets ?? []).map(
       (bucket: any) => bucket.key
     );
     const statuses = transformLastCheckinStatusBuckets(response);
 
-    const responseLast1h = await esClient.search({
-      index: AGENTS_INDEX,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                must: [
-                  {
-                    range: {
-                      last_checkin: {
-                        gte: 'now-1h/h',
-                        lt: 'now/h',
+    const responseLast1h = await esClient.search(
+      {
+        index: AGENTS_INDEX,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  must: [
+                    {
+                      range: {
+                        last_checkin: {
+                          gte: 'now-1h/h',
+                          lt: 'now/h',
+                        },
                       },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
+            ],
+          },
+        },
+        aggs: {
+          last_checkin_status: {
+            terms: { field: 'last_checkin_status' },
+          },
         },
       },
-      aggs: {
-        last_checkin_status: {
-          terms: { field: 'last_checkin_status' },
-        },
-      },
-    });
+      { signal: abortController.signal }
+    );
     const statusesLast1h = transformLastCheckinStatusBuckets(responseLast1h);
 
     return {

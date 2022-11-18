@@ -11,6 +11,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 
 import type { Usage } from '../../collectors/register';
 
@@ -26,24 +27,30 @@ export class FleetUsageSender {
   private taskType = 'Fleet-Usage-Sender';
   private wasStarted: boolean = false;
   private interval = '1h';
+  private timeout = '1m';
+  private abortController = new AbortController();
 
   constructor(
     taskManager: TaskManagerSetupContract,
     core: CoreSetup,
-    fetchUsage: () => Promise<Usage>
+    fetchUsage: (abortController: AbortController) => Promise<Usage | undefined>
   ) {
     taskManager.registerTaskDefinitions({
       [this.taskType]: {
         title: 'Fleet Usage Sender',
-        timeout: '1m',
+        timeout: this.timeout,
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, fetchUsage);
+              return withSpan({ name: this.taskType, type: 'telemetry' }, () =>
+                this.runTask(taskInstance, core, () => fetchUsage(this.abortController))
+              );
             },
 
-            cancel: async () => {},
+            cancel: async () => {
+              this.abortController.abort('task timed out');
+            },
           };
         },
       },
@@ -54,7 +61,7 @@ export class FleetUsageSender {
   private runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    fetchUsage: () => Promise<Usage>
+    fetchUsage: () => Promise<Usage | undefined>
   ) => {
     if (!this.wasStarted) {
       appContextService.getLogger().debug('[runTask()] Aborted. Task not started yet');
@@ -69,6 +76,9 @@ export class FleetUsageSender {
 
     try {
       const usageData = await fetchUsage();
+      if (!usageData) {
+        return;
+      }
       appContextService.getLogger().debug(JSON.stringify(usageData));
       core.analytics.reportEvent(EVENT_TYPE, usageData);
     } catch (error) {

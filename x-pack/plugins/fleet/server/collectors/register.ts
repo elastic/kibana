@@ -27,16 +27,23 @@ export interface Usage {
   fleet_server: FleetServerUsage;
 }
 
-export const fetchFleetUsage = async (core: CoreSetup, config: FleetConfigType) => {
+export const fetchFleetUsage = async (
+  core: CoreSetup,
+  config: FleetConfigType,
+  abortController: AbortController
+) => {
   const [soClient, esClient] = await getInternalClients(core);
+  if (!soClient || !esClient) {
+    return;
+  }
   const usage = {
     agents_enabled: getIsAgentsEnabled(config),
     agents: await getAgentUsage(config, soClient, esClient),
     fleet_server: await getFleetServerUsage(soClient, esClient),
     packages: await getPackageUsage(soClient),
-    ...(await getAgentData(esClient)),
-    fleet_server_config: await getFleetServerConfig(soClient, esClient),
-    agent_policies: await getAgentPoliciesUsage(soClient, esClient),
+    ...(await getAgentData(esClient, abortController)),
+    fleet_server_config: await getFleetServerConfig(soClient),
+    agent_policies: await getAgentPoliciesUsage(esClient, abortController),
   };
   return usage;
 };

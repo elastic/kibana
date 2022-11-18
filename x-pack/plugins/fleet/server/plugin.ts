@@ -374,7 +374,8 @@ export class FleetPlugin
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
-    const fetch = async () => fetchFleetUsage(core, config);
+    const fetch = async (abortController: AbortController) =>
+      await fetchFleetUsage(core, config, abortController);
     this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, fetch);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
 

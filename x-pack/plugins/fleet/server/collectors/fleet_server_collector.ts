@@ -87,13 +87,7 @@ export const getFleetServerUsage = async (
   };
 };
 
-export const getFleetServerConfig = async (
-  soClient?: SavedObjectsClient,
-  esClient?: ElasticsearchClient
-): Promise<any> => {
-  if (!soClient || !esClient) {
-    return {};
-  }
+export const getFleetServerConfig = async (soClient: SavedObjectsClient): Promise<any> => {
   const fleetServerHosts = await listFleetServerHosts(soClient);
   const hosts = fleetServerHosts.items.map((item) => ({
     ...item,

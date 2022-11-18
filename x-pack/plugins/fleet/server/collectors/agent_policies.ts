@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { AGENT_POLICY_INDEX } from '../../common';
 import { ES_SEARCH_LIMIT } from '../../common/constants';
 
 export const getAgentPoliciesUsage = async (
-  soClient?: SavedObjectsClient,
-  esClient?: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  abortController: AbortController
 ): Promise<any> => {
-  if (!soClient || !esClient) {
-    return {};
-  }
-
-  const res = await esClient.search({
-    index: AGENT_POLICY_INDEX,
-    size: ES_SEARCH_LIMIT,
-    track_total_hits: true,
-    rest_total_hits_as_int: true,
-  });
+  const res = await esClient.search(
+    {
+      index: AGENT_POLICY_INDEX,
+      size: ES_SEARCH_LIMIT,
+      track_total_hits: true,
+      rest_total_hits_as_int: true,
+    },
+    { signal: abortController.signal }
+  );
 
   const agentPolicies = res.hits.hits;
 
