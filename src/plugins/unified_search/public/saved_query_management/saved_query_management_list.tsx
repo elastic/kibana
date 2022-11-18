@@ -138,7 +138,7 @@ export function SavedQueryManagementList({
         requestGotCancelled = true;
       };
 
-      const { queries: savedQueryItems } = await savedQueryService.findSavedQueries();
+      const savedQueryItems = await savedQueryService.getAllSavedQueries();
 
       if (requestGotCancelled) return;
 
