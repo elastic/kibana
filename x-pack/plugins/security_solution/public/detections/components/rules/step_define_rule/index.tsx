@@ -240,11 +240,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
     initialState.eqlOptions || {}
   );
-  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] = useFetchIndex(
-    index,
-    false
-  );
-  const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
+
+  const [indexPattern, setIndexPattern] = useState<DataViewBase>({ fields: [] });
 
   const { data } = useKibana().services;
 
@@ -254,8 +251,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // when we choose some other dataSourceType
   useEffect(() => {
     if (dataSourceType === DataSourceType.IndexPatterns) {
-      if (!isIndexPatternLoading) {
-        setIndexPattern(initIndexPattern);
+      const createInMemoryDataView = async () => {
+        const dv = await data.dataViews.create({
+          title: index.join(','),
+          allowNoIndex: true,
+        });
+        console.error(dv);
+        setIndexPattern(dv);
+      };
+      if (indexPattern.title !== index.join(',')) {
+        createInMemoryDataView();
       }
     }
 
@@ -267,10 +272,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           setIndexPattern(dv);
         }
       };
-
-      fetchDataView();
+      if (indexPattern.id !== dataView) {
+        fetchDataView();
+      }
     }
-  }, [dataSourceType, isIndexPatternLoading, data, dataView, initIndexPattern]);
+  }, [dataSourceType, data, dataView, index, indexPattern.title, indexPattern.id]);
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
@@ -299,7 +305,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
      * We will need to determine where these types are defined and
      * figure out where the discrepency is.
      */
-    setAggregatableFields(aggregatableFields(fields as BrowserField[]));
+    const aggs = aggregatableFields(fields as BrowserField[]);
+    console.log('aggs', aggs);
+    setAggregatableFields(aggs);
   }, [indexPattern]);
 
   const termsAggregationFields: BrowserField[] = useMemo(
@@ -617,12 +625,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         component={QueryBarDefineRule}
         componentProps={
           {
-            browserFields,
+            // browserFields,
             idAria: 'detectionEngineStepDefineRuleQueryBar',
             indexPattern,
             isDisabled: isLoading || formShouldLoadQueryDynamically,
             resetToSavedQuery: formShouldLoadQueryDynamically,
-            isLoading: isIndexPatternLoading,
+            isLoading: false,
             dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
             openTimelineSearch,
             onValidityChange: setIsQueryBarValid,
@@ -634,11 +642,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       />
     ),
     [
-      browserFields,
+      // browserFields,
       handleCloseTimelineSearch,
       handleOpenTimelineSearch,
       indexPattern,
-      isIndexPatternLoading,
+      // isIndexPatternLoading,
       isLoading,
       openTimelineSearch,
       formShouldLoadQueryDynamically,
@@ -674,7 +682,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           },
     [indexPattern]
   );
-
+  console.log('optionsData', optionsData);
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(initialState);
 
   if (dataSourceType === DataSourceType.DataView) {
@@ -733,7 +741,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     onValidityChange: setIsQueryBarValid,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
-                    isLoading: isIndexPatternLoading,
+                    isLoading: false,
                     indexPattern,
                     showFilterBar: true,
                     // isLoading: indexPatternsLoading,
