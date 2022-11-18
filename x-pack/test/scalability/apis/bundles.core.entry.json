@@ -13,11 +13,11 @@
       {
         "action": "incrementUsersPerSec",
         "userCount": 20,
-        "times": 25,
+        "times": 50,
         "duration": "5s"
       }
     ],
-    "maxDuration": "10m"
+    "maxDuration": "15m"
   },
   "testData": {
     "esArchives": [],
