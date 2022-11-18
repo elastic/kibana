@@ -17,7 +17,7 @@ import {
 
 interface RuleEventLogListStatusProps {
   status: RuleAlertingOutcome;
-  lastRunOutcomeEnabled?: boolean;
+  useExecutionStatus?: boolean;
 }
 
 const statusContainerStyles = {
@@ -45,15 +45,15 @@ const STATUS_TO_OUTCOME: Record<RuleAlertingOutcome, string> = {
 };
 
 export const RuleEventLogListStatus = (props: RuleEventLogListStatusProps) => {
-  const { status, lastRunOutcomeEnabled = false } = props;
+  const { status, useExecutionStatus = true } = props;
   const color = STATUS_TO_COLOR[status] || 'gray';
 
   const statusString = useMemo(() => {
-    if (lastRunOutcomeEnabled) {
-      return STATUS_TO_OUTCOME[status].toLocaleLowerCase();
+    if (useExecutionStatus) {
+      return status;
     }
-    return status;
-  }, [lastRunOutcomeEnabled, status]);
+    return STATUS_TO_OUTCOME[status].toLocaleLowerCase();
+  }, [useExecutionStatus, status]);
 
   return (
     <div style={statusContainerStyles}>
