@@ -15,7 +15,8 @@
   ],
   "name": "Suspicious Powershell Script",
   "references": [
-    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+    "https://www.elastic.co/security-labs/detecting-living-off-the-land-attacks-with-new-elastic-integration"
   ],
   "risk_score": 21,
   "rule_id": "1781d055-5c66-4adf-9d60-fc0fa58337b6",
@@ -53,5 +54,5 @@
     }
   ],
   "type": "machine_learning",
-  "version": 100
+  "version": 101
 }

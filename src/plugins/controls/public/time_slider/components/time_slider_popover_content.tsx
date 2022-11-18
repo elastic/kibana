@@ -15,6 +15,7 @@ interface Props {
   value: [number, number];
   onChange: (value?: [number, number]) => void;
   onClear: () => void;
+  stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
@@ -26,11 +27,24 @@ export function TimeSliderPopoverContent(props: Props) {
     props.onChange(value as [number, number]);
   }
 
+  const ticks =
+    props.ticks.length <= 12
+      ? props.ticks
+      : props.ticks.map((tick, index) => {
+          return {
+            value: tick.value,
+            // to avoid label overlap, only display even tick labels
+            // Passing empty string as tick label results in tick not rendering, so must wrap empty label in react element
+            // Can not store react node in redux state because its not serializable so have to transform into react node here
+            label: index % 2 === 0 ? tick.label : <span>&nbsp;</span>,
+          };
+        });
+
   return (
     <EuiFlexGroup
       className="rangeSlider__actions"
       gutterSize="none"
-      data-test-subj="timeSlider-control-actions"
+      data-test-subj="timeSlider-popoverContents"
       responsive={false}
     >
       <EuiFlexItem>
@@ -42,8 +56,8 @@ export function TimeSliderPopoverContent(props: Props) {
           showTicks={true}
           min={props.timeRangeMin}
           max={props.timeRangeMax}
-          step={1}
-          ticks={props.ticks}
+          step={props.stepSize}
+          ticks={ticks}
           isDraggable
         />
       </EuiFlexItem>

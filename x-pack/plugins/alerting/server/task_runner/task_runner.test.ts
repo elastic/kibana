@@ -197,8 +197,8 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
     );
-    mockedRuleTypeSavedObject.monitoring!.execution.history = [];
-    mockedRuleTypeSavedObject.monitoring!.execution.calculated_metrics.success_ratio = 0;
+    mockedRuleTypeSavedObject.monitoring!.run.history = [];
+    mockedRuleTypeSavedObject.monitoring!.run.calculated_metrics.success_ratio = 0;
 
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
     (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
@@ -252,14 +252,18 @@ describe('Task Runner', () => {
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 
-    expect(logger.debug).toHaveBeenCalledTimes(4);
+    expect(logger.debug).toHaveBeenCalledTimes(5);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+      'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
     );
     expect(logger.debug).nthCalledWith(
       3,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}'
+    );
+    expect(logger.debug).nthCalledWith(
+      4,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
@@ -327,7 +331,7 @@ describe('Task Runner', () => {
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput(inputIsArray));
 
-      expect(logger.debug).toHaveBeenCalledTimes(5);
+      expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
       expect(logger.debug).nthCalledWith(
         2,
@@ -335,10 +339,14 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         3,
-        'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
       );
       expect(logger.debug).nthCalledWith(
         4,
+        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}'
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
         'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
       );
 
@@ -405,7 +413,7 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
-    expect(logger.debug).toHaveBeenCalledTimes(6);
+    expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -417,10 +425,14 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
     expect(logger.debug).nthCalledWith(
       5,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}'
+    );
+    expect(logger.debug).nthCalledWith(
+      6,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
@@ -579,7 +591,7 @@ describe('Task Runner', () => {
       await taskRunner.run();
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
-      expect(logger.debug).toHaveBeenCalledTimes(6);
+      expect(logger.debug).toHaveBeenCalledTimes(7);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
       expect(logger.debug).nthCalledWith(
         2,
@@ -591,10 +603,14 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
       );
       expect(logger.debug).nthCalledWith(
         5,
+        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":2,"new":2,"recovered":0,"ignored":0}}'
+      );
+      expect(logger.debug).nthCalledWith(
+        6,
         'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -702,7 +718,7 @@ describe('Task Runner', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       await taskRunner.run();
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(logger.debug).toHaveBeenCalledTimes(6);
+      expect(logger.debug).toHaveBeenCalledTimes(7);
       expect(logger.debug).nthCalledWith(
         3,
         `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`
@@ -1010,7 +1026,7 @@ describe('Task Runner', () => {
         generateAlertInstance({ id: 1, duration: MOCK_DURATION, start: DATE_1969 })
       );
 
-      expect(logger.debug).toHaveBeenCalledTimes(6);
+      expect(logger.debug).toHaveBeenCalledTimes(7);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
       expect(logger.debug).nthCalledWith(
         2,
@@ -1022,10 +1038,14 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
       );
       expect(logger.debug).nthCalledWith(
         5,
+        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}'
+      );
+      expect(logger.debug).nthCalledWith(
+        6,
         'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
       );
 
@@ -1135,10 +1155,14 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        `ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
+        `deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
       );
       expect(logger.debug).nthCalledWith(
         5,
+        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}'
+      );
+      expect(logger.debug).nthCalledWith(
+        6,
         `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}`
       );
 
@@ -1544,10 +1568,15 @@ describe('Task Runner', () => {
 
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
-      const executeRuleDebugLogger = logger.debug.mock.calls[3][0];
+      const updateRuleDebugLogger = logger.debug.mock.calls[3][0];
+      expect(updateRuleDebugLogger as string).toMatchInlineSnapshot(
+        `"Updating rule task for test rule with id 1 - {\\"lastExecutionDate\\":\\"1970-01-01T00:00:00.000Z\\",\\"status\\":\\"error\\",\\"error\\":{\\"reason\\":\\"read\\",\\"message\\":\\"Saved object [alert/1] not found\\"}} - {\\"outcome\\":\\"failed\\",\\"warning\\":\\"read\\",\\"outcomeMsg\\":\\"Saved object [alert/1] not found\\",\\"alertsCount\\":{}}"`
+      );
+      const executeRuleDebugLogger = logger.debug.mock.calls[4][0];
       expect(executeRuleDebugLogger as string).toMatchInlineSnapshot(
         `"Executing Rule foo:test:1 has resulted in Error: Saved object [alert/1] not found"`
       );
+
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
@@ -1626,10 +1655,15 @@ describe('Task Runner', () => {
 
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
-      const ruleExecuteDebugLog = logger.debug.mock.calls[3][0];
+      const updateRuleDebugLogger = logger.debug.mock.calls[3][0];
+      expect(updateRuleDebugLogger as string).toMatchInlineSnapshot(
+        `"Updating rule task for test rule with id 1 - {\\"lastExecutionDate\\":\\"1970-01-01T00:00:00.000Z\\",\\"status\\":\\"error\\",\\"error\\":{\\"reason\\":\\"read\\",\\"message\\":\\"Saved object [alert/1] not found\\"}} - {\\"outcome\\":\\"failed\\",\\"warning\\":\\"read\\",\\"outcomeMsg\\":\\"Saved object [alert/1] not found\\",\\"alertsCount\\":{}}"`
+      );
+      const ruleExecuteDebugLog = logger.debug.mock.calls[4][0];
       expect(ruleExecuteDebugLog as string).toMatchInlineSnapshot(
         `"Executing Rule test space:test:1 has resulted in Error: Saved object [alert/1] not found"`
       );
+
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
@@ -2077,14 +2111,18 @@ describe('Task Runner', () => {
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 
-    expect(logger.debug).toHaveBeenCalledTimes(4);
+    expect(logger.debug).toHaveBeenCalledTimes(5);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+      'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
     );
     expect(logger.debug).nthCalledWith(
       3,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}'
+    );
+    expect(logger.debug).nthCalledWith(
+      4,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
@@ -2176,6 +2214,78 @@ describe('Task Runner', () => {
     );
   });
 
+  test('successfully stores next run', async () => {
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
+    );
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    rulesClient.get.mockResolvedValue({
+      ...mockedRuleTypeSavedObject,
+      schedule: { interval: '50s' },
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
+
+    await taskRunner.run();
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(
+      ...generateSavedObjectParams({
+        nextRun: '1970-01-01T00:00:50.000Z',
+      })
+    );
+  });
+
+  test('updates the rule saved object correctly when failed', async () => {
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
+    );
+    expect(AlertingEventLogger).toHaveBeenCalled();
+
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        throw new Error(GENERIC_ERROR_MESSAGE);
+      }
+    );
+    await taskRunner.run();
+    ruleType.executor.mockClear();
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(
+      ...generateSavedObjectParams({
+        error: {
+          message: GENERIC_ERROR_MESSAGE,
+          reason: 'execute',
+        },
+        outcome: 'failed',
+        status: 'error',
+        successRatio: 0,
+        history: [
+          {
+            success: false,
+            timestamp: 0,
+          },
+        ],
+      })
+    );
+  });
+
   test('caps monitoring history at 200', async () => {
     const taskRunner = new TaskRunner(
       ruleType,
@@ -2192,7 +2302,7 @@ describe('Task Runner', () => {
       await taskRunner.run();
     }
     const runnerResult = await taskRunner.run();
-    expect(runnerResult.monitoring?.execution.history.length).toBe(200);
+    expect(runnerResult.monitoring?.run.history.length).toBe(200);
   });
 
   test('Actions circuit breaker kicked in, should set status as warning and log a message in event log', async () => {
@@ -2276,7 +2386,17 @@ describe('Task Runner', () => {
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
-    ).toHaveBeenCalledWith(...generateSavedObjectParams({ status: 'warning', warning }));
+    ).toHaveBeenCalledWith(
+      ...generateSavedObjectParams({
+        status: 'warning',
+        outcome: 'warning',
+        warning,
+        alertsCount: {
+          active: 1,
+          new: 1,
+        },
+      })
+    );
 
     expect(runnerResult).toEqual(
       generateRunnerResult({
@@ -2299,7 +2419,7 @@ describe('Task Runner', () => {
       })
     );
 
-    expect(logger.debug).toHaveBeenCalledTimes(6);
+    expect(logger.debug).toHaveBeenCalledTimes(7);
 
     expect(logger.debug).nthCalledWith(
       3,
@@ -2428,7 +2548,17 @@ describe('Task Runner', () => {
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
-    ).toHaveBeenCalledWith(...generateSavedObjectParams({ status: 'warning', warning }));
+    ).toHaveBeenCalledWith(
+      ...generateSavedObjectParams({
+        status: 'warning',
+        outcome: 'warning',
+        warning,
+        alertsCount: {
+          active: 2,
+          new: 2,
+        },
+      })
+    );
 
     expect(runnerResult).toEqual(
       generateRunnerResult({
@@ -2463,7 +2593,7 @@ describe('Task Runner', () => {
       })
     );
 
-    expect(logger.debug).toHaveBeenCalledTimes(6);
+    expect(logger.debug).toHaveBeenCalledTimes(7);
 
     expect(logger.debug).nthCalledWith(
       3,

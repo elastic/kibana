@@ -34,16 +34,27 @@ describe('apiKeysManagementApp', () => {
   });
 
   it('mount() works for the `grid` page', async () => {
-    const { getStartServices } = coreMock.createSetup();
+    const coreStart = coreMock.createSetup();
     const { authc } = securityMock.createSetup();
 
-    const startServices = await getStartServices();
+    const startServices = await coreStart.getStartServices();
+
+    const [{ application }] = startServices;
+    application.capabilities = {
+      ...application.capabilities,
+      api_keys: {
+        save: true,
+      },
+    };
+
     const docTitle = startServices[0].chrome.docTitle;
 
     const container = document.createElement('div');
 
     const setBreadcrumbs = jest.fn();
+
     let unmount: Unmount;
+
     await act(async () => {
       unmount = await apiKeysManagementApp
         .create({ authc, getStartServices: () => Promise.resolve(startServices) as any })
@@ -84,7 +95,8 @@ describe('apiKeysManagementApp', () => {
             "anonymousPaths": {},
             "externalUrl": {}
           }
-        }
+        },
+        "readOnly": false
       }
       </div>
     `);
