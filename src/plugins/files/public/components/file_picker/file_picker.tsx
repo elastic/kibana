@@ -96,7 +96,14 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
       {isLoading ? (
         <>
           <EuiModalBody>
-            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
+            <EuiFlexGroup
+              css={css`
+                height: 100%;
+              `}
+              justifyContent="center"
+              alignItems="center"
+              gutterSize="none"
+            >
               <EuiLoadingSpinner data-test-subj="loadingSpinner" size="xl" />
             </EuiFlexGroup>
           </EuiModalBody>
