@@ -18,7 +18,7 @@ import { TaskRunningStage } from './task_running';
 
 describe('TaskPool', () => {
   beforeEach(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(2021, 12, 30));
   });
 

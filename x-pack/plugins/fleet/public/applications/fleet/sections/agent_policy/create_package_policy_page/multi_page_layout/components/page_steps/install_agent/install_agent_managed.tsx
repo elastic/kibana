@@ -19,8 +19,9 @@ import {
 } from '../../../../../../../../../components/agent_enrollment_flyout/steps';
 import { ManualInstructions } from '../../../../../../../../../components/enrollment_instructions';
 
-import type { InstallAgentPageProps } from './types';
 import { KubernetesManifestApplyStep } from '../../../../../../../../../components/agent_enrollment_flyout/steps/run_k8s_apply_command_step';
+
+import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps> = (props) => {
   const {
@@ -31,6 +32,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     agentPolicy,
     enrollmentAPIKey,
     fleetServerHosts,
+    fleetProxy,
     enrolledAgentIds,
   } = props;
 
@@ -60,11 +62,12 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const isK8s =
     props.packageInfo.name === 'kubernetes' ? 'IS_KUBERNETES_MULTIPAGE' : 'IS_NOT_KUBERNETES';
 
-  const installManagedCommands = ManualInstructions(
-    enrollmentAPIKey.api_key,
+  const installManagedCommands = ManualInstructions({
+    apiKey: enrollmentAPIKey.api_key,
+    fleetProxy,
     fleetServerHosts,
-    kibanaVersion
-  );
+    kibanaVersion,
+  });
 
   const steps = [
     InstallManagedAgentStep({
