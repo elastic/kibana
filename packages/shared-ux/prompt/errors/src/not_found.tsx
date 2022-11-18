@@ -22,7 +22,7 @@ const NOT_FOUND_TITLE = i18n.translate('sharedUXPackages.prompt.errors.notFound.
 
 const NOT_FOUND_BODY = i18n.translate('sharedUxPackages.prompt.errors.notFound.body', {
   defaultMessage:
-    "Sorry, we can't find the page you're looking for. It might have been removed or renamed, or maybe it never existed.",
+    "Sorry, the page you're looking for can't be found. It might have been removed or renamed, or maybe it never existed at all.",
 });
 
 const NOT_FOUND_GO_BACK = i18n.translate('sharedUxPackages.prompt.errors.notFound.goBacklabel', {
