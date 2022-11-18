@@ -8,38 +8,55 @@
 import { getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
+export type ShouldShowFieldInTableHandler = (fieldName: string) => boolean;
+
 /**
- * Returns am array of fields to display in the Documents column of the data table
+ * Returns a function for checking whether we should display a field in the Documents column of the data table
  * If showMultiFields is set to false, it filters out multifields that have a parent, to prevent entries for multifields
  * like this: field, field.keyword, field.whatever
  * @param fields
  * @param dataView
  * @param showMultiFields
  */
-export const getFieldsToShow = (fields: string[], dataView: DataView, showMultiFields: boolean) => {
+export const getShouldShowFieldHandler = (
+  fields: string[],
+  dataView: DataView,
+  showMultiFields: boolean
+): ShouldShowFieldInTableHandler => {
+  const fieldsToShowMap = new Map();
+
+  fields.forEach((fieldName) => {
+    if (canShowFieldInTable(fieldName, fields, dataView, showMultiFields)) {
+      fieldsToShowMap.set(fieldName, true);
+    }
+  });
+
+  return (fieldName: string) => fieldsToShowMap.get(fieldName) ?? false;
+};
+
+const canShowFieldInTable = (
+  fieldName: string,
+  fields: string[],
+  dataView: DataView,
+  showMultiFields: boolean
+): boolean => {
   if (showMultiFields) {
-    return fields;
+    return true;
   }
-  const fieldSet = new Set();
-  const childParentFieldsMap = new Map();
-  const parentFieldSet = new Set();
-  fields.forEach((key) => {
-    const mapped = dataView.fields.getByName(key);
-    const subTypeMulti = mapped && getFieldSubtypeMulti(mapped.spec);
-    const isMultiField = Boolean(subTypeMulti?.multi);
-    if (mapped && subTypeMulti?.multi?.parent) {
-      childParentFieldsMap.set(key, subTypeMulti.multi.parent);
-    }
-    if (mapped && isMultiField) {
-      parentFieldSet.add(key);
-    }
-    fieldSet.add(key);
-  });
-  return fields.filter((key: string) => {
-    if (!parentFieldSet.has(key)) {
-      return true;
-    }
-    const parent = childParentFieldsMap.get(key);
-    return parent && !fieldSet.has(parent);
-  });
+
+  const mapped = dataView.fields.getByName(fieldName);
+
+  if (!mapped) {
+    return true;
+  }
+
+  const subTypeMulti = getFieldSubtypeMulti(mapped.spec);
+  const isMultiField = Boolean(subTypeMulti?.multi);
+
+  if (!isMultiField) {
+    return true;
+  }
+
+  const parentName = subTypeMulti?.multi?.parent;
+  return Boolean(parentName && !fields.includes(parentName));
 };

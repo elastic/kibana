@@ -7,7 +7,7 @@
  */
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { getFieldsToShow } from './get_fields_to_show';
+import { getShouldShowFieldHandler } from './get_fields_to_show';
 
 describe('get fields to show', () => {
   let dataView: DataView;
@@ -74,20 +74,24 @@ describe('get fields to show', () => {
   });
 
   it('shows multifields when showMultiFields is true', () => {
-    const fieldsToShow = getFieldsToShow(
+    const shouldShowFieldHandler = getShouldShowFieldHandler(
       ['machine.os', 'machine.os.raw', 'clientip'],
       dataView,
       true
     );
-    expect(fieldsToShow).toEqual(['machine.os', 'machine.os.raw', 'clientip']);
+    expect(shouldShowFieldHandler('machine.os')).toBe(true);
+    expect(shouldShowFieldHandler('machine.os.raw')).toBe(true);
+    expect(shouldShowFieldHandler('clientip')).toBe(true);
   });
 
   it('do not show multifields when showMultiFields is false', () => {
-    const fieldsToShow = getFieldsToShow(
+    const shouldShowFieldHandler = getShouldShowFieldHandler(
       ['machine.os', 'machine.os.raw', 'acknowledged', 'clientip'],
       dataView,
       false
     );
-    expect(fieldsToShow).toEqual(['machine.os', 'acknowledged', 'clientip']);
+    expect(shouldShowFieldHandler('acknowledged')).toBe(true);
+    expect(shouldShowFieldHandler('clientip')).toBe(true);
+    expect(shouldShowFieldHandler('machine.os.raw')).toBe(false);
   });
 });

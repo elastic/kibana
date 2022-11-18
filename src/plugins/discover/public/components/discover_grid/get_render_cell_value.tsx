@@ -29,6 +29,7 @@ import { formatHit } from '../../utils/format_hit';
 import { DataTableRecord, EsHitRecord } from '../../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
+import { type ShouldShowFieldInTableHandler } from '../../utils/get_fields_to_show';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
 
@@ -37,7 +38,7 @@ export const getRenderCellValueFn =
     dataView: DataView,
     rows: DataTableRecord[] | undefined,
     useNewFieldsApi: boolean,
-    fieldsToShow: string[],
+    shouldShowFieldHandler: ShouldShowFieldInTableHandler,
     maxDocFieldsDisplayed: number,
     closePopover: () => void
   ) =>
@@ -98,11 +99,11 @@ export const getRenderCellValueFn =
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
       const pairs = useTopLevelObjectColumns
-        ? getTopLevelObjectPairs(row.raw, columnId, dataView, fieldsToShow).slice(
+        ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
             0,
             maxDocFieldsDisplayed
           )
-        : formatHit(row, dataView, fieldsToShow, maxEntries, fieldFormats);
+        : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
 
       return (
         <EuiDescriptionList
@@ -235,7 +236,7 @@ function getTopLevelObjectPairs(
   row: EsHitRecord,
   columnId: string,
   dataView: DataView,
-  fieldsToShow: string[]
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler
 ) {
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
@@ -260,7 +261,7 @@ function getTopLevelObjectPairs(
       .join(', ');
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     if (displayKey) {
-      if (fieldsToShow.includes(displayKey)) {
+      if (shouldShowFieldHandler(displayKey)) {
         pairs.push([displayKey, formatted]);
       }
     } else {
