@@ -24,6 +24,7 @@ export type DashboardStateFromSaveModal = Pick<
 
 export interface DashboardPublicState {
   lastSavedInput: DashboardContainerByValueInput;
+  isEmbeddedExternally?: boolean;
   hasUnsavedChanges?: boolean;
   expandedPanelId?: string;
   fullScreenMode?: boolean;

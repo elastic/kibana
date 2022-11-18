@@ -8,10 +8,9 @@
 
 import React, { useEffect, useRef } from 'react';
 
-import { CoreStart } from '@kbn/core/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { ExitFullScreenButton } from '@kbn/kibana-react-plugin/public';
+import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { CalloutProps, LazyControlsCallout } from '@kbn/controls-plugin/public';
 
 import { DashboardGrid } from '../grid';
@@ -60,6 +59,7 @@ export const DashboardViewport = ({ onDataLoaded }: DashboardViewportProps) => {
   const useMargins = select((state) => state.explicitInput.useMargins);
   const description = select((state) => state.explicitInput.description);
   const isFullScreenMode = select((state) => state.componentState.fullScreenMode);
+  const isEmbeddedExternally = select((state) => state.componentState.isEmbeddedExternally);
 
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
   const hideAnnouncements = Boolean(uiSettings.get('hideAnnouncements'));
@@ -96,11 +96,9 @@ export const DashboardViewport = ({ onDataLoaded }: DashboardViewportProps) => {
         className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
       >
         {isFullScreenMode && (
-          // TODO: Replace with Shared UX ExitFullScreenButton once https://github.com/elastic/kibana/issues/140311 is resolved
           <ExitFullScreenButton
-            chrome={chrome as CoreStart['chrome']}
-            onExitFullScreenMode={() => dispatch(setFullScreenMode(false))}
-            toggleChrome={true}
+            onExit={() => dispatch(setFullScreenMode(false))}
+            toggleChrome={!isEmbeddedExternally}
           />
         )}
         {panelCount === 0 && (

@@ -32,6 +32,7 @@ import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
+import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import {
   runClone,
@@ -117,6 +118,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private analyticsService: DashboardAnalyticsService;
   private dashboardSavedObjectService: DashboardSavedObjectService;
   private theme$;
+  private chrome;
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -147,6 +149,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       settings: {
         theme: { theme$: this.theme$ },
       },
+      chrome: this.chrome,
     } = pluginServices.getServices());
 
     this.initialSavedDashboardId = dashboardContainerInputIsByValue(this.input)
@@ -385,11 +388,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     const { Wrapper: DashboardReduxWrapper } = this.reduxEmbeddableTools;
     ReactDOM.render(
       <I18nProvider>
-        <KibanaThemeProvider theme$={this.theme$}>
-          <DashboardReduxWrapper>
-            <DashboardViewport onDataLoaded={this.onDataLoaded.bind(this)} container={this} />
-          </DashboardReduxWrapper>
-        </KibanaThemeProvider>
+        <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: this.chrome }}>
+          <KibanaThemeProvider theme$={this.theme$}>
+            <DashboardReduxWrapper>
+              <DashboardViewport onDataLoaded={this.onDataLoaded.bind(this)} container={this} />
+            </DashboardReduxWrapper>
+          </KibanaThemeProvider>
+        </ExitFullScreenButtonKibanaProvider>
       </I18nProvider>,
       dom
     );
