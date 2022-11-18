@@ -116,6 +116,11 @@ export function useTextBasedQueryLanguage({
           if (dataView.fields.getByName('@timestamp')?.type === 'date') {
             dataView.timeFieldName = '@timestamp';
           }
+
+          // if (dataView.fields.getByType('date')) {
+          //   const dateFields = dataView.fields.getByType('date');
+          //   dataView.timeFieldName = dateFields[0].name;
+          // }
           const addColumnsToState = Boolean(
             nextColumns.length && (!initialFetch || !stateColumns?.length)
           );

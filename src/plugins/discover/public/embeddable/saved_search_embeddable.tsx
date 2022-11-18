@@ -225,11 +225,13 @@ export class SavedSearchEmbeddable
     try {
       // Request SQL data
       if (useSql && query) {
+        const dataView = this.savedSearch.searchSource.getField('index');
         const result = await fetchSql(
           this.savedSearch.searchSource.getField('query')!,
           this.services.dataViews,
           this.services.data,
           this.services.expressions,
+          dataView?.timeFieldName,
           this.input.filters,
           this.input.query
         );

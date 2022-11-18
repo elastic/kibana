@@ -79,7 +79,6 @@ export async function getStateFromAggregateQuery(
   let allColumns: TextBasedLayerColumn[] = [];
   let timeFieldName;
   try {
-    const table = await fetchDataFromAggregateQuery(query, dataViews, data, expressions);
     const dataView = index
       ? await dataViews.get(index)
       : await dataViews.create({
@@ -89,9 +88,27 @@ export async function getStateFromAggregateQuery(
       if (dataView.fields.getByName('@timestamp')?.type === 'date') {
         dataView.timeFieldName = '@timestamp';
       }
-      index = dataView?.id ?? '';
+      // if (dataView.fields.getByType('date')) {
+      //   const dateFields = dataView.fields.getByType('date');
+      //   dataView.timeFieldName = dateFields[0].name;
+      // }
+      if (dataView && dataView.id) {
+        index = dataView?.id;
+        indexPatternRefs.push({
+          id: dataView.id,
+          title: dataView.name,
+          timeField: dataView.timeFieldName,
+        });
+      }
     }
     timeFieldName = dataView?.timeFieldName;
+    const table = await fetchDataFromAggregateQuery(
+      query,
+      dataViews,
+      data,
+      expressions,
+      timeFieldName
+    );
     columnsFromQuery = table?.columns ?? [];
     allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
   } catch (e) {

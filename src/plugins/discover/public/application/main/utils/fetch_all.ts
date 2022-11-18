@@ -8,6 +8,7 @@
 import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
+import { getIndexPatternFromSQLQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { getRawRecordType } from './get_raw_record_type';
@@ -109,11 +110,23 @@ export function fetchAll(
 
     const isChartVisible =
       !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
-
+    let allowTimeField = false;
+    if (useSql && query && isOfAggregateQueryType(query) && 'sql' in query) {
+      const indexPattern = getIndexPatternFromSQLQuery(query.sql);
+      if (indexPattern === dataView.name) {
+        allowTimeField = true;
+      }
+    }
     // Start fetching all required requests
     const documents =
       useSql && query
-        ? fetchSql(query, services.dataViews, data, services.expressions)
+        ? fetchSql(
+            query,
+            services.dataViews,
+            data,
+            services.expressions,
+            allowTimeField ? dataView.timeFieldName : undefined
+          )
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
     const charts =
       isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;

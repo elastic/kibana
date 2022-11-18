@@ -25,6 +25,7 @@ export function fetchDataFromAggregateQuery(
   dataViewsService: DataViewsContract,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
+  timeFieldName?: string,
   filters?: Filter[],
   inputQuery?: Query
 ) {
@@ -35,6 +36,7 @@ export function fetchDataFromAggregateQuery(
     time: timeRange,
     dataViewsService,
     inputQuery,
+    timeFieldName,
   })
     .then((ast) => {
       if (ast) {

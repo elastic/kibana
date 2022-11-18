@@ -18,6 +18,7 @@ import { textBasedQueryStateToExpressionAst } from './text_based_query_state_to_
 interface Args extends QueryState {
   dataViewsService: DataViewsContract;
   inputQuery?: Query;
+  timeFieldName?: string;
 }
 
 const getIndexPatternFromAggregateQuery = (query: AggregateQuery) => {
@@ -38,6 +39,7 @@ export async function textBasedQueryStateToAstWithValidation({
   inputQuery,
   time,
   dataViewsService,
+  timeFieldName,
 }: Args) {
   let ast;
   if (query && isOfAggregateQueryType(query)) {
@@ -48,29 +50,30 @@ export async function textBasedQueryStateToAstWithValidation({
 
     if (dataViewIdTitle) {
       const dataView = await dataViewsService.get(dataViewIdTitle.id);
-      const timeFieldName = dataView.timeFieldName;
+      const timeField = dataView.timeFieldName;
 
       ast = textBasedQueryStateToExpressionAst({
         filters,
         query,
         inputQuery,
         time,
-        timeFieldName,
+        timeFieldName: timeField,
       });
     } else {
-      // no dataview found but user gave an index pattern
       // const dataView = await dataViewsService.create({
       //   title: idxPattern,
       // });
       // if (dataView.fields.getByName('@timestamp')?.type === 'date') {
       //   dataView.timeFieldName = '@timestamp';
       // }
-      // const timeFieldName = dataView.timeFieldName;
+      // const timeField = dataView.timeFieldName;
+      // no dataview found but user gave an index pattern
       ast = textBasedQueryStateToExpressionAst({
         filters,
         query,
         inputQuery,
         time,
+        timeFieldName,
       });
     }
   }

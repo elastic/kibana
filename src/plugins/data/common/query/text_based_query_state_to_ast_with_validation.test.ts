@@ -68,7 +68,7 @@ describe('textBasedQueryStateToAstWithValidation', () => {
     );
   });
 
-  it('eturns an object with the correct structure for text based language with non existing dataview', async () => {
+  it('returns an object with the correct structure for text based language with non existing dataview', async () => {
     const dataViewsService = {
       getIdsWithTitle: jest.fn(() => {
         return [
