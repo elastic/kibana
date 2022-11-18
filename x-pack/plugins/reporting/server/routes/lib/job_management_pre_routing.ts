@@ -20,7 +20,7 @@ import type { Counters } from './get_counter';
 type JobManagementResponseHandler = (doc: ReportApiJSON) => Promise<IKibanaResponse<object>>;
 
 /**
- * Handles parts of requests to manage (download and delete) reports
+ * Handles the common parts of requests to manage (download and delete) reports
  */
 export const jobManagementPreRouting = async (
   reporting: ReportingCore,
@@ -42,17 +42,18 @@ export const jobManagementPreRouting = async (
     return res.notFound();
   }
 
-  if (!jobTypes.includes(doc.jobtype)) {
+  const { jobtype } = doc;
+  if (!jobTypes.includes(jobtype)) {
     return res.unauthorized({
       body: i18n.translate('xpack.reporting.jobResponse.errorHandler.notAuthorized', {
         defaultMessage: `Sorry, you are not authorized to download or delete {jobtype} reports`,
-        values: { jobtype: doc.jobtype },
+        values: { jobtype },
       }),
     });
   }
 
   // Count usage once allowing the request
-  counters.usageCounter();
+  counters.usageCounter(jobtype);
 
   try {
     return await cb(doc);
@@ -61,14 +62,14 @@ export const jobManagementPreRouting = async (
     logger.error(err);
     if (err instanceof Boom.Boom) {
       const statusCode = err.output.statusCode;
-      counters?.errorCounter(statusCode);
+      counters?.errorCounter(jobtype, statusCode);
       return res.customError({
         statusCode,
         body: err.output.payload.message,
       });
     }
 
-    counters?.errorCounter(500);
+    counters?.errorCounter(jobtype, 500);
     return res.customError({
       statusCode: 500,
       body:

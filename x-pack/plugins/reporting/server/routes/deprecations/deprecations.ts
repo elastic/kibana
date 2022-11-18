@@ -148,12 +148,12 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         if (err instanceof errors.ResponseError) {
           // If there were no reporting indices to update, that's OK because then there is nothing to migrate
           if (err.statusCode === 404) {
-            counters.errorCounter(404);
+            counters.errorCounter(undefined, 404);
             return res.ok();
           }
 
           const statusCode = err.statusCode ?? 500;
-          counters.errorCounter(statusCode);
+          counters.errorCounter(undefined, statusCode);
           return res.customError({
             body: {
               message: err.message,

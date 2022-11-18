@@ -114,7 +114,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         log.info(`calling getUsageStats...`);
         expect(
-          getUsageCount(await usageAPI.getUsageStats(), `get /api/reporting/jobs/download/{docId}`)
+          getUsageCount(
+            await usageAPI.getUsageStats(),
+            `get /api/reporting/jobs/download/{docId}:printable_pdf`
+          )
         ).to.be(3);
       });
 
@@ -137,7 +140,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         log.info(`calling getUsageStats...`);
         expect(
-          getUsageCount(await usageAPI.getUsageStats(), `delete /api/reporting/jobs/delete/{docId}`)
+          getUsageCount(
+            await usageAPI.getUsageStats(),
+            `delete /api/reporting/jobs/delete/{docId}:csv_searchsource`
+          )
         ).to.be(1);
       });
     });

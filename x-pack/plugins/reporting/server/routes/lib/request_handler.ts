@@ -26,7 +26,7 @@ const getDownloadBaseUrl = (reporting: ReportingCore) => {
 };
 
 /**
- * Handles parts of requests to generate a report
+ * Handles the common parts of requests to generate a report
  */
 export class RequestHandler {
   constructor(
@@ -137,8 +137,9 @@ export class RequestHandler {
       });
     }
 
+    let report: Report | undefined;
     try {
-      const report = await this.enqueueJob(exportTypeId, jobParams);
+      report = await this.enqueueJob(exportTypeId, jobParams);
 
       // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(this.reporting);
@@ -153,20 +154,16 @@ export class RequestHandler {
         },
       });
     } catch (err) {
-      this.logger.error(err);
-      throw err;
+      return this.handleError(err, counters, report?.jobtype);
     }
   }
 
-  /*
-   * This method does not log the error, as it assumes the error has already
-   * been caught and logged for stack trace context, and then rethrown
-   */
-  public handleError(err: Error | Boom.Boom, counters?: Counters) {
+  private handleError(err: Error | Boom.Boom, counters: Counters, jobtype?: string) {
+    this.logger.error(err);
+
     if (err instanceof Boom.Boom) {
       const statusCode = err.output.statusCode;
-
-      counters?.errorCounter(statusCode);
+      counters?.errorCounter(jobtype, statusCode);
 
       return this.res.customError({
         statusCode,
@@ -174,7 +171,7 @@ export class RequestHandler {
       });
     }
 
-    counters?.errorCounter(500);
+    counters?.errorCounter(jobtype, 500);
 
     return this.res.customError({
       statusCode: 500,

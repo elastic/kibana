@@ -84,16 +84,11 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
         }
 
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
-
-        try {
-          return await requestHandler.handleGenerateRequest(
-            req.params.exportType,
-            jobParams,
-            counters
-          );
-        } catch (err) {
-          return requestHandler.handleError(err, counters);
-        }
+        return await requestHandler.handleGenerateRequest(
+          req.params.exportType,
+          jobParams,
+          counters
+        );
       })
     );
   };

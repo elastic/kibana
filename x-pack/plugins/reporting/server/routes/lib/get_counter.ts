@@ -10,19 +10,38 @@ import { API_USAGE_COUNTER_TYPE, API_USAGE_ERROR_TYPE } from '../../../common/co
 
 export type Counters = ReturnType<typeof getCounters>;
 
+/**
+ * A helper utility that can be passed around and call the usage counter service
+ */
 export function getCounters(method: string, path: string, usageCounter: UsageCounter | undefined) {
   return {
-    // constructs a counterName from the API request method and path
-    usageCounter() {
+    /**
+     * constructs a counterName from the API request method and path
+     * appends an optional "path suffix" for additional context about filetype, etc
+     */
+    usageCounter(pathSuffix?: string) {
+      const counterName = `${method} ${path}${pathSuffix ? ':' + pathSuffix : ''}`;
+
       usageCounter?.incrementCounter({
-        counterName: `${method} ${path}`,
+        counterName,
         counterType: API_USAGE_COUNTER_TYPE,
       });
     },
-    // appends `:{statusCode}` to the counterName if there is a statusCode
-    errorCounter(statusCode?: number) {
+
+    /**
+     * appends `:{statusCode}` to the counterName if there is a statusCode
+     */
+    errorCounter(pathSuffix?: string, statusCode?: number) {
+      let counterName = `${method} ${path}`;
+      if (pathSuffix) {
+        counterName += `:${pathSuffix}`;
+      }
+      if (statusCode) {
+        counterName += `:${statusCode}`;
+      }
+
       usageCounter?.incrementCounter({
-        counterName: `${method} ${path}${statusCode ? ':' + statusCode : ''}`,
+        counterName,
         counterType: API_USAGE_ERROR_TYPE,
       });
     },

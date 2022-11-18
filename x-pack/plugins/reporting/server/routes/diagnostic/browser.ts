@@ -63,18 +63,19 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
           return helpTexts;
         }, []);
 
+        const success = boundSuccessfully && !help.length;
         const response: DiagnosticResponse = {
-          success: boundSuccessfully && !help.length,
+          success,
           help,
           logs,
         };
 
-        counters.usageCounter();
+        counters.usageCounter(success ? 'success' : 'failure');
 
         return res.ok({ body: response });
       } catch (err) {
         logger.error(err);
-        counters.errorCounter(500);
+        counters.errorCounter(undefined, 500);
         return res.custom({ statusCode: 500 });
       }
     })
