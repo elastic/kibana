@@ -12,15 +12,17 @@ export type Counters = ReturnType<typeof getCounters>;
 
 export function getCounters(method: string, path: string, usageCounter: UsageCounter | undefined) {
   return {
+    // constructs a counterName from the API request method and path
     usageCounter() {
       usageCounter?.incrementCounter({
         counterName: `${method} ${path}`,
         counterType: API_USAGE_COUNTER_TYPE,
       });
     },
-    errorCounter(statusCode: number) {
+    // appends `:{statusCode}` to the counterName if there is a statusCode
+    errorCounter(statusCode?: number) {
       usageCounter?.incrementCounter({
-        counterName: `${method} ${path}:${statusCode}`,
+        counterName: `${method} ${path}${statusCode ? ':' + statusCode : ''}`,
         counterType: API_USAGE_ERROR_TYPE,
       });
     },

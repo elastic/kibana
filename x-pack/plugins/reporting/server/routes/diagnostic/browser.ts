@@ -74,6 +74,7 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
         return res.ok({ body: response });
       } catch (err) {
         logger.error(err);
+        counters.errorCounter(500);
         return res.custom({ statusCode: 500 });
       }
     })

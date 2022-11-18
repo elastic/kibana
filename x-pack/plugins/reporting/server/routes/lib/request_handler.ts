@@ -171,6 +171,8 @@ export class RequestHandler {
       });
     }
 
+    counters?.errorCounter(500);
+
     return this.res.customError({
       statusCode: 500,
       body:

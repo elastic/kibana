@@ -86,9 +86,11 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         return res.ok({ body: response });
       } catch (e) {
         logger.error(e);
+        const statusCode = e?.statusCode ?? 500;
+        counters.errorCounter(statusCode);
         return res.customError({
-          statusCode: e?.statusCode ?? 500,
           body: { message: e.message },
+          statusCode,
         });
       }
     })
@@ -146,14 +148,18 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         if (err instanceof errors.ResponseError) {
           // If there were no reporting indices to update, that's OK because then there is nothing to migrate
           if (err.statusCode === 404) {
+            counters.errorCounter(404);
             return res.ok();
           }
+
+          const statusCode = err.statusCode ?? 500;
+          counters.errorCounter(statusCode);
           return res.customError({
-            statusCode: err.statusCode ?? 500,
             body: {
               message: err.message,
               name: err.name,
             },
+            statusCode,
           });
         }
 

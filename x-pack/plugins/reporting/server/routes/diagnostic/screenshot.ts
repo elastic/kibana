@@ -82,8 +82,9 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
             },
           });
         })
-        .catch((error) =>
-          res.ok({
+        .catch((error) => {
+          counters.errorCounter();
+          return res.ok({
             body: {
               success: false,
               help: [
@@ -93,8 +94,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
               ],
               logs: error.message,
             },
-          })
-        );
+          });
+        });
     })
   );
 };
