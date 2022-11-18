@@ -97,14 +97,13 @@ export function logAlerts<
       const { group: actionGroup } = recoveredAlerts[id].getLastScheduledActions() ?? {};
       const state = recoveredAlerts[id].getState();
       const message = `${ruleLogPrefix} alert '${id}' has recovered`;
-      const flapping = flappingAlertIds.has(id);
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         id,
         group: actionGroup,
         message,
         state,
-        flapping,
+        flapping: false,
       });
     }
 
