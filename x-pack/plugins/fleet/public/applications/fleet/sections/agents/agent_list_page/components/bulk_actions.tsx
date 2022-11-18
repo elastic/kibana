@@ -82,7 +82,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
   const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
-  const { showRequestDiagnostics } = ExperimentalFeaturesService.get();
+  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
 
   const menuItems = [
     {
@@ -171,7 +171,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     },
   ];
 
-  if (showRequestDiagnostics) {
+  if (diagnosticFileUploadEnabled) {
     menuItems.push({
       name: (
         <FormattedMessage
