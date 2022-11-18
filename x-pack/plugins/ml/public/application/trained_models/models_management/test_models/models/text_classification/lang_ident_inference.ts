@@ -6,12 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { estypes } from '@elastic/elasticsearch';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferenceType } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getLangIdentOutputComponent } from './lang_ident_output';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 
 export class LangIdentInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType: InferenceType = 'classification';
@@ -25,14 +27,21 @@ export class LangIdentInference extends InferenceBase<TextClassificationResponse
     }),
   ];
 
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
+
+    this.initialize();
+  }
+
   public async inferText() {
     try {
       return await this.runInfer<RawTextClassificationResponse>(
-        (inputText: string) => {
-          return {
-            docs: [{ [this.inputField]: inputText }],
-            inference_config: this.getInferenceConfig(this.getNumTopClassesConfig()),
-          };
+        () => {
+          return this.getInferenceConfig(this.getNumTopClassesConfig());
         },
         (resp, inputText) => {
           return processResponse(resp, this.model, inputText);
@@ -50,7 +59,7 @@ export class LangIdentInference extends InferenceBase<TextClassificationResponse
         return {
           response: processInferenceResult(doc._source[this.inferenceType], this.model),
           rawResponse: doc._source[this.inferenceType],
-          inputText: doc._source[this.inputField],
+          inputText: doc._source[this.getInputField()],
         };
       });
     } catch (error) {
