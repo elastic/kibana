@@ -265,7 +265,7 @@ export class VectorStyleEditor extends Component<Props, State> {
     );
   }
 
-  _renderLabelProperties() {
+  _renderLabelProperties(isPoint: boolean) {
     const hasLabel = getHasLabel(
       this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT] as
         | StaticTextProperty
@@ -284,6 +284,7 @@ export class VectorStyleEditor extends Component<Props, State> {
     const labelBorderColorProperty = this.props.styleProperties[
       VECTOR_STYLES.LABEL_BORDER_COLOR
     ] as IStyleProperty<ColorDynamicOptions | ColorStaticOptions>;
+
     return (
       <Fragment>
         <VectorStyleLabelEditor
@@ -305,14 +306,18 @@ export class VectorStyleEditor extends Component<Props, State> {
         />
         <EuiSpacer size="m" />
 
-        <LabelPositionEditor
-          hasLabel={hasLabel}
-          handlePropertyChange={this.props.handlePropertyChange}
-          styleProperty={
-            this.props.styleProperties[VECTOR_STYLES.LABEL_POSITION] as LabelPositionProperty
-          }
-        />
-        <EuiSpacer size="m" />
+        {isPoint ? (
+          <>
+            <LabelPositionEditor
+              hasLabel={hasLabel}
+              handlePropertyChange={this.props.handlePropertyChange}
+              styleProperty={
+                this.props.styleProperties[VECTOR_STYLES.LABEL_POSITION] as LabelPositionProperty
+              }
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
 
         <LabelZoomRangeEditor
           disabled={!hasLabel}
@@ -505,7 +510,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         />
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties()}
+        {this._renderLabelProperties(true)}
       </Fragment>
     );
   }
@@ -519,7 +524,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         {this._renderLineWidth()}
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties()}
+        {this._renderLabelProperties(false)}
       </Fragment>
     );
   }
@@ -536,7 +541,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         {this._renderLineWidth()}
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties()}
+        {this._renderLabelProperties(false)}
       </Fragment>
     );
   }
