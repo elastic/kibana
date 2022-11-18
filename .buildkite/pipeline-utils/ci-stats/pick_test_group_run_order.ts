@@ -234,6 +234,7 @@ export async function pickTestGroupRunOrder() {
     ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
         cwd: process.cwd(),
         absolute: false,
+        ignore: DISABLED_JEST_CONFIGS,
       })
     : [];
 
