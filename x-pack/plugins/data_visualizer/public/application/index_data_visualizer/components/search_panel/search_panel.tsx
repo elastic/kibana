@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { css } from '@emotion/react';
 import { isDefined } from '../../../common/util/is_defined';
-import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
 import { SupportedFieldType } from '../../../../../common/types';
@@ -147,12 +147,15 @@ export const SearchPanel: FC<Props> = ({
         />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={2} className={'dvSearchPanel__controls'}>
-        <ShardSizeFilter
-          samplerShardSize={samplerShardSize}
-          setSamplerShardSize={setSamplerShardSize}
-        />
-
+      <EuiFlexItem
+        grow={2}
+        className={'dvSearchPanel__controls'}
+        css={css`
+          margin-left: 0px !important;
+          padding-left: 0px !important;
+          padding-right: 0px !important;
+        `}
+      >
         <DataVisualizerFieldNamesFilter
           overallStats={overallStats}
           setVisibleFieldNames={setVisibleFieldNames}

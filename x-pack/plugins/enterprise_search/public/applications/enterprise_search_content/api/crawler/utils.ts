@@ -29,6 +29,8 @@ import {
   BasicCrawlerAuth,
   CrawlerAuth,
   RawCrawlerAuth,
+  CrawlScheduleFromServer,
+  CrawlSchedule,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -239,6 +241,16 @@ export const crawlerDomainsWithMetaServerToClient = ({
 }: CrawlerDomainsWithMetaFromServer): CrawlerDomainsWithMeta => ({
   domains: results.map(crawlerDomainServerToClient),
   meta,
+});
+
+export const crawlScheduleServerToClient = ({
+  frequency,
+  unit,
+  use_connector_schedule: useConnectorSchedule,
+}: CrawlScheduleFromServer): CrawlSchedule => ({
+  frequency,
+  unit,
+  useConnectorSchedule,
 });
 
 export function isBasicCrawlerAuth(auth: CrawlerAuth): auth is BasicCrawlerAuth {
