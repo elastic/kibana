@@ -65,7 +65,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikesPage.assertNoWindowParametersEmptyPromptExists();
 
       await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
-      await aiops.explainLogRateSpikesPage.clickDocumentCountChart();
+      await aiops.explainLogRateSpikesPage.clickDocumentCountChart(testData.chartClickCoordinates);
       await aiops.explainLogRateSpikesPage.assertAnalysisSectionExists();
 
       await ml.testExecution.logTestStep('displays the no results found prompt');

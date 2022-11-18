@@ -12,6 +12,7 @@ export const farequoteDataViewTestData: TestData = {
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'ft_farequote',
   brushTargetTimestamp: 1455033600000,
+  chartClickCoordinates: [0, 0],
   expected: {
     totalDocCountFormatted: '86,374',
     analysisGroupsTable: [
@@ -28,6 +29,34 @@ export const farequoteDataViewTestData: TestData = {
         logRate: 'Chart type:bar chart',
         pValue: '4.66e-11',
         impact: 'High',
+      },
+    ],
+  },
+};
+
+export const artificialLogDataViewTestData: TestData = {
+  suiteTitle: 'artificial index pattern',
+  isSavedSearch: false,
+  sourceIndexOrSavedSearch: 'aiops_frequent_items_test',
+  brushTargetTimestamp: 1455033600000,
+  chartClickCoordinates: [-200, 30],
+  expected: {
+    totalDocCountFormatted: '16,000',
+    analysisGroupsTable: [{ group: 'response_code: 500user: Peter', docCount: '481' }],
+    analysisTable: [
+      {
+        fieldName: 'user',
+        fieldValue: 'Peter',
+        logRate: 'Chart type:bar chart',
+        pValue: '2.30e-41',
+        impact: 'High',
+      },
+      {
+        fieldName: 'response_code',
+        fieldValue: '500',
+        logRate: 'Chart type:bar chart',
+        pValue: '0.0000384',
+        impact: 'Medium',
       },
     ],
   },

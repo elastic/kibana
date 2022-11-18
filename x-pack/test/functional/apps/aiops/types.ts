@@ -11,6 +11,7 @@ export interface TestData {
   sourceIndexOrSavedSearch: string;
   rowsPerPage?: 10 | 25 | 50;
   brushTargetTimestamp: number;
+  chartClickCoordinates: [number, number];
   expected: {
     totalDocCountFormatted: string;
     analysisGroupsTable: Array<{ group: string; docCount: string }>;

@@ -64,11 +64,15 @@ export function ExplainLogRateSpikesPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail(`aiopsNoResultsFoundEmptyPrompt`);
     },
 
-    async clickDocumentCountChart() {
+    async clickDocumentCountChart(chartClickCoordinates: [number, number]) {
       await elasticChart.waitForRenderComplete();
       const el = await elasticChart.getCanvas();
 
-      await browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
+      await browser
+        .getActions()
+        .move({ x: chartClickCoordinates[0], y: chartClickCoordinates[1], origin: el._webElement })
+        .click()
+        .perform();
 
       await this.assertHistogramBrushesExist();
     },
@@ -154,7 +158,14 @@ export function ExplainLogRateSpikesPageProvider({ getService }: FtrProviderCont
       // Get the total count of bars and index of a bar for a given timestamp in the charts debug data.
       const bars = chartDebugData?.bars?.[0].bars ?? [];
       const barsCount = bars.length;
-      const targetDeviationBarIndex = bars.findIndex((b) => b.x === timestamp);
+
+      const closestTimestamp = bars
+        .map((d) => d.x)
+        .reduce(function (p, c) {
+          return Math.abs(c - timestamp) < Math.abs(p - timestamp) ? c : p;
+        });
+
+      const targetDeviationBarIndex = bars.findIndex((b) => b.x === closestTimestamp);
 
       // The pixel location based on the given timestamp, calculated by taking the share of the index value
       // over the total count of bars, normalized by the wrapping element's width.
