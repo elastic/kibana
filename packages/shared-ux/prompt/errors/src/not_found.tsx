@@ -20,12 +20,12 @@ const NOT_FOUND_TITLE = i18n.translate('sharedUXPackages.prompt.errors.notFound.
   defaultMessage: 'Page not found',
 });
 
-const NOT_FOUND_BODY = i18n.translate('sharedUxPackages.prompt.errors.notFound.body', {
+const NOT_FOUND_BODY = i18n.translate('sharedUXPackages.prompt.errors.notFound.body', {
   defaultMessage:
     "Sorry, the page you're looking for can't be found. It might have been removed or renamed, or maybe it never existed at all.",
 });
 
-const NOT_FOUND_GO_BACK = i18n.translate('sharedUxPackages.prompt.errors.notFound.goBacklabel', {
+const NOT_FOUND_GO_BACK = i18n.translate('sharedUXPackages.prompt.errors.notFound.goBacklabel', {
   defaultMessage: 'Go back',
 });
 
