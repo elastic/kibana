@@ -83,6 +83,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       !!packagePolicyInputStream.id &&
       packagePolicyInputStream.id === defaultDataStreamId;
     const isPackagePolicyEdit = !!packagePolicyId;
+    const isInputOnlyPackage = packageInfo.type === 'input';
 
     useEffect(() => {
       if (isDefaultDatstream && containerRef.current) {
@@ -317,8 +318,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         </EuiFlexItem>
                       );
                     })}
-                    {/* Only show datastream pipelines and mappings on edit */}
-                    {isPackagePolicyEdit && (
+                    {/* Only show datastream pipelines and mappings on edit and not for input packages*/}
+                    {isPackagePolicyEdit && !isInputOnlyPackage && (
                       <>
                         <EuiFlexItem>
                           <PackagePolicyEditorDatastreamPipelines
