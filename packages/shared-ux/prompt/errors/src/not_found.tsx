@@ -30,9 +30,13 @@ const NOT_FOUND_GO_BACK = i18n.translate('sharedUXPackages.prompt.errors.notFoun
 });
 
 interface NotFoundProps {
+  /** Array of buttons, links and other actions to show at the bottom of the `EuiEmptyPrompt`. Defaults to a "Back" button. */
   actions?: EuiEmptyPromptProps['actions'];
 }
 
+/**
+ * Predefined `EuiEmptyPrompt` for 404 pages.
+ */
 export function NotFound({ actions }: NotFoundProps) {
   const { colorMode } = useEuiTheme();
   const [errorImage, setErrorImage] = useState<string>();
