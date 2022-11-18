@@ -32,6 +32,7 @@ export const getLazyOsqueryResponseActionTypeForm =
   () => (props: LazyOsqueryActionParamsFormProps) => {
     const { item, formRef } = props;
 
+    // Wait for mounted is a way to make sure we get form data for this item, otherwise we are missing params
     // Not sure why, but useMountedState or useIsMounted did not work - returning false all the time
     const [isMounted, setMounted] = useState(false);
     useEffect(() => {
