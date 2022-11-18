@@ -18,6 +18,10 @@
 /src/plugins/unified_field_list/ @elastic/kibana-data-discovery
 /src/plugins/unified_histogram/ @elastic/kibana-data-discovery
 /src/plugins/saved_objects_finder/ @elastic/kibana-data-discovery
+/src/plugins/data_views/ @elastic/kibana-data-discovery
+/src/plugins/data_view_editor/ @elastic/kibana-data-discovery
+/src/plugins/data_view_field_editor/ @elastic/kibana-data-discovery
+/src/plugins/data_view_management/ @elastic/kibana-data-discovery
 
 # Vis Editors
 /x-pack/plugins/lens/ @elastic/kibana-visualizations
@@ -60,15 +64,11 @@
 /examples/partial_results_example/ @elastic/kibana-app-services
 /examples/search_examples/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-visualizations  @elastic/kibana-data-discovery
-/src/plugins/data_views/ @elastic/kibana-app-services
 /src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/field_formats/ @elastic/kibana-app-services
-/src/plugins/data_view_editor/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
 /src/plugins/kibana_utils/ @elastic/kibana-app-services
 /src/plugins/navigation/ @elastic/kibana-app-services
-/src/plugins/data_view_field_editor @elastic/kibana-app-services
-/src/plugins/data_view_management/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
