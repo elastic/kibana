@@ -46,13 +46,13 @@ Array [
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
         data-test-subj="enableCollectionInterval"
         type="button"
       >

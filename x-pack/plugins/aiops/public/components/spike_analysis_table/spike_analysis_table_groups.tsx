@@ -20,6 +20,8 @@ import {
   EuiTableSortingType,
   EuiToolTip,
   RIGHT_ALIGNMENT,
+  useEuiTheme,
+  euiPaletteColorBlind,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -28,7 +30,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
-import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { MiniHistogram } from '../mini_histogram';
@@ -82,7 +83,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     {}
   );
 
-  const euiTheme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
+  const visColors = euiPaletteColorBlind();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
   const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
@@ -260,9 +262,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                   color="hollow"
                 >
                   <span>{`${fieldName}: `}</span>
-                  <span
-                    style={{ color: euiTheme.euiCodeBlockStringColor }}
-                  >{`${group[fieldName]}`}</span>
+                  <span style={{ color: visColors[2] }}>{`${group[fieldName]}`}</span>
                 </EuiBadge>
                 <EuiSpacer size="xs" />
               </>
@@ -479,12 +479,12 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
 
     if (selectedGroup && selectedGroup.id === group.id) {
       return {
-        backgroundColor: euiTheme.euiColorLightestShade,
+        backgroundColor: euiTheme.colors.lightestShade,
       };
     }
 
     return {
-      backgroundColor: euiTheme.euiColorEmptyShade,
+      backgroundColor: euiTheme.colors.emptyShade,
     };
   };
 

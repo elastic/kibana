@@ -47,19 +47,19 @@ Object {
               class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
             />
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+              class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
             >
               <div
-                class="euiFlexItem"
+                class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <h1
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                    class="euiFlexGroup css-nhr7ke"
                   >
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrow10"
+                      class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
                         data-test-subj="TitleText"
@@ -68,7 +68,7 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-EuiFlexItem"
                     >
                       <button
                         aria-label="Edit Text List Header"
@@ -97,10 +97,10 @@ Object {
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                        class="euiFlexGroup css-nhr7ke"
                       >
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrow10"
+                          class="euiFlexItem emotion-euiFlexItem-grow-10"
                         >
                           <span
                             css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -110,7 +110,7 @@ Object {
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                          class="euiFlexItem emotion-EuiFlexItem"
                         >
                           <button
                             aria-label="Edit Text List Header"
@@ -148,16 +148,16 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
                       data-test-subj="RightSideMenuItemsContainer"
                     >
                       <div
@@ -171,10 +171,10 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <button
-                          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
                           data-test-subj="RightSideMenuItemsManageRulesButton"
                           type="button"
                         >
@@ -190,10 +190,10 @@ Object {
                         </button>
                       </div>
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                         >
                           <div
                             class="euiPopover emotion-euiPopover"
@@ -229,7 +229,7 @@ Object {
       </div>
     </div>
     <div
-      class="euiOverlayMask"
+      class="euiOverlayMask emotion-euiOverlayMask-aboveHeader"
       data-euiportal="true"
       data-relative-to-header="above"
     >
@@ -365,7 +365,7 @@ Object {
               </span>
             </button>
             <button
-              class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
               data-test-subj="editModalSaveBtn"
               form="modalForm_generated-id"
               type="submit"
@@ -428,19 +428,19 @@ Object {
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+            class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiFlexItem"
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <h1
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                  class="euiFlexGroup css-nhr7ke"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrow10"
+                    class="euiFlexItem emotion-euiFlexItem-grow-10"
                   >
                     <span
                       data-test-subj="TitleText"
@@ -449,7 +449,7 @@ Object {
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                    class="euiFlexItem emotion-EuiFlexItem"
                   >
                     <button
                       aria-label="Edit Text List Header"
@@ -478,10 +478,10 @@ Object {
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                      class="euiFlexGroup css-nhr7ke"
                     >
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrow10"
+                        class="euiFlexItem emotion-euiFlexItem-grow-10"
                       >
                         <span
                           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -491,7 +491,7 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-EuiFlexItem"
                       >
                         <button
                           aria-label="Edit Text List Header"
@@ -529,16 +529,16 @@ Object {
               </div>
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
@@ -552,10 +552,10 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <button
-                        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
                         data-test-subj="RightSideMenuItemsManageRulesButton"
                         type="button"
                       >
@@ -571,10 +571,10 @@ Object {
                       </button>
                     </div>
                     <div
-                      class="euiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                       >
                         <div
                           class="euiPopover emotion-euiPopover"
@@ -710,19 +710,19 @@ Object {
               class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
             />
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+              class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
             >
               <div
-                class="euiFlexItem"
+                class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <h1
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                    class="euiFlexGroup css-nhr7ke"
                   >
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrow10"
+                      class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
                         data-test-subj="TitleText"
@@ -731,7 +731,7 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-EuiFlexItem"
                     >
                       <button
                         aria-label="Edit Text List Header"
@@ -760,10 +760,10 @@ Object {
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                        class="euiFlexGroup css-nhr7ke"
                       >
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrow10"
+                          class="euiFlexItem emotion-euiFlexItem-grow-10"
                         >
                           <span
                             css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -773,7 +773,7 @@ Object {
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                          class="euiFlexItem emotion-EuiFlexItem"
                         >
                           <button
                             aria-label="Edit Text List Header"
@@ -811,16 +811,16 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
                       data-test-subj="RightSideMenuItemsContainer"
                     >
                       <div
@@ -834,10 +834,10 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <button
-                          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
                           data-test-subj="RightSideMenuItemsManageRulesButton"
                           type="button"
                         >
@@ -853,10 +853,10 @@ Object {
                         </button>
                       </div>
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                         >
                           <div
                             class="euiPopover emotion-euiPopover"
@@ -935,19 +935,19 @@ Object {
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+            class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiFlexItem"
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <h1
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                  class="euiFlexGroup css-nhr7ke"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrow10"
+                    class="euiFlexItem emotion-euiFlexItem-grow-10"
                   >
                     <span
                       data-test-subj="TitleText"
@@ -956,7 +956,7 @@ Object {
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                    class="euiFlexItem emotion-EuiFlexItem"
                   >
                     <button
                       aria-label="Edit Text List Header"
@@ -985,10 +985,10 @@ Object {
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                      class="euiFlexGroup css-nhr7ke"
                     >
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrow10"
+                        class="euiFlexItem emotion-euiFlexItem-grow-10"
                       >
                         <span
                           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -998,7 +998,7 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-EuiFlexItem"
                       >
                         <button
                           aria-label="Edit Text List Header"
@@ -1036,16 +1036,16 @@ Object {
               </div>
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
@@ -1059,10 +1059,10 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <button
-                        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
                         data-test-subj="RightSideMenuItemsManageRulesButton"
                         type="button"
                       >
@@ -1078,10 +1078,10 @@ Object {
                       </button>
                     </div>
                     <div
-                      class="euiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                       >
                         <div
                           class="euiPopover emotion-euiPopover"
@@ -1217,19 +1217,19 @@ Object {
               class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
             />
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+              class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
             >
               <div
-                class="euiFlexItem"
+                class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <h1
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                    class="euiFlexGroup css-nhr7ke"
                   >
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrow10"
+                      class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
                         data-test-subj="TitleText"
@@ -1238,7 +1238,7 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-EuiFlexItem"
                     />
                   </div>
                 </h1>
@@ -1253,10 +1253,10 @@ Object {
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                        class="euiFlexGroup css-nhr7ke"
                       >
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrow10"
+                          class="euiFlexItem emotion-euiFlexItem-grow-10"
                         >
                           <span
                             css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1266,7 +1266,7 @@ Object {
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                          class="euiFlexItem emotion-EuiFlexItem"
                         />
                       </div>
                       <div
@@ -1290,16 +1290,16 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
                       data-test-subj="RightSideMenuItemsContainer"
                     >
                       <div
@@ -1313,10 +1313,10 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <button
-                          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
                           data-test-subj="RightSideMenuItemsManageRulesButton"
                           type="button"
                         >
@@ -1332,10 +1332,10 @@ Object {
                         </button>
                       </div>
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                         >
                           <div
                             class="euiPopover emotion-euiPopover"
@@ -1415,19 +1415,19 @@ Object {
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+            class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiFlexItem"
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <h1
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                  class="euiFlexGroup css-nhr7ke"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrow10"
+                    class="euiFlexItem emotion-euiFlexItem-grow-10"
                   >
                     <span
                       data-test-subj="TitleText"
@@ -1436,7 +1436,7 @@ Object {
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                    class="euiFlexItem emotion-EuiFlexItem"
                   />
                 </div>
               </h1>
@@ -1451,10 +1451,10 @@ Object {
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                      class="euiFlexGroup css-nhr7ke"
                     >
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrow10"
+                        class="euiFlexItem emotion-euiFlexItem-grow-10"
                       >
                         <span
                           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1464,7 +1464,7 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-EuiFlexItem"
                       />
                     </div>
                     <div
@@ -1488,16 +1488,16 @@ Object {
               </div>
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
@@ -1511,10 +1511,10 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <button
-                        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
                         data-test-subj="RightSideMenuItemsManageRulesButton"
                         type="button"
                       >
@@ -1530,10 +1530,10 @@ Object {
                       </button>
                     </div>
                     <div
-                      class="euiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                       >
                         <div
                           class="euiPopover emotion-euiPopover"
@@ -1670,19 +1670,19 @@ Object {
               class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
             />
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+              class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
             >
               <div
-                class="euiFlexItem"
+                class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <h1
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                    class="euiFlexGroup css-nhr7ke"
                   >
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrow10"
+                      class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
                         data-test-subj="TitleText"
@@ -1691,7 +1691,7 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-EuiFlexItem"
                     />
                   </div>
                 </h1>
@@ -1706,10 +1706,10 @@ Object {
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                        class="euiFlexGroup css-nhr7ke"
                       >
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrow10"
+                          class="euiFlexItem emotion-euiFlexItem-grow-10"
                         >
                           <span
                             css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1719,7 +1719,7 @@ Object {
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                          class="euiFlexItem emotion-EuiFlexItem"
                         />
                       </div>
                       <div
@@ -1743,16 +1743,16 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
                       data-test-subj="RightSideMenuItemsContainer"
                     >
                       <div
@@ -1766,10 +1766,10 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                         >
                           <div
                             class="euiPopover emotion-euiPopover"
@@ -1929,19 +1929,19 @@ Object {
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+            class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiFlexItem"
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <h1
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                  class="euiFlexGroup css-nhr7ke"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrow10"
+                    class="euiFlexItem emotion-euiFlexItem-grow-10"
                   >
                     <span
                       data-test-subj="TitleText"
@@ -1950,7 +1950,7 @@ Object {
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                    class="euiFlexItem emotion-EuiFlexItem"
                   />
                 </div>
               </h1>
@@ -1965,10 +1965,10 @@ Object {
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+                      class="euiFlexGroup css-nhr7ke"
                     >
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrow10"
+                        class="euiFlexItem emotion-euiFlexItem-grow-10"
                       >
                         <span
                           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1978,7 +1978,7 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-EuiFlexItem"
                       />
                     </div>
                     <div
@@ -2002,16 +2002,16 @@ Object {
               </div>
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
@@ -2025,10 +2025,10 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                       >
                         <div
                           class="euiPopover emotion-euiPopover"

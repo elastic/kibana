@@ -9,7 +9,7 @@ import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elasti
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { useCallback, useMemo } from 'react';
 import { find } from 'lodash/fp';
-import type { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
+import type { EuiFlexItemProps } from '@elastic/eui';
 import { TimelineId } from '../../../../../../../common/types';
 import { isAlertFromEndpointEvent } from '../../../../../../common/utils/endpoint_alert_check';
 import { SummaryValueCell } from '../../../../../../common/components/event_details/table/summary_value_cell';
@@ -49,7 +49,7 @@ export interface HostPanelProps {
 
 const HostPanelSection: React.FC<{
   title?: string | React.ReactElement;
-  grow?: FlexItemGrowSize;
+  grow?: EuiFlexItemProps['grow'];
 }> = ({ grow, title, children }) =>
   children ? (
     <EuiFlexItem grow={grow}>
