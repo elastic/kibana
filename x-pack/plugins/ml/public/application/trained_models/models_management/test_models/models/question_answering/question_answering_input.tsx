@@ -18,8 +18,8 @@ import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 const QuestionInput: FC<{
   inferrer: QuestionAnsweringInference;
 }> = ({ inferrer }) => {
-  const questionText = useObservable(inferrer.getQuestionText$());
-  const runningState = useObservable(inferrer.getRunningState$());
+  const questionText = useObservable(inferrer.getQuestionText$(), inferrer.getQuestionText());
+  const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
 
   return (
     <EuiFormRow

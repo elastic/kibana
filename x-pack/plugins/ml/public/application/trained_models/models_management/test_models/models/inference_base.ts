@@ -88,7 +88,7 @@ export abstract class InferenceBase<TInferResponse> {
 
   protected initialize(
     additionalValidators?: Array<Observable<boolean>>,
-    additionalChanges?: Array<Observable<string | boolean>>
+    additionalChanges?: Array<Observable<unknown>>
   ) {
     this.initializeValidators(additionalValidators);
     this.initializePipeline(additionalChanges);
@@ -112,7 +112,7 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   private initializePipeline(additionalChanges?: Array<Observable<any>>) {
-    const formObservables$: Array<Observable<any>> = [
+    const formObservables$: Array<Observable<unknown>> = [
       this.inputField$.asObservable(),
       ...(additionalChanges ? additionalChanges : []),
     ];
@@ -174,20 +174,40 @@ export abstract class InferenceBase<TInferResponse> {
     return this.inputText$.asObservable();
   }
 
+  public getInputText() {
+    return this.inputText$.getValue();
+  }
+
   public getInferenceResult$() {
     return this.inferenceResult$.asObservable();
+  }
+
+  public getInferenceResult() {
+    return this.inferenceResult$.getValue();
   }
 
   public getInferenceError$() {
     return this.inferenceError$.asObservable();
   }
 
+  public getInferenceError() {
+    return this.inferenceError$.getValue();
+  }
+
   public getRunningState$() {
     return this.runningState$.asObservable();
   }
 
+  public getRunningState() {
+    return this.runningState$.getValue();
+  }
+
   public getIsValid$() {
     return this.isValid$.asObservable();
+  }
+
+  public getIsValid() {
+    return this.isValid$.getValue();
   }
 
   protected abstract getInputComponent(): JSX.Element | null;

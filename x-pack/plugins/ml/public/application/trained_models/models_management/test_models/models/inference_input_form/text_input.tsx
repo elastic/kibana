@@ -31,11 +31,11 @@ export const TextInputForm: FC<Props> = ({ inferrer }) => {
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [errorText, setErrorText] = useState<string | null>(null);
 
-  const runningState = useObservable(inferrer.getRunningState$());
+  const isValid = useObservable(inferrer.getIsValid$(), inferrer.getIsValid());
+  const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
   const inputComponent = useMemo(() => inferrer.getInputComponent(), [inferrer]);
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
   const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);
-  const isValid = useObservable(inferrer.getIsValid$());
 
   const run = useCallback(async () => {
     setErrorText(null);

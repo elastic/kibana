@@ -109,6 +109,10 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
     return this.questionText$.asObservable();
   }
 
+  public getQuestionText() {
+    return this.questionText$.getValue();
+  }
+
   public getInputComponent(): JSX.Element {
     const placeholder = i18n.translate(
       'xpack.ml.trainedModels.testModelsFlyout.questionAnswer.inputText',

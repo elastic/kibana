@@ -33,8 +33,8 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
     setSelectedField,
   } = data;
 
-  const runningState = useObservable(inferrer.getRunningState$());
-  const pipeline = useObservable(inferrer.getPipeline$());
+  const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
+  const pipeline = useObservable(inferrer.getPipeline$(), inferrer.getPipeline());
   const inputComponent = useMemo(() => inferrer.getInputComponent(), [inferrer]);
 
   return (

@@ -35,9 +35,9 @@ export const IndexInputForm: FC<Props> = ({ inferrer }) => {
   const { reloadExamples, selectedField } = data;
 
   const [errorText, setErrorText] = useState<string | null>(null);
-  const runningState = useObservable(inferrer.getRunningState$());
-  const examples = useObservable(inferrer.getInputText$()) ?? [];
-  const isValid = useObservable(inferrer.getIsValid$());
+  const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
+  const examples = useObservable(inferrer.getInputText$(), inferrer.getInputText());
+  const isValid = useObservable(inferrer.getIsValid$(), inferrer.getIsValid());
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
   const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);
 

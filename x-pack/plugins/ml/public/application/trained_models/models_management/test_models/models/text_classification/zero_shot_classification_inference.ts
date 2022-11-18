@@ -96,12 +96,19 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
     return this.labelsText$.asObservable();
   }
 
+  public getLabelsText() {
+    return this.labelsText$.getValue();
+  }
+
   public setMultiLabel(multiLabel: boolean) {
     this.multiLabel$.next(multiLabel);
   }
 
   public getMultiLabel$() {
     return this.multiLabel$.asObservable();
+  }
+  public getMultiLabel() {
+    return this.multiLabel$.getValue();
   }
 
   public getInputComponent(): JSX.Element {
