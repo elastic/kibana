@@ -88,28 +88,30 @@ describe('QueryBarDefineRule', () => {
     expect(getByTestId('query-bar-define-rule')).toBeInTheDocument();
   });
 
-  it('renders import query from saved timeline modal actions hidden correctly', () => {
-    const field = useFormFieldMock();
+  it('renders import query from saved timeline modal actions hidden correctly', async () => {
+    await act(async () => {
+      const field = useFormFieldMock();
 
-    const { queryByTestId } = render(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <QueryBarDefineRule
-            browserFields={{}}
-            isLoading={false}
-            indexPattern={{ fields: [], title: 'title' }}
-            onCloseTimelineSearch={jest.fn()}
-            openTimelineSearch={true}
-            dataTestSubj="query-bar-define-rule"
-            idAria="idAria"
-            field={field}
-          />
-        </Router>
-      </TestProviders>
-    );
+      const { queryByTestId } = render(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <QueryBarDefineRule
+              browserFields={{}}
+              isLoading={false}
+              indexPattern={{ fields: [], title: 'title' }}
+              onCloseTimelineSearch={jest.fn()}
+              openTimelineSearch={true}
+              dataTestSubj="query-bar-define-rule"
+              idAria="idAria"
+              field={field}
+            />
+          </Router>
+        </TestProviders>
+      );
 
-    expect(queryByTestId('open-duplicate')).not.toBeInTheDocument();
-    expect(queryByTestId('create-from-template')).not.toBeInTheDocument();
+      expect(queryByTestId('open-duplicate')).not.toBeInTheDocument();
+      expect(queryByTestId('create-from-template')).not.toBeInTheDocument();
+    });
   });
 
   it('calls onOpenTimeline correctly', async () => {
