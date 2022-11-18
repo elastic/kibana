@@ -37,7 +37,7 @@ export function useUrlState<
         ...updatedQuery,
       };
 
-      history.push({
+      history.replace({
         search: `?${queryString.stringify(queryParams, { encode: false })}`,
       });
     },
