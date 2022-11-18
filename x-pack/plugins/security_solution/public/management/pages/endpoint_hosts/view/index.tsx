@@ -71,7 +71,6 @@ import { BackToExternalAppButton } from '../../../components/back_to_external_ap
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
-import { NoPrivileges } from '../../../../common/components/no_privileges';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -134,7 +133,11 @@ export const EndpointList = () => {
     endpointsTotalError,
     metadataTransformStats,
   } = useEndpointSelector(selector);
-  const { canReadEndpointList, canAccessFleet } = useUserPrivileges().endpointPrivileges;
+  const {
+    canReadEndpointList,
+    canAccessFleet,
+    loading: endpointPrivilegesLoading,
+  } = useUserPrivileges().endpointPrivileges;
   const { search } = useFormatUrl(SecurityPageName.administration);
   const { search: searchParams } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -175,6 +178,23 @@ export const EndpointList = () => {
   const backToPolicyList = (
     <BackToExternalAppButton {...backLinkOptions} data-test-subj="endpointListBackLink" />
   );
+
+  const missingFleetAccessInfo = useMemo(() => {
+    return (
+      <EuiText size="s" color="subdued">
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.onboarding.enableFleetAccess"
+          defaultMessage="Deploying Agents for the first time requires Fleet access. For more information, "
+        />
+        <EuiLink external href={`${services?.docLinks.links.securitySolution.privileges}`}>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policyList.onboardingDocsLink"
+            defaultMessage="view the Elastic Security documentation"
+          />
+        </EuiLink>
+      </EuiText>
+    );
+  }, [services?.docLinks.links.securitySolution.privileges]);
 
   useEffect(() => {
     // if no endpoint policy, skip transform check
@@ -550,6 +570,16 @@ export const EndpointList = () => {
           rowProps={setTableRowProps}
         />
       );
+    } else if (canReadEndpointList && !canAccessFleet) {
+      return (
+        <ManagementEmptyStateWrapper>
+          <PolicyEmptyState
+            loading={endpointPrivilegesLoading}
+            actionHidden
+            additionalInfo={missingFleetAccessInfo}
+          />
+        </ManagementEmptyStateWrapper>
+      );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
       return (
         <HostsEmptyState
@@ -584,6 +614,10 @@ export const EndpointList = () => {
     handleSelectableOnChange,
     selectionOptions,
     handleCreatePolicyClick,
+    canAccessFleet,
+    canReadEndpointList,
+    endpointPrivilegesLoading,
+    missingFleetAccessInfo,
   ]);
 
   const hasListData = listData && listData.length > 0;
@@ -681,15 +715,6 @@ export const EndpointList = () => {
       </>
     );
   }, [showTransformFailedCallout, closeTransformFailedCallout, transformFailedCalloutDescription]);
-
-  if (!canReadEndpointList || (canReadEndpointList && !canAccessFleet)) {
-    return (
-      <NoPrivileges
-        pageName={SecurityPageName.endpoints}
-        documentationUrl={services?.docLinks.links.securitySolution.privileges}
-      />
-    );
-  }
 
   return (
     <AdministrationListPage
