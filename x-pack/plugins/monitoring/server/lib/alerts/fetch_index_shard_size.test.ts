@@ -12,12 +12,13 @@ import { Globals } from '../../static_globals';
 
 const getConfig = (ccsEnabled: boolean) =>
   ({
+    getKeyStoreValue: () => '*',
     config: {
       ui: {
         ccs: { enabled: ccsEnabled },
       },
     },
-  } as Partial<typeof Globals.app> as typeof Globals.app);
+  } as unknown as typeof Globals.app);
 
 describe('fetchIndexShardSize', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;

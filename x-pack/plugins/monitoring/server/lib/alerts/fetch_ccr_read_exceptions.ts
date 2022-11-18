@@ -189,7 +189,7 @@ export async function fetchCCRReadExceptions(
         shardId,
         leaderIndex,
         lastReadException,
-        ccs: monitoringIndexName.includes(':') ? monitoringIndexName.split(':')[0] : '',
+        ccs: monitoringIndexName.includes(':') ? monitoringIndexName.split(':')[0] : null,
       });
     }
   }

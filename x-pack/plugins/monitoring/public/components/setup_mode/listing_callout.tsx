@@ -10,12 +10,18 @@ import { get } from 'lodash';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatProductName, getIdentifier } from './formatting';
+import type { SetupModeData } from './types';
 
 const MIGRATE_TO_MB_LABEL = i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeat', {
   defaultMessage: 'Monitor with Metricbeat',
 });
 
-export function ListingCallOut({ setupModeData, productName, customRenderer = null }) {
+export interface Props {
+  setupModeData: SetupModeData;
+  productName: string;
+  customRenderer?: () => { shouldRender: boolean; componentToRender: JSX.Element | null };
+}
+export function ListingCallOut({ setupModeData, productName, customRenderer }: Props) {
   if (customRenderer) {
     const { shouldRender, componentToRender } = customRenderer();
     if (shouldRender) {

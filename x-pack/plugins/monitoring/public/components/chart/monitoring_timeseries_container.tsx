@@ -7,13 +7,8 @@
 
 import React, { Fragment } from 'react';
 import { get, first } from 'lodash';
-import { getTechnicalPreview } from './get_technical_preview';
-import { getTitle } from './get_title';
-import { getUnits } from './get_units';
-import { MonitoringTimeseries } from './monitoring_timeseries';
-import { InfoTooltip } from './info_tooltip';
-import './monitoring_timeseries_container.scss';
-
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiIconTip,
@@ -24,11 +19,38 @@ import {
   EuiTextAlign,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { getTechnicalPreview } from './get_technical_preview';
+import { getTitle } from './get_title';
+import { getUnits } from './get_units';
+import { MonitoringTimeseries } from './monitoring_timeseries';
+import { InfoTooltip } from './info_tooltip';
 import { AlertsBadge } from '../../alerts/badge';
+import type { AlertsByName } from '../../alerts/types';
 
-const zoomOutBtn = (zoomInfo) => {
+import './monitoring_timeseries_container.scss';
+
+interface ZoomInfo {
+  showZoomOutBtn: () => boolean;
+  zoomOutHandler: () => void;
+}
+
+interface SeriesAlert {
+  alerts: AlertsByName;
+}
+interface Series {
+  metric: { title: string; label: string; description: string };
+}
+interface Props {
+  series?: Series[] | SeriesAlert;
+  onBrush?: ({ xaxis }: any) => void;
+  zoomInfo?: ZoomInfo;
+}
+
+const isSeriesAlert = (series: SeriesAlert | Series[]): series is SeriesAlert => {
+  return (series as SeriesAlert).alerts !== undefined;
+};
+
+const zoomOutBtn = (zoomInfo?: ZoomInfo) => {
   if (!zoomInfo || !zoomInfo.showZoomOutBtn()) {
     return null;
   }
@@ -52,7 +74,7 @@ const zoomOutBtn = (zoomInfo) => {
   );
 };
 
-const technicalPreviewBadge = (technicalPreview) => {
+const technicalPreviewBadge = (technicalPreview: boolean) => {
   if (!technicalPreview) {
     return null;
   }
@@ -69,16 +91,17 @@ const technicalPreviewBadge = (technicalPreview) => {
   );
 };
 
-export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
+export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }: Props) {
   if (series === undefined) {
     return null; // still loading
   }
 
-  const title = getTitle(series);
-  const technicalPreview = getTechnicalPreview(series);
+  const seriesMetrics = !isSeriesAlert(series) ? series : [];
+  const title = getTitle(seriesMetrics);
+  const technicalPreview = getTechnicalPreview(seriesMetrics);
   const titleForAriaIds = title.replace(/\s+/, '--');
-  const units = getUnits(series);
-  const bucketSize = get(first(series), 'bucket_size'); // bucket size will be the same for all metrics in all series
+  const units = getUnits(seriesMetrics);
+  const bucketSize = get(first(seriesMetrics), 'bucket_size'); // bucket size will be the same for all metrics in all series
 
   const seriesScreenReaderTextList = [
     i18n.translate('xpack.monitoring.chart.seriesScreenReaderListDescription', {
@@ -87,13 +110,14 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
         bucketSize,
       },
     }),
-  ].concat(series.map((item) => `${item.metric.label}: ${item.metric.description}`));
+  ].concat(seriesMetrics.map((item) => `${item.metric.label}: ${item.metric.description}`));
 
   let alertStatus = null;
-  if (series.alerts) {
+  const seriesAlert = isSeriesAlert(series) ? series : undefined;
+  if (seriesAlert?.alerts) {
     alertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertsBadge alerts={series.alerts} />
+        <AlertsBadge alerts={seriesAlert.alerts} />
       </EuiFlexItem>
     );
   }
@@ -105,9 +129,9 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiTitle size="s" tabIndex="0">
+                <EuiTitle size="s">
                   <h2>
-                    {getTitle(series)}
+                    {getTitle(seriesMetrics)}
                     {units ? ` (${units})` : ''}
                     <EuiScreenReaderOnly>
                       <span>
@@ -126,7 +150,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
                     anchorClassName="eui-textRight eui-alignMiddle monChart__tooltipTrigger"
                     type="iInCircle"
                     position="right"
-                    content={<InfoTooltip series={series} bucketSize={bucketSize} />}
+                    content={<InfoTooltip series={seriesMetrics} bucketSize={bucketSize} />}
                   />
                   <EuiScreenReaderOnly>
                     <span id={`monitoringChart${titleForAriaIds}`}>
@@ -143,7 +167,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem style={{ minHeight: '200px' }}>
-        <MonitoringTimeseries series={series} onBrush={onBrush} />
+        <MonitoringTimeseries series={seriesMetrics} onBrush={onBrush} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

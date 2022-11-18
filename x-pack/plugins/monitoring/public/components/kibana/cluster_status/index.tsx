@@ -9,13 +9,32 @@ import { EuiBadge, EuiLink, EuiStat, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import type { AlertsByName } from '../../../alerts/types';
 import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
 import { formatMetric } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { DefaultStatusIndicator, SummaryStatus } from '../../summary_status';
 import { KibanaStatusIcon } from '../status_icon';
 
-export function ClusterStatus({ stats, alerts }) {
+interface ClusterStatusProps {
+  stats: {
+    concurrent_connections: number;
+    count: number;
+    memory_limit: number;
+    memory_size: number;
+    requests_total: number;
+    response_time_max: number;
+    status: string;
+    some_status_is_stale: boolean;
+  };
+  alerts?: AlertsByName;
+}
+
+interface IndicatorProps {
+  staleMessage: React.ReactNode;
+}
+
+export function ClusterStatus({ stats, alerts }: ClusterStatusProps) {
   const {
     concurrent_connections: connections,
     count: instances,
@@ -103,7 +122,7 @@ export function ClusterStatus({ stats, alerts }) {
   );
 }
 
-function OverviewPageStatusIndicator({ staleMessage }) {
+function OverviewPageStatusIndicator({ staleMessage }: IndicatorProps) {
   const instancesHref = getSafeForExternalLink('#/kibana/instances');
 
   const title = (
@@ -145,7 +164,7 @@ function OverviewPageStatusIndicator({ staleMessage }) {
   );
 }
 
-function InstancesPageStatusIndicator({ staleMessage }) {
+function InstancesPageStatusIndicator({ staleMessage }: IndicatorProps) {
   const title = (
     <EuiToolTip position="top" content={staleMessage}>
       <EuiBadge iconType="alert" color="warning">

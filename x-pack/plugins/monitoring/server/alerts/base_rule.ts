@@ -339,7 +339,7 @@ export class BaseRule {
     throw new Error('Child classes must implement `executeActions`');
   }
 
-  protected createGlobalStateLink(link: string, clusterUuid: string, ccs?: string) {
+  protected createGlobalStateLink(link: string, clusterUuid: string, ccs?: string | null) {
     const globalState = [`cluster_uuid:${clusterUuid}`];
     if (ccs) {
       globalState.push(`ccs:${ccs}`);

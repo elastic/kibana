@@ -81,7 +81,7 @@ export interface AlertInstanceState {
 
 export interface AlertState {
   cluster: AlertCluster;
-  ccs?: string;
+  ccs?: string | null;
   ui: AlertUiState;
   [key: string]: unknown;
 }
@@ -163,7 +163,7 @@ export interface AlertNodeStats {
   clusterUuid: string;
   nodeId: string;
   nodeName?: string;
-  ccs?: string;
+  ccs?: string | null;
 }
 
 export interface AlertCpuUsageNodeStats extends AlertNodeStats {
@@ -200,7 +200,7 @@ export interface CCRReadExceptionsStats {
   leaderIndex: string;
   lastReadException: { type?: string; reason?: string };
   clusterUuid: string;
-  ccs?: string;
+  ccs: string | null;
 }
 
 export interface CCRReadExceptionsUIMeta extends CCRReadExceptionsStats {
@@ -226,7 +226,7 @@ export interface AlertData {
   nodeName?: string;
   nodeId?: string;
   clusterUuid: string;
-  ccs?: string;
+  ccs?: string | null;
   shouldFire?: boolean;
   severity: AlertSeverity;
   meta: any;

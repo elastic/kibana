@@ -8,18 +8,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchClusterHealth } from './fetch_cluster_health';
-
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
-        },
-      },
-    },
-  },
-}));
 import { Globals } from '../../static_globals';
 
 const getConfig = (ccsEnabled: boolean) =>
