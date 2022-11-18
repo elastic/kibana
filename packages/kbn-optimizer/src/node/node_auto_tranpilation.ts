@@ -61,6 +61,10 @@ const IGNORE_PATTERNS = [
   // root `src` directory, in any test or __tests__ directory, or it
   // ends with .test.js, .test.ts, or .test.tsx
   /[\/\\]packages[\/\\](eslint-|kbn-)[^\/\\]+[\/\\](?!src[\/\\].*|(.+[\/\\])?(test|__tests__)[\/\\].+|.+\.test\.(js|ts|tsx)$)(.+$)/,
+
+  // ignore any code in a .storybook directory, storybook loads ts-node (which is currently being installed by synthetics)
+  // https://github.com/elastic/synthetics/issues/654
+  /[\/\\]\.storybook[\/\\]/,
 ];
 
 function getBabelOptions(path: string) {
