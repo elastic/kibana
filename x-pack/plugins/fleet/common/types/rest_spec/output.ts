@@ -70,6 +70,7 @@ export interface PostOutputRequest {
       certificate?: string;
       key?: string;
     };
+    proxy_id?: string | null;
     disk_queue_enabled?: boolean;
     disk_queue_path?: string;
     disk_queue_max_size?: number;

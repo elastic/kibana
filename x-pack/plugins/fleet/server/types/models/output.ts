@@ -54,6 +54,7 @@ const OutputBaseSchema = {
       key: schema.maybe(schema.string()),
     })
   ),
+  proxy_id: schema.nullable(schema.string()),
   disk_queue_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
   disk_queue_path: schema.maybe(schema.string()),
   disk_queue_max_size: schema.maybe(schema.number()),
@@ -88,6 +89,7 @@ export const UpdateOutputSchema = schema.object({
       key: schema.maybe(schema.string()),
     })
   ),
+  proxy_id: schema.nullable(schema.string()),
   disk_queue_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
   disk_queue_path: schema.maybe(schema.string()),
   disk_queue_max_size: schema.maybe(schema.number()),

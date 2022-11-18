@@ -55,6 +55,7 @@ export interface OutputFormInputsType {
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+  proxyIdInput: ReturnType<typeof useInput>;
   loadBalanceEnabledInput: ReturnType<typeof useSwitchInput>;
   memQueueSize: ReturnType<typeof useNumberInput>;
   queueFlushTimeout: ReturnType<typeof useNumberInput>;
@@ -184,6 +185,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isPreconfigured
   );
 
+  const proxyIdInput = useInput(output?.proxy_id ?? '', () => undefined, isPreconfigured);
+
   const sslKeyInput = useInput(output?.ssl?.key ?? '', validateSSLKey, isPreconfigured);
 
   const isLogstash = typeInput.value === 'logstash';
@@ -206,6 +209,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     sslCertificateInput,
     sslKeyInput,
     sslCertificateAuthoritiesInput,
+    proxyIdInput,
     loadBalanceEnabledInput,
     memQueueSize,
     queueFlushTimeout,
@@ -285,6 +289,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         };
       }
 
+      const proxyIdValue = proxyIdInput.value !== '' ? proxyIdInput.value : null;
       const data: PostOutputRequest['body'] = isLogstash
         ? {
             name: nameInput.value,
@@ -300,6 +305,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                 (val) => val !== ''
               ),
             },
+            proxy_id: proxyIdValue,
           }
         : {
             name: nameInput.value,
@@ -309,6 +315,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
             is_default_monitoring: defaultMonitoringOutputInput.value,
             config_yaml: additionalYamlConfigInput.value,
             ca_trusted_fingerprint: caTrustedFingerprintInput.value,
+            proxy_id: proxyIdValue,
             ...shipperParams,
           };
 
@@ -356,8 +363,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     sslCertificateAuthoritiesInput.value,
     elasticsearchUrlInput.value,
     caTrustedFingerprintInput.value,
-    output,
+    proxyIdInput.value,
+    notifications.toasts,
     onSucess,
+    output,
     diskQueueEnabledInput.value,
     diskQueuePathInput.value,
     diskQueueMaxSizeInput.value,
@@ -369,7 +378,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     queueFlushTimeout.value,
     maxBatchSize.value,
     confirm,
-    notifications.toasts,
   ]);
 
   return {

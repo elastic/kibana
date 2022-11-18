@@ -37,7 +37,7 @@ export const cloudPostureIntegrations = {
       {
         type: CLOUDBEAT_VANILLA,
         name: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.nameTitle', {
-          defaultMessage: 'Unmanaged Kubernetes',
+          defaultMessage: 'Self-Managed/Vanilla Kubernetes',
         }),
         benchmark: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.benchmarkTitle', {
           defaultMessage: 'CIS Kubernetes',
