@@ -310,7 +310,11 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, ruleToDuplicate);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.duplicate })
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: false },
+        })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -352,7 +356,11 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.duplicate })
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: false },
+        })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });

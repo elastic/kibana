@@ -19,6 +19,9 @@ import {
 export const IMAGE_WIDTH = 360;
 export const IMAGE_HEIGHT = 203;
 
+export const IMAGE_WIDTH_M = 200;
+export const IMAGE_HEIGHT_M = 114;
+
 export const imageStyle = css`
   padding: 0;
   margin: auto;
@@ -31,16 +34,11 @@ export const imageStyle = css`
   justify-content: center;
 `;
 
-export const EmptyImage = ({
-  isLoading = false,
-  width = IMAGE_WIDTH,
-  height = IMAGE_HEIGHT,
-}: {
-  isLoading: boolean;
-  width?: number;
-  height?: number;
-}) => {
+export const EmptyImage = ({ size, isLoading = false }: { isLoading: boolean; size?: 'm' }) => {
   const { euiTheme } = useEuiTheme();
+
+  const imgWidth = size === 'm' ? IMAGE_WIDTH_M : IMAGE_WIDTH;
+  const imgHeight = size === 'm' ? IMAGE_HEIGHT_M : IMAGE_HEIGHT;
 
   return (
     <div
@@ -50,8 +48,8 @@ export const EmptyImage = ({
       title={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : SCREENSHOT_NOT_AVAILABLE}
       css={css`
         ${imageStyle};
-        width: ${width}px;
-        height: ${height}px;
+        width: ${imgWidth}px;
+        height: ${imgHeight}px;
         background: ${useEuiBackgroundColor('subdued')};
         border: ${euiTheme.border.thin};
       `}

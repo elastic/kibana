@@ -8,16 +8,19 @@
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
-import { ES_SEARCH_LIMIT } from '../../../common/constants';
 import {
-  FILE_STORAGE_DATA_INDEX,
-  FILE_STORAGE_METADATA_INDEX,
-} from '../../constants/fleet_es_assets';
+  FILE_STORAGE_DATA_INDEX_PATTERN,
+  FILE_STORAGE_METADATA_INDEX_PATTERN,
+} from '../../../common/constants/file_storage';
+
+import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common/services';
+
+import { ES_SEARCH_LIMIT } from '../../../common/constants';
 
 import { fileIdsWithoutChunksByIndex, getFilesByStatus, updateFilesStatus } from '.';
 
-const ENDPOINT_FILE_METADATA_INDEX = '.fleet-endpoint-files';
-const ENDPOINT_FILE_INDEX = '.fleet-endpoint-file-data';
+const ENDPOINT_FILE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
+const ENDPOINT_FILE_INDEX = getFileDataIndexName('endpoint');
 
 describe('files service', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -61,12 +64,12 @@ describe('files service', () => {
 
       expect(esClientMock.search).toBeCalledWith(
         {
-          index: FILE_STORAGE_METADATA_INDEX,
+          index: FILE_STORAGE_METADATA_INDEX_PATTERN,
           body: {
             size: ES_SEARCH_LIMIT,
             query: {
               term: {
-                'file.Status.keyword': status,
+                'file.Status': status,
               },
             },
             _source: false,
@@ -124,7 +127,7 @@ describe('files service', () => {
 
       expect(esClientMock.search).toBeCalledWith(
         {
-          index: FILE_STORAGE_DATA_INDEX,
+          index: FILE_STORAGE_DATA_INDEX_PATTERN,
           body: {
             size: ES_SEARCH_LIMIT,
             query: {
@@ -132,7 +135,7 @@ describe('files service', () => {
                 must: [
                   {
                     terms: {
-                      'bid.keyword': Array.from(files.map((file) => file._id)),
+                      bid: Array.from(files.map((file) => file._id)),
                     },
                   },
                   {
@@ -157,7 +160,7 @@ describe('files service', () => {
 
   describe('#updateFilesStatus()', () => {
     it('calls esClient.updateByQuery with expected values', () => {
-      const FAKE_INTEGRATION_METADATA_INDEX = '.fleet-someintegration-files';
+      const FAKE_INTEGRATION_METADATA_INDEX = getFileMetadataIndexName('someintegration');
       const files = {
         [ENDPOINT_FILE_METADATA_INDEX]: new Set(['delete1', 'delete2']),
         [FAKE_INTEGRATION_METADATA_INDEX]: new Set(['delete2', 'delete3']),

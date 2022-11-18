@@ -7,7 +7,7 @@
  */
 
 import _, { get } from 'lodash';
-import { Subscription } from 'rxjs';
+import { Subscription, ReplaySubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
@@ -126,6 +126,9 @@ export class VisualizeEmbeddable
     VisualizeByValueInput,
     VisualizeByReferenceInput
   >;
+  private readonly expressionVariablesSubject = new ReplaySubject<
+    Record<string, unknown> | undefined
+  >(1);
 
   constructor(
     timefilter: TimefilterContract,
@@ -581,6 +584,13 @@ export class VisualizeEmbeddable
   private async updateHandler() {
     const context = this.getExecutionContext();
 
+    const expressionVariables = await this.vis.type.getExpressionVariables?.(
+      this.vis,
+      this.timefilter
+    );
+
+    this.expressionVariablesSubject.next(expressionVariables);
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
@@ -590,7 +600,7 @@ export class VisualizeEmbeddable
       },
       variables: {
         embeddableTitle: this.getTitle(),
-        ...(await this.vis.type.getExpressionVariables?.(this.vis, this.timefilter)),
+        ...expressionVariables,
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
@@ -635,6 +645,10 @@ export class VisualizeEmbeddable
 
   public supportedTriggers(): string[] {
     return this.vis.type.getSupportedTriggers?.(this.vis.params) ?? [];
+  }
+
+  public getExpressionVariables$() {
+    return this.expressionVariablesSubject.asObservable();
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {
