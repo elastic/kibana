@@ -341,6 +341,12 @@ describe('action_form', () => {
         setActionParamsProperty={(key: string, value: any, index: number) =>
           (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
         }
+        setActionFrequencyProperty={(key: string, value: any, index: number) =>
+          (initialAlert.actions[index] = {
+            ...initialAlert.actions[index],
+            frequency: { ...initialAlert.actions[index].frequency!, [key]: value },
+          })
+        }
         actionTypeRegistry={actionTypeRegistry}
         setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
       />
