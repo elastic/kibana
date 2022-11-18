@@ -2644,10 +2644,6 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
-            },
-            {
-              "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
             },
             {
