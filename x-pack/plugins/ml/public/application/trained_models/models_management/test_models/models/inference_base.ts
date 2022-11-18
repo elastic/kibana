@@ -88,7 +88,7 @@ export abstract class InferenceBase<TInferResponse> {
 
   protected initialize(
     additionalValidators?: Array<Observable<boolean>>,
-    additionalChanges?: Array<Observable<any>>
+    additionalChanges?: Array<Observable<string | boolean>>
   ) {
     this.initializeValidators(additionalValidators);
     this.initializePipeline(additionalChanges);
