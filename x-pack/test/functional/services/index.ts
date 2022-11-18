@@ -70,6 +70,7 @@ import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
 // import { CompareImagesProvider } from './compare_images';
 import { CasesServiceProvider } from './cases';
+import { ActionsServiceProvider } from './actions';
 import { AiopsProvider } from './aiops';
 import { SampleDataServiceProvider } from './sample_data';
 
@@ -131,6 +132,7 @@ export const services = {
   searchSessions: SearchSessionsService,
   observability: ObservabilityProvider,
   // compareImages: CompareImagesProvider,
+  actions: ActionsServiceProvider,
   cases: CasesServiceProvider,
   aiops: AiopsProvider,
   sampleData: SampleDataServiceProvider,
