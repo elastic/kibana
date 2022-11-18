@@ -55,7 +55,7 @@ export const jobManagementPreRouting = async (
   counters.usageCounter();
 
   try {
-    return cb(doc);
+    return await cb(doc);
   } catch (err) {
     const { logger } = reporting.getPluginSetupDeps();
     logger.error(err);
