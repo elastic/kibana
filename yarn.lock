@@ -3453,6 +3453,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-test-helpers-kbn-server@link:bazel-bin/packages/core/test-helpers/core-test-helpers-kbn-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-test-helpers-so-type-serializer@link:bazel-bin/packages/core/test-helpers/core-test-helpers-so-type-serializer":
   version "0.0.0"
   uid ""
