@@ -13,7 +13,7 @@ The IBM Resilient connector uses the https://developer.ibm.com/security/resilien
 
 IBM Resilient connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
+Name::      The name of the connector.
 URL::       IBM Resilient instance URL.
 Organization ID:: IBM Resilient organization ID.
 API key ID::  The authentication key ID for HTTP Basic authentication.
@@ -54,7 +54,7 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[define-resilient-ui]]
-==== Define connector in Stack Management
+==== Define connector in {stack-manage-app}
 
 Define IBM Resilient connector properties.
 

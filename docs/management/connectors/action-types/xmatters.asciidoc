@@ -12,7 +12,7 @@ The xMatters connector uses the https://help.xmatters.com/integrations/#cshid=El
 
 xMatters connectors have the following configuration properties:
 
-Name:: The name of the connector. The name is used to identify a connector in the management UI connector listing, or in the connector list when configuring an action.
+Name:: The name of the connector.
 Authentication Type:: The type of authentication used in the request made to xMatters.
 URL:: The request URL for the Elastic Alerts trigger in xMatters. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 Username:: Username for HTTP Basic Authentication.
@@ -22,7 +22,7 @@ Password:: Password for HTTP Basic Authentication.
 [[xmatters-connector-networking-configuration]]
 ==== Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the <<action-settings,Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[Preconfigured-xmatters-configuration]]
@@ -70,7 +70,7 @@ Secrets defines sensitive information for the connector type:
 
 [float]
 [[define-xmatters-ui]]
-==== Define connector in Stack Management
+==== Define connector in {stack-manage-app}
 
 Define xMatters connector properties. Choose between basic and URL authentication for the requests:
 

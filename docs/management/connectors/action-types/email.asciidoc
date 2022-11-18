@@ -170,7 +170,7 @@ A string that corresponds to *Client Secret*. Should be stored in the
 
 [float]
 [[define-email-ui]]
-==== Define connector in Stack Management
+==== Define connector in {stack-manage-app}
 
 Define email connector properties.
 

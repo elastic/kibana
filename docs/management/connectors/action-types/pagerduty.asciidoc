@@ -48,7 +48,7 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[define-pagerduty-ui]]
-==== Define connector in Stack Management
+==== Define connector in {stack-manage-app}
 
 Define PagerDuty connector properties.
 
@@ -128,20 +128,20 @@ image::images/pagerduty-integration.png[PagerDuty Integrations tab]
 [[pagerduty-in-elastic]]
 *In Elastic*
 
-. Create a PagerDuty Connector in Kibana.  You can:
+. Create a PagerDuty connector in Kibana.  You can:
 +
 * Create a connector as part of creating an rule by selecting PagerDuty in the *Actions*
 section of the rule configuration and selecting *Add new*.
-* Alternatively, create a connector. To create a connector, open the main menu, click *Stack Management > Rules and Connectors*, select *Connectors*, click *Create connector*, then select the PagerDuty option.
+* Alternatively, create a connector. To create a connector, go to *{stack-manage-app} > {connectors-ui}*, click *Create connector*, then select the PagerDuty option.
 
 . Configure the connector by giving it a name and entering the Integration Key, optionally entering a custom API URL.
 +
-See <<pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and key information from PagerDuty and
-<<pagerduty-connector-configuration, Connector configuration>> for more details.
+See <<pagerduty-in-pagerduty,In PagerDuty>> for how to obtain the endpoint and key information from PagerDuty and
+<<pagerduty-connector-configuration,Connector configuration>> for more details.
 
-. Save the Connector.
+. Save the connector.
 
-. To create a rule, open the main menu, then click *Stack Management > Rules and Connectors* or the application of your choice.
+. To create a rule, go to *{stack-manage-app} > {rules-ui}* or the application of your choice.
 
 . Set up an action using your PagerDuty connector, by determining:
 +
@@ -151,5 +151,5 @@ See <<pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and 
 Depending on your custom needs, assign them variables from the rule context.
 To see the available context variables, click on the *Add variable* icon next
 to each corresponding field. For more details on these parameters, see the
-<<pagerduty-action-configuration, Actions Configuration>> and the PagerDuty
+<<pagerduty-action-configuration,Actions configuration>> and the PagerDuty
 https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[API v2 documentation].

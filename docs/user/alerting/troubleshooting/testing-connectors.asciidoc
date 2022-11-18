@@ -3,11 +3,11 @@
 === Test connectors
 
 
-In *{stack-manage-app} > {rules-ui}*, you can test a newly created connector by navigating to the Test tab of Connector Edit flyout or by clicking "Save & test" button on Create flyout:
+In *{stack-manage-app} > {connectors-ui}*, you can test a newly created connector by navigating to the Test tab of Connector Edit flyout or by clicking "Save & test" button on Create flyout:
 [role="screenshot"]
 image::user/alerting/images/connector-save-and-test.png[Rule management page with the errors banner]
 
-or by directly opening the proper connector Edit flyout:
+or by directly opening the proper connector edit flyout:
 [role="screenshot"]
 image::user/alerting/images/email-connector-test.png[Rule management page with the errors banner]
 
