@@ -1042,7 +1042,7 @@ describe.skip('rules_list component with props', () => {
   });
 });
 
-describe.skip('rules_list component with items', () => {
+describe('rules_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(editable: boolean = true) {
