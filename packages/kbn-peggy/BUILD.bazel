@@ -2,22 +2,18 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-es-query"
-PKG_REQUIRE_NAME = "@kbn/es-query"
+PKG_DIRNAME = "kbn-peggy"
+PKG_REQUIRE_NAME = "@kbn/peggy"
 
 SOURCE_FILES = glob(
   [
     "**/*.ts",
-    "**/grammar.config.json",
-    "**/grammar.peggy",
   ],
   exclude = [
     "**/*.config.js",
     "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
-    "**/__fixtures__/**",
-    "**/__mocks__/**",
     "**/__snapshots__/**",
     "**/integration_tests/**",
     "**/mocks/**",
@@ -37,49 +33,41 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md",
 ]
 
+# In this array place runtime dependencies, including other packages and NPM packages
+# which must be available for this code to run.
+#
+#  To reference other packages use:
+#    "//repo/relative/path/to/package"
+#    eg. "//packages/kbn-utils"
+#
+#  To reference a NPM package use:
+#    "@npm//name-of-package"
+#    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "//packages/kbn-utility-types",
-  "//packages/kbn-i18n",
-  "@npm//@elastic/elasticsearch",
-  "@npm//load-json-file",
-  "@npm//lodash",
-  "@npm//moment-timezone",
+  "@npm//peggy",
 ]
 
+# In this array place dependencies necessary to build the types, which will include the
+# :npm_module_types target of other packages and packages from NPM, including @types/*
+# packages.
+#
+#  To reference the types for another package use:
+#    "//repo/relative/path/to/package:npm_module_types"
+#    eg. "//packages/kbn-utils:npm_module_types"
+#
+#  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "//packages/kbn-utility-types:npm_module_types",
-  "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-ambient-common-types:npm_module_types",
-  "@npm//@elastic/elasticsearch",
-  "@npm//tslib",
-  "@npm//@types/jest",
-  "@npm//@types/lodash",
-  "@npm//moment-timezone",
   "@npm//@types/node",
+  "@npm//@types/jest",
+  "@npm//peggy",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  additional_args = [
-    "--copy-files",
-    "--quiet"
-  ],
-)
-
-jsts_transpiler(
-  name = "target_web",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-  web = True,
-  additional_args = [
-    "--copy-files",
-    "--quiet"
-  ],
 )
 
 ts_config(
@@ -105,7 +93,7 @@ ts_project(
 js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -113,7 +101,7 @@ js_library(
 js_library(
   name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -125,14 +113,12 @@ pkg_npm(
 
 filegroup(
   name = "build",
-  srcs = [
-    ":npm_module",
-  ],
+  srcs = [":npm_module"],
   visibility = ["//visibility:public"],
 )
 
-pkg_npm(
+filegroup(
   name = "build_types",
-  deps = [":npm_module_types"],
+  srcs = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-declare module '*/grammar/built_grammar.js' {
-  export const parse: any;
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-peggy-loader'],
+};

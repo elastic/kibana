@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { parse } from './grammar.peggy';
+import { peggyTransform } from './peggy';
+import { babelTransform } from './babel';
+
+export const TRANSFORMS = {
+  '.peggy': peggyTransform,
+  default: babelTransform,
+};

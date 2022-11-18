@@ -57,6 +57,10 @@ module.exports = {
         ],
       },
       {
+        test: /\.peggy$/,
+        use: ['@kbn/peggy-loader'],
+      },
+      {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },

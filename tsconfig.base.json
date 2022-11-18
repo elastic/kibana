@@ -376,6 +376,8 @@
       "@kbn/ace/*": ["packages/kbn-ace/*"],
       "@kbn/alerts": ["packages/kbn-alerts"],
       "@kbn/alerts/*": ["packages/kbn-alerts/*"],
+      "@kbn/ambient-common-types": ["packages/kbn-ambient-common-types"],
+      "@kbn/ambient-common-types/*": ["packages/kbn-ambient-common-types/*"],
       "@kbn/ambient-storybook-types": ["packages/kbn-ambient-storybook-types"],
       "@kbn/ambient-storybook-types/*": ["packages/kbn-ambient-storybook-types/*"],
       "@kbn/ambient-ui-types": ["packages/kbn-ambient-ui-types"],
@@ -518,6 +520,10 @@
       "@kbn/optimizer-webpack-helpers/*": ["packages/kbn-optimizer-webpack-helpers/*"],
       "@kbn/osquery-io-ts-types": ["packages/kbn-osquery-io-ts-types"],
       "@kbn/osquery-io-ts-types/*": ["packages/kbn-osquery-io-ts-types/*"],
+      "@kbn/peggy": ["packages/kbn-peggy"],
+      "@kbn/peggy/*": ["packages/kbn-peggy/*"],
+      "@kbn/peggy-loader": ["packages/kbn-peggy-loader"],
+      "@kbn/peggy-loader/*": ["packages/kbn-peggy-loader/*"],
       "@kbn/performance-testing-dataset-extractor": ["packages/kbn-performance-testing-dataset-extractor"],
       "@kbn/performance-testing-dataset-extractor/*": ["packages/kbn-performance-testing-dataset-extractor/*"],
       "@kbn/plugin-discovery": ["packages/kbn-plugin-discovery"],
@@ -1274,6 +1280,7 @@
       "@testing-library/jest-dom",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
+      "@kbn/ambient-common-types",
       "@kbn/ambient-storybook-types"
     ]
   },

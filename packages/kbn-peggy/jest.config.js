@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { parse } from './grammar.peggy';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-peggy'],
+};

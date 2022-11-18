@@ -10,7 +10,7 @@ import Fs from 'fs';
 import Fsp from 'fs/promises';
 import Path from 'path';
 
-import { asyncMap, asyncForEach } from '@kbn/std';
+import { asyncForEach } from '@kbn/std';
 
 import { assertAbsolute, mkdirp } from './fs';
 
@@ -35,6 +35,10 @@ interface Options {
    * Date to use for atime/mtime
    */
   time?: Date;
+  /**
+   *
+   */
+  map?: (path: string) => Promise<undefined | { source: string | Buffer; filename?: string }>;
 }
 
 class Record {
@@ -58,41 +62,60 @@ export async function scanCopy(options: Options) {
 
   // create or copy each child of a directory
   const copyChildren = async (parent: Record) => {
-    const names = await Fsp.readdir(parent.absolute);
-
-    const records = await asyncMap(names, async (name) => {
-      const absolute = Path.join(parent.absolute, name);
-      const stat = await Fsp.stat(absolute);
-      return new Record(stat.isDirectory(), name, absolute, Path.join(parent.absoluteDest, name));
+    const children = await Fsp.readdir(parent.absolute, {
+      withFileTypes: true,
     });
 
-    await asyncForEach(records, async (rec) => {
-      if (filter && !filter(rec)) {
-        return;
-      }
+    await asyncForEach(
+      children.map((child) => {
+        return new Record(
+          child.isDirectory(),
+          child.name,
+          Path.join(parent.absolute, child.name),
+          Path.join(parent.absoluteDest, child.name)
+        );
+      }),
+      async (rec) => {
+        if (filter && !filter(rec)) {
+          return;
+        }
 
-      if (rec.isDirectory) {
-        await Fsp.mkdir(rec.absoluteDest, {
-          mode: permissions ? permissions(rec) : undefined,
-        });
-      } else {
-        await Fsp.copyFile(rec.absolute, rec.absoluteDest, Fs.constants.COPYFILE_EXCL);
-        if (permissions) {
-          const perm = permissions(rec);
-          if (perm !== undefined) {
-            await Fsp.chmod(rec.absoluteDest, perm);
+        if (rec.isDirectory) {
+          await Fsp.mkdir(rec.absoluteDest, {
+            mode: permissions ? permissions(rec) : undefined,
+          });
+        } else {
+          const mapped = options.map ? await options.map(rec.absolute) : undefined;
+
+          if (mapped === undefined) {
+            await Fsp.copyFile(rec.absolute, rec.absoluteDest, Fs.constants.COPYFILE_EXCL);
+          } else {
+            if (mapped.filename) {
+              rec.absoluteDest = Path.resolve(Path.dirname(rec.absoluteDest), mapped.filename);
+            }
+
+            await Fsp.writeFile(rec.absoluteDest, mapped.source, {
+              flag: 'wx',
+            });
+          }
+
+          if (permissions) {
+            const perm = permissions(rec);
+            if (perm !== undefined) {
+              await Fsp.chmod(rec.absoluteDest, perm);
+            }
           }
         }
-      }
 
-      if (time) {
-        await Fsp.utimes(rec.absoluteDest, time, time);
-      }
+        if (time) {
+          await Fsp.utimes(rec.absoluteDest, time, time);
+        }
 
-      if (rec.isDirectory) {
-        await copyChildren(rec);
+        if (rec.isDirectory) {
+          await copyChildren(rec);
+        }
       }
-    });
+    );
   };
 
   await mkdirp(destination);

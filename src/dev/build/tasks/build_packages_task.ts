@@ -11,6 +11,7 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { runBazel } from '@kbn/bazel-runner';
+import * as Peggy from '@kbn/peggy';
 
 import { Task, scanCopy, write } from '../lib';
 
@@ -34,6 +35,23 @@ export const BuildBazelPackages: Task = {
         source: config.resolveFromRepo('bazel-bin', pkg.normalizedRepoRelativeDir, 'npm_module'),
         destination: pkgDirInBuild,
         permissions: (rec) => (rec.isDirectory ? 0o755 : 0o644),
+        async map(path) {
+          const extname = Path.extname(path);
+          if (extname !== '.peggy') {
+            return;
+          }
+
+          return {
+            filename: `${Path.basename(path)}.js`,
+            source: (
+              await Peggy.getJsSource({
+                path,
+                format: 'commonjs',
+                optimize: 'speed',
+              })
+            ).source,
+          };
+        },
       });
 
       await write(

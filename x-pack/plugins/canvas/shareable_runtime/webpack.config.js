@@ -187,6 +187,10 @@ module.exports = {
         ],
         use: require.resolve('null-loader'),
       },
+      {
+        test: /\.peggy$/,
+        use: require.resolve('@kbn/peggy-loader'),
+      },
     ],
   },
   node: {

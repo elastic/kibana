@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-declare module '*/grammar/built_grammar.js' {
-  export const parse: import('./parse').Parse;
-}
+import { Cache } from '../cache';
+
+export type Transform = (path: string, source: string, cache: Cache) => string;

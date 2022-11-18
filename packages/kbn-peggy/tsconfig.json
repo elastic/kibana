@@ -6,8 +6,7 @@
     "outDir": "target_types",
     "types": [
       "jest",
-      "node",
-      "@kbn/ambient-common-types"
+      "node"
     ]
   },
   "include": [
