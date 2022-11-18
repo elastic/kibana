@@ -23,7 +23,7 @@ interface DuplicateRuleParams {
   rule: SanitizedRule<RuleParams>;
 }
 
-export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<InternalRuleCreate> => {
+export const duplicateRule = ({ rule }: DuplicateRuleParams): InternalRuleCreate => {
   // Generate a new static ruleId
   const ruleId = uuid.v4();
 
