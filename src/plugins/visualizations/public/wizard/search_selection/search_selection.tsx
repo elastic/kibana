@@ -26,7 +26,7 @@ interface SearchSelectionProps {
 }
 interface SavedSearchesAttributes extends SavedObjectAttributes {
   isTextBasedQuery: boolean;
-  isOfAdHocDataView: boolean;
+  isOfAdHocDataView?: boolean;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps> {

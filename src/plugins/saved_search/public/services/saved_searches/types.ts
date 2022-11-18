@@ -33,7 +33,7 @@ export interface SavedSearchAttributes {
   };
   hideChart: boolean;
   isTextBasedQuery: boolean;
-  isOfAdHocDataView: boolean;
+  isOfAdHocDataView?: boolean;
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };

@@ -50,7 +50,7 @@ describe('saved_searches_utils', () => {
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
-          "isOfAdHocDataView": undefined,
+          "isOfAdHocDataView": false,
           "isTextBasedQuery": false,
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -123,6 +123,7 @@ describe('saved_searches_utils', () => {
         grid: {},
         hideChart: true,
         isTextBasedQuery: true,
+        isOfAdHocDataView: false,
       };
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`

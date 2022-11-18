@@ -67,7 +67,7 @@ export const toSavedSearchAttributes = (
   hideAggregatedPreview: savedSearch.hideAggregatedPreview,
   rowHeight: savedSearch.rowHeight,
   isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
-  isOfAdHocDataView: savedSearch.isOfAdHocDataView ?? false,
+  isOfAdHocDataView: savedSearch.isOfAdHocDataView,
   timeRestore: savedSearch.timeRestore ?? false,
   timeRange: savedSearch.timeRange,
   refreshInterval: savedSearch.refreshInterval,
