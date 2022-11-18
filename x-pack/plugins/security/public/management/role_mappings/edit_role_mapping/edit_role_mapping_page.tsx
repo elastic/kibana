@@ -12,8 +12,8 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiLink,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { Component } from 'react';
@@ -101,9 +101,9 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
     if (loadState === 'loading') {
       return (
-        <EuiPageContent horizontalPosition="center" verticalPosition="center" color="subdued">
+        <EuiPageSection alignment="center" color="subdued">
           <SectionLoading />
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 

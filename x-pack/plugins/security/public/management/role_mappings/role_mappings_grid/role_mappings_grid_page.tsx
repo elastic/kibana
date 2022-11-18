@@ -13,8 +13,8 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
@@ -101,14 +101,14 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
     if (loadState === 'loadingApp') {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiPageSection alignment="center" grow={true} color="subdued">
           <SectionLoading>
             <FormattedMessage
               id="xpack.security.management.roleMappings.loadingRoleMappingsDescription"
               defaultMessage="Loading role mappings…"
             />
           </SectionLoading>
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 
@@ -118,7 +118,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       } = error;
 
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiPageSection alignment="center" color="danger">
           <EuiCallOut
             title={
               <FormattedMessage
@@ -131,15 +131,15 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           >
             {statusCode}: {errorTitle} - {message}
           </EuiCallOut>
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 
     if (loadState === 'finished' && roleMappings && roleMappings.length === 0) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiPageSection alignment="center" color="subdued">
           <EmptyPrompt history={this.props.history} readOnly={this.props.readOnly} />
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 
