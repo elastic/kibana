@@ -13,10 +13,12 @@ import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+// import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '@kbn/core-root-server-internal';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { getMigrationDocLink } from './test_utils';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { createTestServers as createkbnServerTestServers } from '@kbn/core-test-helpers-kbn-server';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures.log');
@@ -29,7 +31,7 @@ async function removeLogFile() {
 }
 
 describe('migration v2', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
 
   beforeAll(async () => {
@@ -148,7 +150,7 @@ describe('migration v2', () => {
 });
 
 function createTestServers() {
-  return kbnTestServer.createTestServers({
+  return createkbnServerTestServers({
     adjustTimeout: (t: number) => jest.setTimeout(t),
     settings: {
       es: {
@@ -186,7 +188,7 @@ function createTestServers() {
 }
 
 function createRoot(discardCorruptObjects?: string) {
-  return kbnTestServer.createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       migrations: {
         skip: false,
