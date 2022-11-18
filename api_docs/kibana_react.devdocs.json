@@ -3625,20 +3625,7 @@
         "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {

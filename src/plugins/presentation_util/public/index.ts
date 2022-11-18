@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110893
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { PresentationUtilPlugin } from './plugin';
 import { pluginServices } from './services';
@@ -18,7 +15,6 @@ export type {
   PresentationDashboardsService,
   PresentationLabsService,
 } from './services';
-export { getStubPluginServices } from './services';
 
 export type {
   KibanaPluginServiceFactory,
@@ -30,9 +26,6 @@ export { PluginServices, PluginServiceProvider, PluginServiceRegistry } from './
 
 export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
 export type { SaveModalDashboardProps } from './components/types';
-export type { ProjectID, Project } from '../common/labs';
-export { projectIDs } from '../common/labs';
-export * from '../common/lib';
 
 export {
   LazyExpressionInput,
@@ -54,7 +47,11 @@ export {
   type ReduxEmbeddablePackage,
 } from './redux_embeddables';
 
-export * from './components/types';
+export type {
+  ExpressionInputEditorRef,
+  ExpressionInputProps,
+  OnExpressionInputEditorDidMount,
+} from './components/types';
 
 /** @deprecated QuickButtonProps - use `IconButtonGroupProps` from `@kbn/shared-ux-button-toolbar` */
 export type { QuickButtonProps } from './components/solution_toolbar';
