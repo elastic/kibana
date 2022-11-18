@@ -58,7 +58,7 @@ export const RULE_FROM_TIMELINE_ERROR_TITLE = i18n.translate(
   }
 );
 
-export const FROM_TIMELINE_ERROR_ACTION = i18n.translate(
+export const RULE_FROM_TIMELINE_ERROR_ACTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.fromTimelineErrorAction',
   {
     defaultMessage: "update the timeline's data view",

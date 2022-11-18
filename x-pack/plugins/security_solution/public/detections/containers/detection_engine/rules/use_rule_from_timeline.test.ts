@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useRuleFromTimelineId } from './use_rule_from_timeline_id';
+import { initialState, useRuleFromTimeline } from './use_rule_from_timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
 import { resolveTimeline } from '../../../../timelines/containers/api';
@@ -42,11 +42,7 @@ jest.mock('../../../../common/hooks/use_selector');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../timelines/containers/api');
 
-const defaults = {
-  index: ['auditbeat-*'],
-  queryBar: { query: { query: '', language: '' }, filters: [], saved_id: null },
-};
-const fromTimeline = {
+const selectedTimeline = {
   data: {
     timeline: {
       ...mockTimeline,
@@ -91,7 +87,8 @@ const fromTimeline = {
     },
   },
 };
-describe('useRuleFromTimelineId', () => {
+
+describe('useRuleFromTimeline', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
@@ -112,28 +109,28 @@ describe('useRuleFromTimelineId', () => {
     (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
       decodedParam: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
     }));
-    (resolveTimeline as jest.Mock).mockResolvedValue(fromTimeline);
+    (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
   });
 
   it('if no from timeline id, updated: false and loading: false', async () => {
     (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
       decodedParam: undefined,
     }));
-    const { result } = renderHook(() => useRuleFromTimelineId(defaults));
+    const { result } = renderHook(() => useRuleFromTimeline());
 
     const { onOpenTimeline, ...hookData } = result.current;
     expect(hookData).toEqual({
-      ...defaults,
+      ...initialState,
       updated: false,
       loading: false,
     });
   });
 
   it('if from timeline id, updated: false and loading: true', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimelineId(defaults));
+    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline());
     const { onOpenTimeline, ...hookData } = result.current;
     expect(hookData).toEqual({
-      ...defaults,
+      ...initialState,
       updated: false,
       loading: true,
     });
@@ -141,7 +138,7 @@ describe('useRuleFromTimelineId', () => {
   });
 
   it('if from timeline id, set active timeline data view to from timeline data view', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimelineId(defaults));
+    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline());
     await waitForNextUpdate();
     expect(mockDispatch).toHaveBeenCalledTimes(3);
     expect(mockDispatch).toHaveBeenNthCalledWith(1, {
@@ -156,8 +153,8 @@ describe('useRuleFromTimelineId', () => {
       type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
       payload: {
         id: 'timeline',
-        selectedDataViewId: fromTimeline.data.timeline.dataViewId,
-        selectedPatterns: fromTimeline.data.timeline.indexNames,
+        selectedDataViewId: selectedTimeline.data.timeline.dataViewId,
+        selectedPatterns: selectedTimeline.data.timeline.indexNames,
       },
     });
     expect(mockDispatch).toHaveBeenNthCalledWith(3, {
@@ -170,7 +167,7 @@ describe('useRuleFromTimelineId', () => {
 
     const { onOpenTimeline, ...hookData } = result.current;
     expect(hookData).toEqual({
-      ...defaults,
+      ...initialState,
       updated: false,
       loading: true,
     });
@@ -188,7 +185,7 @@ describe('useRuleFromTimelineId', () => {
         selectedPatterns: ['auditbeat-*'],
       },
     });
-    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimelineId(defaults));
+    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline());
     await waitForNextUpdate();
 
     const { onOpenTimeline, ...hookData } = result.current;

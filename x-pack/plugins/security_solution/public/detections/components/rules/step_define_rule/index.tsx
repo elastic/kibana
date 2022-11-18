@@ -27,7 +27,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useRuleFromTimelineId } from '../../../containers/detection_engine/rules/use_rule_from_timeline_id';
+import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -183,10 +183,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     },
   });
-  const { onOpenTimeline, ...ruleFromTimelineData } = useRuleFromTimelineId({
-    index: initialState.index,
-    queryBar: initialState.queryBar,
-  });
+  const { onOpenTimeline, ...ruleFromTimelineData } = useRuleFromTimeline();
 
   useEffect(() => {
     if (ruleFromTimelineData.updated) {
