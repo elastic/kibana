@@ -28,7 +28,6 @@ export interface DashboardViewportProps {
 
 export const DashboardViewport = ({ onDataLoaded }: DashboardViewportProps) => {
   const {
-    chrome,
     settings: { isProjectEnabledInLabs, uiSettings },
   } = pluginServices.getServices();
   const controlsRoot = useRef(null);
