@@ -66,12 +66,13 @@ jsts_transpiler(
 peggy(
   name = "grammar",
   data = [
+    ":grammar/grammar.config.json",
     ":grammar/grammar.peggy"
   ],
   output_dir = True,
   args = [
-    "--allowed-start-rules",
-    "expression,argument",
+    "--extra-options-file",
+    "./%s/grammar/grammar.config.json" % package_name(),
     "-o",
     "$(@D)/built_grammar.js",
     "./%s/grammar/grammar.peggy" % package_name()
