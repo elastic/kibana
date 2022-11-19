@@ -148,10 +148,12 @@ const SecretsSchema = schema.object(SecretsSchemaProps);
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
+const addressListSchema = schema.nullable(schema.arrayOf(schema.string()));
+
 const ParamsSchemaProps = {
-  to: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  to: addressListSchema,
+  cc: addressListSchema,
+  bcc: addressListSchema,
   subject: schema.string(),
   message: schema.string(),
   // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
@@ -174,7 +176,7 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
-  const { to, cc, bcc } = params;
+  const { to, cc, bcc } = getAddresses(params);
   const addrs = to.length + cc.length + bcc.length;
 
   if (addrs === 0) {
@@ -273,7 +275,9 @@ async function executor(
     execOptions;
   const connectorTokenClient = services.connectorTokenClient;
 
-  const emails = params.to.concat(params.cc).concat(params.bcc);
+  const { to, cc, bcc } = getAddresses(params);
+
+  const emails = to.concat(cc).concat(bcc);
   let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
   if (invalidEmailsMessage) {
     return { status: 'error', actionId, message: `[to/cc/bcc]: ${invalidEmailsMessage}` };
@@ -329,9 +333,9 @@ async function executor(
     transport,
     routing: {
       from: config.from,
-      to: params.to,
-      cc: params.cc,
-      bcc: params.bcc,
+      to,
+      cc,
+      bcc,
     },
     content: {
       subject: params.subject,
@@ -407,4 +411,14 @@ function getFooterMessage({
       link: `${publicBaseUrl}${kibanaFooterLink.path === '/' ? '' : kibanaFooterLink.path}`,
     },
   });
+}
+
+function getAddresses(params: ActionParamsType) {
+  let { to, cc, bcc } = params;
+
+  if (!to) to = [];
+  if (!cc) cc = [];
+  if (!bcc) bcc = [];
+
+  return { to, cc, bcc };
 }
