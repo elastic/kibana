@@ -661,7 +661,7 @@ describe('rules_list component with items', () => {
     jest.clearAllMocks();
   });
 
-  it('renders license errors and manage license modal on click', async () => {
+  it.skip('renders license errors and manage license modal on click', async () => {
     global.open = jest.fn();
     await setup();
     expect(wrapper.find('ManageLicenseModal').exists()).toBeFalsy();
@@ -683,7 +683,7 @@ describe('rules_list component with items', () => {
     expect(global.open).toHaveBeenCalled();
   });
 
-  it('sorts rules when clicking the name column', async () => {
+  it.skip('sorts rules when clicking the name column', async () => {
     await setup();
     wrapper
       .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
@@ -705,7 +705,7 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('sorts rules when clicking the status control column', async () => {
+  it.skip('sorts rules when clicking the status control column', async () => {
     await setup();
     wrapper
       .find('[data-test-subj="tableHeaderCell_enabled_10"] .euiTableHeaderButton')
@@ -727,13 +727,13 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('renders edit and delete buttons when user can manage rules', async () => {
+  it.skip('renders edit and delete buttons when user can manage rules', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="ruleSidebarEditAction"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="ruleSidebarDeleteAction"]').exists()).toBeTruthy();
   });
 
-  it('does not render edit and delete button when rule type does not allow editing in rules management', async () => {
+  it.skip('does not render edit and delete button when rule type does not allow editing in rules management', async () => {
     await setup(false);
     expect(wrapper.find('[data-test-subj="ruleSidebarEditAction"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="ruleSidebarDeleteAction"]').exists()).toBeTruthy();
