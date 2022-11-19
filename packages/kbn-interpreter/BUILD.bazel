@@ -9,7 +9,7 @@ SOURCE_FILES = glob(
   [
     "**/*.ts",
     "**/*.js",
-    "**/grammar.config.json",
+    "**/grammar.peggy.config.json",
     "**/grammar.peggy",
   ],
   exclude = [

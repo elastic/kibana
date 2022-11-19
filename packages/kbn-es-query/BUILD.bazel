@@ -8,7 +8,7 @@ PKG_REQUIRE_NAME = "@kbn/es-query"
 SOURCE_FILES = glob(
   [
     "**/*.ts",
-    "**/grammar.config.json",
+    "**/grammar.peggy.config.json",
     "**/grammar.peggy",
   ],
   exclude = [

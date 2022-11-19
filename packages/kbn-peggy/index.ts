@@ -65,15 +65,7 @@ export interface Result {
 }
 
 export function findConfigFile(grammarPath: string): Config | undefined {
-  const extname = Path.extname(grammarPath);
-  if (extname !== '.peggy') {
-    throw new Error(`unexpected extension [${extname}], expected ".peggy"`);
-  }
-
-  const path = Path.resolve(
-    Path.dirname(grammarPath),
-    `${Path.basename(grammarPath, extname)}.config.json`
-  );
+  const path = Path.resolve(Path.dirname(grammarPath), `${Path.basename(grammarPath)}.config.json`);
 
   let source;
   let parsed;
