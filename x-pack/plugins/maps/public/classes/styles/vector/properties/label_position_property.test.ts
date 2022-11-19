@@ -118,7 +118,7 @@ describe('syncLabelPositionWithMb', () => {
       });
     });
 
-    test('should set top layout values for static icon size', () => {
+    test('should set layout values for static icon size', () => {
       const labelPosition = new LabelPositionProperty(
         options,
         VECTOR_STYLES.LABEL_POSITION,
@@ -137,7 +137,59 @@ describe('syncLabelPositionWithMb', () => {
       });
     });
 
-    test('should set top layout values for dynamic icon size', () => {
+    test('should set layout values when symbolized as icon with center anchor', () => {
+      const labelPosition = new LabelPositionProperty(
+        options,
+        VECTOR_STYLES.LABEL_POSITION,
+        {
+          isDynamic: () => {
+            return false;
+          },
+          getSymbolAnchor: () => {
+            return 'center';
+          },
+        } as unknown as StaticIconProperty,
+        mockStaticIconSize,
+        mockStaticLabelSize,
+        true
+      );
+      labelPosition.isDisabled = () => {
+        return false;
+      };
+      labelPosition.syncLabelPositionWithMb('layerId', mockMbMap);
+      expect(layoutProperties).toEqual({
+        'text-anchor': 'bottom',
+        'text-offset': [0, -2.571428571428571],
+      });
+    });
+
+    test('should set layout values when symbolized as icon with bottom anchor', () => {
+      const labelPosition = new LabelPositionProperty(
+        options,
+        VECTOR_STYLES.LABEL_POSITION,
+        {
+          isDynamic: () => {
+            return false;
+          },
+          getSymbolAnchor: () => {
+            return 'bottom';
+          },
+        } as unknown as StaticIconProperty,
+        mockStaticIconSize,
+        mockStaticLabelSize,
+        true
+      );
+      labelPosition.isDisabled = () => {
+        return false;
+      };
+      labelPosition.syncLabelPositionWithMb('layerId', mockMbMap);
+      expect(layoutProperties).toEqual({
+        'text-anchor': 'bottom',
+        'text-offset': [0, -6],
+      });
+    });
+
+    test('should set layout values for dynamic icon size', () => {
       const labelPosition = new LabelPositionProperty(
         options,
         VECTOR_STYLES.LABEL_POSITION,
@@ -177,6 +229,127 @@ describe('syncLabelPositionWithMb', () => {
           ['literal', [0, -0.5]],
           10.04987562112089,
           ['literal', [0, -2.2857142857142856]],
+        ],
+      });
+    });
+  });
+
+  describe('bottom', () => {
+    const options = {
+      position: LABEL_POSITIONS.BOTTOM,
+    };
+
+    test('should set layout values for static icon size', () => {
+      const labelPosition = new LabelPositionProperty(
+        options,
+        VECTOR_STYLES.LABEL_POSITION,
+        {} as unknown as StaticIconProperty,
+        mockStaticIconSize,
+        mockStaticLabelSize,
+        false
+      );
+      labelPosition.isDisabled = () => {
+        return false;
+      };
+      labelPosition.syncLabelPositionWithMb('layerId', mockMbMap);
+      expect(layoutProperties).toEqual({
+        'text-anchor': 'top',
+        'text-offset': [0, 1.7142857142857142],
+      });
+    });
+
+    test('should set layout values when symbolized as icon with center anchor', () => {
+      const labelPosition = new LabelPositionProperty(
+        options,
+        VECTOR_STYLES.LABEL_POSITION,
+        {
+          isDynamic: () => {
+            return false;
+          },
+          getSymbolAnchor: () => {
+            return 'center';
+          },
+        } as unknown as StaticIconProperty,
+        mockStaticIconSize,
+        mockStaticLabelSize,
+        true
+      );
+      labelPosition.isDisabled = () => {
+        return false;
+      };
+      labelPosition.syncLabelPositionWithMb('layerId', mockMbMap);
+      expect(layoutProperties).toEqual({
+        'text-anchor': 'top',
+        'text-offset': [0, 2.571428571428571],
+      });
+    });
+
+    test('should set layout values when symbolized as icon with bottom anchor', () => {
+      const labelPosition = new LabelPositionProperty(
+        options,
+        VECTOR_STYLES.LABEL_POSITION,
+        {
+          isDynamic: () => {
+            return false;
+          },
+          getSymbolAnchor: () => {
+            return 'bottom';
+          },
+        } as unknown as StaticIconProperty,
+        mockStaticIconSize,
+        mockStaticLabelSize,
+        true
+      );
+      labelPosition.isDisabled = () => {
+        return false;
+      };
+      labelPosition.syncLabelPositionWithMb('layerId', mockMbMap);
+      expect(layoutProperties).toEqual({
+        'text-anchor': 'top',
+        'text-offset': [0, 0],
+      });
+    });
+
+    test('should set layout values for dynamic icon size', () => {
+      const labelPosition = new LabelPositionProperty(
+        options,
+        VECTOR_STYLES.LABEL_POSITION,
+        {} as unknown as StaticIconProperty,
+        dynamicIconSize,
+        mockStaticLabelSize,
+        false
+      );
+      labelPosition.isDisabled = () => {
+        return false;
+      };
+      labelPosition.syncLabelPositionWithMb('layerId', mockMbMap);
+      // console.log(JSON.stringify(layoutProperties['text-offset'], null, ' '));
+      expect(layoutProperties).toEqual({
+        'text-anchor': 'top',
+        'text-offset': [
+          'interpolate',
+          ['linear'],
+          [
+            'sqrt',
+            [
+              '+',
+              [
+                'coalesce',
+                [
+                  'case',
+                  ['==', ['get', 'iconSizeField'], null],
+                  0,
+                  ['max', ['min', ['to-number', ['get', 'iconSizeField']], 100], 0],
+                ],
+                0,
+              ],
+              1,
+            ],
+          ],
+          1,
+          ['literal', [0, 0.5]],
+          10.04987562112089,
+          ['literal', [0, 2.2857142857142856]],
         ],
       });
     });

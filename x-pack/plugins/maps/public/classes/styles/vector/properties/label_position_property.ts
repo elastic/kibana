@@ -24,8 +24,7 @@ import { getVectorStyleLabel } from '../components/get_vector_style_label';
 import { FIXED_LABEL, BY_VALUE_LABEL } from '../components/style_prop_editor';
 
 const CENTER_ANCHORED_ICON_SCALE = (MAKI_ICON_SIZE + HALF_MAKI_ICON_SIZE) / MAKI_ICON_SIZE;
-const BOTTOM_ANCHORED_ICON_SCALE =
-  (2 * MAKI_ICON_SIZE + MAKI_ICON_SIZE + HALF_MAKI_ICON_SIZE) / MAKI_ICON_SIZE;
+const BOTTOM_ANCHORED_ICON_SCALE = 2 + CENTER_ANCHORED_ICON_SCALE;
 
 export class LabelPositionProperty extends AbstractStyleProperty<
   LabelPositionStylePropertyDescriptor['options']
