@@ -24,7 +24,7 @@ import { FlowTargetSourceDest } from '../../../../common/search_strategy/securit
 import { EventDetailsPanel } from './event_details';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import { dataTableReducer } from '../../../common/store/data_table/reducer';
-import type { ExpandedDetail } from '../../../../common/types';
+import type { ExpandedDetailTimeline } from '../../../../common/types';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
@@ -58,7 +58,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const hostExpandedDetail: ExpandedDetail = {
+  const hostExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.query]: {
       panelView: 'hostDetail',
       params: {
@@ -67,7 +67,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const networkExpandedDetail: ExpandedDetail = {
+  const networkExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.query]: {
       panelView: 'networkDetail',
       params: {
@@ -77,7 +77,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const eventExpandedDetail: ExpandedDetail = {
+  const eventExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.query]: {
       panelView: 'eventDetail',
       params: {
@@ -87,7 +87,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const eventPinnedExpandedDetail: ExpandedDetail = {
+  const eventPinnedExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.pinned]: {
       panelView: 'eventDetail',
       params: {
@@ -131,7 +131,7 @@ describe('Details Panel Component', () => {
 
     test('it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set', () => {
       state.timeline.timelineById[TimelineId.test].expandedDetail =
-        dataLessExpandedDetail as ExpandedDetail; // Casting as the dataless doesn't meet the actual type requirements
+        dataLessExpandedDetail as ExpandedDetailTimeline; // Casting as the dataless doesn't meet the actual type requirements
       const wrapper = mount(
         <TestProviders store={store}>
           <DetailsPanel {...mockProps} />

@@ -8,11 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
-import type {
-  SetEventsDeleted,
-  SetEventsLoading,
-} from '../../../../../../common/types/bulk_actions';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type {
   ColumnHeaderOptions,
@@ -42,7 +37,12 @@ import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { useGetMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import type { ControlColumnProps, ExpandedDetailType } from '../../../../../../common/types';
+import type {
+  ControlColumnProps,
+  ExpandedDetailType,
+  SetEventsDeleted,
+  SetEventsLoading,
+} from '../../../../../../common/types';
 
 interface Props {
   actionsColumnWidth: number;

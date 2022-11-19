@@ -13,12 +13,10 @@ import type {
 } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
-import type { JSXElementConstructor, ReactNode } from 'react';
-import type { OnRowSelected } from '..';
-import type { HeaderCellRender } from '../../../public/common/components/toolbar/bulk_actions/types';
+import type { ComponentType, JSXElementConstructor, ReactNode } from 'react';
+import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
 import type { Ecs } from '../../ecs';
 import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
-import type { SetEventsDeleted, SetEventsLoading } from '../bulk_actions';
 import type { SortColumnTable } from '../data_table';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
@@ -109,6 +107,8 @@ export interface HeaderActionProps {
   tabType: string;
   timelineId: string;
 }
+
+export type HeaderCellRender = ComponentType | ComponentType<HeaderActionProps>;
 
 type GenericActionRowCellRenderProps = Pick<
   EuiDataGridCellValueElementProps,

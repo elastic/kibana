@@ -11,8 +11,7 @@ import uuid from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
-import type { SessionViewConfig } from '../../../../common/types';
-import type { ExpandedDetail } from '../../../../common/types/detail_panel';
+import type { SessionViewConfig, ExpandedDetailTimeline } from '../../../../common/types';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Sort } from '../../components/timeline/body/sort';
 import type {
@@ -1233,7 +1232,7 @@ export const updateExcludedRowRenderersIds = ({
   };
 };
 
-export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): ExpandedDetail => {
+export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): ExpandedDetailTimeline => {
   const { tabType, id, ...expandedDetails } = action;
 
   const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
@@ -1241,7 +1240,7 @@ export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): ExpandedD
   const newExpandDetails = {
     params: expandedDetails.params ? { ...expandedDetails.params } : {},
     panelView: expandedDetails.panelView,
-  } as ExpandedDetail;
+  } as ExpandedDetailTimeline;
   return {
     [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
       ? newExpandDetails

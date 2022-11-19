@@ -17,3 +17,6 @@ export * from './bulk_actions';
 export const FILTER_OPEN: Status = 'open';
 export const FILTER_CLOSED: Status = 'closed';
 export const FILTER_ACKNOWLEDGED: Status = 'acknowledged';
+
+export type SetEventsLoading = (params: { eventIds: string[]; isLoading: boolean }) => void;
+export type SetEventsDeleted = (params: { eventIds: string[]; isDeleted: boolean }) => void;

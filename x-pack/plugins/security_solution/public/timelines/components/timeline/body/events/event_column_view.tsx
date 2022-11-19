@@ -7,11 +7,12 @@
 
 import React, { useMemo } from 'react';
 
-import type { ControlColumnProps, RowCellRender } from '../../../../../../common/types';
 import type {
+  ControlColumnProps,
+  RowCellRender,
   SetEventsDeleted,
   SetEventsLoading,
-} from '../../../../../../common/types/bulk_actions';
+} from '../../../../../../common/types';
 import type { Ecs } from '../../../../../../common/ecs';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type { OnRowSelected } from '../../events';

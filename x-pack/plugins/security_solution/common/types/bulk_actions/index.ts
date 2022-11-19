@@ -6,10 +6,6 @@
  */
 
 import type { TimelineItem } from '../../search_strategy';
-
-export type SetEventsLoading = (params: { eventIds: string[]; isLoading: boolean }) => void;
-export type SetEventsDeleted = (params: { eventIds: string[]; isDeleted: boolean }) => void;
-
 export interface CustomBulkAction {
   key: string;
   label: string;

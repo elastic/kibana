@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ComponentType } from 'react';
-import type { HeaderActionProps, CustomBulkAction } from '../../../../../common/types';
+import type { CustomBulkAction } from '../../../../../common/types';
 import type { AlertWorkflowStatus } from '../../../types';
 
 export interface BulkActionsObjectProp {
@@ -21,7 +20,5 @@ export type OnUpdateAlertStatusSuccess = (
   status: AlertWorkflowStatus
 ) => void;
 export type OnUpdateAlertStatusError = (status: AlertWorkflowStatus, error: Error) => void;
-
-export type HeaderCellRender = ComponentType | ComponentType<HeaderActionProps>;
 
 export type BulkActionsProp = boolean | BulkActionsObjectProp;

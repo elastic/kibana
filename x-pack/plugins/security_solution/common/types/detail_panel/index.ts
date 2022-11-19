@@ -56,7 +56,7 @@ export type ExpandedDetailType =
   | ExpandedNetworkType
   | ExpandedUserType;
 
-export type ExpandedDetail = {
+export type ExpandedDetailTimeline = {
   [tab in TimelineTabs]?: ExpandedDetailType;
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExpandedDetail, ExpandedDetailType } from '../../../common/types';
+import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../common/types';
 import { TimelineTabs } from '../../../common/types/timeline';
 import type {
   TimelineEqlRequestOptions,
@@ -26,7 +26,7 @@ import type { TimelineArgs } from '.';
 
 class ActiveTimelineEvents {
   private _activePage: number = 0;
-  private _expandedDetail: ExpandedDetail = {};
+  private _expandedDetail: ExpandedDetailTimeline = {};
   private _pageName: string = '';
   private _request: TimelineEventsAllRequestOptions | null = null;
   private _response: TimelineArgs | null = null;
@@ -73,7 +73,7 @@ class ActiveTimelineEvents {
     }
   }
 
-  setExpandedDetail(expandedDetail: ExpandedDetail) {
+  setExpandedDetail(expandedDetail: ExpandedDetailTimeline) {
     this._expandedDetail = expandedDetail;
   }
 

@@ -13,7 +13,10 @@ import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-g
 import type {
   SetEventsDeleted,
   SetEventsLoading,
-} from '../../../../../../common/types/bulk_actions';
+  ActionProps,
+  ControlColumnProps,
+  RowCellRender,
+} from '../../../../../../common/types';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -34,11 +37,6 @@ import {
 
 import { StatefulCell } from './stateful_cell';
 import * as i18n from './translations';
-import type {
-  ActionProps,
-  ControlColumnProps,
-  RowCellRender,
-} from '../../../../../../common/types';
 
 interface CellProps {
   _id: string;
