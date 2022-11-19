@@ -69,6 +69,7 @@ import { getEventIdToDataMapping } from '../data_table/helpers';
 import type { ViewSelection } from './summary_view_select';
 import { SummaryViewSelector } from './summary_view_select';
 import { useAlertBulkActions } from './use_alert_bulk_actions';
+import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};

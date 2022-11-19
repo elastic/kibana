@@ -10,7 +10,6 @@ import { transformControlColumns } from './transform_control_columns';
 
 describe('transformControlColumns', () => {
   const defaultProps: TransformColumnsProps = {
-    ariaRowindex: 1,
     columnId: 'test-columnId',
     columnValues: 'test-columnValues',
     checked: false,

@@ -60,6 +60,8 @@ export interface DataTableModel extends DataTableModelSettings {
   sessionViewConfig: SessionViewConfig | null;
   /** updated saved object timestamp */
   updated?: number;
+  /** Total number of fetched events/alerts */
+  totalCount: number;
 }
 
 export type SubsetDataTableModel = Readonly<
@@ -86,5 +88,6 @@ export type SubsetDataTableModel = Readonly<
     | 'title'
     | 'initialized'
     | 'selectAll'
+    | 'totalCount'
   >
 >;
