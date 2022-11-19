@@ -18,10 +18,6 @@ import {
 import { getScopedActions, isTimelineScope } from '../../../helpers';
 import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import {
-  AlertsCasesTourSteps,
-  SecurityStepId,
-} from '../../../../../common/components/guided_onboarding_tour/tour_config';
 import type { ActionProps, OnPinEvent } from '../../../../common/types';
 import { TableId, TimelineId, TimelineTabs } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
@@ -39,7 +35,7 @@ import { AlertContextMenu } from '../../../detections/components/alerts_table/ti
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
 import { useTourContext } from '../guided_onboarding_tour';
-import { SecurityStepId } from '../guided_onboarding_tour/tour_config';
+import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
