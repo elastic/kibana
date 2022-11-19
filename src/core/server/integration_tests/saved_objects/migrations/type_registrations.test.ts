@@ -7,7 +7,7 @@
  */
 
 import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
- '../../../../test_helpers/kbn_server';
+('../../../../test_helpers/kbn_server');
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 
 // Types should NEVER be removed from this array

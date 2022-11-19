@@ -7,9 +7,13 @@
  */
 
 import { Root } from '@kbn/core-root-server-internal';
- '../../../test_helpers/kbn_server';
-import { createTestServers, createRootWithCorePlugins, request} from '@kbn/core-test-helpers-kbn-server'
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server'
+('../../../test_helpers/kbn_server');
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  request,
+} from '@kbn/core-test-helpers-kbn-server';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 
 describe('default route provider', () => {
   let esServer: TestElasticsearchUtils;

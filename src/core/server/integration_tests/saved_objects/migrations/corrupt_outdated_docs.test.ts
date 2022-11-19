@@ -9,7 +9,7 @@
 import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
- '../../../../test_helpers/kbn_server';
+('../../../../test_helpers/kbn_server');
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { Root } from '@kbn/core-root-server-internal';

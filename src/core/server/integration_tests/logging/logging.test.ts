@@ -7,7 +7,7 @@
  */
 
 import type { LoggerContextConfigInput } from '@kbn/core-logging-server';
- '../../../test_helpers/kbn_server';
+('../../../test_helpers/kbn_server');
 import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
 import { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
 import { Subject } from 'rxjs';

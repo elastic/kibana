@@ -13,11 +13,14 @@ import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
- '../../../../test_helpers/kbn_server';
+('../../../../test_helpers/kbn_server');
 import { Root } from '@kbn/core-root-server-internal';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { getMigrationDocLink } from './test_utils';
-import { createRootWithCorePlugins, TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import {
+  createRootWithCorePlugins,
+  TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers as createkbnServerTestServers } from '@kbn/core-test-helpers-kbn-server';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;

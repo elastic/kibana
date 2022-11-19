@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
- '../../../test_helpers/kbn_server';
+('../../../test_helpers/kbn_server');
 
 describe('http resources service', () => {
   describe('register', () => {

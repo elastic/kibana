@@ -7,7 +7,7 @@
  */
 
 import { Root } from '@kbn/core-root-server-internal';
- '../../../test_helpers/kbn_server';
+('../../../test_helpers/kbn_server');
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 describe('Platform assets', function () {

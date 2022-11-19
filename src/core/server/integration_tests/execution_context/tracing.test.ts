@@ -9,7 +9,12 @@
 import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
 // import * as from '../../../test_helpers/kbn_server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { createRoot, createTestServers, createRootWithCorePlugins, request } from '@kbn/core-test-helpers-kbn-server';
+import {
+  createRoot,
+  createTestServers,
+  createRootWithCorePlugins,
+  request,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import { RequestHandlerContext } from '../..';
 
@@ -344,15 +349,9 @@ describe('trace', () => {
       });
 
       await root.start();
-      const responseA = request
-        .get(root, '/execution-context')
-        .set('x-opaque-id', 'req-1');
-      const responseB = request
-        .get(root, '/execution-context')
-        .set('x-opaque-id', 'req-2');
-      const responseC = request
-        .get(root, '/execution-context')
-        .set('x-opaque-id', 'req-3');
+      const responseA = request.get(root, '/execution-context').set('x-opaque-id', 'req-1');
+      const responseB = request.get(root, '/execution-context').set('x-opaque-id', 'req-2');
+      const responseC = request.get(root, '/execution-context').set('x-opaque-id', 'req-3');
 
       const [{ body: bodyA }, { body: bodyB }, { body: bodyC }] = await Promise.all([
         responseA,

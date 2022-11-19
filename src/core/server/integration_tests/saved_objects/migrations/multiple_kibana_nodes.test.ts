@@ -11,7 +11,7 @@ import del from 'del';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
- '../../../../test_helpers/kbn_server';
+('../../../../test_helpers/kbn_server');
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   createTestServers,

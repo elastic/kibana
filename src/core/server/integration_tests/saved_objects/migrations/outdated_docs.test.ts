@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
- '../../../../test_helpers/kbn_server';
+('../../../../test_helpers/kbn_server');
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
