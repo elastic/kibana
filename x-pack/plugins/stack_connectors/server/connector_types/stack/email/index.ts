@@ -148,12 +148,10 @@ const SecretsSchema = schema.object(SecretsSchemaProps);
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-const addressListSchema = schema.nullable(schema.arrayOf(schema.string()));
-
 const ParamsSchemaProps = {
-  to: addressListSchema,
-  cc: addressListSchema,
-  bcc: addressListSchema,
+  to: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
   subject: schema.string(),
   message: schema.string(),
   // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
@@ -169,6 +167,20 @@ const ParamsSchemaProps = {
 };
 
 const ParamsSchema = schema.object(ParamsSchemaProps);
+
+const paramsSchemaPreprocessor = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  validate(params: any) {
+    if (params) {
+      const { to, cc, bcc } = params;
+      if (to === null) params.to = [];
+      if (cc === null) params.cc = [];
+      if (bcc === null) params.bcc = [];
+    }
+
+    return ParamsSchema.validate(params);
+  },
+};
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
@@ -239,7 +251,7 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
         schema: SecretsSchema,
       },
       params: {
-        schema: ParamsSchema,
+        schema: paramsSchemaPreprocessor,
         customValidator: validateParams,
       },
       connector: validateConnector,
