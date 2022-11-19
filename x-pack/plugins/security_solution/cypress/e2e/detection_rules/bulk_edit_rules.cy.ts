@@ -132,6 +132,7 @@ describe('Detection rules, bulk edit', () => {
     login();
   });
   beforeEach(() => {
+    // Make sure persisted rules table state is cleared
     clearSessionStorage();
     deleteAlertsAndRules();
     esArchiverResetKibana();
