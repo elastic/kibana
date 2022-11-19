@@ -8,10 +8,12 @@
 import Boom from '@hapi/boom';
 
 // @ts-ignore
+import type { createRoot } from '@kbn/core-test-helpers-kbn-server';
+import { request as kbnTestServerRequest } from '@kbn/core-test-helpers-kbn-server';
 import type { CoreSetup, IBasePath, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
+// import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { kibanaTestUser } from '@kbn/test';
@@ -24,7 +26,7 @@ import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 
 // FLAKY: https://github.com/elastic/kibana/issues/55953
 describe.skip('onPostAuthInterceptor', () => {
-  let root: ReturnType<typeof kbnTestServer.createRoot>;
+  let root: ReturnType<typeof createRoot>;
   jest.setTimeout(30000);
 
   const headers = {
@@ -39,7 +41,7 @@ describe.skip('onPostAuthInterceptor', () => {
    * https://github.com/facebook/jest/issues/8379
 
    beforeEach(async () => {
-    root = kbnTestServer.createRoot();
+    root = createRoot();
   });
 
    afterEach(async () => await root.shutdown());
@@ -159,7 +161,7 @@ describe.skip('onPostAuthInterceptor', () => {
 
     await root.start();
 
-    const response = await kbnTestServer.request.get(root, path);
+    const response = await kbnTestServerRequest.get(root, path);
 
     return {
       response,
