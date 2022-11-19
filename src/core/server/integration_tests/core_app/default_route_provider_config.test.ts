@@ -7,7 +7,7 @@
  */
 
 import { Root } from '@kbn/core-root-server-internal';
-// import * as kbnTestServer from '../../../test_helpers/kbn_server';
+ '../../../test_helpers/kbn_server';
 import { createTestServers, createRootWithCorePlugins, request} from '@kbn/core-test-helpers-kbn-server'
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server'
 

@@ -8,7 +8,6 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockLoggingSystem } from './config_deprecation.test.mocks';
-// import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 
 describe('configuration deprecations', () => {

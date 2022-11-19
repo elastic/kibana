@@ -13,7 +13,6 @@ import { request as kbnTestServerRequest } from '@kbn/core-test-helpers-kbn-serv
 import type { CoreSetup, IBasePath, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-// import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { kibanaTestUser } from '@kbn/test';

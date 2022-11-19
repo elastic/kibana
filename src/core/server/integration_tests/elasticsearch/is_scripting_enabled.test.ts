@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
-} from '../../../test_helpers/kbn_server';
+import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { isInlineScriptingEnabled } from '@kbn/core-elasticsearch-server-internal';
 
 describe('isInlineScriptingEnabled', () => {

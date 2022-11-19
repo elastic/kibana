@@ -17,7 +17,6 @@ import type {
   RequestHandlerContext,
 } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-// import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 

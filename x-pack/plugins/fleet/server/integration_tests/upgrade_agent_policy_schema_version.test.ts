@@ -12,7 +12,6 @@ import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from '@kbn/core/server';
-// import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';

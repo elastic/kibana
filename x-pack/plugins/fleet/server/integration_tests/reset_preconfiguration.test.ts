@@ -7,7 +7,6 @@
 
 import Path from 'path';
 
-// import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 

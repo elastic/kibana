@@ -11,12 +11,8 @@ import * as http from 'http';
 import supertest from 'supertest';
 
 import { Root } from '@kbn/core-root-server-internal';
-import {
-  createRootWithCorePlugins,
-  createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
-} from '../../../test_helpers/kbn_server';
+import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 
 describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;

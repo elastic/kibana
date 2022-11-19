@@ -10,7 +10,7 @@ import { join } from 'path';
 import { rm, mkdtemp, readFile, readdir } from 'fs/promises';
 import moment from 'moment-timezone';
 import { getNextRollingTime } from '@kbn/core-logging-server-internal';
-// import * as kbnTestServer from '../../../test_helpers/kbn_server';
+ '../../../test_helpers/kbn_server';
 import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
 
 const flushDelay = 250;

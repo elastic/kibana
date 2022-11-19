@@ -9,7 +9,7 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-// import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+ '../../../../test_helpers/kbn_server';
 import { Root } from '@kbn/core-root-server-internal';
 import {
   createRootWithCorePlugins,

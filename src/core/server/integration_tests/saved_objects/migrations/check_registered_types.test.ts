@@ -9,7 +9,7 @@
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
 import { Root } from '@kbn/core-root-server-internal';
-// import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+ '../../../../test_helpers/kbn_server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 
