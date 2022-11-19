@@ -167,6 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should remember time range and pinned filters from discover', async () => {
+      await PageObjects.lens.goToTimeRange(
         'Sep 7, 2015 @ 06:31:44.000',
         'Sep 19, 2025 @ 06:31:44.000'
       );
