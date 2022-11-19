@@ -713,7 +713,18 @@ const getSuppressedAlertData = (ecsData: Ecs | Ecs[]) => {
   );
   const dataProviderPartials = terms.map((term) => {
     const fieldId = term.field.replace('.', '-');
-    return {
+    return term.value == null ? {
+      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`,
+      name: fieldId,
+      enabled: true,
+      excluded: true,
+      kqlQuery: '',
+      queryMatch: {
+        field: term.field,
+        value: '',
+        operator: ':*' as const,
+      },
+    } : {
       id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`,
       name: fieldId,
       enabled: true,
