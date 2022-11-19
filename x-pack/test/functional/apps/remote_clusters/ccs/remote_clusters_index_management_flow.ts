@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const remoteEs = getService('remoteEs' as 'es');
   const localEs = getService('es');
 
-  describe('CCS Remote Clusters > Index Management', function () {
+  describe.only('CCS Remote Clusters > Index Management', function () {
     const leaderName = 'my-index';
     const followerName = 'my-follower';
     before(async () => {
@@ -43,12 +43,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           return await testSubjects.isDisplayed('remoteClusterListTable');
         });
         const remotes = await pageObjects.remoteClusters.getRemoteClustersList();
+        const filteredRemotes = remotes.filter(async (remote) => {
+          return remote.remoteName === 'ftr-remote';
+        });
         expect(remotes.length).to.eql(1);
-        expect(remotes[0].remoteName).to.eql('ftr-remote');
-        expect(remotes[0].remoteAddress).to.contain('localhost');
-        expect(remotes[0].remoteStatus).to.eql('Connected');
-        expect(remotes[0].remoteConnectionCount).to.eql('1');
-        expect(remotes[0].remoteMode).to.eql('default');
+        expect(filteredRemotes[0].remoteAddress).to.contain('localhost');
+        expect(filteredRemotes[0].remoteStatus).to.eql('Connected');
+        expect(filteredRemotes[0].remoteConnectionCount).to.eql('1');
+        expect(filteredRemotes[0].remoteMode).to.eql('default');
       });
     });
 
@@ -96,8 +98,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         const indicesList = await pageObjects.indexManagement.getIndexList();
-        const followerIndex = indicesList[0];
-        expect(followerIndex.indexDocuments).to.eql('1');
+        const followerIndex = indicesList.filter(async (follower) => {
+          return (await follower.indexName) === followerName;
+        });
+        expect(followerIndex[0].indexDocuments).to.eql('1');
       });
     });
 
