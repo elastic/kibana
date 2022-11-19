@@ -121,7 +121,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "Error associated with this object, populated if an operation failed for this object."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -1822,7 +1824,9 @@
             "type": "IndexSignature",
             "tags": [],
             "label": "[pluginName: string]: string",
-            "description": [],
+            "description": [
+              "The plugin name and version string"
+            ],
             "signature": [
               "[pluginName: string]:  string"
             ],
