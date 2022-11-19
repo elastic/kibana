@@ -400,7 +400,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
       noMatchesMessage={i18n.NO_SEARCH_MATCH}
       emptyMessage={i18n.NO_TAGS_AVAILABLE}
       data-test-subj="cases-actions-tags-edit-selectable"
-      height={!showNoMatchText ? 'full' : undefined}
+      height="full"
     >
       {(list, search) => (
         <>
@@ -457,19 +457,19 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="m" />
-          {list}
           {showNoMatchText ? (
             <EuiText
               size="xs"
               color="subdued"
               textAlign="center"
               css={{
-                marginTop: euiTheme.size.m,
+                marginBottom: euiTheme.size.s,
               }}
             >
               {i18n.NO_SEARCH_MATCH}
             </EuiText>
           ) : null}
+          {list}
         </>
       )}
     </EuiSelectable>
