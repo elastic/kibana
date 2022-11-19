@@ -62,6 +62,12 @@ export const cleanKibana = () => {
   deleteTimelines();
 };
 
+export const clearSessionStorage = () => {
+  cy.window().then((win) => {
+    win.sessionStorage.clear();
+  });
+};
+
 export const deleteAlertsAndRules = () => {
   cy.log('Delete all alerts and rules');
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;

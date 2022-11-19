@@ -1,4 +1,4 @@
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, clearSessionStorage } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import {
   DETECTIONS_RULE_MANAGEMENT_URL,
@@ -38,9 +38,7 @@ describe('Persistent rules table state', () => {
   });
 
   beforeEach(() => {
-    cy.window().then((win) => {
-      win.sessionStorage.clear();
-    });
+    clearSessionStorage();
   });
 
   it('reloads the state from the url if the storage was cleared', () => {

@@ -87,7 +87,7 @@ import {
   createNewTermsRule,
 } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { cleanKibana, clearSessionStorage, deleteAlertsAndRules } from '../../tasks/common';
 
 import {
   getEqlRule,
@@ -132,6 +132,7 @@ describe('Detection rules, bulk edit', () => {
     login();
   });
   beforeEach(() => {
+    clearSessionStorage();
     deleteAlertsAndRules();
     esArchiverResetKibana();
     createCustomRule(
