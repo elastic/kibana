@@ -11,7 +11,6 @@ import fs from 'fs/promises';
 import JSON5 from 'json5';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
-('../../../../test_helpers/kbn_server');
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { Root } from '@kbn/core-root-server-internal';

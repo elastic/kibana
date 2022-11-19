@@ -10,7 +10,6 @@ import { MockElasticsearchClient } from './core_service.test.mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { errors } from '@elastic/elasticsearch';
 import type { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
-('../../../test_helpers/kbn_server');
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 const cookieOptions = {

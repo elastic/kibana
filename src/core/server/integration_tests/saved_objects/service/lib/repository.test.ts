@@ -7,7 +7,6 @@
  */
 
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-('../../../../../test_helpers/kbn_server');
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { Root } from '@kbn/core-root-server-internal';

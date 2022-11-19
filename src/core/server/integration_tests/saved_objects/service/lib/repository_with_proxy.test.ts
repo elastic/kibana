@@ -13,7 +13,6 @@ import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
-('../../../../../test_helpers/kbn_server');
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import {

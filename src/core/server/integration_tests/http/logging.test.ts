@@ -8,7 +8,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
-('../../../test_helpers/kbn_server');
 
 describe('request logging', () => {
   let mockConsoleLog: jest.SpyInstance;

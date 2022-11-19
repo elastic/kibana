@@ -9,7 +9,6 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-('../../../../test_helpers/kbn_server');
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { Root } from '@kbn/core-root-server-internal';

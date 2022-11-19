@@ -13,7 +13,6 @@ import { errors } from '@elastic/elasticsearch';
 import type { TaskEither } from 'fp-ts/lib/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-('../../../../../test_helpers/kbn_server');
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import {

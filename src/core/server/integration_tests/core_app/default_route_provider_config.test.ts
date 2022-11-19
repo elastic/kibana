@@ -7,7 +7,6 @@
  */
 
 import { Root } from '@kbn/core-root-server-internal';
-('../../../test_helpers/kbn_server');
 import {
   createTestServers,
   createRootWithCorePlugins,

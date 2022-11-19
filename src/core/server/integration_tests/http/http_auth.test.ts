@@ -8,7 +8,6 @@
 
 import type { IRouter, RouteConfigOptions, HttpAuth } from '@kbn/core-http-server';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
-('../../../test_helpers/kbn_server');
 
 describe('http auth', () => {
   let root: ReturnType<typeof createRoot>;

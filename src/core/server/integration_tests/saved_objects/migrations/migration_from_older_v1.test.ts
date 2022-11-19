@@ -15,7 +15,6 @@ import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-('../../../../test_helpers/kbn_server');
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';

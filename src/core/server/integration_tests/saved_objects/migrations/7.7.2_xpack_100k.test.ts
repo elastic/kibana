@@ -12,7 +12,6 @@ import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-('../../../../test_helpers/kbn_server');
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';

@@ -7,7 +7,6 @@
  */
 
 import { migratorInstanceMock } from './migrate.test.mocks';
-('../../../../test_helpers/kbn_server');
 
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
