@@ -17,11 +17,9 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiHighlight,
-  EuiSelectableListItem,
   useEuiTheme,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
 import { isEmpty } from 'lodash';
 import type { Case } from '../../../../common';
@@ -237,29 +235,9 @@ const hasExactMatch = (searchValue: string, options: TagSelectableOption[]) => {
   return options.some((option) => option.key === searchValue);
 };
 
-const AddNewTagItem: React.FC<{ searchValue: string; onNewItem: (newTag: string) => void }> =
-  React.memo(({ searchValue, onNewItem }) => {
-    const onNewTagClick = useCallback(() => {
-      onNewItem(searchValue);
-    }, [onNewItem, searchValue]);
-
-    return (
-      <EuiSelectableListItem
-        isFocused={false}
-        showIcons={false}
-        onClick={onNewTagClick}
-        data-test-subj="cases-actions-tags-edit-selectable-add-new-tag"
-      >
-        <FormattedMessage
-          id="xpack.cases.actions.tags.newTagMessage"
-          defaultMessage="Add {searchValue} as a tag"
-          values={{ searchValue: <b>{searchValue}</b> }}
-        />
-      </EuiSelectableListItem>
-    );
-  });
-
-AddNewTagItem.displayName = 'AddNewTagItem';
+const hasPartialMatch = (searchValue: string, options: TagSelectableOption[]) => {
+  return options.some((option) => option.key?.includes(searchValue));
+};
 
 const EditTagsSelectableComponent: React.FC<Props> = ({
   selectedCases,
@@ -326,16 +304,6 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
       onChangeTags({ selectedTags, unSelectedTags });
     },
     [onChangeTags, state.tags]
-  );
-
-  const onNewItem = useCallback(
-    (newTag: string) => {
-      const { selectedTags, unSelectedTags } = getSelectedAndUnselectedTags(options, state.tags);
-      dispatch({ type: Actions.CHECK_TAG, payload: [newTag] });
-      setSearchValue('');
-      onChangeTags({ selectedTags: [...selectedTags, newTag], unSelectedTags });
-    },
-    [onChangeTags, options, state.tags]
   );
 
   const onSelectAll = useCallback(() => {
@@ -409,6 +377,11 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     (tag) => tag.tagState === TagState.CHECKED || tag.tagState === TagState.PARTIAL
   ).length;
 
+  const showNoMatchText = useMemo(
+    () => !hasPartialMatch(searchValue, options),
+    [options, searchValue]
+  );
+
   return (
     <EuiSelectable
       options={optionsWithAddNewTagOption}
@@ -424,9 +397,10 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
       renderOption={renderOption}
       listProps={{ showIcons: false }}
       onChange={onChange}
-      noMatchesMessage={<AddNewTagItem searchValue={searchValue ?? ''} onNewItem={onNewItem} />}
+      noMatchesMessage={i18n.NO_SEARCH_MATCH}
+      emptyMessage={i18n.NO_TAGS_AVAILABLE}
       data-test-subj="cases-actions-tags-edit-selectable"
-      height="full"
+      height={!showNoMatchText ? 'full' : undefined}
     >
       {(list, search) => (
         <>
@@ -484,6 +458,18 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
           </EuiFlexGroup>
           <EuiHorizontalRule margin="m" />
           {list}
+          {showNoMatchText ? (
+            <EuiText
+              size="xs"
+              color="subdued"
+              textAlign="center"
+              css={{
+                marginTop: euiTheme.size.m,
+              }}
+            >
+              {i18n.NO_SEARCH_MATCH}
+            </EuiText>
+          ) : null}
         </>
       )}
     </EuiSelectable>

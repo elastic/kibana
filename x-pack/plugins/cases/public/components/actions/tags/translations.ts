@@ -51,3 +51,11 @@ export const SELECTED_TAGS = (selectedTags: number) =>
     defaultMessage: 'Selected: {selectedTags}',
     values: { selectedTags },
   });
+
+export const NO_TAGS_AVAILABLE = i18n.translate('xpack.cases.actions.tags.noTagsAvailable', {
+  defaultMessage: 'No tags available. Type to add one.',
+});
+
+export const NO_SEARCH_MATCH = i18n.translate('xpack.cases.actions.tags.noTagsAvailable', {
+  defaultMessage: 'No tags match your search',
+});
