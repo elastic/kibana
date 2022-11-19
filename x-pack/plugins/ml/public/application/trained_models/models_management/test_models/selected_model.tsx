@@ -6,7 +6,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useEffect } from 'react';
 
 import { NerInference } from './models/ner';
 import { QuestionAnsweringInference } from './models/question_answering';
@@ -68,6 +68,12 @@ export const SelectedModel: FC<Props> = ({ model, inputType }) => {
       return new LangIdentInference(trainedModels, model, inputType);
     }
   }, [inputType, model, trainedModels]);
+
+  useEffect(() => {
+    return () => {
+      inferrer?.destroy();
+    };
+  }, [inferrer]);
 
   if (inferrer !== undefined) {
     return <InferenceInputForm inferrer={inferrer} inputType={inputType} />;

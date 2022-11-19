@@ -30,13 +30,14 @@ interface Props {
   inferrer: InferrerType;
 }
 
-export const IndexInput: FC<Props> = ({ inferrer }) => {
+export const IndexInputForm: FC<Props> = ({ inferrer }) => {
   const data = useIndexInput({ inferrer });
   const { reloadExamples, selectedField } = data;
 
   const [errorText, setErrorText] = useState<string | null>(null);
-  const runningState = useObservable(inferrer.getRunningState$());
-  const examples = useObservable(inferrer.getInputText$()) ?? [];
+  const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
+  const examples = useObservable(inferrer.getInputText$(), inferrer.getInputText());
+  const isValid = useObservable(inferrer.getIsValid$(), inferrer.getIsValid());
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
   const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);
 
@@ -60,7 +61,7 @@ export const IndexInput: FC<Props> = ({ inferrer }) => {
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={run}
-            disabled={runningState === RUNNING_STATE.RUNNING || selectedField === undefined}
+            disabled={runningState === RUNNING_STATE.RUNNING || isValid === false}
             fullWidth={false}
           >
             <FormattedMessage

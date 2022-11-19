@@ -19,7 +19,7 @@ import {
 } from '../../waterfall/components/translations';
 
 describe('waterfall filter', () => {
-  jest.useFakeTimers('legacy');
+  jest.useFakeTimers({ legacyFakeTimers: true });
 
   it('renders correctly', () => {
     const { getByLabelText, getByTitle } = render(

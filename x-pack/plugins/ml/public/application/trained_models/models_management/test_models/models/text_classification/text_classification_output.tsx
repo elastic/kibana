@@ -39,7 +39,7 @@ export const TextClassificationOutput: FC<{
     | FillMaskInference
     | LangIdentInference;
 }> = ({ inferrer }) => {
-  const result = useObservable(inferrer.getInferenceResult$());
+  const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
   }
