@@ -739,7 +739,7 @@ describe('rules_list component with items', () => {
     expect(wrapper.find('[data-test-subj="ruleSidebarDeleteAction"]').exists()).toBeTruthy();
   });
 
-  it('renders brief', async () => {
+  it.skip('renders brief', async () => {
     await setup();
 
     // { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 }
@@ -761,18 +761,18 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('does not render the status filter if the feature flag is off', async () => {
+  it.skip('does not render the status filter if the feature flag is off', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="ruleStatusFilter"]').exists()).toBeFalsy();
   });
 
-  it('renders the status filter if the experiment is on', async () => {
+  it.skip('renders the status filter if the experiment is on', async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     await setup();
     expect(wrapper.find('[data-test-subj="ruleStatusFilter"]').exists()).toBeTruthy();
   });
 
-  it('can filter by rule states', async () => {
+  it.skip('can filter by rule states', async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     loadRulesWithKueryFilter.mockReset();
     await setup();
@@ -810,18 +810,18 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('does not render the tag filter is the feature flag is off', async () => {
+  it.skip('does not render the tag filter is the feature flag is off', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="ruleTagFilter"]').exists()).toBeFalsy();
   });
 
-  it('renders the tag filter if the experiment is on', async () => {
+  it.skip('renders the tag filter if the experiment is on', async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     await setup();
     expect(wrapper.find('[data-test-subj="ruleTagFilter"]').exists()).toBeTruthy();
   });
 
-  it('can filter by tags', async () => {
+  it.skip('can filter by tags', async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     loadRulesWithKueryFilter.mockReset();
     await setup();
@@ -856,12 +856,12 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('rule list items with actions are editable if canExecuteAction is true', async () => {
+  it.skip('rule list items with actions are editable if canExecuteAction is true', async () => {
     await setup();
     expect(wrapper.find('button.euiButtonIcon[disabled=true]').length).toEqual(2);
   });
 
-  it('rule list items with actions are not editable if canExecuteAction is false', async () => {
+  it.skip('rule list items with actions are not editable if canExecuteAction is false', async () => {
     const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
     hasExecuteActionsCapability.mockReturnValue(false);
     await setup();
