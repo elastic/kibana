@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const remoteEs = getService('remoteEs' as 'es');
   const localEs = getService('es');
 
-  describe.only('CCS Remote Clusters > Index Management', function () {
+  describe('CCS Remote Clusters > Index Management', function () {
     const leaderName = 'my-index';
     const followerName = 'my-follower';
     before(async () => {
