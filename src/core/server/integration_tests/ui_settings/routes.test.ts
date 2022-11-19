@@ -8,7 +8,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
-('../../../test_helpers/kbn_server');
 
 describe('ui settings service', () => {
   describe('routes', () => {

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-'./kbn_server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   createRootWithCorePlugins,
