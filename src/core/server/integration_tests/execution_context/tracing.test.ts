@@ -348,9 +348,15 @@ describe('trace', () => {
       });
 
       await root.start();
-      const responseA = kbnServerRequest.get(root, '/execution-context').set('x-opaque-id', 'req-1');
-      const responseB = kbnServerRequest.get(root, '/execution-context').set('x-opaque-id', 'req-2');
-      const responseC = kbnServerRequest.get(root, '/execution-context').set('x-opaque-id', 'req-3');
+      const responseA = kbnServerRequest
+        .get(root, '/execution-context')
+        .set('x-opaque-id', 'req-1');
+      const responseB = kbnServerRequest
+        .get(root, '/execution-context')
+        .set('x-opaque-id', 'req-2');
+      const responseC = kbnServerRequest
+        .get(root, '/execution-context')
+        .set('x-opaque-id', 'req-3');
 
       const [{ body: bodyA }, { body: bodyB }, { body: bodyC }] = await Promise.all([
         responseA,
