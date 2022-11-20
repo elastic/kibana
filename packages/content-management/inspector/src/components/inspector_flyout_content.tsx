@@ -26,8 +26,8 @@ import { css } from '@emotion/react';
 import type { Services } from '../services';
 import type { Item } from '../types';
 import { MetadataForm } from './metadata_form';
-import { DuplicateTitleCallout } from './inspector_duplicate_title_callout';
 import { useMetadataForm } from './use_metadata_form';
+import type { CustomValidators } from './use_metadata_form';
 
 const getI18nTexts = ({ entityName }: { entityName: string }) => ({
   title: i18n.translate('contentManagement.inspector.flyoutTitle', {
@@ -55,7 +55,7 @@ export interface Props {
     description?: string;
     tags: string[];
   }) => Promise<void>;
-  checkForDuplicateTitle?: (args: { id: string; title: string }) => Promise<boolean>;
+  customValidators?: CustomValidators;
   onCancel: () => void;
 }
 
@@ -65,15 +65,14 @@ export const InspectorFlyoutContent: FC<Props> = ({
   isReadonly = true,
   services: { TagSelector, TagList, notifyError },
   onSave,
-  checkForDuplicateTitle,
   onCancel,
+  customValidators,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const [confirmedDuplicateTitle, setConfirmedDuplicateTitle] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
-  const form = useMetadataForm({ item });
+  const form = useMetadataForm({ item, customValidators });
 
   const onClickSave = useCallback(async () => {
     if (form.isValid) {
@@ -84,25 +83,12 @@ export const InspectorFlyoutContent: FC<Props> = ({
         setIsSubmitting(true);
 
         try {
-          let hasDuplicatedTitle = false;
-
-          if (checkForDuplicateTitle && title !== item.title) {
-            hasDuplicatedTitle = await checkForDuplicateTitle({ id, title });
-          }
-
-          if (
-            !hasDuplicatedTitle ||
-            (confirmedDuplicateTitle && confirmedDuplicateTitle === title)
-          ) {
-            await onSave({
-              id,
-              title,
-              description: form.description.value,
-              tags: form.tags.value,
-            });
-          }
-
-          setConfirmedDuplicateTitle(hasDuplicatedTitle ? title : undefined);
+          await onSave({
+            id,
+            title,
+            description: form.description.value,
+            tags: form.tags.value,
+          });
         } catch (error) {
           notifyError(
             <FormattedMessage
@@ -119,16 +105,7 @@ export const InspectorFlyoutContent: FC<Props> = ({
     }
 
     setIsSubmitted(true);
-  }, [
-    form,
-    onSave,
-    item.id,
-    item.title,
-    checkForDuplicateTitle,
-    confirmedDuplicateTitle,
-    notifyError,
-    entityName,
-  ]);
+  }, [form, onSave, item.id, notifyError, entityName]);
 
   const onClickCancel = useCallback(() => {
     onCancel();
@@ -150,9 +127,6 @@ export const InspectorFlyoutContent: FC<Props> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {confirmedDuplicateTitle ? (
-          <DuplicateTitleCallout title={confirmedDuplicateTitle} entityName={entityName} />
-        ) : null}
         <MetadataForm
           form={{ ...form, isSubmitted }}
           isReadonly={isReadonly}

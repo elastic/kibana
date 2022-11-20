@@ -13,13 +13,7 @@ import type { Props as InspectorFlyoutContentProps } from './inspector_flyout_co
 
 type CommonProps = Pick<
   InspectorFlyoutContentProps,
-  | 'item'
-  | 'isReadonly'
-  | 'services'
-  | 'onSave'
-  | 'onCancel'
-  | 'entityName'
-  | 'checkForDuplicateTitle'
+  'item' | 'isReadonly' | 'services' | 'onSave' | 'onCancel' | 'entityName' | 'customValidators'
 >;
 
 export type Props = CommonProps;

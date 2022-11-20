@@ -31,39 +31,26 @@ export const MetadataForm: FC<Props> = ({
   TagSelector,
   isReadonly,
 }) => {
-  const {
-    title,
-    setTitle,
-    description,
-    setDescription,
-    tags,
-    setTags,
-    isSubmitted,
-    isValid,
-    getErrors,
-  } = form;
+  const { title, setTitle, description, setDescription, tags, setTags, isSubmitted, errors } = form;
 
   return (
-    <EuiForm
-      isInvalid={isSubmitted && isValid === false}
-      error={getErrors()}
-      data-test-subj="metadataForm"
-    >
+    <EuiForm isInvalid={isSubmitted && errors.length} error={errors} data-test-subj="metadataForm">
       <EuiFormRow
         label={i18n.translate('contentManagement.inspector.metadataForm.nameInputLabel', {
           defaultMessage: 'Name',
         })}
-        error={title.errorMessage}
-        isInvalid={!title.isChangingValue && !title.isValid}
+        error={title.errors}
+        isInvalid={!title.isChangingValue && Boolean(title.errors?.length)}
         fullWidth
       >
         <EuiFieldText
-          isInvalid={!title.isChangingValue && !title.isValid}
+          isInvalid={!title.isChangingValue && Boolean(title.errors?.length)}
           value={title.value}
           onChange={(e) => {
             setTitle(e.target.value);
           }}
           fullWidth
+          isLoading={title.isChangingValue}
           data-test-subj="nameInput"
           readOnly={isReadonly}
         />
@@ -75,12 +62,12 @@ export const MetadataForm: FC<Props> = ({
         label={i18n.translate('contentManagement.inspector.metadataForm.descriptionInputLabel', {
           defaultMessage: 'Description',
         })}
-        error={description.errorMessage}
-        isInvalid={!description.isChangingValue && !description.isValid}
+        error={description.errors}
+        isInvalid={!description.isChangingValue && Boolean(description.errors?.length)}
         fullWidth
       >
         <EuiTextArea
-          isInvalid={!description.isChangingValue && !description.isValid}
+          isInvalid={!description.isChangingValue && Boolean(description.errors?.length)}
           value={description.value}
           onChange={(e) => {
             setDescription(e.target.value);
