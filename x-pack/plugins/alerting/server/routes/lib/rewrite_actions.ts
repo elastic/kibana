@@ -7,7 +7,7 @@
 import { CamelToSnake, RewriteRequestCase } from './rewrite_request_case';
 import { RuleAction } from '../../types';
 
-type ReqRuleAction = Omit<RuleAction, 'actionTypeId' | 'frequency'> & {
+type ReqRuleAction = Omit<RuleAction, 'actionTypeId' | 'frequency' | 'lastTriggerDate'> & {
   frequency?: {
     [K in keyof NonNullable<RuleAction['frequency']> as CamelToSnake<K>]: NonNullable<
       RuleAction['frequency']
@@ -16,7 +16,7 @@ type ReqRuleAction = Omit<RuleAction, 'actionTypeId' | 'frequency'> & {
 };
 export const rewriteActions: (
   actions?: ReqRuleAction[]
-) => Array<Omit<RuleAction, 'actionTypeId'>> = (actions) => {
+) => Array<Omit<RuleAction, 'actionTypeId' | 'lastTriggerDate'>> = (actions) => {
   const rewriteFrequency: RewriteRequestCase<NonNullable<RuleAction['frequency']>> = ({
     notify_when: notifyWhen,
     ...rest
@@ -27,6 +27,6 @@ export const rewriteActions: (
       ({
         ...action,
         ...(action.frequency ? { frequency: rewriteFrequency(action.frequency) } : {}),
-      } as RuleAction)
+      } as unknown as RuleAction)
   );
 };

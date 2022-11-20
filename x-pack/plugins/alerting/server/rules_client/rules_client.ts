@@ -75,6 +75,7 @@ import {
   RuleSnooze,
   RuleSnoozeSchedule,
   RawAlertInstance as RawAlert,
+  RawRuleAction,
 } from '../types';
 import {
   validateRuleTypeParams,
@@ -144,7 +145,7 @@ import { isDetectionEngineAADRuleType } from '../saved_objects/migrations/utils'
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
 }
-type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
+export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId' | 'lastTriggerDate'>;
 export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginGrantAPIKeyResult };
@@ -713,12 +714,16 @@ export class RulesClient {
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
     const throttle = data.throttle ?? null;
+    const actionsWithDefaultValues = actions.map((action) => ({
+      ...action,
+      lastTriggerDate: null,
+    }));
 
     const rawRule: RawRule = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       legacyId,
-      actions,
+      actions: actionsWithDefaultValues,
       createdBy: username,
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
@@ -3792,9 +3797,12 @@ export class RulesClient {
     references: SavedObjectReference[]
   ) {
     return actions.map((action) => {
+      const lastTriggerDate = action.lastTriggerDate ? new Date(action.lastTriggerDate) : null;
+
       if (action.actionRef.startsWith(preconfiguredConnectorActionRefPrefix)) {
         return {
-          ...omit(action, 'actionRef'),
+          ...action,
+          ...(lastTriggerDate !== undefined && { lastTriggerDate }),
           id: action.actionRef.replace(preconfiguredConnectorActionRefPrefix, ''),
         };
       }
@@ -3804,7 +3812,8 @@ export class RulesClient {
         throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
       }
       return {
-        ...omit(action, 'actionRef'),
+        ...action,
+        ...(lastTriggerDate !== undefined && { lastTriggerDate }),
         id: reference.id,
       };
     }) as Rule['actions'];
@@ -4097,7 +4106,7 @@ export class RulesClient {
               ...alertAction,
               actionRef: `${preconfiguredConnectorActionRefPrefix}${id}`,
               actionTypeId: actionResultValue.actionTypeId,
-            });
+            } as RawRuleAction);
           } else {
             const actionRef = `action_${i}`;
             references.push({
@@ -4109,14 +4118,14 @@ export class RulesClient {
               ...alertAction,
               actionRef,
               actionTypeId: actionResultValue.actionTypeId,
-            });
+            } as RawRuleAction);
           }
         } else {
           actions.push({
             ...alertAction,
             actionRef: '',
             actionTypeId: '',
-          });
+          } as RawRuleAction);
         }
       });
     }

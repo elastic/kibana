@@ -69,11 +69,12 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: actions.map(({ group, id, actionTypeId, params }) => ({
+        actions: actions.map(({ group, id, actionTypeId, params, lastTriggerDate }) => ({
           group,
           id,
           params,
           connector_type_id: actionTypeId,
+          last_trigger_date: lastTriggerDate,
         })),
       }
     : {}),

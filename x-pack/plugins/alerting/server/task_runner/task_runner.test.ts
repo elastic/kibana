@@ -223,7 +223,30 @@ describe('Task Runner', () => {
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
     const runnerResult = await taskRunner.run();
-    expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
+    expect(runnerResult).toEqual(
+      generateRunnerResult({
+        state: true,
+        history: [true],
+        updatedActions: [
+          {
+            group: 'default',
+            actionTypeId: 'action',
+            params: {
+              foo: true,
+            },
+            lastTriggerDate: null,
+          },
+          {
+            group: 'recovered',
+            actionTypeId: 'action',
+            params: {
+              isResolved: true,
+            },
+            lastTriggerDate: null,
+          },
+        ],
+      })
+    );
 
     expect(ruleType.executor).toHaveBeenCalledTimes(1);
     const call = ruleType.executor.mock.calls[0][0];
@@ -271,7 +294,9 @@ describe('Task Runner', () => {
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
-    ).toHaveBeenCalledWith(...generateSavedObjectParams({}));
+    ).toHaveBeenCalledWith(
+      ...generateSavedObjectParams({ actions: RULE_ACTIONS.map(({ id, ...action }) => action) })
+    );
 
     expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
     expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledWith(
@@ -668,13 +693,12 @@ describe('Task Runner', () => {
 
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
+        notifyWhen: 'onThrottleInterval',
         throttle: '1d',
       });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       await taskRunner.run();
-      // expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
-      // expect(logger.debug).toHaveBeenCalledTimes(5);
       expect(logger.debug).nthCalledWith(
         3,
         `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is throttled`
@@ -1255,6 +1279,7 @@ describe('Task Runner', () => {
             params: {
               foo: true,
             },
+            lastTriggerDate: null,
           },
           {
             group: recoveryActionGroup.id,
@@ -1263,6 +1288,7 @@ describe('Task Runner', () => {
             params: {
               isResolved: true,
             },
+            lastTriggerDate: null,
           },
         ],
       });
@@ -1395,7 +1421,29 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(
-      generateRunnerResult({ state: true, interval: '30s', history: [true] })
+      generateRunnerResult({
+        state: true,
+        interval: '30s',
+        history: [true],
+        updatedActions: [
+          {
+            group: 'default',
+            actionTypeId: 'action',
+            params: {
+              foo: true,
+            },
+            lastTriggerDate: null,
+          },
+          {
+            group: 'recovered',
+            actionTypeId: 'action',
+            params: {
+              isResolved: true,
+            },
+            lastTriggerDate: null,
+          },
+        ],
+      })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
@@ -2083,7 +2131,30 @@ describe('Task Runner', () => {
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
     const runnerResult = await taskRunner.run();
-    expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
+    expect(runnerResult).toEqual(
+      generateRunnerResult({
+        state: true,
+        history: [true],
+        updatedActions: [
+          {
+            group: 'default',
+            actionTypeId: 'action',
+            params: {
+              foo: true,
+            },
+            lastTriggerDate: null,
+          },
+          {
+            group: 'recovered',
+            actionTypeId: 'action',
+            params: {
+              isResolved: true,
+            },
+            lastTriggerDate: null,
+          },
+        ],
+      })
+    );
     expect(ruleType.executor).toHaveBeenCalledTimes(1);
     const call = ruleType.executor.mock.calls[0][0];
     expect(call.params).toEqual({ bar: true });
@@ -2132,7 +2203,9 @@ describe('Task Runner', () => {
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
-    ).toHaveBeenCalledWith(...generateSavedObjectParams({}));
+    ).toHaveBeenCalledWith(
+      ...generateSavedObjectParams({ actions: RULE_ACTIONS.map(({ id, ...action }) => action) })
+    );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
@@ -2148,7 +2221,30 @@ describe('Task Runner', () => {
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
     const runnerResult = await taskRunner.run();
-    expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
+    expect(runnerResult).toEqual(
+      generateRunnerResult({
+        state: true,
+        history: [true],
+        updatedActions: [
+          {
+            group: 'default',
+            actionTypeId: 'action',
+            params: {
+              foo: true,
+            },
+            lastTriggerDate: null,
+          },
+          {
+            group: 'recovered',
+            actionTypeId: 'action',
+            params: {
+              isResolved: true,
+            },
+            lastTriggerDate: null,
+          },
+        ],
+      })
+    );
   });
 
   test('successfully stores failure runs', async () => {
@@ -2234,6 +2330,7 @@ describe('Task Runner', () => {
     ).toHaveBeenCalledWith(
       ...generateSavedObjectParams({
         nextRun: '1970-01-01T00:00:50.000Z',
+        actions: RULE_ACTIONS.map(({ id, ...action }) => action),
       })
     );
   });
@@ -2339,26 +2436,36 @@ describe('Task Runner', () => {
         group: 'default',
         id: '1',
         actionTypeId: 'action',
+        params: {},
+        lastTriggerDate: null,
       },
       {
         group: 'default',
         id: '2',
         actionTypeId: 'action',
+        params: {},
+        lastTriggerDate: null,
       },
       {
         group: 'default',
         id: '3',
         actionTypeId: 'action',
+        params: {},
+        lastTriggerDate: null,
       },
       {
         group: 'default',
         id: '4',
         actionTypeId: 'action',
+        params: {},
+        lastTriggerDate: null,
       },
       {
         group: 'default',
         id: '5',
         actionTypeId: 'action',
+        params: {},
+        lastTriggerDate: null,
       },
     ];
 
@@ -2384,6 +2491,11 @@ describe('Task Runner', () => {
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
 
+    const updatedActions = mockActions.map(({ id, ...action }) => ({
+      ...action,
+      lastTriggerDate: ['1', '2', '3'].includes(id) ? new Date('1970-01-01T00:00:00.000Z') : null,
+    }));
+
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
     ).toHaveBeenCalledWith(
@@ -2395,6 +2507,7 @@ describe('Task Runner', () => {
           active: 1,
           new: 1,
         },
+        actions: updatedActions,
       })
     );
 
@@ -2416,6 +2529,7 @@ describe('Task Runner', () => {
             },
           },
         },
+        updatedActions,
       })
     );
 
@@ -2496,35 +2610,52 @@ describe('Task Runner', () => {
       }
     );
 
+    const mockActions = [
+      {
+        group: 'default',
+        id: '1',
+        actionTypeId: '.server-log',
+        params: {},
+        lastTriggerDate: null,
+      },
+      {
+        group: 'default',
+        id: '2',
+        actionTypeId: '.server-log',
+        params: {},
+        lastTriggerDate: null,
+      },
+      {
+        group: 'default',
+        id: '3',
+        actionTypeId: '.server-log',
+        params: {},
+        lastTriggerDate: null,
+      },
+      {
+        group: 'default',
+        id: '4',
+        actionTypeId: 'any-action',
+        params: {},
+        lastTriggerDate: null,
+      },
+      {
+        group: 'default',
+        id: '5',
+        actionTypeId: 'any-action',
+        params: {},
+        lastTriggerDate: null,
+      },
+    ];
+
+    const updatedActions = mockActions.map(({ id, ...action }) => ({
+      ...action,
+      lastTriggerDate: ['1', '4', '5'].includes(id) ? new Date('1970-01-01T00:00:00.000Z') : null,
+    }));
+
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
-      actions: [
-        {
-          group: 'default',
-          id: '1',
-          actionTypeId: '.server-log',
-        },
-        {
-          group: 'default',
-          id: '2',
-          actionTypeId: '.server-log',
-        },
-        {
-          group: 'default',
-          id: '3',
-          actionTypeId: '.server-log',
-        },
-        {
-          group: 'default',
-          id: '4',
-          actionTypeId: 'any-action',
-        },
-        {
-          group: 'default',
-          id: '5',
-          actionTypeId: 'any-action',
-        },
-      ],
+      actions: mockActions,
     } as jest.ResolvedValue<unknown>);
 
     ruleTypeRegistry.get.mockReturnValue(ruleType);
@@ -2557,6 +2688,7 @@ describe('Task Runner', () => {
           active: 2,
           new: 2,
         },
+        actions: updatedActions,
       })
     );
 
@@ -2590,6 +2722,7 @@ describe('Task Runner', () => {
             },
           },
         },
+        updatedActions,
       })
     );
 

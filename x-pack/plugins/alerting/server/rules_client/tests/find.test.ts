@@ -101,6 +101,7 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                lastTriggerDate: null,
               },
             ],
           },
@@ -145,8 +146,10 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionRef": "action_0",
                 "group": "default",
                 "id": "1",
+                "lastTriggerDate": null,
                 "params": Object {
                   "foo": true,
                 },
@@ -210,6 +213,7 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                lastTriggerDate: null,
               },
               {
                 group: 'default',
@@ -217,6 +221,7 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                lastTriggerDate: '2020-01-01T12:00:00Z',
               },
             ],
           },
@@ -239,15 +244,19 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionRef": "action_0",
                 "group": "default",
                 "id": "1",
+                "lastTriggerDate": null,
                 "params": Object {
                   "foo": true,
                 },
               },
               Object {
+                "actionRef": "preconfigured:preconfigured",
                 "group": "default",
                 "id": "preconfigured",
+                "lastTriggerDate": 2020-01-01T12:00:00.000Z,
                 "params": Object {
                   "foo": true,
                 },
@@ -398,6 +407,7 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                lastTriggerDate: null,
               },
             ],
           },
@@ -430,6 +440,7 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                lastTriggerDate: null,
               },
             ],
           },
@@ -467,8 +478,10 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionRef": "action_0",
                 "group": "default",
                 "id": "1",
+                "lastTriggerDate": null,
                 "params": Object {
                   "foo": true,
                 },
@@ -490,8 +503,10 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionRef": "action_0",
                 "group": "default",
                 "id": "1",
+                "lastTriggerDate": null,
                 "params": Object {
                   "foo": true,
                 },

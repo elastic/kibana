@@ -15,8 +15,12 @@ import {
 } from '../../common';
 
 function transformAction(input: AsApiContract<RuleAction>): RuleAction {
-  const { connector_type_id: actionTypeId, ...rest } = input;
-  return { actionTypeId, ...rest };
+  const { connector_type_id: actionTypeId, last_trigger_date: lastTriggerDate, ...rest } = input;
+  return {
+    actionTypeId,
+    lastTriggerDate: lastTriggerDate ? new Date(lastTriggerDate as unknown as string) : null,
+    ...rest,
+  };
 }
 
 // AsApiContract does not deal with object properties that are dates - the

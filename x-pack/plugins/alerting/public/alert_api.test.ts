@@ -106,6 +106,7 @@ describe('loadRule', () => {
             "actionTypeId": ".server-log",
             "group": "threshold met",
             "id": "3619a0d0-582b-11ec-8995-2b1578a3bc5d",
+            "lastTriggerDate": null,
             "params": Object {
               "message": "alert 37: {{context.message}}",
             },
@@ -278,6 +279,7 @@ function getApiRule() {
         },
         group: 'threshold met',
         id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
+        lastTriggerDate: null,
       },
     ],
     params: { x: 42 },
@@ -319,6 +321,7 @@ function getRule(): Rule<{ x: number }> {
         },
         group: 'threshold met',
         id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
+        lastTriggerDate: null,
       },
     ],
     params: { x: 42 },

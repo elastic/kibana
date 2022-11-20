@@ -8,7 +8,7 @@
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { ActionsCompletion } from '../../common';
+import { ActionsCompletion, RuleAction } from '../../common';
 import {
   RuleLastRunOutcomeValues,
   RuleLastRunOutcomes,
@@ -22,10 +22,11 @@ import { RuleRunMetrics } from './rule_run_metrics_store';
 export interface ILastRun {
   lastRun: RuleLastRun;
   metrics: RuleRunMetrics | null;
+  updatedActions: Array<Omit<RuleAction, 'id'>>;
 }
 
 export const lastRunFromState = (stateWithMetrics: RuleTaskStateAndMetrics): ILastRun => {
-  const { metrics } = stateWithMetrics;
+  const { metrics, updatedActions } = stateWithMetrics;
   let outcome: RuleLastRunOutcomes = RuleLastRunOutcomeValues[0];
   // Check for warning states
   let warning = null;
@@ -55,6 +56,7 @@ export const lastRunFromState = (stateWithMetrics: RuleTaskStateAndMetrics): ILa
       },
     },
     metrics,
+    updatedActions,
   };
 };
 
@@ -67,6 +69,7 @@ export const lastRunFromError = (error: Error): ILastRun => {
       alertsCount: {},
     },
     metrics: null,
+    updatedActions: [],
   };
 };
 
