@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await queryBar.submitQuery();
   };
 
-  describe.only('dashboard with async search', () => {
+  describe('dashboard with async search', () => {
     before(async function () {
       const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {

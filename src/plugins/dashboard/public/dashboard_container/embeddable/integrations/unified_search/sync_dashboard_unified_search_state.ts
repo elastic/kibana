@@ -7,16 +7,12 @@
  */
 
 import { merge, Subject } from 'rxjs';
+import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs/operators';
 
-import {
-  connectToQueryState,
-  syncGlobalQueryStateWithUrl,
-  waitUntilNextSessionCompletes$,
-} from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
-import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs/operators';
+import { connectToQueryState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
 import { pluginServices } from '../../../../services/plugin_services';
@@ -53,12 +49,6 @@ export function syncUnifiedSearchState(
       query: query ?? queryString.getDefaultQuery(),
     });
   });
-
-  // starts syncing `_g` portion of url with query services
-  const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-    queryService,
-    kbnUrlStateStorage
-  );
 
   // starts syncing app filters between dashboard state and filterManager
   const {
@@ -107,7 +97,6 @@ export function syncUnifiedSearchState(
   const stopSyncingUnifiedSearchState = () => {
     autoRefreshSubscription.unsubscribe();
     timeRefreshSubscription.unsubscribe();
-    stopSyncingQueryServiceStateWithUrl();
     unsubscribeFromSavedFilterChanges();
     stopSyncingAppFilters();
   };

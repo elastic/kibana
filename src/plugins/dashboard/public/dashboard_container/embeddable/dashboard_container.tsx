@@ -431,20 +431,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     if (this.controlGroup) {
       combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
     }
-    console.log('inheriting input', {
-      refreshConfig: refreshInterval,
-      filters: combinedFilters,
-      hidePanelTitles,
-      searchSessionId,
-      executionContext,
-      syncTooltips,
-      syncColors,
-      timeRange,
-      timeslice,
-      viewMode,
-      query,
-      id,
-    });
     return {
       refreshConfig: refreshInterval,
       filters: combinedFilters,

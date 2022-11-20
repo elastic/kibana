@@ -8,12 +8,13 @@
 
 import { cloneDeep } from 'lodash';
 
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
-import { syncUnifiedSearchState } from './sync_dashboard_unified_search_state';
 import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardContainerByValueInput } from '../../../../../common';
+import { syncUnifiedSearchState } from './sync_dashboard_unified_search_state';
 
 /**
  * Applies initial state to the query service, and the saved dashboard search source
@@ -35,9 +36,14 @@ export function startUnifiedSearchIntegration(
   const {
     data: { query: queryService },
   } = pluginServices.getServices();
-  const {
-    timefilter: { timefilter: timefilterService },
-  } = queryService;
+  const { timefilter } = queryService;
+  const { timefilter: timefilterService } = timefilter;
+
+  // starts syncing `_g` portion of url with query services
+  const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
+    queryService,
+    kbnUrlStateStorage
+  );
 
   // apply initial dashboard saved filters, query, and time range to the query bar.
   applySavedFiltersToUnifiedSearch.bind(this)(initialInput);
@@ -46,6 +52,7 @@ export function startUnifiedSearchIntegration(
   this.untilInitialized().then(() => {
     const stopSyncingUnifiedSearchState = syncUnifiedSearchState.bind(this)(kbnUrlStateStorage);
     setCleanupFunction(() => {
+      stopSyncingQueryServiceStateWithUrl?.();
       stopSyncingUnifiedSearchState?.();
     });
   });
