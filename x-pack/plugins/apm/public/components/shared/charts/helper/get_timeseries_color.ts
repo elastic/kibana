@@ -7,7 +7,7 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 
-export const enum ChartType {
+export enum ChartType {
   LATENCY_AVG,
   LATENCY_P95,
   LATENCY_P99,

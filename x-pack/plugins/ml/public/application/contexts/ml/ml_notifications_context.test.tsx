@@ -56,7 +56,7 @@ describe('useMlNotifications', () => {
       mockKibana as unknown as ReturnType<typeof useMlKibana>
     );
 
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(1663945337063);
   });
 

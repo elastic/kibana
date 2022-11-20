@@ -6,10 +6,10 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+        class="euiFlexGroup css-nhr7ke"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrow10"
+          class="euiFlexItem emotion-euiFlexItem-grow-10"
         >
           <span
             data-test-subj="TextWithEditTestText"
@@ -18,17 +18,17 @@ Object {
           </span>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+          class="euiFlexItem emotion-EuiFlexItem"
         />
       </div>
     </div>
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+      class="euiFlexGroup css-nhr7ke"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrow10"
+        class="euiFlexItem emotion-euiFlexItem-grow-10"
       >
         <span
           data-test-subj="TextWithEditTestText"
@@ -37,7 +37,7 @@ Object {
         </span>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+        class="euiFlexItem emotion-EuiFlexItem"
       />
     </div>
   </div>,
@@ -101,10 +101,10 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+        class="euiFlexGroup css-nhr7ke"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrow10"
+          class="euiFlexItem emotion-euiFlexItem-grow-10"
         >
           <span
             data-test-subj="TextWithEditTestText"
@@ -113,7 +113,7 @@ Object {
           </span>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+          class="euiFlexItem emotion-EuiFlexItem"
         >
           <button
             aria-label="Edit Text List Header"
@@ -134,10 +134,10 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
+      class="euiFlexGroup css-nhr7ke"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrow10"
+        class="euiFlexItem emotion-euiFlexItem-grow-10"
       >
         <span
           data-test-subj="TextWithEditTestText"
@@ -146,7 +146,7 @@ Object {
         </span>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero emotion-EuiFlexItem"
+        class="euiFlexItem emotion-EuiFlexItem"
       >
         <button
           aria-label="Edit Text List Header"
