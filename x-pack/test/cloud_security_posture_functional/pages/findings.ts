@@ -45,6 +45,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     // Testing only page numbers buttons to verify the request we issue results in proper paginating
     describe('Pagination', () => {
+      it('Changes rows per page', async () => {
+        await pageObjects.findings.assertPageSize(25);
+        await pageObjects.findings.changePageSize(10);
+        await pageObjects.findings.assertPageSize(10);
+      });
+
       it('Navigates to next page', async () => {
         await pageObjects.findings.goToPageIndex(1);
         await pageObjects.findings.assertPageIndex(1);
@@ -53,13 +59,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('Navigates to prev page', async () => {
         await pageObjects.findings.goToPageIndex(0);
         await pageObjects.findings.assertPageIndex(0);
-      });
-
-      it('Changes rows per page', async () => {
-        await pageObjects.findings.assertPageSize(10);
-        await pageObjects.findings.changePageSize(25);
-        await pageObjects.findings.assertPageSize(25);
-        await pageObjects.findings.changePageSize(10); // revert
       });
     });
 
