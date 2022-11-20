@@ -105,14 +105,14 @@ export class Cache {
     clearTimeout(this.timer);
   }
 
-  update(path: string, file: { mtime: string; code: string; map?: any }) {
+  async update(path: string, file: { mtime: string; code: string; map?: any }) {
     const key = this.getKey(path);
-    this.safePut(this.atimes, key, GLOBAL_ATIME);
-    this.safePut(this.mtimes, key, file.mtime);
-    this.safePut(this.codes, key, file.code);
-    if (file.map != null) {
-      this.safePut(this.sourceMaps, key, JSON.stringify(file.map));
-    }
+    await Promise.all([
+      this.safePut(this.atimes, key, GLOBAL_ATIME),
+      this.safePut(this.mtimes, key, file.mtime),
+      this.safePut(this.codes, key, file.code),
+      file.map != null ? this.safePut(this.sourceMaps, key, JSON.stringify(file.map)) : null,
+    ]);
   }
 
   private getKey(path: string) {
