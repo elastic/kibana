@@ -31,10 +31,24 @@ export const MetadataForm: FC<Props> = ({
   TagSelector,
   isReadonly,
 }) => {
-  const { title, setTitle, description, setDescription, tags, setTags, isSubmitted, errors } = form;
+  const {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    tags,
+    setTags,
+    isSubmitted,
+    isValid,
+    getErrorsMessages,
+  } = form;
 
   return (
-    <EuiForm isInvalid={isSubmitted && errors.length} error={errors} data-test-subj="metadataForm">
+    <EuiForm
+      isInvalid={isSubmitted && !isValid}
+      error={getErrorsMessages()}
+      data-test-subj="metadataForm"
+    >
       <EuiFormRow
         label={i18n.translate('contentManagement.inspector.metadataForm.nameInputLabel', {
           defaultMessage: 'Name',

@@ -231,13 +231,16 @@ export const VisualizeListing = () => {
                   { savedObjectsClient: savedObjects.client, overlays }
                 );
               } catch (e) {
-                return i18n.translate('contentManagement.inspector.duplicateTitleLabel', {
-                  defaultMessage:
-                    'This Visualization already exists. Saving {value} creates a duplicate title.',
-                  values: {
-                    value,
-                  },
-                });
+                return i18n.translate(
+                  'visualizations.visualizeListingDeleteErrorTitle.duplicateWarning',
+                  {
+                    defaultMessage:
+                      'This Visualization already exists. Saving {value} creates a duplicate title.',
+                    values: {
+                      value,
+                    },
+                  }
+                );
               }
             }
           },

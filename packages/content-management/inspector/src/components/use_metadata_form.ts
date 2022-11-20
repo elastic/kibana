@@ -110,7 +110,6 @@ export const useMetadataForm = ({
     },
     tags: {
       value: item.tags ? item.tags.map(({ id }) => id) : [],
-
       isChangingValue: false,
     },
   });
@@ -197,8 +196,9 @@ export const useMetadataForm = ({
     setDescription,
     tags: fields.tags,
     setTags,
-    errors,
-    warnings,
+    isValid: !errors?.length,
+    getErrorsMessages: () => errors,
+    getWarningMessages: () => warnings,
   };
 };
 
