@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
             stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
             actions: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
@@ -100,7 +101,6 @@ export default function ({ getService }: FtrProviderContext) {
               'actions_log_management_all',
               'actions_log_management_read',
               'all',
-              'file_operations_all',
               'host_isolation_all',
               'minimal_all',
               'minimal_read',
@@ -132,6 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
             dev_tools: ['all', 'read', 'minimal_all', 'minimal_read'],
             advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             osquery: [
               'all',

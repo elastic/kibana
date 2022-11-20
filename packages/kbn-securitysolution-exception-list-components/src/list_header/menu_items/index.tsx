@@ -72,18 +72,19 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
         )}
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <EuiButton
-          data-test-subj={`${dataTestSubj || ''}ManageRulesButton`}
-          fill
-          onClick={() => {
-            if (typeof onExportList === 'function') onManageRules();
-          }}
-        >
-          {i18n.EXCEPTION_LIST_HEADER_MANAGE_RULES_BUTTON}
-        </EuiButton>
-      </EuiFlexItem>
-
+      {canUserEditList && (
+        <EuiFlexItem>
+          <EuiButton
+            data-test-subj={`${dataTestSubj || ''}ManageRulesButton`}
+            fill
+            onClick={() => {
+              if (typeof onExportList === 'function') onManageRules();
+            }}
+          >
+            {i18n.EXCEPTION_LIST_HEADER_MANAGE_RULES_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <HeaderMenu
           dataTestSubj={`${dataTestSubj || ''}MenuActions`}

@@ -16,9 +16,11 @@ import { EmptyComponent, onFilterAdded, useKibanaServices } from './helpers';
 export const getFilterForCellAction = ({
   data,
   pageSize,
+  closeCellPopover,
 }: {
   data?: TimelineNonEcsData[][];
   pageSize: number;
+  closeCellPopover?: () => void;
 }) =>
   data && data.length > 0
     ? function FilterFor({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) {
@@ -47,6 +49,7 @@ export const getFilterForCellAction = ({
             ownFocus: false,
             showTooltip: false,
             value,
+            onClick: closeCellPopover,
           };
         }, [Component, columnId, filterManager, value]);
 

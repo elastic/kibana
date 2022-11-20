@@ -1,0 +1,84 @@
+get:
+  summary: Fleet Proxies - Info
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/proxies.yaml
+            required:
+              - item
+  operationId: get-one-fleet-proxies
+parameters:
+  - schema:
+      type: string
+    name: itemId
+    in: path
+    required: true
+delete:
+  summary: Fleet Proxies - Delete
+  operationId: delete-fleet-proxies
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+            required:
+              - id
+  parameters:
+    - schema:
+        type: string
+      name: itemId
+      in: path
+      required: true
+    - $ref: ../components/headers/kbn_xsrf.yaml
+put:
+  summary: Fleet Proxies - Update
+  operationId: update-fleet-proxies
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            url:
+              type: string
+            proxy_headers:
+              type: object
+            certificate_authorities:
+              type: string
+            certificate:
+              type: string
+            certificate_key:
+              type: string
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/proxies.yaml
+            required:
+              - item
+  parameters:
+    - schema:
+        type: string
+      name: itemId
+      in: path
+      required: true
+    - $ref: ../components/headers/kbn_xsrf.yaml
