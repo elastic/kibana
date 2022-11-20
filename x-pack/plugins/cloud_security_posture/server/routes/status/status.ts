@@ -18,7 +18,7 @@ import {
   getCspAgentPolicies,
   getCspPackagePolicies,
 } from '../../lib/fleet_util';
-import { checkForFindings } from '../../lib/check_for_findings';
+import { checkForFindingsStatus, type FindingsStatus } from '../../lib/check_for_findings';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 
@@ -51,12 +51,13 @@ const getHealthyAgents = async (
 };
 
 const calculateCspStatusCode = (
-  hasFindings: boolean,
+  findingsStatus: FindingsStatus,
   installedCspPackagePolicies: number,
   healthyAgents: number,
   timeSinceInstallationInMinutes: number
 ): CspStatusCode => {
-  if (hasFindings) return 'indexed';
+  if (findingsStatus === 'exists') return 'indexed';
+  if (findingsStatus === 'unprivileged') return 'unprivileged';
   if (installedCspPackagePolicies === 0) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
@@ -74,16 +75,15 @@ const getCspStatus = async ({
   agentPolicyService,
   agentService,
 }: CspApiRequestHandlerContext): Promise<CspSetupStatus> => {
-  const [hasFindings, installation, latestCspPackage, installedPackagePolicies] = await Promise.all(
-    [
-      checkForFindings(esClient.asCurrentUser, true, logger),
+  const [findingsStatus, installation, latestCspPackage, installedPackagePolicies] =
+    await Promise.all([
+      checkForFindingsStatus(esClient.asCurrentUser, true, logger),
       packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
       packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
       getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
         per_page: 10000,
       }),
-    ]
-  );
+    ]);
 
   const healthyAgents = await getHealthyAgents(
     soClient,
@@ -97,7 +97,7 @@ const getCspStatus = async ({
 
   const MIN_DATE = 0;
   const status = calculateCspStatusCode(
-    hasFindings,
+    findingsStatus,
     installedPackagePoliciesTotal,
     healthyAgents,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE)

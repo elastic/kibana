@@ -6,8 +6,16 @@
  */
 
 import React from 'react';
-import { EuiLoadingLogo, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiLoadingLogo,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiIcon,
+  EuiMarkdownFormat,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { useCspBenchmarkIntegrations } from '../pages/benchmarks/use_csp_benchmark_integrations';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
@@ -116,6 +124,44 @@ const IndexTimeout = () => (
   />
 );
 
+const Unprivileged = () => (
+  <EuiEmptyPrompt
+    data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED}
+    color="plain"
+    icon={<EuiIcon type="logoSecurity" size="xl" />}
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.csp.noFindingsStates.unprivileged.unprivilegedTitle"
+          defaultMessage="Privileges required"
+        />
+      </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.csp.noFindingsStates.unprivileged.unprivilegedDescription"
+          defaultMessage="To view cloud posture data, you must update privileges. For more information, contact your Kibana administrator."
+        />
+      </p>
+    }
+    footer={
+      <EuiMarkdownFormat
+        css={css`
+          text-align: initial;
+        `}
+        children={i18n.translate(
+          'xpack.csp.noFindingsStates.unprivileged.unprivilegedFooterMarkdown',
+          {
+            defaultMessage:
+              'Required Elasticsearch index privilege `read` for the following indices:\n- `logs-cloud_security_posture.findings_latest-*`\n- `logs-cloud_security_posture.scores-*`',
+          }
+        )}
+      />
+    }
+  />
+);
+
 /**
  * This component will return the render states based on cloud posture setup status API
  * since 'not-installed' is being checked globally by CloudPosturePage and 'indexed' is the pass condition, those states won't be handled here
@@ -130,6 +176,7 @@ export const NoFindingsStates = () => {
     if (status === 'not-deployed') return <NotDeployed />; // integration installed, but no agents added
     if (status === 'indexing') return <Indexing />; // agent added, index timeout hasn't passed since installation
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
+    if (status === 'unprivileged') return <Unprivileged />; // user has no privileges for our indices
   };
 
   return (

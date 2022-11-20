@@ -247,6 +247,7 @@ describe('<ComplianceDashboard />', () => {
         DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
   });
@@ -268,6 +269,7 @@ describe('<ComplianceDashboard />', () => {
         DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
   });
@@ -289,6 +291,29 @@ describe('<ComplianceDashboard />', () => {
         DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('no findings state: unprivileged - shows Unprivileged instead of dashboard', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'unprivileged' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED],
+      notToBe: [
+        DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
       ],
     });
   });
@@ -308,6 +333,7 @@ describe('<ComplianceDashboard />', () => {
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
   });

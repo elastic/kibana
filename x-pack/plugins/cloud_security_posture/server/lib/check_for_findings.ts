@@ -8,11 +8,13 @@
 import { ElasticsearchClient, type Logger } from '@kbn/core/server';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS, FINDINGS_INDEX_PATTERN } from '../../common/constants';
 
-export const checkForFindings = async (
+export type FindingsStatus = 'exists' | 'empty' | 'unprivileged';
+
+export const checkForFindingsStatus = async (
   esClient: ElasticsearchClient,
   latestIndex: boolean,
   logger: Logger
-): Promise<boolean> => {
+): Promise<FindingsStatus> => {
   try {
     const queryResult = await esClient.search({
       index: latestIndex ? LATEST_FINDINGS_INDEX_DEFAULT_NS : FINDINGS_INDEX_PATTERN,
@@ -22,9 +24,17 @@ export const checkForFindings = async (
       size: 1,
     });
 
-    return !!queryResult.hits.hits.length;
+    if (queryResult.hits.hits.length) {
+      return 'exists';
+    }
+
+    return 'empty';
   } catch (e) {
     logger.debug(e);
-    return false;
+    if (e?.meta?.body?.error?.type === 'security_exception') {
+      return 'unprivileged';
+    }
+
+    return 'empty';
   }
 };
