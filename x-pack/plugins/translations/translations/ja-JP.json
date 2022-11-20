@@ -9867,8 +9867,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.resourceNameTitle": "リソース名",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle": "ルール名",
     "xpack.csp.findings.findingsFlyout.overviewTabTitle": "概要",
-    "xpack.csp.findings.findingsFlyout.resourceTab.hostAccordionTitle": "ホスト",
-    "xpack.csp.findings.findingsFlyout.resourceTab.resourceAccordionTitle": "リソース",
     "xpack.csp.findings.findingsFlyout.resourceTabTitle": "リソース",
     "xpack.csp.findings.findingsFlyout.ruleTab.auditTitle": "監査",
     "xpack.csp.findings.findingsFlyout.ruleTab.benchmarkTitle": "ベンチマーク",

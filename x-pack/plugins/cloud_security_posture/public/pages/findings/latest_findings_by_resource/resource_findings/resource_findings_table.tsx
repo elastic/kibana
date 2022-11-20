@@ -95,6 +95,11 @@ const ResourceFindingsTableComponent = ({
         <FindingsRuleFlyout
           findings={selectedFinding}
           onClose={() => setSelectedFinding(undefined)}
+          pagination={{
+            pageCount: items.length,
+            activePage: items.findIndex((finding) => finding === selectedFinding),
+            onPageClick: (index) => setSelectedFinding(items[index]),
+          }}
         />
       )}
     </>

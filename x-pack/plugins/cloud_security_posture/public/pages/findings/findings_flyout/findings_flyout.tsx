@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react';
 import {
+  type EuiPaginationProps,
   EuiFlexItem,
   EuiSpacer,
   EuiTextColor,
@@ -17,9 +18,11 @@ import {
   EuiTab,
   EuiFlexGroup,
   PropsOf,
+  EuiPagination,
   EuiCodeBlock,
   EuiMarkdownFormat,
   EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -66,6 +69,7 @@ type FindingsTab = typeof tabs[number];
 interface FindingFlyoutProps {
   onClose(): void;
   findings: CspFinding;
+  pagination: Pick<EuiPaginationProps, 'pageCount' | 'activePage' | 'onPageClick'>;
 }
 
 export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
@@ -108,12 +112,13 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
   }
 };
 
-export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
+export const FindingsRuleFlyout = ({ onClose, findings, pagination }: FindingFlyoutProps) => {
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader>
+        <EuiSpacer size="l" />
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <CspEvaluationBadge type={findings.result.evaluation} />
@@ -126,6 +131,7 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <FlyoutPagination pagination={pagination} />
         <EuiSpacer />
         <EuiTabs>
           {tabs.map((v) => (
@@ -135,9 +141,25 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
           ))}
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody key={tab.id}>
+      <EuiFlyoutBody key={tab.id} style={{ position: 'relative' }}>
         <FindingsTab tab={tab} findings={findings} />
       </EuiFlyoutBody>
     </EuiFlyout>
+  );
+};
+
+const FlyoutPagination = ({ pagination }: { pagination: FindingFlyoutProps['pagination'] }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiPagination
+      {...pagination}
+      style={{
+        justifyContent: 'flex-end',
+        position: 'absolute',
+        top: euiTheme.size.s,
+        right: euiTheme.size.xl,
+      }}
+      compressed
+    />
   );
 };

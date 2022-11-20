@@ -6,102 +6,97 @@
  */
 
 import {
-  EuiAccordion,
-  EuiCode,
-  EuiCodeBlock,
-  EuiDescriptionList,
-  EuiPanel,
+  type EuiInMemoryTableProps,
+  EuiMarkdownFormat,
+  EuiInMemoryTable,
+  EuiToolTip,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
+  EuiCode,
+  EuiCopy,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
 
-const getDescriptionDisplay = (value: unknown) => {
-  if (value === undefined) return 'undefined';
-  if (typeof value === 'boolean' || value === null) {
-    return <EuiCode>{JSON.stringify(value)}</EuiCode>;
+interface ResourceItem {
+  key: string; // flattened dot notation object path for CspFinding['resource'];
+  value: unknown;
+}
+
+function renderField(record: ResourceItem) {
+  switch (record.key) {
+    case 'id':
+    case 'name':
+      return <EuiCode>{JSON.stringify(record.value, null, 2)}</EuiCode>;
+
+    default:
+      return <EuiMarkdownFormat>{record.value as string}</EuiMarkdownFormat>;
   }
+}
 
-  if (typeof value === 'object') {
-    return (
-      <EuiCodeBlock isCopyable={true} overflowHeight={300}>
-        {JSON.stringify(value, null, 2)}
-      </EuiCodeBlock>
-    );
-  }
+const columns: EuiInMemoryTableProps<ResourceItem>['columns'] = [
+  {
+    field: 'key',
+    name: i18n.translate('xpack.csp.flyout.resource.fieldLabel', { defaultMessage: 'Field' }),
+    width: '25%',
+    render: (value: string) => (
+      <EuiCopy textToCopy={value} anchorClassName="eui-textTruncate">
+        {(copy) => (
+          <EuiToolTip content={value} delay="long">
+            <EuiText color="subdued" onClick={copy}>
+              {value}
+            </EuiText>
+          </EuiToolTip>
+        )}
+      </EuiCopy>
+    ),
+  },
+  {
+    field: 'value',
+    name: i18n.translate('xpack.csp.flyout.resource.fieldValueLabel', { defaultMessage: 'Value' }),
+    render: (value, record) => (
+      <EuiCopy textToCopy={value}>
+        {(copy) => <button onClick={copy}>{renderField(record)}</button>}
+      </EuiCopy>
+    ),
+  },
+];
 
-  return <EuiText size="s">{value as string}</EuiText>;
+const search: EuiInMemoryTableProps<ResourceItem>['search'] = {
+  box: {
+    incremental: true,
+  },
 };
 
-export const prepareDescriptionList = (data: any) =>
-  Object.entries(getFlattenedObject(data))
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([key, value]) => ({
-      title: (
-        <EuiText size="s">
-          <strong>{key}</strong>
-        </EuiText>
-      ),
-      description: getDescriptionDisplay(value),
-    }));
+const sorting: EuiInMemoryTableProps<ResourceItem>['sorting'] = {
+  sort: {
+    field: 'key',
+    direction: 'asc',
+  },
+};
+
+const pagination: EuiInMemoryTableProps<ResourceItem>['pagination'] = {
+  initialPageSize: 100,
+  showPerPageOptions: false,
+};
+
+const getFlattenedItems = (resource: CspFinding['resource']) =>
+  Object.entries(getFlattenedObject(resource)).map(([key, value]) => ({ key, value }));
 
 export const ResourceTab = ({ data }: { data: CspFinding }) => {
-  const { euiTheme } = useEuiTheme();
-
-  const accordions = useMemo(
-    () => [
-      {
-        title: i18n.translate(
-          'xpack.csp.findings.findingsFlyout.resourceTab.resourceAccordionTitle',
-          { defaultMessage: 'Resource' }
-        ),
-        id: 'resourceAccordion',
-        listItems: prepareDescriptionList(data.resource),
-      },
-      {
-        title: i18n.translate('xpack.csp.findings.findingsFlyout.resourceTab.hostAccordionTitle', {
-          defaultMessage: 'Host',
-        }),
-        id: 'hostAccordion',
-        listItems: prepareDescriptionList(data.host),
-      },
-    ],
-    [data.host, data.resource]
-  );
-
+  const items = getFlattenedItems(data.resource);
   return (
     <>
-      {accordions.map((accordion) => (
-        <React.Fragment key={accordion.id}>
-          <EuiPanel hasShadow={false} hasBorder>
-            <EuiAccordion
-              id={accordion.id}
-              buttonContent={
-                <EuiText>
-                  <strong>{accordion.title}</strong>
-                </EuiText>
-              }
-              arrowDisplay="left"
-              initialIsOpen
-            >
-              <EuiDescriptionList
-                listItems={accordion.listItems}
-                type="column"
-                style={{
-                  marginTop: euiTheme.size.l,
-                }}
-                titleProps={{ style: { width: '35%' } }}
-                descriptionProps={{ style: { width: '65%' } }}
-              />
-            </EuiAccordion>
-          </EuiPanel>
-          <EuiSpacer size="m" />
-        </React.Fragment>
-      ))}
+      <EuiInMemoryTable
+        items={items}
+        search={search}
+        sorting={sorting}
+        columns={columns}
+        pagination={pagination}
+      />
+      <EuiSpacer size="m" />
     </>
   );
 };

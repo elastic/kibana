@@ -9880,8 +9880,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.resourceNameTitle": "Nom de ressource",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle": "Nom de règle",
     "xpack.csp.findings.findingsFlyout.overviewTabTitle": "Aperçu",
-    "xpack.csp.findings.findingsFlyout.resourceTab.hostAccordionTitle": "Hôte",
-    "xpack.csp.findings.findingsFlyout.resourceTab.resourceAccordionTitle": "Ressource",
     "xpack.csp.findings.findingsFlyout.resourceTabTitle": "Ressource",
     "xpack.csp.findings.findingsFlyout.ruleTab.auditTitle": "Audit",
     "xpack.csp.findings.findingsFlyout.ruleTab.benchmarkTitle": "Benchmark",
