@@ -15,7 +15,7 @@ import type { InspectorFlyoutContentContainerProps } from './components';
 
 export type OpenInspectorParams = Pick<
   InspectorFlyoutContentContainerProps,
-  'item' | 'onSave' | 'isReadonly' | 'entityName' | 'checkForDuplicateTitle'
+  'item' | 'onSave' | 'isReadonly' | 'entityName' | 'customValidators'
 >;
 
 export function useOpenInspector() {

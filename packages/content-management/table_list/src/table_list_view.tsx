@@ -44,7 +44,7 @@ import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 
 interface InspectorConfig
-  extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave' | 'checkForDuplicateTitle'> {
+  extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
   enabled?: boolean;
 }
 

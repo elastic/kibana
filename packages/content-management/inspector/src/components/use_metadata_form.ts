@@ -26,7 +26,7 @@ export interface Fields {
 
 export interface Validator<TValueType = unknown> {
   type: 'warning' | 'error';
-  fn: (value: TValueType) => null | string | Promise<null | string>;
+  fn: (value: TValueType, id: Item['id']) => undefined | string | Promise<undefined | string>;
 }
 
 type BasicValidators = Partial<{
@@ -46,12 +46,11 @@ const basicValidators: BasicValidators = {
     {
       type: 'error',
       fn: (value) => {
-        if (value && value.trim() === '') {
+        if (!value || !value.trim()) {
           return i18n.translate('contentManagement.inspector.metadataForm.nameIsEmptyError', {
             defaultMessage: 'A name is required.',
           });
         }
-        return null;
       },
     },
   ],
@@ -69,6 +68,7 @@ function getCustomValidation<TField extends keyof Fields>(
 
 const executeValidation = async <TField extends keyof Fields>(
   field: TField,
+  id: string,
   value: Fields[TField]['value'],
   customValidators?: CustomValidators
 ) => {
@@ -81,10 +81,10 @@ const executeValidation = async <TField extends keyof Fields>(
     ...(basicValidators[field] ?? []),
     ...getCustomValidation(field, customValidators),
   ]) {
-    const result = await validator.fn(value);
+    const result = await validator.fn(value, id);
     if (result) {
       const key = validator.type === 'error' ? 'errors' : 'warnings';
-      if (key in results && Array.isArray(results[key])) {
+      if (Array.isArray(results[key])) {
         results[key]!.push(result);
       } else {
         results[key] = [result];
@@ -138,7 +138,12 @@ export const useMetadataForm = ({
       // We add a 500s delay so possible errors of the field don't show up
       // _immediately_ as the user writes and we avoid flickering of error message.
       changingValueTimeout.current[fieldName] = setTimeout(async () => {
-        const { errors, warnings } = await executeValidation(fieldName, value, customValidators);
+        const { errors, warnings } = await executeValidation(
+          fieldName,
+          item.id,
+          value,
+          customValidators
+        );
 
         setFields((prev) => {
           return {
@@ -153,7 +158,7 @@ export const useMetadataForm = ({
         });
       }, 500);
     },
-    [customValidators]
+    [customValidators, item.id]
   );
 
   const setTitle: SetFieldValueFn<'title'> = useMemo(() => setFieldValue('title'), [setFieldValue]);
@@ -173,7 +178,7 @@ export const useMetadataForm = ({
             acc.errors = [...acc.errors, ...field.errors];
           }
           if (Array.isArray(field.warnings)) {
-            acc.errors = [...acc.warnings, ...field.warnings];
+            acc.warnings = [...acc.warnings, ...field.warnings];
           }
           return acc;
         },

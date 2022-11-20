@@ -20,6 +20,7 @@ import { useLocation } from 'react-router-dom';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { TableListView } from '@kbn/content-management-table-list';
+import type { OpenInspectorParams } from '@kbn/content-management-inspector';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { findListItems } from '../../utils/saved_visualize_utils';
 import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
@@ -207,32 +208,42 @@ export const VisualizeListing = () => {
     [overlays, savedObjects.client, savedObjectsTagging]
   );
 
-  const doCheckForDuplicateTitle = useCallback(
-    async (args: { id: string; title: string }) => {
-      let hasDuplicatedTitle = false;
-      const content = visualizedUserContent.current?.find(({ id }) => id === args.id);
-
-      if (content) {
-        try {
-          hasDuplicatedTitle = !(await checkForDuplicateTitle(
-            {
-              id: args.id,
-              title: args.title,
-              lastSavedTitle: content.title,
-              getEsType: () => content.type,
-            },
-            false,
-            false,
-            () => {},
-            { savedObjectsClient: savedObjects.client, overlays }
-          ));
-        } catch (e) {
-          hasDuplicatedTitle = true;
-        }
-      }
-
-      return hasDuplicatedTitle;
-    },
+  const inspectorValidators: OpenInspectorParams['customValidators'] = useMemo(
+    () => ({
+      title: [
+        {
+          // @todo: change to warning
+          type: 'error',
+          async fn(value, id) {
+            const content = visualizedUserContent.current?.find((c) => c.id === id);
+            if (content) {
+              try {
+                await checkForDuplicateTitle(
+                  {
+                    id,
+                    title: value,
+                    lastSavedTitle: content.title,
+                    getEsType: () => content.type,
+                  },
+                  false,
+                  false,
+                  () => {},
+                  { savedObjectsClient: savedObjects.client, overlays }
+                );
+              } catch (e) {
+                return i18n.translate('contentManagement.inspector.duplicateTitleLabel', {
+                  defaultMessage:
+                    'This Visualization already exists. Saving {value} creates a duplicate title.',
+                  values: {
+                    value,
+                  },
+                });
+              }
+            }
+          },
+        },
+      ],
+    }),
     [overlays, savedObjects.client]
   );
 
@@ -292,7 +303,7 @@ export const VisualizeListing = () => {
       inspector={{
         isReadonly: !visualizeCapabilities.save,
         onSave: onInspectorSave,
-        checkForDuplicateTitle: doCheckForDuplicateTitle,
+        customValidators: inspectorValidators,
       }}
       emptyPrompt={noItemsFragment}
       entityName={i18n.translate('visualizations.listing.table.entityName', {
