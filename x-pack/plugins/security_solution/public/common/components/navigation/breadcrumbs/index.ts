@@ -167,8 +167,6 @@ const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRoute
 const isExceptionRoutes = (spyState: RouteSpyState) =>
   spyState.pageName === SecurityPageName.exceptions;
 
-const isCloudSecurityPostureManagedRoutes = (spyState: RouteSpyState) =>
-  spyState.pageName === SecurityPageName.cloudSecurityPostureRules;
 const isCloudSecurityPostureBenchmarksRoutes = (spyState: RouteSpyState) =>
   spyState.pageName === SecurityPageName.cloudSecurityPostureBenchmarks;
 
