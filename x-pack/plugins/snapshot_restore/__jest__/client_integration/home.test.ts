@@ -748,7 +748,7 @@ describe('<SnapshotRestoreHome />', () => {
               const { find } = testBed;
 
               const tabs = find('snapshotDetail.tab');
-              const selectedTab = find('snapshotDetail').find('.euiTab-isSelected');
+              const selectedTab = find('snapshotDetail').find('.euiTab-isSelected').last();
 
               expect(selectedTab.instance()).toBe(tabs.at(0).instance());
             });
