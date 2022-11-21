@@ -31,6 +31,7 @@ import {
   ResponseError,
   UpdateIncidentParams,
 } from './types';
+import { escapeJqlSpecialCharacters } from './utils';
 
 import * as i18n from './translations';
 
@@ -39,9 +40,6 @@ const BASE_URL = `rest/api/${VERSION}`;
 const CAPABILITIES_URL = `rest/capabilities`;
 
 const VIEW_INCIDENT_URL = `browse`;
-
-// These characters need to be escaped per Jira's search syntax, see for more details: https://confluence.atlassian.com/jirasoftwareserver/search-syntax-for-text-fields-939938747.html
-const JQL_SPECIAL_CHARACTERS_REGEX = /[!^&*()+\-[\]\\/{}|:?~]/;
 
 const createMetaCapabilities = ['list-project-issuetypes', 'list-issuetype-fields'];
 
@@ -137,12 +135,6 @@ export const createExternalService = (
       const msg = errorMessage.length > 0 ? `${errorMessage} ${value}` : value;
       return msg;
     }, '');
-  };
-
-  const escapeJqlSpecialCharacters = (str: string) => {
-    const doubleBackSlashRegExp = '\\\\$&';
-
-    return str.replace(new RegExp(JQL_SPECIAL_CHARACTERS_REGEX, 'g'), doubleBackSlashRegExp);
   };
 
   const hasSupportForNewAPI = (capabilities: { capabilities?: {} }) =>
