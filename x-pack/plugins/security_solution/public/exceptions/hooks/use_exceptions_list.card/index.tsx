@@ -145,8 +145,8 @@ export const useExceptionsListCard = ({
 
   // routes to x-pack/plugins/security_solution/public/exceptions/routes.tsx
   const { onClick: goToExceptionDetail } = useGetSecuritySolutionLinkProps()({
-    deepLinkId: SecurityPageName.sharedExceptionListDetails,
-    path: `/exceptions/shared/${exceptionsList.list_id}`,
+    deepLinkId: SecurityPageName.exceptions,
+    path: `/details/${exceptionsList.list_id}`,
   });
   return {
     listId,
