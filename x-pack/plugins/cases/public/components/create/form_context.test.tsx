@@ -446,7 +446,9 @@ describe('Create case', () => {
     });
   });
 
-  describe('Step 2 - Connector Fields', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/143407
+  // FLAKY: https://github.com/elastic/kibana/issues/142282
+  describe.skip('Step 2 - Connector Fields', () => {
     it(`should submit and push to Jira connector`, async () => {
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
