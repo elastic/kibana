@@ -28,4 +28,5 @@ export type {
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  CustomBranding,
 } from './src';
