@@ -37,6 +37,7 @@ import { useFetchIndex } from '../source';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { useKibana } from '../../lib/kibana';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -374,37 +375,39 @@ export const useSourcererDataView = (
     [scopeSelectedPatterns]
   );
 
-  const [legacyPatterns, setLegacyPatterns] = useState<string[]>([]);
+  useEffect(() => console.error({ selectedDataView }));
+  useEffect(() => console.error({ selectedPatterns }));
 
-  const [indexPatternsLoading, fetchIndexReturn] = useFetchIndex(legacyPatterns);
+  const { data } = useKibana().services;
 
-  const legacyDataView: Omit<SourcererDataView, 'id'> & { id: string | null } = useMemo(
-    () => ({
-      ...fetchIndexReturn,
-      runtimeMappings: {},
-      title: '',
-      id: selectedDataView?.id ?? null,
-      loading: indexPatternsLoading,
-      patternList: fetchIndexReturn.indexes,
-      indexFields: fetchIndexReturn.indexPatterns
-        .fields as SelectedDataView['indexPattern']['fields'],
-    }),
-    [fetchIndexReturn, indexPatternsLoading, selectedDataView]
-  );
+  const [indexPattern, setIndexPattern] = useState({ fields: [] });
 
   useEffect(() => {
-    if (selectedDataView == null || missingPatterns.length > 0) {
-      // old way of fetching indices, legacy timeline
-      setLegacyPatterns(selectedPatterns);
-    } else {
-      setLegacyPatterns([]);
+    const createInMemoryDataView = async () => {
+      const dv = await data.dataViews.create({
+        title: selectedPatterns.join(','),
+        allowNoIndex: true,
+      });
+      setIndexPattern(dv);
+    };
+    if (indexPattern.title !== selectedPatterns.join(',')) {
+      createInMemoryDataView();
     }
-  }, [missingPatterns, selectedDataView, selectedPatterns]);
+  }, [data.dataViews, indexPattern.title, selectedPatterns]);
+
+  // useEffect(() => {
+  //   if (selectedDataView == null || missingPatterns.length > 0) {
+  //     // old way of fetching indices, legacy timeline
+  //     setLegacyPatterns(selectedPatterns);
+  //   } else {
+  //     setLegacyPatterns([]);
+  //   }
+  // }, [missingPatterns, selectedDataView, selectedPatterns]);
 
   const sourcererDataView = useMemo(
     () =>
-      selectedDataView == null || missingPatterns.length > 0 ? legacyDataView : selectedDataView,
-    [legacyDataView, missingPatterns.length, selectedDataView]
+      selectedDataView == null || missingPatterns.length > 0 ? indexPattern : selectedDataView,
+    [indexPattern, missingPatterns.length, selectedDataView]
   );
 
   const indicesExist = useMemo(
@@ -414,19 +417,23 @@ export const useSourcererDataView = (
         : checkIfIndicesExist({
             scopeId,
             signalIndexName,
-            patternList: sourcererDataView.patternList,
+            patternList: sourcererDataView.title.split(',') || sourcererDataView.patternList,
           }),
-    [loading, scopeId, signalIndexName, sourcererDataView.loading, sourcererDataView.patternList]
+    [
+      loading,
+      scopeId,
+      signalIndexName,
+      sourcererDataView.loading,
+      sourcererDataView.patternList,
+      sourcererDataView.title,
+    ]
   );
 
   return useMemo(
     () => ({
       browserFields: sourcererDataView.browserFields,
       dataViewId: sourcererDataView.id,
-      indexPattern: {
-        fields: sourcererDataView.indexFields,
-        title: selectedPatterns.join(','),
-      },
+      indexPattern,
       indicesExist,
       loading: loading || sourcererDataView.loading,
       runtimeMappings: sourcererDataView.runtimeMappings,
@@ -435,9 +442,20 @@ export const useSourcererDataView = (
       // selected patterns in DATA_VIEW including filter
       selectedPatterns,
       // if we have to do an update to data view, tell us which patterns are active
-      ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
+      ...(selectedPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
     }),
-    [sourcererDataView, selectedPatterns, indicesExist, loading, legacyPatterns.length]
+    [
+      sourcererDataView.browserFields,
+      sourcererDataView.id,
+      sourcererDataView.loading,
+      sourcererDataView.runtimeMappings,
+      sourcererDataView.title,
+      sourcererDataView.patternList,
+      indexPattern,
+      indicesExist,
+      loading,
+      selectedPatterns,
+    ]
   );
 };
 

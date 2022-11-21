@@ -170,7 +170,7 @@ export const useFetchIndex = (
       abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState]
+    [data.search, onlyCheckIfIndicesExist, addWarning, addError]
   );
 
   useEffect(() => {
