@@ -19,4 +19,6 @@
 
 # node create_schema_from_mapping.js ../component_templates/assets/ecs_legacy_template.json
 
-# echo --- Generating Alert schema from template
+echo --- Generating Alert schema from template
+
+node create_schema_from_mapping.js ../field_maps/alert_field_map.ts

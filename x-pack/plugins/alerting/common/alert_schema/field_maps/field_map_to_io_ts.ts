@@ -117,9 +117,91 @@ export type OutputOfFieldMap<T extends FieldMap> = OutputOf<SetOptional<T>>;
 
 export type FieldMapType<T extends FieldMap> = t.Type<TypeOfFieldMap<T>, OutputOfFieldMap<T>>;
 
-export function runtimeTypeFromFieldMap<TFieldMap extends FieldMap>(
-  fieldMap: TFieldMap
-): FieldMapType<TFieldMap> {
+function valueToIoTs(value: FieldMap): t.Mixed {
+  const valueType: string = value.type;
+  switch (valueType) {
+    case 'boolean':
+      return t.boolean;
+    case 'keyword':
+    case 'text':
+    case 'date':
+      return t.string;
+    case 'byte':
+    case 'double':
+    case 'float':
+    case 'integer':
+    case 'long':
+    case 'short':
+      return t.number;
+    case 'array':
+      if ('items' in value) {
+        return t.array(schemaValueToIoTs((value as SchemaArray<unknown, unknown>).items));
+      }
+      throw new Error(`Schema type must include the "items" declaration.`);
+    default:
+      throw new Error(`Unsupported schema type ${valueType}.`);
+  }
+
+  if ('properties' in value) {
+    const { DYNAMIC_KEY, ...properties } = value.properties as SchemaObject<Value>['properties'] & {
+      DYNAMIC_KEY?: SchemaValue<unknown>;
+    };
+    const schemas: t.Mixed[] = [schemaObjectToIoTs<Record<string, unknown>>({ properties })];
+    if (DYNAMIC_KEY) {
+      schemas.push(t.record(t.string, schemaValueToIoTs(DYNAMIC_KEY)));
+    }
+    return isOneOfCandidate(schemas) ? t.union(schemas) : schemas[0];
+  } else {
+    const valueType = value.type; // Copied in here because of TS reasons, it's not available in the `default` case
+    switch (valueType) {
+      case 'boolean':
+        return t.boolean;
+      case 'keyword':
+      case 'text':
+      case 'date':
+        return t.string;
+      case 'byte':
+      case 'double':
+      case 'float':
+      case 'integer':
+      case 'long':
+      case 'short':
+        return t.number;
+      case 'array':
+        if ('items' in value) {
+          return t.array(schemaValueToIoTs((value as SchemaArray<unknown, unknown>).items));
+        }
+        throw new Error(`Schema type must include the "items" declaration.`);
+      default:
+        throw new Error(`Unsupported schema type ${valueType}.`);
+    }
+  }
+}
+
+function entriesToObjectIoTs(entries: FieldMap): Record<string, t.Mixed> {
+  const fields = Object.keys(entries).map((key: string) => {
+    const value = entries[key];
+    try {
+      return [key, valueToIoTs(value)];
+    } catch (err) {
+      err.failedKey = [key, ...(err.failedKey || [])];
+      throw err;
+    }
+  });
+}
+
+export function fieldMapToIoTs(fieldMap: FieldMap): t.Type<Record<string, unknown>> {
+  try {
+    const requiredFields: FieldMap = pickBy(fieldMap, (field) => field.required === true);
+    const optionalFields: FieldMap = pickBy(fieldMap, (field) => field.required === false);
+
+    return t.intersection([
+      t.interface(entriesToObjectIoTs(requiredFields)),
+      t.partial(entriesToObjectIoTs(optionalFields)),
+    ]) as unknown as FieldMapType<TFieldMap>;
+  } catch (err) {
+    throw error;
+  }
   function mapToType(fields: FieldMap) {
     return mapValues(fields, (field) => {
       const type =
