@@ -94,12 +94,12 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
   data-eui="EuiFocusTrap"
 >
   <div
-    class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+    class="euiModal euiModal--confirmation emotion-euiModal-defaultMaxWidth-confirmation"
     tabindex="0"
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles"
+      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
       type="button"
     >
       <span
@@ -110,10 +110,10 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
       />
     </button>
     <div
-      class="euiModalBody"
+      class="euiModalBody emotion-euiModalBody"
     >
       <div
-        class="euiModalBody__overflow"
+        class="euiModalBody__overflow emotion-euiModalBody__overflow"
       >
         <div
           class="euiText emotion-euiText-m"
@@ -130,7 +130,7 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
       </div>
     </div>
     <div
-      class="euiModalFooter"
+      class="euiModalFooter emotion-euiModalFooter"
     >
       <button
         class="euiButtonEmpty css-9t7nyf-empty-primary"
@@ -298,12 +298,12 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
   data-eui="EuiFocusTrap"
 >
   <div
-    class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+    class="euiModal euiModal--confirmation emotion-euiModal-defaultMaxWidth-confirmation"
     tabindex="0"
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles"
+      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
       type="button"
     >
       <span
@@ -314,10 +314,10 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
       />
     </button>
     <div
-      class="euiModalBody"
+      class="euiModalBody emotion-euiModalBody"
     >
       <div
-        class="euiModalBody__overflow"
+        class="euiModalBody__overflow emotion-euiModalBody__overflow"
       >
         <div
           class="euiText emotion-euiText-m"
@@ -330,7 +330,7 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
       </div>
     </div>
     <div
-      class="euiModalFooter"
+      class="euiModalFooter emotion-euiModalFooter"
     >
       <button
         class="euiButtonEmpty css-9t7nyf-empty-primary"
@@ -1065,12 +1065,12 @@ exports[`ModalService openModal() renders a modal to the DOM 2`] = `
   data-eui="EuiFocusTrap"
 >
   <div
-    class="euiModal euiModal--maxWidth-default"
+    class="euiModal emotion-euiModal-defaultMaxWidth"
     tabindex="0"
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles"
+      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
       type="button"
     >
       <span
