@@ -51,7 +51,7 @@ describe('useInlineErrors', function () {
                 {
                   range: {
                     'monitor.timespan': {
-                      gte: '2022-01-01T23:55:00.000Z',
+                      gte: '2022-01-01T23:40:00.000Z',
                       lte: '2022-01-02T00:00:00.000Z',
                     },
                   },
