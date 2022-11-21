@@ -7,8 +7,9 @@
  */
 
 import { getFileKindsRegistry } from '../common/file_kinds_registry';
-import { defaultFileKind } from '../common';
+import { defaultImageFileKind } from '../common';
 
-export function registerDefaultFileKind() {
-  getFileKindsRegistry().register(defaultFileKind);
+export function registerDefaultFileKinds() {
+  const registry = getFileKindsRegistry();
+  registry.register(defaultImageFileKind);
 }

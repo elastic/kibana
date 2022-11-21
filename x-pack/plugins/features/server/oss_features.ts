@@ -445,7 +445,7 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: [],
-          api: ['files:manageFiles'],
+          api: ['files:manageFiles', 'files:defaultImage'],
         },
         read: {
           app: ['kibana'],
@@ -457,7 +457,7 @@ export const buildOSSFeatures = ({
             read: ['files'],
           },
           ui: [],
-          api: ['files:manageFiles'],
+          api: ['files:manageFiles', 'files:defaultImage'],
         },
       },
     },

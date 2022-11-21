@@ -8,8 +8,9 @@
 
 import { FileKind } from './types';
 
-const id = 'default' as const;
-const tags: string[] = [];
+const id = 'defaultImage' as const;
+const tag = 'files:defaultImage' as const;
+const tags = [tag];
 const tenMebiBytes = 1024 * 1024 * 10;
 
 /**
@@ -18,10 +19,11 @@ const tenMebiBytes = 1024 * 1024 * 10;
  * @note this file kind has no access controls and so creating a file of this
  * kind is visible to all Kibana users.
  */
-export const defaultFileKind: FileKind = {
+export const defaultImageFileKind: FileKind = {
   id,
   maxSizeBytes: tenMebiBytes,
   blobStoreSettings: {},
+  allowedMimeTypes: ['image/*'],
   http: {
     create: { tags },
     delete: { tags },

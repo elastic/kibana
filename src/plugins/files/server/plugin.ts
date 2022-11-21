@@ -34,7 +34,7 @@ import type {
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes, registerFileKindRoutes } from './routes';
 import { Counters, registerUsageCollector } from './usage';
-import { registerDefaultFileKind } from './register_default_file_kind';
+import { registerDefaultFileKinds } from './register_default_file_kind';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
   private static analytics?: AnalyticsServiceStart;
@@ -93,7 +93,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
     });
 
     // Now that everything is set up:
-    registerDefaultFileKind();
+    registerDefaultFileKinds();
 
     return {
       registerFileKind(fileKind) {

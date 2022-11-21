@@ -7,7 +7,7 @@
  */
 
 export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME, ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
-export { defaultFileKind } from './default_file_kind';
+export { defaultImageFileKind } from './default_image_file_kind';
 
 export type {
   File,
