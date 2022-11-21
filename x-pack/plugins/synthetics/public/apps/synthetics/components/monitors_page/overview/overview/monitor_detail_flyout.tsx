@@ -347,16 +347,16 @@ export function MonitorDetailFlyout(props: Props) {
                 compressed
                 listItems={
                   [
-                    {
-                      title: URL_HEADER_TEXT,
-                      description: monitorDetail.data?.url?.full ? (
-                        <EuiLink external href={monitorDetail.data.url.full}>
-                          {monitorDetail.data.url.full}
-                        </EuiLink>
-                      ) : (
-                        ''
-                      ),
-                    },
+                    monitorDetail.data?.url?.full
+                      ? {
+                          title: URL_HEADER_TEXT,
+                          description: (
+                            <EuiLink external href={monitorDetail.data.url.full}>
+                              {monitorDetail.data.url.full}
+                            </EuiLink>
+                          ),
+                        }
+                      : undefined,
                     {
                       title: LAST_RUN_HEADER_TEXT,
                       description: <Time timestamp={monitorDetail.data?.timestamp} />,
