@@ -135,7 +135,7 @@ export const useMetadataForm = ({
       });
 
       // We add a 500s delay so possible errors of the field don't show up
-      // _immediately_ as the user writes and we avoid flickering of error message.
+      // _immediately_ as the user writes, we avoid flickering of error message.
       changingValueTimeout.current[fieldName] = setTimeout(async () => {
         const { errors, warnings } = await executeValidation(
           fieldName,
@@ -169,21 +169,22 @@ export const useMetadataForm = ({
 
   const setTags: SetFieldValueFn<'tags'> = useMemo(() => setFieldValue('tags'), [setFieldValue]);
 
-  const { errors, warnings } = useMemo(
+  const { errors, warnings, isChangingValue } = useMemo(
     () =>
-      Object.values(fields).reduce<Pick<Field, 'errors' | 'warnings'>>(
+      Object.values(fields).reduce<
+        Pick<Field, 'errors' | 'warnings'> & { isChangingValue: boolean }
+      >(
         (acc, field: Field) => {
-          if (Array.isArray(field.errors)) {
-            acc.errors = [...(acc.errors ?? []), ...field.errors];
-          }
-          if (Array.isArray(field.warnings)) {
-            acc.warnings = [...(acc.warnings ?? []), ...field.warnings];
-          }
-          return acc;
+          return {
+            errors: [...(acc.errors ?? []), ...(field.errors ?? [])],
+            warnings: [...(acc.warnings ?? []), ...(field.warnings ?? [])],
+            isChangingValue: acc.isChangingValue || field.isChangingValue,
+          };
         },
         {
           errors: [],
           warnings: [],
+          isChangingValue: false,
         }
       ),
     [fields]
@@ -196,9 +197,11 @@ export const useMetadataForm = ({
     setDescription,
     tags: fields.tags,
     setTags,
-    isValid: !errors?.length,
+
+    isValid: errors?.length === 0,
+    getIsChangingValue: () => isChangingValue,
     getErrorsMessages: () => errors,
-    getWarningMessages: () => warnings,
+    getWarningsMessages: () => warnings,
   };
 };
 

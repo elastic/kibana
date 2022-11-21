@@ -75,37 +75,35 @@ export const InspectorFlyoutContent: FC<Props> = ({
   const form = useMetadataForm({ item, customValidators });
 
   const onClickSave = useCallback(async () => {
-    if (form.isValid) {
-      if (form.isValid && onSave) {
-        const id = item.id;
-        const title = form.title.value;
+    if (form.isValid && onSave) {
+      const id = item.id;
+      const title = form.title.value;
 
-        setIsSubmitting(true);
+      setIsSubmitting(true);
 
-        try {
-          await onSave({
-            id,
-            title,
-            description: form.description.value,
-            tags: form.tags.value,
-          });
-        } catch (error) {
-          notifyError(
-            <FormattedMessage
-              id="contentManagement.inspector.metadataForm.unableToSaveDangerMessage"
-              defaultMessage="Unable to save {entityName}"
-              values={{ entityName }}
-            />,
-            error.message
-          );
-        } finally {
-          setIsSubmitting(false);
-        }
+      try {
+        await onSave({
+          id,
+          title,
+          description: form.description.value,
+          tags: form.tags.value,
+        });
+      } catch (error) {
+        notifyError(
+          <FormattedMessage
+            id="contentManagement.inspector.metadataForm.unableToSaveDangerMessage"
+            defaultMessage="Unable to save {entityName}"
+            values={{ entityName }}
+          />,
+          error.message
+        );
+      } finally {
+        setIsSubmitting(false);
       }
     }
 
     setIsSubmitted(true);
-  }, [form, onSave, item.id, notifyError, entityName]);
+  }, [onSave, item.id, form, notifyError, entityName]);
 
   const onClickCancel = useCallback(() => {
     onCancel();
@@ -157,7 +155,7 @@ export const InspectorFlyoutContent: FC<Props> = ({
                   onClick={onClickSave}
                   data-test-subj="saveButton"
                   fill
-                  disabled={isSubmitted && !form.isValid}
+                  disabled={(isSubmitted && !form.isValid) || form.getIsChangingValue()}
                   isLoading={isSubmitting}
                 >
                   {i18nTexts.saveButtonLabel}

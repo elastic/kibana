@@ -25,7 +25,7 @@ interface Props {
   TagSelector?: Services['TagSelector'];
 }
 
-const isFormFieldValid = (field: Field) => !field.isChangingValue && !Boolean(field.errors?.length);
+const isFormFieldValid = (field: Field) => !Boolean(field.errors?.length);
 
 export const MetadataForm: FC<Props> = ({
   form,
@@ -44,10 +44,8 @@ export const MetadataForm: FC<Props> = ({
     isSubmitted,
     isValid,
     getErrorsMessages,
-    getWarningMessages,
+    getWarningsMessages,
   } = form;
-
-  const warningMessages = getWarningMessages();
 
   return (
     <EuiForm
@@ -55,7 +53,7 @@ export const MetadataForm: FC<Props> = ({
       error={getErrorsMessages()}
       data-test-subj="metadataForm"
     >
-      <InspectorFlyoutWarningsCallOut warningMessages={warningMessages} />
+      <InspectorFlyoutWarningsCallOut warningMessages={getWarningsMessages()} />
 
       <EuiFormRow
         label={i18n.translate('contentManagement.inspector.metadataForm.nameInputLabel', {
@@ -99,7 +97,7 @@ export const MetadataForm: FC<Props> = ({
         />
       </EuiFormRow>
 
-      {TagList && isReadonly === true && (
+      {TagList && isReadonly && (
         <>
           <EuiSpacer />
           <EuiFormRow
@@ -113,7 +111,7 @@ export const MetadataForm: FC<Props> = ({
         </>
       )}
 
-      {TagSelector && isReadonly === false && (
+      {TagSelector && !isReadonly && (
         <>
           <EuiSpacer />
           <TagSelector initialSelection={tags.value} onTagsSelected={setTags} fullWidth />
