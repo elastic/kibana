@@ -13,11 +13,12 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { TestData } from './types';
 import { artificialLogDataViewTestData } from './test_data';
 
+const REFERENCE_TS = 1669018354793;
 const DAY_MS = 86400000;
 const ES_INDEX = 'aiops_frequent_items_test';
 
-const DEVIATION_DATE = Date.now() - DAY_MS * 2;
-const BASELINE_DATE = DEVIATION_DATE - DAY_MS * 1;
+const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
+const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
 interface SampleDoc {
   user: string;
@@ -95,7 +96,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // Get the px values for the timestamp we want to move the brush to.
       const { targetPx, intervalPx } = await aiops.explainLogRateSpikesPage.getPxForTimestamp(
-        DEVIATION_DATE + DAY_MS / 2
+        DEVIATION_TS + DAY_MS / 2
       );
 
       // Adjust the right brush handle
@@ -114,7 +115,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // Get the px values for the timestamp we want to move the brush to.
       const { targetPx: targetBaselinePx } = await aiops.explainLogRateSpikesPage.getPxForTimestamp(
-        BASELINE_DATE + DAY_MS / 2
+        BASELINE_TS + DAY_MS / 2
       );
 
       // Adjust the right brush handle
@@ -160,15 +161,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       const analysisGroupsTable =
         await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
-
-      expect(analysisGroupsTable.length).to.be.greaterThan(0);
+      expect(analysisGroupsTable).to.be.eql(testData.expected.analysisGroupsTable);
 
       await ml.testExecution.logTestStep('expand table row');
       await aiops.explainLogRateSpikesAnalysisGroupsTable.assertExpandRowButtonExists();
       await aiops.explainLogRateSpikesAnalysisGroupsTable.expandRow();
 
       const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
-      expect(analysisTable.length).to.be.greaterThan(0);
+      expect(analysisTable).to.be.eql(testData.expected.analysisTable);
     });
   }
 
@@ -199,7 +199,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       const action = { index: { _index: ES_INDEX } };
       let tsOffset = 0;
 
-      [BASELINE_DATE, DEVIATION_DATE].forEach((ts) => {
+      // Creates docs evenly spread across baseline and deviation time frame
+      [BASELINE_TS, DEVIATION_TS].forEach((ts) => {
         ['Peter', 'Paul', 'Mary'].forEach((user) => {
           ['200', '404', '500'].forEach((responseCode) => {
             ['login.php', 'user.php', 'home.php'].forEach((url) => {
@@ -232,7 +233,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
 
       // Now let's add items to the dataset to make some specific significant terms being returned as results
-
       ['200', '404'].forEach((responseCode) => {
         ['login.php', 'user.php', 'home.php'].forEach((url) => {
           tsOffset = 0;
@@ -244,7 +244,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
               response_code: responseCode,
               url,
               version: 'v1.0.0',
-              '@timestamp': DEVIATION_DATE + tsOffset,
+              '@timestamp': DEVIATION_TS + tsOffset,
             });
           });
         });
@@ -261,7 +261,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
               response_code: '500',
               url,
               version: 'v1.0.0',
-              '@timestamp': DEVIATION_DATE + tsOffset,
+              '@timestamp': DEVIATION_TS + tsOffset,
             });
           });
         });

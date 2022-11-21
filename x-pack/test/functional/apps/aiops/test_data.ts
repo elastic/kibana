@@ -42,21 +42,17 @@ export const artificialLogDataViewTestData: TestData = {
   chartClickCoordinates: [-200, 30],
   expected: {
     totalDocCountFormatted: '8,400',
-    analysisGroupsTable: [{ group: 'response_code: 500user: Peter', docCount: '481' }],
+    analysisGroupsTable: [
+      { group: 'user: Peter', docCount: '2081' },
+      { group: 'response_code: 500url: login.php', docCount: '834' },
+    ],
     analysisTable: [
       {
         fieldName: 'user',
         fieldValue: 'Peter',
         logRate: 'Chart type:bar chart',
-        pValue: '2.30e-41',
+        pValue: '2.78e-22',
         impact: 'High',
-      },
-      {
-        fieldName: 'response_code',
-        fieldValue: '500',
-        logRate: 'Chart type:bar chart',
-        pValue: '0.0000384',
-        impact: 'Medium',
       },
     ],
   },
