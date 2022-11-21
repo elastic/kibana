@@ -3921,23 +3921,8 @@ export class RulesClient {
     alertType: UntypedNormalizedRuleType,
     data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertAction[] }
   ): Promise<void> {
-    const { actions, notifyWhen, throttle } = data;
-    // Due to a limitation in kbn-config-schema, undefined throttle or notifyWhen
-    // will be converted to 'null' at the route level.
-    const hasNotifyWhen = Boolean(notifyWhen);
-    const hasThrottle = Boolean(throttle);
-
-    let usesRuleLevelFreqParams;
-    if (hasNotifyWhen && typeof throttle !== 'undefined') usesRuleLevelFreqParams = true;
-    else if (!hasNotifyWhen && !hasThrottle) usesRuleLevelFreqParams = false;
-    else {
-      throw Boom.badRequest(
-        i18n.translate('xpack.alerting.rulesClient.usesValidGlobalFreqParams.oneUndefined', {
-          defaultMessage:
-            'Rule-level notifyWhen and throttle must both be defined or both be undefined',
-        })
-      );
-    }
+    const { actions, notifyWhen } = data;
+    const hasRuleLevelNotifyWhen = Boolean(notifyWhen);
 
     if (actions.length === 0) {
       return;
@@ -3983,7 +3968,9 @@ export class RulesClient {
     }
 
     // check for actions using frequency params if the rule has rule-level frequency params defined
-    if (usesRuleLevelFreqParams) {
+    // ONLY CHECK if rule-level notifyWhen is defined. We need to maintain backwards compatibility for
+    // cases where a rule-level throttle is still stored, but rule-level notifyWhen is null or undefined
+    if (hasRuleLevelNotifyWhen) {
       const actionsWithFrequency = actions.filter((action) => Boolean(action.frequency));
       if (actionsWithFrequency.length) {
         throw Boom.badRequest(
