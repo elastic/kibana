@@ -26,6 +26,10 @@ export const DEFAULT_SIZE = 20;
 export const DEFAULT_FROM = 'now-20m';
 export const DEFAULT_TO = 'now';
 
+function absoluteDate(relativeDate: string) {
+  return DateMath.parse(relativeDate)?.valueOf() ?? relativeDate;
+}
+
 export const getCertsRequestBody = ({
   pageIndex,
   search,
@@ -81,8 +85,8 @@ export const getCertsRequestBody = ({
             {
               range: {
                 'monitor.timespan': {
-                  gte: DateMath.parse(from)?.valueOf() ?? from,
-                  lte: DateMath.parse(to)?.valueOf() ?? to,
+                  gte: absoluteDate(from),
+                  lte: absoluteDate(to),
                 },
               },
             },
@@ -97,7 +101,7 @@ export const getCertsRequestBody = ({
                         {
                           range: {
                             'tls.certificate_not_valid_before': {
-                              lte: notValidBefore,
+                              lte: absoluteDate(notValidBefore),
                             },
                           },
                         },
@@ -108,7 +112,7 @@ export const getCertsRequestBody = ({
                         {
                           range: {
                             'tls.certificate_not_valid_after': {
-                              lte: notValidAfter,
+                              lte: absoluteDate(notValidAfter),
                             },
                           },
                         },
