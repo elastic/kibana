@@ -20,7 +20,7 @@ import {
   METRICSET_NAME,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { GenericMetricsChart } from '../fetch_and_transform_metrics';

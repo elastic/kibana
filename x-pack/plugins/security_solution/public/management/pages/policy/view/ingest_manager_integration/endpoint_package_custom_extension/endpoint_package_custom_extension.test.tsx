@@ -88,8 +88,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
 
   it('should NOT show Host Isolation Exceptions if user has no authz and no entries exist', async () => {
     useEndpointPrivilegesMock.mockReturnValue({
-      ...getEndpointPrivilegesInitialStateMock(),
-      canIsolateHost: false,
+      ...getEndpointPrivilegesInitialStateMock({ canReadHostIsolationExceptions: false }),
     });
     render();
 

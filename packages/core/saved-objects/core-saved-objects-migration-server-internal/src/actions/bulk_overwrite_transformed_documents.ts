@@ -14,7 +14,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { isWriteBlockException, isIndexNotFoundException } from './es_errors';
 import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';

@@ -16,7 +16,7 @@ import {
 import { APMPlugin, APMRouteHandlerResources } from '../..';
 import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
-import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
+import { AGENT_NAME } from '../../../common/es_fields/apm';
 import { APMPluginStartDependencies } from '../../types';
 import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
 

@@ -44,7 +44,7 @@ const reset = () => {
 
   executeFn.mockReset();
   openContextMenuSpy.mockReset();
-  jest.useFakeTimers('legacy');
+  jest.useFakeTimers({ legacyFakeTimers: true });
 };
 beforeEach(reset);
 
