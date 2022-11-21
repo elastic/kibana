@@ -40,4 +40,4 @@ export { convertEsSortToEventLogSort } from './convert_es_sort_to_event_log_sort
 export * from './snooze';
 export { setFlapping } from './set_flapping';
 export { determineAlertsToReturn } from './determine_alerts_to_return';
-export { updateFlappingHistory, isFlapping, atCapacity } from './flapping_utils';
+export { updateFlappingHistory, isFlapping } from './flapping_utils';

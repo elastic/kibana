@@ -8,7 +8,6 @@
 import { keys } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, RawAlertInstance } from '../types';
-import { atCapacity } from './flapping_utils';
 
 // determines which alerts to return in the state
 export function determineAlertsToReturn<
@@ -41,7 +40,7 @@ export function determineAlertsToReturn<
     const numStateChanges = flappingHistory.filter((f) => f).length;
     if (flapping) {
       recoveredAlertsToReturn[id] = alert.toRaw(true);
-    } else if (!atCapacity(alert.getFlappingHistory()) || numStateChanges > 0) {
+    } else if (numStateChanges > 0) {
       recoveredAlertsToReturn[id] = alert.toRaw(true);
     }
   }

@@ -19,7 +19,7 @@ import {
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
-import { atCapacity, isFlapping } from '@kbn/alerting-plugin/server/lib';
+import { isFlapping } from '@kbn/alerting-plugin/server/lib';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
@@ -369,9 +369,7 @@ export const createLifecycleExecutor =
             // this is a space saving effort that will stop tracking a recovered alert if it wasn't flapping and doesn't have state changes
             // in the last max capcity number of executions
             event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
-            (flapping ||
-              !atCapacity(flappingHistory) ||
-              flappingHistory.filter((f) => f).length > 0)
+            (flapping || flappingHistory.filter((f) => f).length > 0)
         )
         .map(({ event, flappingHistory, flapping }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
