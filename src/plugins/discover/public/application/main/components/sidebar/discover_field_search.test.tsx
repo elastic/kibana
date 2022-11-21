@@ -51,7 +51,7 @@ describe('DiscoverFieldSearch', () => {
     const onChange = jest.fn();
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
-    const badge = btn.find('.euiNotificationBadge');
+    const badge = btn.find('.euiNotificationBadge').last();
     expect(badge.text()).toEqual('0');
     btn.simulate('click');
     const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');
@@ -70,7 +70,7 @@ describe('DiscoverFieldSearch', () => {
     let btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');
     btn = findTestSubject(component, 'toggleFieldFilterButton');
-    const badge = btn.find('.euiNotificationBadge');
+    const badge = btn.find('.euiNotificationBadge').last();
     // no active filters
     expect(badge.text()).toEqual('0');
     // change value of aggregatable select
