@@ -88,7 +88,7 @@ describe('ElasticsearchService', () => {
     });
 
     it('`watchOnlineStatus$` allows to schedule retry', async () => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
 
       // Both ES and license are available.
       mockLicense.isEnabled.mockReturnValue(true);
@@ -146,7 +146,7 @@ describe('ElasticsearchService', () => {
     });
 
     it('`watchOnlineStatus$` cancels scheduled retry if status changes before retry timeout fires', async () => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
 
       // Both ES and license are available.
       mockLicense.isEnabled.mockReturnValue(true);

@@ -246,7 +246,7 @@ describe('TelemetrySender', () => {
 
     beforeEach(() => {
       window.fetch = mockFetch = jest.fn();
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
       consoleWarnMock = jest.spyOn(global.console, 'warn').mockImplementation(() => {});
     });
 
@@ -380,7 +380,7 @@ describe('TelemetrySender', () => {
   });
 
   describe('getRetryDelay', () => {
-    beforeEach(() => jest.useFakeTimers('legacy'));
+    beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
     afterAll(() => jest.useRealTimers());
 
     it('sets a minimum retry delay of 60 seconds', () => {
@@ -399,7 +399,7 @@ describe('TelemetrySender', () => {
   });
 
   describe('startChecking', () => {
-    beforeEach(() => jest.useFakeTimers('legacy'));
+    beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
     afterAll(() => jest.useRealTimers());
 
     it('calls sendIfDue every 60000 ms', () => {

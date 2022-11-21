@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardControls.gotoNextTimeSlice();
           await dashboardControls.closeTimeSliderPopover(); // close popover so its not blocking panel
           await dashboard.waitForRenderComplete();
-          expect(await discover.getSavedSearchDocumentCount()).to.be('605 documents');
+          expect(await discover.getSavedSearchDocumentCount()).to.be('16 documents');
         });
       });
     });

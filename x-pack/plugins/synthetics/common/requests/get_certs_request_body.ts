@@ -21,7 +21,7 @@ enum SortFields {
 export const DEFAULT_SORT = 'not_after';
 export const DEFAULT_DIRECTION = 'asc';
 export const DEFAULT_SIZE = 20;
-export const DEFAULT_FROM = 'now-5m';
+export const DEFAULT_FROM = 'now-20m';
 export const DEFAULT_TO = 'now';
 
 export const getCertsRequestBody = ({
