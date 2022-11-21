@@ -3928,7 +3928,7 @@ export class RulesClient {
     const hasThrottle = Boolean(throttle);
 
     let usesRuleLevelFreqParams;
-    if (hasNotifyWhen && hasThrottle) usesRuleLevelFreqParams = true;
+    if (hasNotifyWhen && typeof throttle !== 'undefined') usesRuleLevelFreqParams = true;
     else if (!hasNotifyWhen && !hasThrottle) usesRuleLevelFreqParams = false;
     else {
       throw Boom.badRequest(
