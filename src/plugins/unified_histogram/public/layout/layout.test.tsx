@@ -118,7 +118,7 @@ describe('Layout', () => {
       const component = await mountComponent();
       setBreakpoint(component, 's');
       const expectedHeight = component.find(Panels).prop('topPanelHeight');
-      expect(component.find(Chart).childAt(0).getDOMNode()).toHaveStyle({
+      expect(component.find(Chart).find('div.euiFlexGroup').first().getDOMNode()).toHaveStyle({
         height: `${expectedHeight}px`,
       });
     });
@@ -127,7 +127,7 @@ describe('Layout', () => {
       const component = await mountComponent({ chart: { ...createChart(), hidden: true } });
       setBreakpoint(component, 's');
       const expectedHeight = component.find(Panels).prop('topPanelHeight');
-      expect(component.find(Chart).childAt(0).getDOMNode()).not.toHaveStyle({
+      expect(component.find(Chart).find('div.euiFlexGroup').first().getDOMNode()).not.toHaveStyle({
         height: `${expectedHeight}px`,
       });
     });
@@ -136,7 +136,7 @@ describe('Layout', () => {
       const component = await mountComponent({ chart: null });
       setBreakpoint(component, 's');
       const expectedHeight = component.find(Panels).prop('topPanelHeight');
-      expect(component.find(Chart).childAt(0).getDOMNode()).not.toHaveStyle({
+      expect(component.find(Chart).find('div.euiFlexGroup').first().getDOMNode()).not.toHaveStyle({
         height: `${expectedHeight}px`,
       });
     });

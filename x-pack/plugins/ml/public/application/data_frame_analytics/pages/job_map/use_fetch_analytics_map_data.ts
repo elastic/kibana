@@ -26,9 +26,14 @@ export const useFetchAnalyticsMapData = () => {
   const [nodeDetails, setNodeDetails] = useState<Record<string, any>>({});
   const [error, setError] = useState<any>();
   const [message, setMessage] = useState<string | undefined>();
+  // Keeps track of which nodes have been used as root so we can refetch related nodes on refresh
+  const [usedAsRoot, setUsedAsRoot] = useState<Record<string, string | undefined>>({});
 
   const fetchAndSetElements = async (idToUse: string, treatAsRoot: boolean, type?: string) => {
     setIsLoading(true);
+    if (treatAsRoot && usedAsRoot[idToUse] === undefined) {
+      setUsedAsRoot({ ...usedAsRoot, [idToUse]: type });
+    }
     // Pass in treatAsRoot flag - endpoint will take job or index to grab jobs created from it
     const analyticsMap: AnalyticsMapReturnType =
       await ml.dataFrameAnalytics.getDataFrameAnalyticsMap(idToUse, treatAsRoot, type);
@@ -80,6 +85,15 @@ export const useFetchAnalyticsMapData = () => {
       treatAsRoot,
       modelId !== undefined && treatAsRoot === false ? JOB_MAP_NODE_TYPES.TRAINED_MODEL : type
     );
+
+    // If related nodes had been fetched from any node then refetch
+    if (Object.keys(usedAsRoot).length) {
+      for (const nodeId in usedAsRoot) {
+        if (usedAsRoot.hasOwnProperty(nodeId)) {
+          await fetchAndSetElements(nodeId, true, usedAsRoot[nodeId]);
+        }
+      }
+    }
   };
 
   return {
