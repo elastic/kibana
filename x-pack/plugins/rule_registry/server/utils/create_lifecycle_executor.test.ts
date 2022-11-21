@@ -878,15 +878,7 @@ describe('createLifecycleExecutor', () => {
       );
 
       const recovered = pick(trackedAlertsRecovered, ['TEST_ALERT_0.flappingHistory']);
-      expect(recovered).toMatchInlineSnapshot(`
-        Object {
-          "TEST_ALERT_0": Object {
-            "flappingHistory": Array [
-              false,
-            ],
-          },
-        }
-      `);
+      expect(recovered).toMatchInlineSnapshot(`Object {}`);
       const active = pick(trackedAlerts, ['TEST_ALERT_1.flappingHistory']);
       expect(active).toMatchInlineSnapshot(`
         Object {

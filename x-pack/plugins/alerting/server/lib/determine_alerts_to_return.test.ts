@@ -31,14 +31,5 @@ describe('determineAlertsToReturn', () => {
       const { recoveredAlertsToReturn } = determineAlertsToReturn({}, recoveredAlerts);
       expect(keys(recoveredAlertsToReturn)).toEqual(['1']);
     });
-
-    test('should return all recovered alerts if flappingHistory is not at capacity', () => {
-      const recoveredAlerts = {
-        '1': new Alert('1', { meta: { flappingHistory: [false, false, false] } }),
-        '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
-      };
-      const { recoveredAlertsToReturn } = determineAlertsToReturn({}, recoveredAlerts);
-      expect(keys(recoveredAlertsToReturn)).toEqual(['1']);
-    });
   });
 });
