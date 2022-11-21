@@ -147,6 +147,7 @@ export const useListDetailsView = () => {
               type: list.type,
               name: listDetails.name,
               description: listDetails.description || list.description,
+              namespace_type: list.namespace_type,
             },
           });
       } catch (error) {
