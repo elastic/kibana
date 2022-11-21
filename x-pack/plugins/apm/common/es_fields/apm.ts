@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+export const AGENT = 'agent';
+export const AGENT_NAME = 'agent.name';
+export const AGENT_VERSION = 'agent.version';
+
+export const DESTINATION_ADDRESS = 'destination.address';
+
 export const CLOUD = 'cloud';
 export const CLOUD_AVAILABILITY_ZONE = 'cloud.availability_zone';
 export const CLOUD_PROVIDER = 'cloud.provider';
@@ -27,18 +33,12 @@ export const SERVICE_RUNTIME_VERSION = 'service.runtime.version';
 export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
 
-export const AGENT = 'agent';
-export const AGENT_NAME = 'agent.name';
-export const AGENT_VERSION = 'agent.version';
-
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
 export const HTTP_RESPONSE_STATUS_CODE = 'http.response.status_code';
 export const USER_ID = 'user.id';
 export const USER_AGENT_ORIGINAL = 'user_agent.original';
 export const USER_AGENT_NAME = 'user_agent.name';
-
-export const DESTINATION_ADDRESS = 'destination.address';
 
 export const OBSERVER_HOSTNAME = 'observer.hostname';
 export const OBSERVER_LISTENING = 'observer.listening';
@@ -125,28 +125,16 @@ export const HOST_NAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const HOST_ARCHITECTURE = 'host.architecture';
 export const HOST_OS_VERSION = 'host.os.version';
+
 export const CONTAINER_ID = 'container.id';
 export const CONTAINER = 'container';
 export const CONTAINER_IMAGE = 'container.image.name';
 
-// Kubernetes
 export const KUBERNETES = 'kubernetes';
-export const KUBERNETES_CONTAINER_NAME = 'kubernetes.container.name';
-export const KUBERNETES_DEPLOYMENT = 'kubernetes.deployment';
-export const KUBERNETES_DEPLOYMENT_NAME = 'kubernetes.deployment.name';
-export const KUBERNETES_NAMESPACE_NAME = 'kubernetes.namespace.name';
-export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
-export const KUBERNETES_REPLICASET = 'kubernetes.replicaset';
-export const KUBERNETES_REPLICASET_NAME = 'kubernetes.replicaset.name';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
-
-// RUM Labels
-export const TRANSACTION_URL = 'url.full';
-export const USER_AGENT_DEVICE = 'user_agent.device.name';
-export const USER_AGENT_OS = 'user_agent.os.name';
 
 export const FAAS_ID = 'faas.id';
 export const FAAS_NAME = 'faas.name';
