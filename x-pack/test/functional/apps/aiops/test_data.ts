@@ -41,7 +41,7 @@ export const artificialLogDataViewTestData: TestData = {
   brushTargetTimestamp: 1455033600000,
   chartClickCoordinates: [-200, 30],
   expected: {
-    totalDocCountFormatted: '16,000',
+    totalDocCountFormatted: '8,400',
     analysisGroupsTable: [{ group: 'response_code: 500user: Peter', docCount: '481' }],
     analysisTable: [
       {

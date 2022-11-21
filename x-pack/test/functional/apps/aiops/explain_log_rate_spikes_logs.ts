@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { sample } from 'lodash';
-
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import expect from '@kbn/expect';
@@ -20,11 +18,6 @@ const ES_INDEX = 'aiops_frequent_items_test';
 
 const DEVIATION_DATE = Date.now() - DAY_MS * 2;
 const BASELINE_DATE = DEVIATION_DATE - DAY_MS * 1;
-
-// Randomizes a timestamp to be +/- 12 hours
-function jiggleTimestamp(ts: number) {
-  return ts + Math.floor(Math.random() * DAY_MS) - DAY_MS / 2;
-}
 
 interface SampleDoc {
   user: string;
@@ -102,7 +95,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // Get the px values for the timestamp we want to move the brush to.
       const { targetPx, intervalPx } = await aiops.explainLogRateSpikesPage.getPxForTimestamp(
-        DEVIATION_DATE
+        DEVIATION_DATE + DAY_MS / 2
       );
 
       // Adjust the right brush handle
@@ -121,7 +114,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // Get the px values for the timestamp we want to move the brush to.
       const { targetPx: targetBaselinePx } = await aiops.explainLogRateSpikesPage.getPxForTimestamp(
-        BASELINE_DATE
+        BASELINE_DATE + DAY_MS / 2
       );
 
       // Adjust the right brush handle
@@ -202,52 +195,75 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
       });
 
-      // Index 10000 random docs using the bulk API
       const bulkBody: estypes.BulkRequest<SampleDoc, SampleDoc>['body'] = [];
+      const action = { index: { _index: ES_INDEX } };
+      let tsOffset = 0;
 
-      [...Array(10000)].forEach(() => {
-        const action = { index: { _index: ES_INDEX } };
-        const doc: SampleDoc = {
-          user: sample(['Peter', 'Paul', 'Mary']) as string,
-          response_code: sample(['200', '404', '500']) as string,
-          url: sample(['login.php', 'user.php', 'home.php']) as string,
-          version: 'v1.0.0',
-          '@timestamp': jiggleTimestamp(sample([BASELINE_DATE, DEVIATION_DATE]) as number),
-        };
+      [BASELINE_DATE, DEVIATION_DATE].forEach((ts) => {
+        ['Peter', 'Paul', 'Mary'].forEach((user) => {
+          ['200', '404', '500'].forEach((responseCode) => {
+            ['login.php', 'user.php', 'home.php'].forEach((url) => {
+              // Don't add docs that match the exact pattern of the filter we want to base the test queries on
+              if (
+                !(
+                  user === 'Peter' &&
+                  responseCode === '500' &&
+                  (url === 'home.php' || url === 'login.php')
+                )
+              ) {
+                tsOffset = 0;
+                [...Array(100)].forEach(() => {
+                  tsOffset += DAY_MS / 100;
+                  const doc: SampleDoc = {
+                    user,
+                    response_code: responseCode,
+                    url,
+                    version: 'v1.0.0',
+                    '@timestamp': ts + tsOffset,
+                  };
 
-        // Don't add docs that match the exact pattern of the filter we want to base the test queries on
-        if (
-          !(
-            doc.user === 'Peter' &&
-            doc.response_code === '500' &&
-            (doc.url === 'home.php' || doc.url === 'login.php')
-          )
-        ) {
-          doc.user = sample(['Paul', 'Mary']) as string;
-        }
-
-        bulkBody.push(action);
-        bulkBody.push(doc);
+                  bulkBody.push(action);
+                  bulkBody.push(doc);
+                });
+              }
+            });
+          });
+        });
       });
 
       // Now let's add items to the dataset to make some specific significant terms being returned as results
-      [...Array(3000)].forEach(() => {
-        bulkBody.push({ index: { _index: ES_INDEX } });
-        bulkBody.push({
-          user: 'Peter',
-          response_code: sample(['200', '404']) as string,
-          url: sample(['login.php', 'user.php', 'home.php']) as string,
-          version: 'v1.0.0',
-          '@timestamp': jiggleTimestamp(DEVIATION_DATE),
-        });
 
-        bulkBody.push({ index: { _index: ES_INDEX } });
-        bulkBody.push({
-          user: sample(['Paul', 'Mary']) as string,
-          response_code: '500',
-          url: sample(['login.php', 'home.php']) as string,
-          version: 'v1.0.0',
-          '@timestamp': jiggleTimestamp(DEVIATION_DATE),
+      ['200', '404'].forEach((responseCode) => {
+        ['login.php', 'user.php', 'home.php'].forEach((url) => {
+          tsOffset = 0;
+          [...Array(300)].forEach(() => {
+            tsOffset += DAY_MS / 300;
+            bulkBody.push(action);
+            bulkBody.push({
+              user: 'Peter',
+              response_code: responseCode,
+              url,
+              version: 'v1.0.0',
+              '@timestamp': DEVIATION_DATE + tsOffset,
+            });
+          });
+        });
+      });
+
+      ['Paul', 'Mary'].forEach((user) => {
+        ['login.php', 'home.php'].forEach((url) => {
+          tsOffset = 0;
+          [...Array(400)].forEach(() => {
+            tsOffset += DAY_MS / 400;
+            bulkBody.push(action);
+            bulkBody.push({
+              user,
+              response_code: '500',
+              url,
+              version: 'v1.0.0',
+              '@timestamp': DEVIATION_DATE + tsOffset,
+            });
+          });
         });
       });
 
