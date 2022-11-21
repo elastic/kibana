@@ -95,7 +95,7 @@ function wrapper({
 
 describe('useLatencyCorrelations', () => {
   beforeEach(async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   afterEach(() => {
     jest.useRealTimers();

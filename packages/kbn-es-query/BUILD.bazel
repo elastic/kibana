@@ -62,12 +62,13 @@ TYPES_DEPS = [
 peggy(
   name = "grammar",
   data = [
-    ":grammar/grammar.peggy"
+    ":grammar/grammar.peggy",
+    ":grammar/grammar.config.json"
   ],
   output_dir = True,
   args = [
-    "--allowed-start-rules",
-    "start,Literal",
+    "--extra-options-file",
+    "./%s/grammar/grammar.config.json" % package_name(),
     "-o",
     "$(@D)/built_grammar.js",
     "./%s/grammar/grammar.peggy" % package_name()

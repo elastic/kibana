@@ -46,7 +46,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   beforeEach(() => {
-    jest.useFakeTimers('modern').setSystemTime(new Date('2022-09-15T10:00:00.000Z'));
+    jest.useFakeTimers().setSystemTime(new Date('2022-09-15T10:00:00.000Z'));
   });
 
   afterEach(() => {

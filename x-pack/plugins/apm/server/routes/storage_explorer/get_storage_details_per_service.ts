@@ -16,7 +16,7 @@ import {
   SERVICE_NAME,
   TIER,
   INDEX,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,

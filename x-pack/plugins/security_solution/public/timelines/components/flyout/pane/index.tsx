@@ -38,7 +38,7 @@ const StyledEuiFlyout = styled(EuiFlyout)<EuiFlyoutProps>`
 const IndexPatternFieldEditorOverlayGlobalStyle = createGlobalStyle<{
   theme: { eui: { euiZLevel5: number } };
 }>`
-  .indexPatternFieldEditorMaskOverlay {
+  .euiOverlayMask.indexPatternFieldEditorMaskOverlay {
     ${({ theme }) => `
     z-index: ${theme.eui.euiZLevel5};
   `}

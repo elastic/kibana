@@ -10,7 +10,7 @@ import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
-const defaultSuccessfulResponse = { total: 1, errors: [], taskIdsFailedToBeEnabled: [] };
+const defaultSuccessfulResponse = { total: 1, rules: [], errors: [], taskIdsFailedToBeEnabled: [] };
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -21,7 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('bulkEnableRules', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    after(() => objectRemover.removeAll());
+    afterEach(() => objectRemover.removeAll());
 
     const getScheduledTask = async (id: string) => {
       return await es.get({
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestRuleData())
+            .send({ ...getTestRuleData(), enabled: false })
             .expect(200);
 
           const response = await supertestWithoutAuth
@@ -73,15 +73,49 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
               expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                total: 1,
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    alertTypeId: 'test.noop',
+                    apiKeyOwner: response.body.rules[0].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[0].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[0].updatedAt,
+                    createdAt: response.body.rules[0].createdAt,
+                    scheduledTaskId: response.body.rules[0].scheduledTaskId,
+                    executionStatus: {
+                      lastDuration: 0,
+                      lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                ],
+                errors: [],
+                taskIdsFailedToBeEnabled: [],
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
 
-        it('should handle bulk enable of one rule appropriately based on id  when consumer is the same as producer', async () => {
+        it('should handle bulk enable of one rule appropriately based on id when consumer is the same as producer', async () => {
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
