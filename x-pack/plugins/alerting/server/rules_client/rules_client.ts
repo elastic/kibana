@@ -3923,7 +3923,8 @@ export class RulesClient {
   ): Promise<void> {
     const { actions, notifyWhen, throttle } = data;
     const hasNotifyWhen = typeof notifyWhen !== 'undefined';
-    const hasThrottle = typeof throttle !== 'undefined';
+    // Due to a limitation in kbn-config-schema, undefined throttle will be converted to 'null' at the route level. Allow this.
+    const hasThrottle = typeof throttle !== 'undefined' && throttle !== null;
     let usesRuleLevelFreqParams;
     if (hasNotifyWhen && hasThrottle) usesRuleLevelFreqParams = true;
     else if (!hasNotifyWhen && !hasThrottle) usesRuleLevelFreqParams = false;
