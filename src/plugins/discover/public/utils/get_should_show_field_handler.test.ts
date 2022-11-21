@@ -92,6 +92,19 @@ describe('get fields to show', () => {
     );
     expect(shouldShowFieldHandler('acknowledged')).toBe(true);
     expect(shouldShowFieldHandler('clientip')).toBe(true);
+    expect(shouldShowFieldHandler('machine.os')).toBe(true);
     expect(shouldShowFieldHandler('machine.os.raw')).toBe(false);
+  });
+
+  it('show multifields when showMultiFields is false but parent is not present', () => {
+    const shouldShowFieldHandler = getShouldShowFieldHandler(['machine.os.raw'], dataView, false);
+    expect(shouldShowFieldHandler('machine.os.raw')).toBe(true);
+  });
+
+  it('show unmapped fields', () => {
+    let shouldShowFieldHandler = getShouldShowFieldHandler(['unmapped'], dataView, false);
+    expect(shouldShowFieldHandler('unmapped')).toBe(true);
+    shouldShowFieldHandler = getShouldShowFieldHandler(['unmapped'], dataView, true);
+    expect(shouldShowFieldHandler('unmapped')).toBe(true);
   });
 });
