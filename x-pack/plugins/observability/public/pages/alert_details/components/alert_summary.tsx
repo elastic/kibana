@@ -5,7 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiBadge, EuiBadgeGroup } from '@elastic/eui';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiBadge,
+  EuiBadgeGroup,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import {
@@ -83,7 +91,8 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           {alert?.fields[ALERT_STATUS] ? (
-            <AlertStatusIndicator textSize="s"
+            <AlertStatusIndicator
+              textSize="s"
               alertStatus={
                 alert?.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE
                   ? ALERT_STATUS_ACTIVE
@@ -150,22 +159,17 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <div>
-            {
-              tags && tags.length > 0
-                ?
-                <EuiBadgeGroup>{
-                  tags.map((tag, index) => (
-                    <EuiBadge
-                      data-test-subj={`ruleTagBadgeItem-${tag}`}
-                      key={index}
-                      color="hollow"
-                    >
-                      <EuiText size="s">{tag}</EuiText>
-                    </EuiBadge>
-                  ))}
-                </EuiBadgeGroup>
-                : <div data-test-subj="noRuleTags">-</div>
-            }
+            {tags && tags.length > 0 ? (
+              <EuiBadgeGroup>
+                {tags.map((tag, index) => (
+                  <EuiBadge data-test-subj={`ruleTagBadgeItem-${tag}`} key={index} color="hollow">
+                    <EuiText size="s">{tag}</EuiText>
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            ) : (
+              <div data-test-subj="noRuleTags">-</div>
+            )}
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -13,10 +13,10 @@ import { LIGHT_THEME } from '@elastic/charts';
 
 interface AlertStatusIndicatorProps {
   alertStatus: AlertStatus;
-  textSize: "xs" | "s" | "m" | "inherit";
+  textSize: 'xs' | 's' | 'm' | 'inherit';
 }
 
-export function AlertStatusIndicator({ alertStatus, textSize = "xs" }: AlertStatusIndicatorProps) {
+export function AlertStatusIndicator({ alertStatus, textSize = 'xs' }: AlertStatusIndicatorProps) {
   if (alertStatus === ALERT_STATUS_ACTIVE) {
     return (
       <EuiHealth color={LIGHT_THEME.colors.vizColors[2]} textSize={textSize}>
