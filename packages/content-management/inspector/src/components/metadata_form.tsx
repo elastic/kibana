@@ -25,7 +25,7 @@ interface Props {
   TagSelector?: Services['TagSelector'];
 }
 
-const isFormFieldValid = (field: Field) => !field.isChangingValue && Boolean(field.errors?.length);
+const isFormFieldValid = (field: Field) => !field.isChangingValue && !Boolean(field.errors?.length);
 
 export const MetadataForm: FC<Props> = ({
   form,
@@ -72,7 +72,6 @@ export const MetadataForm: FC<Props> = ({
             setTitle(e.target.value);
           }}
           fullWidth
-          isLoading={title.isChangingValue}
           data-test-subj="nameInput"
           readOnly={isReadonly}
         />
