@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, useEffect } from 'react';
+import React, { useState, lazy, useEffect, useCallback } from 'react';
 import { Route, RouteComponentProps, Switch, Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
@@ -34,6 +34,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
+  const [createRuleButton, setCreateRuleButton] = useState<React.ReactNode>();
   const { chrome, setBreadcrumbs, docLinks } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
 
@@ -70,6 +71,16 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     history.push(`/${newSection}`);
   };
 
+  const renderRulesList = useCallback(() => {
+    return suspendedComponentWithProps(
+      RulesList,
+      'xl'
+    )({
+      showCreateRuleButton: false,
+      setCreateRuleButton,
+    });
+  }, []);
+
   // Set breadcrumb and page title
   useEffect(() => {
     setBreadcrumbs([getAlertingSectionBreadcrumb(section || 'home')]);
@@ -87,6 +98,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           </span>
         }
         rightSideItems={[
+          ...(createRuleButton ? [createRuleButton] : []),
           <EuiButtonEmpty
             href={docLinks.links.alerting.guide}
             target="_blank"
@@ -126,11 +138,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
                 </EuiPageTemplate.Section>
               )}
             />
-            <Route
-              exact
-              path={routeToRules}
-              component={suspendedComponentWithProps(RulesList, 'xl')}
-            />
+            <Route exact path={routeToRules} component={renderRulesList} />
             {isInternalAlertsTableEnabled ? (
               <Route
                 exact

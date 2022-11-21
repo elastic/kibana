@@ -581,7 +581,10 @@ describe('rules_list component with props', () => {
           .exists()
       ).toBeTruthy(); // doesnt have a tick icon
       expect(
-        wrapper.find('[data-test-subj="actionTypeFilterButton"] .euiNotificationBadge').text()
+        wrapper
+          .find('[data-test-subj="actionTypeFilterButton"] .euiNotificationBadge')
+          .first()
+          .text()
       ).toEqual('1'); // badge is being shown
     });
   });
