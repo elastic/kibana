@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { FailedTestsCount } from './failed_tests_count';
 import { useGetUrlParams } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
@@ -31,6 +32,8 @@ export const MonitorErrors = () => {
     [dateRangeEnd, dateRangeStart]
   );
 
+  const monitorId = useMonitorQueryId();
+
   return (
     <>
       <SyntheticsDatePicker fullWidth={true} />
@@ -43,7 +46,13 @@ export const MonitorErrors = () => {
             </EuiTitle>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <MonitorErrorsCount to={dateRangeEnd} from={dateRangeStart} />
+                {monitorId && (
+                  <MonitorErrorsCount
+                    to={dateRangeEnd}
+                    from={dateRangeStart}
+                    monitorId={[monitorId]}
+                  />
+                )}
               </EuiFlexItem>
               <EuiFlexItem>
                 <FailedTestsCount to={dateRangeEnd} from={dateRangeStart} />
