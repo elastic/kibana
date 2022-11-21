@@ -7,7 +7,7 @@
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
 import expect from '@kbn/expect';
-import { times } from 'lodash';
+import { first, last, times } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -47,9 +47,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  async function listSourcemaps() {
+  async function listSourcemaps({ page, perPage }: { page?: number; perPage?: number } = {}) {
+    const query = page && perPage ? { page, perPage } : {};
+
     const response = await apmApiClient.readUser({
       endpoint: 'GET /api/apm/sourcemaps',
+      params: { query },
     });
     return response.body.artifacts;
   }
@@ -66,7 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('can upload a source map', async () => {
         resp = await uploadSourcemap({
-          serviceName: 'foo',
+          serviceName: 'my_service',
           serviceVersion: '1.0.0',
           bundleFilePath: 'bar',
           sourcemap: {
@@ -82,10 +85,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('list source maps', () => {
       const uploadedSourcemapIds: string[] = [];
       before(async () => {
-        const sourcemapCount = times(2);
+        const sourcemapCount = times(15);
         for (const i of sourcemapCount) {
           const sourcemap = await uploadSourcemap({
-            serviceName: 'foo',
+            serviceName: 'my_service',
             serviceVersion: `1.0.${i}`,
             bundleFilePath: 'bar',
             sourcemap: {
@@ -95,7 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           });
           uploadedSourcemapIds.push(sourcemap.id);
-          await sleep(100);
+          await sleep(50);
         }
       });
 
@@ -106,6 +109,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('can list source maps', async () => {
         const sourcemaps = await listSourcemaps();
         expect(sourcemaps).to.not.empty();
+      });
+
+      it('can paginate source maps', async () => {
+        const firstPageItems = await listSourcemaps({ page: 1, perPage: 5 });
+        expect(first(firstPageItems)?.identifier).to.eql('my_service-1.0.14');
+        expect(last(firstPageItems)?.identifier).to.eql('my_service-1.0.10');
+
+        const secondPageItems = await listSourcemaps({ page: 2, perPage: 5 });
+        expect(first(secondPageItems)?.identifier).to.eql('my_service-1.0.9');
+        expect(last(secondPageItems)?.identifier).to.eql('my_service-1.0.5');
+
+        const thirdPageItems = await listSourcemaps({ page: 3, perPage: 5 });
+        expect(first(thirdPageItems)?.identifier).to.eql('my_service-1.0.4');
+        expect(last(thirdPageItems)?.identifier).to.eql('my_service-1.0.0');
       });
 
       it('returns newest source maps first', async () => {
@@ -121,7 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('delete source maps', () => {
       it('can delete a source map', async () => {
         const sourcemap = await uploadSourcemap({
-          serviceName: 'foo',
+          serviceName: 'my_service',
           serviceVersion: '1.0.0',
           bundleFilePath: 'bar',
           sourcemap: {
