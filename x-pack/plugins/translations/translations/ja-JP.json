@@ -23106,7 +23106,6 @@
     "xpack.observability.enableComparisonByDefaultDescription": "APMアプリで比較機能を有効にする",
     "xpack.observability.enableInspectEsQueriesExperimentDescription": "API応答でElasticsearchクエリを調査します。",
     "xpack.observability.enableInspectEsQueriesExperimentName": "ESクエリを調査",
-    "xpack.observability.enableNewSyntheticsViewExperimentDescription": "オブザーバビリティで新しい合成監視アプリケーションを有効にします。設定を適用するにはページを更新してください。",
     "xpack.observability.enableNewSyntheticsViewExperimentName": "新しい合成監視アプリケーションを有効にする",
     "xpack.observability.enableServiceGroups": "サービスグループ機能",
     "xpack.observability.exp.breakDownFilter.noBreakdown": "内訳なし",
