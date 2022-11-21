@@ -34,18 +34,19 @@ export const BuildBazelPackages: Task = {
       await scanCopy({
         source: config.resolveFromRepo('bazel-bin', pkg.normalizedRepoRelativeDir, 'npm_module'),
         destination: pkgDirInBuild,
-        permissions: (rec) => (rec.isDirectory ? 0o755 : 0o644),
-        async map(path) {
-          const extname = Path.extname(path);
+        permissions: (rec) => (rec.type === 'file' ? 0o644 : 0o755),
+        async map(rec) {
+          const extname = Path.extname(rec.source.name);
           if (extname !== '.peggy') {
-            return;
+            return undefined;
           }
 
           return {
-            filename: `${Path.basename(path)}.js`,
-            source: (
+            ...rec,
+            dest: rec.dest.withExt('.js'),
+            content: (
               await Peggy.getJsSource({
-                path,
+                path: rec.source.abs,
                 format: 'commonjs',
                 optimize: 'speed',
               })
