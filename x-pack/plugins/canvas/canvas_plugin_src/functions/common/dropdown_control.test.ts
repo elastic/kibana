@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper } from '@kbn/presentation-util-plugin/common/lib';
+import { functionWrapper } from '@kbn/presentation-util-plugin/common';
 import { testTable, relationalTable } from './__fixtures__/test_tables';
 import { dropdownControl } from './dropdownControl';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
