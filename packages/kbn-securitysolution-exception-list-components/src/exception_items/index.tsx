@@ -16,8 +16,8 @@ import type { Pagination as PaginationType } from '@elastic/eui';
 import type {
   CommentsArray,
   ExceptionListItemSchema,
+  ExceptionListTypeEnum
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EmptyViewerState, ExceptionItemCard, Pagination } from '../..';
@@ -28,7 +28,6 @@ import type {
   ViewerStatus,
   GetExceptionItemProps,
 } from '../types';
-
 
 const exceptionItemCss = css`
   margin: ${euiThemeVars.euiSize} 0;
