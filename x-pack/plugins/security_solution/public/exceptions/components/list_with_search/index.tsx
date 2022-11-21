@@ -42,6 +42,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
     pagination,
     emptyViewerTitle,
     emptyViewerBody,
+    emptyViewerButtonText,
     viewerStatus,
     ruleReferences,
     showAddExceptionFlyout,
@@ -94,7 +95,11 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
               />
             )}
             <SearchBar
-              addExceptionButtonText={i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON}
+              addExceptionButtonText={
+                listType === ExceptionListTypeEnum.ENDPOINT
+                  ? i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON_ENDPOINT
+                  : i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON
+              }
               listType={listType as ExceptionListTypeEnum}
               onSearch={onSearch}
               onAddExceptionClick={onAddExceptionClick}
@@ -110,6 +115,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
               exceptions={exceptions}
               emptyViewerTitle={emptyViewerTitle}
               emptyViewerBody={emptyViewerBody}
+              emptyViewerButtonText={emptyViewerButtonText}
               pagination={pagination}
               lastUpdated={lastUpdated}
               onPaginationChange={onPaginationChange}
