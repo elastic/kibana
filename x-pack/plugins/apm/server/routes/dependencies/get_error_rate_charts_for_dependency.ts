@@ -15,7 +15,7 @@ import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';

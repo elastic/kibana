@@ -14,6 +14,695 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.AddAuditEventParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "AddAuditEventParams",
+        "description": [
+          "\nThe AddAuditEventParams interface contains settings for adding\naudit events via the ISavedObjectsSecurityExtension."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AddAuditEventParams.action",
+            "type": "Enum",
+            "tags": [],
+            "label": "action",
+            "description": [
+              "\nThe relevant action"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.AuditAction",
+                "text": "AuditAction"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AddAuditEventParams.outcome",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "outcome",
+            "description": [
+              "\nThe outcome of the operation\n'failure' | 'success' | 'unknown'"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.EcsEventOutcome",
+                "text": "EcsEventOutcome"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AddAuditEventParams.savedObject",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObject",
+            "description": [
+              "\nrelevant saved object information\nobject containing type & id strings"
+            ],
+            "signature": [
+              "{ type: string; id: string; } | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AddAuditEventParams.addToSpaces",
+            "type": "Object",
+            "tags": [],
+            "label": "addToSpaces",
+            "description": [
+              "\nArray of spaces being added. For\nUPDATE_OBJECTS_SPACES action only"
+            ],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AddAuditEventParams.deleteFromSpaces",
+            "type": "Object",
+            "tags": [],
+            "label": "deleteFromSpaces",
+            "description": [
+              "\nArray of spaces being removed. For\nUPDATE_OBJECTS_SPACES action only"
+            ],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AddAuditEventParams.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "\nrelevant error information to add to\nthe audit event"
+            ],
+            "signature": [
+              "Error | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.AuthorizationTypeEntry",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthorizationTypeEntry",
+        "description": [
+          "\nThe AuthorizationTypeEntry interface contains space-related details\nfor CheckAuthorizationResults."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AuthorizationTypeEntry.authorizedSpaces",
+            "type": "Array",
+            "tags": [],
+            "label": "authorizedSpaces",
+            "description": [
+              "\nAn array of authorized spaces for the associated type/action\nin the associated record/map."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AuthorizationTypeEntry.isGloballyAuthorized",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isGloballyAuthorized",
+            "description": [
+              "\nIs the associated type/action globally authorized?"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.CheckAuthorizationParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CheckAuthorizationParams",
+        "description": [
+          "\nThe CheckAuthorizationParams interface contains settings for checking\nauthorization via the ISavedObjectsSecurityExtension."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.CheckAuthorizationParams",
+            "text": "CheckAuthorizationParams"
+          },
+          "<A>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.CheckAuthorizationParams.types",
+            "type": "Object",
+            "tags": [],
+            "label": "types",
+            "description": [
+              "\nA set of types to check."
+            ],
+            "signature": [
+              "Set<string>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.CheckAuthorizationParams.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [
+              "\nA set of spaces to check."
+            ],
+            "signature": [
+              "Set<string>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.CheckAuthorizationParams.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [
+              "\nAn set of actions to check."
+            ],
+            "signature": [
+              "Set<A>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.CheckAuthorizationParams.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "\nAuthorization options - whether or not to allow global resources, false if options are undefined"
+            ],
+            "signature": [
+              "{ allowGlobalResource: boolean; } | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.CheckAuthorizationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "CheckAuthorizationResult",
+        "description": [
+          "\nThe CheckAuthorizationResult interface contains the overall status of an\nauthorization check and the specific authorized privileges as an\nAuthorizationTypeMap."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.CheckAuthorizationResult",
+            "text": "CheckAuthorizationResult"
+          },
+          "<A>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.CheckAuthorizationResult.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "\nThe overall status of the authorization check as a string:\n'fully_authorized' | 'partially_authorized' | 'unauthorized'"
+            ],
+            "signature": [
+              "\"fully_authorized\" | \"partially_authorized\" | \"unauthorized\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.CheckAuthorizationResult.typeMap",
+            "type": "Object",
+            "tags": [],
+            "label": "typeMap",
+            "description": [
+              "\nThe specific authorized privileges: a map of type to record\nof action/AuthorizationTypeEntry (spaces/globallyAuthz'd)"
+            ],
+            "signature": [
+              "Map<string, Record<A, ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.AuthorizationTypeEntry",
+                "text": "AuthorizationTypeEntry"
+              },
+              ">>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.EncryptedObjectDescriptor",
+        "type": "Interface",
+        "tags": [],
+        "label": "EncryptedObjectDescriptor",
+        "description": [
+          "\nThe EncryptedObjectDescriptor interface contains settings for describing\nan object to be encrypted or decrpyted."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.EncryptedObjectDescriptor.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The Saved Object type"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.EncryptedObjectDescriptor.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "The Saved Object ID"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.EncryptedObjectDescriptor.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [
+              "Namespace for use in index migration...\nIf the object is being decrypted during index migration, the object was previously\nencrypted with its namespace in the descriptor portion of the AAD; on the other hand,\nif the object is being decrypted during object migration, the object was never encrypted\nwith its namespace in the descriptor portion of the AAD."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.EnforceAuthorizationParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "EnforceAuthorizationParams",
+        "description": [
+          "\nThe EnforceAuthorizationParams interface contains settings for\nenforcing a single action via the ISavedObjectsSecurityExtension."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.EnforceAuthorizationParams",
+            "text": "EnforceAuthorizationParams"
+          },
+          "<A>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.EnforceAuthorizationParams.typesAndSpaces",
+            "type": "Object",
+            "tags": [],
+            "label": "typesAndSpaces",
+            "description": [
+              "\nA map of types to spaces that will be affected by the action"
+            ],
+            "signature": [
+              "Map<string, Set<string>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.EnforceAuthorizationParams.action",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "action",
+            "description": [
+              "\nThe relevant action (create, update, etc.)"
+            ],
+            "signature": [
+              "A"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.EnforceAuthorizationParams.typeMap",
+            "type": "Object",
+            "tags": [],
+            "label": "typeMap",
+            "description": [
+              "\nThe authorization map from CheckAuthorizationResult: a\nmap of type to record of action/AuthorizationTypeEntry\n(spaces/globallyAuthz'd)"
+            ],
+            "signature": [
+              "Map<string, Record<A, ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.AuthorizationTypeEntry",
+                "text": "AuthorizationTypeEntry"
+              },
+              ">>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.EnforceAuthorizationParams.auditCallback",
+            "type": "Function",
+            "tags": [],
+            "label": "auditCallback",
+            "description": [
+              "\nA callback intended to handle adding audit events in\nboth error (unauthorized), or success (authorized)\ncases"
+            ],
+            "signature": [
+              "((error?: Error | undefined) => void) | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.EnforceAuthorizationParams.auditCallback.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.ISavedObjectsEncryptionExtension",
+        "type": "Interface",
+        "tags": [],
+        "label": "ISavedObjectsEncryptionExtension",
+        "description": [
+          "\nThe ISavedObjectsEncryptionExtension interface defines the functions of a saved objects\nrepository encryption extension. It contains functions for determining if a type is\nencryptable, encrypting object attributes, and decrypting or stripping object attributes."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsEncryptionExtension.isEncryptableType",
+            "type": "Function",
+            "tags": [],
+            "label": "isEncryptableType",
+            "description": [
+              "\nReturns true if a type has been registered as encryptable."
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsEncryptionExtension.isEncryptableType.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "- the string name of the object type"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "boolean, true if type is encryptable"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsEncryptionExtension.decryptOrStripResponseAttributes",
+            "type": "Function",
+            "tags": [],
+            "label": "decryptOrStripResponseAttributes",
+            "description": [
+              "\nGiven a saved object, will return a decrypted saved object or will strip\nattributes from the returned object if decryption fails."
+            ],
+            "signature": [
+              "<T, R extends ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<T>>(response: R, originalAttributes?: T | undefined) => Promise<R>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsEncryptionExtension.decryptOrStripResponseAttributes.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "response",
+                "description": [
+                  "- any object R that extends SavedObject with attributes T"
+                ],
+                "signature": [
+                  "R"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsEncryptionExtension.decryptOrStripResponseAttributes.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "originalAttributes",
+                "description": [
+                  "- optional, original attributes T from when the object was created (NOT encrypted).\nThese are used to avoid decryption execution cost if they are supplied."
+                ],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "R with decrypted or stripped attributes"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsEncryptionExtension.encryptAttributes",
+            "type": "Function",
+            "tags": [],
+            "label": "encryptAttributes",
+            "description": [
+              "\nGiven a saved object descriptor and some attributes, returns an encrypted version\nof supplied attributes."
+            ],
+            "signature": [
+              "<T extends Record<string, unknown>>(descriptor: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.EncryptedObjectDescriptor",
+                "text": "EncryptedObjectDescriptor"
+              },
+              ", attributes: T) => Promise<T>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsEncryptionExtension.encryptAttributes.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "descriptor",
+                "description": [
+                  "- an object containing a saved object id, type, and optional namespace."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.EncryptedObjectDescriptor",
+                    "text": "EncryptedObjectDescriptor"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsEncryptionExtension.encryptAttributes.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "attributes",
+                "description": [
+                  "- T, attributes of the specified object, some of which to be encrypted."
+                ],
+                "signature": [
+                  "T"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "T, encrypted attributes"
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.ISavedObjectsExporter",
         "type": "Interface",
         "tags": [],
@@ -260,6 +949,245 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.ISavedObjectsSecurityExtension",
+        "type": "Interface",
+        "tags": [],
+        "label": "ISavedObjectsSecurityExtension",
+        "description": [
+          "\nThe ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.\nIt contains functions for checking & enforcing authorization, adding audit events, and redacting namespaces."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSecurityExtension.checkAuthorization",
+            "type": "Function",
+            "tags": [],
+            "label": "checkAuthorization",
+            "description": [
+              "\nChecks authorization of actions on specified types in specified spaces."
+            ],
+            "signature": [
+              "<T extends string>(params: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.CheckAuthorizationParams",
+                "text": "CheckAuthorizationParams"
+              },
+              "<T>) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.CheckAuthorizationResult",
+                "text": "CheckAuthorizationResult"
+              },
+              "<T>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSecurityExtension.checkAuthorization.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "- types, spaces, and actions to check"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.CheckAuthorizationParams",
+                    "text": "CheckAuthorizationParams"
+                  },
+                  "<T>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSecurityExtension.enforceAuthorization",
+            "type": "Function",
+            "tags": [],
+            "label": "enforceAuthorization",
+            "description": [
+              "\nEnforces authorization of a single action on specified types in specified spaces.\nThrows error if authorization map does not cover specified parameters."
+            ],
+            "signature": [
+              "<T extends string>(params: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.EnforceAuthorizationParams",
+                "text": "EnforceAuthorizationParams"
+              },
+              "<T>) => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSecurityExtension.enforceAuthorization.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "- map of types/spaces, action to check, and authz map (from CheckAuthorizationResult)"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.EnforceAuthorizationParams",
+                    "text": "EnforceAuthorizationParams"
+                  },
+                  "<T>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSecurityExtension.addAuditEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "addAuditEvent",
+            "description": [
+              "\nAdds an audit event for the specified action with relevant information"
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.AddAuditEventParams",
+                "text": "AddAuditEventParams"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSecurityExtension.addAuditEvent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "- the action, outcome, error, and relevant object/space information"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.AddAuditEventParams",
+                    "text": "AddAuditEventParams"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSecurityExtension.redactNamespaces",
+            "type": "Function",
+            "tags": [],
+            "label": "redactNamespaces",
+            "description": [
+              "\nFilters a saved object's spaces based on an authorization map (from CheckAuthorizationResult)"
+            ],
+            "signature": [
+              "<T, A extends string>(params: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.RedactNamespacesParams",
+                "text": "RedactNamespacesParams"
+              },
+              "<T, A>) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<T>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSecurityExtension.redactNamespaces.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "- the saved object and an authorization map"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.RedactNamespacesParams",
+                    "text": "RedactNamespacesParams"
+                  },
+                  "<T, A>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "SavedObject - saved object with filtered spaces"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -652,6 +1580,90 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.ISavedObjectsSpacesExtension",
+        "type": "Interface",
+        "tags": [],
+        "label": "ISavedObjectsSpacesExtension",
+        "description": [
+          "\nThe ISavedObjectsSpacesExtension interface defines the functions of a saved objects repository spaces extension.\nIt contains functions for getting the current namespace & getting and array of searchable spaces."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/spaces.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSpacesExtension.getCurrentNamespace",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentNamespace",
+            "description": [
+              "\nRetrieves the active namespace ID. This is *not* the same as a namespace string. See also: `namespaceIdToString` and\n`namespaceStringToId`.\n\nThis takes the saved objects repository's namespace option as a parameter, and doubles as a validation function; if the namespace\noption has already been set some other way, this will throw an error."
+            ],
+            "signature": [
+              "(namespace: string | undefined) => string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/spaces.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSpacesExtension.getCurrentNamespace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/spaces.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSpacesExtension.getSearchableNamespaces",
+            "type": "Function",
+            "tags": [],
+            "label": "getSearchableNamespaces",
+            "description": [
+              "\nGiven a list of namespace strings, returns a subset that the user is authorized to search in.\nIf a wildcard '*' is used, it is expanded to an explicit list of namespace strings."
+            ],
+            "signature": [
+              "(namespaces: string[] | undefined) => Promise<string[]>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/spaces.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSpacesExtension.getSearchableNamespaces.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "namespaces",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/spaces.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.ISavedObjectTypeRegistry",
         "type": "Interface",
         "tags": [],
@@ -1026,6 +2038,79 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.RedactNamespacesParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RedactNamespacesParams",
+        "description": [
+          "\nThe RedactNamespacesParams interface contains settings for filtering\nnamespace access via the ISavedObjectsSecurityExtension."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.RedactNamespacesParams",
+            "text": "RedactNamespacesParams"
+          },
+          "<T, A>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.RedactNamespacesParams.savedObject",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObject",
+            "description": [
+              "\nrelevant saved object"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<T>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.RedactNamespacesParams.typeMap",
+            "type": "Object",
+            "tags": [],
+            "label": "typeMap",
+            "description": [
+              "\nThe authorization map from CheckAuthorizationResult: a map of\ntype to record of action/AuthorizationTypeEntry\n(spaces/globallyAuthz'd)"
+            ],
+            "signature": [
+              "Map<string, Record<A, ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.AuthorizationTypeEntry",
+                "text": "AuthorizationTypeEntry"
+              },
+              ">>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.SavedObjectExportBaseOptions",
         "type": "Interface",
         "tags": [],
@@ -1258,104 +2343,31 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-server.SavedObjectsClientProviderOptions.excludedWrappers",
-            "type": "Array",
-            "tags": [],
-            "label": "excludedWrappers",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.SavedObjectsClientProviderOptions.includedHiddenTypes",
             "type": "Array",
             "tags": [],
             "label": "includedHiddenTypes",
-            "description": [],
+            "description": [
+              "Array of hidden types to include"
+            ],
             "signature": [
               "string[] | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-server",
-        "id": "def-server.SavedObjectsClientWrapperOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectsClientWrapperOptions",
-        "description": [
-          "\nOptions passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance."
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-server.SavedObjectsClientWrapperOptions.client",
-            "type": "Object",
-            "tags": [],
-            "label": "client",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-server.SavedObjectsClientWrapperOptions.typeRegistry",
-            "type": "Object",
+            "id": "def-server.SavedObjectsClientProviderOptions.excludedExtensions",
+            "type": "Array",
             "tags": [],
-            "label": "typeRegistry",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectTypeRegistry",
-                "text": "ISavedObjectTypeRegistry"
-              }
+            "label": "excludedExtensions",
+            "description": [
+              "array of extensions to exclude (ENCRYPTION_EXTENSION_ID | SECURITY_EXTENSION_ID | SPACES_EXTENSION_ID)"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-server.SavedObjectsClientWrapperOptions.request",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>"
+              "string[] | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
             "deprecated": false,
@@ -1698,6 +2710,85 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsExtensions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsExtensions",
+        "description": [
+          "\nThe SavedObjectsExtensions interface contains the intefaces for three\nextensions to the saved objects repository. These extensions augment\nthe funtionality of the saved objects repository to provide encryption,\nsecurity, and spaces features."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExtensions.encryptionExtension",
+            "type": "Object",
+            "tags": [],
+            "label": "encryptionExtension",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsEncryptionExtension",
+                "text": "ISavedObjectsEncryptionExtension"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExtensions.securityExtension",
+            "type": "Object",
+            "tags": [],
+            "label": "securityExtension",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsSecurityExtension",
+                "text": "ISavedObjectsSecurityExtension"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExtensions.spacesExtension",
+            "type": "Object",
+            "tags": [],
+            "label": "spacesExtension",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsSpacesExtension",
+                "text": "ISavedObjectsSpacesExtension"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2389,7 +3480,15 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => ",
+              "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined, extensions?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExtensions",
+                "text": "SavedObjectsExtensions"
+              },
+              " | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "server",
@@ -2440,6 +3539,30 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsRepositoryFactory.createScopedRepository.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "extensions",
+                "description": [
+                  "- Extensions that the repository should use (for encryption, security, and spaces)."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsExtensions",
+                    "text": "SavedObjectsExtensions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2454,7 +3577,15 @@
               "\nCreates a {@link ISavedObjectsRepository | Saved Objects repository} that\nuses the internal Kibana user for authenticating with Elasticsearch.\n"
             ],
             "signature": [
-              "(includedHiddenTypes?: string[] | undefined) => ",
+              "(includedHiddenTypes?: string[] | undefined, extensions?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExtensions",
+                "text": "SavedObjectsExtensions"
+              },
+              " | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "server",
@@ -2478,6 +3609,30 @@
                 ],
                 "signature": [
                   "string[] | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsRepositoryFactory.createInternalRepository.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "extensions",
+                "description": [
+                  "- Extensions that the repository should use (for encryption, security, and spaces)."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsExtensions",
+                    "text": "SavedObjectsExtensions"
+                  },
+                  " | undefined"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
                 "deprecated": false,
@@ -2797,7 +3952,7 @@
         "tags": [],
         "label": "SavedObjectsServiceSetup",
         "description": [
-          "\nSaved Objects is Kibana's data persistence mechanism allowing plugins to\nuse Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods\nfor registering Saved Object types, creating and registering Saved Object client wrappers and factories.\n"
+          "\nSaved Objects is Kibana's data persistence mechanism allowing plugins to\nuse Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods\nor registering Saved Object types, and creating and registering Saved Object client factories.\n"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
         "deprecated": false,
@@ -2853,21 +4008,21 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-server.SavedObjectsServiceSetup.addClientWrapper",
+            "id": "def-server.SavedObjectsServiceSetup.setEncryptionExtension",
             "type": "Function",
             "tags": [],
-            "label": "addClientWrapper",
+            "label": "setEncryptionExtension",
             "description": [
-              "\nAdd a {@link SavedObjectsClientWrapperFactory | client wrapper factory} with the given priority."
+              "\nSets the {@link SavedObjectsEncryptionExtensionFactory encryption extension factory}."
             ],
             "signature": [
-              "(priority: number, id: string, factory: ",
+              "(factory: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsClientWrapperFactory",
-                "text": "SavedObjectsClientWrapperFactory"
+                "section": "def-server.SavedObjectsEncryptionExtensionFactory",
+                "text": "SavedObjectsEncryptionExtensionFactory"
               },
               ") => void"
             ],
@@ -2877,37 +4032,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-server.SavedObjectsServiceSetup.addClientWrapper.$1",
-                "type": "number",
-                "tags": [],
-                "label": "priority",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-server.SavedObjectsServiceSetup.addClientWrapper.$2",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-server.SavedObjectsServiceSetup.addClientWrapper.$3",
+                "id": "def-server.SavedObjectsServiceSetup.setEncryptionExtension.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "factory",
@@ -2917,8 +4042,104 @@
                     "pluginId": "@kbn/core-saved-objects-server",
                     "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectsClientWrapperFactory",
-                    "text": "SavedObjectsClientWrapperFactory"
+                    "section": "def-server.SavedObjectsEncryptionExtensionFactory",
+                    "text": "SavedObjectsEncryptionExtensionFactory"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceSetup.setSecurityExtension",
+            "type": "Function",
+            "tags": [],
+            "label": "setSecurityExtension",
+            "description": [
+              "\nSets the {@link SavedObjectsSecurityExtensionFactory security extension factory}."
+            ],
+            "signature": [
+              "(factory: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsSecurityExtensionFactory",
+                "text": "SavedObjectsSecurityExtensionFactory"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceSetup.setSecurityExtension.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "factory",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsSecurityExtensionFactory",
+                    "text": "SavedObjectsSecurityExtensionFactory"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceSetup.setSpacesExtension",
+            "type": "Function",
+            "tags": [],
+            "label": "setSpacesExtension",
+            "description": [
+              "\nSets the {@link SavedObjectsSpacesExtensionFactory spaces extension factory}."
+            ],
+            "signature": [
+              "(factory: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsSpacesExtensionFactory",
+                "text": "SavedObjectsSpacesExtensionFactory"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceSetup.setSpacesExtension.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "factory",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsSpacesExtensionFactory",
+                    "text": "SavedObjectsSpacesExtensionFactory"
                   }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
@@ -3019,7 +4240,7 @@
             "tags": [],
             "label": "getScopedClient",
             "description": [
-              "\nCreates a {@link SavedObjectsClientContract | Saved Objects client} that\nuses the credentials from the passed in request to authenticate with\nElasticsearch. If other plugins have registered Saved Objects client\nwrappers, these will be applied to extend the functionality of the client.\n\nA client that is already scoped to the incoming request is also exposed\nfrom the route handler context see {@link RequestHandlerContext}."
+              "\nCreates a {@link SavedObjectsClientContract | Saved Objects client} that\nuses the credentials from the passed in request to authenticate with\nElasticsearch.\n\nA client that is already scoped to the incoming request is also exposed\nfrom the route handler context see {@link RequestHandlerContext}."
             ],
             "signature": [
               "(req: ",
@@ -3116,7 +4337,15 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => ",
+              "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined, extensions?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExtensions",
+                "text": "SavedObjectsExtensions"
+              },
+              " | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "server",
@@ -3169,6 +4398,30 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceStart.createScopedRepository.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "extensions",
+                "description": [
+                  "- Extensions that the repository should use (for encryption, security, and spaces)."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsExtensions",
+                    "text": "SavedObjectsExtensions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -3183,7 +4436,15 @@
               "\nCreates a {@link ISavedObjectsRepository | Saved Objects repository} that\nuses the internal Kibana user for authenticating with Elasticsearch.\n"
             ],
             "signature": [
-              "(includedHiddenTypes?: string[] | undefined) => ",
+              "(includedHiddenTypes?: string[] | undefined, extensions?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExtensions",
+                "text": "SavedObjectsExtensions"
+              },
+              " | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "server",
@@ -3207,6 +4468,30 @@
                 ],
                 "signature": [
                   "string[] | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceStart.createInternalRepository.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "extensions",
+                "description": [
+                  "- Extensions that the repository should use (for encryption, security, and spaces)."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsExtensions",
+                    "text": "SavedObjectsExtensions"
+                  },
+                  " | undefined"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
                 "deprecated": false,
@@ -4069,8 +5354,48 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.AuditAction",
+        "type": "Enum",
+        "tags": [],
+        "label": "AuditAction",
+        "description": [
+          "\nThe AuditAction enumeration contains values for all\nvalid audit actions for use in AddAuditEventParams."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.AuthorizationTypeMap",
+        "type": "Type",
+        "tags": [],
+        "label": "AuthorizationTypeMap",
+        "description": [
+          "\nThe AuthorizationTypeMap type is a map of saved object type\nto a record of action/AuthorizationTypeEntry,"
+        ],
+        "signature": [
+          "Map<string, Record<A, ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.AuthorizationTypeEntry",
+            "text": "AuthorizationTypeEntry"
+          },
+          ">>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.CreatedObject",
@@ -4089,6 +5414,21 @@
           "<T> & { destinationId?: string | undefined; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.ENCRYPTION_EXTENSION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENCRYPTION_EXTENSION_ID",
+        "description": [],
+        "signature": [
+          "\"encryptedSavedObjects\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4214,7 +5554,7 @@
           "\nDescribes the factory used to create instances of the Saved Objects Client."
         ],
         "signature": [
-          "({ request, includedHiddenTypes, }: { request: ",
+          "({ request, includedHiddenTypes, extensions, }: { request: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -4222,7 +5562,15 @@
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
-          "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; }) => ",
+          "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; extensions?: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsExtensions",
+            "text": "SavedObjectsExtensions"
+          },
+          " | undefined; }) => ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "server",
@@ -4252,7 +5600,15 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; }"
+              "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; extensions?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExtensions",
+                "text": "SavedObjectsExtensions"
+              },
+              " | undefined; }"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
             "deprecated": false,
@@ -4318,30 +5674,39 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
-        "id": "def-server.SavedObjectsClientWrapperFactory",
+        "id": "def-server.SavedObjectsEncryptionExtensionFactory",
         "type": "Type",
         "tags": [],
-        "label": "SavedObjectsClientWrapperFactory",
+        "label": "SavedObjectsEncryptionExtensionFactory",
         "description": [
-          "\nDescribes the factory used to create instances of Saved Objects Client Wrappers."
+          "\nDescribes the factory used to create instances of the Saved Objects Encryption Extension."
         ],
         "signature": [
-          "(options: ",
+          "(params: { typeRegistry: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
             "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsClientWrapperOptions",
-            "text": "SavedObjectsClientWrapperOptions"
+            "section": "def-server.ISavedObjectTypeRegistry",
+            "text": "ISavedObjectTypeRegistry"
           },
-          ") => ",
+          "; request: ",
           {
-            "pluginId": "@kbn/core-saved-objects-api-server",
+            "pluginId": "@kbn/core-http-server",
             "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsClientContract",
-            "text": "SavedObjectsClientContract"
-          }
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>; }) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.ISavedObjectsEncryptionExtension",
+            "text": "ISavedObjectsEncryptionExtension"
+          },
+          " | undefined"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
         "deprecated": false,
@@ -4350,19 +5715,29 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-server.SavedObjectsClientWrapperFactory.$1",
+            "id": "def-server.SavedObjectsEncryptionExtensionFactory.$1",
             "type": "Object",
             "tags": [],
-            "label": "options",
+            "label": "params",
             "description": [],
             "signature": [
+              "{ typeRegistry: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsClientWrapperOptions",
-                "text": "SavedObjectsClientWrapperOptions"
-              }
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              },
+              "; request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>; }"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
             "deprecated": false,
@@ -4513,6 +5888,72 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsExtensionFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsExtensionFactory",
+        "description": [
+          "\nDescribes the base Saved Objects Extension factory."
+        ],
+        "signature": [
+          "(params: { typeRegistry: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.ISavedObjectTypeRegistry",
+            "text": "ISavedObjectTypeRegistry"
+          },
+          "; request: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>; }) => T"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExtensionFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ typeRegistry: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              },
+              "; request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.SavedObjectsFieldMapping",
         "type": "Type",
         "tags": [],
@@ -4590,6 +6031,154 @@
               "<T>[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsSecurityExtensionFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsSecurityExtensionFactory",
+        "description": [
+          "\nDescribes the factory used to create instances of the Saved Objects Security Extension."
+        ],
+        "signature": [
+          "(params: { typeRegistry: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.ISavedObjectTypeRegistry",
+            "text": "ISavedObjectTypeRegistry"
+          },
+          "; request: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>; }) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.ISavedObjectsSecurityExtension",
+            "text": "ISavedObjectsSecurityExtension"
+          },
+          " | undefined"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsSecurityExtensionFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ typeRegistry: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              },
+              "; request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsSpacesExtensionFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsSpacesExtensionFactory",
+        "description": [
+          "\nDescribes the factory used to create instances of the Saved Objects Spaces Extension."
+        ],
+        "signature": [
+          "(params: { typeRegistry: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.ISavedObjectTypeRegistry",
+            "text": "ISavedObjectTypeRegistry"
+          },
+          "; request: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>; }) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.ISavedObjectsSpacesExtension",
+            "text": "ISavedObjectsSpacesExtension"
+          },
+          " | undefined"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsSpacesExtensionFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ typeRegistry: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              },
+              "; request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4703,6 +6292,36 @@
           "[] | undefined; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SECURITY_EXTENSION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_EXTENSION_ID",
+        "description": [],
+        "signature": [
+          "\"security\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SPACES_EXTENSION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SPACES_EXTENSION_ID",
+        "description": [],
+        "signature": [
+          "\"spaces\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
