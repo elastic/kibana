@@ -88,24 +88,14 @@ export const getFleetServerUsage = async (
 };
 
 export const getFleetServerConfig = async (soClient: SavedObjectsClient): Promise<any> => {
-  const fleetServerHosts = await listFleetServerHosts(soClient);
-  const hosts = fleetServerHosts.items.map((item) => ({
-    ...item,
-    proxy_id: (item as any).proxy_id ?? '',
-  }));
-
   const res = await packagePolicyService.list(soClient, {
     page: 1,
     perPage: SO_SEARCH_LIMIT,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:fleet_server`,
   });
   const policies = res.items.map((item) => ({
-    id: item.id,
-    name: item.name,
-    enabled: item.enabled,
-    policy_id: item.policy_id,
     input_config: (item.inputs[0] ?? {}).compiled_input,
   }));
 
-  return { hosts, policies };
+  return { policies };
 };
