@@ -12,7 +12,7 @@ export interface AlertStatusEventEntityIdMap {
   };
 }
 
-export const enum ProcessEventAlertCategory {
+export enum ProcessEventAlertCategory {
   all = 'all',
   file = 'file',
   network = 'network',
@@ -25,12 +25,12 @@ export interface AlertTypeCount {
 }
 export type DefaultAlertFilterType = 'all';
 
-export const enum EventKind {
+export enum EventKind {
   event = 'event',
   signal = 'signal',
 }
 
-export const enum EventAction {
+export enum EventAction {
   fork = 'fork',
   exec = 'exec',
   end = 'end',
