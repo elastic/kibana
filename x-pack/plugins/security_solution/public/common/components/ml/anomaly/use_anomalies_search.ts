@@ -20,7 +20,7 @@ import type { inputsModel } from '../../../store';
 import { useSecurityJobs } from '../../ml_popover/hooks/use_security_jobs';
 import type { SecurityJob } from '../../ml_popover/types';
 
-export const enum AnomalyEntity {
+export enum AnomalyEntity {
   User,
   Host,
 }

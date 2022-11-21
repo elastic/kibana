@@ -10,6 +10,7 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface Props {
   from: string;
@@ -21,10 +22,11 @@ export const MonitorCompleteSparklines = (props: Props) => {
   const { ExploratoryViewEmbeddable } = observability;
 
   const monitorId = useMonitorQueryId();
+  const selectedLocation = useSelectedLocation();
 
   const { euiTheme } = useEuiTheme();
 
-  if (!monitorId) {
+  if (!monitorId || !selectedLocation) {
     return null;
   }
 
@@ -38,7 +40,10 @@ export const MonitorCompleteSparklines = (props: Props) => {
         {
           seriesType: 'area',
           time: props,
-          reportDefinitions: { 'monitor.id': [monitorId] },
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation.label],
+          },
           dataType: 'synthetics',
           selectedMetricField: 'state.id',
           name: 'Monitor complete',

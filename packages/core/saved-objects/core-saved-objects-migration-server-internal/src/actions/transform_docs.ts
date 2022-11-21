@@ -9,7 +9,7 @@
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { TransformRawDocs } from '../types';
-import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../core/migrate_raw_docs';
+import type { DocumentsTransformFailed, DocumentsTransformSuccess } from '../core/migrate_raw_docs';
 
 /** @internal */
 export interface TransformDocsParams {
