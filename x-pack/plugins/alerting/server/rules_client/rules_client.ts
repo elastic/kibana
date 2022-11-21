@@ -3922,9 +3922,11 @@ export class RulesClient {
     data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertAction[] }
   ): Promise<void> {
     const { actions, notifyWhen, throttle } = data;
-    const hasNotifyWhen = typeof notifyWhen !== 'undefined';
-    // Due to a limitation in kbn-config-schema, undefined throttle will be converted to 'null' at the route level. Allow this.
-    const hasThrottle = typeof throttle !== 'undefined' && throttle !== null;
+    // Due to a limitation in kbn-config-schema, undefined throttle or notifyWhen
+    // will be converted to 'null' at the route level.
+    const hasNotifyWhen = Boolean(notifyWhen);
+    const hasThrottle = Boolean(throttle);
+
     let usesRuleLevelFreqParams;
     if (hasNotifyWhen && hasThrottle) usesRuleLevelFreqParams = true;
     else if (!hasNotifyWhen && !hasThrottle) usesRuleLevelFreqParams = false;
