@@ -19,6 +19,7 @@ export interface PutFleetServerHostsRequest {
     name?: string;
     host_urls?: string[];
     is_default?: boolean;
+    proxy_id?: string | null;
   };
 }
 
@@ -28,6 +29,7 @@ export interface PostFleetServerHostsRequest {
     name?: string;
     host_urls?: string[];
     is_default?: boolean;
+    proxy_id?: string | null;
   };
 }
 
