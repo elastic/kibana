@@ -41,7 +41,7 @@ export const MetricItem = ({
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const locationName = useLocationName({ locationId: monitor.location?.id });
-  const { locations } = useStatusByLocation(monitor.id);
+  const { locations } = useStatusByLocation(monitor.configId);
   const ping = locations.find((loc) => loc.observer?.geo?.name === locationName);
   const theme = useTheme();
 
