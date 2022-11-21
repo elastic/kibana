@@ -4,7 +4,6 @@ exports[`should render 1`] = `
 <EuiFormRow
   describedByIds={Array []}
   display="row"
-  fullWidth={false}
   hasChildLabel={true}
   hasEmptyLabelSpace={false}
   label="Label position"
@@ -47,7 +46,6 @@ exports[`should render as disabled when label is not set 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Label position"
@@ -91,7 +89,6 @@ exports[`should render as disabled when label position is disabled 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Label position"
