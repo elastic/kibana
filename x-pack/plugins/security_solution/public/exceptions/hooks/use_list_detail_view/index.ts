@@ -144,6 +144,7 @@ export const useExceptionListDetails = () => {
               type: list.type,
               name: listDetails.name,
               description: listDetails.description || list.description,
+              namespace_type: list.namespace_type,
             },
           });
       } catch (error) {
