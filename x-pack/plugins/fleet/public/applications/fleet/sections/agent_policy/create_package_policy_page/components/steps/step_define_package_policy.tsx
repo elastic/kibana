@@ -44,7 +44,7 @@ import { PackagePolicyInputVarField } from './components';
 // on smaller screens, fields should be displayed in one column
 const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
   @media (max-width: 767px) {
-    .euiFlexGroup--responsive {
+    [class*='euiFlexGroup-responsive'] {
       align-items: flex-start;
     }
   }
