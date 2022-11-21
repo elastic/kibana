@@ -146,7 +146,7 @@ export default function spaceSelectorFunctionalTests({
         await PageObjects.common.navigateToApp('home', {
           hash: sampleDataHash,
         });
-        await PageObjects.home.addSampleDataSet('logs');
+        await PageObjects.home.addSampleDataSet('logs'); // TIMES OUT HERE
         await PageObjects.common.navigateToApp('home', {
           hash: sampleDataHash,
           basePath: `/s/${spaceId}`,
@@ -162,12 +162,12 @@ export default function spaceSelectorFunctionalTests({
         await PageObjects.common.navigateToApp('home', {
           hash: sampleDataHash,
         });
-        await PageObjects.home.removeSampleDataSet('logs');
+        await PageObjects.home.removeSampleDataSet('logs'); // TIMES OUT HERE - This is just a result of the other timeout
         await PageObjects.security.forceLogout();
       });
 
       describe('displays separate data for each space', () => {
-        it('in the default space', async () => {
+        it.only('in the default space', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await expectDashboardRenders('[Logs] Web Traffic');
         });

@@ -36,9 +36,13 @@ export class HomePageObject extends FtrService {
   }
 
   async isSampleDataSetInstalled(id: string) {
+    console.log('-- isSampleDataSetInstalled', { id });
     const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
+    console.log('-- isSampleDataSetInstalled', { sampleDataCard });
     const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
-    return deleteButton.length > 0;
+    const result = deleteButton.length > 0;
+    console.log('-- isSampleDataSetInstalled', { deleteButton, result });
+    return result;
   }
 
   async isWelcomeInterstitialDisplayed() {
@@ -62,11 +66,16 @@ export class HomePageObject extends FtrService {
     await this.openSampleDataAccordion();
     const isInstalled = await this.isSampleDataSetInstalled(id);
     if (!isInstalled) {
+      console.log('-- addSampleDataSet - not installed');
       await this.retry.waitFor('wait until sample data is installed', async () => {
-        await this.testSubjects.click(`addSampleDataSet${id}`);
+        console.log('-- addSampleDataSet - wait...');
+        await this.testSubjects.click(`addSampleDataSet${id}`); // TIMES OUT HERE! ElementNotInteractableError: element not interactable
         await this._waitForSampleDataLoadingAction(id);
         return await this.isSampleDataSetInstalled(id);
       });
+      console.log('-- addSampleDataSet - done');
+    } else {
+      console.log('-- addSampleDataSet - is installed');
     }
   }
 
@@ -85,12 +94,16 @@ export class HomePageObject extends FtrService {
 
   // loading action is either uninstall and install
   async _waitForSampleDataLoadingAction(id: string) {
+    console.log('-- _waitForSampleDataLoadingAction', { id });
     const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
+    // console.log('-- _waitForSampleDataLoadingAction', { sampleDataCard });
     await this.retry.try(async () => {
+      console.log('-- _waitForSampleDataLoadingAction - try...');
       // waitForDeletedByCssSelector needs to be inside retry because it will timeout at least once
       // before action is complete
       await sampleDataCard.waitForDeletedByCssSelector('.euiLoadingSpinner');
     });
+    console.log('-- _waitForSampleDataLoadingAction - done');
   }
 
   async launchSampleDiscover(id: string) {
