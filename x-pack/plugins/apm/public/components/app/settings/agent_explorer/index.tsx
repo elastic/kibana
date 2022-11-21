@@ -20,7 +20,7 @@ import { useHistory } from 'react-router-dom';
 import {
   SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';

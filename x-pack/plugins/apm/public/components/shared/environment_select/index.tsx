@@ -14,7 +14,7 @@ import {
   ENVIRONMENT_NOT_DEFINED,
   ENVIRONMENT_ALL,
 } from '../../../../common/environment_filter_values';
-import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_ENVIRONMENT } from '../../../../common/es_fields/apm';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useApmParams } from '../../../hooks/use_apm_params';

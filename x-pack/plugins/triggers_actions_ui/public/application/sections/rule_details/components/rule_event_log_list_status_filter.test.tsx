@@ -34,7 +34,7 @@ describe('rule_event_log_list_status_filter', () => {
     expect(wrapper.find(EuiFilterSelectItem).exists()).toBeFalsy();
     expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
 
-    expect(wrapper.find('.euiNotificationBadge').text()).toEqual('0');
+    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('0');
   });
 
   it('can open the popover correctly', () => {
@@ -54,7 +54,7 @@ describe('rule_event_log_list_status_filter', () => {
       selectedOptions: ['success'],
     });
 
-    expect(wrapper.find('.euiNotificationBadge').text()).toEqual('1');
+    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('1');
 
     statusItems.at(1).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['success', 'failure']);
@@ -63,7 +63,7 @@ describe('rule_event_log_list_status_filter', () => {
       selectedOptions: ['success', 'failure'],
     });
 
-    expect(wrapper.find('.euiNotificationBadge').text()).toEqual('2');
+    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('2');
 
     statusItems.at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['failure']);
