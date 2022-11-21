@@ -18,7 +18,7 @@ export const ruleStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
   // tracks the active alerts
   alertInstances: t.record(t.string, rawAlertInstance),
-  // tracks the recovered alerts
+  // tracks the recovered alerts for flapping purposes
   alertRecoveredInstances: t.record(t.string, rawAlertInstance),
   previousStartedAt: t.union([t.null, DateFromString]),
 });
