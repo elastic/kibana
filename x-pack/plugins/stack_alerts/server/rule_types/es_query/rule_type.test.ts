@@ -149,7 +149,7 @@ describe('ruleType', () => {
         timeWindowSize: 5,
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
-        threshold: [10],
+        threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
         aggType: 'count',

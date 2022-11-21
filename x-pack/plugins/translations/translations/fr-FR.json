@@ -30224,7 +30224,6 @@
     "xpack.spaces.spacesTitle": "Espaces",
     "xpack.spaces.uiApi.errorBoundaryToastMessage": "Rechargez la page pour continuer.",
     "xpack.spaces.uiApi.errorBoundaryToastTitle": "Impossible de charger la ressource Kibana",
-    "xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription": "Le nombre de documents correspondants est {negation} {thresholdComparator} {threshold}",
     "xpack.stackAlerts.esQuery.alertTypeContextMessageDescription": "La règle {name} est {verb} :\n\n- Valeur : {value}\n- Conditions remplies : {conditions} sur {window}\n- Horodatage : {date}\n- Lien : {link}",
     "xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle": "règle '{name}' : {verb}",
     "xpack.stackAlerts.esQuery.invalidComparatorErrorMessage": "thresholdComparator spécifié non valide : {comparator}",
