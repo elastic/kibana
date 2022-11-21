@@ -54,6 +54,8 @@ export interface PingHistogramComponentProps {
   data: HistogramResult | null;
 
   loading?: boolean;
+
+  timeZone: string;
 }
 
 interface BarPoint {
@@ -68,6 +70,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   data,
   loading = false,
   height,
+  timeZone,
 }) => {
   const {
     colors: { danger, gray },
@@ -181,7 +184,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             })}
             stackAccessors={['x']}
             splitSeriesAccessors={['type']}
-            timeZone="local"
+            timeZone={timeZone}
             xAccessor="x"
             xScaleType={ScaleType.Time}
             yAccessors={['y']}
