@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+export BAZEL_CACHE_MODE=buildbuddy
 export DISABLE_BOOTSTRAP_VALIDATION=true
 
 # Since our Mac agents are currently static,
