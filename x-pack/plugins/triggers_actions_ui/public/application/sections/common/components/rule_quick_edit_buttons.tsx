@@ -295,7 +295,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
           onClick={onEnable}
           isLoading={isEnablingRules}
           isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-          data-test-subj="enableAll"
+          data-test-subj="bulkEnable"
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableAllTitle"
@@ -308,7 +308,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
           onClick={onDisable}
           isLoading={isDisablingRules}
           isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-          data-test-subj="disableAll"
+          data-test-subj="bulkDisable"
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.disableAllTitle"
