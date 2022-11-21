@@ -19,7 +19,7 @@ import { MissingPrivilegesCallOut } from '../../../detections/components/callout
 import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
-import { useExceptionListDetails } from '../../hooks';
+import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
 
 export const ListsDetailViewComponent: FC = () => {
@@ -51,14 +51,14 @@ export const ListsDetailViewComponent: FC = () => {
     handleDelete,
     handleCloseReferenceErrorModal,
     handleReferenceDelete,
-  } = useExceptionListDetails();
+  } = useListDetailsView();
 
   if (viewerStatus === ViewerStatus.ERROR)
     return <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />;
 
   if (isLoading) return <EuiLoadingContent lines={4} data-test-subj="loading" />;
 
-  if (invalidListId || !listName || !listDescription || !list) return <NotFoundPage />;
+  if (invalidListId || !listName || !list) return <NotFoundPage />;
   return (
     <>
       <MissingPrivilegesCallOut />
