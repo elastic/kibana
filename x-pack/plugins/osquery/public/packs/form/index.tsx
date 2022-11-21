@@ -242,16 +242,19 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             <NameField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         <EuiFlexGroup>
           <EuiFlexItem>
             <DescriptionField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         <EuiFlexGroup>
           <PackTypeSelectable packType={packType} setPackType={changePackType} />
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         {packType === 'policy' && (
           <>
@@ -260,6 +263,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 <PolicyIdComboBoxField options={availableOptions} />
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="m" />
 
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -274,6 +278,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 </StyledEuiAccordion>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="m" />
           </>
         )}
 
