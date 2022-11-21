@@ -17,7 +17,7 @@ Array [
       type="button"
     />
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       style="flex-shrink: 0;"
     >
       <div
@@ -29,20 +29,20 @@ Array [
           class="euiCollapsibleNavGroup__children"
         >
           <ul
-            class="euiListGroup"
-            style="max-width: none;"
+            class="euiListGroup emotion-euiListGroup-none"
+            style="max-inline-size: none;"
           >
             <li
-              class="euiListGroupItem euiListGroupItem--small euiListGroupItem--ghost euiListGroupItem-isClickable"
+              class="euiListGroupItem emotion-euiListGroupItem-text-s"
             >
               <a
-                class="euiListGroupItem__button"
+                class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-text-isClickable"
                 data-test-subj="collapsibleNavCustomNavLink"
                 href="Custom link"
                 rel="noreferrer"
               >
                 <span
-                  class="euiListGroupItem__label"
+                  class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                   title="Custom link"
                 >
                   Custom link
@@ -57,7 +57,7 @@ Array [
       class="euiHorizontalRule euiHorizontalRule--full emotion-euiHorizontalRule-full"
     />
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       style="flex-shrink: 0;"
     >
       <div
@@ -70,25 +70,25 @@ Array [
         >
           <ul
             aria-label="Pinned links"
-            class="euiListGroup"
-            style="max-width: none;"
+            class="euiListGroup emotion-euiListGroup-none"
+            style="max-inline-size: none;"
           >
             <li
-              class="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+              class="euiListGroupItem emotion-euiListGroupItem-text-s"
             >
               <a
-                class="euiListGroupItem__button"
+                class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-text-isClickable"
                 data-test-subj="homeLink"
                 href="/"
                 rel="noreferrer"
               >
                 <span
-                  class="euiListGroupItem__icon"
+                  class="euiListGroupItem__icon emotion-euiListGroupItem__icon"
                   color="inherit"
                   data-euiicon-type="home"
                 />
                 <span
-                  class="euiListGroupItem__label"
+                  class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                   title="Home"
                 >
                   Home
@@ -117,10 +117,10 @@ Array [
             class="euiAccordion__buttonContent"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+              class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
             >
               <div
-                class="euiFlexItem"
+                class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <h3
                   class="euiTitle euiCollapsibleNavGroup__title emotion-euiTitle-xxs"
@@ -164,22 +164,22 @@ Array [
             >
               <ul
                 aria-label="Recently viewed links"
-                class="euiListGroup kbnCollapsibleNav__recentsListGroup"
-                style="max-width: none;"
+                class="euiListGroup kbnCollapsibleNav__recentsListGroup emotion-euiListGroup-none"
+                style="max-inline-size: none;"
               >
                 <li
-                  class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                  class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                 >
                   <a
                     aria-label="recent 1"
-                    class="euiListGroupItem__button"
+                    class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
                     data-test-subj="collapsibleNavAppLink--recent"
                     href="http://localhost/recent%201"
                     rel="noreferrer"
                     title="recent 1"
                   >
                     <span
-                      class="euiListGroupItem__label"
+                      class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                       title="recent 1"
                     >
                       recent 1
@@ -187,18 +187,18 @@ Array [
                   </a>
                 </li>
                 <li
-                  class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                  class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                 >
                   <a
                     aria-label="recent 2"
-                    class="euiListGroupItem__button"
+                    class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
                     data-test-subj="collapsibleNavAppLink--recent"
                     href="http://localhost/recent%202"
                     rel="noreferrer"
                     title="recent 2"
                   >
                     <span
-                      class="euiListGroupItem__label"
+                      class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                       title="recent 2"
                     >
                       recent 2
@@ -215,7 +215,7 @@ Array [
       class="euiHorizontalRule euiHorizontalRule--full emotion-euiHorizontalRule-full"
     />
     <div
-      class="euiFlexItem eui-yScroll"
+      class="euiFlexItem eui-yScroll emotion-euiFlexItem-grow-1"
     >
       <div
         class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
@@ -235,17 +235,17 @@ Array [
               class="euiAccordion__buttonContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
                     data-euiicon-type="logoKibana"
                   />
                 </div>
                 <div
-                  class="euiFlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h3
                     class="euiTitle euiCollapsibleNavGroup__title emotion-euiTitle-xxs"
@@ -289,20 +289,20 @@ Array [
               >
                 <ul
                   aria-label="Primary navigation links, Analytics"
-                  class="euiListGroup"
-                  style="max-width: none;"
+                  class="euiListGroup emotion-euiListGroup-none"
+                  style="max-inline-size: none;"
                 >
                   <li
-                    class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                   >
                     <a
-                      class="euiListGroupItem__button"
+                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
                       data-test-subj="collapsibleNavAppLink"
                       href="discover"
                       rel="noreferrer"
                     >
                       <span
-                        class="euiListGroupItem__label"
+                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                         title="discover"
                       >
                         discover
@@ -310,16 +310,16 @@ Array [
                     </a>
                   </li>
                   <li
-                    class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                   >
                     <a
-                      class="euiListGroupItem__button"
+                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
                       data-test-subj="collapsibleNavAppLink"
                       href="visualize"
                       rel="noreferrer"
                     >
                       <span
-                        class="euiListGroupItem__label"
+                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                         title="visualize"
                       >
                         visualize
@@ -327,16 +327,16 @@ Array [
                     </a>
                   </li>
                   <li
-                    class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                   >
                     <a
-                      class="euiListGroupItem__button"
+                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
                       data-test-subj="collapsibleNavAppLink"
                       href="dashboard"
                       rel="noreferrer"
                     >
                       <span
-                        class="euiListGroupItem__label"
+                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                         title="dashboard"
                       >
                         dashboard
@@ -367,17 +367,17 @@ Array [
               class="euiAccordion__buttonContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
                     data-euiicon-type="logoObservability"
                   />
                 </div>
                 <div
-                  class="euiFlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h3
                     class="euiTitle euiCollapsibleNavGroup__title emotion-euiTitle-xxs"
@@ -421,20 +421,20 @@ Array [
               >
                 <ul
                   aria-label="Primary navigation links, Observability"
-                  class="euiListGroup"
-                  style="max-width: none;"
+                  class="euiListGroup emotion-euiListGroup-none"
+                  style="max-inline-size: none;"
                 >
                   <li
-                    class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                   >
                     <a
-                      class="euiListGroupItem__button"
+                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
                       data-test-subj="collapsibleNavAppLink"
                       href="metrics"
                       rel="noreferrer"
                     >
                       <span
-                        class="euiListGroupItem__label"
+                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                         title="metrics"
                       >
                         metrics
@@ -442,16 +442,16 @@ Array [
                     </a>
                   </li>
                   <li
-                    class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                   >
                     <a
-                      class="euiListGroupItem__button"
+                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
                       data-test-subj="collapsibleNavAppLink"
                       href="logs"
                       rel="noreferrer"
                     >
                       <span
-                        class="euiListGroupItem__label"
+                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                         title="logs"
                       >
                         logs
@@ -482,17 +482,17 @@ Array [
               class="euiAccordion__buttonContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
                     data-euiicon-type="logoSecurity"
                   />
                 </div>
                 <div
-                  class="euiFlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h3
                     class="euiTitle euiCollapsibleNavGroup__title emotion-euiTitle-xxs"
@@ -536,20 +536,20 @@ Array [
               >
                 <ul
                   aria-label="Primary navigation links, Security"
-                  class="euiListGroup"
-                  style="max-width: none;"
+                  class="euiListGroup emotion-euiListGroup-none"
+                  style="max-inline-size: none;"
                 >
                   <li
-                    class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                   >
                     <a
-                      class="euiListGroupItem__button"
+                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
                       data-test-subj="collapsibleNavAppLink"
                       href="siem"
                       rel="noreferrer"
                     >
                       <span
-                        class="euiListGroupItem__label"
+                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                         title="siem"
                       >
                         siem
@@ -580,17 +580,17 @@ Array [
               class="euiAccordion__buttonContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
                     data-euiicon-type="managementApp"
                   />
                 </div>
                 <div
-                  class="euiFlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h3
                     class="euiTitle euiCollapsibleNavGroup__title emotion-euiTitle-xxs"
@@ -634,20 +634,20 @@ Array [
               >
                 <ul
                   aria-label="Primary navigation links, Management"
-                  class="euiListGroup"
-                  style="max-width: none;"
+                  class="euiListGroup emotion-euiListGroup-none"
+                  style="max-inline-size: none;"
                 >
                   <li
-                    class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
+                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                   >
                     <a
-                      class="euiListGroupItem__button"
+                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
                       data-test-subj="collapsibleNavAppLink"
                       href="monitoring"
                       rel="noreferrer"
                     >
                       <span
-                        class="euiListGroupItem__label"
+                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                         title="monitoring"
                       >
                         monitoring
@@ -669,19 +669,19 @@ Array [
           class="euiCollapsibleNavGroup__children"
         >
           <ul
-            class="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
+            class="euiListGroup emotion-euiListGroup-s-flush-maxWidthDefault"
           >
             <li
-              class="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+              class="euiListGroupItem emotion-euiListGroupItem-text-s"
             >
               <a
-                class="euiListGroupItem__button"
+                class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-text-isClickable"
                 data-test-subj="collapsibleNavAppLink"
                 href="canvas"
                 rel="noreferrer"
               >
                 <span
-                  class="euiListGroupItem__label"
+                  class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                   title="canvas"
                 >
                   canvas
