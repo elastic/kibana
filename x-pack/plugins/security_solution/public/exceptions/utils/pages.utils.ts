@@ -6,7 +6,6 @@
  */
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { EXCEPTIONS_PATH } from '../../../common/constants';
-import { SecurityPageName } from '../../app/types';
 import type { GetSecuritySolutionUrl } from '../../common/components/link_to';
 import type { RouteSpyState } from '../../common/utils/route/types';
 
@@ -24,10 +23,6 @@ export const getTrailingBreadcrumbs = (
       ...breadcrumb,
       {
         text: params.state.listName,
-        href: getSecuritySolutionUrl({
-          deepLinkId: SecurityPageName.exceptions,
-          path: '',
-        }),
       },
     ];
   }
