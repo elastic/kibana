@@ -36,6 +36,10 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
       title=""
       css={css`
         place-self: stretch;
+        > * {
+          // TODO: Once content no longer overflows card, remove this style
+          width: 100%;
+        }
       `}
       paddingSize="s"
       selectable={{
