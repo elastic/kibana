@@ -12,7 +12,11 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApmPluginStartDeps } from '../../../../plugin';
-
+import {
+  KUBERNETES_POD_NAME,
+  HOST_NAME,
+  CONTAINER_ID,
+} from '../../../../../common/es_fields/apm';
 type Tab = NonNullable<EuiTabbedContentProps['tabs']>[0] & {
   id: 'containers' | 'pods' | 'hosts';
   hidden?: boolean;
@@ -57,7 +61,7 @@ export function useTabs({
         should: [
           {
             terms: {
-              'host.name': hostNames,
+              [HOST_NAME]: hostNames,
             },
           },
         ],
@@ -69,7 +73,7 @@ export function useTabs({
   const podsFilter = useMemo(
     () => ({
       bool: {
-        filter: [{ terms: { 'kubernetes.pod.name': podNames } }],
+        filter: [{ terms: { [KUBERNETES_POD_NAME]: podNames } }],
       },
     }),
     [podNames]
@@ -77,7 +81,7 @@ export function useTabs({
   const containersFilter = useMemo(
     () => ({
       bool: {
-        filter: [{ terms: { 'container.id': containerIds } }],
+        filter: [{ terms: { [CONTAINER_ID]: containerIds } }],
       },
     }),
     [containerIds]

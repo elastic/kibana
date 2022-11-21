@@ -24,6 +24,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   monitorId,
   bucketSize,
   query,
+  timeZone,
 }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
@@ -73,6 +74,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
             field: '@timestamp',
             fixed_interval: bucketSize || minInterval + 'ms',
             missing: '0',
+            time_zone: timeZone,
           },
           aggs: {
             down: {
