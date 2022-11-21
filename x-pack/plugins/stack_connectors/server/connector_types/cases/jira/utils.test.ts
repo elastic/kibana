@@ -11,7 +11,9 @@ describe('escapeJqlSpecialCharacters', () => {
   it('should escape jql special characters', () => {
     const str = '[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]';
     const escapedStr = escapeJqlSpecialCharacters(str);
-    expect(escapedStr).toEqual('\\\\[th\\\\!s\\\\^is\\\\(\\\\)a\\\\-te\\\\+st\\\\-\\\\{\\\\~is\\\\*s\\\\&ue\\\\?or\\\\|and\\\\\\bye\\\\:\\\\}\\\\]\"\\\\}\\\\]');
+    expect(escapedStr).toEqual(
+      '\\\\[th\\\\!s\\\\^is\\\\(\\\\)a\\\\-te\\\\+st\\\\-\\\\{\\\\~is\\\\*s\\\\&ue\\\\?or\\\\|and\\\\\\bye\\\\:\\\\}\\\\]"\\\\}\\\\]'
+    );
   });
 
   it('should not escape other special characters', () => {
@@ -29,7 +31,7 @@ describe('escapeJqlSpecialCharacters', () => {
   it('should not escape unicode spaces', () => {
     const str = 'comm\u2000=\u2001"hello"\u3000';
     const escapedStr = escapeJqlSpecialCharacters(str);
-    expect(escapedStr).toEqual('comm = \"hello\"　');
+    expect(escapedStr).toEqual('comm = "hello"　');
   });
 
   it('should not escape non ASCII characters', () => {
