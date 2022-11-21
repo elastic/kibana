@@ -18,7 +18,7 @@ import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_q
 import { ES_QUERY_ID } from '../constants';
 import { getSearchParams } from './get_search_params';
 
-interface FetchEsQueryOpts {
+export interface FetchEsQueryOpts {
   ruleId: string;
   name: string;
   params: OnlyEsQueryRuleParams;

@@ -22,7 +22,7 @@ import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 
-interface FetchSearchSourceQueryOpts {
+export interface FetchSearchSourceQueryOpts {
   ruleId: string;
   params: OnlySearchSourceRuleParams;
   latestTimestamp: string | undefined;

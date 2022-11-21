@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { EsQueryRuleActionContext, addMessages } from './action_context';
+import {
+  EsQueryRuleActionContext,
+  addMessages,
+  getContextConditionsDescription,
+} from './action_context';
 import { EsQueryRuleParamsSchema } from './rule_type_params';
 import { OnlyEsQueryRuleParams } from './types';
+import { Comparator } from '../../../common/comparator_types';
 
-describe('ActionContext', () => {
+describe('addMessages', () => {
   it('generates expected properties', async () => {
     const params = EsQueryRuleParamsSchema.validate({
       index: ['[index]'],
@@ -31,7 +36,7 @@ describe('ActionContext', () => {
       hits: [],
       link: 'link-mock',
     };
-    const context = addMessages('[rule-name]', base, params);
+    const context = addMessages({ ruleName: '[rule-name]', baseContext: base, params });
     expect(context.title).toMatchInlineSnapshot(`"rule '[rule-name]' matched query"`);
     expect(context.message).toEqual(
       `rule '[rule-name]' is active:
@@ -64,7 +69,12 @@ describe('ActionContext', () => {
       hits: [],
       link: 'link-mock',
     };
-    const context = addMessages('[rule-name]', base, params, true);
+    const context = addMessages({
+      ruleName: '[rule-name]',
+      baseContext: base,
+      params,
+      isRecovered: true,
+    });
     expect(context.title).toMatchInlineSnapshot(`"rule '[rule-name]' recovered"`);
     expect(context.message).toEqual(
       `rule '[rule-name]' is recovered:
@@ -97,7 +107,7 @@ describe('ActionContext', () => {
       hits: [],
       link: 'link-mock',
     };
-    const context = addMessages('[rule-name]', base, params);
+    const context = addMessages({ ruleName: '[rule-name]', baseContext: base, params });
     expect(context.title).toMatchInlineSnapshot(`"rule '[rule-name]' matched query"`);
     expect(context.message).toEqual(
       `rule '[rule-name]' is active:
@@ -107,5 +117,91 @@ describe('ActionContext', () => {
 - Timestamp: 2020-01-01T00:00:00.000Z
 - Link: link-mock`
     );
+  });
+
+  it('generates expected properties when group is specified', async () => {
+    const params = EsQueryRuleParamsSchema.validate({
+      index: ['[index]'],
+      timeField: '[timeField]',
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '>',
+      threshold: [4],
+      searchType: 'esQuery',
+      aggType: 'count',
+      groupBy: 'top',
+      termField: 'host.name',
+      termSize: 5,
+    }) as OnlyEsQueryRuleParams;
+    const base: EsQueryRuleActionContext = {
+      date: '2020-01-01T00:00:00.000Z',
+      value: 42,
+      conditions: `count for group "host-1" not greater than 4`,
+      hits: [],
+      link: 'link-mock',
+    };
+    const context = addMessages({
+      ruleName: '[rule-name]',
+      baseContext: base,
+      params,
+      group: 'host-1',
+    });
+    expect(context.title).toMatchInlineSnapshot(
+      `"rule '[rule-name]' matched query for group host-1"`
+    );
+    expect(context.message).toEqual(
+      `rule '[rule-name]' is active:
+
+- Value: 42
+- Conditions Met: count for group "host-1" not greater than 4 over 5m
+- Timestamp: 2020-01-01T00:00:00.000Z
+- Link: link-mock`
+    );
+  });
+});
+
+describe('getContextConditionsDescription', () => {
+  it('should return conditions correctly', () => {
+    const result = getContextConditionsDescription({ comparator: Comparator.GT, threshold: [10] });
+    expect(result).toBe(`Number of matching documents is greater than 10`);
+  });
+
+  it('should return conditions correctly when isRecovered is true', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [10],
+      isRecovered: true,
+    });
+    expect(result).toBe(`Number of matching documents is NOT greater than 10`);
+  });
+
+  it('should return conditions correctly when multiple thresholds provided', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.BETWEEN,
+      threshold: [10, 20],
+      isRecovered: true,
+    });
+    expect(result).toBe(`Number of matching documents is NOT between 10 and 20`);
+  });
+
+  it('should return conditions correctly when group is specified', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [10],
+      group: 'host-1',
+    });
+    expect(result).toBe(`Number of matching documents for group "host-1" is greater than 10`);
+  });
+
+  it('should return conditions correctly when group is specified and isRecovered is true', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [10],
+      isRecovered: true,
+      group: 'host-1',
+    });
+    expect(result).toBe(`Number of matching documents for group "host-1" is NOT greater than 10`);
   });
 });

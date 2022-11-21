@@ -12,6 +12,7 @@ import {
   AggregationsSingleMetricAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+export const UngroupedGroupId = 'all documents';
 export interface ParsedAggregationGroup {
   group: string;
   count: number;
@@ -36,7 +37,7 @@ export const parseAggregationResults = ({
     aggregations.groupAgg = {
       buckets: [
         {
-          key: 'all documents',
+          key: UngroupedGroupId,
           doc_count: totalHitsToNumber(esResult.hits.total),
           topHitsAgg: {
             hits: {

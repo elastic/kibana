@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
+import { Comparator } from '../../../common/comparator_types';
+import { getHumanReadableComparator } from '../../../common';
 
 // rule type context provided to actions
 export interface ActionContext extends EsQueryRuleActionContext {
@@ -32,17 +34,25 @@ export interface EsQueryRuleActionContext extends AlertInstanceContext {
   link: string;
 }
 
-export function addMessages(
-  ruleName: string,
-  baseContext: EsQueryRuleActionContext,
-  params: OnlyEsQueryRuleParams | OnlySearchSourceRuleParams,
-  isRecovered: boolean = false
-): ActionContext {
+interface AddMessagesOpts {
+  ruleName: string;
+  baseContext: EsQueryRuleActionContext;
+  params: OnlyEsQueryRuleParams | OnlySearchSourceRuleParams;
+  group?: string;
+  isRecovered?: boolean;
+}
+export function addMessages({
+  ruleName,
+  baseContext,
+  params,
+  group,
+  isRecovered = false,
+}: AddMessagesOpts): ActionContext {
   const title = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle', {
     defaultMessage: `rule '{name}' {verb}`,
     values: {
       name: ruleName,
-      verb: isRecovered ? 'recovered' : 'matched query',
+      verb: isRecovered ? 'recovered' : `matched query${group ? ` for group ${group}` : ''}`,
     },
   });
 
@@ -66,4 +76,29 @@ export function addMessages(
   });
 
   return { ...baseContext, title, message };
+}
+
+interface GetContextConditionsDescriptionOpts {
+  comparator: Comparator;
+  threshold: number[];
+  isRecovered?: boolean;
+  group?: string;
+}
+
+export function getContextConditionsDescription({
+  comparator,
+  threshold,
+  isRecovered = false,
+  group,
+}: GetContextConditionsDescriptionOpts) {
+  return i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
+    defaultMessage:
+      'Number of matching documents{groupCondition} is {negation}{thresholdComparator} {threshold}',
+    values: {
+      groupCondition: group ? ` for group "${group}"` : '',
+      thresholdComparator: getHumanReadableComparator(comparator),
+      threshold: threshold.join(' and '),
+      negation: isRecovered ? 'NOT ' : '',
+    },
+  });
 }
