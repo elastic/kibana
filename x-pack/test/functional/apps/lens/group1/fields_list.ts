@@ -35,6 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
           }
 
+          if (datasourceType !== 'ad-hoc-no-timefield') {
+            await PageObjects.lens.goToTimeRange();
+          }
+
           await retry.try(async () => {
             await PageObjects.lens.clickAddField();
             await fieldEditor.setName('runtime_string');
