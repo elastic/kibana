@@ -64,7 +64,7 @@ export const BuildBazelPackages: Task = {
 
           return {
             ...rec,
-            dest: rec.dest.withExt('.js'),
+            dest: rec.dest.withName(rec.dest.name + '.js'),
             content: result.source,
           };
         },
