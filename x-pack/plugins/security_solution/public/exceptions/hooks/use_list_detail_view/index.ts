@@ -53,8 +53,8 @@ export const useListDetailsView = () => {
 
   const { exportExceptionList, deleteExceptionList } = useApi(http);
 
-  const { exceptionListId } = useParams<{
-    exceptionListId: string;
+  const { detailName: exceptionListId } = useParams<{
+    detailName: string;
   }>();
 
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
