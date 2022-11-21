@@ -61,10 +61,10 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
 
     const countResult = isMonitorsQueryFiltered(request.query)
       ? await savedObjectsClient.find({
-          type: syntheticsMonitorType,
-          perPage: 0,
-          page: 1,
-        })
+        type: syntheticsMonitorType,
+        perPage: 0,
+        page: 1,
+      })
       : queryResult;
 
     const { saved_objects: monitors, per_page: perPageT, ...rest } = queryResult;
@@ -108,7 +108,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
         const configId = monitor.attributes[ConfigKey.CONFIG_ID];
         allMonitorIds.push(configId);
 
-        /* for reach location, add a config item */
+        /* for each location, add a config item */
         const locations = monitor.attributes[ConfigKey.LOCATIONS];
         locations.forEach((location) => {
           const config = {
