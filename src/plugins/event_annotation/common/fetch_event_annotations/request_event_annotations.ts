@@ -314,7 +314,7 @@ function regroupForRequestOptimization(
             (dataView.timeFieldName ||
               dataView.fields.find((field) => field.type === 'date' && field.displayName)?.name);
 
-          const key = `${g.dataView.value.id}-${timeField}-${Boolean(current.ignoreGlobalFilters)}`;
+          const key = `${g.dataView.value.id}-${timeField}-${Boolean(g.ignoreGlobalFilters)}`;
           const subGroup = acc[key] as QueryGroup;
           if (subGroup) {
             let allFields = [...(subGroup.allFields || []), ...(current.extraFields || [])];
@@ -342,7 +342,7 @@ function regroupForRequestOptimization(
               timeField: timeField!,
               allFields,
               annotations: [current],
-              ignoreGlobalFilters: Boolean(current.ignoreGlobalFilters),
+              ignoreGlobalFilters: Boolean(g.ignoreGlobalFilters),
             },
           };
         }
