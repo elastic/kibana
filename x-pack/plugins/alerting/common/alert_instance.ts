@@ -18,7 +18,7 @@ const metaSchema = t.partial({
       date: DateFromString,
     }),
   ]),
-  // an array used to track changes in alert state, the order is based on the rule executions
+  // an array used to track changes in alert state, the order is based on the rule executions (oldest to most recent)
   // true - alert has changed from active/recovered
   // false - alert is new or the status has remained either active or recovered
   flappingHistory: t.array(t.boolean),
