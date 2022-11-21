@@ -36,7 +36,7 @@ export const MetricItem = ({
   data: Array<{ x: number; y: number }>;
   averageDuration: number;
   loaded: boolean;
-  onClick: (id: string, location: string) => void;
+  onClick: (params: { id: string; configId: string; location: string }) => void;
 }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -68,7 +68,9 @@ export const MetricItem = ({
           <Chart>
             <Settings
               onElementClick={() =>
-                monitor.configId && locationName && onClick(monitor.configId, locationName)
+                monitor.configId &&
+                locationName &&
+                onClick({ configId: monitor.configId, id: monitor.id, location: locationName })
               }
               baseTheme={DARK_THEME}
             />
