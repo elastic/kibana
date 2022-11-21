@@ -40,7 +40,7 @@ export class TimePickerPageObject extends FtrService {
 
   public readonly defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
   public readonly defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
-  public readonly defaultStartTimeUTC = '2015-09-18T06:31:44.000Z';
+  public readonly defaultStartTimeUTC = '2015-09-19T06:31:44.000Z';
   public readonly defaultEndTimeUTC = '2015-09-23T18:31:44.000Z';
 
   async setDefaultAbsoluteRange() {
