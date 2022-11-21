@@ -15,7 +15,7 @@ const DATE_WITH_DATA = {
 
 const ALERTS_TITLE = 'Alerts';
 const ALERTS_ACCORDION_SELECTOR = `accordion-${ALERTS_TITLE}`;
-const ALERTS_SECTION_BUTTON_SELECTOR = `button[aria-controls="${ALERTS_TITLE}"]`;
+const ALERTS_SECTION_BUTTON_CSS_SELECTOR = `[data-test-subj=${ALERTS_ACCORDION_SELECTOR}] button.euiAccordion__button`;
 const ALERTS_TABLE_NO_DATA_SELECTOR = 'alertsStateTableEmptyState';
 const ALERTS_TABLE_WITH_DATA_SELECTOR = 'alertsTable';
 const ALERTS_TABLE_LOADING_SELECTOR = 'internalAlertsPageLoading';
@@ -25,7 +25,7 @@ export function ObservabilityOverviewCommonProvider({
   getService,
 }: FtrProviderContext) {
   const find = getService('find');
-  const pageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -39,12 +39,13 @@ export function ObservabilityOverviewCommonProvider({
   };
 
   const navigateToOverviewPage = async () => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+    await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
       '/overview',
       undefined,
       { ensureCurrentUrl: false }
     );
+    await pageObjects.header.waitUntilLoadingHasFinished();
   };
 
   const waitForAlertsAccordionToAppear = async () => {
@@ -54,15 +55,12 @@ export function ObservabilityOverviewCommonProvider({
   };
 
   const waitForAlertsTableLoadingToDisappear = async () => {
-    await retry.try(async () => {
-      await testSubjects.missingOrFail(ALERTS_TABLE_LOADING_SELECTOR, { timeout: 10000 });
-    });
+    await testSubjects.missingOrFail(ALERTS_TABLE_LOADING_SELECTOR, { timeout: 30_000 });
   };
 
   const openAlertsSection = async () => {
     await waitForAlertsAccordionToAppear();
-    const alertSectionButton = await find.byCssSelector(ALERTS_SECTION_BUTTON_SELECTOR);
-    return await alertSectionButton.click();
+    await find.clickByCssSelector(ALERTS_SECTION_BUTTON_CSS_SELECTOR);
   };
 
   const openAlertsSectionAndWaitToAppear = async () => {
