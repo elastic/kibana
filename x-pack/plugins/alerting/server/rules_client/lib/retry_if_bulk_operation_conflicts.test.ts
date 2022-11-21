@@ -19,7 +19,7 @@ const mockFilter: KueryNode = {
 const mockLogger = loggingSystemMock.create().get();
 
 const mockSuccessfulResult = {
-  accList: [['apiKey1'], ['taskId1']],
+  accListSpecificForBulkOperation: [['apiKey1'], ['taskId1']],
   errors: [],
   rules: [],
 };
@@ -39,7 +39,7 @@ const getOperationConflictsTimes = (times: number) => {
     times--;
     if (times >= 0) {
       return {
-        accList: [[], []],
+        accListSpecificForBulkOperation: [[], []],
         errors: [error409],
         rules: [],
       };

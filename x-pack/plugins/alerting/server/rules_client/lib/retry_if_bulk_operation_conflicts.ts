@@ -19,7 +19,7 @@ const MAX_RULES_IDS_IN_RETRY = 1000;
 interface BulkOperationResult {
   errors: BulkOperationError[];
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
-  accList: string[][];
+  accListSpecificForBulkOperation: string[][];
 }
 
 export const retryIfBulkOperationConflicts = async ({
@@ -27,7 +27,7 @@ export const retryIfBulkOperationConflicts = async ({
   logger,
   bulkOperation,
   filter,
-  accList,
+  accListSpecificForBulkOperation, // this list can include several accumulators, depends on the type of bulk operation
   accErrors = [],
   accRules = [],
   retries = RETRY_IF_CONFLICTS_ATTEMPTS,
@@ -36,7 +36,7 @@ export const retryIfBulkOperationConflicts = async ({
   logger: Logger;
   bulkOperation: (filter: KueryNode | null) => Promise<BulkOperationResult>;
   filter: KueryNode | null;
-  accList?: string[][]; // this list can include several accumulators, depends on the type of bulk operation
+  accListSpecificForBulkOperation?: string[][];
   accErrors?: BulkOperationError[];
   accRules?: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   retries?: number;
@@ -45,12 +45,15 @@ export const retryIfBulkOperationConflicts = async ({
     const {
       errors: currentErrors,
       rules: currentRules,
-      accList: currentAccList,
+      accListSpecificForBulkOperation: currentAccListSpecificForBulkOperation,
     } = await bulkOperation(filter);
 
-    // it a way to assign default value for a accList
-    if (!accList) {
-      accList = Array.from(Array(currentAccList.length), () => []);
+    // it a way to assign default value for a accListSpecificForBulkOperation
+    if (!accListSpecificForBulkOperation) {
+      accListSpecificForBulkOperation = Array.from(
+        Array(currentAccListSpecificForBulkOperation.length),
+        () => []
+      );
     }
 
     const rules = [...accRules, ...currentRules];
@@ -67,13 +70,16 @@ export const retryIfBulkOperationConflicts = async ({
       return acc;
     }, []);
 
-    const newAccList = accList.map((acc, index) => [...acc, ...currentAccList[index]]);
+    const newAccListSpecificForBulkOperation = accListSpecificForBulkOperation.map((acc, index) => [
+      ...acc,
+      ...currentAccListSpecificForBulkOperation[index],
+    ]);
 
     if (ruleIdsWithConflictError.length === 0) {
       return {
         errors,
         rules,
-        accList: newAccList,
+        accListSpecificForBulkOperation: newAccListSpecificForBulkOperation,
       };
     }
 
@@ -83,7 +89,7 @@ export const retryIfBulkOperationConflicts = async ({
       return {
         errors,
         rules,
-        accList: newAccList,
+        accListSpecificForBulkOperation: newAccListSpecificForBulkOperation,
       };
     }
 
@@ -107,7 +113,7 @@ export const retryIfBulkOperationConflicts = async ({
             logger,
             bulkOperation,
             filter: convertRuleIdsToKueryNode(queryIds),
-            accList: newAccList,
+            accListSpecificForBulkOperation: newAccListSpecificForBulkOperation,
             accErrors: errors,
             accRules: rules,
             retries: retries - 1,
@@ -121,10 +127,19 @@ export const retryIfBulkOperationConflicts = async ({
         return {
           errors: [...acc.errors, ...item.errors],
           rules: [...acc.rules, ...item.rules],
-          accList: acc.accList.map((element, index) => [...element, ...item.accList[index]]),
+          accListSpecificForBulkOperation: acc.accListSpecificForBulkOperation.map(
+            (element, index) => [...element, ...item.accListSpecificForBulkOperation[index]]
+          ),
         };
       },
-      { errors: [], rules: [], accList: Array.from(Array(accList.length), () => []) }
+      {
+        errors: [],
+        rules: [],
+        accListSpecificForBulkOperation: Array.from(
+          Array(accListSpecificForBulkOperation.length),
+          () => []
+        ),
+      }
     );
   } catch (err) {
     throw err;

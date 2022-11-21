@@ -2652,7 +2652,7 @@ export class RulesClient {
       action: 'ENABLE',
     });
 
-    const { errors, rules, accList } = await retryIfBulkOperationConflicts({
+    const { errors, rules, accListSpecificForBulkOperation } = await retryIfBulkOperationConflicts({
       action: 'ENABLE',
       logger: this.logger,
       bulkOperation: (filterKueryNode: KueryNode | null) =>
@@ -2660,7 +2660,7 @@ export class RulesClient {
       filter: kueryNodeFilterWithAuth,
     });
 
-    const [taskIdsToEnable] = accList;
+    const [taskIdsToEnable] = accListSpecificForBulkOperation;
 
     const taskIdsFailedToBeEnabled: string[] = [];
     if (taskIdsToEnable.length > 0) {
@@ -2822,7 +2822,7 @@ export class RulesClient {
         });
       }
     });
-    return { errors, rules, accList: [taskIdsToEnable] };
+    return { errors, rules, accListSpecificForBulkOperation: [taskIdsToEnable] };
   };
 
   private apiKeyAsAlertAttributes(
