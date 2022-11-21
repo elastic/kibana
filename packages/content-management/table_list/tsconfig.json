@@ -10,7 +10,6 @@
       "react",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types",
-      "@kbn/content-management-inspector",
       "@emotion/react/types/css-prop"
     ]
   },
