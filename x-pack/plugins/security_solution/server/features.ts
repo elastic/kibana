@@ -302,7 +302,7 @@ const subFeatures: SubFeatureConfig[] = [
             name: 'All',
             savedObject: {
               all: [],
-              read: [],
+              read: FLEET_SAVED_OBJECTS,
             },
             ui: ['writeTrustedApplications', 'readTrustedApplications'],
           },
