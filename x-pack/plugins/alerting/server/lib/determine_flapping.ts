@@ -58,11 +58,14 @@ export function determineAlertsToReturn<
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
     // return recovered alerts if they are flapping or if the flapping array is not at capacity
-    // this is a space saving effort that will stop tracking a recovered alert if it wasn't flapping in the last max capcity number of executions,
-    // which will mean once the alert is reported as active again it will be treated as a "new" alert
-    if (isFlapping(alert)) {
+    // this is a space saving effort that will stop tracking a recovered alert if it wasn't flapping and doesn't have state changes
+    // in the last max capcity number of executions
+    const flapping = alert.getFlapping();
+    const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
+    const numStateChanges = flappingHistory.filter((f) => f).length;
+    if (flapping) {
       recoveredAlertsToReturn[id] = alert.toRaw(true);
-    } else if (!atCapacity(alert.getFlappingHistory())) {
+    } else if (!atCapacity(alert.getFlappingHistory()) || numStateChanges > 0) {
       recoveredAlertsToReturn[id] = alert.toRaw(true);
     }
   }

@@ -94,24 +94,17 @@ function processAlertsHelper<
 
         // if this alert was not active in the previous run, we need to inject start time into the alert state
         if (!existingAlertIds.has(id)) {
-          const state = alerts[id].getState();
-          alerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
+          newAlerts[id] = alerts[id];
+          const state = newAlerts[id].getState();
+          newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
 
-          if (previouslyRecoveredAlertsIds.has(id)) {
-            // this alert has flapped from recovered to active
-            if (setFlapping) {
-              activeAlerts[id].setFlappingHistory(
-                previouslyRecoveredAlerts[id].getFlappingHistory()
-              );
-              updateFlappingHistory(activeAlerts[id], true);
+          if (setFlapping) {
+            if (previouslyRecoveredAlertsIds.has(id)) {
+              // this alert has flapped from recovered to active
+              newAlerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
               previouslyRecoveredAlertsIds.delete(id);
             }
-          } else {
-            // this alert was not recovered in the previous run, it is considered "new"
-            newAlerts[id] = alerts[id];
-            if (setFlapping) {
-              updateFlappingHistory(newAlerts[id], true);
-            }
+            updateFlappingHistory(newAlerts[id], true);
           }
         } else {
           // this alert did exist in previous run
@@ -230,23 +223,17 @@ function processAlertsLimitReached<
       // if this alert did not exist in previous run, it is considered "new"
       if (!existingAlertIds.has(id)) {
         activeAlerts[id] = alerts[id];
-
+        newAlerts[id] = alerts[id];
         // if this alert was not active in the previous run, we need to inject start time into the alert state
-        const state = alerts[id].getState();
-        alerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
+        const state = newAlerts[id].getState();
+        newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
 
-        if (previouslyRecoveredAlertsIds.has(id)) {
-          // this alert has flapped from recovered to active
-          if (setFlapping) {
-            activeAlerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
-            updateFlappingHistory(activeAlerts[id], true);
+        if (setFlapping) {
+          if (previouslyRecoveredAlertsIds.has(id)) {
+            // this alert has flapped from recovered to active
+            newAlerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
           }
-        } else {
-          // this alert was not recovered in the previous run, it is considered "new"
-          newAlerts[id] = alerts[id];
-          if (setFlapping) {
-            updateFlappingHistory(newAlerts[id], true);
-          }
+          updateFlappingHistory(newAlerts[id], true);
         }
 
         if (!hasCapacityForNewAlerts()) {

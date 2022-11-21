@@ -151,7 +151,7 @@ describe('getFlappingHistory', () => {
       trackedAlerts: {},
     };
     const recoveredIds = ['TEST_ALERT_0'];
-    expect(getFlappingHistory('TEST_ALERT_0', state, false, false, true, recoveredIds))
+    expect(getFlappingHistory('TEST_ALERT_0', state, true, false, true, recoveredIds))
       .toMatchInlineSnapshot(`
       Array [
         true,

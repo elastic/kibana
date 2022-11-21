@@ -114,7 +114,7 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: false,
+        flapping: activeAlerts[id].getFlapping(),
       });
     }
 

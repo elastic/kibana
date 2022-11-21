@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
@@ -156,11 +155,6 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
           },
         },
       });
-
-      const hits = (searchResult.hits.total as estypes.SearchTotalHits).value;
-      if (hits !== 1) {
-        throw new Error(`Expected 1 search hit but received ${hits}.`);
-      }
 
       const taskDoc: any = searchResult.hits.hits[0];
       const state = JSON.parse(taskDoc._source.task.state);

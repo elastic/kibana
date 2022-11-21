@@ -794,7 +794,7 @@ describe('createLifecycleExecutor', () => {
       `);
     });
 
-    it('sets flapping state to true on an alert that is still recovered', async () => {
+    it('sets flapping state to false on an alert that is still recovered', async () => {
       const logger = loggerMock.create();
       const ruleDataClientMock = createRuleDataClientMock();
       ruleDataClientMock.getReader().search.mockResolvedValue({

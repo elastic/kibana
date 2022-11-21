@@ -57,7 +57,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
           actions: new Map([
             // make sure the counts of the # of events per type are as expected
             ['execute', { gte: 9 }],
-            ['new-instance', { equal: 1 }],
+            ['new-instance', { equal: 2 }],
             ['active-instance', { gte: 4 }],
             ['recovered-instance', { equal: 2 }],
           ]),
@@ -93,12 +93,12 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
         start?: string;
         durationToDate?: string;
       } = {};
-
+      const flapping = [];
       for (let i = 0; i < instanceEvents.length; ++i) {
+        flapping.push(instanceEvents[i]?.kibana?.alert?.flapping);
         switch (instanceEvents[i]?.event?.action) {
           case 'new-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
-            expect(instanceEvents[i]?.kibana?.alert?.flapping).to.equal(false);
             // a new alert should generate a unique UUID for the duration of its activeness
             expect(instanceEvents[i]?.event?.end).to.be(undefined);
 
@@ -109,8 +109,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
 
           case 'active-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
-            expect(instanceEvents[i]?.kibana?.alert?.flapping).to.equal(false);
-            expect(instanceEvents[i]?.event?.start).not.to.equal(undefined);
+            expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
             expect(instanceEvents[i]?.event?.end).to.be(undefined);
 
             if (instanceEvents[i]?.event?.duration! !== '0') {
@@ -119,14 +118,11 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
                   BigInt(currentAlertSpan.durationToDate!)
               ).to.be(true);
             }
-            currentAlertSpan.alertId = instanceEvents[i]?.kibana?.alerting?.instance_id;
-            currentAlertSpan.start = instanceEvents[i]?.event?.start;
             currentAlertSpan.durationToDate = `${instanceEvents[i]?.event?.duration}`;
             break;
 
           case 'recovered-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
-            expect(instanceEvents[i]?.kibana?.alert?.flapping).to.equal(false);
             expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
             expect(instanceEvents[i]?.event?.end).not.to.be(undefined);
             expect(
@@ -136,6 +132,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             break;
         }
       }
+      expect(flapping).to.eql(new Array(instanceEvents.length - 1).fill(false).concat(true));
     });
   });
 }

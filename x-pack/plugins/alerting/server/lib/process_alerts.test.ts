@@ -856,7 +856,22 @@ describe('processAlerts', () => {
           },
         }
       `);
-      expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
+      expect(newAlerts).toMatchInlineSnapshot(`
+        Object {
+          "1": Object {
+            "meta": Object {
+              "flappingHistory": Array [
+                false,
+                true,
+              ],
+            },
+            "state": Object {
+              "duration": "0",
+              "start": "1970-01-01T00:00:00.000Z",
+            },
+          },
+        }
+      `);
       expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
     });
 
@@ -1158,6 +1173,18 @@ describe('processAlerts', () => {
         `);
         expect(newAlerts).toMatchInlineSnapshot(`
           Object {
+            "1": Object {
+              "meta": Object {
+                "flappingHistory": Array [
+                  false,
+                  true,
+                ],
+              },
+              "state": Object {
+                "duration": "0",
+                "start": "1970-01-01T00:00:00.000Z",
+              },
+            },
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [

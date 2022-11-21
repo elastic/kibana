@@ -87,7 +87,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           provider: 'alerting',
           actions: new Map([
             ['execute-action', { gte: 6 }], // one more action (for recovery) will be executed after the last pattern fires
-            ['new-instance', { equal: 1 }],
+            ['new-instance', { equal: 2 }],
           ]),
         });
       });
@@ -163,7 +163,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           provider: 'alerting',
           actions: new Map([
             ['execute-action', { gte: 4 }],
-            ['new-instance', { equal: 1 }],
+            ['new-instance', { equal: 2 }],
           ]),
         });
       });

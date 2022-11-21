@@ -258,7 +258,7 @@ export const createLifecycleExecutor =
           logger.debug(`[Rule Registry] Could not find alert data for ${alertId}`);
         }
 
-        const isNew = !state.trackedAlerts[alertId] && !state.trackedAlertsRecovered[alertId];
+        const isNew = !state.trackedAlerts[alertId];
         const isRecovered = !currentAlerts[alertId];
         const isActive = !isRecovered;
 
@@ -277,12 +277,12 @@ export const createLifecycleExecutor =
           flapping: isCurrentlyFlapping,
         } = !isNew
           ? state.trackedAlerts[alertId]
-            ? state.trackedAlerts[alertId]
-            : state.trackedAlertsRecovered[alertId]
           : {
               alertUuid: lifecycleAlertServices.getAlertUuid(alertId),
               started: commonRuleFields[TIMESTAMP],
-              flapping: false,
+              flapping: state.trackedAlertsRecovered[alertId]
+                ? state.trackedAlertsRecovered[alertId].flapping
+                : false,
             };
 
         const flapping = isFlapping(flappingHistory, isCurrentlyFlapping);
@@ -365,8 +365,12 @@ export const createLifecycleExecutor =
         .filter(
           ({ event, flappingHistory, flapping }) =>
             // return recovered alerts if they are flapping or if the flapping array is not at capacity
+            // this is a space saving effort that will stop tracking a recovered alert if it wasn't flapping and doesn't have state changes
+            // in the last max capcity number of executions
             event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
-            (flapping || !atCapacity(flappingHistory))
+            (flapping ||
+              !atCapacity(flappingHistory) ||
+              flappingHistory.filter((f) => f).length > 0)
         )
         .map(({ event, flappingHistory, flapping }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;

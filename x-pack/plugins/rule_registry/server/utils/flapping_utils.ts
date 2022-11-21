@@ -59,21 +59,7 @@ export function getFlappingHistory<State extends RuleTypeState = never>(
 ) {
   // duplicating this logic to determine flapping at this level
   let flappingHistory: boolean[] = [];
-  if (isNew) {
-    flappingHistory = updateFlappingHistory([], true);
-  } else if (isActive) {
-    if (!state.trackedAlerts[alertId] && state.trackedAlertsRecovered[alertId]) {
-      // this alert has flapped from recovered to active
-      flappingHistory = updateFlappingHistory(
-        state.trackedAlertsRecovered[alertId].flappingHistory,
-        true
-      );
-      remove(recoveredIds, (id) => id === alertId);
-    } else {
-      // this alert is still active
-      flappingHistory = updateFlappingHistory(state.trackedAlerts[alertId].flappingHistory, false);
-    }
-  } else if (isRecovered) {
+  if (isRecovered) {
     if (state.trackedAlerts[alertId]) {
       // this alert has flapped from active to recovered
       flappingHistory = updateFlappingHistory(state.trackedAlerts[alertId].flappingHistory, true);
@@ -84,6 +70,20 @@ export function getFlappingHistory<State extends RuleTypeState = never>(
         false
       );
     }
+  } else if (isNew) {
+    if (state.trackedAlertsRecovered[alertId]) {
+      // this alert has flapped from recovered to active
+      flappingHistory = updateFlappingHistory(
+        state.trackedAlertsRecovered[alertId].flappingHistory,
+        true
+      );
+      remove(recoveredIds, (id) => id === alertId);
+    } else {
+      flappingHistory = updateFlappingHistory([], true);
+    }
+  } else if (isActive) {
+    // this alert is still active
+    flappingHistory = updateFlappingHistory(state.trackedAlerts[alertId].flappingHistory, false);
   }
   return flappingHistory;
 }
