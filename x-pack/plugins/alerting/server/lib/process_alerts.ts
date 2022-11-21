@@ -6,7 +6,7 @@
  */
 
 import { millisToNanos } from '@kbn/event-log-plugin/server';
-import { cloneDeep, drop } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 
@@ -251,21 +251,7 @@ export function updateFlappingHistory<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>, state: boolean) {
-  let flappingHistory: boolean[] = alert.getFlappingHistory() || [];
-  const { atCapacity, diff } = determineAtCapacity(flappingHistory);
-  if (atCapacity) {
-    // drop old flapping states to make space for the next state
-    flappingHistory = drop(flappingHistory, diff);
-  }
-  flappingHistory.push(state);
-  alert.setFlappingHistory(flappingHistory);
-}
-
-export function determineAtCapacity(flappingHistory: boolean[] = []) {
-  const len = flappingHistory.length;
-  return {
-    atCapacity: len >= MAX_CAPACITY,
-    // adding + 1 to make space for next the flapping state
-    diff: len + 1 - MAX_CAPACITY,
-  };
+  const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
+  const updatedFlappingHistory = flappingHistory.concat(state).slice(MAX_CAPACITY * -1);
+  alert.setFlappingHistory(updatedFlappingHistory);
 }

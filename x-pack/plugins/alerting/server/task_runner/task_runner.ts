@@ -23,9 +23,10 @@ import {
   ruleExecutionStatusToRaw,
   isRuleSnoozed,
   processAlerts,
-  determineFlapping,
+  setFlapping,
   lastRunFromError,
   getNextRun,
+  determineAlertsToReturn,
 } from '../lib';
 import {
   RuleExecutionStatus,
@@ -67,7 +68,6 @@ import { loadRule } from './rule_loader';
 import { logAlerts } from './log_alerts';
 import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
-import { determineAlertsToReturn } from '../lib/determine_flapping';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
 
@@ -418,7 +418,7 @@ export class TaskRunner<
           setFlapping: true,
         });
 
-        determineFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+        setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
           processedAlertsActive,
           processedAlertsRecovered
         );

@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import { keys, pick, size } from 'lodash';
+import { pick } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
-import {
-  atCapacity,
-  determineAlertsToReturn,
-  determineFlapping,
-  isFlapping,
-} from './determine_flapping';
+import { atCapacity, setFlapping, isFlapping } from './set_flapping';
 
-describe('determineFlapping', () => {
+describe('setFlapping', () => {
   const flapping = new Array(16).fill(false).concat([true, true, true, true]);
   const notFlapping = new Array(20).fill(false);
 
@@ -34,7 +29,7 @@ describe('determineFlapping', () => {
       '4': new Alert('4', { meta: { flapping: true, flappingHistory: notFlapping } }),
     };
 
-    determineFlapping(activeAlerts, recoveredAlerts);
+    setFlapping(activeAlerts, recoveredAlerts);
     const fields = ['1.meta.flapping', '2.meta.flapping', '3.meta.flapping', '4.meta.flapping'];
     expect(pick(activeAlerts, fields)).toMatchInlineSnapshot(`
       Object {
@@ -84,35 +79,6 @@ describe('determineFlapping', () => {
         },
       }
     `);
-  });
-
-  describe('determineAlertsToReturn', () => {
-    test('should return all active alerts regardless of flapping', () => {
-      const activeAlerts = {
-        '1': new Alert('1', { meta: { flappingHistory: flapping } }),
-        '2': new Alert('2', { meta: { flappingHistory: [false, false] } }),
-      };
-      const { alertsToReturn } = determineAlertsToReturn(activeAlerts, {});
-      expect(size(alertsToReturn)).toEqual(2);
-    });
-
-    test('should return all flapping recovered alerts', () => {
-      const recoveredAlerts = {
-        '1': new Alert('1', { meta: { flappingHistory: flapping } }),
-        '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
-      };
-      const { recoveredAlertsToReturn } = determineAlertsToReturn({}, recoveredAlerts);
-      expect(keys(recoveredAlertsToReturn)).toEqual(['1']);
-    });
-
-    test('should return all recovered alerts if flappingHistory is not at capacity', () => {
-      const recoveredAlerts = {
-        '1': new Alert('1', { meta: { flappingHistory: [false, false, false] } }),
-        '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
-      };
-      const { recoveredAlertsToReturn } = determineAlertsToReturn({}, recoveredAlerts);
-      expect(keys(recoveredAlertsToReturn)).toEqual(['1']);
-    });
   });
 
   describe('isFlapping', () => {
