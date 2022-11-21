@@ -137,7 +137,7 @@ export function getMonitorListColumns({
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsSavedMonitor) => (
         <MonitorEnabled
-          id={monitor.id}
+          configId={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
           reloadPage={reloadPage}
           isSwitchable={!loading}
