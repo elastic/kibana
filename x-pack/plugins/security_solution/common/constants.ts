@@ -97,7 +97,6 @@ export enum SecurityPageName {
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
-  exceptionListDetails = 'exception-list-details',
   exploreLanding = 'explore',
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
