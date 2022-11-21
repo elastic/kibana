@@ -11,7 +11,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   TRACE_ID,
   TRANSACTION_ID,
-} from '../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { useTheme } from '../../../../../hooks/use_theme';
