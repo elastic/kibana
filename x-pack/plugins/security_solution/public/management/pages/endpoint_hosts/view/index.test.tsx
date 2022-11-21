@@ -1371,21 +1371,6 @@ describe('when on the endpoint list page', () => {
       const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
       expect(onboardingSteps).not.toBeNull();
     });
-    it('user has endpoint list NONE and fleet All and cannot view entire onboarding screen', async () => {
-      mockUserPrivileges.mockReturnValue({
-        ...initialUserPrivilegesState(),
-        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
-          canReadEndpointList: false,
-          canAccessFleet: true,
-        }),
-      });
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
-      });
-      const noPrivilegesPage = await renderResult.findByTestId('noPrivilegesPage');
-      expect(noPrivilegesPage).not.toBeNull();
-    });
     it('user has endpoint list ALL/READ and fleet NONE and can view a modified onboarding screen with no actions link to fleet', async () => {
       mockUserPrivileges.mockReturnValue({
         ...initialUserPrivilegesState(),
@@ -1404,21 +1389,6 @@ describe('when on the endpoint list page', () => {
       expect(noPrivilegesPage).not.toBeNull();
       const startButton = renderResult.queryByTestId('onboardingStartButton');
       expect(startButton).toBeNull();
-    });
-    it('user has endpoint list NONE and fleet NONE and cannot view entire onboarding screen', async () => {
-      mockUserPrivileges.mockReturnValue({
-        ...initialUserPrivilegesState(),
-        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
-          canReadEndpointList: false,
-          canAccessFleet: false,
-        }),
-      });
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
-      });
-      const noPrivilegesPage = await renderResult.findByTestId('noPrivilegesPage');
-      expect(noPrivilegesPage).not.toBeNull();
     });
   });
 });
