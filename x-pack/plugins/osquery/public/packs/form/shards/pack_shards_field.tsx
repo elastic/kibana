@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { InternalFieldErrors } from 'react-hook-form';
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -40,15 +40,26 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
 
   const rootShards = watchRoot('shards');
 
+  const initialShardsArray = useMemo(() => {
+    const initialConvertedShards = convertShardsToArray(rootShards, agentPoliciesById);
+    if (!isEmpty(initialConvertedShards)) {
+      if (initialConvertedShards[initialConvertedShards.length - 1].policy.key) {
+        return [...initialConvertedShards, defaultShardData];
+      }
+
+      return initialConvertedShards;
+    }
+
+    return [defaultShardData];
+  }, [agentPoliciesById, rootShards]);
+
   const { control, watch, getFieldState, formState, resetField, setValue } = useForm<{
     shardsArray: ShardsArray;
   }>({
     mode: 'all',
     shouldUnregister: true,
     defaultValues: {
-      shardsArray: !isEmpty(convertShardsToArray(rootShards, agentPoliciesById))
-        ? [...convertShardsToArray(rootShards, agentPoliciesById), defaultShardData]
-        : [defaultShardData],
+      shardsArray: initialShardsArray,
     },
   });
   const { fields, remove, append } = useFieldArray({
@@ -108,6 +119,7 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
             control={control}
             options={options}
           />
+          <EuiSpacer size="xs" />
         </div>
       ))}
     </>

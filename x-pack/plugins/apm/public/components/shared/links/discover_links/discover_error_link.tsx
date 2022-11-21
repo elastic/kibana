@@ -9,7 +9,7 @@ import React, { ReactNode } from 'react';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { DiscoverLink } from './discover_link';
 
