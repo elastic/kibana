@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { ControlGroupInput, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Filter, TimeRange } from '@kbn/es-query';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
+import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
 interface Props {
   timeRange: TimeRange;
   dataViewId: string;
   filters: Filter[];
-  setControlFilters: Dispatch<SetStateAction<Filter[]>>;
   query: {
     language: string;
     query: string;
   };
+  setPanelFilters: React.Dispatch<React.SetStateAction<null | Filter[]>>;
 }
 
 // Disable refresh, allow our timerange changes to refresh the embeddable.
@@ -33,8 +34,10 @@ export const ControlsContent: React.FC<Props> = ({
   dataViewId,
   query,
   filters,
-  setControlFilters,
+  setPanelFilters,
 }) => {
+  const { setControlPanels, controlPanel } = useControlPanels(dataViewId);
+
   const embeddableInput: ControlGroupInput = useMemo(() => {
     return {
       id: dataViewId,
@@ -45,45 +48,28 @@ export const ControlsContent: React.FC<Props> = ({
       },
       refreshConfig: REFRESH_CONFIG,
       viewMode: ViewMode.VIEW,
-      filters,
+      filters: [...filters],
       query,
       chainingSystem: 'HIERARCHICAL',
       controlStyle: 'oneLine',
       defaultControlWidth: 'small',
-      panels: {
-        osPanel: {
-          order: 0,
-          width: 'medium',
-          grow: false,
-          type: 'optionsListControl',
-          explicitInput: {
-            id: 'osPanel',
-            dataViewId,
-            fieldName: 'host.os.name',
-            title: 'Operating System',
-          },
-        },
-        cloudProviderPanel: {
-          order: 1,
-          width: 'medium',
-          grow: false,
-          type: 'optionsListControl',
-          explicitInput: {
-            id: 'cloudProviderPanel',
-            dataViewId,
-            fieldName: 'cloud.provider',
-            title: 'Cloud Provider',
-          },
-        },
-      },
+      panels: controlPanel,
     };
-  }, [dataViewId, timeRange.to, timeRange.from, filters, query]);
+  }, [dataViewId, timeRange.from, timeRange.to, filters, query, controlPanel]);
 
   return (
     <LazyControlsRenderer
       input={embeddableInput}
       onEmbeddableLoad={(controlGroup) => {
-        controlGroup.onFiltersPublished$.subscribe((newFilters) => setControlFilters(newFilters));
+        controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+          setPanelFilters([...newFilters]);
+        });
+        controlGroup.getInput$().subscribe(({ panels, filters: currentFilters }) => {
+          setControlPanels(panels);
+          if (currentFilters?.length === 0) {
+            setPanelFilters([]);
+          }
+        });
       }}
     />
   );

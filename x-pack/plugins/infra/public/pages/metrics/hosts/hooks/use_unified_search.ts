@@ -16,11 +16,8 @@ import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefi
 import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_hosts_url_state';
 
 export const useUnifiedSearch = () => {
-  // For now the control filters won't be passed to the URL
-  // that's why they will be set to a separate state variable
-  // used only in buildQuery to update the table results
+  const [panelFilters, setPanelFilters] = useState<Filter[] | null>(null);
 
-  const [controlFilters, setControlFilters] = useState<Filter[]>([]);
   const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
   const { metricsDataView } = useMetricsDataViewContext();
   const { services } = useKibana<InfraClientStartDeps>();
@@ -54,7 +51,7 @@ export const useUnifiedSearch = () => {
         });
       }
     },
-    [filterManager, getRangeInTimestamp, getTime, dispatch]
+    [getTime, dispatch, filterManager, getRangeInTimestamp]
   );
 
   // This won't prevent onSubmit from being fired twice when `clear filters` is clicked,
@@ -92,8 +89,11 @@ export const useUnifiedSearch = () => {
     if (!metricsDataView) {
       return null;
     }
-    return buildEsQuery(metricsDataView, state.query, [...state.filters, ...controlFilters]);
-  }, [metricsDataView, state.filters, state.query, controlFilters]);
+    if (panelFilters && panelFilters.length > 0) {
+      return buildEsQuery(metricsDataView, state.query, [...state.filters, ...panelFilters]);
+    }
+    return buildEsQuery(metricsDataView, state.query, [...state.filters]);
+  }, [metricsDataView, panelFilters, state.filters, state.query]);
 
   return {
     dateRangeTimestamp: state.dateRangeTimestamp,
@@ -104,7 +104,8 @@ export const useUnifiedSearch = () => {
     unifiedSearchQuery: state.query,
     unifiedSearchDateRange: getTime(),
     unifiedSearchFilters: state.filters,
-    setControlFilters,
+    setPanelFilters,
+    panelFilters,
   };
 };
 
