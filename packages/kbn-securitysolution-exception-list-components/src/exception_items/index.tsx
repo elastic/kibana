@@ -16,7 +16,7 @@ import type { Pagination as PaginationType } from '@elastic/eui';
 import type {
   CommentsArray,
   ExceptionListItemSchema,
-  ExceptionListTypeEnum
+  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { euiThemeVars } from '@kbn/ui-theme';
