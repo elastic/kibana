@@ -10,7 +10,7 @@ import { updateFlappingHistory } from '@kbn/alerting-plugin/server/lib';
 import { remove } from 'lodash';
 import { WrappedLifecycleRuleState } from './create_lifecycle_executor';
 
-export function getFlappingHistory<State extends RuleTypeState = never>(
+export function getUpdatedFlappingHistory<State extends RuleTypeState = never>(
   alertId: string,
   state: WrappedLifecycleRuleState<State>,
   isNew: boolean,

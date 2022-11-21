@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getFlappingHistory } from './get_flapping_history';
+import { getUpdatedFlappingHistory } from './get_updated_flapping_history';
 
-describe('getFlappingHistory', () => {
+describe('getUpdatedFlappingHistory', () => {
   type TestRuleState = Record<string, unknown> & {
     aRuleStateKey: string;
   };
@@ -17,7 +17,7 @@ describe('getFlappingHistory', () => {
 
   test('sets flapping state to true if the alert is new', () => {
     const state = { wrapped: initialRuleState, trackedAlerts: {}, trackedAlertsRecovered: {} };
-    expect(getFlappingHistory('TEST_ALERT_0', state, true, false, false, []))
+    expect(getUpdatedFlappingHistory('TEST_ALERT_0', state, true, false, false, []))
       .toMatchInlineSnapshot(`
       Array [
         true,
@@ -39,7 +39,7 @@ describe('getFlappingHistory', () => {
       },
       trackedAlertsRecovered: {},
     };
-    expect(getFlappingHistory('TEST_ALERT_0', state, false, false, true, []))
+    expect(getUpdatedFlappingHistory('TEST_ALERT_0', state, false, false, true, []))
       .toMatchInlineSnapshot(`
       Array [
         false,
@@ -62,7 +62,7 @@ describe('getFlappingHistory', () => {
       trackedAlerts: {},
     };
     const recoveredIds = ['TEST_ALERT_0'];
-    expect(getFlappingHistory('TEST_ALERT_0', state, true, false, true, recoveredIds))
+    expect(getUpdatedFlappingHistory('TEST_ALERT_0', state, true, false, true, recoveredIds))
       .toMatchInlineSnapshot(`
       Array [
         true,
@@ -86,7 +86,7 @@ describe('getFlappingHistory', () => {
       trackedAlertsRecovered: {},
     };
     const recoveredIds = ['TEST_ALERT_0'];
-    expect(getFlappingHistory('TEST_ALERT_0', state, false, true, false, recoveredIds))
+    expect(getUpdatedFlappingHistory('TEST_ALERT_0', state, false, true, false, recoveredIds))
       .toMatchInlineSnapshot(`
       Array [
         true,
@@ -110,7 +110,7 @@ describe('getFlappingHistory', () => {
       },
     };
     const recoveredIds = ['TEST_ALERT_0'];
-    expect(getFlappingHistory('TEST_ALERT_0', state, false, true, false, recoveredIds))
+    expect(getUpdatedFlappingHistory('TEST_ALERT_0', state, false, true, false, recoveredIds))
       .toMatchInlineSnapshot(`
       Array [
         false,

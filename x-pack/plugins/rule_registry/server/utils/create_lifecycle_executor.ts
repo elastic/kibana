@@ -45,7 +45,7 @@ import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
 import { getCommonAlertFields } from './get_common_alert_fields';
-import { getFlappingHistory } from './get_flapping_history';
+import { getUpdatedFlappingHistory } from './get_updated_flapping_history';
 import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
@@ -263,7 +263,7 @@ export const createLifecycleExecutor =
         const isRecovered = !currentAlerts[alertId];
         const isActive = !isRecovered;
 
-        const flappingHistory = getFlappingHistory<State>(
+        const flappingHistory = getUpdatedFlappingHistory<State>(
           alertId,
           state,
           isNew,
