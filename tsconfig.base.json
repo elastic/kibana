@@ -828,6 +828,8 @@
       "@kbn/expressions-plugin/*": ["src/plugins/expressions/*"],
       "@kbn/field-formats-plugin": ["src/plugins/field_formats"],
       "@kbn/field-formats-plugin/*": ["src/plugins/field_formats/*"],
+      "@kbn/files-management-plugin": ["src/plugins/files_management"],
+      "@kbn/files-management-plugin/*": ["src/plugins/files_management/*"],
       "@kbn/files-plugin": ["src/plugins/files"],
       "@kbn/files-plugin/*": ["src/plugins/files/*"],
       "@kbn/guided-onboarding-plugin": ["src/plugins/guided_onboarding"],
@@ -1209,6 +1211,13 @@
     "strict": true,
     // for now, don't use unknown in catch
     "useUnknownInCatchVariables": false,
+    // enabled to point out not supported features when emitting in an isolated module environment
+    "isolatedModules": true,
+    // TODO(jbudz): should be uncommented when upgrading to TS@4.8
+    //
+    // ensures every non-declaration file is treated as a module
+    // "moduleDetection": "force",
+    //
     // disabled for better IDE support, enabled when running the type_check script
     "composite": false,
     // enabled for improved performance

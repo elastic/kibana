@@ -31,7 +31,8 @@ import { EditFilteringFlyout } from './edit_filtering_flyout';
 import { FilteringStateCallouts } from './filtering_callouts';
 
 export const ConnectorFiltering: React.FC = () => {
-  const { indexName } = useValues(IndexViewLogic);
+  const { indexName, hasAdvancedFilteringFeature, hasBasicFilteringFeature } =
+    useValues(IndexViewLogic);
   const { applyDraft, setLocalFilteringRules, setLocalAdvancedSnippet, setIsEditing } =
     useActions(ConnectorFilteringLogic);
   const { advancedSnippet, draftState, filteringRules, hasDraft, isEditing } =
@@ -41,6 +42,8 @@ export const ConnectorFiltering: React.FC = () => {
     <>
       {isEditing && (
         <EditFilteringFlyout
+          hasAdvancedFilteringFeature={hasAdvancedFilteringFeature}
+          hasBasicFilteringFeature={hasBasicFilteringFeature}
           revertLocalFilteringRules={() => setLocalFilteringRules(filteringRules)}
           revertLocalAdvancedFiltering={() => setLocalAdvancedSnippet(advancedSnippet)}
           setIsEditing={setIsEditing}
@@ -115,37 +118,39 @@ export const ConnectorFiltering: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel color="plain" hasShadow={false} hasBorder>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h3>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.content.index.connector.filtering.basicFiltersTitle',
-                      {
-                        defaultMessage: 'Basic filters',
-                      }
-                    )}
-                  </h3>
-                </EuiTitle>
-                <EuiSpacer />
-                <EuiText size="s">
-                  <p>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.content.index.connector.filtering.basicFiltersDescription',
-                      {
-                        defaultMessage: 'These filters apply to documents in post-processing.',
-                      }
-                    )}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              <FilteringRulesTable filteringRules={filteringRules} showOrder />
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-        {!!advancedSnippet && (
+        {hasBasicFilteringFeature && (
+          <EuiFlexItem>
+            <EuiPanel color="plain" hasShadow={false} hasBorder>
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h3>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.index.connector.filtering.basicFiltersTitle',
+                        {
+                          defaultMessage: 'Basic filters',
+                        }
+                      )}
+                    </h3>
+                  </EuiTitle>
+                  <EuiSpacer />
+                  <EuiText size="s">
+                    <p>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.index.connector.filtering.basicFiltersDescription',
+                        {
+                          defaultMessage: 'These filters apply to documents in post-processing.',
+                        }
+                      )}
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <FilteringRulesTable filteringRules={filteringRules} showOrder />
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        )}
+        {hasAdvancedFilteringFeature && !!advancedSnippet && (
           <EuiFlexItem>
             <EuiPanel color="plain" hasShadow={false} hasBorder>
               <EuiFlexGroup direction="column">
