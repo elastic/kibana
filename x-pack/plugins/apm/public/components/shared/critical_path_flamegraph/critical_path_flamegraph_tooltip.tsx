@@ -23,7 +23,7 @@ import {
   SPAN_TYPE,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { SpanIcon } from '../span_icon';
 import { AgentIcon } from '../agent_icon';
 import { asPercent } from '../../../../common/utils/formatters';
