@@ -53,8 +53,8 @@ export const ControlsContent: React.FC<Props> = ({
       panels: {
         osPanel: {
           order: 0,
-          width: 'small',
-          grow: true,
+          width: 'medium',
+          grow: false,
           type: 'optionsListControl',
           explicitInput: {
             id: 'osPanel',
@@ -65,8 +65,8 @@ export const ControlsContent: React.FC<Props> = ({
         },
         cloudProviderPanel: {
           order: 1,
-          width: 'small',
-          grow: true,
+          width: 'medium',
+          grow: false,
           type: 'optionsListControl',
           explicitInput: {
             id: 'cloudProviderPanel',
