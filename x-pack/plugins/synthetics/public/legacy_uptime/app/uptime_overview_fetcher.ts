@@ -7,6 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { UptimeFetchDataResponse, FetchDataParams } from '@kbn/observability-plugin/public';
+import moment from 'moment-timezone';
 import { fetchIndexStatus, fetchPingHistogram, fetchSnapshotCount } from '../state/api';
 import { kibanaService } from '../state/kibana_service';
 
@@ -14,6 +15,7 @@ async function fetchUptimeOverviewData({
   absoluteTime,
   relativeTime,
   intervalString,
+  timeZone,
 }: FetchDataParams) {
   const start = new Date(absoluteTime.start).toISOString();
   const end = new Date(absoluteTime.end).toISOString();
@@ -26,6 +28,7 @@ async function fetchUptimeOverviewData({
     dateStart: start,
     dateEnd: end,
     bucketSize: intervalString,
+    timeZone: timeZone ?? moment.tz.guess(),
   });
 
   const response: UptimeFetchDataResponse = {

@@ -26,6 +26,7 @@
 # Vis Editors
 /x-pack/plugins/lens/ @elastic/kibana-visualizations
 /src/plugins/charts/ @elastic/kibana-visualizations
+/src/plugins/event_annotation @elastic/kibana-visualizations
 /src/plugins/vis_default_editor/ @elastic/kibana-visualizations
 /src/plugins/vis_types/metric/ @elastic/kibana-visualizations
 /src/plugins/vis_types/table/ @elastic/kibana-visualizations
