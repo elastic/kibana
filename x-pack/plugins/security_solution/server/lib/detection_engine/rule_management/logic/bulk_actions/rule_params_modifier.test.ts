@@ -272,7 +272,7 @@ describe('ruleParamsModifier', () => {
           },
         ]
       );
-      expect(modifiedParams).toHaveProperty('index', undefined);
+      expect(modifiedParams).not.toHaveProperty('index');
       expect(isParamsUpdateSkipped).toBe(true);
     });
 
