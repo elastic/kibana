@@ -30,6 +30,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
@@ -359,7 +360,11 @@ export function MonitorDetailFlyout(props: Props) {
                       : undefined,
                     {
                       title: LAST_RUN_HEADER_TEXT,
-                      description: <Time timestamp={monitorDetail.data?.timestamp} />,
+                      description: monitorDetail.data?.timestamp ? (
+                        <Time timestamp={monitorDetail.data.timestamp} />
+                      ) : (
+                        <EuiText color="subdued">--</EuiText>
+                      ),
                     },
                     {
                       title: LAST_MODIFIED_HEADER_TEXT,
