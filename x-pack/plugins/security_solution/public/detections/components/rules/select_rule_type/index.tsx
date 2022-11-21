@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { css } from '@emotion/css';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -100,23 +99,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
     [ruleType, setNewTerms]
   );
 
-  // TODO: custom css shouldn't be necessary after https://github.com/elastic/eui/issues/6345
-  // tested this placeholder fix on mac in Chrome, Firefox, Safari, and Edge
-  // with multiple zoom levels and with keyboard <tab> navigation
-  // and in a responsive design / mobile view
-  const cardStyles = css`
-    padding-bottom: 60px;
-    position: relative;
-
-    button {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      border-radius: 0;
-    }
-  `;
-
   return (
     <EuiFormRow
       fullWidth
@@ -135,7 +117,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               icon={<EuiIcon size="xl" type="search" />}
               selectable={querySelectableConfig}
               layout="horizontal"
-              className={cardStyles}
             />
           </EuiFlexItem>
         )}
@@ -150,7 +131,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               isDisabled={mlSelectableConfig.isDisabled && !mlSelectableConfig.isSelected}
               selectable={mlSelectableConfig}
               layout="horizontal"
-              className={cardStyles}
             />
           </EuiFlexItem>
         )}
@@ -164,7 +144,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               icon={<EuiIcon size="l" type="indexFlush" />}
               selectable={thresholdSelectableConfig}
               layout="horizontal"
-              className={cardStyles}
             />
           </EuiFlexItem>
         )}
@@ -178,7 +157,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               icon={<EuiIcon size="l" type="eql" />}
               selectable={eqlSelectableConfig}
               layout="horizontal"
-              className={cardStyles}
             />
           </EuiFlexItem>
         )}
@@ -192,7 +170,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               icon={<EuiIcon size="l" type="list" />}
               selectable={threatMatchSelectableConfig}
               layout="horizontal"
-              className={cardStyles}
             />
           </EuiFlexItem>
         )}
@@ -206,7 +183,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               icon={<EuiIcon size="l" type="magnifyWithPlus" />}
               selectable={newTermsSelectableConfig}
               layout="horizontal"
-              className={cardStyles}
             />
           </EuiFlexItem>
         )}

@@ -1408,15 +1408,33 @@
           },
           {
             "parentPluginId": "@kbn/analytics-client",
+            "id": "def-common.IAnalyticsClient.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nForces all shippers to send all their enqueued events and fulfills the returned promise."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-common.IAnalyticsClient.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
             "description": [
-              "\nStops the client."
+              "\nStops the client. Flushing any pending events in the process."
             ],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
@@ -1601,6 +1619,24 @@
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
+            "id": "def-common.IShipper.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nSends all the enqueued events and fulfills the returned promise."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/client/src/shippers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -2284,7 +2320,7 @@
           "Types matching number values"
         ],
         "signature": [
-          "\"date\" | \"long\" | \"double\" | \"short\" | \"byte\" | \"float\" | \"integer\""
+          "\"date\" | \"long\" | \"double\" | \"short\" | \"float\" | \"byte\" | \"integer\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
@@ -2318,7 +2354,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"byte\" | \"float\" | \"integer\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"float\" | \"byte\" | \"integer\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,

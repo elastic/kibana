@@ -83,6 +83,20 @@ describe('Endpoint Authz service', () => {
           true
         );
       });
+
+      it(`should allow Host Isolation Exception read/delete when license is not Platinum+, but entries exist`, () => {
+        licenseService.isPlatinumPlus.mockReturnValue(false);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false, undefined, true)
+        ).toEqual(
+          expect.objectContaining({
+            canWriteHostIsolationExceptions: false,
+            canReadHostIsolationExceptions: true,
+            canDeleteHostIsolationExceptions: true,
+          })
+        );
+      });
     });
 
     describe('and `fleet.all` access is false', () => {
@@ -126,6 +140,7 @@ describe('Endpoint Authz service', () => {
         ['canReadPolicyManagement', 'readPolicyManagement'],
         ['canWriteActionsLogManagement', 'writeActionsLogManagement'],
         ['canReadActionsLogManagement', 'readActionsLogManagement'],
+        ['canAccessEndpointActionsLogManagement', 'readActionsLogManagement'],
         ['canIsolateHost', 'writeHostIsolation'],
         ['canUnIsolateHost', 'writeHostIsolation'],
         ['canKillProcess', 'writeProcessOperations'],
@@ -152,6 +167,10 @@ describe('Endpoint Authz service', () => {
         ['canReadPolicyManagement', ['writePolicyManagement', 'readPolicyManagement']],
         ['canWriteActionsLogManagement', ['writeActionsLogManagement']],
         ['canReadActionsLogManagement', ['writeActionsLogManagement', 'readActionsLogManagement']],
+        [
+          'canAccessEndpointActionsLogManagement',
+          ['writeActionsLogManagement', 'readActionsLogManagement'],
+        ],
         ['canIsolateHost', ['writeHostIsolation']],
         ['canUnIsolateHost', ['writeHostIsolation']],
         ['canKillProcess', ['writeProcessOperations']],
@@ -204,8 +223,10 @@ describe('Endpoint Authz service', () => {
         canWriteSecuritySolution: false,
         canReadSecuritySolution: false,
         canAccessFleet: false,
+        canAccessEndpointActionsLogManagement: false,
         canAccessEndpointManagement: false,
         canCreateArtifactsByPolicy: false,
+        canDeleteHostIsolationExceptions: false,
         canWriteEndpointList: false,
         canReadEndpointList: false,
         canWritePolicyManagement: false,

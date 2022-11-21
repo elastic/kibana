@@ -13,7 +13,7 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { getLensAttributes } from './get_lens_attributes';
 import { MostUsedChart, MostUsedMetricTypes } from '.';
-import { HOST_OS_VERSION } from '../../../../../../common/elasticsearch_fieldnames';
+import { HOST_OS_VERSION } from '../../../../../../common/es_fields/apm';
 
 const mockEmbeddableComponent = jest.fn();
 
