@@ -9,12 +9,12 @@ import type { EuiTourStepProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ElementTarget } from '@elastic/eui/src/services/findElement';
 
-export const enum SecurityStepId {
+export enum SecurityStepId {
   rules = 'rules',
   alertsCases = 'alertsCases',
 }
 
-export const enum AlertsCasesTourSteps {
+export enum AlertsCasesTourSteps {
   none = 0,
   pointToAlertName = 1,
   expandEvent = 2,

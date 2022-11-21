@@ -7,7 +7,7 @@
 
 import { termQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import datemath from '@kbn/datemath';
-import { METRICSET_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
 export async function getConfigsAppliedToAgentsThroughFleet(
