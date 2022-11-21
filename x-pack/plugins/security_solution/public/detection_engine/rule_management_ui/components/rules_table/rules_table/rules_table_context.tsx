@@ -118,6 +118,7 @@ export type LoadingRuleAction =
 export interface LoadingRules {
   ids: string[];
   action: LoadingRuleAction;
+  isDryRun?: boolean;
 }
 
 export interface RulesTableActions {
@@ -175,7 +176,11 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>(initialSortingOptions);
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [isRefreshOn, setIsRefreshOn] = useState(autoRefreshSettings.on);
-  const [loadingRules, setLoadingRules] = useState<LoadingRules>({ ids: [], action: null });
+  const [loadingRules, setLoadingRules] = useState<LoadingRules>({
+    ids: [],
+    action: null,
+    isDryRun: false,
+  });
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
@@ -196,10 +201,12 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   const isActionInProgress = useMemo(() => {
     if (loadingRules.ids.length > 0) {
-      return !['disable', 'enable', 'edit'].includes(loadingRules.action ?? '');
+      return (
+        loadingRules.isDryRun || !['disable', 'enable', 'edit'].includes(loadingRules.action ?? '')
+      );
     }
     return false;
-  }, [loadingRules.action, loadingRules.ids.length]);
+  }, [loadingRules.action, loadingRules.ids.length, loadingRules.isDryRun]);
 
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
