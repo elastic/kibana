@@ -15,7 +15,7 @@ import {
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 
 describe('custom link get transaction', () => {
   let mock: SearchParamsMock;
