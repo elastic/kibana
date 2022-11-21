@@ -87,7 +87,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     const [_, element] = await getColumnIndex(FINDINGS_TABLE_TESTID, columnName);
     const currentSort = await element.getAttribute('aria-sort');
     if (currentSort === 'none') await element.click(); // a click is needed to focus on Eui column header
-    await element.click();
+
+    // Without getting the element again, the click throws an error (stale element reference)
+    const [__, nonStaleElement] = await getColumnIndex(FINDINGS_TABLE_TESTID, columnName);
+
+    await nonStaleElement.click();
   };
 
   return {
