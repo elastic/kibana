@@ -84,7 +84,8 @@ export const createLogStreamPageStateMachine = ({
       services: {},
       guards: {
         hasLogViewIndices: (context, event) =>
-          event.type === 'loadingLogViewSucceeded' && event.resolvedLogView.fields.length > 0, // TODO: replace with status check once implemented in log view state machine
+          event.type === 'loadingLogViewSucceeded' &&
+          ['empty', 'available'].includes(event.status.index),
       },
       actions: {
         spawnLogViewMachine: assign({

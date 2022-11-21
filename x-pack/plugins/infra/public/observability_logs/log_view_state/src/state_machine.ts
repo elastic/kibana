@@ -44,11 +44,26 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
           },
           on: {
             resolutionSucceeded: {
-              target: 'resolved',
+              target: 'checkingStatus',
               actions: 'storeResolvedLogView',
             },
             resolutionFailed: {
               target: 'resolutionFailed',
+              actions: 'storeError',
+            },
+          },
+        },
+        checkingStatus: {
+          invoke: {
+            src: 'loadLogViewStatus',
+          },
+          on: {
+            checkingStatusSucceeded: {
+              target: 'resolved',
+              actions: 'storeStatus',
+            },
+            checkingStatusFailed: {
+              target: 'checkingStatusFailed',
               actions: 'storeError',
             },
           },
@@ -73,6 +88,13 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
           on: {
             retry: {
               target: 'resolving',
+            },
+          },
+        },
+        checkingStatusFailed: {
+          on: {
+            retry: {
+              target: 'checkingStatus',
             },
           },
         },
@@ -111,11 +133,20 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         ),
         storeResolvedLogView: logViewStateMachineHelpers.assignOnTransition(
           'resolving',
-          'resolved',
+          'checkingStatus',
           'resolutionSucceeded',
           (context, event) => ({
             ...context,
             resolvedLogView: event.resolvedLogView,
+          })
+        ),
+        storeStatus: logViewStateMachineHelpers.assignOnTransition(
+          'checkingStatus',
+          'resolved',
+          'checkingStatusSucceeded',
+          (context, event) => ({
+            ...context,
+            status: event.status,
           })
         ),
         storeError: assign((context, event) =>
@@ -170,6 +201,27 @@ export const createLogViewStateMachine = ({
           catchError((error) =>
             of<LogViewEvent>({
               type: 'resolutionFailed',
+              error,
+            })
+          )
+        ),
+      loadLogViewStatus: (context) =>
+        from(
+          'resolvedLogView' in context
+            ? logViews.getResolvedLogViewStatus(context.resolvedLogView)
+            : throwError(
+                () => new Error('Failed to resolve log view: No log view found in context.')
+              )
+        ).pipe(
+          map(
+            (status): LogViewEvent => ({
+              type: 'checkingStatusSucceeded',
+              status,
+            })
+          ),
+          catchError((error) =>
+            of<LogViewEvent>({
+              type: 'checkingStatusFailed',
               error,
             })
           )

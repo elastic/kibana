@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ResolvedLogView } from '../../../../common/log_views';
+import { LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
 import { LogViewContext } from './types';
 
-export type ListenerEvents =
+export type ListenerEvent =
   | {
       type: 'loadingLogViewStarted';
       logViewId: string;
@@ -16,13 +16,17 @@ export type ListenerEvents =
   | {
       type: 'loadingLogViewSucceeded';
       resolvedLogView: ResolvedLogView;
+      status: LogViewStatus;
     }
   | {
       type: 'loadingLogViewFailed';
       error: Error;
     };
 
-export const logViewListenerEventSelectors = {
+export const logViewListenerEventSelectors: Record<
+  string,
+  (context: LogViewContext) => ListenerEvent | undefined
+> = {
   loadingLogViewStarted: (context: LogViewContext) =>
     'logViewId' in context
       ? {
@@ -31,10 +35,11 @@ export const logViewListenerEventSelectors = {
         }
       : undefined,
   loadingLogViewSucceeded: (context: LogViewContext) =>
-    'resolvedLogView' in context
+    'resolvedLogView' in context && 'status' in context
       ? {
-          type: 'loadingLogViewStarted',
+          type: 'loadingLogViewSucceeded',
           resolvedLogView: context.resolvedLogView,
+          status: context.status,
         }
       : undefined,
   loadingLogViewFailed: (context: LogViewContext) =>
