@@ -56,6 +56,6 @@ export const NO_TAGS_AVAILABLE = i18n.translate('xpack.cases.actions.tags.noTags
   defaultMessage: 'No tags available. Type to add one.',
 });
 
-export const NO_SEARCH_MATCH = i18n.translate('xpack.cases.actions.tags.noTagsAvailable', {
+export const NO_SEARCH_MATCH = i18n.translate('xpack.cases.actions.tags.noTagsMatch', {
   defaultMessage: 'No tags match your search',
 });
