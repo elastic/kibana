@@ -6,14 +6,10 @@
  */
 
 import React, { Dispatch, SetStateAction, useMemo } from 'react';
-import {
-  ControlGroupInput,
-  CONTROL_GROUP_TYPE,
-  LazyControlGroupRenderer,
-} from '@kbn/controls-plugin/public';
+import { ControlGroupInput, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Filter, TimeRange } from '@kbn/es-query';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { LazyControlsRenderer } from './lazy_controls_renderer';
 
 interface Props {
   timeRange: TimeRange;
@@ -31,8 +27,6 @@ const REFRESH_CONFIG = {
   pause: true,
   value: 0,
 };
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer); // TODO Check for different way to load it to avoid adding presentation-util-plugin
 
 export const ControlsContent: React.FC<Props> = ({
   timeRange,
@@ -81,24 +75,12 @@ export const ControlsContent: React.FC<Props> = ({
             title: 'Cloud Provider',
           },
         },
-        namePanel: {
-          order: 1,
-          width: 'small',
-          grow: true,
-          type: 'optionsListControl',
-          explicitInput: {
-            id: 'namePanel',
-            dataViewId,
-            fieldName: 'host.hostname',
-            title: 'Host Name',
-          },
-        },
       },
     };
   }, [dataViewId, timeRange.to, timeRange.from, filters, query]);
 
   return (
-    <ControlGroupRenderer
+    <LazyControlsRenderer
       input={embeddableInput}
       onEmbeddableLoad={(controlGroup) => {
         controlGroup.onFiltersPublished$.subscribe((newFilters) => setControlFilters(newFilters));
