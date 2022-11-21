@@ -92,7 +92,8 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     setOnSplash(false);
   };
 
-  const { fleetServerHosts, isLoadingInitialRequest } = useFleetServerHostsForPolicy(agentPolicy);
+  const { fleetServerHosts, fleetProxy, isLoadingInitialRequest } =
+    useFleetServerHostsForPolicy(agentPolicy);
 
   const cancelUrl = getHref('add_integration_to_policy', {
     pkgkey,
@@ -134,6 +135,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   return (
     <MultiPageStepsLayout
       fleetServerHosts={fleetServerHosts}
+      fleetProxy={fleetProxy}
       agentPolicy={agentPolicy}
       enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}
