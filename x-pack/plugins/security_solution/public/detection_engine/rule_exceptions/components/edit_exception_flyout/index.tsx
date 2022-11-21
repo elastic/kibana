@@ -27,8 +27,8 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  updateExceptionListItemSchema,
   ExceptionListTypeEnum,
-  exceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
@@ -237,7 +237,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
 
   const areItemsReadyForUpdate = useCallback(
     (items: ExceptionsBuilderReturnExceptionItem[]): items is ExceptionListItemSchema[] => {
-      return items.every((item) => exceptionListItemSchema.is(item));
+      return items.every((item) => updateExceptionListItemSchema.is(item));
     },
     []
   );
