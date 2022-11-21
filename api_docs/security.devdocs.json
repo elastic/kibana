@@ -1597,7 +1597,9 @@
             "label": "apiKeys",
             "description": [],
             "signature": [
-              "{ create: (request: ",
+              "{ validate: (apiKeyPrams: ",
+              "ValidateAPIKeyParams",
+              ") => Promise<boolean>; create: (request: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -2635,10 +2637,6 @@
             {
               "plugin": "logstash",
               "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
             },
             {
               "plugin": "securitySolution",

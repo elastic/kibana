@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { FileJSON } from '../../../common';
 import type { CreateFileKindHttpEndpoint } from '../../../common/api_routes';
 import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../test_utils';
 
@@ -197,6 +198,32 @@ describe('File HTTP API', () => {
             },
           },
         });
+      }
+    });
+  });
+
+  describe('bulk delete', () => {
+    afterEach(async () => {
+      await testHarness.cleanupAfterEach();
+    });
+    it('bulk deletes files', async () => {
+      const [file1] = await Promise.all([
+        createFile({}, { deleteAfterTest: false }),
+        createFile(),
+        createFile(),
+      ]);
+      {
+        const { body: response } = await request
+          .delete(root, `/api/files/blobs`)
+          .send({ ids: [file1.id, 'unknown'] })
+          .expect(200);
+        expect(response.succeeded).toEqual([file1.id]);
+        expect(response.failed).toEqual([['unknown', 'File not found']]);
+      }
+      {
+        const { body: response } = await request.post(root, `/api/files/find`).send({}).expect(200);
+        expect(response.files).toHaveLength(2);
+        expect(response.files.find((file: FileJSON) => file.id === file1.id)).toBeUndefined();
       }
     });
   });

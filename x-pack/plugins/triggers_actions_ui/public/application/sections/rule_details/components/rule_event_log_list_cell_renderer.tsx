@@ -10,7 +10,7 @@ import moment from 'moment';
 import { EuiLink } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { useHistory } from 'react-router-dom';
-import { routeToRuleDetails } from '../../../constants';
+import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
 import { useKibana, useSpacesData } from '../../../../common/lib/kibana';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
@@ -32,10 +32,19 @@ interface RuleEventLogListCellRendererProps {
   dateFormat?: string;
   ruleId?: string;
   spaceIds?: string[];
+  useExecutionStatus?: boolean;
 }
 
 export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRendererProps) => {
-  const { columnId, value, version, dateFormat = DEFAULT_DATE_FORMAT, ruleId, spaceIds } = props;
+  const {
+    columnId,
+    value,
+    version,
+    dateFormat = DEFAULT_DATE_FORMAT,
+    ruleId,
+    spaceIds,
+    useExecutionStatus = true,
+  } = props;
   const spacesData = useSpacesData();
   const { http } = useKibana().services;
 
@@ -53,7 +62,9 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
 
   const ruleNamePathname = useMemo(() => {
     if (!ruleId) return '';
-    const ruleRoute = routeToRuleDetails.replace(':ruleId', ruleId);
+
+    const ruleRoute = getRuleDetailsRoute(ruleId);
+
     if (ruleOnDifferentSpace) {
       const [linkedSpaceId] = spaceIds ?? [];
       const basePath = http.basePath.get();
@@ -85,7 +96,12 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
   }
 
   if (columnId === 'status') {
-    return <RuleEventLogListStatus status={value as RuleAlertingOutcome} />;
+    return (
+      <RuleEventLogListStatus
+        status={value as RuleAlertingOutcome}
+        useExecutionStatus={useExecutionStatus}
+      />
+    );
   }
 
   if (columnId === 'timestamp') {

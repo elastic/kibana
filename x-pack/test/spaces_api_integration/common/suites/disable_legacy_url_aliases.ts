@@ -57,7 +57,7 @@ export function disableLegacyUrlAliasesTestSuiteFactory(
         expect(response.body).to.eql({
           statusCode: 403,
           error: 'Forbidden',
-          message: `Unable to disable aliases for ${targetType}`,
+          message: `Unable to disable aliases: Unable to bulk_update ${targetType}`,
         });
       }
       const esResponse = await es.get<RawLegacyUrlAlias>(

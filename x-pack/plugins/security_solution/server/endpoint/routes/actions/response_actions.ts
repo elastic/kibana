@@ -160,18 +160,21 @@ export function registerResponseActionRoutes(
     )
   );
 
-  router.post(
-    {
-      path: GET_FILE_ROUTE,
-      validate: EndpointActionGetFileSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      logger,
-      responseActionRequestHandler(endpointContext, 'get-file')
-    )
-  );
+  // `get-file` currently behind FF
+  if (endpointContext.experimentalFeatures.responseActionGetFileEnabled) {
+    router.post(
+      {
+        path: GET_FILE_ROUTE,
+        validate: EndpointActionGetFileSchema,
+        options: { authRequired: true, tags: ['access:securitySolution'] },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'get-file')
+      )
+    );
+  }
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([

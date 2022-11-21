@@ -44,7 +44,7 @@ const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = 
 ];
 
 interface LocalState {
-  index: DataView;
+  index?: DataView;
   filter: Filter[];
   query: Query;
   thresholdComparator: CommonRuleParams['thresholdComparator'];
@@ -120,7 +120,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       return { ...currentState, [action.type]: action.payload };
     },
     {
-      index: searchSource.getField('index')!,
+      index: searchSource.getField('index'),
       query: searchSource.getField('query')! as Query,
       filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
       threshold: ruleParams.threshold ?? DEFAULT_VALUES.THRESHOLD,

@@ -85,7 +85,7 @@ export const SearchSourceExpression = ({
 
       data.search.searchSource
         .create(initialSearchConfiguration)
-        .then((fetchedSearchSource) => setSearchSource(fetchedSearchSource))
+        .then(setSearchSource)
         .catch(setParamsError);
     };
 

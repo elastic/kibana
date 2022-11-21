@@ -6,7 +6,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useEffect } from 'react';
 
 import { NerInference } from './models/ner';
 import { QuestionAnsweringInference } from './models/question_answering';
@@ -26,43 +26,58 @@ import {
 } from '../../../../../common/constants/trained_models';
 import { useMlApiContext } from '../../../contexts/kibana';
 import { InferenceInputForm } from './models/inference_input_form';
+import { InferrerType } from './models';
+import { INPUT_TYPE } from './models/inference_base';
 
 interface Props {
   model: estypes.MlTrainedModelConfig;
+  inputType: INPUT_TYPE;
 }
 
-export const SelectedModel: FC<Props> = ({ model }) => {
+export const SelectedModel: FC<Props> = ({ model, inputType }) => {
   const { trainedModels } = useMlApiContext();
 
-  const inferrer = useMemo(() => {
+  const inferrer: InferrerType | undefined = useMemo(() => {
     if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
       const taskType = Object.keys(model.inference_config)[0];
 
       switch (taskType) {
         case SUPPORTED_PYTORCH_TASKS.NER:
-          return new NerInference(trainedModels, model);
+          return new NerInference(trainedModels, model, inputType);
+          break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION:
-          return new TextClassificationInference(trainedModels, model);
+          return new TextClassificationInference(trainedModels, model, inputType);
+          break;
         case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
-          return new ZeroShotClassificationInference(trainedModels, model);
+          return new ZeroShotClassificationInference(trainedModels, model, inputType);
+          break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
-          return new TextEmbeddingInference(trainedModels, model);
+          return new TextEmbeddingInference(trainedModels, model, inputType);
+          break;
         case SUPPORTED_PYTORCH_TASKS.FILL_MASK:
-          return new FillMaskInference(trainedModels, model);
+          return new FillMaskInference(trainedModels, model, inputType);
+          break;
         case SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING:
-          return new QuestionAnsweringInference(trainedModels, model);
+          return new QuestionAnsweringInference(trainedModels, model, inputType);
+          break;
 
         default:
           break;
       }
     } else if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
-      return new LangIdentInference(trainedModels, model);
+      return new LangIdentInference(trainedModels, model, inputType);
     }
-  }, [model, trainedModels]);
+  }, [inputType, model, trainedModels]);
 
-  if (inferrer === undefined) {
-    return null;
+  useEffect(() => {
+    return () => {
+      inferrer?.destroy();
+    };
+  }, [inferrer]);
+
+  if (inferrer !== undefined) {
+    return <InferenceInputForm inferrer={inferrer} inputType={inputType} />;
   }
 
-  return <InferenceInputForm inferrer={inferrer} />;
+  return null;
 };

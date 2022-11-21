@@ -134,7 +134,7 @@ describe('FileService', () => {
 
   it('retrieves a file', async () => {
     const { id } = await createDisposableFile({ fileKind, name: 'test' });
-    const myFile = await fileService.getById({ id, fileKind });
+    const myFile = await fileService.getById({ id });
     expect(myFile?.id).toMatch(id);
   });
 
@@ -203,7 +203,7 @@ describe('FileService', () => {
     expect(updatedFile1.data.alt).toBe(updatableFields.alt);
 
     // Fetch the file anew to be doubly sure
-    const updatedFile2 = await fileService.getById<CustomMeta>({ fileKind, id: file.id });
+    const updatedFile2 = await fileService.getById<CustomMeta>({ id: file.id });
     expect(updatedFile2.data.meta).toEqual(expect.objectContaining(updatableFields.meta));
     // Below also tests that our meta type is work as expected by using `some` field.
     expect(updatedFile2.data.meta?.some).toBe(updatableFields.meta.some);

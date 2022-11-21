@@ -7,6 +7,7 @@
 
 import React, { useContext, VFC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { MoreActions } from './more_actions/more_actions';
 import { InvestigateInTimelineButtonIcon } from '../../../../timeline';
 import { Indicator } from '../../../../../../common/types/indicator';
 import { OpenIndicatorFlyoutButton } from './open_flyout_button';
@@ -34,6 +35,9 @@ export const ActionsRowCell: VFC<{ indicator: Indicator }> = ({ indicator }) => 
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <InvestigateInTimelineButtonIcon data={indicator} data-test-subj={INVESTIGATE_TEST_ID} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <MoreActions indicator={indicator} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
