@@ -6,11 +6,11 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
         data-test-subj="MetaInfoDetailsmetaInfoDetails"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class="euiText emotion-EuiText"
@@ -19,7 +19,7 @@ Object {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
           data-test-subj="MetaInfoDetailslastUpdate"
         >
           <span
@@ -41,7 +41,7 @@ Object {
           </span>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class="euiText emotion-EuiText"
@@ -50,14 +50,14 @@ Object {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
           data-test-subj="MetaInfoDetailslastUpdateValue"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <span
                 class="euiBadge emotion-EuiInnerText"
@@ -81,11 +81,11 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
       data-test-subj="MetaInfoDetailsmetaInfoDetails"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
           class="euiText emotion-EuiText"
@@ -94,7 +94,7 @@ Object {
         </div>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
         data-test-subj="MetaInfoDetailslastUpdate"
       >
         <span
@@ -116,7 +116,7 @@ Object {
         </span>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
           class="euiText emotion-EuiText"
@@ -125,14 +125,14 @@ Object {
         </div>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
         data-test-subj="MetaInfoDetailslastUpdateValue"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
               class="euiBadge emotion-EuiInnerText"
@@ -213,11 +213,11 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
         data-test-subj="MetaInfoDetailsmetaInfoDetails"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class="euiText emotion-EuiText"
@@ -226,7 +226,7 @@ Object {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
           data-test-subj="MetaInfoDetailslastUpdate"
         >
           <span
@@ -246,7 +246,7 @@ Object {
           </span>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class="euiText emotion-EuiText"
@@ -255,14 +255,14 @@ Object {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
           data-test-subj="MetaInfoDetailslastUpdateValue"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <span
                 class="euiBadge emotion-EuiInnerText"
@@ -286,11 +286,11 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
       data-test-subj="MetaInfoDetailsmetaInfoDetails"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
           class="euiText emotion-EuiText"
@@ -299,7 +299,7 @@ Object {
         </div>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
         data-test-subj="MetaInfoDetailslastUpdate"
       >
         <span
@@ -319,7 +319,7 @@ Object {
         </span>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
           class="euiText emotion-EuiText"
@@ -328,14 +328,14 @@ Object {
         </div>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
         data-test-subj="MetaInfoDetailslastUpdateValue"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
               class="euiBadge emotion-EuiInnerText"

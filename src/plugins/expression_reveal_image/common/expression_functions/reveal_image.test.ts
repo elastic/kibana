@@ -10,7 +10,7 @@ import {
   functionWrapper,
   getElasticOutline,
   getElasticLogo,
-} from '@kbn/presentation-util-plugin/common/lib';
+} from '@kbn/presentation-util-plugin/common';
 import { revealImageFunction, errors } from './reveal_image_function';
 import { Origin } from '../types';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
