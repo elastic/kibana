@@ -10,6 +10,7 @@ import { AutocompleteSetup } from './autocomplete';
 
 const autocompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
   getAutocompleteSettings: jest.fn(),
+  getInitializerContextConfig: jest.fn(),
 };
 
 function createSetupContract() {
