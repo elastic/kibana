@@ -93,22 +93,22 @@ const ActionsTableComponent = () => {
 
     const query = item._source.queries[0].query;
     const queryWithoutMultiLines = removeMultilines(query);
-    const content =
+    const getContent = (length = 90) =>
       queryWithoutMultiLines && queryWithoutMultiLines.length > 90
-        ? `${queryWithoutMultiLines?.substring(0, 90)}...`
+        ? `${queryWithoutMultiLines?.substring(0, length)}...`
         : queryWithoutMultiLines;
 
     return (
       <EuiFlexItem>
         <EuiToolTip
           content={
-            <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-              {queryWithoutMultiLines}
+            <EuiCodeBlock language="sql" fontSize="s" paddingSize="none">
+              {getContent(360)}
             </EuiCodeBlock>
           }
         >
           <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-            {content}
+            {getContent()}
           </EuiCodeBlock>
         </EuiToolTip>
       </EuiFlexItem>
