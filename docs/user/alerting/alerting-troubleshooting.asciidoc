@@ -83,12 +83,11 @@ The result of this HTTP request (and printed to stdout by https://github.com/pmu
 [[alerting-error-banners]]
 === Look for error banners
 
-The *Rule Management* and *Rule Details* pages contain an error banner, which helps to identify the errors for the rules:
-[role="screenshot"]
-image::images/rules-management-health.png[Rule management page with the errors banner]
+The **{stack-manage-app}** > *{rules-ui}* page contains an error banner that
+helps to identify the errors for the rules:
 
 [role="screenshot"]
-image::images/rules-details-health.png[Rule details page with the errors banner]
+image::images/rules-management-health.png[Rule management page with the errors banner]
 
 [float]
 [[task-manager-diagnostics]]

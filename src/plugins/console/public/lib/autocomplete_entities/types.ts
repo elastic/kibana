@@ -29,7 +29,7 @@ export interface FieldMapping {
   fields?: FieldMapping[];
 }
 
-export interface MappingsApiResponse {
+export interface AutoCompleteEntitiesApiResponse {
   mappings: IndicesGetMappingResponse;
   aliases: IndicesGetAliasResponse;
   dataStreams: IndicesGetDataStreamResponse;

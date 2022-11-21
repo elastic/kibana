@@ -11,6 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
+import _ from 'lodash';
 import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
@@ -43,7 +44,7 @@ import { ControlEmbeddable, ControlInput, ControlOutput, DataControlInput } from
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
 import { TIME_SLIDER_CONTROL } from '../../time_slider';
-import { loadFieldRegistryFromDataViewId } from '../editor/data_control_editor_tools';
+import { getDataControlFieldRegistry } from '../editor/data_control_editor_tools';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -102,7 +103,8 @@ export class ControlGroupContainer extends Container<
     fieldName: string;
     title?: string;
   }) {
-    const fieldRegistry = await loadFieldRegistryFromDataViewId(dataViewId);
+    const dataView = await pluginServices.getServices().dataViews.get(dataViewId);
+    const fieldRegistry = await getDataControlFieldRegistry(dataView);
     const field = fieldRegistry[fieldName];
     return this.addNewEmbeddable(field.compatibleControlTypes[0], {
       id: uuid,
@@ -291,7 +293,10 @@ export class ControlGroupContainer extends Container<
       }
     });
     // if filters are different, publish them
-    if (!compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS)) {
+    if (
+      !compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS) ||
+      !_.isEqual(this.output.timeslice, timeslice)
+    ) {
       this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
       this.onFiltersPublished$.next(allFilters);
     }

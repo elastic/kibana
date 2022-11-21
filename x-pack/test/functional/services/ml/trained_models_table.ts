@@ -249,6 +249,13 @@ export function TrainedModelsTableProvider(
       await this.assertNumOfAllocations(value);
     }
 
+    public async setPriority(value: 'low' | 'normal') {
+      await mlCommonUI.selectButtonGroupValue(
+        'mlModelsStartDeploymentModalPriority',
+        value.toString()
+      );
+    }
+
     public async setThreadsPerAllocation(value: number) {
       await mlCommonUI.selectButtonGroupValue(
         'mlModelsStartDeploymentModalThreadsPerAllocation',
@@ -258,10 +265,11 @@ export function TrainedModelsTableProvider(
 
     public async startDeploymentWithParams(
       modelId: string,
-      params: { numOfAllocations: number; threadsPerAllocation: number }
+      params: { priority: 'low' | 'normal'; numOfAllocations: number; threadsPerAllocation: number }
     ) {
       await this.openStartDeploymentModal(modelId);
 
+      await this.setPriority(params.priority);
       await this.setNumOfAllocations(params.numOfAllocations);
       await this.setThreadsPerAllocation(params.threadsPerAllocation);
 

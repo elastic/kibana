@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
-import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../common/types';
+import { EnrichedDeprecationInfo, ESUpgradeStatus, FeatureSet } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
 import {
@@ -16,7 +16,8 @@ import {
 } from './es_system_indices_migration';
 
 export async function getESUpgradeStatus(
-  dataClient: IScopedClusterClient
+  dataClient: IScopedClusterClient,
+  featureSet: FeatureSet
 ): Promise<ESUpgradeStatus> {
   const deprecations = await dataClient.asCurrentUser.migration.deprecations();
 
@@ -24,7 +25,6 @@ export async function getESUpgradeStatus(
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
     const systemIndices = await getESSystemIndicesMigrationStatus(dataClient.asCurrentUser);
     const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
-
     return Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {
       if (deprecationType === 'index_settings') {
         // We need to exclude all index related deprecations for system indices since
@@ -40,28 +40,54 @@ export async function getESUpgradeStatus(
           deprecationType as keyof estypes.MigrationDeprecationsResponse
         ] as estypes.MigrationDeprecationsDeprecation[];
 
-        const enrichedDeprecationInfo = deprecationsByType.map(
-          ({
-            details,
-            level,
-            message,
-            url,
-            // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
-            _meta: metadata,
-            // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
-            resolve_during_rolling_upgrade: resolveDuringUpgrade,
-          }) => {
-            return {
+        const enrichedDeprecationInfo = deprecationsByType
+          .map(
+            ({
               details,
+              level,
               message,
               url,
-              type: deprecationType as keyof estypes.MigrationDeprecationsResponse,
-              isCritical: level === 'critical',
-              resolveDuringUpgrade,
-              correctiveAction: getCorrectiveAction(message, metadata),
-            };
-          }
-        );
+              // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
+              _meta: metadata,
+              // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
+              resolve_during_rolling_upgrade: resolveDuringUpgrade,
+            }) => {
+              return {
+                details,
+                message,
+                url,
+                type: deprecationType as keyof estypes.MigrationDeprecationsResponse,
+                isCritical: level === 'critical',
+                resolveDuringUpgrade,
+                correctiveAction: getCorrectiveAction(message, metadata),
+              };
+            }
+          )
+          .filter(({ correctiveAction, type }) => {
+            /**
+             * This disables showing the ML deprecations in the UA if `featureSet.mlSnapshots`
+             * is set to `false`.
+             *
+             * This config should be set to true only on the `x.last` versions, or when
+             * the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
+             * is incremented to something higher than 7.0.0 in the Elasticsearch code.
+             */
+            if (!featureSet.mlSnapshots) {
+              if (type === 'ml_settings' || correctiveAction?.type === 'mlSnapshot') {
+                return false;
+              }
+            }
+
+            /**
+             * This disables showing the reindexing deprecations in the UA if
+             * `featureSet.reindexCorrectiveActions` is set to `false`.
+             */
+            if (!featureSet.reindexCorrectiveActions && correctiveAction?.type === 'reindex') {
+              return false;
+            }
+
+            return true;
+          });
 
         combinedDeprecations = combinedDeprecations.concat(enrichedDeprecationInfo);
       }

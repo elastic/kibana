@@ -22,6 +22,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./console'));
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./uptime'));
+    loadTestFile(require.resolve('./synthetics'));
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./security_solution'));
     loadTestFile(require.resolve('./transform'));

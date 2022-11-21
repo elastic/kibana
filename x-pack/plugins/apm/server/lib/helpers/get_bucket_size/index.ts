@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-// @ts-expect-error
 import { calculateAuto } from './calculate_auto';
 
 export function getBucketSize({
@@ -22,7 +21,7 @@ export function getBucketSize({
 }) {
   const duration = moment.duration(end - start, 'ms');
   const bucketSize = Math.max(
-    calculateAuto.near(numBuckets, duration).asSeconds(),
+    calculateAuto.near(numBuckets, duration)?.asSeconds() ?? 0,
     minBucketSize || 1
   );
 

@@ -2073,6 +2073,7 @@ export const mockTGridModel: TGridModel = {
   title: 'Test rule',
   showCheckboxes: false,
   selectAll: false,
+  totalCount: 0,
 };
 
 export const mockGetOneTimelineResult: TimelineResult = {

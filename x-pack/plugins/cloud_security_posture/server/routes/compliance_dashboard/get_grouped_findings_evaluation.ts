@@ -11,6 +11,7 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { calculatePostureScore } from './get_stats';
 import type { ComplianceDashboardData } from '../../../common/types';
 import { KeyDocCount } from './compliance_dashboard';
 
@@ -25,12 +26,14 @@ export interface FailedFindingsBucket extends KeyDocCount {
   passed_findings: {
     doc_count: number;
   };
+  score: { value: number };
 }
 
 export const failedFindingsAggQuery = {
   aggs_by_resource_type: {
     terms: {
       field: 'rule.section',
+      size: 5,
     },
     aggs: {
       failed_findings: {
@@ -38,6 +41,22 @@ export const failedFindingsAggQuery = {
       },
       passed_findings: {
         filter: { term: { 'result.evaluation': 'passed' } },
+      },
+      score: {
+        bucket_script: {
+          buckets_path: {
+            passed: 'passed_findings>_count',
+            failed: 'failed_findings>_count',
+          },
+          script: 'params.passed / (params.passed + params.failed)',
+        },
+      },
+      sort_by_score: {
+        bucket_sort: {
+          sort: {
+            score: 'asc' as 'asc',
+          },
+        },
       },
     },
   },
@@ -55,12 +74,18 @@ export const getRisksEsQuery = (query: QueryDslQueryContainer, pitId: string): S
 export const getFailedFindingsFromAggs = (
   queryResult: FailedFindingsBucket[]
 ): ComplianceDashboardData['groupedFindingsEvaluation'] =>
-  queryResult.map((bucket) => ({
-    name: bucket.key,
-    totalFindings: bucket.doc_count,
-    totalFailed: bucket.failed_findings.doc_count || 0,
-    totalPassed: bucket.passed_findings.doc_count || 0,
-  }));
+  queryResult.map((bucket) => {
+    const totalPassed = bucket.passed_findings.doc_count || 0;
+    const totalFailed = bucket.failed_findings.doc_count || 0;
+
+    return {
+      name: bucket.key,
+      totalFindings: bucket.doc_count,
+      totalFailed,
+      totalPassed,
+      postureScore: calculatePostureScore(totalPassed, totalFailed),
+    };
+  });
 
 export const getGroupedFindingsEvaluation = async (
   esClient: ElasticsearchClient,

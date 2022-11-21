@@ -18,6 +18,9 @@ import type { HostsKpiProps } from '../types';
 import { HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
@@ -61,15 +64,23 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
+
   const [loading, { refetch, id, inspect, ...data }] = useHostsKpiUniqueIps({
     filterQuery,
     endDate: to,
     indexNames,
     startDate: from,
-    skip: querySkip,
+    skip: querySkip || isChartEmbeddablesEnabled,
+  });
+
+  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+    inputId: InputsModelId.global,
+    queryId: id,
   });
 
   return (
@@ -82,9 +93,10 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
       from={from}
       to={to}
       updateDateRange={updateDateRange}
-      refetch={refetch}
+      refetch={isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
+      searchSessionId={isChartEmbeddablesEnabled ? searchSessionId : undefined}
     />
   );
 };

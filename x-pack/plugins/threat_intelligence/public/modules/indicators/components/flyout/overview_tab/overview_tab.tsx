@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, VFC } from 'react';
 import { EMPTY_VALUE } from '../../../../../common/constants';
-import { Indicator, RawIndicatorFieldId } from '../../../types';
+import { Indicator, RawIndicatorFieldId } from '../../../../../../common/types/indicator';
 import { unwrapValue } from '../../../utils';
 import { IndicatorEmptyPrompt } from '../empty_prompt';
 import { IndicatorBlock } from './block';

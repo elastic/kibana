@@ -18,6 +18,12 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getAlertDetailsUrl } from '../../../../common/components/link_to';
+import {
+  SecuritySolutionLinkAnchor,
+  useGetSecuritySolutionLinkProps,
+} from '../../../../common/components/links';
 import type { Ecs } from '../../../../../common/ecs';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
@@ -25,6 +31,7 @@ import { EventDetails } from '../../../../common/components/event_details/event_
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { SecurityPageName } from '../../../../../common/constants';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -44,6 +51,7 @@ interface Props {
 }
 
 interface ExpandableEventTitleProps {
+  eventId: string;
   isAlert: boolean;
   loading: boolean;
   ruleName?: string;
@@ -68,31 +76,50 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
-  ({ isAlert, loading, handleOnEventClosed, ruleName, timestamp }) => (
-    <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
-      <EuiFlexItem grow={false}>
-        {!loading && (
-          <>
-            <EuiTitle size="s">
-              <h4>{isAlert && !isEmpty(ruleName) ? ruleName : i18n.EVENT_DETAILS}</h4>
-            </EuiTitle>
-            {timestamp && (
-              <>
-                <EuiSpacer size="s" />
-                <PreferenceFormattedDate value={new Date(timestamp)} />
-              </>
-            )}
-            <EuiSpacer size="m" />
-          </>
-        )}
-      </EuiFlexItem>
-      {handleOnEventClosed && (
+  ({ eventId, isAlert, loading, handleOnEventClosed, ruleName, timestamp }) => {
+    const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
+    const { onClick } = useGetSecuritySolutionLinkProps()({
+      deepLinkId: SecurityPageName.alerts,
+      path: eventId && isAlert ? getAlertDetailsUrl(eventId) : '',
+    });
+    return (
+      <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
+          {!loading && (
+            <>
+              <EuiTitle size="s">
+                <h4>{isAlert && !isEmpty(ruleName) ? ruleName : i18n.EVENT_DETAILS}</h4>
+              </EuiTitle>
+              {timestamp && (
+                <>
+                  <EuiSpacer size="s" />
+                  <PreferenceFormattedDate value={new Date(timestamp)} />
+                </>
+              )}
+              {isAlert && eventId && isAlertDetailsPageEnabled && (
+                <>
+                  <EuiSpacer size="l" />
+                  <SecuritySolutionLinkAnchor
+                    data-test-subj="open-alert-details-page"
+                    deepLinkId={SecurityPageName.alerts}
+                    onClick={onClick}
+                  >
+                    {i18n.OPEN_ALERT_DETAILS_PAGE}
+                  </SecuritySolutionLinkAnchor>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+            </>
+          )}
         </EuiFlexItem>
-      )}
-    </StyledEuiFlexGroup>
-  )
+        {handleOnEventClosed && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
+          </EuiFlexItem>
+        )}
+      </StyledEuiFlexGroup>
+    );
+  }
 );
 
 ExpandableEventTitle.displayName = 'ExpandableEventTitle';

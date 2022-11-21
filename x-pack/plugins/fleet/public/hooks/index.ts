@@ -29,3 +29,4 @@ export * from './use_package_installations';
 export * from './use_agent_enrollment_flyout_data';
 export * from './use_flyout_context';
 export * from './use_is_guided_onboarding_active';
+export * from './use_fleet_server_hosts_for_policy';

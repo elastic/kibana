@@ -43,6 +43,7 @@ export type ComponentOpts = {
   onEditRule: (item: RuleTableItem) => void;
   onUpdateAPIKey: (id: string[]) => void;
   onRunRule: (item: RuleTableItem) => void;
+  onCloneRule: (ruleId: string) => void;
 } & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
@@ -57,6 +58,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   snoozeRule,
   unsnoozeRule,
   onRunRule,
+  onCloneRule,
 }: ComponentOpts) => {
   const {
     ruleTypeRegistry,
@@ -208,6 +210,18 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
                 'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.disableTitle',
                 { defaultMessage: 'Disable' }
               ),
+        },
+        {
+          disabled: !item.isEditable || item.consumer === AlertConsumers.SIEM,
+          'data-test-subj': 'cloneRule',
+          onClick: async () => {
+            setIsPopoverOpen(!isPopoverOpen);
+            onCloneRule(item.id);
+          },
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.cloneRuleTitle',
+            { defaultMessage: 'Clone rule' }
+          ),
         },
         {
           disabled: !item.isEditable || !isRuleTypeEditableInContext,

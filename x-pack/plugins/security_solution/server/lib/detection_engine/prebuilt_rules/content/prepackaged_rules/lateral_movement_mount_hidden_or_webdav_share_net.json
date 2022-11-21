@@ -50,6 +50,7 @@
     "Host",
     "Windows",
     "Threat Detection",
+    "Initial Access",
     "Lateral Movement"
   ],
   "threat": [
@@ -74,9 +75,31 @@
           ]
         }
       ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/",
+          "subtechnique": [
+            {
+              "id": "T1078.003",
+              "name": "Local Accounts",
+              "reference": "https://attack.mitre.org/techniques/T1078/003/"
+            }
+          ]
+        }
+      ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 101
+  "version": 102
 }

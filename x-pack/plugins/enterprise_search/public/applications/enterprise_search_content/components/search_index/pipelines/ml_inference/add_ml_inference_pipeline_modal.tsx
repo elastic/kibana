@@ -77,7 +77,7 @@ export const AddMLInferencePipelineModal: React.FC<AddMLInferencePipelineModalPr
   );
 };
 
-const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClose }) => {
+export const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClose }) => {
   const { ingestionMethod } = useValues(IndexViewLogic);
   const {
     createErrors,
@@ -85,6 +85,15 @@ const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClo
     isLoading,
     addInferencePipelineModal: { step },
   } = useValues(MLInferenceLogic);
+  // Using the value of create errors to reduce unnecessary hook calls
+  const createErrorsHookDep = createErrors.join('|');
+  useEffect(() => {
+    if (createErrors.length === 0) return;
+    const modalOverflow = document.getElementsByClassName('euiModalBody__overflow');
+    if (modalOverflow.length === 0) return;
+    modalOverflow[0].scrollTop = 0;
+  }, [createErrorsHookDep]);
+
   if (isLoading) {
     return (
       <EuiModalBody>
@@ -92,7 +101,7 @@ const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClo
       </EuiModalBody>
     );
   }
-  if (supportedMLModels === undefined || supportedMLModels?.length === 0) {
+  if (supportedMLModels.length === 0) {
     return <NoModelsPanel />;
   }
   return (
@@ -125,7 +134,7 @@ const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClo
   );
 };
 
-const ModalSteps: React.FC = () => {
+export const ModalSteps: React.FC = () => {
   const {
     addInferencePipelineModal: { step },
     isPipelineDataValid,
@@ -183,13 +192,14 @@ const ModalSteps: React.FC = () => {
   return <EuiStepsHorizontal steps={navSteps} />;
 };
 
-const ModalFooter: React.FC<AddMLInferencePipelineModalProps & { ingestionMethod: string }> = ({
-  ingestionMethod,
-  onClose,
-}) => {
+export const ModalFooter: React.FC<
+  AddMLInferencePipelineModalProps & { ingestionMethod: string }
+> = ({ ingestionMethod, onClose }) => {
   const { addInferencePipelineModal: modal, isPipelineDataValid } = useValues(MLInferenceLogic);
-  const { createPipeline, setAddInferencePipelineStep } = useActions(MLInferenceLogic);
+  const { attachPipeline, createPipeline, setAddInferencePipelineStep } =
+    useActions(MLInferenceLogic);
 
+  const attachExistingPipeline = Boolean(modal.configuration.existingPipeline);
   let nextStep: AddInferencePipelineSteps | undefined;
   let previousStep: AddInferencePipelineSteps | undefined;
   switch (modal.step) {
@@ -238,6 +248,21 @@ const ModalFooter: React.FC<AddMLInferencePipelineModalProps & { ingestionMethod
               fill
             >
               {CONTINUE_BUTTON_LABEL}
+            </EuiButton>
+          ) : attachExistingPipeline ? (
+            <EuiButton
+              color="primary"
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-attach`}
+              disabled={!isPipelineDataValid}
+              fill
+              onClick={attachPipeline}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.footer.attach',
+                {
+                  defaultMessage: 'Attach',
+                }
+              )}
             </EuiButton>
           ) : (
             <EuiButton

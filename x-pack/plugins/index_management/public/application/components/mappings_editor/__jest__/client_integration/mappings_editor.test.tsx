@@ -21,7 +21,7 @@ describe('Mappings editor: core', () => {
   let testBed: MappingsEditorTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

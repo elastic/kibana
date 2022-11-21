@@ -202,6 +202,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       keptLayerIds: [],
+      subVisualizationId: 'area',
       state: {
         legend: { isVisible: true, position: 'bottom' },
         valueLabels: 'hide',
@@ -227,6 +228,7 @@ describe('xy_suggestions', () => {
 
     expect(suggestions).toHaveLength(visualizationTypes.length);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
+      'line',
       'bar',
       'bar_horizontal',
       'bar_stacked',
@@ -236,7 +238,6 @@ describe('xy_suggestions', () => {
       'area',
       'area_stacked',
       'area_percentage_stacked',
-      'line',
     ]);
   });
 

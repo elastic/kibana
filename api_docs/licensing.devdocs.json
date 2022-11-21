@@ -975,7 +975,13 @@
             "text": "RequestHandler"
           },
           "<P, Q, B, Context, any, ",
-          "KibanaResponseFactory",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
           ">) => ",
           {
             "pluginId": "core",
@@ -985,7 +991,13 @@
             "text": "RequestHandler"
           },
           "<P, Q, B, Context, any, ",
-          "KibanaResponseFactory",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
           ">"
         ],
         "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
@@ -1029,7 +1041,13 @@
                 "text": "RequestHandler"
               },
               "<P, Q, B, Context, any, ",
-              "KibanaResponseFactory",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
               ">"
             ],
             "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
@@ -2328,7 +2346,13 @@
           ],
           "signature": [
             "(clusterClient: ",
-            "IClusterClient",
+            {
+              "pluginId": "@kbn/core-elasticsearch-server",
+              "scope": "server",
+              "docId": "kibKbnCoreElasticsearchServerPluginApi",
+              "section": "def-server.IClusterClient",
+              "text": "IClusterClient"
+            },
             ", pollingFrequency: number) => { license$: ",
             "Observable",
             "<",
@@ -2349,7 +2373,13 @@
               "label": "clusterClient",
               "description": [],
               "signature": [
-                "IClusterClient"
+                {
+                  "pluginId": "@kbn/core-elasticsearch-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                  "section": "def-server.IClusterClient",
+                  "text": "IClusterClient"
+                }
               ],
               "path": "x-pack/plugins/licensing/server/types.ts",
               "deprecated": false,

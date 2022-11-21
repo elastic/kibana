@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink, EuiIcon } from '@elastic/eui';
 import { InPortal } from 'react-reverse-portal';
 import { MonitorDetailsLinkPortalNode } from './portals';
 
@@ -25,8 +25,8 @@ export const MonitorDetailsLink = ({ name, id }: { name: string; id: string }) =
     pathname: `monitor/${id}`,
   });
   return (
-    <EuiButtonEmpty href={href} iconType="arrowLeft" flush="left">
-      {name}
-    </EuiButtonEmpty>
+    <EuiLink href={href}>
+      <EuiIcon type="arrowLeft" /> {name}
+    </EuiLink>
   );
 };

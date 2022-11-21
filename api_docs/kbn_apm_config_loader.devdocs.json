@@ -274,7 +274,62 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/apm-config-loader",
+        "id": "def-server.apmConfigSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "apmConfigSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ active: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; serverUrl: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; secretToken: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; globalLabels: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{}>; }>"
+        ],
+        "path": "packages/kbn-apm-config-loader/src/apm_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "common": {
     "classes": [],

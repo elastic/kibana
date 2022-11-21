@@ -42,7 +42,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
           _source: {
             '@timestamp': '1234567899',
             host: {
-              name: 'testUsermame',
+              name: 'testUsername',
               risk: {
                 rule_risks: [],
                 calculated_level: RiskSeverity.high,
@@ -121,8 +121,11 @@ describe('buildRiskScoreQuery search strategy', () => {
         alertsByEntity: {
           buckets: [
             {
-              key: 'testUsermame',
+              key: 'testUsername',
               doc_count: alertsCunt,
+              oldestAlertTimestamp: {
+                value_as_string: '12345566',
+              },
             },
           ],
         },
@@ -132,5 +135,36 @@ describe('buildRiskScoreQuery search strategy', () => {
     const result = await riskScore.parse(mockOptions, mockSearchStrategyResponse, mockDeps);
 
     expect(get('data[0].alertsCount', result)).toBe(alertsCunt);
+  });
+
+  test('should enhance data with alerts oldest timestamp', async () => {
+    const oldestAlertTimestamp = 'oldestTimestamp_test';
+    searchMock.mockReturnValue({
+      aggregations: {
+        oldestAlertTimestamp: {
+          value_as_string: oldestAlertTimestamp,
+        },
+      },
+    });
+
+    searchMock.mockReturnValue({
+      aggregations: {
+        alertsByEntity: {
+          buckets: [
+            {
+              key: 'testUsername',
+              doc_count: 1,
+              oldestAlertTimestamp: {
+                value_as_string: oldestAlertTimestamp,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const result = await riskScore.parse(mockOptions, mockSearchStrategyResponse, mockDeps);
+
+    expect(get('data[0].oldestAlertTimestamp', result)).toBe(oldestAlertTimestamp);
   });
 });

@@ -605,7 +605,7 @@ describe('Custom Links', () => {
       const wrapper = mount(
         <SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} path={path} />
       );
-      wrapper.find('LinkButton').simulate('click');
+      wrapper.find('a[href="testTabPath"]').simulate('click');
 
       expect(mockNavigateTo).toHaveBeenLastCalledWith({ url: path });
     });

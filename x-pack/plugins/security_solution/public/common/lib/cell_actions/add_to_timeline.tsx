@@ -25,9 +25,11 @@ import { addProvider } from '../../../timelines/store/timeline/actions';
 export const getAddToTimelineCellAction = ({
   data,
   pageSize,
+  closeCellPopover,
 }: {
   data?: TimelineNonEcsData[][];
   pageSize: number;
+  closeCellPopover?: () => void;
 }) =>
   data && data.length > 0
     ? function AddToTimeline({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) {
@@ -97,6 +99,9 @@ export const getAddToTimelineCellAction = ({
               providers: dataProvider,
             })
           );
+          if (closeCellPopover) {
+            closeCellPopover();
+          }
         }, [dataProvider, dispatch]);
 
         const addToTimelineProps = useMemo(() => {

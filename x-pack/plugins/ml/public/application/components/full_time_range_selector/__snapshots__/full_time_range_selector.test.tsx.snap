@@ -19,9 +19,11 @@ exports[`FullTimeRangeSelector renders the selector 1`] = `
     position="top"
   >
     <EuiButton
+      color="primary"
       data-test-subj="mlButtonUseFullData"
       isDisabled={false}
       onClick={[Function]}
+      size="m"
     >
       <FormattedMessage
         defaultMessage="Use full data"

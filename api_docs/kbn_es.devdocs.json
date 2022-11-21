@@ -1,0 +1,96 @@
+{
+  "id": "@kbn/es",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-server.run",
+        "type": "Function",
+        "tags": [],
+        "label": "run",
+        "description": [],
+        "signature": [
+          "(defaults?: {}) => Promise<void>"
+        ],
+        "path": "packages/kbn-es/src/cli.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-server.run.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "defaults",
+            "description": [],
+            "signature": [
+              "{}"
+            ],
+            "path": "packages/kbn-es/src/cli.js",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-server.SYSTEM_INDICES_SUPERUSER",
+        "type": "string",
+        "tags": [],
+        "label": "SYSTEM_INDICES_SUPERUSER",
+        "description": [],
+        "path": "packages/kbn-es/src/utils/native_realm.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-server.Cluster",
+        "type": "Object",
+        "tags": [],
+        "label": "Cluster",
+        "description": [],
+        "signature": [
+          "typeof ",
+          {
+            "pluginId": "@kbn/es",
+            "scope": "server",
+            "docId": "kibKbnEsPluginApi",
+            "section": "def-server.Cluster",
+            "text": "Cluster"
+          }
+        ],
+        "path": "packages/kbn-es/src/cluster.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

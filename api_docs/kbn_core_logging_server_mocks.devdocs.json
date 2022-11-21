@@ -51,7 +51,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "LoggingServiceSetup",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.LoggingServiceSetup",
+                "text": "LoggingServiceSetup"
+              },
               ">"
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
@@ -137,21 +143,63 @@
             "description": [],
             "signature": [
               "(loggerFactory: ",
-              "LoggerFactory",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LoggerFactory",
+                "text": "LoggerFactory"
+              },
               ") => { debug: [message: string, meta?: ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               " | undefined][]; error: [errorOrMessage: string | Error, meta?: ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               " | undefined][]; fatal: [errorOrMessage: string | Error, meta?: ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               " | undefined][]; info: [message: string, meta?: ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               " | undefined][]; log: [record: ",
               "LogRecord",
               "][]; trace: [message: string, meta?: ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               " | undefined][]; warn: [errorOrMessage: string | Error, meta?: ",
-              "LogMeta",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LogMeta",
+                "text": "LogMeta"
+              },
               " | undefined][]; }"
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
@@ -167,7 +215,13 @@
                 "label": "loggerFactory",
                 "description": [],
                 "signature": [
-                  "LoggerFactory"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.LoggerFactory",
+                    "text": "LoggerFactory"
+                  }
                 ],
                 "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
                 "deprecated": false,
@@ -184,7 +238,13 @@
             "description": [],
             "signature": [
               "(loggerFactory: ",
-              "LoggerFactory",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LoggerFactory",
+                "text": "LoggerFactory"
+              },
               ") => void"
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
@@ -200,7 +260,13 @@
                 "label": "loggerFactory",
                 "description": [],
                 "signature": [
-                  "LoggerFactory"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.LoggerFactory",
+                    "text": "LoggerFactory"
+                  }
                 ],
                 "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
                 "deprecated": false,
@@ -216,8 +282,14 @@
             "label": "createLogger",
             "description": [],
             "signature": [
-              "(context?: string[] | undefined) => ",
-              "MockedLogger"
+              "(context?: string[]) => ",
+              {
+                "pluginId": "@kbn/logging-mocks",
+                "scope": "server",
+                "docId": "kibKbnLoggingMocksPluginApi",
+                "section": "def-server.MockedLogger",
+                "text": "MockedLogger"
+              }
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
             "deprecated": false,
@@ -232,9 +304,9 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "string[] | undefined"
+                  "string[]"
                 ],
-                "path": "node_modules/@types/kbn__logging-mocks/index.d.ts",
+                "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

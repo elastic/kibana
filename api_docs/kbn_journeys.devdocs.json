@@ -48,7 +48,13 @@
                 "text": "Journey"
               },
               "<any>) => ",
-              "FtrConfigProvider"
+              {
+                "pluginId": "@kbn/test",
+                "scope": "server",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-server.FtrConfigProvider",
+                "text": "FtrConfigProvider"
+              }
             ],
             "path": "packages/kbn-journeys/journey/journey.ts",
             "deprecated": false,
@@ -262,7 +268,13 @@
             ],
             "signature": [
               "({ getService }: ",
-              "FtrProviderContext",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "server",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-server.FtrProviderContext",
+                "text": "FtrProviderContext"
+              },
               ") => void"
             ],
             "path": "packages/kbn-journeys/journey/journey.ts",
@@ -277,7 +289,13 @@
                 "label": "{ getService }",
                 "description": [],
                 "signature": [
-                  "FtrProviderContext"
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "server",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-server.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  }
                 ],
                 "path": "packages/kbn-journeys/journey/journey.ts",
                 "deprecated": false,

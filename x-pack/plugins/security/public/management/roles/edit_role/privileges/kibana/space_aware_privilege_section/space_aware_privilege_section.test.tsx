@@ -87,6 +87,13 @@ describe('<SpaceAwarePrivilegeSection>', () => {
     expect(table).toHaveLength(0);
   });
 
+  it('hides "Add space privilege" button if not editable', () => {
+    const props = buildProps();
+
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection {...props} editable={false} />);
+    expect(wrapper.find('button[data-test-subj="addSpacePrivilegeButton"]')).toHaveLength(0);
+  });
+
   it('Renders flyout after clicking "Add space privilege" button', () => {
     const props = buildProps({
       role: {

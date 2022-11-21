@@ -10,8 +10,13 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useEuiTheme } from '@elastic/eui';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
-export const MonitorErrorSparklines = () => {
+interface Props {
+  from: string;
+  to: string;
+}
+export const MonitorErrorSparklines = (props: Props) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -19,6 +24,12 @@ export const MonitorErrorSparklines = () => {
   const { monitorId } = useParams<{ monitorId: string }>();
 
   const { euiTheme } = useEuiTheme();
+
+  const selectedLocation = useSelectedLocation();
+
+  if (!selectedLocation) {
+    return null;
+  }
 
   return (
     <ExploratoryViewEmbeddable
@@ -29,13 +40,13 @@ export const MonitorErrorSparklines = () => {
       attributes={[
         {
           seriesType: 'area',
-          time: {
-            from: 'now-30d/d',
-            to: 'now',
+          time: props,
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation?.label],
           },
-          reportDefinitions: { 'monitor.id': [monitorId] },
           dataType: 'synthetics',
-          selectedMetricField: 'state.id',
+          selectedMetricField: 'state.up',
           name: 'Monitor errors',
           color: euiTheme.colors.danger,
           operationType: 'unique_count',

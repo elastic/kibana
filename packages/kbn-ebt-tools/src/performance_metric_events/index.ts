@@ -5,8 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export type { PerformanceMetricEvent as MetricEvent } from './schema';
-export {
-  registerPerformanceMetricEventType as registerPerformanceMetricEventType,
-  reportPerformanceMetricEvent,
-} from './helpers';
+export type { PerformanceMetricEvent } from './schema';
+export { registerPerformanceMetricEventType, reportPerformanceMetricEvent } from './helpers';

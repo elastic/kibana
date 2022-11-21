@@ -7,6 +7,7 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
+import { networkEventsReducer, NetworkEventsState } from './network_events';
 import { monitorDetailsReducer, MonitorDetailsState } from './monitor_details';
 import { uiReducer, UiState } from './ui';
 import { indexStatusReducer, IndexStatusState } from './index_status';
@@ -16,6 +17,7 @@ import { serviceLocationsReducer, ServiceLocationsState } from './service_locati
 import { monitorOverviewReducer, MonitorOverviewState } from './overview';
 import { BrowserJourneyState } from './browser_journey/models';
 import { browserJourneyReducer } from './browser_journey';
+import { PingStatusState, pingStatusReducer } from './ping_status';
 
 export interface SyntheticsAppState {
   ui: UiState;
@@ -26,6 +28,8 @@ export interface SyntheticsAppState {
   monitorDetails: MonitorDetailsState;
   overview: MonitorOverviewState;
   browserJourney: BrowserJourneyState;
+  networkEvents: NetworkEventsState;
+  pingStatus: PingStatusState;
 }
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
@@ -37,4 +41,6 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   monitorDetails: monitorDetailsReducer,
   overview: monitorOverviewReducer,
   browserJourney: browserJourneyReducer,
+  networkEvents: networkEventsReducer,
+  pingStatus: pingStatusReducer,
 });

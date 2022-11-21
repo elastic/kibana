@@ -122,6 +122,8 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   listTypes: RuleTypeRegistry['list'];
 
+  getAllTypes: RuleTypeRegistry['getAllTypes'];
+
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
 
   getAlertingAuthorizationWithRequest(
@@ -464,6 +466,7 @@ export class AlertingPlugin {
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
+      getAllTypes: ruleTypeRegistry!.getAllTypes.bind(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>

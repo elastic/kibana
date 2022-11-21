@@ -14,7 +14,6 @@ import { EMPTY_VALUE } from '../constants';
 moment.suppressDeprecationWarnings = true;
 
 export const FULL_DATE = 'MMMM Do YYYY @ HH:mm:ss';
-export const BARCHART_NUMBER_OF_COLUMNS = 16;
 
 /**
  * Converts a string or moment date to the 'MMMM Do YYYY @ HH:mm:ss' format.
@@ -61,21 +60,4 @@ export const barChartTimeAxisLabelFormatter = (dateRange: TimeRangeBounds): Tick
   );
   const format = niceTimeFormatByDay(diff);
   return timeFormatter(format);
-};
-
-/**
- * Calculates the time interval in ms for a specific number of columns
- * @param dateFrom Min (older) date for the barchart
- * @param dateTo Max (newer) date for the barchart
- * @param numberOfColumns Desired number of columns (defaulted to {@link BARCHART_NUMBER_OF_COLUMNS})
- * @returns The interval in ms for a column (for example '100000ms')
- */
-export const calculateBarchartColumnTimeInterval = (
-  dateFrom: number | moment.Moment,
-  dateTo: number | moment.Moment,
-  numberOfColumns = BARCHART_NUMBER_OF_COLUMNS
-): string => {
-  const from: number = moment.isMoment(dateFrom) ? dateFrom.valueOf() : dateFrom;
-  const to: number = moment.isMoment(dateTo) ? dateTo.valueOf() : dateTo;
-  return `${Math.floor(moment(to).diff(moment(from)) / numberOfColumns)}ms`;
 };

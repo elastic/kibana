@@ -69,7 +69,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "SavedObjectsServiceSetup",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsServiceSetup",
+                "text": "SavedObjectsServiceSetup"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
@@ -87,9 +93,21 @@
             "description": [],
             "signature": [
               "(typeRegistry?: jest.Mocked<",
-              "ISavedObjectTypeRegistry",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              },
               "> | undefined) => jest.Mocked<",
-              "SavedObjectsServiceStart",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsServiceStart",
+                "text": "SavedObjectsServiceStart"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
@@ -106,7 +124,13 @@
                 "description": [],
                 "signature": [
                   "jest.Mocked<",
-                  "ISavedObjectTypeRegistry",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.ISavedObjectTypeRegistry",
+                    "text": "ISavedObjectTypeRegistry"
+                  },
                   "> | undefined"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
@@ -124,9 +148,21 @@
             "description": [],
             "signature": [
               "(typeRegistry?: jest.Mocked<",
-              "ISavedObjectTypeRegistry",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              },
               "> | undefined) => jest.Mocked<",
-              "SavedObjectsServiceStart",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsServiceStart",
+                "text": "SavedObjectsServiceStart"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
@@ -143,7 +179,13 @@
                 "description": [],
                 "signature": [
                   "jest.Mocked<",
-                  "ISavedObjectTypeRegistry",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.ISavedObjectTypeRegistry",
+                    "text": "ISavedObjectTypeRegistry"
+                  },
                   "> | undefined"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
@@ -160,8 +202,14 @@
             "label": "createMigrationContext",
             "description": [],
             "signature": [
-              "({ migrationVersion, convertToMultiNamespaceTypeVersion, isSingleNamespaceType, }?: { migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; } | undefined) => jest.Mocked<",
-              "SavedObjectMigrationContext",
+              "({ migrationVersion, convertToMultiNamespaceTypeVersion, isSingleNamespaceType, }?: { migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }) => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectMigrationContext",
+                "text": "SavedObjectMigrationContext"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
@@ -177,9 +225,9 @@
                 "label": "__0",
                 "description": [],
                 "signature": [
-                  "{ migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; } | undefined"
+                  "{ migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }"
                 ],
-                "path": "node_modules/@types/kbn__core-saved-objects-migration-server-mocks/index.d.ts",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -194,7 +242,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ISavedObjectTypeRegistry",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              },
               " & Pick<",
               "SavedObjectTypeRegistry",
               ", \"registerType\">>"
@@ -214,7 +268,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ISavedObjectsExporter",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsExporter",
+                "text": "ISavedObjectsExporter"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
@@ -232,7 +292,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ISavedObjectsImporter",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsImporter",
+                "text": "ISavedObjectsImporter"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
@@ -250,7 +316,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ISavedObjectsSerializer",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsSerializer",
+                "text": "ISavedObjectsSerializer"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",

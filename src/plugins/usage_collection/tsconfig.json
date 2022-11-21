@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
     "isolatedModules": true
   },
   "include": [
@@ -13,7 +12,7 @@
     "common/*",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../../plugins/kibana_utils/tsconfig.json" }
   ]

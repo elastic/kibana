@@ -5,14 +5,22 @@
  * 2.0.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
-import { useMonitorList } from '../hooks/use_monitor_list';
-import { MonitorList } from './monitor_list_table/monitor_list';
+import type { useMonitorList } from '../hooks/use_monitor_list';
 import { MonitorAsyncError } from './monitor_errors/monitor_async_error';
 import { useInlineErrors } from '../hooks/use_inline_errors';
+import { ListFilters } from './list_filters/list_filters';
+import { MonitorList } from './monitor_list_table/monitor_list';
 
-export const MonitorListContainer = ({ isEnabled }: { isEnabled?: boolean }) => {
+export const MonitorListContainer = ({
+  isEnabled,
+  monitorListProps,
+}: {
+  isEnabled?: boolean;
+  monitorListProps: ReturnType<typeof useMonitorList>;
+}) => {
   const {
     pageState,
     error,
@@ -22,7 +30,7 @@ export const MonitorListContainer = ({ isEnabled }: { isEnabled?: boolean }) => 
     absoluteTotal,
     loadPage,
     reloadPage,
-  } = useMonitorList();
+  } = monitorListProps;
 
   const { errorSummaries, loading: errorsLoading } = useInlineErrors({
     onlyInvalidMonitors: false,
@@ -37,6 +45,8 @@ export const MonitorListContainer = ({ isEnabled }: { isEnabled?: boolean }) => 
   return (
     <>
       <MonitorAsyncError />
+      <ListFilters />
+      <EuiSpacer />
       <MonitorList
         syntheticsMonitors={syntheticsMonitors}
         total={total}

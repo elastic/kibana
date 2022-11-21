@@ -43,7 +43,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "PublicMethodsOf",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
               "<",
               "CapabilitiesService",
               ">>"

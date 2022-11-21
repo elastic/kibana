@@ -8,7 +8,6 @@
 
 import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import { SerializedStyles } from '@emotion/serialize';
 import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 import { useIsWithinBreakpoints, useEuiTheme, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
@@ -37,7 +36,6 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
       !JSON.parse(String(localStorage.getItem(SOLUTION_NAV_COLLAPSED_KEY)))
     );
-
     const { solutionNav, children, ...propagatedProps } = props;
     const { euiTheme } = useEuiTheme();
 
@@ -53,11 +51,11 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
     const withSolutionNavStyles = WithSolutionNavStyles(euiTheme);
     const sideBarClasses = classNames(
-      'kbnStickyMenu',
       {
         'kbnSolutionNav__sidebar--shrink': isSidebarShrunk,
       },
-      props.pageSideBarProps?.className
+      props.pageSideBarProps?.className,
+      withSolutionNavStyles
     );
 
     const pageSideBar = (
@@ -68,12 +66,11 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       />
     );
 
-    const pageSideBarProps: TemplateProps['pageSideBarProps'] & { css: SerializedStyles } = {
+    const pageSideBarProps: TemplateProps['pageSideBarProps'] = {
       paddingSize: 'none' as 'none',
       ...props.pageSideBarProps,
       minWidth: isSidebarShrunk ? euiTheme.size.xxl : undefined,
       className: sideBarClasses,
-      css: withSolutionNavStyles,
     };
 
     return (

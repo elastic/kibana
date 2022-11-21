@@ -36,8 +36,8 @@ import { policyHasFleetServer } from '../../../../services';
 import {
   useOutputOptions,
   useDownloadSourcesOptions,
-  DEFAULT_OUTPUT_VALUE,
-  DEFAULT_DOWNLOAD_SOURCE_VALUE,
+  DEFAULT_SELECT_VALUE,
+  useFleetServerHostsOptions,
 } from './hooks';
 
 interface Props {
@@ -64,6 +64,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   } = useOutputOptions(agentPolicy);
   const { dataDownloadSourceOptions, isLoading: isLoadingDownloadSources } =
     useDownloadSourcesOptions(agentPolicy);
+
+  const { fleetServerHostsOptions, isLoading: isLoadingFleetServerHostsOption } =
+    useFleetServerHostsOptions(agentPolicy);
 
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();
@@ -296,6 +299,45 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         title={
           <h4>
             <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.fleetServerHostsLabel"
+              defaultMessage="Fleet Server"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.fleetServerHostsDescripton"
+            defaultMessage="Select to which Fleet Server the agents in this policy will communicate."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.fleet_server_host_id && validation.fleet_server_host_id
+              ? validation.fleet_server_host_id
+              : null
+          }
+          isInvalid={Boolean(touchedFields.fleet_server_host_id && validation.fleet_server_host_id)}
+        >
+          <EuiSuperSelect
+            disabled={agentPolicy.is_managed === true}
+            valueOfSelected={agentPolicy.fleet_server_host_id || DEFAULT_SELECT_VALUE}
+            fullWidth
+            isLoading={isLoadingFleetServerHostsOption}
+            onChange={(e) => {
+              updateAgentPolicy({
+                fleet_server_host_id: e !== DEFAULT_SELECT_VALUE ? e : null,
+              });
+            }}
+            options={fleetServerHostsOptions}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
               id="xpack.fleet.agentPolicyForm.dataOutputLabel"
               defaultMessage="Output for integrations"
             />
@@ -319,12 +361,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         >
           <EuiSuperSelect
             disabled={agentPolicy.is_managed === true}
-            valueOfSelected={agentPolicy.data_output_id || DEFAULT_OUTPUT_VALUE}
+            valueOfSelected={agentPolicy.data_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
             onChange={(e) => {
               updateAgentPolicy({
-                data_output_id: e !== DEFAULT_OUTPUT_VALUE ? e : null,
+                data_output_id: e !== DEFAULT_SELECT_VALUE ? e : null,
               });
             }}
             options={dataOutputOptions}
@@ -358,12 +400,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         >
           <EuiSuperSelect
             disabled={agentPolicy.is_managed === true}
-            valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_OUTPUT_VALUE}
+            valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
             onChange={(e) => {
               updateAgentPolicy({
-                monitoring_output_id: e !== DEFAULT_OUTPUT_VALUE ? e : null,
+                monitoring_output_id: e !== DEFAULT_SELECT_VALUE ? e : null,
               });
             }}
             options={monitoringOutputOptions}
@@ -397,12 +439,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.download_source_id && validation.download_source_id)}
         >
           <EuiSuperSelect
-            valueOfSelected={agentPolicy.download_source_id || DEFAULT_DOWNLOAD_SOURCE_VALUE}
+            valueOfSelected={agentPolicy.download_source_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingDownloadSources}
             onChange={(e) => {
               updateAgentPolicy({
-                download_source_id: e !== DEFAULT_DOWNLOAD_SOURCE_VALUE ? e : null,
+                download_source_id: e !== DEFAULT_SELECT_VALUE ? e : null,
               });
             }}
             options={dataDownloadSourceOptions}

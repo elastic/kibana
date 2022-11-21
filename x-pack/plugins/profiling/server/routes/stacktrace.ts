@@ -36,6 +36,9 @@ import { ProjectTimeQuery } from './query';
 
 const BASE64_FRAME_ID_LENGTH = 32;
 
+const CACHE_MAX_ITEMS = 100000;
+const CACHE_TTL_MILLISECONDS = 1000 * 60 * 5;
+
 export type EncodedStackTrace = DedotObject<{
   // This field is a base64-encoded byte string. The string represents a
   // serialized list of frame IDs in which the order of frames are
@@ -270,7 +273,17 @@ export async function mgetStackTraces({
   return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
 }
 
-const frameLRU = new LRUCache<StackFrameID, StackFrame>({ max: 100000 });
+const frameLRU = new LRUCache<StackFrameID, StackFrame>({
+  max: CACHE_MAX_ITEMS,
+  maxAge: CACHE_TTL_MILLISECONDS,
+});
+
+// clearStackFrameCache clears the entire cache and returns the number of deleted items
+export function clearStackFrameCache(): number {
+  const numDeleted = frameLRU.length;
+  frameLRU.reset();
+  return numDeleted;
+}
 
 export async function mgetStackFrames({
   logger,
@@ -339,7 +352,17 @@ export async function mgetStackFrames({
   return stackFrames;
 }
 
-const executableLRU = new LRUCache<FileID, Executable>({ max: 100000 });
+const executableLRU = new LRUCache<FileID, Executable>({
+  max: CACHE_MAX_ITEMS,
+  maxAge: CACHE_TTL_MILLISECONDS,
+});
+
+// clearExecutableCache clears the entire cache and returns the number of deleted items
+export function clearExecutableCache(): number {
+  const numDeleted = executableLRU.length;
+  executableLRU.reset();
+  return numDeleted;
+}
 
 export async function mgetExecutables({
   logger,

@@ -16,8 +16,13 @@ import {
   ALERTS_HEADERS_THRESHOLD_TERMS,
   ALERTS_HEADERS_RULE_DESCRIPTION,
   ALERTS_HEADERS_NEW_TERMS,
+  ALERTS_HEADERS_NEW_TERMS_FIELDS,
 } from '../../../detections/components/alerts_table/translations';
-import { ALERT_NEW_TERMS, ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
+import {
+  ALERT_NEW_TERMS_FIELDS,
+  ALERT_NEW_TERMS,
+  ALERT_THRESHOLD_RESULT,
+} from '../../../../common/field_maps/field_names';
 import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import type { AlertSummaryRow } from './helpers';
 import { getEnrichedFieldInfo } from './helpers';
@@ -172,6 +177,10 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
       ];
     case 'new_terms':
       return [
+        {
+          id: ALERT_NEW_TERMS_FIELDS,
+          label: ALERTS_HEADERS_NEW_TERMS_FIELDS,
+        },
         {
           id: ALERT_NEW_TERMS,
           label: ALERTS_HEADERS_NEW_TERMS,

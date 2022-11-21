@@ -32,6 +32,7 @@ import {
   CoreStart,
 } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { generateId } from '../../../id_generator';
 import { FormBasedPrivateState } from '../types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -77,6 +78,16 @@ jest.mock('../operations/definitions/formula/editor/formula_editor', () => {
     FormulaEditor: () => <div />,
   };
 });
+
+jest.mock('@kbn/unified-field-list-plugin/public/hooks/use_existing_fields', () => ({
+  useExistingFieldsReader: jest.fn(() => {
+    return {
+      hasFieldData: (dataViewId: string, fieldName: string) => {
+        return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
+      },
+    };
+  }),
+}));
 
 const fields = [
   {
@@ -197,14 +208,6 @@ describe('FormBasedDimensionEditor', () => {
 
     defaultProps = {
       indexPatterns: expectedIndexPatterns,
-      existingFields: {
-        'my-fake-index-pattern': {
-          timestamp: true,
-          bytes: true,
-          memory: true,
-          source: true,
-        },
-      },
       state,
       setState,
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
@@ -339,16 +342,15 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should hide fields that have no data', () => {
-    const props = {
-      ...defaultProps,
-      existingFields: {
-        'my-fake-index-pattern': {
-          timestamp: true,
-          source: true,
+    (useExistingFieldsReader as jest.Mock).mockImplementationOnce(() => {
+      return {
+        hasFieldData: (dataViewId: string, fieldName: string) => {
+          return ['timestamp', 'source'].includes(fieldName);
         },
-      },
-    };
-    wrapper = mount(<FormBasedDimensionEditorComponent {...props} />);
+      };
+    });
+
+    wrapper = mount(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
     const options = wrapper
       .find(EuiComboBox)

@@ -47,4 +47,6 @@ export type AnalyticsNoDataPageKibanaDependencies = KibanaDependencies &
 export interface AnalyticsNoDataPageProps {
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
+  /** if set to true allows creation of an ad-hoc data view from data view editor */
+  allowAdHocDataView?: boolean;
 }

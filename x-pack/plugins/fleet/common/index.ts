@@ -65,6 +65,8 @@ export {
   INVALID_NAMESPACE_CHARACTERS,
   // TODO Should probably not be exposed by Fleet
   decodeCloudId,
+  getFileMetadataIndexName,
+  getFileDataIndexName,
 } from './services';
 
 export type { FleetAuthz } from './authz';

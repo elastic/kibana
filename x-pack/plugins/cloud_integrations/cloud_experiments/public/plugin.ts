@@ -82,8 +82,8 @@ export class CloudExperimentsPlugin
       this.metadataService.setup({
         userId: sha256(deps.cloud.cloudId),
         kibanaVersion: this.kibanaVersion,
-        trial_end_date: deps.cloud.trialEndDate?.toISOString(),
-        is_elastic_staff_owned: deps.cloud.isElasticStaffOwned,
+        trialEndDate: deps.cloud.trialEndDate?.toISOString(),
+        isElasticStaff: deps.cloud.isElasticStaffOwned,
       });
     }
   }
@@ -98,7 +98,7 @@ export class CloudExperimentsPlugin
   ): CloudExperimentsPluginStart {
     if (cloud.isCloudEnabled) {
       this.metadataService.start({
-        hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasUserDataView() }),
+        hasDataFetcher: async () => ({ hasData: await dataViews.hasData.hasUserDataView() }),
       });
 
       // We only subscribe to the user metadata updates if Cloud is enabled.

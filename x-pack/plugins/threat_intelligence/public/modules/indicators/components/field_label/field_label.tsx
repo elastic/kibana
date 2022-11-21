@@ -7,7 +7,7 @@
 
 import React, { VFC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { RawIndicatorFieldId } from '../../types';
+import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 
 interface IndicatorFieldLabelProps {
   field: string;

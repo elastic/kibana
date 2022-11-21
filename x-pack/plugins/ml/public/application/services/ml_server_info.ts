@@ -11,6 +11,7 @@ import { MlServerDefaults, MlServerLimits } from '../../../common/types/ml_serve
 export interface CloudInfo {
   cloudId: string | null;
   isCloud: boolean;
+  isCloudTrial: boolean;
   deploymentId: string | null;
 }
 
@@ -23,6 +24,7 @@ let limits: MlServerLimits = {};
 const cloudInfo: CloudInfo = {
   cloudId: null,
   isCloud: false,
+  isCloudTrial: false,
   deploymentId: null,
 };
 
@@ -31,9 +33,11 @@ export async function loadMlServerInfo() {
     const resp = await ml.mlInfo();
     defaults = resp.defaults;
     limits = resp.limits;
-    cloudInfo.cloudId = resp.cloudId || null;
+    cloudInfo.cloudId = resp.cloudId ?? null;
     cloudInfo.isCloud = resp.cloudId !== undefined;
+    cloudInfo.isCloudTrial = resp.isCloudTrial === true;
     cloudInfo.deploymentId = !resp.cloudId ? null : extractDeploymentId(resp.cloudId);
+
     return { defaults, limits, cloudId: cloudInfo };
   } catch (error) {
     return { defaults, limits, cloudId: cloudInfo };
@@ -54,6 +58,10 @@ export function getCloudId(): string | null {
 
 export function isCloud(): boolean {
   return cloudInfo.isCloud;
+}
+
+export function isCloudTrial(): boolean {
+  return cloudInfo.isCloudTrial;
 }
 
 export function getCloudDeploymentId(): string | null {

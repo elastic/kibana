@@ -1,6 +1,3 @@
-@import '@elastic/eui/src/components/call_out/variables';
-@import '@elastic/eui/src/components/call_out/mixins';
-
 .upgStepProgress__step {
   display: flex;
   align-items: center;
@@ -15,10 +12,10 @@
 }
 
 $stepStatusToCallOutColor: (
-  failed: 'danger',
-  complete: 'success',
-  paused: 'warning',
-  cancelled: 'warning',
+  failed: $euiColorDanger,
+  complete: $euiColorSuccess,
+  paused: $euiColorWarning,
+  cancelled: $euiColorWarning,
 );
 
 .upgStepProgress__status--circle {
@@ -28,8 +25,9 @@ $stepStatusToCallOutColor: (
 
   @each $status, $callOutColor in $stepStatusToCallOutColor {
     &-#{$status} {
-      color: euiCallOutColor($callOutColor, 'foreground');
-      background-color: euiCallOutColor($callOutColor, 'background');
+      $statusBg: tintOrShade($callOutColor, 90%, 70%);
+      color: shadeOrTint(makeHighContrastColor($callOutColor, $statusBg), 0, 20%);
+      background-color: $statusBg;
     }
   }
 }

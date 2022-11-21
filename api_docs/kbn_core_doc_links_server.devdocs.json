@@ -59,7 +59,13 @@
               "A record of all registered doc links"
             ],
             "signature": [
-              "DocLinks"
+              {
+                "pluginId": "@kbn/doc-links",
+                "scope": "common",
+                "docId": "kibKbnDocLinksPluginApi",
+                "section": "def-common.DocLinks",
+                "text": "DocLinks"
+              }
             ],
             "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
             "deprecated": false,

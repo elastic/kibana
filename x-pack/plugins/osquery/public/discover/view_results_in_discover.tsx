@@ -32,7 +32,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover;
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
@@ -125,7 +125,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
         aria-label={VIEW_IN_DISCOVER}
         href={discoverUrl}
         target="_blank"
-        isDisabled={!actionId}
+        isDisabled={!actionId || !discoverUrl.length}
       />
     </EuiToolTip>
   );

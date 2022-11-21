@@ -9,6 +9,7 @@ import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 
 const statusFilters: RuleAlertingOutcome[] = ['success', 'failure', 'warning', 'unknown'];
@@ -20,6 +21,8 @@ interface RuleEventLogListStatusFilterProps {
 
 export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilterProps) => {
   const { selectedOptions = [], onChange = () => {} } = props;
+
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -68,7 +71,10 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
                 onClick={onFilterItemClick(status)}
                 checked={selectedOptions.includes(status) ? 'on' : undefined}
               >
-                <RuleEventLogListStatus status={status} />
+                <RuleEventLogListStatus
+                  status={status}
+                  useExecutionStatus={isRuleUsingExecutionStatus}
+                />
               </EuiFilterSelectItem>
             );
           })}

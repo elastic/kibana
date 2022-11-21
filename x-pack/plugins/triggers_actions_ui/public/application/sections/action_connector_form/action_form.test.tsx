@@ -55,6 +55,7 @@ describe('action_form', () => {
     },
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
+    actionTypeTitle: 'action-type-title',
   };
 
   const disabledByConfigActionType = {
@@ -415,6 +416,11 @@ describe('action_form', () => {
           },
         ]
       `);
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
     });
 
     it('renders disabled action groups for selected action type', async () => {
@@ -449,6 +455,10 @@ describe('action_form', () => {
           },
         ]
       `);
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
     });
 
     it('renders disabled action groups for custom recovered action groups', async () => {
@@ -486,6 +496,10 @@ describe('action_form', () => {
           },
         ]
       `);
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
     });
 
     it('renders available connectors for the selected action type', async () => {
@@ -528,6 +542,10 @@ describe('action_form', () => {
           },
         ]
       `);
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
     });
 
     it('renders only preconfigured connectors for the selected preconfigured action type', async () => {
@@ -551,6 +569,10 @@ describe('action_form', () => {
           },
         ]
       `);
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
     });
 
     it('does not render "Add connector" button for preconfigured only action type', async () => {
@@ -564,6 +586,10 @@ describe('action_form', () => {
         '[data-test-subj="addNewActionConnectorButton-preconfigured"]'
       );
       expect(addNewConnectorButton.exists()).toBeFalsy();
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
     });
 
     it('renders action types disabled by license', async () => {

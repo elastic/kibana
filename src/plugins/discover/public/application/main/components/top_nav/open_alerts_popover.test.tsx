@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
@@ -16,6 +16,8 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 
+const Context = ({ children }: { children: ReactNode }) => <>{children}</>;
+
 const mount = (dataView = dataViewMock) =>
   mountWithIntl(
     <KibanaContextProvider services={discoverServiceMock}>
@@ -23,7 +25,11 @@ const mount = (dataView = dataViewMock) =>
         searchSource={createSearchSourceMock({ index: dataView })}
         anchorElement={document.createElement('div')}
         savedQueryId={undefined}
-        onClose={() => {}}
+        adHocDataViews={[]}
+        services={discoverServiceMock}
+        updateDataViewList={jest.fn()}
+        onClose={jest.fn()}
+        I18nContext={Context}
       />
     </KibanaContextProvider>
   );

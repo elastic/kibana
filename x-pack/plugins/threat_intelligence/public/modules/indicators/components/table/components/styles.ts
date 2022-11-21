@@ -13,7 +13,16 @@ export const useStyles = () => {
     'word-break': 'break-word',
   };
 
+  const tableCell: CSSObject = {
+    overflow: 'hidden',
+    'text-overflow': 'ellipsis',
+    'overflow-wrap': 'initial',
+    'word-wrap': 'initial',
+    'word-break': 'initial',
+  };
+
   return {
     popoverMaxWidth,
+    tableCell,
   };
 };

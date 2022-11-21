@@ -68,8 +68,10 @@ exports[`Table render conflict summary modal  1`] = `
   </EuiModalBody>
   <EuiModalFooter>
     <EuiButton
+      color="primary"
       fill={true}
       onClick={[Function]}
+      size="m"
     >
       <FormattedMessage
         defaultMessage="Close"

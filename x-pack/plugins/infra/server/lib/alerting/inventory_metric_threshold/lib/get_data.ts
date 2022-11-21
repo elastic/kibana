@@ -18,13 +18,15 @@ import {
 import { LogQueryFields } from '../../../metrics/types';
 import { InfraSource } from '../../../sources';
 import { createRequest } from './create_request';
+import {
+  AdditionalContext,
+  doFieldsExist,
+  KUBERNETES_POD_UID,
+  termsAggField,
+} from '../../common/utils';
 
 interface BucketKey {
   node: string;
-}
-
-interface AdditionalContext {
-  [x: string]: any;
 }
 
 type Response = Record<
@@ -43,8 +45,20 @@ interface Bucket {
   doc_count: number;
   shouldWarn: { value: number };
   shouldTrigger: { value: number };
+  containerContext?: ContainerContext;
   additionalContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
 }
+
+interface ContainerContext {
+  buckets: ContainerBucket[];
+}
+
+interface ContainerBucket {
+  key: BucketKey;
+  doc_count: number;
+  container: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
+}
+
 type NodeBucket = Bucket & Metric;
 interface ResponseAggregations {
   nodes: {
@@ -52,6 +66,19 @@ interface ResponseAggregations {
     buckets: NodeBucket[];
   };
 }
+
+const createContainerList = (containerContext: ContainerContext) => {
+  const containerList = [];
+  for (const containerBucket of containerContext.buckets) {
+    const containerHits = containerBucket.container.hits?.hits;
+    const containerSource =
+      containerHits && containerHits.length > 0 ? containerHits[0]._source : null;
+    if (containerSource && containerSource.container) {
+      containerList.push(containerSource.container);
+    }
+  }
+  return containerList;
+};
 
 export const getData = async (
   esClient: ElasticsearchClient,
@@ -73,6 +100,11 @@ export const getData = async (
     const nextAfterKey = nodes.after_key;
     for (const bucket of nodes.buckets) {
       const metricId = customMetric && customMetric.field ? customMetric.id : metric;
+
+      const containerList = bucket.containerContext
+        ? createContainerList(bucket.containerContext)
+        : undefined;
+
       const bucketHits = bucket.additionalContext?.hits?.hits;
       const additionalContextSource =
         bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
@@ -81,6 +113,7 @@ export const getData = async (
         value: bucket?.[metricId]?.value ?? null,
         warn: bucket?.shouldWarn.value > 0 ?? false,
         trigger: bucket?.shouldTrigger.value > 0 ?? false,
+        container: containerList,
         ...additionalContextSource,
       };
     }
@@ -108,6 +141,12 @@ export const getData = async (
     metric === 'logRate' && logQueryFields
       ? logQueryFields.indexPattern
       : source.configuration.metricAlias;
+
+  const fieldsExisted =
+    nodeType === 'pod'
+      ? await doFieldsExist(esClient, [termsAggField[KUBERNETES_POD_UID]], index)
+      : null;
+
   const request = createRequest(
     index,
     nodeType,
@@ -117,7 +156,8 @@ export const getData = async (
     afterKey,
     condition,
     filterQuery,
-    customMetric
+    customMetric,
+    fieldsExisted
   );
   logger.trace(`Request: ${JSON.stringify(request)}`);
   const body = await esClient.search<undefined, ResponseAggregations>(request);

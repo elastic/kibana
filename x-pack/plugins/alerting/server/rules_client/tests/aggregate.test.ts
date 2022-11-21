@@ -90,6 +90,13 @@ describe('aggregate()', () => {
             { key: 'warning', doc_count: 1 },
           ],
         },
+        outcome: {
+          buckets: [
+            { key: 'succeeded', doc_count: 2 },
+            { key: 'failed', doc_count: 4 },
+            { key: 'warning', doc_count: 6 },
+          ],
+        },
         enabled: {
           buckets: [
             { key: 0, key_as_string: '0', doc_count: 2 },
@@ -165,6 +172,11 @@ describe('aggregate()', () => {
           "disabled": 2,
           "enabled": 28,
         },
+        "ruleLastRunOutcome": Object {
+          "failed": 4,
+          "succeeded": 2,
+          "warning": 6,
+        },
         "ruleMutedStatus": Object {
           "muted": 3,
           "unmuted": 27,
@@ -191,6 +203,9 @@ describe('aggregate()', () => {
           status: {
             terms: { field: 'alert.attributes.executionStatus.status' },
           },
+          outcome: {
+            terms: { field: 'alert.attributes.lastRun.outcome' },
+          },
           enabled: {
             terms: { field: 'alert.attributes.enabled' },
           },
@@ -212,7 +227,7 @@ describe('aggregate()', () => {
             },
           },
           tags: {
-            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
           },
         },
       },
@@ -246,6 +261,9 @@ describe('aggregate()', () => {
           status: {
             terms: { field: 'alert.attributes.executionStatus.status' },
           },
+          outcome: {
+            terms: { field: 'alert.attributes.lastRun.outcome' },
+          },
           enabled: {
             terms: { field: 'alert.attributes.enabled' },
           },
@@ -267,7 +285,7 @@ describe('aggregate()', () => {
             },
           },
           tags: {
-            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
           },
         },
       },

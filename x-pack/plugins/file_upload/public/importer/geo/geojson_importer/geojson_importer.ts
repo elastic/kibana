@@ -7,7 +7,6 @@
 
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error
 import { JSONLoader, loadInBatches } from '../loaders';
 import type { ImportFailure } from '../../../../common/types';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
@@ -36,12 +35,13 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
     };
 
     if (this._iterator === undefined) {
-      this._iterator = await loadInBatches(this._getFile(), JSONLoader, {
+      // TODO: loadInBatches returns an AsyncIterable, not an AsyncInterator, which doesn't necessarily have a .next() function
+      this._iterator = (await loadInBatches(this._getFile(), JSONLoader, {
         json: {
           jsonpaths: ['$.features'],
           _rootObjectBatches: true,
         },
-      });
+      })) as any;
     }
 
     if (!this._getIsActive() || !this._iterator) {

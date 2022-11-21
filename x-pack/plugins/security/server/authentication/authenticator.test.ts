@@ -24,6 +24,7 @@ import type { SecurityLicenseFeatures } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+  SESSION_ERROR_REASON_HEADER,
 } from '../../common/constants';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
@@ -33,7 +34,13 @@ import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
-import type { SessionValue } from '../session_management';
+import {
+  type SessionError,
+  SessionExpiredError,
+  SessionMissingError,
+  SessionUnexpectedError,
+  type SessionValue,
+} from '../session_management';
 import { sessionMock } from '../session_management/index.mock';
 import type { UserProfileGrant } from '../user_profile';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
@@ -41,7 +48,11 @@ import { AuthenticationResult } from './authentication_result';
 import type { AuthenticatorOptions } from './authenticator';
 import { Authenticator, enrichWithUserProfileId } from './authenticator';
 import { DeauthenticationResult } from './deauthentication_result';
-import type { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
+import type {
+  BasicAuthenticationProvider,
+  HTTPAuthenticationProvider,
+  SAMLAuthenticationProvider,
+} from './providers';
 
 let auditLogger: AuditLogger;
 function getMockOptions({
@@ -107,8 +118,16 @@ function expectAuditEvents(...events: ExpectedAuditEvent[]) {
 }
 
 describe('Authenticator', () => {
+  let mockHTTPAuthenticationProvider: jest.Mocked<PublicMethodsOf<HTTPAuthenticationProvider>>;
   let mockBasicAuthenticationProvider: jest.Mocked<PublicMethodsOf<BasicAuthenticationProvider>>;
   beforeEach(() => {
+    mockHTTPAuthenticationProvider = {
+      login: jest.fn(),
+      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
+      logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
+      getHTTPAuthenticationScheme: jest.fn(),
+    };
+
     mockBasicAuthenticationProvider = {
       login: jest.fn(),
       authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
@@ -118,8 +137,7 @@ describe('Authenticator', () => {
 
     jest.requireMock('./providers/http').HTTPAuthenticationProvider.mockImplementation(() => ({
       type: 'http',
-      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
-      logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
+      ...mockHTTPAuthenticationProvider,
     }));
 
     jest.requireMock('./providers/basic').BasicAuthenticationProvider.mockImplementation(() => ({
@@ -305,7 +323,6 @@ describe('Authenticator', () => {
 
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
-      mockOptions.session.get.mockResolvedValue(null);
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
@@ -592,7 +609,6 @@ describe('Authenticator', () => {
             },
           },
         });
-        mockOptions.session.get.mockResolvedValue(null);
 
         authenticator = new Authenticator(mockOptions);
       });
@@ -684,8 +700,11 @@ describe('Authenticator', () => {
         const request = httpServerMock.createKibanaRequest();
 
         mockOptions.session.get.mockResolvedValue({
-          ...mockSessVal,
-          provider: { type: 'saml', name: 'saml2' },
+          error: null,
+          value: {
+            ...mockSessVal,
+            provider: { type: 'saml', name: 'saml2' },
+          },
         });
 
         const loginAttemptValue = Symbol('attempt');
@@ -733,7 +752,7 @@ describe('Authenticator', () => {
       authenticator = new Authenticator(mockOptions);
 
       mockBasicAuthenticationProvider.login.mockResolvedValue(AuthenticationResult.succeeded(user));
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(
         authenticator.login(request, { provider: { name: 'basic1' }, value: credentials })
@@ -752,7 +771,7 @@ describe('Authenticator', () => {
     it('clears session if provider asked to do so in `succeeded` result.', async () => {
       const user = mockAuthenticatedUser();
       const request = httpServerMock.createKibanaRequest();
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       mockBasicAuthenticationProvider.login.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: null })
@@ -772,7 +791,7 @@ describe('Authenticator', () => {
 
     it('clears session if provider asked to do so in `redirected` result.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       mockBasicAuthenticationProvider.login.mockResolvedValue(
         AuthenticationResult.redirectTo('some-url', { state: null })
@@ -815,7 +834,6 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if authenticated session is not created', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(null);
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser)
@@ -829,7 +847,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if request cannot be handled', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(AuthenticationResult.notHandled());
 
@@ -841,7 +859,6 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if authentication fails', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(null);
 
         const failureReason = new Error('something went wrong');
         mockBasicAuthenticationProvider.login.mockResolvedValue(
@@ -856,7 +873,6 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if redirect is required to complete login', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(null);
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.redirectTo('/some-url', { state: 'some-state' })
@@ -871,8 +887,11 @@ describe('Authenticator', () => {
       it('does not redirect to Access Agreement if user has already acknowledged it', async () => {
         const request = httpServerMock.createKibanaRequest();
         mockOptions.session.get.mockResolvedValue({
-          ...mockSessVal,
-          accessAgreementAcknowledged: true,
+          error: null,
+          value: {
+            ...mockSessVal,
+            accessAgreementAcknowledged: true,
+          },
         });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
@@ -887,7 +906,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement its own requests', async () => {
         const request = httpServerMock.createKibanaRequest({ path: '/security/access_agreement' });
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, { state: 'some-state' })
@@ -901,7 +920,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if it is not configured', async () => {
         mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
         authenticator = new Authenticator(mockOptions);
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
@@ -917,7 +936,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if license doesnt allow it.', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
         mockOptions.license.getFeatures.mockReturnValue({
           allowAccessAgreement: false,
         } as SecurityLicenseFeatures);
@@ -933,7 +952,7 @@ describe('Authenticator', () => {
       });
 
       it('redirects to Access Agreement when needed.', async () => {
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, {
@@ -959,7 +978,7 @@ describe('Authenticator', () => {
       });
 
       it('redirects to Access Agreement preserving redirect URL specified in login attempt.', async () => {
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, {
@@ -989,7 +1008,7 @@ describe('Authenticator', () => {
       });
 
       it('redirects to Access Agreement preserving redirect URL specified in the authentication result.', async () => {
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.redirectTo('/some-url', {
@@ -1016,7 +1035,7 @@ describe('Authenticator', () => {
       });
 
       it('redirects AJAX requests to Access Agreement when needed.', async () => {
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, {
@@ -1051,7 +1070,6 @@ describe('Authenticator', () => {
             saml: { saml1: { order: 1, realm: 'saml1' } },
           },
         });
-        mockOptions.session.get.mockResolvedValue(null);
         mockOptions.session.update.mockImplementation(async (request, value) => value);
         mockOptions.session.extend.mockImplementation(async (request, value) => value);
         mockOptions.session.create.mockImplementation(async (request, value) => ({
@@ -1066,7 +1084,10 @@ describe('Authenticator', () => {
         const request = httpServerMock.createKibanaRequest({
           path: '/security/overwritten_session',
         });
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: 'old-username' });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: 'old-username' },
+        });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, { state: 'some-state' })
@@ -1083,7 +1104,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Overwritten Session if username and provider did not change', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, {
@@ -1105,7 +1126,10 @@ describe('Authenticator', () => {
 
       it('does not redirect to Overwritten Session if session was unauthenticated before login', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: undefined });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: undefined },
+        });
 
         const newMockUser = mockAuthenticatedUser({ username: 'new-username' });
         mockBasicAuthenticationProvider.login.mockResolvedValue(
@@ -1131,7 +1155,10 @@ describe('Authenticator', () => {
 
       it('redirects to Overwritten Session when username changes', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: 'old-username' });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: 'old-username' },
+        });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, {
@@ -1161,8 +1188,11 @@ describe('Authenticator', () => {
       it('redirects to Overwritten Session when provider changes', async () => {
         const request = httpServerMock.createKibanaRequest();
         mockOptions.session.get.mockResolvedValue({
-          ...mockSessVal,
-          provider: { type: 'saml', name: 'saml1' },
+          error: null,
+          value: {
+            ...mockSessVal,
+            provider: { type: 'saml', name: 'saml1' },
+          },
         });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
@@ -1192,7 +1222,10 @@ describe('Authenticator', () => {
 
       it('redirects to Overwritten Session preserving redirect URL specified in login attempt.', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: 'old-username' });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: 'old-username' },
+        });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, {
@@ -1225,7 +1258,10 @@ describe('Authenticator', () => {
 
       it('redirects to Overwritten Session preserving redirect URL specified in the authentication result.', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: 'old-username' });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: 'old-username' },
+        });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.redirectTo('/some-url', {
@@ -1255,7 +1291,10 @@ describe('Authenticator', () => {
 
       it('redirects AJAX requests to Overwritten Session when needed.', async () => {
         const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: 'old-username' });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: 'old-username' },
+        });
 
         mockBasicAuthenticationProvider.login.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, {
@@ -1291,7 +1330,6 @@ describe('Authenticator', () => {
 
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
-      mockOptions.session.get.mockResolvedValue(null);
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
@@ -1317,6 +1355,136 @@ describe('Authenticator', () => {
       expect(authenticationResult.error).toBe(failureReason);
       expectAuditEvents({ action: 'user_login', outcome: 'failure' });
     });
+
+    for (const FailureClass of [SessionMissingError, SessionExpiredError, SessionUnexpectedError]) {
+      describe(`session.get results in ${FailureClass.name}`, () => {
+        it('fails as expected for redirectable requests', async () => {
+          const request = httpServerMock.createKibanaRequest();
+          const failureReason = new FailureClass();
+
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+
+          await expect(authenticator.authenticate(request)).resolves.toEqual(
+            failureReason instanceof SessionMissingError
+              ? AuthenticationResult.notHandled()
+              : AuthenticationResult.failed(failureReason)
+          );
+          // TODO: Add check for expected audit log
+          // expect(auditLogger.log).not.toHaveBeenCalled();
+        });
+
+        it('fails as expected for non-redirectable requests', async () => {
+          const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+          const failureReason = new FailureClass();
+
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+
+          await expect(authenticator.authenticate(request)).resolves.toEqual(
+            failureReason instanceof SessionMissingError
+              ? AuthenticationResult.notHandled()
+              : AuthenticationResult.failed(failureReason, {
+                  authResponseHeaders: {
+                    [SESSION_ERROR_REASON_HEADER]: (failureReason as SessionError).code,
+                  },
+                })
+          );
+          // TODO: Add check for expected audit log
+          // expect(auditLogger.log).not.toHaveBeenCalled();
+        });
+
+        it('should get expected reponse headers for non-redirectable requests where the authentication succeeds', async () => {
+          const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+          const failureReason = new FailureClass();
+
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+
+          const user = mockAuthenticatedUser();
+          mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+            AuthenticationResult.succeeded(user)
+          );
+
+          const authenticationResult = await authenticator.authenticate(request);
+          const expectedResult =
+            failureReason instanceof SessionExpiredError
+              ? AuthenticationResult.succeeded(user, {
+                  authResponseHeaders: {
+                    [SESSION_ERROR_REASON_HEADER]: (failureReason as SessionError).code,
+                  },
+                })
+              : AuthenticationResult.succeeded(user);
+          expect(authenticationResult).toEqual(expectedResult);
+          // TODO: Add check for expected audit log
+          // expect(auditLogger.log).not.toHaveBeenCalled();
+        });
+
+        it('should get expected reponse headers for non-redirectable requests where the authentication fails', async () => {
+          const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+          const failureReason = new FailureClass();
+
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+
+          const authError = new Error('foo');
+          mockHTTPAuthenticationProvider.authenticate.mockResolvedValue(
+            AuthenticationResult.failed(authError)
+          );
+
+          const authenticationResult = await authenticator.authenticate(request);
+          const expectedResult =
+            failureReason instanceof SessionExpiredError
+              ? AuthenticationResult.failed(authError, {
+                  authResponseHeaders: {
+                    [SESSION_ERROR_REASON_HEADER]: (failureReason as SessionError).code,
+                  },
+                })
+              : AuthenticationResult.failed(authError);
+          expect(authenticationResult).toEqual(expectedResult);
+          // TODO: Add check for expected audit log
+          // expectAuditEvents({ action: 'user_login', outcome: 'failure' });
+        });
+
+        it('expected message is attached to the URL when authentication provider redirects to login page', async () => {
+          const request = httpServerMock.createKibanaRequest();
+          const redirectUrl = '/mock-server-basepath/login?foo=bar';
+          const failureReason = new FailureClass();
+
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+
+          mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+            AuthenticationResult.redirectTo(redirectUrl)
+          );
+
+          const authenticationResult = await authenticator.authenticate(request);
+          expect(authenticationResult.redirected()).toBe(true);
+          if (failureReason instanceof SessionExpiredError) {
+            expect(authenticationResult.redirectURL).toBe(
+              redirectUrl + '&msg=' + failureReason.code
+            );
+          } else {
+            expect(authenticationResult.redirectURL).toBe(redirectUrl);
+          }
+          // TODO: Add check for expected audit log
+          // expect(auditLogger.log).not.toHaveBeenCalled();
+        });
+
+        it('should not get a message attached to the redirect URL when authentication provider redirects to something that is not the login page', async () => {
+          const request = httpServerMock.createKibanaRequest();
+          const redirectUrl = '/mock-server-basepath/some-other-page?foo=bar';
+          const failureReason = new FailureClass();
+
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+
+          mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+            AuthenticationResult.redirectTo(redirectUrl)
+          );
+
+          const authenticationResult = await authenticator.authenticate(request);
+          expect(authenticationResult.redirected()).toBe(true);
+          expect(authenticationResult.redirectURL).toBe(redirectUrl);
+          // TODO: Add check for expected audit log
+          // expect(auditLogger.log).not.toHaveBeenCalled();
+        });
+      });
+    }
 
     it('returns user that authentication provider returns.', async () => {
       const request = httpServerMock.createKibanaRequest({
@@ -1425,7 +1593,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user)
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(user)
@@ -1447,7 +1615,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user)
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(user)
@@ -1470,7 +1638,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.failed(failureReason)
@@ -1492,7 +1660,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.failed(failureReason)
@@ -1515,7 +1683,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: newState })
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(user, { state: newState })
@@ -1543,7 +1711,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: newState })
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(user, { state: newState })
@@ -1580,7 +1748,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { userProfileGrant, state: newState })
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(user, { userProfileGrant, state: newState })
@@ -1611,7 +1779,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.failed(failureReason)
@@ -1636,7 +1804,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.failed(failureReason)
@@ -1656,7 +1824,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.redirectTo('some-url', { state: null })
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.redirectTo('some-url', { state: null })
@@ -1675,7 +1843,7 @@ describe('Authenticator', () => {
         headers: { 'kbn-system-request': 'true' },
       });
 
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.notHandled()
@@ -1693,7 +1861,7 @@ describe('Authenticator', () => {
         headers: { 'kbn-system-request': 'false' },
       });
 
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.notHandled()
@@ -1718,7 +1886,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Login Selector if there is an active session', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.notHandled()
@@ -1770,7 +1938,10 @@ describe('Authenticator', () => {
         );
 
         // Unauthenticated session should be treated as non-existent one.
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: undefined });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: undefined },
+        });
         await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.redirectTo(
             '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath'
@@ -1793,7 +1964,10 @@ describe('Authenticator', () => {
         );
 
         // Includes hint if session is unauthenticated.
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: undefined });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: undefined },
+        });
         await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.redirectTo(
             '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath%3Fauth_provider_hint%3Dcustom1&auth_provider_hint=custom1'
@@ -1826,7 +2000,6 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if there is no active session', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(null);
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser)
@@ -1836,7 +2009,7 @@ describe('Authenticator', () => {
 
       it('does not redirect AJAX requests to Access Agreement', async () => {
         const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser)
@@ -1846,7 +2019,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if request cannot be handled', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
           AuthenticationResult.notHandled()
@@ -1860,7 +2033,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if authentication fails', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         const failureReason = new Error('something went wrong');
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
@@ -1875,7 +2048,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if redirect is required to complete authentication', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
           AuthenticationResult.redirectTo('/some-url')
@@ -1890,8 +2063,11 @@ describe('Authenticator', () => {
       it('does not redirect to Access Agreement if user has already acknowledged it', async () => {
         const request = httpServerMock.createKibanaRequest();
         mockOptions.session.get.mockResolvedValue({
-          ...mockSessVal,
-          accessAgreementAcknowledged: true,
+          error: null,
+          value: {
+            ...mockSessVal,
+            accessAgreementAcknowledged: true,
+          },
         });
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
@@ -1902,7 +2078,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement its own requests', async () => {
         const request = httpServerMock.createKibanaRequest({ path: '/security/access_agreement' });
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser)
@@ -1912,7 +2088,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if it is not configured', async () => {
         mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
         authenticator = new Authenticator(mockOptions);
 
         const request = httpServerMock.createKibanaRequest();
@@ -1924,7 +2100,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if license doesnt allow it.', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
         mockOptions.license.getFeatures.mockReturnValue({
           allowAccessAgreement: false,
         } as SecurityLicenseFeatures);
@@ -1936,7 +2112,7 @@ describe('Authenticator', () => {
       });
 
       it('redirects to Access Agreement when needed.', async () => {
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
         mockOptions.session.extend.mockResolvedValue(mockSessVal);
 
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
@@ -1969,7 +2145,7 @@ describe('Authenticator', () => {
 
         authenticator = new Authenticator(mockOptions);
 
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
         mockOptions.session.extend.mockResolvedValue(mockSessVal);
 
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
@@ -2012,7 +2188,10 @@ describe('Authenticator', () => {
         const request = httpServerMock.createKibanaRequest({
           path: '/security/overwritten_session',
         });
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: 'old-username' });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: 'old-username' },
+        });
 
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser)
@@ -2029,7 +2208,10 @@ describe('Authenticator', () => {
 
       it('does not redirect AJAX requests to Overwritten Session', async () => {
         const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: 'old-username' });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: 'old-username' },
+        });
 
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, {
@@ -2052,7 +2234,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Overwritten Session if username and provider did not change', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, {
@@ -2072,7 +2254,10 @@ describe('Authenticator', () => {
 
       it('redirects to Overwritten Session when username changes', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: 'old-username' });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: 'old-username' },
+        });
 
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser, {
@@ -2100,8 +2285,11 @@ describe('Authenticator', () => {
       it('redirects to Overwritten Session when provider changes', async () => {
         const request = httpServerMock.createKibanaRequest();
         mockOptions.session.get.mockResolvedValue({
-          ...mockSessVal,
-          provider: { type: 'saml', name: 'saml1' },
+          error: null,
+          value: {
+            ...mockSessVal,
+            provider: { type: 'saml', name: 'saml1' },
+          },
         });
 
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
@@ -2129,7 +2317,10 @@ describe('Authenticator', () => {
 
       it('redirects to Overwritten Session preserving redirect URL specified in the authentication result.', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: 'old-username' });
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: 'old-username' },
+        });
 
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
           AuthenticationResult.redirectTo('/some-url', {
@@ -2164,7 +2355,6 @@ describe('Authenticator', () => {
 
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
-      mockOptions.session.get.mockResolvedValue(null);
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
@@ -2215,7 +2405,7 @@ describe('Authenticator', () => {
 
     it('does not clear session if provider cannot handle authentication', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.notHandled()
@@ -2244,7 +2434,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
         AuthenticationResult.failed(failureReason)
@@ -2264,7 +2454,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user)
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(user)
@@ -2286,7 +2476,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: newState })
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(user, { state: newState })
@@ -2312,7 +2502,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
         AuthenticationResult.failed(failureReason)
@@ -2348,7 +2538,6 @@ describe('Authenticator', () => {
 
     it('redirects to login form if session does not exist.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockOptions.session.get.mockResolvedValue(null);
       mockBasicAuthenticationProvider.logout.mockResolvedValue(DeauthenticationResult.notHandled());
 
       await expect(authenticator.logout(request)).resolves.toEqual(
@@ -2364,7 +2553,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.logout.mockResolvedValue(
         DeauthenticationResult.redirectTo('some-url')
       );
-      mockOptions.session.get.mockResolvedValue(mockSessVal);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.logout(request)).resolves.toEqual(
         DeauthenticationResult.redirectTo('some-url')
@@ -2379,7 +2568,6 @@ describe('Authenticator', () => {
       const request = httpServerMock.createKibanaRequest({
         query: { provider: 'basic1' },
       });
-      mockOptions.session.get.mockResolvedValue(null);
 
       mockBasicAuthenticationProvider.logout.mockResolvedValue(
         DeauthenticationResult.redirectTo('some-url')
@@ -2397,7 +2585,6 @@ describe('Authenticator', () => {
 
     it('if session does not exist and provider name is not available, returns whatever authentication provider returns.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockOptions.session.get.mockResolvedValue(null);
 
       mockBasicAuthenticationProvider.logout.mockResolvedValue(
         DeauthenticationResult.redirectTo('some-url')
@@ -2434,7 +2621,6 @@ describe('Authenticator', () => {
 
     it('redirects to login form if session does not exist and provider name is invalid', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { provider: 'foo' } });
-      mockOptions.session.get.mockResolvedValue(null);
 
       await expect(authenticator.logout(request)).resolves.toEqual(
         DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
@@ -2454,7 +2640,7 @@ describe('Authenticator', () => {
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
       mockSessionValue = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
-      mockOptions.session.get.mockResolvedValue(mockSessionValue);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessionValue });
       mockOptions.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
       mockOptions.license.getFeatures.mockReturnValue({
         allowAccessAgreement: true,
@@ -2478,7 +2664,7 @@ describe('Authenticator', () => {
     });
 
     it('fails if cannot retrieve user session', async () => {
-      mockOptions.session.get.mockResolvedValue(null);
+      mockOptions.session.get.mockResolvedValue({ error: new SessionMissingError(), value: null });
 
       await expect(
         authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest())

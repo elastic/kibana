@@ -60,6 +60,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs packages from direct upload', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     afterEach(async () => {
       if (server) {
         // remove the packages just in case it being installed will affect other tests

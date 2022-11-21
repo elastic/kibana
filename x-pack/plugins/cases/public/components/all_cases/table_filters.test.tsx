@@ -330,7 +330,10 @@ describe('CasesTableFilters ', () => {
           />
         </TestProviders>
       );
-      wrapper.find(`[data-test-subj="cases-table-add-case-filter-bar"]`).first().simulate('click');
+      wrapper
+        .find(`button[data-test-subj="cases-table-add-case-filter-bar"]`)
+        .first()
+        .simulate('click');
       wrapper.update();
       // NOTE: intentionally checking no arguments are passed
       expect(onCreateCasePressed).toHaveBeenCalledWith();

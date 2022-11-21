@@ -26,7 +26,7 @@ import {
 } from '@kbn/rule-data-utils';
 import moment from 'moment-timezone';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { RULE_DETAILS_PAGE_ID } from '../../../rule_details/types';
+import { RULE_DETAILS_PAGE_ID } from '../../../rule_details/constants';
 import { asDuration } from '../../../../../common/utils/formatters';
 import { translations, paths } from '../../../../config';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';

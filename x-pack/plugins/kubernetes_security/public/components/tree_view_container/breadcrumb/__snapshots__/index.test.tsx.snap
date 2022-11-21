@@ -13,10 +13,10 @@ Object {
           style="color: rgb(84, 179, 153);"
         />
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-EuiButtonEmpty"
             type="button"
           >
             <span
@@ -39,10 +39,10 @@ Object {
           style="color: rgb(96, 146, 192);"
         />
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-EuiButtonEmpty"
             type="button"
           >
             <span
@@ -65,10 +65,10 @@ Object {
           style="color: rgb(231, 102, 76);"
         />
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-EuiButtonEmpty"
             type="button"
           >
             <span
@@ -91,10 +91,10 @@ Object {
           style="color: rgb(170, 101, 86);"
         />
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-EuiButtonEmpty"
             type="button"
           >
             <span
@@ -120,10 +120,10 @@ Object {
         style="color: rgb(84, 179, 153);"
       />
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+          class="euiButtonEmpty emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -146,10 +146,10 @@ Object {
         style="color: rgb(96, 146, 192);"
       />
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+          class="euiButtonEmpty emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -172,10 +172,10 @@ Object {
         style="color: rgb(231, 102, 76);"
       />
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+          class="euiButtonEmpty emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -198,10 +198,10 @@ Object {
         style="color: rgb(170, 101, 86);"
       />
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+          class="euiButtonEmpty emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -284,10 +284,10 @@ Object {
           style="color: rgb(84, 179, 153);"
         />
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-EuiButtonEmpty"
             type="button"
           >
             <span
@@ -310,10 +310,10 @@ Object {
           style="color: rgb(145, 112, 184);"
         />
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-EuiButtonEmpty"
             type="button"
           >
             <span
@@ -336,10 +336,10 @@ Object {
           style="color: rgb(170, 101, 86);"
         />
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-EuiButtonEmpty"
             type="button"
           >
             <span
@@ -365,10 +365,10 @@ Object {
         style="color: rgb(84, 179, 153);"
       />
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+          class="euiButtonEmpty emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -391,10 +391,10 @@ Object {
         style="color: rgb(145, 112, 184);"
       />
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+          class="euiButtonEmpty emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -417,10 +417,10 @@ Object {
         style="color: rgb(170, 101, 86);"
       />
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+          class="euiButtonEmpty emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -503,10 +503,10 @@ Object {
           style="color: rgb(84, 179, 153);"
         />
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-EuiButtonEmpty"
             type="button"
           >
             <span
@@ -529,10 +529,10 @@ Object {
           style="color: rgb(96, 146, 192);"
         />
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-EuiButtonEmpty"
             type="button"
           >
             <span
@@ -555,10 +555,10 @@ Object {
           style="color: rgb(231, 102, 76);"
         />
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-EuiButtonEmpty"
             type="button"
           >
             <span
@@ -581,10 +581,10 @@ Object {
           style="color: rgb(170, 101, 86);"
         />
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            class="euiButtonEmpty emotion-EuiButtonEmpty"
             type="button"
           >
             <span
@@ -610,10 +610,10 @@ Object {
         style="color: rgb(84, 179, 153);"
       />
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+          class="euiButtonEmpty emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -636,10 +636,10 @@ Object {
         style="color: rgb(96, 146, 192);"
       />
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+          class="euiButtonEmpty emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -662,10 +662,10 @@ Object {
         style="color: rgb(231, 102, 76);"
       />
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+          class="euiButtonEmpty emotion-EuiButtonEmpty"
           type="button"
         >
           <span
@@ -688,10 +688,10 @@ Object {
         style="color: rgb(170, 101, 86);"
       />
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+          class="euiButtonEmpty emotion-EuiButtonEmpty"
           type="button"
         >
           <span

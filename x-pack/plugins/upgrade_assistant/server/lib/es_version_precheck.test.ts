@@ -9,7 +9,6 @@ import { SemVer } from 'semver';
 import { IScopedClusterClient, kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { MAJOR_VERSION } from '../../common/constants';
 import { getMockVersionInfo } from './__fixtures__/version';
 
 import {
@@ -96,7 +95,7 @@ describe('verifyAllMatchKibanaVersion', () => {
 
 describe('EsVersionPrecheck', () => {
   beforeEach(() => {
-    versionService.setup(MAJOR_VERSION);
+    versionService.setup('8.0.0');
   });
 
   it('returns a 403 when callCluster fails with a 403', async () => {

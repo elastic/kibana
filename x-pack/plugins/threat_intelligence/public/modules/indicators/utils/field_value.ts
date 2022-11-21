@@ -7,7 +7,7 @@
 
 import { EMPTY_VALUE } from '../../../common/constants';
 import { unwrapValue } from './unwrap_value';
-import { Indicator, RawIndicatorFieldId } from '../types';
+import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 
 /**
  * Retrieves a field/value pair from an Indicator

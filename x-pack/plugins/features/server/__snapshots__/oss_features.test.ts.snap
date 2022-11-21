@@ -166,6 +166,10 @@ Array [
     "subFeatures": undefined,
   },
   Object {
+    "id": "filesManagement",
+    "subFeatures": undefined,
+  },
+  Object {
     "id": "savedObjectsManagement",
     "subFeatures": undefined,
   },
@@ -447,6 +451,10 @@ Array [
   },
   Object {
     "id": "indexPatterns",
+    "subFeatures": undefined,
+  },
+  Object {
+    "id": "filesManagement",
     "subFeatures": undefined,
   },
   Object {
@@ -753,6 +761,57 @@ Array [
       "ui": Array [
         "show",
       ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a basic license returns the filesManagement feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:manageFiles",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "filesManagement",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [
+          "files",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:manageFiles",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "filesManagement",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "files",
+        ],
+      },
+      "ui": Array [],
     },
     "privilegeId": "read",
   },
@@ -1261,6 +1320,57 @@ Array [
       "ui": Array [
         "show",
       ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the filesManagement feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:manageFiles",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "filesManagement",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [
+          "files",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:manageFiles",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "filesManagement",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "files",
+        ],
+      },
+      "ui": Array [],
     },
     "privilegeId": "read",
   },

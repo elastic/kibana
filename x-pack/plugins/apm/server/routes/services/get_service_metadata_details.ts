@@ -59,6 +59,7 @@ export interface ServiceMetadataDetails {
     type?: string;
     functionNames?: string[];
     faasTriggerTypes?: string[];
+    hostArchitecture?: string;
   };
   cloud?: {
     provider?: string;
@@ -102,6 +103,7 @@ export async function getServiceMetadataDetails({
         ProcessorEvent.metric,
       ],
     },
+    sort: [{ '@timestamp': { order: 'desc' as const } }],
     body: {
       track_total_hits: 1,
       size: 1,
@@ -212,6 +214,7 @@ export async function getServiceMetadataDetails({
           faasTriggerTypes: response.aggregations?.faasTriggerTypes.buckets.map(
             (bucket) => bucket.key as string
           ),
+          hostArchitecture: host?.architecture,
         }
       : undefined;
 

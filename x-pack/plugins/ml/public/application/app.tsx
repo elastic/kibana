@@ -93,6 +93,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     cases: deps.cases,
     unifiedSearch: deps.unifiedSearch,
     licensing: deps.licensing,
+    lens: deps.lens,
     ...coreStart,
   };
 

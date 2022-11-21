@@ -26,12 +26,14 @@ export const wrapHitsFactory =
     mergeStrategy,
     spaceId,
     indicesToQuery,
+    alertTimestampOverride,
   }: {
     completeRule: CompleteRule<RuleParams>;
     ignoreFields: ConfigType['alertIgnoreFields'];
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
     indicesToQuery: string[];
+    alertTimestampOverride: Date | undefined;
   }) =>
   (
     events: Array<estypes.SearchHit<SignalSource>>,
@@ -56,7 +58,8 @@ export const wrapHitsFactory =
             ignoreFields,
             true,
             buildReasonMessage,
-            indicesToQuery
+            indicesToQuery,
+            alertTimestampOverride
           ),
           [ALERT_UUID]: id,
         },

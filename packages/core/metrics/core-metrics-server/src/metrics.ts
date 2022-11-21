@@ -52,30 +52,12 @@ export type ElasticsearchClientProtocol = 'none' | 'http' | 'https' | 'mixed';
  * @public
  */
 export interface ElasticsearchClientsMetrics {
-  /** The protocol (or protocols) that these Agents are using */
-  protocol: ElasticsearchClientProtocol;
-  /** Number of ES nodes that ES-js client is connecting to */
-  connectedNodes: number;
-  /** Number of nodes with active connections */
-  nodesWithActiveSockets: number;
-  /** Number of nodes with available connections (alive but idle).
-   * Note that a node can have both active and idle connections at the same time
-   */
-  nodesWithIdleSockets: number;
   /** Total number of active sockets (all nodes, all connections) */
   totalActiveSockets: number;
   /** Total number of available sockets (alive but idle, all nodes, all connections) */
   totalIdleSockets: number;
   /** Total number of queued requests (all nodes, all connections) */
   totalQueuedRequests: number;
-  /** Number of active connections of the node with most active connections */
-  mostActiveNodeSockets: number;
-  /** Average of active sockets per node (all connections) */
-  averageActiveSocketsPerNode: number;
-  /** Number of idle connections of the node with most idle connections */
-  mostIdleNodeSockets: number;
-  /** Average of available (idle) sockets per node (all connections) */
-  averageIdleSocketsPerNode: number;
 }
 
 /**

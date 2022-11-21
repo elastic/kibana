@@ -29,7 +29,7 @@ describe('Mappings editor: shape datatype', () => {
   let testBed: MappingsEditorTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

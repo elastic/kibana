@@ -8,7 +8,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import { NamespaceType } from '../common/default_namespace';
-import { ExceptionListType } from '../common/exception_list';
+import { ExceptionListType, ExceptionListTypeEnum } from '../common/exception_list';
 import { Page } from '../common/page';
 import { PerPage } from '../common/per_page';
 import { TotalOrUndefined } from '../common/total';
@@ -32,7 +32,7 @@ export interface ExceptionListFilter {
   name?: string | null;
   list_id?: string | null;
   created_by?: string | null;
-  type?: string | null;
+  types?: ExceptionListTypeEnum[] | null;
   tags?: string | null;
 }
 
@@ -44,6 +44,7 @@ export interface UseExceptionListsProps {
   notifications: NotificationsStart;
   initialPagination?: Pagination;
   hideLists?: readonly string[];
+  initialSort?: Sort;
 }
 
 export interface UseExceptionListProps {
@@ -56,6 +57,7 @@ export interface UseExceptionListProps {
   showEndpointListsOnly: boolean;
   matchFilters: boolean;
   onSuccess?: (arg: UseExceptionListItemsSuccess) => void;
+  sort?: Sort;
 }
 
 export interface FilterExceptionsOptions {
@@ -81,6 +83,10 @@ export interface ApiListExportProps {
   onSuccess: (blob: Blob) => void;
 }
 
+export interface Sort {
+  field: string;
+  order: string;
+}
 export interface Pagination {
   page: Page;
   perPage: PerPage;
@@ -168,6 +174,7 @@ export interface ApiCallFetchExceptionListsProps {
   http: HttpStart;
   namespaceTypes: string;
   pagination: Partial<Pagination>;
+  sort?: Sort;
   filters: string;
   signal: AbortSignal;
 }

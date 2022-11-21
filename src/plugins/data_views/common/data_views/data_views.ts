@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
@@ -823,7 +823,7 @@ export class DataViewsService {
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
 
-    const indexPattern = await this.create(spec, true, displayErrors);
+    const indexPattern = await this.createFromSpec(spec, true, displayErrors);
     indexPattern.matchedIndices = indices;
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
@@ -898,7 +898,7 @@ export class DataViewsService {
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    * @returns DataView
    */
-  async create(
+  private async createFromSpec(
     { id, name, title, ...restOfSpec }: DataViewSpec,
     skipFetchFields = false,
     displayErrors = true
@@ -913,7 +913,7 @@ export class DataViewsService {
       ...restOfSpec,
     };
 
-    const indexPattern = new DataView({
+    const dataView = new DataView({
       spec,
       fieldFormats: this.fieldFormats,
       shortDotsEnable,
@@ -921,12 +921,38 @@ export class DataViewsService {
     });
 
     if (!skipFetchFields) {
-      await this.refreshFields(indexPattern, displayErrors);
+      await this.refreshFields(dataView, displayErrors);
     }
 
-    this.dataViewCache.set(indexPattern.id!, Promise.resolve(indexPattern));
+    return dataView;
+  }
 
-    return indexPattern;
+  /**
+   * Create data view instance.
+   * @param spec data view spec
+   * @param skipFetchFields if true, will not fetch fields
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
+   * @returns DataView
+   */
+  async create(
+    spec: DataViewSpec,
+    skipFetchFields = false,
+    displayErrors = true
+  ): Promise<DataView> {
+    const doCreate = () => this.createFromSpec(spec, skipFetchFields, displayErrors);
+
+    if (spec.id) {
+      const cachedDataView = this.dataViewCache.get(spec.id);
+
+      if (cachedDataView) {
+        return cachedDataView;
+      }
+
+      return this.dataViewCache.set(spec.id, doCreate());
+    }
+
+    const dataView = await doCreate();
+    return this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
   }
 
   /**
@@ -943,7 +969,7 @@ export class DataViewsService {
     skipFetchFields = false,
     displayErrors = true
   ) {
-    const indexPattern = await this.create(spec, skipFetchFields, displayErrors);
+    const indexPattern = await this.createFromSpec(spec, skipFetchFields, displayErrors);
     const createdIndexPattern = await this.createSavedObject(indexPattern, override, displayErrors);
     await this.setDefault(createdIndexPattern.id!);
     return createdIndexPattern!;

@@ -20,6 +20,7 @@ import { OpsgenieConnector } from './connector';
 import { ConfigSchema, SecretsSchema } from './schema';
 import { Config, Secrets } from './types';
 import * as i18n from './translations';
+import { renderParameterTemplates } from './render_template_variables';
 
 export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secrets> => {
   return {
@@ -34,6 +35,7 @@ export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secre
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
+    renderParameterTemplates,
   };
 };
 

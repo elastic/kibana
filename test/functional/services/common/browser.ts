@@ -552,7 +552,14 @@ class BrowserService extends FtrService {
     a2: A2,
     a3: A3
   ): Promise<T>;
-  public async executeAsync<T = unknown>(fn: (...args: any[]) => void, ...args: any[]): Promise<T> {
+  public async executeAsync<T = unknown, A1 = unknown, A2 = unknown, A3 = unknown>(
+    fn: string,
+    ...args: any[]
+  ): Promise<T>;
+  public async executeAsync<T = unknown>(
+    fn: string | ((...args: any[]) => void),
+    ...args: any[]
+  ): Promise<T> {
     return await this.driver.executeAsyncScript<T>(
       fn,
       ...cloneDeepWith<any>(args, (arg) => {

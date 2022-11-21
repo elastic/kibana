@@ -40,7 +40,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--usageCollection.usageCounters.bufferDuration=0',
 
         `--plugin-path=${path.resolve(__dirname, 'plugins', 'core_plugin_initializer_context')}`,
-        '--node.roles=["background_tasks"]',
+        '--node.roles=["ui","background_tasks"]',
       ],
     },
   };

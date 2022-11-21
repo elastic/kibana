@@ -6,13 +6,11 @@ exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces"
   data-test-subj="userCannotManageSpacesCallout"
   iconType="alert"
   title={
-    <p>
-      <FormattedMessage
-        defaultMessage="Insufficient Privileges"
-        id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
-        values={Object {}}
-      />
-    </p>
+    <FormattedMessage
+      defaultMessage="Insufficient Privileges"
+      id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
+      values={Object {}}
+    />
   }
 >
   <p>

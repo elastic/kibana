@@ -6,13 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { memoize } from 'lodash';
+
 import { IFieldSubTypeMulti } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 
 import { pluginServices } from '../../services';
 import { DataControlFieldRegistry, IEditableControlFactory } from '../../types';
 
-const dataControlFieldRegistryCache: { [key: string]: DataControlFieldRegistry } = {};
+export const getDataControlFieldRegistry = memoize(
+  async (dataView: DataView) => {
+    return await loadFieldRegistryFromDataView(dataView);
+  },
+  (dataView: DataView) => [dataView.id, JSON.stringify(dataView.fields.getAll())].join('|')
+);
 
 const doubleLinkFields = (dataView: DataView) => {
   // double link the parent-child relationship specifically for case-sensitivity support for options lists
@@ -22,6 +29,7 @@ const doubleLinkFields = (dataView: DataView) => {
     if (!fieldRegistry[field.name]) {
       fieldRegistry[field.name] = { field, compatibleControlTypes: [] };
     }
+
     const parentFieldName = (field.subType as IFieldSubTypeMulti)?.multi?.parent;
     if (parentFieldName) {
       fieldRegistry[field.name].parentFieldName = parentFieldName;
@@ -36,20 +44,13 @@ const doubleLinkFields = (dataView: DataView) => {
   return fieldRegistry;
 };
 
-export const loadFieldRegistryFromDataViewId = async (
-  dataViewId: string
+const loadFieldRegistryFromDataView = async (
+  dataView: DataView
 ): Promise<DataControlFieldRegistry> => {
-  if (dataControlFieldRegistryCache[dataViewId]) {
-    return dataControlFieldRegistryCache[dataViewId];
-  }
   const {
-    dataViews,
     controls: { getControlTypes, getControlFactory },
   } = pluginServices.getServices();
-  const dataView = await dataViews.get(dataViewId);
-
   const newFieldRegistry: DataControlFieldRegistry = doubleLinkFields(dataView);
-
   const controlFactories = getControlTypes().map(
     (controlType) => getControlFactory(controlType) as IEditableControlFactory
   );
@@ -64,7 +65,6 @@ export const loadFieldRegistryFromDataViewId = async (
       delete newFieldRegistry[dataViewField.name];
     }
   });
-  dataControlFieldRegistryCache[dataViewId] = newFieldRegistry;
 
   return newFieldRegistry;
 };
