@@ -68,23 +68,10 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
   });
 
   const errorResponse = await client.asCurrentUser.count({
-    index: CONNECTORS_JOBS_INDEX,
+    index: CONNECTORS_INDEX,
     query: {
-      bool: {
-        should: [
-          {
-            term: {
-              status: SyncStatus.ERROR,
-            },
-          },
-          {
-            range: {
-              last_seen: {
-                lt: moment().subtract(30, 'minutes').toISOString(),
-              },
-            },
-          },
-        ],
+      term: {
+        last_sync_status: SyncStatus.ERROR,
       },
     },
   });
