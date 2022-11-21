@@ -108,6 +108,9 @@ export KIBANA_CI_REPORTER_KEY
   export TEST_FAILURES_ES_PASSWORD
 }
 
+KIBANA_BUILDBUDDY_CI_API_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibana-buildbuddy-ci-api-key)
+export KIBANA_BUILDBUDDY_CI_API_KEY
+
 # By default, all steps should set up these things to get a full environment before running
 # It can be skipped for pipeline upload steps though, to make job start time a little faster
 if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
