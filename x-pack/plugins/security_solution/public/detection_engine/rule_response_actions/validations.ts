@@ -11,6 +11,7 @@ import type {
   ValidationError,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { RESPONSE_ACTION_TYPES } from '../../../common/detection_engine/rule_response_actions/schemas';
+import { DEFAULT_CUSTOM_FORM_ERROR, REQUIRED_ECS_MAPPING } from './osquery/translations';
 
 export const validateForEmptyParams = (
   responseActions: Array<{ actionTypeId: string; params: string }>,
@@ -30,8 +31,8 @@ export const validateForEmptyParams = (
 export const getCustomErrorMessage = (name: string) => {
   switch (name) {
     case 'ecs_mapping':
-      return 'ECS mapping is required';
+      return REQUIRED_ECS_MAPPING;
     default:
-      return 'Something is wrong with the form';
+      return DEFAULT_CUSTOM_FORM_ERROR;
   }
 };

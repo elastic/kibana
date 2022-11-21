@@ -67,7 +67,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
   });
 
   const { watch, register, formState, handleSubmit, reset, trigger } = hooksForm;
-  const { errors, isValid } = formState;
+  const { errors } = formState;
 
   const watchedValues = watch();
   const { data: packData } = usePack({
@@ -121,7 +121,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
         };
       };
     }
-  }, [errors, handleSubmit, isValid, item.id, item.path, onSubmit, trigger, ref, watchedValues]);
+  }, [errors, item.id, item.path, trigger, ref]);
 
   useEffect(() => {
     register('savedQueryId');

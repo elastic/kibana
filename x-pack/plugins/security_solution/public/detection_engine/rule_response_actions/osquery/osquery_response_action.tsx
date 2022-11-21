@@ -12,7 +12,12 @@ import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import type { ResponseActionValidatorRef } from '../response_actions_form';
 import type { ArrayItem, ValidationFunc } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
-import { NOT_AVAILABLE, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
+import {
+  NOT_AVAILABLE,
+  PARAMS_INTEGRATION_NOT_AVAILABLE,
+  PERMISSION_DENIED,
+  SHORT_EMPTY_TITLE,
+} from './translations';
 import { UseField } from '../../../shared_imports';
 
 interface IProps {
@@ -26,7 +31,7 @@ const emptyParamsValidator = (...args: Parameters<ValidationFunc>): ReturnType<V
   return {
     code: 'ERR_FIELD_MISSING',
     path,
-    message: '**ResponseActions:**\n Osquery Response Action is not available.\n ',
+    message: PARAMS_INTEGRATION_NOT_AVAILABLE,
   };
 };
 
