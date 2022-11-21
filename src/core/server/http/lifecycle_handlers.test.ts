@@ -234,7 +234,13 @@ describe('customHeaders pre-response handler', () => {
   it('adds the kbn-name and Content-Security-Policy headers to the response', () => {
     const config = createConfig({
       name: 'my-server-name',
-      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
+      csp: {
+        rules: [],
+        strict: true,
+        warnLegacyBrowsers: true,
+        disableEmbedding: true,
+        header: 'foo',
+      },
     });
     const handler = createCustomHeadersPreResponseHandler(config as HttpConfig);
 
@@ -252,7 +258,13 @@ describe('customHeaders pre-response handler', () => {
   it('adds the security headers and custom headers defined in the configuration', () => {
     const config = createConfig({
       name: 'my-server-name',
-      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
+      csp: {
+        rules: [],
+        strict: true,
+        warnLegacyBrowsers: true,
+        disableEmbedding: true,
+        header: 'foo',
+      },
       securityResponseHeaders: {
         headerA: 'value-A',
         headerB: 'value-B', // will be overridden by the custom response header below
@@ -279,7 +291,13 @@ describe('customHeaders pre-response handler', () => {
   it('do not allow overwrite of the kbn-name and Content-Security-Policy headers if defined in custom headders ', () => {
     const config = createConfig({
       name: 'my-server-name',
-      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
+      csp: {
+        rules: [],
+        strict: true,
+        warnLegacyBrowsers: true,
+        disableEmbedding: true,
+        header: 'foo',
+      },
       customResponseHeaders: {
         'kbn-name': 'custom-name',
         'Content-Security-Policy': 'custom-csp',
