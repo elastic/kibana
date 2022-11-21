@@ -54,14 +54,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       })
     );
 
-  const removeFindingsIndex = async () => {
-    try {
-      await es.indices.delete({ index: FINDINGS_INDEX });
-    } catch (e) {}
-  };
+  const removeFindingsIndex = () =>
+    es.indices.delete({ index: FINDINGS_INDEX, ignore_unavailable: true });
+
   describe('Findings Page', () => {
     before(async () => {
-      await removeFindingsIndex();
       await waitForPluginInitialized();
       await indexFindings();
       await pageObjects.findings.navigateToFindingsPage();
