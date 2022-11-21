@@ -21,6 +21,13 @@ export const EXCEPTION_LIST_EMPTY_VIEWER_BODY = (listName: string) =>
       'There is no exception in your [{listName}]. Create rule exceptions to this list.',
   });
 
+export const EXCEPTION_LIST_EMPTY_VIEWER_BUTTON_ENDPOINT = i18n.translate(
+  'xpack.securitySolution.exception.list.empty.viewer_button_endpoint',
+  {
+    defaultMessage: 'Create endpoint exception',
+  }
+);
+
 export const EXCEPTION_LIST_EMPTY_VIEWER_BUTTON = i18n.translate(
   'xpack.securitySolution.exception.list.empty.viewer_button',
   {

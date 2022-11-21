@@ -43,6 +43,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
     pagination,
     emptyViewerTitle,
     emptyViewerBody,
+    emptyViewerButtonText,
     viewerStatus,
     ruleReferences,
     showAddExceptionFlyout,
@@ -79,7 +80,6 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
           title={i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE}
           body={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BODY(listName)}
           buttonText={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON}
-          listType={listType === ExceptionListTypeEnum.ENDPOINT ? ListTypeText.ENDPOINT : undefined}
         />
       ) : (
         <EuiPanel hasBorder={false} hasShadow={false}>
@@ -116,6 +116,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
               exceptions={exceptions}
               emptyViewerTitle={emptyViewerTitle}
               emptyViewerBody={emptyViewerBody}
+              emptyViewerButtonText={emptyViewerButtonText}
               pagination={pagination}
               lastUpdated={lastUpdated}
               onPaginationChange={onPaginationChange}

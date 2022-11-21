@@ -29,7 +29,6 @@ import type {
   GetExceptionItemProps,
 } from '../types';
 
-import { ListTypeText } from '../types';
 
 const exceptionItemCss = css`
   margin: ${euiThemeVars.euiSize} 0;
@@ -95,7 +94,6 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
         buttonText={emptyViewerButtonText}
         body={emptyViewerBody}
         onCreateExceptionListItem={onCreateExceptionListItem}
-        listType={listType === ExceptionListTypeEnum.ENDPOINT ? ListTypeText.ENDPOINT : undefined}
       />
     );
   return (
