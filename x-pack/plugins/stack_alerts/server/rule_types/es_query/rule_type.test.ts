@@ -149,7 +149,7 @@ describe('ruleType', () => {
         timeWindowSize: 5,
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.BETWEEN,
-        threshold: [0],
+        threshold: [-1, 0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
         aggType: 'count',

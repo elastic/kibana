@@ -21,6 +21,8 @@ describe('ActionContext', () => {
       thresholdComparator: '>',
       threshold: [4],
       searchType: 'esQuery',
+      aggType: 'count',
+      groupBy: 'all',
     }) as OnlyEsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
@@ -52,6 +54,8 @@ describe('ActionContext', () => {
       thresholdComparator: '>',
       threshold: [4],
       searchType: 'esQuery',
+      aggType: 'count',
+      groupBy: 'all',
     }) as OnlyEsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
@@ -83,6 +87,8 @@ describe('ActionContext', () => {
       thresholdComparator: 'between',
       threshold: [4, 5],
       searchType: 'esQuery',
+      aggType: 'count',
+      groupBy: 'all',
     }) as OnlyEsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',

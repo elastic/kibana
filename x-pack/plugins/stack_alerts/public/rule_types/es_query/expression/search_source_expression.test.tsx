@@ -22,6 +22,7 @@ import { copyToClipboard, EuiLoadingSpinner } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ReactWrapper } from 'enzyme';
+import { DataPlugin } from '@kbn/data-plugin/public';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -60,7 +61,6 @@ const defaultSearchSourceExpressionParams: EsQueryRuleParams<SearchType.searchSo
   groupBy: 'all',
 };
 
-const mockSearchResult = new Subject();
 const testResultComplete = {
   rawResponse: {
     hits: {
@@ -126,87 +126,6 @@ const searchSourceFieldsMock = {
   },
 };
 
-const searchSourceMock = {
-  id: 'data_source6',
-  fields: searchSourceFieldsMock,
-  getField: (name: string) => {
-    return (searchSourceFieldsMock as Record<string, object>)[name] || '';
-  },
-  setField: jest.fn(),
-  createCopy: jest.fn(() => {
-    return searchSourceMock;
-  }),
-  setParent: jest.fn(() => {
-    return searchSourceMock;
-  }),
-  fetch$: jest.fn(() => {
-    return mockSearchResult;
-  }),
-  getSearchRequestBody: jest.fn(() => ({
-    fields: [
-      {
-        field: '@timestamp',
-        format: 'date_time',
-      },
-      {
-        field: 'timestamp',
-        format: 'date_time',
-      },
-      {
-        field: 'utc_time',
-        format: 'date_time',
-      },
-    ],
-    script_fields: {},
-    stored_fields: ['*'],
-    runtime_mappings: {
-      hour_of_day: {
-        type: 'long',
-        script: {
-          source: "emit(doc['timestamp'].value.getHour());",
-        },
-      },
-    },
-    _source: {
-      excludes: [],
-    },
-    query: {
-      bool: {
-        must: [],
-        filter: [
-          {
-            bool: {
-              must_not: {
-                bool: {
-                  should: [
-                    {
-                      match: {
-                        response: '200',
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            },
-          },
-          {
-            range: {
-              timestamp: {
-                format: 'strict_date_optional_time',
-                gte: '2022-06-19T02:49:51.192Z',
-                lte: '2022-06-24T02:49:51.192Z',
-              },
-            },
-          },
-        ],
-        should: [],
-        must_not: [],
-      },
-    },
-  })),
-} as unknown as ISearchSource;
-
 const savedQueryMock = {
   id: 'test-id',
   attributes: {
@@ -220,61 +139,147 @@ const savedQueryMock = {
   },
 };
 
-const dataMock = dataPluginMock.createStartContract();
-(dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
-  Promise.resolve(searchSourceMock)
-);
 (dataViewPluginMock.getIds as jest.Mock) = jest.fn().mockImplementation(() => Promise.resolve([]));
 dataViewPluginMock.getDefaultDataView = jest.fn(() => Promise.resolve(null));
 dataViewPluginMock.get = jest.fn();
-(dataMock.query.savedQueries.getSavedQuery as jest.Mock).mockImplementation(() =>
-  Promise.resolve(savedQueryMock)
-);
-dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
-  Promise.resolve({ total: 0, queries: [] })
-);
-
-const setup = (ruleParams: EsQueryRuleParams<SearchType.searchSource>) => {
-  const errors = {
-    size: [],
-    timeField: [],
-    timeWindowSize: [],
-    searchConfiguration: [],
-  };
-  const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
-
-  return mountWithIntl(
-    <KibanaContextProvider
-      services={{
-        dataViews: dataViewPluginMock,
-        data: dataMock,
-        uiSettings: uiSettingsMock,
-        dataViewEditor: dataViewEditorMock,
-        unifiedSearch: unifiedSearchMock,
-      }}
-    >
-      <SearchSourceExpression
-        ruleInterval="1m"
-        ruleThrottle="1m"
-        alertNotifyWhen="onThrottleInterval"
-        ruleParams={ruleParams}
-        setRuleParams={() => {}}
-        setRuleProperty={() => {}}
-        errors={errors}
-        unifiedSearch={unifiedSearchMock}
-        data={dataMock}
-        dataViews={dataViewPluginMock}
-        defaultActionGroupId=""
-        actionGroups={[]}
-        charts={chartsStartMock}
-        metadata={{ adHocDataViewList: [] }}
-        onChangeMetaData={jest.fn()}
-      />
-    </KibanaContextProvider>
-  );
-};
 
 describe('SearchSourceAlertTypeExpression', () => {
+  let dataMock: jest.Mocked<ReturnType<DataPlugin['start']>>;
+  let searchSourceMock: ISearchSource;
+  let mockSearchResult: Subject<unknown>;
+  beforeEach(() => {
+    mockSearchResult = new Subject();
+    searchSourceMock = {
+      id: 'data_source6',
+      fields: searchSourceFieldsMock,
+      getField: (name: string) => {
+        return (searchSourceFieldsMock as Record<string, object>)[name] || '';
+      },
+      setField: jest.fn(),
+      createCopy: jest.fn(() => {
+        return searchSourceMock;
+      }),
+      setParent: jest.fn(() => {
+        return searchSourceMock;
+      }),
+      fetch$: jest.fn(() => {
+        return mockSearchResult;
+      }),
+      getSearchRequestBody: jest.fn(() => ({
+        fields: [
+          {
+            field: '@timestamp',
+            format: 'date_time',
+          },
+          {
+            field: 'timestamp',
+            format: 'date_time',
+          },
+          {
+            field: 'utc_time',
+            format: 'date_time',
+          },
+        ],
+        script_fields: {},
+        stored_fields: ['*'],
+        runtime_mappings: {
+          hour_of_day: {
+            type: 'long',
+            script: {
+              source: "emit(doc['timestamp'].value.getHour());",
+            },
+          },
+        },
+        _source: {
+          excludes: [],
+        },
+        query: {
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  must_not: {
+                    bool: {
+                      should: [
+                        {
+                          match: {
+                            response: '200',
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                },
+              },
+              {
+                range: {
+                  timestamp: {
+                    format: 'strict_date_optional_time',
+                    gte: '2022-06-19T02:49:51.192Z',
+                    lte: '2022-06-24T02:49:51.192Z',
+                  },
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        },
+      })),
+    } as unknown as ISearchSource;
+    dataMock = dataPluginMock.createStartContract();
+    (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
+      Promise.resolve(searchSourceMock)
+    );
+    (dataMock.query.savedQueries.getSavedQuery as jest.Mock).mockImplementation(() =>
+      Promise.resolve(savedQueryMock)
+    );
+    dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
+      Promise.resolve({ total: 0, queries: [] })
+    );
+  });
+
+  const setup = (ruleParams: EsQueryRuleParams<SearchType.searchSource>) => {
+    const errors = {
+      size: [],
+      timeField: [],
+      timeWindowSize: [],
+      searchConfiguration: [],
+    };
+    const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
+
+    return mountWithIntl(
+      <KibanaContextProvider
+        services={{
+          dataViews: dataViewPluginMock,
+          data: dataMock,
+          uiSettings: uiSettingsMock,
+          dataViewEditor: dataViewEditorMock,
+          unifiedSearch: unifiedSearchMock,
+        }}
+      >
+        <SearchSourceExpression
+          ruleInterval="1m"
+          ruleThrottle="1m"
+          alertNotifyWhen="onThrottleInterval"
+          ruleParams={ruleParams}
+          setRuleParams={() => {}}
+          setRuleProperty={() => {}}
+          errors={errors}
+          unifiedSearch={unifiedSearchMock}
+          data={dataMock}
+          dataViews={dataViewPluginMock}
+          defaultActionGroupId=""
+          actionGroups={[]}
+          charts={chartsStartMock}
+          metadata={{ adHocDataViewList: [] }}
+          onChangeMetaData={jest.fn()}
+        />
+      </KibanaContextProvider>
+    );
+  };
   test('should render correctly', async () => {
     let wrapper = setup(defaultSearchSourceExpressionParams);
 

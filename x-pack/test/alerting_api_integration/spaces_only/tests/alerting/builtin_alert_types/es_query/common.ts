@@ -63,6 +63,8 @@ export interface CreateRuleParams {
   searchType?: 'searchSource';
   notifyWhen?: string;
   indexName?: string;
+  aggType?: string;
+  groupBy?: string;
 }
 
 export function getRuleServices(getService: FtrProviderContext['getService']) {
