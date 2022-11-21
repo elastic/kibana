@@ -15,7 +15,7 @@ import {
   SPAN_LINKS_SPAN_ID,
   TRACE_ID,
   TRANSACTION_ID,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getBufferedTimerange } from './utils';

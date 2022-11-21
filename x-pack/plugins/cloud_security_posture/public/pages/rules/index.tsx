@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React from 'react';
 import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
 import {
   EuiButtonEmpty,
@@ -21,36 +21,14 @@ import { i18n } from '@kbn/i18n';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CspInlineDescriptionList } from '../../components/csp_inline_description_list';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
-import type { BreadcrumbEntry } from '../../common/navigation/types';
 import { RulesContainer, type PageUrlParams } from './rules_container';
 import { cloudPosturePages } from '../../common/navigation/constants';
-import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { useCspIntegrationInfo } from './use_csp_integration';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { SecuritySolutionContext } from '../../application/security_solution_context';
+import { useSecuritySolutionContext } from '../../application/security_solution_context';
 import * as TEST_SUBJECTS from './test_subjects';
 import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
-
-const getRulesBreadcrumbs = (
-  name?: string,
-  manageBreadcrumb?: BreadcrumbEntry
-): BreadcrumbEntry[] => {
-  const breadCrumbs: BreadcrumbEntry[] = [];
-  if (manageBreadcrumb) {
-    breadCrumbs.push(manageBreadcrumb);
-  }
-
-  breadCrumbs.push(cloudPosturePages.benchmarks);
-
-  if (name) {
-    breadCrumbs.push({ ...cloudPosturePages.rules, name });
-  } else {
-    breadCrumbs.push(cloudPosturePages.rules);
-  }
-
-  return breadCrumbs;
-};
 
 const getRulesSharedValues = (
   packageInfo?: PackagePolicy
@@ -90,17 +68,9 @@ const getRulesSharedValues = (
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const { http } = useKibana().services;
   const integrationInfo = useCspIntegrationInfo(params);
-  const securitySolutionContext = useContext(SecuritySolutionContext);
+  const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
 
   const [packageInfo] = integrationInfo.data || [];
-
-  const breadcrumbs = useMemo(
-    () =>
-      getRulesBreadcrumbs(packageInfo?.name, securitySolutionContext?.getManageBreadcrumbEntry()),
-    [packageInfo?.name, securitySolutionContext]
-  );
-
-  useCspBreadcrumbs(breadcrumbs);
 
   const sharedValues = getRulesSharedValues(packageInfo);
 
@@ -155,6 +125,12 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
       />
       <EuiSpacer />
       <RulesContainer />
+      {SpyRoute && (
+        <SpyRoute
+          pageName={cloudPosturePages.benchmarks.id}
+          state={{ ruleName: packageInfo?.name }}
+        />
+      )}
     </CloudPosturePage>
   );
 };

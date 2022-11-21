@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   TRANSACTION_DURATION,
-} from '../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../common/es_fields/apm';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../common/data_view_constants';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
