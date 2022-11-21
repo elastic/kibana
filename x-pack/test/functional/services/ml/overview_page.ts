@@ -87,7 +87,7 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
       await this.assertPageNotFoundBannerExists();
       const text = await testSubjects.getVisibleText('mlPageNotFoundBannerText');
       expect(text).to.eql(
-        `The Machine Learning application doesn't recognize this route: /ml/${pathname}. You've been redirected to the Overview page.`
+        `The Machine Learning application doesn't recognize this route: /${pathname}. You've been redirected to the Overview page.`
       );
     },
   };
