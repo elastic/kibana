@@ -18,17 +18,20 @@ import {
   CLOUD_PROVIDER,
   CONTAINER_ID,
   HOST_NAME,
+  SERVICE_VERSION,
   SERVICE_NODE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
-  SERVICE_VERSION,
-  KUBERNETES_CONTAINER_NAME,
-  KUBERNETES_NAMESPACE,
   KUBERNETES_POD_NAME,
   KUBERNETES_POD_UID,
+} from '../../../../../common/es_fields/apm';
+
+import {
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/infra_metrics';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
