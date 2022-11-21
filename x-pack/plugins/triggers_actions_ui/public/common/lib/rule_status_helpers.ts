@@ -43,11 +43,11 @@ export const getExecutionStatusHealthColor = (status: RuleExecutionStatuses) => 
 };
 
 export const getRuleHealthColor = (rule: Rule) => {
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
-  if (isRuleLastRunOutcomeEnabled) {
-    return (rule.lastRun && getOutcomeHealthColor(rule.lastRun.outcome)) || 'subdued';
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
+  if (isRuleUsingExecutionStatus) {
+    return getExecutionStatusHealthColor(rule.executionStatus.status);
   }
-  return getExecutionStatusHealthColor(rule.executionStatus.status);
+  return (rule.lastRun && getOutcomeHealthColor(rule.lastRun.outcome)) || 'subdued';
 };
 
 export const getIsLicenseError = (rule: Rule) => {
@@ -69,13 +69,13 @@ export const getRuleStatusMessage = ({
   executionStatusTranslations: Record<string, string>;
 }) => {
   const isLicenseError = getIsLicenseError(rule);
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   if (isLicenseError) {
     return licenseErrorText;
   }
-  if (isRuleLastRunOutcomeEnabled) {
-    return rule.lastRun && lastOutcomeTranslations[rule.lastRun.outcome];
+  if (isRuleUsingExecutionStatus) {
+    return executionStatusTranslations[rule.executionStatus.status];
   }
-  return executionStatusTranslations[rule.executionStatus.status];
+  return rule.lastRun && lastOutcomeTranslations[rule.lastRun.outcome];
 };

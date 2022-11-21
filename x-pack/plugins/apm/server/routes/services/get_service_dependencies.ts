@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';

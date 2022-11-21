@@ -15,7 +15,7 @@ import {
   TRANSACTION_DURATION_SUMMARY,
   TRANSACTION_FAILURE_COUNT,
   TRANSACTION_SUCCESS_COUNT,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
