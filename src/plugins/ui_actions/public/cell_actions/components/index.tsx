@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+export type { CellActionExecutionContext } from './cell_actions';
 export { CellActions, CellActionsMode } from './cell_actions';
 export { CellActionsContextProvider } from './cell_actions_context';

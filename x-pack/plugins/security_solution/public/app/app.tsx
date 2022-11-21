@@ -16,6 +16,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { CellActionsContextProvider } from '@kbn/ui-actions-plugin/public';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
@@ -49,6 +50,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
   const {
     i18n,
     application: { capabilities },
+    uiActions,
   } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   return (
@@ -62,13 +64,17 @@ const StartAppComponent: FC<StartAppComponent> = ({
                   <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                     <ManageUserInfo>
                       <ReactQueryClientProvider>
-                        <PageRouter
-                          history={history}
-                          onAppLeave={onAppLeave}
-                          setHeaderActionMenu={setHeaderActionMenu}
+                        <CellActionsContextProvider
+                          getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                         >
-                          {children}
-                        </PageRouter>
+                          <PageRouter
+                            history={history}
+                            onAppLeave={onAppLeave}
+                            setHeaderActionMenu={setHeaderActionMenu}
+                          >
+                            {children}
+                          </PageRouter>
+                        </CellActionsContextProvider>
                       </ReactQueryClientProvider>
                     </ManageUserInfo>
                   </UserPrivilegesProvider>

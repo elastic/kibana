@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionItem } from './cell_action_item';
 import { usePartitionActions } from '../hooks/actions';
 import { ExtraActionsPopOver } from './extra_actions_popover';
@@ -25,7 +25,7 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
   showActionTooltips,
   visibleCellActions,
 }) => {
-  const { value: allActions } = useLoadActions(actionContext);
+  const { value: allActions, error } = useLoadActions(actionContext);
   const { extraActions, visibleActions } = usePartitionActions(
     allActions ?? [],
     visibleCellActions
@@ -37,6 +37,13 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
     () => <ExtraActionsButton onClick={togglePopOver} showTooltip={showActionTooltips} />,
     [togglePopOver, showActionTooltips]
   );
+
+  useEffect(() => {
+    if (error) {
+      // eslint-disable-next-line no-console -- Make sure loadActions error are not swallowed
+      console.error(error);
+    }
+  }, [error]);
 
   return (
     <span data-test-subj="inlineActions">

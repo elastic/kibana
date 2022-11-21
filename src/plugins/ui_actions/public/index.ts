@@ -45,4 +45,4 @@ export {
   CellActionsContextProvider,
 } from './cell_actions/components';
 
-export type { CellActionExecutionContext } from './cell_actions/components/cell_actions';
+export type { CellActionExecutionContext } from './cell_actions/components';

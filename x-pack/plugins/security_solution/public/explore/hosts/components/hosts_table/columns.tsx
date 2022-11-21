@@ -7,23 +7,16 @@
 
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../common/components/drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
+import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
-import { DefaultDraggable } from '../../../../common/components/draggables';
 import type { HostsTableColumns } from '.';
-
 import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
 import { RiskScore } from '../../../components/risk_score/severity/common';
+import { SECURITY_SOLUTION_ACTION_TRIGGER } from '../../../../../common/constants';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,
@@ -38,31 +31,20 @@ export const getHostsColumns = (
       sortable: true,
       render: (hostName) => {
         if (hostName != null && hostName.length > 0) {
-          const id = escapeDataProviderId(`hosts-table-hostName-${hostName[0]}`);
           return (
-            <DraggableWrapper
-              key={id}
-              dataProvider={{
-                and: [],
-                enabled: true,
-                excluded: false,
-                id,
-                name: hostName[0],
-                kqlQuery: '',
-                queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
+            <CellActions
+              mode={CellActionsMode.HOVER_POPOVER}
+              visibleCellActions={5}
+              showActionTooltips
+              triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+              field={{
+                name: 'host.name',
+                value: hostName[0],
+                type: 'keyword',
               }}
-              isAggregatable={true}
-              fieldType={'keyword'}
-              render={(dataProvider, _, snapshot) =>
-                snapshot.isDragging ? (
-                  <DragEffects>
-                    <Provider dataProvider={dataProvider} />
-                  </DragEffects>
-                ) : (
-                  <HostDetailsLink hostName={hostName[0]} />
-                )
-              }
-            />
+            >
+              <HostDetailsLink hostName={hostName[0]} />
+            </CellActions>
           );
         }
         return getEmptyTagValue();
@@ -107,14 +89,19 @@ export const getHostsColumns = (
       render: (hostOsName) => {
         if (hostOsName != null) {
           return (
-            <DefaultDraggable
-              id={`host-page-draggable-host.os.name-${hostOsName[0]}`}
-              field={'host.os.name'}
-              value={hostOsName[0]}
-              isDraggable={false}
-              hideTopN={true}
-              tooltipContent={null}
-            />
+            <CellActions
+              mode={CellActionsMode.HOVER_POPOVER}
+              visibleCellActions={5}
+              showActionTooltips
+              triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+              field={{
+                name: 'host.os.name',
+                value: hostOsName[0],
+                type: 'keyword',
+              }}
+            >
+              {hostOsName}
+            </CellActions>
           );
         }
         return getEmptyTagValue();
@@ -129,14 +116,19 @@ export const getHostsColumns = (
       render: (hostOsVersion) => {
         if (hostOsVersion != null) {
           return (
-            <DefaultDraggable
-              id={`host-page-draggable-host.os.version-${hostOsVersion[0]}`}
-              field={'host.os.version'}
-              value={hostOsVersion[0]}
-              isDraggable={false}
-              hideTopN={true}
-              tooltipContent={null}
-            />
+            <CellActions
+              mode={CellActionsMode.HOVER_POPOVER}
+              visibleCellActions={5}
+              showActionTooltips
+              triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+              field={{
+                name: 'host.os.version',
+                value: hostOsVersion[0],
+                type: 'keyword',
+              }}
+            >
+              {hostOsVersion}
+            </CellActions>
           );
         }
         return getEmptyTagValue();

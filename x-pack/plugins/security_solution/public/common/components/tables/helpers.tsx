@@ -9,14 +9,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-
 import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
+import { SECURITY_SOLUTION_ACTION_TRIGGER } from '../../../../common/constants';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
@@ -34,6 +35,9 @@ interface GetRowItemDraggableParams {
   maxOverflow?: number;
 }
 
+/**
+ * @deprecated
+ */
 export const getRowItemDraggable = ({
   rowItem,
   attrName,
@@ -80,17 +84,68 @@ export const getRowItemDraggable = ({
   }
 };
 
-interface GetRowItemDraggablesParams {
-  rowItems: string[] | null | undefined;
-  attrName: string;
+interface GetRowItemsWithActionsParams {
+  values: string[] | null | undefined;
+  fieldName: string;
+  fieldType?: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
-  fieldType?: string;
   isAggregatable?: boolean;
   displayCount?: number;
   dragDisplayValue?: string;
   maxOverflow?: number;
 }
+
+export const getRowItemsWithActions = ({
+  values,
+  fieldName,
+  fieldType = 'keyword',
+  idPrefix,
+  render,
+  displayCount = 5,
+  maxOverflow = 5,
+}: GetRowItemsWithActionsParams): JSX.Element => {
+  if (values != null && values.length > 0) {
+    const visibleItems = values.slice(0, displayCount).map((value, index) => {
+      const id = escapeDataProviderId(`${idPrefix}-${fieldName}-${value}-${index}`);
+      return (
+        <CellActions
+          key={id}
+          mode={CellActionsMode.HOVER_POPOVER}
+          visibleCellActions={5}
+          showActionTooltips
+          triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+          field={{
+            name: fieldName,
+            value,
+            type: fieldType,
+          }}
+        >
+          <>{render ? render(value) : defaultToEmptyTag(value)}</>
+        </CellActions>
+      );
+    });
+
+    return visibleItems.length > 0 ? (
+      <>
+        {visibleItems}{' '}
+        <RowItemOverflow
+          fieldName={fieldName}
+          values={values}
+          fieldType={fieldType}
+          idPrefix={idPrefix}
+          maxOverflowItems={maxOverflow}
+          overflowIndexStart={displayCount}
+        />
+      </>
+    ) : (
+      getEmptyTagValue()
+    );
+  } else {
+    return getEmptyTagValue();
+  }
+};
+
 export const getRowItemDraggables = ({
   rowItems,
   attrName,
@@ -142,7 +197,7 @@ export const getRowItemDraggables = ({
     return draggables.length > 0 ? (
       <>
         {draggables}{' '}
-        <RowItemOverflow
+        {/* <RowItemOverflow
           attrName={attrName}
           dragDisplayValue={dragDisplayValue}
           idPrefix={idPrefix}
@@ -151,7 +206,7 @@ export const getRowItemDraggables = ({
           rowItems={rowItems}
           fieldType={fieldType}
           isAggregatable={isAggregatable}
-        />
+        /> */}
       </>
     ) : (
       getEmptyTagValue()
@@ -162,46 +217,40 @@ export const getRowItemDraggables = ({
 };
 
 interface RowItemOverflowProps {
-  attrName: string;
-  dragDisplayValue?: string;
+  fieldName: string;
+  fieldType: string;
+  values: string[];
   idPrefix: string;
   maxOverflowItems: number;
   overflowIndexStart: number;
-  rowItems: string[];
-  fieldType?: string;
-  isAggregatable?: boolean;
 }
 
 export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
-  attrName,
-  dragDisplayValue,
+  fieldName,
+  values,
+  fieldType,
   idPrefix,
   maxOverflowItems = 5,
   overflowIndexStart = 5,
-  rowItems,
-  fieldType,
-  isAggregatable,
 }) => {
   return (
     <>
-      {rowItems.length > overflowIndexStart && (
-        <Popover count={rowItems.length - overflowIndexStart} idPrefix={idPrefix}>
+      {values.length > overflowIndexStart && (
+        <Popover count={values.length - overflowIndexStart} idPrefix={idPrefix}>
           <EuiText size="xs">
             <MoreContainer
-              attrName={attrName}
-              dragDisplayValue={dragDisplayValue}
+              fieldName={fieldName}
               idPrefix={idPrefix}
-              overflowIndexStart={overflowIndexStart}
-              rowItems={rowItems}
-              moreMaxHeight="none"
               fieldType={fieldType}
-              isAggregatable={isAggregatable}
+              values={values}
+              overflowIndexStart={overflowIndexStart}
+              moreMaxHeight="none"
             />
 
-            {rowItems.length > overflowIndexStart + maxOverflowItems && (
+            {values.length > overflowIndexStart + maxOverflowItems && (
               <p data-test-subj="popover-additional-overflow">
                 <EuiTextColor color="subdued">
-                  {rowItems.length - overflowIndexStart - maxOverflowItems}{' '}
+                  {values.length - overflowIndexStart - maxOverflowItems}{' '}
                   <FormattedMessage
                     id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
                     defaultMessage="more not shown"
