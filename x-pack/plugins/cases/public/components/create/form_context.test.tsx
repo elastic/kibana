@@ -474,8 +474,8 @@ describe('Create case', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId('issueTypeSelect')).toBeInTheDocument();
-        expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: 'Bug' }));
+        expect(screen.getByRole('option', { name: 'Low' }));
       });
 
       userEvent.selectOptions(screen.getByTestId('issueTypeSelect'), ['10007']);
@@ -492,7 +492,9 @@ describe('Create case', () => {
             fields: { issueType: '10007', parent: null, priority: 'Low' },
           },
         });
+      });
 
+      await waitFor(() => {
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
           caseId: sampleId,
           connector: {
@@ -502,7 +504,9 @@ describe('Create case', () => {
             fields: { issueType: '10007', parent: null, priority: 'Low' },
           },
         });
+      });
 
+      await waitFor(() => {
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
           id: sampleId,
           ...sampleDataWithoutTags,
@@ -538,7 +542,7 @@ describe('Create case', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
-        expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: 'Low' }));
       });
 
       const checkbox = within(screen.getByTestId('incidentTypeComboBox')).getByTestId(
@@ -559,7 +563,9 @@ describe('Create case', () => {
             fields: { incidentTypes: ['21'], severityCode: '4' },
           },
         });
+      });
 
+      await waitFor(() => {
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
           caseId: sampleId,
           connector: {
@@ -569,7 +575,9 @@ describe('Create case', () => {
             fields: { incidentTypes: ['21'], severityCode: '4' },
           },
         });
+      });
 
+      await waitFor(() => {
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
           id: sampleId,
           ...sampleDataWithoutTags,
@@ -612,11 +620,32 @@ describe('Create case', () => {
         onChoicesSuccess(useGetChoicesResponse.choices);
       });
 
+      await waitFor(() => {
+        expect(
+          within(screen.getByTestId('severitySelect')).getByRole('option', { name: '2 - High' })
+        );
+
+        expect(
+          within(screen.getByTestId('urgencySelect')).getByRole('option', { name: '2 - High' })
+        );
+
+        expect(
+          within(screen.getByTestId('impactSelect')).getByRole('option', { name: '2 - High' })
+        );
+
+        expect(screen.getByRole('option', { name: 'Software' }));
+      });
+
       ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
         userEvent.selectOptions(screen.getByTestId(subj), ['2']);
       });
 
       userEvent.selectOptions(screen.getByTestId('categorySelect'), ['software']);
+
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'Operation System' }));
+      });
+
       userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['os']);
       userEvent.click(screen.getByTestId('create-case-submit'));
 
@@ -636,7 +665,9 @@ describe('Create case', () => {
             },
           },
         });
+      });
 
+      await waitFor(() => {
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
           caseId: sampleId,
           connector: {
@@ -652,7 +683,9 @@ describe('Create case', () => {
             },
           },
         });
+      });
 
+      await waitFor(() => {
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
           id: sampleId,
           ...sampleDataWithoutTags,
@@ -696,8 +729,19 @@ describe('Create case', () => {
       });
 
       userEvent.click(screen.getByTestId('destIpCheckbox'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: '1 - Critical' }));
+        expect(screen.getByRole('option', { name: 'Denial of Service' }));
+      });
+
       userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['1']);
       userEvent.selectOptions(screen.getByTestId('categorySelect'), ['Denial of Service']);
+
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
+      });
+
       userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['26']);
       userEvent.click(screen.getByTestId('create-case-submit'));
 
@@ -719,7 +763,9 @@ describe('Create case', () => {
             },
           },
         });
+      });
 
+      await waitFor(() => {
         expect(pushCaseToExternalService).toHaveBeenCalledWith({
           caseId: sampleId,
           connector: {
@@ -737,7 +783,9 @@ describe('Create case', () => {
             },
           },
         });
+      });
 
+      await waitFor(() => {
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
           id: sampleId,
           ...sampleDataWithoutTags,
@@ -826,11 +874,13 @@ describe('Create case', () => {
 
     await waitForComponentToUpdate();
 
-    expect(createAttachments).toHaveBeenCalledTimes(1);
-    expect(createAttachments).toHaveBeenCalledWith({
-      caseId: 'case-id',
-      data: attachments,
-      caseOwner: 'securitySolution',
+    await waitFor(() => {
+      expect(createAttachments).toHaveBeenCalledTimes(1);
+      expect(createAttachments).toHaveBeenCalledWith({
+        caseId: 'case-id',
+        data: attachments,
+        caseOwner: 'securitySolution',
+      });
     });
   });
 
