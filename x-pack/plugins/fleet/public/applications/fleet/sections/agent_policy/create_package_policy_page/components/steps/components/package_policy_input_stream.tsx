@@ -42,11 +42,8 @@ import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
 
-const FlexItemWithMaxWidth = styled(EuiFlexItem)`
-  max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});
-`;
-
 const ScrollAnchor = styled.div`
+  display: none;
   scroll-margin-top: ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px;
 `;
 
@@ -78,7 +75,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const defaultDataStreamId = useDataStreamId();
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const isDefaultDatstream =
+    const isDefaultDatastream =
       !!defaultDataStreamId &&
       !!packagePolicyInputStream.id &&
       packagePolicyInputStream.id === defaultDataStreamId;
@@ -86,13 +83,13 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const isInputOnlyPackage = packageInfo.type === 'input';
 
     useEffect(() => {
-      if (isDefaultDatstream && containerRef.current) {
+      if (isDefaultDatastream && containerRef.current) {
         containerRef.current.scrollIntoView();
       }
-    }, [isDefaultDatstream, containerRef]);
+    }, [isDefaultDatastream, containerRef]);
 
     // Showing advanced options toggle state
-    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatstream);
+    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatastream);
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
@@ -180,7 +177,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     return (
       <>
-        <EuiFlexGrid columns={2} id={isDefaultDatstream ? 'test123' : 'asas'}>
+        <EuiFlexGrid columns={2}>
           <ScrollAnchor ref={containerRef} />
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none" alignItems="flexStart">
@@ -227,7 +224,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <FlexItemWithMaxWidth>
+          <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="m">
               {requiredVars.map((varDef) => {
                 if (!packagePolicyInputStream?.vars) return null;
@@ -415,7 +412,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                 ) : null}
               </Fragment>
             </EuiFlexGroup>
-          </FlexItemWithMaxWidth>
+          </EuiFlexItem>
         </EuiFlexGrid>
       </>
     );

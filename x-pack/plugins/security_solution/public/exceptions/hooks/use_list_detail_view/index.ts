@@ -53,8 +53,8 @@ export const useListDetailsView = () => {
 
   const { exportExceptionList, deleteExceptionList } = useApi(http);
 
-  const { exceptionListId } = useParams<{
-    exceptionListId: string;
+  const { detailName: exceptionListId } = useParams<{
+    detailName: string;
   }>();
 
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
@@ -147,6 +147,7 @@ export const useListDetailsView = () => {
               type: list.type,
               name: listDetails.name,
               description: listDetails.description || list.description,
+              namespace_type: list.namespace_type,
             },
           });
       } catch (error) {
