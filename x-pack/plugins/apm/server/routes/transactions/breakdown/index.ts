@@ -16,7 +16,7 @@ import {
   SPAN_SELF_TIME_SUM,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { MAX_KPIS } from './constants';
