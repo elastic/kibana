@@ -391,11 +391,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [onSubmit]);
 
   const getData = useCallback(async () => {
-    // validate sometimes do not return correct validation state of form
-    // workaround is to call it twice
-    await validate();
-    const isValid = await validate();
-
+    // validate doesn't return actual state of form
+    // more details here: https://github.com/elastic/kibana/issues/144322#issuecomment-1321838136
+    // wrapping in setTimeout is a workaround until solution within forms-lib can be found
+    const isValid = await new Promise<boolean>((resolve) => {
+      setTimeout(async () => {
+        const valid = await validate();
+        resolve(valid);
+      }, 0);
+    });
     return {
       isValid,
       data: {
