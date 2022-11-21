@@ -87,7 +87,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiSwitch"
+        class="euiSwitch emotion-euiSwitch"
       >
         <button
           aria-checked="false"
@@ -287,13 +287,13 @@ exports[`UrlFormatEditor should render normally 1`] = `
             class="euiTableHeaderMobile"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+              class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               />
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               />
             </div>
           </div>

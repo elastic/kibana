@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { SPAN_ID } from '../../../../../common/elasticsearch_fieldnames';
+import { SPAN_ID } from '../../../../../common/es_fields/apm';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { DiscoverLink } from './discover_link';
 

@@ -1061,7 +1061,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         );
       } else {
         buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class$="selected"] [title^="Sort"]`
+          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class*="selected"] [title^="Sort"]`
         );
       }
       return buttonEl.click();

@@ -25,7 +25,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiSwitch"
+        class="euiSwitch emotion-euiSwitch"
       >
         <button
           aria-checked="false"
@@ -77,7 +77,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     </div>
   </div>
   <button
-    class="euiButton emotion-euiButtonDisplay-s-fullWidth-s-fill-primary"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >
@@ -217,7 +217,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiSwitch"
+        class="euiSwitch emotion-euiSwitch"
       >
         <button
           aria-checked="false"
@@ -269,7 +269,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     </div>
   </div>
   <button
-    class="euiButton emotion-euiButtonDisplay-s-fullWidth-s-fill-primary"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >
@@ -402,7 +402,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <button
-    class="euiButton emotion-euiButtonDisplay-s-fullWidth-s-fill-primary"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >

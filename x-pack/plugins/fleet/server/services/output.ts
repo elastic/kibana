@@ -26,6 +26,7 @@ import {
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
+import { escapeSearchQueryPhrase } from './saved_object';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -277,6 +278,23 @@ class OutputService {
       perPage: SO_SEARCH_LIMIT,
       sortField: 'is_default',
       sortOrder: 'desc',
+    });
+
+    return {
+      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
+      total: outputs.total,
+      page: outputs.page,
+      perPage: outputs.per_page,
+    };
+  }
+
+  public async listAllForProxyId(soClient: SavedObjectsClientContract, proxyId: string) {
+    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      searchFields: ['proxy_id'],
+      search: escapeSearchQueryPhrase(proxyId),
     });
 
     return {
