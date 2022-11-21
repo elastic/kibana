@@ -37,18 +37,18 @@ interface Props {
 
 type TagSelectableOption = EuiSelectableOption<{ tagIcon: IconType; newItem?: boolean }>;
 
-const enum TagState {
+enum TagState {
   CHECKED = 'checked',
   PARTIAL = 'partial',
   UNCHECKED = 'unchecked',
 }
 
-const enum Actions {
+enum Actions {
   CHECK_TAG,
   UNCHECK_TAG,
 }
 
-const enum ICONS {
+enum ICONS {
   CHECKED = 'check',
   PARTIAL = 'asterisk',
   UNCHECKED = 'empty',

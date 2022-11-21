@@ -526,7 +526,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
       },
       {
         ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
-        deepLinks: [getSecuritySolutionLink<SecurityPageName>('rules')],
       },
     ],
   },

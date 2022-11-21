@@ -19,9 +19,9 @@ import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 
 const ControlsContainer = euiStyled('div')`
-  left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
+  left: ${({ theme }) => theme.eui.euiSize};
   position: absolute;
-  top: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
+  top: ${({ theme }) => theme.eui.euiSizeS};
   z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
 `;
 

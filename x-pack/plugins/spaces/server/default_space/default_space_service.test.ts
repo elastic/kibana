@@ -214,7 +214,7 @@ test('maintains unavailable status if default space cannot be created', async ()
 });
 
 test('retries operation', async () => {
-  jest.useFakeTimers('legacy');
+  jest.useFakeTimers({ legacyFakeTimers: true });
 
   const { repository, serviceStatus$ } = setup({
     elasticsearchStatus: ServiceStatusLevels.available,
