@@ -13,7 +13,7 @@ module.exports = (_, options = {}) => ({
     // our explicit plugin configs to a sub-preset
     {
       plugins: [
-        require.resolve('babel-plugin-add-module-exports'),
+        // require.resolve('babel-plugin-add-module-exports'),
 
         // The class properties proposal was merged with the private fields proposal
         // into the "class fields" proposal. Babel doesn't support this combined
