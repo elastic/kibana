@@ -105,7 +105,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   } = useKibana().services;
 
   const isInitialized = useRef(false);
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [kpi, setKpi] = useState<IExecutionKPIResult>();
@@ -173,7 +173,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
                 description={getStatDescription(
                   <RuleEventLogListStatus
                     status="success"
-                    lastRunOutcomeEnabled={isRuleLastRunOutcomeEnabled}
+                    useExecutionStatus={isRuleUsingExecutionStatus}
                   />
                 )}
                 titleSize="s"
@@ -187,7 +187,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
                 description={getStatDescription(
                   <RuleEventLogListStatus
                     status="warning"
-                    lastRunOutcomeEnabled={isRuleLastRunOutcomeEnabled}
+                    useExecutionStatus={isRuleUsingExecutionStatus}
                   />
                 )}
                 titleSize="s"
@@ -201,7 +201,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
                 description={getStatDescription(
                   <RuleEventLogListStatus
                     status="failure"
-                    lastRunOutcomeEnabled={isRuleLastRunOutcomeEnabled}
+                    useExecutionStatus={isRuleUsingExecutionStatus}
                   />
                 )}
                 titleSize="s"

@@ -29,24 +29,39 @@ interface RulesListStatusesProps {
 export const RulesListStatuses = (props: RulesListStatusesProps) => {
   const { rulesStatuses, rulesLastRunOutcomes } = props;
 
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
-  if (isRuleLastRunOutcomeEnabled) {
+  if (isRuleUsingExecutionStatus) {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <EuiHealth color="success" data-test-subj="totalSucceededRulesCount">
-            {RULE_LAST_RUN_OUTCOME_SUCCEEDED_DESCRIPTION(rulesLastRunOutcomes.succeeded)}
+          <EuiHealth color="success" data-test-subj="totalActiveRulesCount">
+            {RULE_STATUS_ACTIVE(rulesStatuses.active)}
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="danger" data-test-subj="totalFailedRulesCount">
-            {RULE_LAST_RUN_OUTCOME_FAILED_DESCRIPTION(rulesLastRunOutcomes.failed)}
+          <EuiHealth color="danger" data-test-subj="totalErrorRulesCount">
+            {RULE_STATUS_ERROR(rulesStatuses.error)}
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiHealth color="warning" data-test-subj="totalWarningRulesCount">
-            {RULE_LAST_RUN_OUTCOME_WARNING_DESCRIPTION(rulesLastRunOutcomes.warning)}
+            {RULE_STATUS_WARNING(rulesStatuses.warning)}
+          </EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="primary" data-test-subj="totalOkRulesCount">
+            {RULE_STATUS_OK(rulesStatuses.ok)}
+          </EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="accent" data-test-subj="totalPendingRulesCount">
+            {RULE_STATUS_PENDING(rulesStatuses.pending)}
+          </EuiHealth>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color="subdued" data-test-subj="totalUnknownRulesCount">
+            {RULE_STATUS_UNKNOWN(rulesStatuses.unknown)}
           </EuiHealth>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -56,33 +71,18 @@ export const RulesListStatuses = (props: RulesListStatusesProps) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiHealth color="success" data-test-subj="totalActiveRulesCount">
-          {RULE_STATUS_ACTIVE(rulesStatuses.active)}
+        <EuiHealth color="success" data-test-subj="totalSucceededRulesCount">
+          {RULE_LAST_RUN_OUTCOME_SUCCEEDED_DESCRIPTION(rulesLastRunOutcomes.succeeded)}
         </EuiHealth>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiHealth color="danger" data-test-subj="totalErrorRulesCount">
-          {RULE_STATUS_ERROR(rulesStatuses.error)}
+        <EuiHealth color="danger" data-test-subj="totalFailedRulesCount">
+          {RULE_LAST_RUN_OUTCOME_FAILED_DESCRIPTION(rulesLastRunOutcomes.failed)}
         </EuiHealth>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiHealth color="warning" data-test-subj="totalWarningRulesCount">
-          {RULE_STATUS_WARNING(rulesStatuses.warning)}
-        </EuiHealth>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiHealth color="primary" data-test-subj="totalOkRulesCount">
-          {RULE_STATUS_OK(rulesStatuses.ok)}
-        </EuiHealth>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiHealth color="accent" data-test-subj="totalPendingRulesCount">
-          {RULE_STATUS_PENDING(rulesStatuses.pending)}
-        </EuiHealth>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiHealth color="subdued" data-test-subj="totalUnknownRulesCount">
-          {RULE_STATUS_UNKNOWN(rulesStatuses.unknown)}
+          {RULE_LAST_RUN_OUTCOME_WARNING_DESCRIPTION(rulesLastRunOutcomes.warning)}
         </EuiHealth>
       </EuiFlexItem>
     </EuiFlexGroup>
