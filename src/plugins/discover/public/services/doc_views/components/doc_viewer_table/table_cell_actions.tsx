@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, MouseEvent } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -122,11 +122,14 @@ export const TableActions = ({
   const closePopover = useCallback(() => setIsOpen(false), []);
   const togglePinned = useCallback(() => onTogglePinned(field), [field, onTogglePinned]);
   const onClickAction = useCallback(
-    (callback: () => void) => () => {
+    (callback: () => void) => (event: MouseEvent) => {
       callback();
       closePopover();
+      if (mode === 'inline') {
+        (event.currentTarget as HTMLButtonElement)?.blur();
+      }
     },
-    [closePopover]
+    [closePopover, mode]
   );
 
   const panels = [
