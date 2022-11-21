@@ -72,6 +72,8 @@ export interface HeaderProps {
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
+  // customLogo
+  // pageTitle
 }
 
 export function Header({

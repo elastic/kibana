@@ -15,6 +15,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
+import { CustomBranding } from '@kbn/core-chrome-browser';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
@@ -27,6 +28,7 @@ interface Props {
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   setIsMounting: (isMounting: boolean) => void;
+  customBranding$?: Observable<CustomBranding | undefined>;
 }
 
 interface Params {
@@ -41,6 +43,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   setAppActionMenu,
   appStatuses$,
   setIsMounting,
+  customBranding$,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
   const createScopedHistory = useMemo(
@@ -61,7 +64,15 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appPath={path}
                 appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{ appId, mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting, theme$ }}
+                {...{
+                  appId,
+                  mounter,
+                  setAppLeaveHandler,
+                  setAppActionMenu,
+                  setIsMounting,
+                  theme$,
+                  customBranding$,
+                }}
               />
             )}
           />
@@ -83,7 +94,14 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appId={id ?? appId}
                 appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{ mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting, theme$ }}
+                {...{
+                  mounter,
+                  setAppLeaveHandler,
+                  setAppActionMenu,
+                  setIsMounting,
+                  theme$,
+                  customBranding$,
+                }}
               />
             );
           }}

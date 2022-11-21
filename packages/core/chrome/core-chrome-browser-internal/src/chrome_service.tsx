@@ -26,6 +26,7 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeUserBanner,
+  CustomBranding,
 } from '@kbn/core-chrome-browser';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
@@ -116,6 +117,7 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
+    const customBranding$ = new BehaviorSubject<CustomBranding | undefined>(undefined);
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -233,6 +235,8 @@ export class ChromeService {
           isLocked$={getIsNavDrawerLocked$}
         />
       ),
+
+      // getCustomBranding$: () => customBranding$.pipe(takeUntil(this.stop$)),
 
       getIsVisible$: () => this.isVisible$,
 

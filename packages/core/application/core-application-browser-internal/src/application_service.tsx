@@ -29,6 +29,7 @@ import type {
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
+import { CustomBranding } from '@kbn/core-chrome-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
@@ -105,6 +106,7 @@ export class ApplicationService {
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
+  private customBranding$ = new BehaviorSubject<CustomBranding | undefined>(undefined);
 
   public setup({
     http: { basePath },
@@ -345,8 +347,15 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
+            customBranding$={
+              this.customBranding$ ? this.customBranding$.pipe(takeUntil(this.stop$)) : undefined
+            }
           />
         );
+      },
+
+      setCustomBranding$: (customBranding$: BehaviorSubject<CustomBranding | undefined>) => {
+        this.customBranding$ = customBranding$;
       },
     };
   }

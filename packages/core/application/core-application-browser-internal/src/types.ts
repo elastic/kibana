@@ -16,6 +16,8 @@ import type {
   ApplicationSetup,
   ApplicationStart,
 } from '@kbn/core-application-browser';
+import { CustomBranding } from '@kbn/core-chrome-browser';
+import { BehaviorSubject } from 'rxjs';
 
 /** @internal */
 export interface Mounter {
@@ -63,4 +65,9 @@ export interface InternalApplicationStart extends ApplicationStart {
    * @internal
    */
   history: History<unknown>;
+  /**
+   * Internal method to set custom branding interface, exposed only to Core.
+   * @param customBranding$
+   */
+  setCustomBranding$(customBranding$: BehaviorSubject<CustomBranding | undefined>): void;
 }

@@ -14,13 +14,18 @@
 
 /** @public */
 export interface CustomBranding {
-  /* similar to iconType
-   * @example 'logoGithub'*/
+  /** Similar to iconType
+   * @example 'logoGithub'
+   * This is refering to the elastic logo in the top left
+   * */
   logo?: string;
-  /** will be set as string even if .png
+  /** Set as string
    * @example href={`${uiPublicURL}/favicons/favicon.png`
+   * need to support only SVG, PNG, GIF files
    * */
   favicon?: string;
+  /** Instead of elastic, Kibana operators can customize the title */
   pageTitle?: string;
+  /** This logo is the loading progress logo that by default is the elastic cluster */
   customizedLogo?: string;
 }
