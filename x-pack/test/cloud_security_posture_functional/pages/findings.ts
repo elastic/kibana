@@ -8,11 +8,13 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'findings']);
   const retry = getService('retry');
+  const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
 
@@ -24,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       log.debug('Check CSP plugin is initialized');
 
       const response = await supertest
-        .get('/internal/cloud_security_posture/status?check_initialized=true')
+        .get('/internal/cloud_security_posture/status?check=init')
         .expect(200);
 
       expect(response.body).to.eql({ initialized: true });
@@ -32,15 +34,51 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       log.debug('CSP plugin is initialized');
     });
 
+  const indexFindings = async () =>
+    Promise.all(
+      Array.from({ length: 11 }, (_, id) => {
+        // We only need to index fields that show up in table columns
+        return es.index({
+          index: FINDINGS_INDEX,
+          body: {
+            resource: { id },
+            result: { evaluation: 'passed' },
+            rule: {
+              name: `Rule ${id}`,
+              section: 'Kubelet',
+              tags: ['Kubernetes'],
+              type: 'process',
+            },
+          },
+        });
+      })
+    );
+
+  const removeFindingsIndex = async () => {
+    try {
+      await es.indices.delete({ index: FINDINGS_INDEX });
+    } catch (e) {}
+  };
   describe('Findings Page', () => {
     before(async () => {
+      await removeFindingsIndex();
       await waitForPluginInitialized();
-      await esArchiver.load('x-pack/test/functional/es_archives/findings');
+      await indexFindings();
       await pageObjects.findings.navigateToFindingsPage();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/findings');
+      await removeFindingsIndex();
+    });
+
+    // Testing only a single column to verify the request we issue results in proper sorting
+    describe('Sorting', () => {
+      it('Sorts by rule name', async () => {
+        await pageObjects.findings.toggleColumnSorting('Rule');
+        await pageObjects.findings.assertColumnSorting('Rule', 'desc');
+        await pageObjects.findings.toggleColumnSorting('Rule');
+        await pageObjects.findings.assertColumnSorting('Rule', 'asc');
+      });
     });
 
     // Testing only page numbers buttons to verify the request we issue results in proper paginating
@@ -59,15 +97,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('Navigates to prev page', async () => {
         await pageObjects.findings.goToPageIndex(0);
         await pageObjects.findings.assertPageIndex(0);
-      });
-    });
-
-    // Testing only a single column to verify the request we issue results in proper sorting
-    describe('Sorting', () => {
-      it('Sorts by rule name', async () => {
-        await pageObjects.findings.assertNameColumnSorting('asc');
-        await pageObjects.findings.toggleNameColumnSorting();
-        await pageObjects.findings.assertNameColumnSorting('desc');
       });
     });
   });

@@ -126,7 +126,7 @@ export const statusQueryParamsSchema = schema.object({
    * CSP Plugin initialization includes creating indices/transforms/tasks.
    * Prior to this initialization, the plugin is not ready to index findings.
    */
-  check_initialized: schema.boolean({ defaultValue: false }),
+  check: schema.oneOf([schema.literal('all'), schema.literal('init')], { defaultValue: 'all' }),
 });
 
 export const defineGetCspStatusRoute = (router: CspRouter): void =>
@@ -141,7 +141,7 @@ export const defineGetCspStatusRoute = (router: CspRouter): void =>
     async (context, request, response) => {
       const cspContext = await context.csp;
       try {
-        if (request.query.check_initialized) {
+        if (request.query.check === 'init') {
           return response.ok({
             body: {
               initialized: cspContext.isPluginInitialized(),

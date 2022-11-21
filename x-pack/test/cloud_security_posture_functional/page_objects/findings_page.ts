@@ -16,11 +16,8 @@ const EUI_PAGINATION_BUTTON = 'tablePaginationPopoverButton';
 
 // Defined in CSP plugin
 const FINDINGS_ROUTE = 'cloud_security_posture/findings';
-const FINDINGS_NAME_COLUMN_TESTID = 'tableHeaderCell_rule.name_5';
-const getNameColumnTestId = (index: string) => `findings_table_cell_rule.name_id-${index}`;
-
-// Defined in archive file
-const getNameColumnText = (index: string) => `Rule ${index}`;
+const FINDINGS_TABLE_TESTID = 'findings_table';
+const FILTER_CELL_VALUE_SELECTOR = 'div[data-test-subj="filter_cell_value"]';
 
 // Defined in Security Solution plugin
 const SECURITY_SOLUTION_APP_NAME = 'securitySolution';
@@ -28,6 +25,26 @@ const SECURITY_SOLUTION_APP_NAME = 'securitySolution';
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
+
+  const getColumnIndex = async (tableTestId: string, columnName: string) => {
+    const table = await testSubjects.find(tableTestId);
+    const headers = await table.findAllByCssSelector('thead th');
+    const headerIndexes = await Promise.all(headers.map((header) => header.getVisibleText()));
+    const columnIndex = headerIndexes.findIndex((i) => i === columnName);
+    return [columnIndex, headers[columnIndex]] as [
+      number,
+      Awaited<ReturnType<typeof testSubjects.find>>
+    ];
+  };
+
+  const getFilterColumnValues = async (tableTestId: string, columnName: string) => {
+    const table = await testSubjects.find(tableTestId);
+    const [columnIndex] = await getColumnIndex(tableTestId, columnName);
+    const columnCells = await table.findAllByCssSelector(
+      `tbody tr td:nth-child(${columnIndex + 1}) ${FILTER_CELL_VALUE_SELECTOR}`
+    );
+    return await Promise.all(columnCells.map((h) => h.getVisibleText()));
+  };
 
   const navigateToFindingsPage = async () => {
     await PageObjects.common.navigateToUrl(SECURITY_SOLUTION_APP_NAME, FINDINGS_ROUTE, {
@@ -57,41 +74,29 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     expect(text).to.be(getEuiPaginationText(size));
   };
 
-  const assertNameColumnCellValue = async (index: string) => {
-    const text = await testSubjects.getVisibleText(getNameColumnTestId(index));
-    expect(text).to.be(getNameColumnText(index));
+  const assertColumnSorting = async (columnName: string, direction: 'asc' | 'desc') => {
+    const values = await getFilterColumnValues(FINDINGS_TABLE_TESTID, columnName);
+    const sorted = values
+      .slice()
+      .sort((a, b) => (direction === 'asc' ? a.localeCompare(b) : b.localeCompare(a)));
+
+    values.every((value, i) => expect(value).to.be(sorted[i]));
   };
 
-  /**
-   * Note: column name values are defined in the archive file
-   */
-  const assertNameColumnSorting = async (direction: 'asc' | 'desc') => {
-    if (direction === 'asc') {
-      await testSubjects.missingOrFail(getNameColumnTestId('11')); // page 2
-      await assertNameColumnCellValue('00');
-      await assertNameColumnCellValue('09');
-    } else if (direction === 'desc') {
-      await testSubjects.missingOrFail(getNameColumnTestId('00')); // page 1
-      await assertNameColumnCellValue('11');
-      await assertNameColumnCellValue('02');
-    }
-  };
-
-  const toggleNameColumnSorting = async () => {
-    const id = FINDINGS_NAME_COLUMN_TESTID;
-    const element = await testSubjects.find(id);
+  const toggleColumnSorting = async (columnName: string) => {
+    const [_, element] = await getColumnIndex(FINDINGS_TABLE_TESTID, columnName);
     const currentSort = await element.getAttribute('aria-sort');
-    if (currentSort === 'none') await testSubjects.click(id); // a click is needed to focus on Eui column header
-    await testSubjects.click(id);
+    if (currentSort === 'none') await element.click(); // a click is needed to focus on Eui column header
+    await element.click();
   };
 
   return {
+    assertColumnSorting,
     assertPageIndex,
     goToPageIndex,
     assertPageSize,
     changePageSize,
     navigateToFindingsPage,
-    toggleNameColumnSorting,
-    assertNameColumnSorting,
+    toggleColumnSorting,
   };
 }
