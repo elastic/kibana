@@ -11,7 +11,6 @@ exports[`renders DashboardSaveModal 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
@@ -32,7 +31,6 @@ exports[`renders DashboardSaveModal 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
