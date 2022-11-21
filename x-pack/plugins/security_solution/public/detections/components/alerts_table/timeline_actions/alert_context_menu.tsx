@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
@@ -77,6 +79,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const getAlertId = () => (ecsRowData?.kibana?.alert ? ecsRowData?._id : null);
   const alertId = getAlertId();
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
+  const ruleRuleId = get(0, ecsRowData?.kibana?.alert?.rule?.rule_id);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
   const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
     scopeId as TableId
@@ -262,19 +265,24 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
           </EventsTdContent>
         </div>
       )}
-      {openAddExceptionFlyout && ruleId != null && ruleName != null && ecsRowData?._id != null && (
-        <AddExceptionFlyoutWrapper
-          ruleId={ruleId}
-          ruleIndices={ruleIndex}
-          ruleDataViewId={ruleDataViewId}
-          ruleName={ruleName}
-          exceptionListType={exceptionFlyoutType}
-          eventId={ecsRowData?._id}
-          onCancel={onAddExceptionCancel}
-          onConfirm={onAddExceptionConfirm}
-          alertStatus={alertStatus}
-        />
-      )}
+      {openAddExceptionFlyout &&
+        ruleId &&
+        ruleRuleId &&
+        ruleName != null &&
+        ecsRowData?._id != null && (
+          <AddExceptionFlyoutWrapper
+            ruleId={ruleId}
+            ruleRuleId={ruleRuleId}
+            ruleIndices={ruleIndex}
+            ruleDataViewId={ruleDataViewId}
+            ruleName={ruleName}
+            exceptionListType={exceptionFlyoutType}
+            eventId={ecsRowData?._id}
+            onCancel={onAddExceptionCancel}
+            onConfirm={onAddExceptionConfirm}
+            alertStatus={alertStatus}
+          />
+        )}
       {isAddEventFilterModalOpen && ecsRowData != null && (
         <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
@@ -319,6 +327,7 @@ type AddExceptionFlyoutWrapperProps = Omit<
 > & {
   eventId?: string;
   ruleId: Rule['id'];
+  ruleRuleId: Rule['rule_id'];
   ruleIndices: Rule['index'];
   ruleDataViewId: Rule['data_view_id'];
   ruleName: Rule['name'];
@@ -332,6 +341,7 @@ type AddExceptionFlyoutWrapperProps = Omit<
  */
 export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps> = ({
   ruleId,
+  ruleRuleId,
   ruleIndices,
   ruleDataViewId,
   ruleName,
@@ -395,6 +405,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
         {
           ...enrichedAlert['kibana.alert.rule.parameters'],
           id: ruleId,
+          rule_id: ruleRuleId,
           name: ruleName,
           index: memoRuleIndices,
           data_view_id: memoDataViewId,
@@ -405,12 +416,13 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     return [
       {
         id: ruleId,
+        rule_id: ruleRuleId,
         name: ruleName,
         index: memoRuleIndices,
         data_view_id: memoDataViewId,
       },
     ] as Rule[];
-  }, [enrichedAlert, memoDataViewId, memoRuleIndices, ruleId, ruleName]);
+  }, [enrichedAlert, memoDataViewId, memoRuleIndices, ruleId, ruleName, ruleRuleId]);
 
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
