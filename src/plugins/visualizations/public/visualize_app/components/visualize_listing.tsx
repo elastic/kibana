@@ -212,8 +212,7 @@ export const VisualizeListing = () => {
     () => ({
       title: [
         {
-          // @todo: change to warning
-          type: 'error',
+          type: 'warning',
           async fn(value, id) {
             const content = visualizedUserContent.current?.find((c) => c.id === id);
             if (content) {
@@ -234,8 +233,7 @@ export const VisualizeListing = () => {
                 return i18n.translate(
                   'visualizations.visualizeListingDeleteErrorTitle.duplicateWarning',
                   {
-                    defaultMessage:
-                      'This Visualization already exists. Saving {value} creates a duplicate title.',
+                    defaultMessage: 'Saving "{value}" creates a duplicate title.',
                     values: {
                       value,
                     },

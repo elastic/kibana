@@ -11,7 +11,8 @@ import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiFieldText, EuiTextArea, EuiSpacer } from '@elastic/eui';
 
-import type { MetadataFormState } from './use_metadata_form';
+import { InspectorFlyoutWarningsCallOut } from './inspector_flyout_warnings';
+import type { MetadataFormState, Field } from './use_metadata_form';
 import type { SavedObjectsReference, Services } from '../services';
 
 interface Props {
@@ -23,6 +24,8 @@ interface Props {
   TagList?: Services['TagList'];
   TagSelector?: Services['TagSelector'];
 }
+
+const isFormFieldValid = (field: Field) => !field.isChangingValue && Boolean(field.errors?.length);
 
 export const MetadataForm: FC<Props> = ({
   form,
@@ -41,7 +44,10 @@ export const MetadataForm: FC<Props> = ({
     isSubmitted,
     isValid,
     getErrorsMessages,
+    getWarningMessages,
   } = form;
+
+  const warningMessages = getWarningMessages();
 
   return (
     <EuiForm
@@ -49,16 +55,18 @@ export const MetadataForm: FC<Props> = ({
       error={getErrorsMessages()}
       data-test-subj="metadataForm"
     >
+      <InspectorFlyoutWarningsCallOut warningMessages={warningMessages} />
+
       <EuiFormRow
         label={i18n.translate('contentManagement.inspector.metadataForm.nameInputLabel', {
           defaultMessage: 'Name',
         })}
         error={title.errors}
-        isInvalid={!title.isChangingValue && Boolean(title.errors?.length)}
+        isInvalid={!isFormFieldValid(title)}
         fullWidth
       >
         <EuiFieldText
-          isInvalid={!title.isChangingValue && Boolean(title.errors?.length)}
+          isInvalid={!isFormFieldValid(title)}
           value={title.value}
           onChange={(e) => {
             setTitle(e.target.value);
@@ -77,11 +85,11 @@ export const MetadataForm: FC<Props> = ({
           defaultMessage: 'Description',
         })}
         error={description.errors}
-        isInvalid={!description.isChangingValue && Boolean(description.errors?.length)}
+        isInvalid={!isFormFieldValid(description)}
         fullWidth
       >
         <EuiTextArea
-          isInvalid={!description.isChangingValue && Boolean(description.errors?.length)}
+          isInvalid={!isFormFieldValid(description)}
           value={description.value}
           onChange={(e) => {
             setDescription(e.target.value);

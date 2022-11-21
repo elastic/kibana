@@ -11,20 +11,20 @@ import { i18n } from '@kbn/i18n';
 
 import type { Item } from '../types';
 
-interface Field<TValueType = unknown> {
+export interface Field<TValueType = unknown> {
   value: TValueType;
   isChangingValue: boolean;
   errors?: string[];
   warnings?: string[];
 }
 
-export interface Fields {
+interface Fields {
   title: Field<string>;
   description: Field<string>;
   tags: Field<string[]>;
 }
 
-export interface Validator<TValueType = unknown> {
+interface Validator<TValueType = unknown> {
   type: 'warning' | 'error';
   fn: (value: TValueType, id: Item['id']) => undefined | string | Promise<undefined | string>;
 }
@@ -171,13 +171,13 @@ export const useMetadataForm = ({
 
   const { errors, warnings } = useMemo(
     () =>
-      Object.values(fields).reduce(
+      Object.values(fields).reduce<Pick<Field, 'errors' | 'warnings'>>(
         (acc, field: Field) => {
           if (Array.isArray(field.errors)) {
-            acc.errors = [...acc.errors, ...field.errors];
+            acc.errors = [...(acc.errors ?? []), ...field.errors];
           }
           if (Array.isArray(field.warnings)) {
-            acc.warnings = [...acc.warnings, ...field.warnings];
+            acc.warnings = [...(acc.warnings ?? []), ...field.warnings];
           }
           return acc;
         },
