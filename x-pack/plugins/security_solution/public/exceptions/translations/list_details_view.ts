@@ -28,6 +28,13 @@ export const EXCEPTION_LIST_EMPTY_VIEWER_BUTTON = i18n.translate(
   }
 );
 
+export const EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON_ENDPOINT = i18n.translate(
+  'xpack.securitySolution.exception.list.search_bar_button_enpoint',
+  {
+    defaultMessage: 'Add endpoint exception to list',
+  }
+);
+
 export const EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON = i18n.translate(
   'xpack.securitySolution.exception.list.search_bar_button',
   {

@@ -16,6 +16,7 @@ import {
   SearchBar,
   EmptyViewerState,
   ViewerStatus,
+  ListTypeText,
 } from '@kbn/securitysolution-exception-list-components';
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
@@ -78,6 +79,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
           title={i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE}
           body={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BODY(listName)}
           buttonText={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON}
+          listType={listType === ExceptionListTypeEnum.ENDPOINT ? ListTypeText.ENDPOINT : undefined}
         />
       ) : (
         <EuiPanel hasBorder={false} hasShadow={false}>
@@ -94,7 +96,11 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
               />
             )}
             <SearchBar
-              addExceptionButtonText={i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON}
+              addExceptionButtonText={
+                listType === ExceptionListTypeEnum.ENDPOINT
+                  ? i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON_ENDPOINT
+                  : i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON
+              }
               listType={listType as ExceptionListTypeEnum}
               onSearch={onSearch}
               onAddExceptionClick={onAddExceptionClick}
