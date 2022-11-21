@@ -618,7 +618,6 @@ export const EndpointList = () => {
     canReadEndpointList,
     endpointPrivilegesLoading,
     missingFleetAccessInfo,
-    services?.docLinks.links.securitySolution.privileges,
   ]);
 
   const hasListData = listData && listData.length > 0;
