@@ -23134,7 +23134,6 @@
     "xpack.observability.enableComparisonByDefaultDescription": "在 APM 应用中启用对比功能",
     "xpack.observability.enableInspectEsQueriesExperimentDescription": "检查 API 响应中的 Elasticsearch 查询。",
     "xpack.observability.enableInspectEsQueriesExperimentName": "检查 ES 查询",
-    "xpack.observability.enableNewSyntheticsViewExperimentDescription": "在 Observability 中启用新的组合监测应用程序。刷新页面可应用该设置。",
     "xpack.observability.enableNewSyntheticsViewExperimentName": "启用新的组合监测应用程序",
     "xpack.observability.enableServiceGroups": "服务组功能",
     "xpack.observability.exp.breakDownFilter.noBreakdown": "无细目",
