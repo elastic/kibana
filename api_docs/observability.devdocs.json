@@ -927,9 +927,11 @@
         "signature": [
           "({ children, ...props }: { children?: React.ReactNode; } & ",
           "CommonProps",
-          " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: GutterSize | undefined; listItems?: ",
+          " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"none\" | \"m\" | \"s\" | undefined; listItems?: ",
           "EuiListGroupItemProps",
-          "[] | undefined; color?: Color | undefined; size?: ItemSize | undefined; maxWidth?: string | number | boolean | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => JSX.Element"
+          "[] | undefined; color?: \"subdued\" | \"primary\" | \"text\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
+          "Property",
+          ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
         "deprecated": false,
@@ -945,9 +947,11 @@
             "signature": [
               "{ children?: React.ReactNode; } & ",
               "CommonProps",
-              " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: GutterSize | undefined; listItems?: ",
+              " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"none\" | \"m\" | \"s\" | undefined; listItems?: ",
               "EuiListGroupItemProps",
-              "[] | undefined; color?: Color | undefined; size?: ItemSize | undefined; maxWidth?: string | number | boolean | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }"
+              "[] | undefined; color?: \"subdued\" | \"primary\" | \"text\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
+              "Property",
+              ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
             "deprecated": false,
@@ -5544,13 +5548,13 @@
           "DisambiguateSet",
           "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
           "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: ItemSize | undefined; color?: Color | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
+          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; color?: \"subdued\" | \"primary\" | \"text\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
           "IconType",
           " | undefined; iconProps?: Omit<",
           "EuiIconProps",
-          ", \"type\"> | undefined; icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; showToolTip?: boolean | undefined; extraAction?: ({ type?: \"reset\" | \"button\" | \"submit\" | undefined; } & ",
-          "EuiButtonIconProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; } & { alwaysShow?: boolean | undefined; }) | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; toolTipText?: string | undefined; }"
+          ", \"type\"> | undefined; icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; showToolTip?: boolean | undefined; extraAction?: ",
+          "EuiListGroupItemExtraActionProps",
+          " | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; toolTipText?: string | undefined; }"
         ],
         "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
         "deprecated": false,
