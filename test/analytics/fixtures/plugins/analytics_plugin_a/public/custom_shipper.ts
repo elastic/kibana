@@ -39,5 +39,8 @@ export class CustomShipper implements IShipper {
   extendContext(newContext: EventContext) {
     this.actions$.next({ action: 'extendContext', meta: newContext });
   }
+  async flush() {
+    this.actions$.next({ action: 'flush', meta: {} });
+  }
   shutdown() {}
 }

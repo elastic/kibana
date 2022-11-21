@@ -38,7 +38,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const isUnenrolling = agent.status === 'unenrolling';
 
   const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
-  const { showRequestDiagnostics } = ExperimentalFeaturesService.get();
+  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
 
   const onClose = useMemo(() => {
     if (onCancelReassign) {
@@ -95,7 +95,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     </EuiContextMenuItem>,
   ];
 
-  if (showRequestDiagnostics) {
+  if (diagnosticFileUploadEnabled) {
     menuItems.push(
       <EuiContextMenuItem
         icon="download"

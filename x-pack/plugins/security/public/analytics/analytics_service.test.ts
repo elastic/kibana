@@ -57,7 +57,7 @@ describe('AnalyticsService', () => {
   });
 
   it('throttle reporting of the authentication type events', async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const mockCore = coreMock.createStart();
     mockCore.http.post.mockResolvedValue({ signature: 'some-signature', timestamp: 1234 });

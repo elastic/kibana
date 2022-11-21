@@ -13,7 +13,7 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { MlClient } from '../../lib/helpers/get_ml_client';

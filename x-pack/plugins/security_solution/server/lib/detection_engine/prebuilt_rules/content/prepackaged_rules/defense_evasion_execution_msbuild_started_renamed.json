@@ -10,7 +10,8 @@
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-windows.*",
+    "endgame-*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
@@ -43,7 +44,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Defense Evasion"
+    "Defense Evasion",
+    "Elastic Endgame"
   ],
   "threat": [
     {
@@ -71,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 101
+  "version": 102
 }

@@ -93,6 +93,11 @@ module.exports = {
     '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/react_testing_library.js',
   ],
 
+  snapshotFormat: {
+    escapeString: true,
+    printBasicPrototype: true,
+  },
+
   // A list of paths to snapshot serializer modules Jest should use for snapshot testing
   snapshotSerializers: [
     '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
@@ -116,8 +121,8 @@ module.exports = {
   // A map from regular expressions to paths to transformers
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/babel_transform.js',
-    '^.+\\.txt?$': 'jest-raw-loader',
-    '^.+\\.html?$': 'jest-raw-loader',
+    '^.+\\.txt?$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/raw_transform.js',
+    '^.+\\.html?$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/raw_transform.js',
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation

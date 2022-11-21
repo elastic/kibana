@@ -210,7 +210,8 @@ describe('Body', () => {
     trailingControlColumns: [],
   };
 
-  describe('rendering', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/145187
+  describe.skip('rendering', () => {
     beforeEach(() => {
       mockDispatch.mockClear();
     });

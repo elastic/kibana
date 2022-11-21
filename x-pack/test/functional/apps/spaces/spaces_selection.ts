@@ -23,7 +23,7 @@ export default function spaceSelectorFunctionalTests({
   const spacesService = getService('spaces');
 
   // Failing: See https://github.com/elastic/kibana/issues/142155
-  describe.skip('Spaces', function () {
+  describe('Spaces', function () {
     const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
     before(async () => {
       for (const testSpaceId of testSpacesIds) {

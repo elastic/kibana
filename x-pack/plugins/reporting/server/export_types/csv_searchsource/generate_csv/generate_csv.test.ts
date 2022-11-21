@@ -830,6 +830,50 @@ it('can override ignoring frozen indices', async () => {
   );
 });
 
+it('adds a warning if export was unable to close the PIT', async () => {
+  mockEsClient.asCurrentUser.closePointInTime = jest.fn().mockRejectedValueOnce(
+    new esErrors.ResponseError({
+      statusCode: 419,
+      warnings: [],
+      meta: { context: 'test' } as any,
+    })
+  );
+
+  const generateCsv = new CsvGenerator(
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
+    mockConfig,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
+    new CancellationToken(),
+    mockLogger,
+    stream
+  );
+
+  await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
+          Object {
+            "content_type": "text/csv",
+            "csv_contains_formulas": false,
+            "error_code": undefined,
+            "max_size_reached": false,
+            "metrics": Object {
+              "csv": Object {
+                "rows": 0,
+              },
+            },
+            "warnings": Array [
+              "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
+            ],
+          }
+        `);
+});
+
 it('will return partial data if the scroll or search fails', async () => {
   mockDataClient.search = jest.fn().mockImplementation(() => {
     throw new esErrors.ResponseError({

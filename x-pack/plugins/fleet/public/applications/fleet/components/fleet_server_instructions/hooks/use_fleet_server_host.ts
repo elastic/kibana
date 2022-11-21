@@ -12,6 +12,7 @@ import {
   useComboInput,
   useInput,
   useSwitchInput,
+  validateInputs,
 } from '../../../hooks';
 import type { FleetServerHost } from '../../../types';
 
@@ -44,10 +45,16 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   const isDefaultInput = useSwitchInput(false, isPreconfigured || fleetServerHost?.is_default);
   const hostUrlsInput = useComboInput('hostUrls', [], validateFleetServerHosts, isPreconfigured);
 
-  const validate = useCallback(
-    () => hostUrlsInput.validate() && nameInput.validate(),
-    [hostUrlsInput, nameInput]
+  const inputs = useMemo(
+    () => ({
+      nameInput,
+      isDefaultInput,
+      hostUrlsInput,
+    }),
+    [nameInput, isDefaultInput, hostUrlsInput]
   );
+
+  const validate = useCallback(() => validateInputs(inputs), [inputs]);
 
   const { data, resendRequest: refreshGetFleetServerHosts } = useGetFleetServerHosts();
 
@@ -97,10 +104,6 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     isFleetServerHostSubmitted,
     setFleetServerHost,
     validate,
-    inputs: {
-      hostUrlsInput,
-      nameInput,
-      isDefaultInput,
-    },
+    inputs,
   };
 };

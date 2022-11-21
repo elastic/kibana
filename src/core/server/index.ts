@@ -245,6 +245,7 @@ export type {
 
 export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
+export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type {
   SavedObject,
   SavedObjectAttribute,
@@ -265,6 +266,7 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectTypeIdTuple,
 } from '@kbn/core-saved-objects-common';
 export type {
   SavedObjectsBulkCreateObject,
@@ -314,15 +316,19 @@ export type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsPointInTimeFinderClient,
+  SavedObjectsBulkDeleteStatus,
 } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
   SavedObjectsClientProviderOptions,
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensionFactory,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
   SavedObjectsExportResultDetails,
   SavedObjectsExportExcludedObject,
@@ -358,6 +364,23 @@ export type {
   SavedObjectsValidationSpec,
   ISavedObjectsSerializer,
   SavedObjectsRequestHandlerContext,
+  EncryptedObjectDescriptor,
+  ISavedObjectsEncryptionExtension,
+  CheckAuthorizationParams,
+  AuthorizationTypeEntry,
+  AuthorizationTypeMap,
+  CheckAuthorizationResult,
+  EnforceAuthorizationParams,
+  AddAuditEventParams,
+  RedactNamespacesParams,
+  ISavedObjectsSecurityExtension,
+  ISavedObjectsSpacesExtension,
+  SavedObjectsExtensions,
+} from '@kbn/core-saved-objects-server';
+export {
+  ENCRYPTION_EXTENSION_ID,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
 } from '@kbn/core-saved-objects-server';
 export {
   SavedObjectsErrorHelpers,

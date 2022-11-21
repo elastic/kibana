@@ -9,7 +9,11 @@ import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types'
 import { ElasticsearchClient } from '@kbn/core/server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { getMlModelTypesForModelConfig } from '../../../../../../common/ml_inference_pipeline';
+import {
+  getMlModelTypesForModelConfig,
+  parseModelStateFromStats,
+  parseModelStateReasonFromStats,
+} from '../../../../../../common/ml_inference_pipeline';
 import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 
@@ -139,27 +143,9 @@ export const getMlModelConfigsForModelIds = async (
   trainedModelsStats.trained_model_stats.forEach((trainedModelStats) => {
     const trainedModelName = trainedModelStats.model_id;
     if (modelConfigs.hasOwnProperty(trainedModelName)) {
-      let modelState: TrainedModelState;
-      switch (trainedModelStats.deployment_stats?.state) {
-        case 'started':
-          modelState = TrainedModelState.Started;
-          break;
-        case 'starting':
-          modelState = TrainedModelState.Starting;
-          break;
-        case 'stopping':
-          modelState = TrainedModelState.Stopping;
-          break;
-        // @ts-ignore: type is wrong, "failed" is a possible state
-        case 'failed':
-          modelState = TrainedModelState.Failed;
-          break;
-        default:
-          modelState = TrainedModelState.NotDeployed;
-          break;
-      }
-      modelConfigs[trainedModelName].modelState = modelState;
-      modelConfigs[trainedModelName].modelStateReason = trainedModelStats.deployment_stats?.reason;
+      modelConfigs[trainedModelName].modelState = parseModelStateFromStats(trainedModelStats);
+      modelConfigs[trainedModelName].modelStateReason =
+        parseModelStateReasonFromStats(trainedModelStats);
     }
   });
 
