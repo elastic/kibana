@@ -283,22 +283,20 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
               >
                 {hasExtraBadges ? (
                   <>
-                    +{Object.keys(group).length - MAX_GROUP_BADGES}{' '}
                     <FormattedMessage
                       id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
-                      defaultMessage="more field/value pairs"
+                      defaultMessage="+{count, plural, one {# more field/value pair} other {# more field/value pairs}}"
+                      values={{ count: Object.keys(group).length - MAX_GROUP_BADGES }}
                     />
                     <br />
                   </>
                 ) : null}
                 {Object.keys(repeatedValues).length > 0 ? (
-                  <>
-                    +{Object.keys(repeatedValues).length}{' '}
-                    <FormattedMessage
-                      id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreRepeatedLabel"
-                      defaultMessage="more field/value pairs also appearing in other groups"
-                    />
-                  </>
+                  <FormattedMessage
+                    id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreRepeatedLabel"
+                    defaultMessage="+{count, plural, one {# more field/value pair} other {# more field/value pairs}} also appearing in other groups"
+                    values={{ count: Object.keys(repeatedValues).length }}
+                  />
                 ) : null}
               </EuiBadge>
               <EuiSpacer size="xs" />
