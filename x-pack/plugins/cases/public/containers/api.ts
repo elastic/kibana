@@ -231,6 +231,10 @@ export const updateCases = async (
   cases: CaseUpdateRequest[],
   signal: AbortSignal
 ): Promise<Case[]> => {
+  if (cases.length === 0) {
+    return [];
+  }
+
   const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases }),
