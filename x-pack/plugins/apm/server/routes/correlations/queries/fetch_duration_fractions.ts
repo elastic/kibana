@@ -12,7 +12,7 @@ import { CommonCorrelationsQueryParams } from '../../../../common/correlations/t
 import {
   SPAN_DURATION,
   TRANSACTION_DURATION,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 

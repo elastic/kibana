@@ -10,6 +10,8 @@ import { readFileSync } from 'fs';
 import type { Duration } from 'moment';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { IConfigService } from '@kbn/config';
+import { Logger } from '@kbn/logging';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
@@ -30,14 +32,22 @@ const configSchema = schema.object({
   }),
 });
 
-export type KibanaConfigType = TypeOf<typeof configSchema>;
+type KibanaConfigType = TypeOf<typeof configSchema>;
 
 export const config: ServiceConfigDescriptor<KibanaConfigType> = {
   path: 'kibana' as const,
   schema: configSchema,
 };
 
+interface KibanaConfigDependencies {
+  logger: Logger;
+  config: IConfigService;
+}
+
 export class KibanaConfig {
+  private readonly logger: Logger;
+  private readonly config: KibanaConfigType;
+
   /**
    * Kibana hosts that the gateway will connect to.
    */
@@ -53,17 +63,43 @@ export class KibanaConfig {
    */
   public readonly ssl: SslConfig;
 
-  constructor(rawConfig: KibanaConfigType) {
-    this.hosts = rawConfig.hosts;
-    this.requestTimeout = rawConfig.requestTimeout;
+  constructor({ logger, config: configService }: KibanaConfigDependencies) {
+    this.logger = logger.get('kibana-config');
+    this.config = configService.atPathSync<KibanaConfigType>('kibana');
 
-    const { verificationMode } = rawConfig.ssl;
-    const { certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
+    this.hosts = this.config.hosts;
+    this.requestTimeout = this.config.requestTimeout;
+
+    const { verificationMode } = this.config.ssl;
+    const { certificate, certificateAuthorities } = this.readKeyAndCerts();
 
     this.ssl = {
       certificate,
       certificateAuthorities,
       verificationMode,
+    };
+  }
+
+  private readKeyAndCerts() {
+    const certificate = this.config.ssl.certificate
+      ? readFile(this.config.ssl.certificate)
+      : undefined;
+
+    if (certificate) {
+      this.logger.debug(`Reading certificate: ${this.config.ssl.certificate}`);
+    }
+
+    const certificateAuthorities = [] as string[];
+    const ca = this.config.ssl.certificateAuthorities || [];
+
+    for (const path of Array.isArray(ca) ? ca : [ca]) {
+      this.logger.debug(`Adding certificate authority: ${path}`);
+      certificateAuthorities.push(readFile(path));
+    }
+
+    return {
+      certificate,
+      certificateAuthorities: certificateAuthorities.length ? certificateAuthorities : undefined,
     };
   }
 }
@@ -73,37 +109,5 @@ interface SslConfig {
   certificate?: string;
   certificateAuthorities?: string[];
 }
-
-const readKeyAndCerts = (rawConfig: KibanaConfigType) => {
-  let certificate: string | undefined;
-  let certificateAuthorities: string[] | undefined;
-
-  const addCAs = (ca: string[] | undefined) => {
-    if (ca && ca.length) {
-      certificateAuthorities = [...(certificateAuthorities || []), ...ca];
-    }
-  };
-
-  if (rawConfig.ssl.certificate) {
-    certificate = readFile(rawConfig.ssl.certificate);
-  }
-
-  const ca = rawConfig.ssl.certificateAuthorities;
-  if (ca) {
-    const parsed: string[] = [];
-    const paths = Array.isArray(ca) ? ca : [ca];
-    if (paths.length > 0) {
-      for (const path of paths) {
-        parsed.push(readFile(path));
-      }
-      addCAs(parsed);
-    }
-  }
-
-  return {
-    certificate,
-    certificateAuthorities,
-  };
-};
 
 const readFile = (file: string) => readFileSync(file, 'utf8');
