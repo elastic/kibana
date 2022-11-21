@@ -37,7 +37,7 @@ export const useUpdateCases = () => {
         showSuccessToast(successToasterTitle);
       },
       onError: (error: ServerError) => {
-        showErrorToast(error, { title: i18n.ERROR_DELETING });
+        showErrorToast(error, { title: i18n.ERROR_UPDATING });
       },
     }
   );
