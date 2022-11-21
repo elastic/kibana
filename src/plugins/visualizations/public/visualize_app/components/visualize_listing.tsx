@@ -214,31 +214,33 @@ export const VisualizeListing = () => {
         {
           type: 'warning',
           async fn(value, id) {
-            const content = visualizedUserContent.current?.find((c) => c.id === id);
-            if (content) {
-              try {
-                await checkForDuplicateTitle(
-                  {
-                    id,
-                    title: value,
-                    lastSavedTitle: content.title,
-                    getEsType: () => content.type,
-                  },
-                  false,
-                  false,
-                  () => {},
-                  { savedObjectsClient: savedObjects.client, overlays }
-                );
-              } catch (e) {
-                return i18n.translate(
-                  'visualizations.visualizeListingDeleteErrorTitle.duplicateWarning',
-                  {
-                    defaultMessage: 'Saving "{value}" creates a duplicate title.',
-                    values: {
-                      value,
+            if (id) {
+              const content = visualizedUserContent.current?.find((c) => c.id === id);
+              if (content) {
+                try {
+                  await checkForDuplicateTitle(
+                    {
+                      id,
+                      title: value,
+                      lastSavedTitle: content.title,
+                      getEsType: () => content.type,
                     },
-                  }
-                );
+                    false,
+                    false,
+                    () => {},
+                    { savedObjectsClient: savedObjects.client, overlays }
+                  );
+                } catch (e) {
+                  return i18n.translate(
+                    'visualizations.visualizeListingDeleteErrorTitle.duplicateWarning',
+                    {
+                      defaultMessage: 'Saving "{value}" creates a duplicate title.',
+                      values: {
+                        value,
+                      },
+                    }
+                  );
+                }
               }
             }
           },
