@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { observabilityAlertFeatureIds } from '../../../config';
 import { ObservabilityAppServices } from '../../../application/types';
 import { AlertsStatusFilter } from './components';
@@ -20,7 +20,9 @@ import { buildEsQuery } from '../../../utils/build_es_query';
 import { AlertStatus } from '../../../../common/typings';
 
 const getAlertStatusQuery = (status: string): Query[] => {
-  return status ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }] : [];
+  return ALERT_STATUS_QUERY[status]
+    ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }]
+    : [];
 };
 
 export function ObservabilityAlertSearchBar({

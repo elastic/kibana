@@ -92,7 +92,7 @@ export class APMPlugin
     ) {
       createApmTelemetry({
         core,
-        config$,
+        config: currentConfig,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,

@@ -21,6 +21,11 @@ import {
   getIsLicenseError,
   getRuleStatusMessage,
 } from '../../../../common/lib/rule_status_helpers';
+import {
+  ALERT_STATUS_LICENSE_ERROR,
+  rulesLastRunOutcomeTranslationMapping,
+  rulesStatusesTranslationsMapping,
+} from '../translations';
 
 export interface RulesListTableStatusCellProps {
   rule: RuleTableItem;
@@ -33,7 +38,12 @@ export const RulesListTableStatusCell = (props: RulesListTableStatusCellProps) =
 
   const isLicenseError = getIsLicenseError(rule);
   const healthColor = getRuleHealthColor(rule);
-  const statusMessage = getRuleStatusMessage(rule);
+  const statusMessage = getRuleStatusMessage({
+    rule,
+    licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
+    lastOutcomeTranslations: rulesLastRunOutcomeTranslationMapping,
+    executionStatusTranslations: rulesStatusesTranslationsMapping,
+  });
   const tooltipMessage = lastRun?.outcome === 'failed' ? `Error: ${lastRun?.outcomeMsg}` : null;
 
   if (!statusMessage) {

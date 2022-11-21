@@ -18,10 +18,12 @@ import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import * as i18n from '../../translations';
 import { useListExceptionItems } from '..';
 
-export const useListWithSearchComponent = (list: ExceptionListSchema) => {
+export const useListWithSearchComponent = (
+  list: ExceptionListSchema,
+  refreshExceptions?: boolean
+) => {
   const [showAddExceptionFlyout, setShowAddExceptionFlyout] = useState(false);
   const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
-
   const [exceptionToEdit, setExceptionToEdit] = useState<ExceptionListItemSchema>();
   const [viewerStatus, setViewerStatus] = useState<ViewerStatus | string>(ViewerStatus.LOADING);
 
@@ -54,7 +56,7 @@ export const useListWithSearchComponent = (list: ExceptionListSchema) => {
 
   useEffect(() => {
     fetchItems(null, ViewerStatus.LOADING);
-  }, [fetchItems]);
+  }, [fetchItems, refreshExceptions]);
 
   const emptyViewerTitle = useMemo(() => {
     return viewerStatus === ViewerStatus.EMPTY ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE : '';

@@ -772,7 +772,7 @@ exports[`prepares assets for distribution: metrics.json 1`] = `
     \\"group\\": \\"page load bundle size\\",
     \\"id\\": \\"foo\\",
     \\"value\\": 2457,
-    \\"limitConfigPath\\": \\"node_modules/@kbn/optimizer/limits.yml\\"
+    \\"limitConfigPath\\": \\"packages/kbn-optimizer/limits.yml\\"
   },
   {
     \\"group\\": \\"async chunks size\\",

@@ -40,6 +40,8 @@ export const ListsDetailViewComponent: FC = () => {
     showReferenceErrorModal,
     referenceModalState,
     showManageButtonLoader,
+    refreshExceptions,
+    disableManageButton,
     onEditListDetails,
     onExportList,
     onManageRules,
@@ -76,7 +78,7 @@ export const ListsDetailViewComponent: FC = () => {
       />
 
       <AutoDownload blob={exportedList} name={listId} />
-      <ListWithSearch list={list} isReadOnly={isReadOnly} />
+      <ListWithSearch list={list} refreshExceptions={refreshExceptions} isReadOnly={isReadOnly} />
       <ReferenceErrorModal
         cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
         confirmText={i18n.REFERENCE_MODAL_CONFIRM_BUTTON}
@@ -91,10 +93,11 @@ export const ListsDetailViewComponent: FC = () => {
       {showManageRulesFlyout ? (
         <ManageRules
           linkedRules={linkedRules as Rule[]}
+          showButtonLoader={showManageButtonLoader}
+          saveIsDisabled={disableManageButton}
           onSave={onSaveManageRules}
           onCancel={onCancelManageRules}
           onRuleSelectionChange={onRuleSelectionChange}
-          showButtonLoader={showManageButtonLoader}
         />
       ) : null}
     </>

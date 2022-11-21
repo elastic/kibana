@@ -11,11 +11,6 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
 import { Rule } from '../../types';
-import {
-  rulesLastRunOutcomeTranslationMapping,
-  rulesStatusesTranslationsMapping,
-  ALERT_STATUS_LICENSE_ERROR,
-} from '../../application/sections/rules_list/translations';
 
 export const getOutcomeHealthColor = (status: RuleLastRunOutcomes) => {
   switch (status) {
@@ -48,11 +43,11 @@ export const getExecutionStatusHealthColor = (status: RuleExecutionStatuses) => 
 };
 
 export const getRuleHealthColor = (rule: Rule) => {
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
-  if (isRuleLastRunOutcomeEnabled) {
-    return (rule.lastRun && getOutcomeHealthColor(rule.lastRun.outcome)) || 'subdued';
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
+  if (isRuleUsingExecutionStatus) {
+    return getExecutionStatusHealthColor(rule.executionStatus.status);
   }
-  return getExecutionStatusHealthColor(rule.executionStatus.status);
+  return (rule.lastRun && getOutcomeHealthColor(rule.lastRun.outcome)) || 'subdued';
 };
 
 export const getIsLicenseError = (rule: Rule) => {
@@ -62,15 +57,25 @@ export const getIsLicenseError = (rule: Rule) => {
   );
 };
 
-export const getRuleStatusMessage = (rule: Rule) => {
+export const getRuleStatusMessage = ({
+  rule,
+  licenseErrorText,
+  lastOutcomeTranslations,
+  executionStatusTranslations,
+}: {
+  rule: Rule;
+  licenseErrorText: string;
+  lastOutcomeTranslations: Record<string, string>;
+  executionStatusTranslations: Record<string, string>;
+}) => {
   const isLicenseError = getIsLicenseError(rule);
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   if (isLicenseError) {
-    return ALERT_STATUS_LICENSE_ERROR;
+    return licenseErrorText;
   }
-  if (isRuleLastRunOutcomeEnabled) {
-    return rule.lastRun && rulesLastRunOutcomeTranslationMapping[rule.lastRun.outcome];
+  if (isRuleUsingExecutionStatus) {
+    return executionStatusTranslations[rule.executionStatus.status];
   }
-  return rulesStatusesTranslationsMapping[rule.executionStatus.status];
+  return rule.lastRun && lastOutcomeTranslations[rule.lastRun.outcome];
 };

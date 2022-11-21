@@ -111,6 +111,7 @@ import {
   validateOperationOnAttributes,
   retryIfBulkEditConflicts,
   retryIfBulkDeleteConflicts,
+  retryIfBulkEnableConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
 } from './lib';
@@ -310,15 +311,15 @@ export type BulkEditOptions<Params extends RuleTypeParams> =
   | BulkEditOptionsFilter<Params>
   | BulkEditOptionsIds<Params>;
 
-export interface BulkDeleteOptionsFilter {
+interface BulkOptionsFilter {
   filter?: string | KueryNode;
 }
 
-export interface BulkDeleteOptionsIds {
+interface BulkOptionsIds {
   ids?: string[];
 }
 
-export type BulkDeleteOptions = BulkDeleteOptionsFilter | BulkDeleteOptionsIds;
+export type BulkOptions = BulkOptionsFilter | BulkOptionsIds;
 
 export interface BulkOperationError {
   message: string;
@@ -395,8 +396,8 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
     params: Params;
-    throttle: string | null;
-    notifyWhen: RuleNotifyWhenType | null;
+    throttle?: string | null;
+    notifyWhen?: RuleNotifyWhenType | null;
   };
 }
 
@@ -458,6 +459,8 @@ interface ScheduleTaskOptions {
   schedule: IntervalSchedule;
   throwOnConflict: boolean; // whether to throw conflict errors or swallow them
 }
+
+type BulkAction = 'DELETE' | 'ENABLE';
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
@@ -688,7 +691,7 @@ export class RulesClient {
       throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
-    await this.validateActions(ruleType, data.actions);
+    await this.validateActions(ruleType, data);
 
     // Throw error if schedule interval is less than the minimum and we are enforcing it
     const intervalInMs = parseDuration(data.schedule.interval);
@@ -708,7 +711,8 @@ export class RulesClient {
     const createTime = Date.now();
     const lastRunTimestamp = new Date();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
-    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
+    const throttle = data.throttle ?? null;
 
     const rawRule: RawRule = {
       ...data,
@@ -724,6 +728,7 @@ export class RulesClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
+      throttle,
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
     };
@@ -1588,7 +1593,7 @@ export class RulesClient {
           terms: { field: 'alert.attributes.muteAll' },
         },
         tags: {
-          terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
+          terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
         },
         snoozed: {
           nested: {
@@ -1867,7 +1872,7 @@ export class RulesClient {
 
     // Validate
     const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
-    await this.validateActions(ruleType, data.actions);
+    await this.validateActions(ruleType, data);
 
     // Throw error if schedule interval is less than the minimum and we are enforcing it
     const intervalInMs = parseDuration(data.schedule.interval);
@@ -1896,7 +1901,7 @@ export class RulesClient {
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
     let updatedObject: SavedObject<RawRule>;
     const createAttributes = this.updateMeta({
@@ -1955,7 +1960,7 @@ export class RulesClient {
     );
   }
 
-  private getAuthorizationFilter = async () => {
+  private getAuthorizationFilter = async ({ action }: { action: BulkAction }) => {
     try {
       const authorizationTuple = await this.authorization.getFindAuthorizationFilter(
         AlertingAuthorizationEntity.Rule,
@@ -1965,7 +1970,7 @@ export class RulesClient {
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.DELETE,
+          action: RuleAuditAction[action],
           error,
         })
       );
@@ -1973,9 +1978,9 @@ export class RulesClient {
     }
   };
 
-  public bulkDeleteRules = async (options: BulkDeleteOptions) => {
-    const filter = (options as BulkDeleteOptionsFilter).filter;
-    const ids = (options as BulkDeleteOptionsIds).ids;
+  private getAndValidateCommonBulkOptions = (options: BulkOptions) => {
+    const filter = (options as BulkOptionsFilter).filter;
+    const ids = (options as BulkOptionsIds).ids;
 
     if (!ids && !filter) {
       throw Boom.badRequest(
@@ -1992,20 +1997,34 @@ export class RulesClient {
         "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
       );
     }
+    return { ids, filter };
+  };
 
-    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
-    const authorizationFilter = await this.getAuthorizationFilter();
-
-    const kueryNodeFilterWithAuth =
-      authorizationFilter && kueryNodeFilter
-        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
-        : kueryNodeFilter;
-
+  private checkAuthorizationAndGetTotal = async ({
+    filter,
+    action,
+  }: {
+    filter: KueryNode | null;
+    action: BulkAction;
+  }) => {
+    const actionToConstantsMapping: Record<
+      BulkAction,
+      { WriteOperation: WriteOperations | ReadOperations; RuleAuditAction: RuleAuditAction }
+    > = {
+      DELETE: {
+        WriteOperation: WriteOperations.BulkDelete,
+        RuleAuditAction: RuleAuditAction.DELETE,
+      },
+      ENABLE: {
+        WriteOperation: WriteOperations.BulkEnable,
+        RuleAuditAction: RuleAuditAction.ENABLE,
+      },
+    };
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
       RawRule,
       RuleBulkOperationAggregation
     >({
-      filter: kueryNodeFilterWithAuth,
+      filter,
       page: 1,
       perPage: 0,
       type: 'alert',
@@ -2023,31 +2042,31 @@ export class RulesClient {
 
     if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
       throw Boom.badRequest(
-        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk delete`
+        `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk ${action.toLocaleLowerCase()}`
       );
     }
 
     const buckets = aggregations?.alertTypeId.buckets;
 
     if (buckets === undefined || buckets?.length === 0) {
-      throw Boom.badRequest('No rules found for bulk delete');
+      throw Boom.badRequest(`No rules found for bulk ${action.toLocaleLowerCase()}`);
     }
 
     await pMap(
       buckets,
-      async ({ key: [ruleType, consumer] }) => {
+      async ({ key: [ruleType, consumer, actions] }) => {
         this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
         try {
           await this.authorization.ensureAuthorized({
             ruleTypeId: ruleType,
             consumer,
-            operation: WriteOperations.BulkDelete,
+            operation: actionToConstantsMapping[action].WriteOperation,
             entity: AlertingAuthorizationEntity.Rule,
           });
         } catch (error) {
           this.auditLogger?.log(
             ruleAuditEvent({
-              action: RuleAuditAction.DELETE,
+              action: actionToConstantsMapping[action].RuleAuditAction,
               error,
             })
           );
@@ -2056,6 +2075,24 @@ export class RulesClient {
       },
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
+    return { total };
+  };
+
+  public bulkDeleteRules = async (options: BulkOptions) => {
+    const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
+
+    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
+    const authorizationFilter = await this.getAuthorizationFilter({ action: 'DELETE' });
+
+    const kueryNodeFilterWithAuth =
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+        : kueryNodeFilter;
+
+    const { total } = await this.checkAuthorizationAndGetTotal({
+      filter: kueryNodeFilterWithAuth,
+      action: 'DELETE',
+    });
 
     const { apiKeysToInvalidate, errors, taskIdsToDelete } = await retryIfBulkDeleteConflicts(
       this.logger,
@@ -2394,7 +2431,7 @@ export class RulesClient {
             for (const operation of operations) {
               switch (operation.field) {
                 case 'actions':
-                  await this.validateActions(ruleType, operation.value);
+                  await this.validateActions(ruleType, { ...attributes, actions: operation.value });
                   ruleActions = applyBulkEditOperation(operation, ruleActions);
                   break;
                 case 'snoozeSchedule':
@@ -2504,7 +2541,7 @@ export class RulesClient {
 
             // get notifyWhen
             const notifyWhen = getRuleNotifyWhenType(
-              attributes.notifyWhen,
+              attributes.notifyWhen ?? null,
               attributes.throttle ?? null
             );
 
@@ -2587,6 +2624,203 @@ export class RulesClient {
 
     return { apiKeysToInvalidate, resultSavedObjects: result.saved_objects, errors, rules };
   }
+
+  private getShouldScheduleTask = async (scheduledTaskId: string | null | undefined) => {
+    if (!scheduledTaskId) return true;
+    try {
+      // make sure scheduledTaskId exist
+      await this.taskManager.get(scheduledTaskId);
+      return false;
+    } catch (err) {
+      return true;
+    }
+  };
+
+  public bulkEnableRules = async (options: BulkOptions) => {
+    const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
+
+    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
+    const authorizationFilter = await this.getAuthorizationFilter({ action: 'ENABLE' });
+
+    const kueryNodeFilterWithAuth =
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+        : kueryNodeFilter;
+
+    const { total } = await this.checkAuthorizationAndGetTotal({
+      filter: kueryNodeFilterWithAuth,
+      action: 'ENABLE',
+    });
+
+    const { errors, rules, taskIdsToEnable } = await retryIfBulkEnableConflicts(
+      this.logger,
+      (filterKueryNode: KueryNode | null) =>
+        this.bulkEnableRulesWithOCC({ filter: filterKueryNode }),
+      kueryNodeFilterWithAuth
+    );
+
+    const taskIdsFailedToBeEnabled: string[] = [];
+    if (taskIdsToEnable.length > 0) {
+      try {
+        const resultFromEnablingTasks = await this.taskManager.bulkEnable(taskIdsToEnable);
+        resultFromEnablingTasks?.errors?.forEach((error) => {
+          taskIdsFailedToBeEnabled.push(error.task.id);
+        });
+        this.logger.debug(
+          `Successfully enabled schedules for underlying tasks: ${taskIdsToEnable
+            .filter((id) => !taskIdsFailedToBeEnabled.includes(id))
+            .join(', ')}`
+        );
+      } catch (error) {
+        taskIdsFailedToBeEnabled.push(...taskIdsToEnable);
+        this.logger.error(
+          `Failure to enable schedules for underlying tasks: ${taskIdsToEnable.join(
+            ', '
+          )}. TaskManager bulkEnable failed with Error: ${error.message}`
+        );
+      }
+    }
+
+    const updatedRules = rules.map(({ id, attributes, references }) => {
+      return this.getAlertFromRaw(
+        id,
+        attributes.alertTypeId as string,
+        attributes as RawRule,
+        references,
+        false
+      );
+    });
+
+    return { errors, rules: updatedRules, total, taskIdsFailedToBeEnabled };
+  };
+
+  private bulkEnableRulesWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
+    const rulesFinder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+        {
+          filter,
+          type: 'alert',
+          perPage: 100,
+          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
+        }
+      );
+
+    const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+    const taskIdsToEnable: string[] = [];
+    const errors: BulkOperationError[] = [];
+    const taskIdToRuleIdMapping: Record<string, string> = {};
+    const ruleNameToRuleIdMapping: Record<string, string> = {};
+
+    for await (const response of rulesFinder.find()) {
+      await pMap(response.saved_objects, async (rule) => {
+        try {
+          if (rule.attributes.actions.length) {
+            try {
+              await this.actionsAuthorization.ensureAuthorized('execute');
+            } catch (error) {
+              throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+            }
+          }
+          if (rule.attributes.enabled === true) return;
+          if (rule.attributes.name) {
+            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+          }
+          if (rule.attributes.scheduledTaskId) {
+            taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
+          }
+
+          const username = await this.getUserName();
+
+          const updatedAttributes = this.updateMeta({
+            ...rule.attributes,
+            ...(!rule.attributes.apiKey &&
+              (await this.createNewAPIKeySet({ attributes: rule.attributes, username }))),
+            enabled: true,
+            updatedBy: username,
+            updatedAt: new Date().toISOString(),
+            executionStatus: {
+              status: 'pending',
+              lastDuration: 0,
+              lastExecutionDate: new Date().toISOString(),
+              error: null,
+              warning: null,
+            },
+          });
+
+          const shouldScheduleTask = await this.getShouldScheduleTask(
+            rule.attributes.scheduledTaskId
+          );
+
+          let scheduledTaskId;
+          if (shouldScheduleTask) {
+            const scheduledTask = await this.scheduleTask({
+              id: rule.id,
+              consumer: rule.attributes.consumer,
+              ruleTypeId: rule.attributes.alertTypeId,
+              schedule: rule.attributes.schedule as IntervalSchedule,
+              throwOnConflict: false,
+            });
+            scheduledTaskId = scheduledTask.id;
+          }
+
+          rulesToEnable.push({
+            ...rule,
+            attributes: {
+              ...updatedAttributes,
+              ...(scheduledTaskId ? { scheduledTaskId } : undefined),
+            },
+          });
+
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.ENABLE,
+              outcome: 'unknown',
+              savedObject: { type: 'alert', id: rule.id },
+            })
+          );
+        } catch (error) {
+          errors.push({
+            message: error.message,
+            rule: {
+              id: rule.id,
+              name: rule.attributes?.name,
+            },
+          });
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.ENABLE,
+              error,
+            })
+          );
+        }
+      });
+    }
+
+    const result = await this.unsecuredSavedObjectsClient.bulkCreate(rulesToEnable, {
+      overwrite: true,
+    });
+
+    const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+
+    result.saved_objects.forEach((rule) => {
+      if (rule.error === undefined) {
+        if (taskIdToRuleIdMapping[rule.id]) {
+          taskIdsToEnable.push(taskIdToRuleIdMapping[rule.id]);
+        }
+        rules.push(rule);
+      } else {
+        errors.push({
+          message: rule.error.message ?? 'n/a',
+          status: rule.error.statusCode,
+          rule: {
+            id: rule.id,
+            name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
+          },
+        });
+      }
+    });
+    return { errors, rules, taskIdsToEnable };
+  };
 
   private apiKeyAsAlertAttributes(
     apiKey: CreateAPIKeyResult | null,
@@ -3685,8 +3919,23 @@ export class RulesClient {
 
   private async validateActions(
     alertType: UntypedNormalizedRuleType,
-    actions: NormalizedAlertAction[]
+    data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertAction[] }
   ): Promise<void> {
+    const { actions, notifyWhen, throttle } = data;
+    const hasNotifyWhen = typeof notifyWhen !== 'undefined';
+    const hasThrottle = typeof throttle !== 'undefined';
+    let usesRuleLevelFreqParams;
+    if (hasNotifyWhen && hasThrottle) usesRuleLevelFreqParams = true;
+    else if (!hasNotifyWhen && !hasThrottle) usesRuleLevelFreqParams = false;
+    else {
+      throw Boom.badRequest(
+        i18n.translate('xpack.alerting.rulesClient.usesValidGlobalFreqParams.oneUndefined', {
+          defaultMessage:
+            'Rule-level notifyWhen and throttle must both be defined or both be undefined',
+        })
+      );
+    }
+
     if (actions.length === 0) {
       return;
     }
@@ -3728,6 +3977,34 @@ export class RulesClient {
           },
         })
       );
+    }
+
+    // check for actions using frequency params if the rule has rule-level frequency params defined
+    if (usesRuleLevelFreqParams) {
+      const actionsWithFrequency = actions.filter((action) => Boolean(action.frequency));
+      if (actionsWithFrequency.length) {
+        throw Boom.badRequest(
+          i18n.translate('xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams', {
+            defaultMessage:
+              'Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: {groups}',
+            values: {
+              groups: actionsWithFrequency.map((a) => a.group).join(', '),
+            },
+          })
+        );
+      }
+    } else {
+      const actionsWithoutFrequency = actions.filter((action) => !action.frequency);
+      if (actionsWithoutFrequency.length) {
+        throw Boom.badRequest(
+          i18n.translate('xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq', {
+            defaultMessage: 'Actions missing frequency parameters: {groups}',
+            values: {
+              groups: actionsWithoutFrequency.map((a) => a.group).join(', '),
+            },
+          })
+        );
+      }
     }
   }
 

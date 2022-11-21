@@ -26,9 +26,14 @@ import { ListExceptionItems } from '..';
 interface ListWithSearchComponentProps {
   list: ExceptionListSchema;
   isReadOnly: boolean;
+  refreshExceptions?: boolean;
 }
 
-const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list, isReadOnly }) => {
+const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
+  list,
+  isReadOnly,
+  refreshExceptions,
+}) => {
   const {
     listName,
     exceptions,
@@ -50,7 +55,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list, isRea
     onPaginationChange,
     handleCancelExceptionItemFlyout,
     handleConfirmExceptionFlyout,
-  } = useListWithSearchComponent(list);
+  } = useListWithSearchComponent(list, refreshExceptions);
   return (
     <>
       {showAddExceptionFlyout ? (
