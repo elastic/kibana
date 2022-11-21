@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
@@ -18,13 +18,9 @@ import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 const QuestionInput: FC<{
   inferrer: QuestionAnsweringInference;
 }> = ({ inferrer }) => {
-  const [questionText, setQuestionText] = useState('');
+  const questionText = useObservable(inferrer.getQuestionText$(), inferrer.getQuestionText());
+  const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
 
-  useEffect(() => {
-    inferrer.questionText$.next(questionText);
-  }, [questionText, inferrer]);
-
-  const runningState = useObservable(inferrer.getRunningState$());
   return (
     <EuiFormRow
       fullWidth
@@ -40,7 +36,7 @@ const QuestionInput: FC<{
         disabled={runningState === RUNNING_STATE.RUNNING}
         fullWidth
         onChange={(e) => {
-          setQuestionText(e.target.value);
+          inferrer.setQuestionText(e.target.value);
         }}
       />
     </EuiFormRow>
