@@ -320,6 +320,8 @@ describe('alertToListItem', () => {
 
 describe('execution duration overview', () => {
   it('render last execution status', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+
     const rule = mockRule({
       executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
     });
