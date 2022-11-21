@@ -77,7 +77,7 @@ export const getTimeSpanFilter = () => ({
   range: {
     'monitor.timespan': {
       lte: moment().toISOString(),
-      gte: moment().subtract(5, 'minutes').toISOString(),
+      gte: moment().subtract(20, 'minutes').toISOString(),
     },
   },
 });
