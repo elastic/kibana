@@ -359,6 +359,7 @@
     "@kbn/rule-data-utils": "link:bazel-bin/packages/kbn-rule-data-utils",
     "@kbn/safer-lodash-set": "link:bazel-bin/packages/kbn-safer-lodash-set",
     "@kbn/securitysolution-autocomplete": "link:bazel-bin/packages/kbn-securitysolution-autocomplete",
+    "@kbn/securitysolution-cell_actions": "link:bazel-bin/packages/kbn-securitysolution-cell-actions",
     "@kbn/securitysolution-es-utils": "link:bazel-bin/packages/kbn-securitysolution-es-utils",
     "@kbn/securitysolution-exception-list-components": "link:bazel-bin/packages/kbn-securitysolution-exception-list-components",
     "@kbn/securitysolution-hook-utils": "link:bazel-bin/packages/kbn-securitysolution-hook-utils",

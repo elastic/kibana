@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/securitysolution-cell_actions",
+  "owner": "@elastic/security-solution-explore",
+  "runtimeDeps": [],
+  "typeDeps": [],
+}
