@@ -97,12 +97,12 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
   }),
   new KbnFieldType({
     name: KBN_FIELD_TYPES.GEO_POINT,
-    filterable:true,
+    filterable: true,
     esTypes: [ES_FIELD_TYPES.GEO_POINT],
   }),
   new KbnFieldType({
     name: KBN_FIELD_TYPES.GEO_SHAPE,
-    filterable:true,
+    filterable: true,
     esTypes: [ES_FIELD_TYPES.GEO_SHAPE],
   }),
   new KbnFieldType({

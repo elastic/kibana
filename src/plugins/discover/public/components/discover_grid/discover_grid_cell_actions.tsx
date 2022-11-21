@@ -14,6 +14,7 @@ import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { DiscoverGridContext, GridContext } from './discover_grid_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { copyValueToClipboard } from '../../utils/copy_value_to_clipboard';
+import { KBN_FIELD_TYPES, KBN_GEO_FEILDS } from '@kbn/field-types';
 
 function onFilterCell(
   context: GridContext,
@@ -118,9 +119,11 @@ export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCell
 };
 
 export function buildCellActions(field: DataViewField, onFilter?: DocViewFilterFn) {
+
+  const isGeoType = KBN_GEO_FEILDS.includes((field?.type || '') as KBN_FIELD_TYPES);
   if (field?.type === '_source') {
     return [CopyBtn];
-  } else if (!onFilter || !field.filterable) {
+  } else if (!onFilter || !field.filterable || isGeoType) {
     return undefined;
   }
 

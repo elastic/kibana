@@ -150,18 +150,18 @@ export const FILTER_OPERATORS: Operator[] = [
   intersectsOperator,
   withinOperator,
   disjointOperator,
-  containsOperator
+  containsOperator,
 ];
 
-export const geoOperatorToOperation =  (operator:Operator)=>{
-  if(operator === intersectsOperator){
-    return 'intersects'
-  }else if(operator === withinOperator){
-    return 'within'
-  }else if(operator === disjointOperator){
-    return 'disjoint'
-  }else if(operator === containsOperator){
-    return 'contains'
+export const geoOperatorToOperation = (operator: Operator) => {
+  if (operator === intersectsOperator) {
+    return 'intersects';
+  } else if (operator === withinOperator) {
+    return 'within';
+  } else if (operator === disjointOperator) {
+    return 'disjoint';
+  } else if (operator === containsOperator) {
+    return 'contains';
   }
-  throw Error("Unsupported Geo Operator")
-}
+  throw Error('Unsupported Geo Operator');
+};

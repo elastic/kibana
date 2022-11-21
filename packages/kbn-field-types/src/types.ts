@@ -86,3 +86,8 @@ export enum KBN_FIELD_TYPES {
   HISTOGRAM = 'histogram',
   MISSING = 'missing',
 }
+
+export const KBN_GEO_FEILDS: string[] = [
+ KBN_FIELD_TYPES.GEO_POINT,
+  KBN_FIELD_TYPES.GEO_SHAPE
+]

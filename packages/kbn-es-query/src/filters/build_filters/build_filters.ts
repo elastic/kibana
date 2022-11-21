@@ -71,9 +71,9 @@ function buildBaseFilter(
     case FILTERS.EXISTS:
       return buildExistsFilter(field, indexPattern);
     case FILTERS.SPATIAL_FILTER:
-      console.log(field,params,indexPattern)
-      let geoFilterParams:unknown = params
-      return buildSpatialFilter(indexPattern,field, geoFilterParams as GeoFilterParams);
+      console.log(field, params, indexPattern);
+      const geoFilterParams: unknown = params;
+      return buildSpatialFilter(indexPattern, field, geoFilterParams as GeoFilterParams);
     default:
       throw new Error(`Unknown filter type: ${type}`);
   }

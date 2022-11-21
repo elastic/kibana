@@ -21,7 +21,6 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {MbMap} from "./map/map_selector"
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   Filter,
@@ -38,6 +37,7 @@ import { XJsonLang } from '@kbn/monaco';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { MbMap } from './map/map_selector';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -51,6 +51,7 @@ import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { getFieldValidityAndErrorMessage } from './lib/helpers';
+import { KBN_FIELD_TYPES, KBN_GEO_FEILDS } from '@kbn/field-types';
 
 export interface FilterEditorProps {
   filter: Filter;
@@ -301,12 +302,12 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
   private renderOperatorInput() {
     const { selectedField, selectedOperator } = this.state;
-    var operators = selectedField ? getOperatorOptions(selectedField) : [];
-    const isGeoType = ['geo_point','geo_shape'].includes(selectedField?.type||"")
-    if(isGeoType){
-      operators = operators.filter(o=>o.type === FILTERS.SPATIAL_FILTER)
-    }else{
-      operators = operators.filter(o=>o.type !== FILTERS.SPATIAL_FILTER)
+    let operators = selectedField ? getOperatorOptions(selectedField) : [];
+    const isGeoType = KBN_GEO_FEILDS.includes((selectedField?.type || '') as KBN_FIELD_TYPES);
+    if (isGeoType) {
+      operators = operators.filter((o) => o.type === FILTERS.SPATIAL_FILTER);
+    } else {
+      operators = operators.filter((o) => o.type !== FILTERS.SPATIAL_FILTER);
     }
 
     return (
@@ -432,17 +433,24 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
           />
         );
       case FILTERS.SPATIAL_FILTER:
-        //Want to use x-pack/plugins/maps but get error when using as a required bundle
-        //Error: X-Pack plugin or bundle with id "maps" is required by OSS plugin "unifiedSearch", which is prohibited. Consider making this an optional dependency instead.
-        //As an optional dependancy we get circular dependancy errors
-        //Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies
-        //So just for now a temp solution
-        return (<div><MbMap onMapDestroyed={()=>{}} onGeojsonCreated={(geo_shape)=>{
-          if(this.state.selectedOperator){
-          let operation =geoOperatorToOperation(this.state.selectedOperator)
-          this.onParamsChange({geo_shape,operation})
-          }
-        }}/></div>)
+        // Want to use x-pack/plugins/maps but get error when using as a required bundle
+        // Error: X-Pack plugin or bundle with id "maps" is required by OSS plugin "unifiedSearch", which is prohibited. Consider making this an optional dependency instead.
+        // As an optional dependancy we get circular dependancy errors
+        // Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies
+        // So just for now a temp solution
+        return (
+          <div>
+            <MbMap
+              onMapDestroyed={() => {}}
+              onGeojsonCreated={(geo_shape) => {
+                if (this.state.selectedOperator) {
+                  const operation = geoOperatorToOperation(this.state.selectedOperator);
+                  this.onParamsChange({ geo_shape, operation });
+                }
+              }}
+            />
+          </div>
+        );
     }
   }
 

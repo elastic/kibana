@@ -16,4 +16,4 @@ export {
 } from './src/kbn_field_types';
 
 export type { KbnFieldTypeOptions } from './src/types';
-export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from './src/types';
+export { KBN_FIELD_TYPES, ES_FIELD_TYPES,KBN_GEO_FEILDS } from './src/types';
