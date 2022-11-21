@@ -8,8 +8,9 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about the {kib} 8.5.0 release.
+Review important information about the {kib} 8.5.x releases.
 
+* <<release-notes-8.5.1>>
 * <<release-notes-8.5.0>>
 //* <<release-notes-8.4.3>>
 //* <<release-notes-8.4.2>>
@@ -36,6 +37,66 @@ Review important information about the {kib} 8.5.0 release.
 //* <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.5.1]]
+== {kib} 8.5.1
+
+Review the following information about the {kib} 8.5.1 release.
+
+[float]
+[[breaking-changes-8.5.1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in {kib} 8.5.1.
+// end::notable-breaking-changes[]
+
+{kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[enhancement-v8.5.1]]
+=== Enhancements
+Elastic Security::
+For the Elastic Security 8.5.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.5.1]]
+=== Bug fixes
+APM::
+* Fixes a bug where Metadata API does not filter by environment {kibana-pull}144472[#144472]
+* Fixes a bug where AWS lambda checks for an undefined value {kibana-pull}143987[#143987]
+* Limits the number of source map artifacts {kibana-pull}144963[#144963]
+* Fixes an incorrect documentation link {kibana-pull}145077[#145077]
+
+Dashboard::
+* Removes support for scripted fields in options list {kibana-pull}144643[#144643]
+* Fixes help documentation link for dashboard {kibana-pull}143894[#143894]
+
+Elastic Security::
+For the Elastic Security 8.5.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+Make asset tags space aware {kibana-pull}144066[#144066]
+
+Machine Learning::
+* Correcting the size of the free ML node on cloud {kibana-pull}144512[#144512]
+* Fixes model testing flyout reload {kibana-pull}144318[#144318]
+* Explain Log Rate Spikes: Wrap analysis in try/catch block {kibana-pull}143651[#143651]
+* Explain Log Rate Spikes: Fix uncompressed streams and backpressure handling {kibana-pull}142970[#142970]
+
+Osquery::
+* Fixes a bug that prevented users from viewing Osquery results if they were in a non-default {kib} space {kibana-pull}144210[#144210]
+
+Platform::
+Fixes the execution pipeline not to stop on a flaky subexpression {kibana-pull}143852[#143852]
+
+Uptime::
+* Adjust forumla for synthetics monitor availability {kibana-pull}144868[#144868]
+* TLS alert - do not alert when status cannot be determined {kibana-pull}144767[#144767]
+
 [[release-notes-8.5.0]]
 == {kib} 8.5.0
 
@@ -57,7 +118,6 @@ To download the {kib} 8.5.0 image, use the https://www.docker.elastic.co/r/kiban
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.5.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
 [discrete]
 [[breaking-141757]]
 .Updates bulk action API to return actionId instead of agent success
@@ -93,7 +153,10 @@ The bidirectional foreign key between agent policy and package policy has been r
 *Impact* +
 The agent policy saved object no longer includes the `package_policies` field.
 ====
-// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following:
+
+{kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
       
 [float]
 [[features-8.5.0]]
@@ -132,8 +195,8 @@ Infrastructure::
 Inital hosts page {kibana-pull}138173[#138173]
 
 Lens & Visualizations::
-* Adds the ability to duplicate layers in *Lens* {kibana-pull}140603[#140603]
-* Updates the AggConfig for nested sibling pipeline aggs {kibana-pull}140650[#140650]
+* Adds query-based annotations in *Lens* {kibana-pull}138753[#138753]
+* Enables ad-hoc data views in *Lens* {kibana-pull}138732[#138732]
 
 Machine Learning::
 * Notifications page {kibana-pull}140613[#140613]
@@ -224,13 +287,12 @@ Lens & Visualizations::
 * Adds TSDB support for *Lens*, *TSVB* and *Timelion* {kibana-pull}139020[#139020]
 * Adds the format selector to the new metric visualization in *Lens* {kibana-pull}139018[#139018]
 * Shows the edit/delete button while field stats are loading in *Lens* {kibana-pull}138899[#138899]
-* Adds query-based annotations in *Lens* {kibana-pull}138753[#138753]
-* Enables ad-hoc data views in *Lens* {kibana-pull}138732[#138732]
 * Adds auto mode for secondary metric prefix in *Lens* {kibana-pull}138167[#138167]
 * Adds open in *Lens* extendability {kibana-pull}136928[#136928]
 * Adds TSDB warning handling support for *Lens*, Agg based, and *TSVB* {kibana-pull}136833[#136833]
 * Adds reduced time range option in *Lens* {kibana-pull}136706[#136706]
 * Migrates xy visualization type to new unified xy expression {kibana-pull}136475[#136475]
+* Adds the ability to duplicate layers in *Lens* {kibana-pull}140603[#140603]
 
 Machine Learning::
 * Explain Log Rate Spikes: add main chart sync on row hover at group level {kibana-pull}141138[#141138]
@@ -519,7 +581,7 @@ Review the following information about the {kib} 8.4.0 release.
 If you have alerting rules that have been snoozed, do not upgrade {kib} to 8.4.0. Upgrade to 8.4.1 instead.
 
 To determine if you have snoozed alerting rules, open the main menu, then click
-**{stack-manage-app}** -> **{rules-ui}**. Filter the rule list by selecting
+**{stack-manage-app}** -> **{rac-ui}**. Filter the rule list by selecting
 **View** -> **Snoozed**. If you must upgrade to 8.4.0, for each space, cancel
 the snooze for all affected rules before you upgrade.
 
@@ -1062,7 +1124,7 @@ If you have upgraded to 8.3.0 or 8.3.1, and your alerting rules fail, reset the 
 
 To disable, then re-enable your alerting rules:
 
-. Open the main menu, then click *{stack-manage-app} > {rules-ui}*.
+. Open the main menu, then click *{stack-manage-app} > {rac-ui}*.
 
 . Select the failed alerting rules.
 
@@ -1127,7 +1189,7 @@ Alerting users who are running 8.2 should not upgrade to either 8.3.0 or 8.3.1.
 Both 8.3.0 and 8.3.1 have a bug where alerting rules that were created or edited
 in 8.2 will stop running on upgrade. If you have upgraded to 8.3.0 or 8.3.1 and
 your alerting rules have stopped running with an error similar to the following
-example, you will need to go to *{stack-manage-app} > {rules-ui}*, multi-select
+example, you will need to go to *{stack-manage-app} > {rac-ui}*, multi-select
 the failed rules, click on **Manage rules > Disable** and then click on **Manage
 rules > Enable**. Disabling and re-enabling the rule will generate a new API key
 using the credentials of the user performing these actions and reset the rule
