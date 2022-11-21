@@ -93,10 +93,10 @@
         ],
         "label": "Image",
         "description": [
-          "\nA viewport-aware component that displays an image. This component is a very\nthin wrapper around the img tag.\n"
+          "\nA wrapper around the <EuiImage/> that can renders blurhash by the file service while the image is loading\n"
         ],
         "signature": [
-          "React.ForwardRefExoticComponent<",
+          "({ src, url, alt, onLoad, onError, meta, ...rest }: ",
           {
             "pluginId": "files",
             "scope": "public",
@@ -104,28 +104,35 @@
             "section": "def-public.Props",
             "text": "Props"
           },
-          " & React.RefAttributes<HTMLImageElement>>"
+          ") => JSX.Element"
         ],
         "path": "src/plugins/files/public/components/image/image.tsx",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [],
         "children": [
           {
             "parentPluginId": "files",
             "id": "def-public.Image.$1",
-            "type": "Uncategorized",
+            "type": "CompoundType",
             "tags": [],
-            "label": "props",
+            "label": "{ src, url, alt, onLoad, onError, meta, ...rest }",
             "description": [],
             "signature": [
-              "P"
+              {
+                "pluginId": "files",
+                "scope": "public",
+                "docId": "kibFilesPluginApi",
+                "section": "def-public.Props",
+                "text": "Props"
+              }
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "src/plugins/files/public/components/image/image.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -800,125 +807,6 @@
             "section": "def-public.Props",
             "text": "Props"
           },
-          " extends React.ImgHTMLAttributes<HTMLImageElement>"
-        ],
-        "path": "src/plugins/files/public/components/image/image.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.src",
-            "type": "string",
-            "tags": [],
-            "label": "src",
-            "description": [],
-            "path": "src/plugins/files/public/components/image/image.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.alt",
-            "type": "string",
-            "tags": [],
-            "label": "alt",
-            "description": [],
-            "path": "src/plugins/files/public/components/image/image.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.meta",
-            "type": "Object",
-            "tags": [],
-            "label": "meta",
-            "description": [
-              "\nImage metadata"
-            ],
-            "signature": [
-              {
-                "pluginId": "files",
-                "scope": "common",
-                "docId": "kibFilesPluginApi",
-                "section": "def-common.FileImageMetadata",
-                "text": "FileImageMetadata"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/files/public/components/image/image.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.size",
-            "type": "CompoundType",
-            "tags": [
-              "default"
-            ],
-            "label": "size",
-            "description": [],
-            "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xl\" | \"original\" | \"fullWidth\" | undefined"
-            ],
-            "path": "src/plugins/files/public/components/image/image.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.wrapperProps",
-            "type": "Object",
-            "tags": [],
-            "label": "wrapperProps",
-            "description": [
-              "\nProps to pass to the wrapper element"
-            ],
-            "signature": [
-              "React.HTMLAttributes<HTMLDivElement> | undefined"
-            ],
-            "path": "src/plugins/files/public/components/image/image.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.onFirstVisible",
-            "type": "Function",
-            "tags": [],
-            "label": "onFirstVisible",
-            "description": [
-              "\nEmits when the image first becomes visible"
-            ],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "src/plugins/files/public/components/image/image.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "files",
-        "id": "def-public.Props",
-        "type": "Interface",
-        "tags": [],
-        "label": "Props",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "files",
-            "scope": "public",
-            "docId": "kibFilesPluginApi",
-            "section": "def-public.Props",
-            "text": "Props"
-          },
           "<Kind>"
         ],
         "path": "src/plugins/files/public/components/file_picker/file_picker.tsx",
@@ -1168,6 +1056,30 @@
           "<unknown>[]; total: number; }; bulkDelete: Result; }"
         ],
         "path": "src/plugins/files/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-public.Props",
+        "type": "Type",
+        "tags": [],
+        "label": "Props",
+        "description": [],
+        "signature": [
+          "{ meta?: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileImageMetadata",
+            "text": "FileImageMetadata"
+          },
+          " | undefined; } & ",
+          "EuiImageProps"
+        ],
+        "path": "src/plugins/files/public/components/image/image.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

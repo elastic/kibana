@@ -8,10 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
 import { ValuesType } from 'utility-types';
-import {
-  SPAN_TYPE,
-  SPAN_SUBTYPE,
-} from '../../../common/elasticsearch_fieldnames';
+import { SPAN_TYPE, SPAN_SUBTYPE } from '../../../common/es_fields/apm';
 import {
   ConnectionElement,
   isSpanGroupingSupported,
