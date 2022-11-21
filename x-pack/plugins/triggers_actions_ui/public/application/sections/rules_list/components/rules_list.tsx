@@ -67,6 +67,8 @@ import {
   snoozeRule,
   unsnoozeRule,
   bulkUpdateAPIKey,
+  bulkDisableRules,
+  bulkEnableRules,
   cloneRule,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
@@ -228,6 +230,8 @@ export const RulesList = ({
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToDeleteFilter, setRulesToDeleteFilter] = useState<KueryNode | null | undefined>();
   const [isDeletingRules, setIsDeletingRules] = useState<boolean>(false);
+  const [isEnablingRules, setIsEnablingRules] = useState<boolean>(false);
+  const [isDisablingRules, setIsDisablingRules] = useState<boolean>(false);
 
   // TODO - tech debt: Right now we're using null and undefined to determine if we should
   // render the bulk edit modal. Refactor this to only keep track of 1 set of rules and types
@@ -662,6 +666,7 @@ export const RulesList = ({
     onSelectAll,
     onSelectPage,
     onClearSelection,
+    filter,
   } = useBulkEditSelect({
     totalItemCount: rulesState.totalItemCount,
     items: tableItems,
@@ -678,9 +683,9 @@ export const RulesList = ({
     if (isAllSelected) {
       return true;
     }
-    const selectedIdsArray = [...selectedIds];
-    return selectedIdsArray.length
-      ? filterRulesById(rulesState.data, selectedIdsArray).every((selectedRule) =>
+
+    return selectedIds.length
+      ? filterRulesById(rulesState.data, selectedIds).every((selectedRule) =>
           hasAllPrivilege(selectedRule, ruleTypesState.data.get(selectedRule.ruleTypeId))
         )
       : false;
@@ -723,6 +728,8 @@ export const RulesList = ({
       isPerformingAction ||
       isDeletingRules ||
       isSnoozingRules ||
+      isEnablingRules ||
+      isDisablingRules ||
       isUnsnoozingRules ||
       isSchedulingRules ||
       isUnschedulingRules ||
@@ -734,6 +741,8 @@ export const RulesList = ({
     ruleTypesState,
     isPerformingAction,
     isDeletingRules,
+    isEnablingRules,
+    isDisablingRules,
     isSnoozingRules,
     isUnsnoozingRules,
     isSchedulingRules,
@@ -758,6 +767,36 @@ export const RulesList = ({
       );
     }
   };
+
+  const onEnable = useCallback(async () => {
+    setIsEnablingRules(true);
+
+    const { errors, total } = await bulkEnableRules({
+      ...(isAllSelected ? { filter } : {}),
+      ids: selectedIds,
+      http,
+    });
+
+    setIsEnablingRules(false);
+    showToast({ errors, total });
+    await refreshRules();
+    onClearSelection();
+  }, [http, selectedIds, filter, setIsEnablingRules, toasts]);
+
+  const onDisable = useCallback(async () => {
+    setIsDisablingRules(true);
+
+    const { errors, total } = await bulkDisableRules({
+      ...(isAllSelected ? { filter } : {}),
+      ids: selectedIds,
+      http,
+    });
+
+    setIsDisablingRules(false);
+    showToast({ errors, total });
+    await refreshRules();
+    onClearSelection();
+  }, [http, selectedIds, filter, setIsDisablingRules, toasts]);
 
   const table = (
     <>
@@ -944,7 +983,7 @@ export const RulesList = ({
             >
               <RuleQuickEditButtons
                 selectedItems={convertRulesToTableItems({
-                  rules: filterRulesById(rulesState.data, [...selectedIds]),
+                  rules: filterRulesById(rulesState.data, selectedIds),
                   ruleTypeIndex: ruleTypesState.data,
                   canExecuteActions,
                   config,
@@ -957,6 +996,8 @@ export const RulesList = ({
                   setIsPerformingAction(false);
                 }}
                 isDeletingRules={isDeletingRules}
+                isEnablingRules={isEnablingRules}
+                isDisablingRules={isDisablingRules}
                 isSnoozingRules={isSnoozingRules}
                 isUnsnoozingRules={isUnsnoozingRules}
                 isSchedulingRules={isSchedulingRules}
@@ -974,6 +1015,8 @@ export const RulesList = ({
                 setRulesToScheduleFilter={setRulesToScheduleFilter}
                 setRulesToUnscheduleFilter={setRulesToUnscheduleFilter}
                 setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
+                onEnable={onEnable}
+                onDisable={onDisable}
               />
             </BulkOperationPopover>
           );
