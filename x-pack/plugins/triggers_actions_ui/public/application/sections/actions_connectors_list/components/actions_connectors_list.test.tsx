@@ -284,7 +284,7 @@ describe('actions_connectors_list', () => {
 
     it('renders table with preconfigured connectors', async () => {
       await setup();
-      expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
+      expect(wrapper.find('span[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(1);
     });
 
     it('renders unknown connector type as disabled', async () => {

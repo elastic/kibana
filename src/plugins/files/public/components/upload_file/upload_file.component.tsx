@@ -33,14 +33,20 @@ export interface Props {
   allowClear?: boolean;
   compressed?: boolean;
   initialFilePromptText?: string;
+  className?: string;
 }
 
 const { euiFormMaxWidth, euiButtonHeightSmall } = euiThemeVars;
 
-const horizontalContainer = css`
-  display: flex;
-  flex-direction: row;
-`;
+const styles = {
+  horizontalContainer: css`
+    display: flex;
+    flex-direction: row;
+  `,
+  fullWidth: css`
+    width: 100%;
+  `,
+};
 
 export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
   (
@@ -53,6 +59,7 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
       multiple,
       initialFilePromptText,
       fullWidth,
+      className,
     },
     ref
   ) => {
@@ -74,8 +81,10 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
           css`
             max-width: ${fullWidth ? '100%' : euiFormMaxWidth};
           `,
-          compressed ? horizontalContainer : undefined,
+          fullWidth ? styles.fullWidth : undefined,
+          compressed ? styles.horizontalContainer : undefined,
         ]}
+        className={className}
       >
         <EuiFilePicker
           fullWidth={fullWidth}
