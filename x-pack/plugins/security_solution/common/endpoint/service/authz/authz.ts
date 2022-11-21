@@ -63,6 +63,8 @@ export function hasKibanaPrivilege(
  * @param hasHostIsolationExceptionsItems if set to `true`, then Host Isolation Exceptions related authz properties
  * may be adjusted to account for a license downgrade scenario
  */
+
+// eslint-disable-next-line complexity
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz,
@@ -223,6 +225,7 @@ export const calculateEndpointAuthz = (
     canReadPolicyManagement,
     canWriteActionsLogManagement,
     canReadActionsLogManagement: canReadActionsLogManagement && isEnterpriseLicense,
+    canAccessEndpointActionsLogManagement: canReadActionsLogManagement && isPlatinumPlusLicense,
     // Response Actions
     canIsolateHost: canIsolateHost && isPlatinumPlusLicense,
     canUnIsolateHost: canIsolateHost,
@@ -250,6 +253,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
   return {
     ...defaultEndpointPermissions(),
     canAccessFleet: false,
+    canAccessEndpointActionsLogManagement: false,
     canAccessEndpointManagement: false,
     canCreateArtifactsByPolicy: false,
     canWriteEndpointList: false,
