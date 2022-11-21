@@ -34,7 +34,7 @@ export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
 export const TABS_TEST_ID = 'tiIndicatorFlyoutTabs';
 export const MORE_ACTIONS_ID = 'tiIndicatorFlyoutMoreActions';
 
-const enum TAB_IDS {
+enum TAB_IDS {
   overview,
   table,
   json,

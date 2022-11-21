@@ -19,7 +19,7 @@ import {
   METRIC_JAVA_GC_COUNT,
   METRIC_JAVA_GC_TIME,
   SERVICE_NAME,
-} from '../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../common/es_fields/apm';
 import { getBucketSize } from '../../../../../lib/helpers/get_bucket_size';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';

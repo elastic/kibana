@@ -100,8 +100,8 @@ describe('AlertsCountPanel', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
-      ).toHaveClass('euiFlexGroup--alignItemsFlexEnd');
+        wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
+      ).toContain('flexEnd');
     });
   });
 
