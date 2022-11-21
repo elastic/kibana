@@ -45,7 +45,7 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listNamespaceType: 'single',
 };
 
-export const useExceptionListDetails = () => {
+export const useListDetailsView = () => {
   const toasts = useToasts();
   const { services } = useKibana();
   const { http, notifications } = services;
@@ -114,7 +114,10 @@ export const useExceptionListDetails = () => {
         id: exceptionListId,
         http,
       });
-      if (!result || !isAnExceptionListItem(result)) return setInvalidListId(true);
+      if (!result || !isAnExceptionListItem(result)) {
+        setIsLoading(false);
+        return setInvalidListId(true);
+      }
 
       setList(result);
       await initializeListRules(result);
