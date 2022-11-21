@@ -84,7 +84,7 @@ export class TestSubjects extends FtrService {
    * the timeout. The default value for that config is currently 2.5 seconds.
    *
    * If the element is hidden but still in the DOM it is treated as "existing", unless `options.allowHidden`
-   * is set to `true`.x-pack/test/functional/services/observability/overview/common.ts
+   * is set to `true`.
    */
   public async missingOrFail(selector: string, options: ExistsOptions = {}): Promise<void | never> {
     const { timeout = this.WAIT_FOR_EXISTS_TIME, allowHidden = false } = options;
