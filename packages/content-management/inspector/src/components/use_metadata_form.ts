@@ -60,7 +60,7 @@ function getCustomValidation<TField extends keyof Fields>(
   field: TField,
   customValidators?: CustomValidators
 ): Array<Validator<Fields[TField]['value']>> {
-  if (customValidators && (field === 'title' || field === 'description')) {
+  if (customValidators && ['title', 'description'].includes(field)) {
     return (customValidators[field] as Array<Validator<Fields[TField]['value']>>) ?? [];
   }
   return [];
@@ -82,6 +82,7 @@ const executeValidation = async <TField extends keyof Fields>(
     ...getCustomValidation(field, customValidators),
   ]) {
     const result = await validator.fn(value, id);
+
     if (result) {
       const key = validator.type === 'error' ? 'errors' : 'warnings';
       if (Array.isArray(results[key])) {
@@ -129,6 +130,8 @@ export const useMetadataForm = ({
           [fieldName]: {
             ...field,
             value,
+            errors: undefined,
+            warnings: undefined,
             isChangingValue: true,
           },
         };
@@ -199,9 +202,9 @@ export const useMetadataForm = ({
     setTags,
 
     isValid: errors?.length === 0,
+    getErrors: () => errors,
+    getWarnings: () => warnings,
     getIsChangingValue: () => isChangingValue,
-    getErrorsMessages: () => errors,
-    getWarningsMessages: () => warnings,
   };
 };
 

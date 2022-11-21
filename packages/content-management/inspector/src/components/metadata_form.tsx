@@ -43,17 +43,13 @@ export const MetadataForm: FC<Props> = ({
     setTags,
     isSubmitted,
     isValid,
-    getErrorsMessages,
-    getWarningsMessages,
+    getErrors,
+    getWarnings,
   } = form;
 
   return (
-    <EuiForm
-      isInvalid={isSubmitted && !isValid}
-      error={getErrorsMessages()}
-      data-test-subj="metadataForm"
-    >
-      <InspectorFlyoutWarningsCallOut warningMessages={getWarningsMessages()} />
+    <EuiForm isInvalid={isSubmitted && !isValid} error={getErrors()} data-test-subj="metadataForm">
+      <InspectorFlyoutWarningsCallOut warningMessages={getWarnings()} />
 
       <EuiFormRow
         label={i18n.translate('contentManagement.inspector.metadataForm.nameInputLabel', {

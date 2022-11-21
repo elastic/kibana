@@ -24,7 +24,7 @@ export function useOpenInspector() {
   const flyout = useRef<OverlayRef | null>(null);
 
   return useCallback(
-    ({ ...args }: OpenInspectorParams) => {
+    (args: OpenInspectorParams) => {
       // Validate arguments
       if (args.isReadonly === false && args.onSave === undefined) {
         throw new Error(`A value for [onSave()] must be provided when [isReadonly] is false.`);
