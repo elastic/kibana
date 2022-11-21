@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/137136
-  describe.skip('Kibana Spaces Accessibility', () => {
+  describe('Kibana Spaces Accessibility', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
@@ -86,8 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // creating space b and making it the current space so space selector page gets displayed when space b gets deleted
-    // FLAKY: https://github.com/elastic/kibana/issues/135341
-    it.skip('a11y test for delete space button', async () => {
+    it('a11y test for delete space button', async () => {
       await PageObjects.spaceSelector.clickCreateSpace();
       await PageObjects.spaceSelector.clickEnterSpaceName();
       await PageObjects.spaceSelector.addSpaceName('space_b');

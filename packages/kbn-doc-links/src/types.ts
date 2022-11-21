@@ -108,7 +108,6 @@ export interface DocLinks {
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
-    readonly crawlerGettingStarted: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
     readonly languageAnalyzers: string;
