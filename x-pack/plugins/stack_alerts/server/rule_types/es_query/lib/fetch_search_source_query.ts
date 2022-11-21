@@ -12,6 +12,7 @@ import {
   ISearchStartSearchSource,
   SortDirection,
 } from '@kbn/data-plugin/common';
+import { adjustUnit } from '../../../../common/adjust_units';
 import { OnlySearchSourceRuleParams } from '../types';
 
 export async function fetchSearchSourceQuery(
@@ -63,8 +64,9 @@ export function updateSearchSource(
 
   searchSource.setField('size', params.size);
 
+  const adjustedUnit = adjustUnit(params.timeWindowUnit);
   const timerangeFilter = getTime(index, {
-    from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
+    from: `now-${params.timeWindowSize}${adjustedUnit}`,
     to: 'now',
   });
   const dateStart = timerangeFilter?.query.range[timeFieldName].gte;

@@ -20,6 +20,7 @@ import {
   type SavedQuery,
   type ISearchSource,
 } from '@kbn/data-plugin/public';
+import { adjustUnit } from '../../../../common/adjust_units';
 import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
 import { CommonRuleParams, EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
@@ -195,8 +196,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const createTestSearchSource = useCallback(() => {
     const testSearchSource = searchSource.createCopy();
+    const adjustedUnit = adjustUnit(ruleConfiguration.timeWindowUnit);
     const timeFilter = getTime(searchSource.getField('index')!, {
-      from: `now-${timeWindow}`,
+      from: `now-${ruleConfiguration.timeWindowSize}${adjustedUnit}`,
       to: 'now',
     });
     testSearchSource.setField(
@@ -204,7 +206,12 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       timeFilter ? [timeFilter, ...ruleConfiguration.filter] : ruleConfiguration.filter
     );
     return testSearchSource;
-  }, [searchSource, timeWindow, ruleConfiguration]);
+  }, [
+    searchSource,
+    ruleConfiguration.timeWindowUnit,
+    ruleConfiguration.timeWindowSize,
+    ruleConfiguration.filter,
+  ]);
 
   const onCopyQuery = useCallback(() => {
     const testSearchSource = createTestSearchSource();
