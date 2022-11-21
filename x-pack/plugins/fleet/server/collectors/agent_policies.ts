@@ -11,7 +11,7 @@ import { AGENT_POLICY_INDEX } from '../../common';
 import { ES_SEARCH_LIMIT } from '../../common/constants';
 import { appContextService } from '../services';
 
-interface AgentPoliciesUsage {
+export interface AgentPoliciesUsage {
   count: number;
   output_types: string[];
 }
