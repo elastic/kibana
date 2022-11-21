@@ -251,17 +251,11 @@ exports[`Error TRANSACTION_SUCCESS_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_TYPE 1`] = `"request"`;
 
-exports[`Error TRANSACTION_URL 1`] = `undefined`;
-
 exports[`Error URL_FULL 1`] = `undefined`;
-
-exports[`Error USER_AGENT_DEVICE 1`] = `undefined`;
 
 exports[`Error USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Error USER_AGENT_ORIGINAL 1`] = `undefined`;
-
-exports[`Error USER_AGENT_OS 1`] = `undefined`;
 
 exports[`Error USER_ID 1`] = `undefined`;
 
@@ -508,17 +502,11 @@ exports[`Span TRANSACTION_SUCCESS_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_TYPE 1`] = `undefined`;
 
-exports[`Span TRANSACTION_URL 1`] = `undefined`;
-
 exports[`Span URL_FULL 1`] = `undefined`;
-
-exports[`Span USER_AGENT_DEVICE 1`] = `undefined`;
 
 exports[`Span USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Span USER_AGENT_ORIGINAL 1`] = `undefined`;
-
-exports[`Span USER_AGENT_OS 1`] = `undefined`;
 
 exports[`Span USER_ID 1`] = `undefined`;
 
@@ -783,16 +771,10 @@ exports[`Transaction TRANSACTION_SUCCESS_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
 
-exports[`Transaction TRANSACTION_URL 1`] = `"http://www.elastic.co"`;
-
 exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
-
-exports[`Transaction USER_AGENT_DEVICE 1`] = `undefined`;
 
 exports[`Transaction USER_AGENT_NAME 1`] = `"Other"`;
 
 exports[`Transaction USER_AGENT_ORIGINAL 1`] = `"test original"`;
-
-exports[`Transaction USER_AGENT_OS 1`] = `undefined`;
 
 exports[`Transaction USER_ID 1`] = `"1337"`;
