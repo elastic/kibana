@@ -83,6 +83,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   for (const result of parsedResults) {
     const alertId = result.group;
     const value = result.value ?? result.count;
+
     // group aggregations use the bucket selector agg to compare conditions
     // within the ES query, so only 'met' results are returned, therefore we don't need
     // to use the compareFn
@@ -103,6 +104,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       conditions: getContextConditionsDescription({
         comparator: params.thresholdComparator,
         threshold: params.threshold,
+        aggType: params.aggType,
+        aggField: params.aggField,
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
     } as EsQueryRuleActionContext;
@@ -129,8 +132,10 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       }
     }
   }
+
   alertFactory.alertLimit.setLimitReached(false);
   // alertFactory.alertLimit.setLimitReached(result.truncated);
+
   const { getRecoveredAlerts } = alertFactory.done();
   for (const recoveredAlert of getRecoveredAlerts()) {
     const alertId = recoveredAlert.getId();
@@ -144,6 +149,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         comparator: params.thresholdComparator,
         threshold: params.threshold,
         isRecovered: true,
+        aggType: params.aggType,
+        aggField: params.aggField,
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
     } as EsQueryRuleActionContext;

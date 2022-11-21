@@ -164,7 +164,11 @@ describe('addMessages', () => {
 
 describe('getContextConditionsDescription', () => {
   it('should return conditions correctly', () => {
-    const result = getContextConditionsDescription({ comparator: Comparator.GT, threshold: [10] });
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [10],
+      aggType: 'count',
+    });
     expect(result).toBe(`Number of matching documents is greater than 10`);
   });
 
@@ -172,6 +176,7 @@ describe('getContextConditionsDescription', () => {
     const result = getContextConditionsDescription({
       comparator: Comparator.GT,
       threshold: [10],
+      aggType: 'count',
       isRecovered: true,
     });
     expect(result).toBe(`Number of matching documents is NOT greater than 10`);
@@ -181,6 +186,7 @@ describe('getContextConditionsDescription', () => {
     const result = getContextConditionsDescription({
       comparator: Comparator.BETWEEN,
       threshold: [10, 20],
+      aggType: 'count',
       isRecovered: true,
     });
     expect(result).toBe(`Number of matching documents is NOT between 10 and 20`);
@@ -190,6 +196,7 @@ describe('getContextConditionsDescription', () => {
     const result = getContextConditionsDescription({
       comparator: Comparator.GT,
       threshold: [10],
+      aggType: 'count',
       group: 'host-1',
     });
     expect(result).toBe(`Number of matching documents for group "host-1" is greater than 10`);
@@ -199,9 +206,62 @@ describe('getContextConditionsDescription', () => {
     const result = getContextConditionsDescription({
       comparator: Comparator.GT,
       threshold: [10],
+      aggType: 'count',
       isRecovered: true,
       group: 'host-1',
     });
     expect(result).toBe(`Number of matching documents for group "host-1" is NOT greater than 10`);
+  });
+
+  it('should return conditions correctly when aggType is not count', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [10],
+      aggType: 'min',
+      aggField: 'numericField',
+    });
+    expect(result).toBe(
+      `Number of matching documents where min of numericField is greater than 10`
+    );
+  });
+
+  it('should return conditions correctly when aggType is not count and isRecovered is true', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [10],
+      aggType: 'min',
+      aggField: 'numericField',
+      isRecovered: true,
+    });
+    expect(result).toBe(
+      `Number of matching documents where min of numericField is NOT greater than 10`
+    );
+  });
+
+  it('should return conditions correctly when group is specified and aggType is not count', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [10],
+      group: 'host-1',
+      aggType: 'max',
+      aggField: 'numericField',
+    });
+    expect(result).toBe(
+      `Number of matching documents for group "host-1" where max of numericField is greater than 10`
+    );
+  });
+
+  it('should return conditions correctly when group is specified, aggType is not count and isRecovered is true', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [10],
+      isRecovered: true,
+      group: 'host-1',
+      aggType: 'max',
+      aggField: 'numericField',
+    });
+    expect(result).toBe(
+      `Number of matching documents for group "host-1" where max of numericField is NOT greater than 10`
+    );
   });
 });

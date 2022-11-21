@@ -141,7 +141,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   const dataViews = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
   useEffect(() => {
-    setEsFields(convertFieldSpecToFieldOption(dataView.fields.map((field) => field.toSpec())));
+    if (dataView) {
+      setEsFields(convertFieldSpecToFieldOption(dataView.fields.map((field) => field.toSpec())));
+    }
   }, [dataView]);
 
   const onSelectDataView = useCallback((newDataView: DataView) => {

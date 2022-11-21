@@ -81,6 +81,8 @@ export function addMessages({
 interface GetContextConditionsDescriptionOpts {
   comparator: Comparator;
   threshold: number[];
+  aggType: string;
+  aggField?: string;
   isRecovered?: boolean;
   group?: string;
 }
@@ -88,13 +90,16 @@ interface GetContextConditionsDescriptionOpts {
 export function getContextConditionsDescription({
   comparator,
   threshold,
+  aggType,
+  aggField,
   isRecovered = false,
   group,
 }: GetContextConditionsDescriptionOpts) {
   return i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
     defaultMessage:
-      'Number of matching documents{groupCondition} is {negation}{thresholdComparator} {threshold}',
+      'Number of matching documents{groupCondition}{aggCondition} is {negation}{thresholdComparator} {threshold}',
     values: {
+      aggCondition: aggType === 'count' ? '' : ` where ${aggType} of ${aggField}`,
       groupCondition: group ? ` for group "${group}"` : '',
       thresholdComparator: getHumanReadableComparator(comparator),
       threshold: threshold.join(' and '),
