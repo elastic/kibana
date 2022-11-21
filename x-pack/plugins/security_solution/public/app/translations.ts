@@ -155,7 +155,3 @@ export const THREAT_INTELLIGENCE = i18n.translate(
     defaultMessage: 'Intelligence',
   }
 );
-
-export const LIST_DETAILS = i18n.translate('xpack.securitySolution.navigation.list_details', {
-  defaultMessage: 'List Details',
-});
