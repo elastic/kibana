@@ -10,11 +10,7 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import type {
-  SelectedDataView,
-  SourcererDataView,
-  SourcererUrlState,
-} from '../../store/sourcerer/model';
+import type { SelectedDataView, SourcererUrlState } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -33,7 +29,6 @@ import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/s
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
-import { useFetchIndex } from '../source';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
