@@ -11,7 +11,7 @@ import { tasks } from './tasks';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 
 describe('data telemetry collection tasks', () => {
   const indices = {

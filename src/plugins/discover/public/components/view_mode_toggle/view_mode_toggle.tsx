@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiTabs,
-  EuiTab,
-  useEuiPaddingSize,
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiTabs, EuiTab, useEuiPaddingSize, EuiBetaBadge } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -37,8 +30,8 @@ export const DocumentViewModeToggle = ({
     background-color: ${euiThemeVars.euiPageBackgroundColor};
   `;
 
-  const badgeCellCss = css`
-    margin-left: ${useEuiPaddingSize('s')};
+  const betaBadgeCss = css`
+    vertical-align: middle;
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -62,24 +55,21 @@ export const DocumentViewModeToggle = ({
         onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
         className="dscViewModeToggle__tab"
         data-test-subj="dscViewModeFieldStatsButton"
+        append={
+          <EuiBetaBadge
+            label={i18n.translate('discover.viewModes.fieldStatistics.betaTitle', {
+              defaultMessage: 'Beta',
+            })}
+            size="s"
+            className="fieldStatsBetaBadge"
+            css={betaBadgeCss}
+          />
+        }
       >
-        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-          <EuiFlexItem>
-            <FormattedMessage
-              id="discover.viewModes.fieldStatistics.label"
-              defaultMessage="Field statistics"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem css={badgeCellCss}>
-            <EuiBetaBadge
-              label={i18n.translate('discover.viewModes.fieldStatistics.betaTitle', {
-                defaultMessage: 'Beta',
-              })}
-              size="s"
-              className="fieldStatsBetaBadge"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FormattedMessage
+          id="discover.viewModes.fieldStatistics.label"
+          defaultMessage="Field statistics"
+        />
       </EuiTab>
     </EuiTabs>
   );
