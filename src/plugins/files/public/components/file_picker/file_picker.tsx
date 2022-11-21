@@ -31,7 +31,6 @@ import { FileGrid } from './components/file_grid';
 import { SearchField } from './components/search_field';
 import { ModalFooter } from './components/modal_footer';
 
-import './file_picker.scss';
 import { ClearFilterButton } from './components/clear_filter_button';
 import type { FileJSON } from '../../../common';
 
@@ -88,8 +87,9 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
       maxWidth="75vw"
       onClose={onClose}
       css={css`
-        @media (min-width: ${euiTheme.breakpoint.l}) {
-          height: 75vh; // Always be max height for the file picker
+        @media screen and (min-width: ${euiTheme.breakpoint.l}px) {
+          width: 75vw;
+          height: 75vh;
         }
       `}
     >
