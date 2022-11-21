@@ -9,6 +9,7 @@
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { registerExpressionsLanguage } from '.';
 import { PresentationLabsService } from './services/labs/types';
+import { PresentationEmbeddablesService } from './services/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}
@@ -16,6 +17,7 @@ export interface PresentationUtilPluginSetup {}
 export interface PresentationUtilPluginStart {
   ContextProvider: React.FC;
   labsService: PresentationLabsService;
+  embeddableLinksRegistry: PresentationEmbeddablesService['registry'];
   registerExpressionsLanguage: typeof registerExpressionsLanguage;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

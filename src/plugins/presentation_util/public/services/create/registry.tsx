@@ -62,7 +62,6 @@ export class PluginServiceRegistry<Services, StartParameters = {}> {
         }, children)}
       </>
     );
-
     return provider;
   }
 

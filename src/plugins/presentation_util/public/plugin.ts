@@ -42,6 +42,7 @@ export class PresentationUtilPlugin
     return {
       ContextProvider: pluginServices.getContextProvider(),
       labsService: pluginServices.getServices().labs,
+      embeddableLinksRegistry: pluginServices.getServices().embeddableLinks.registry,
       registerExpressionsLanguage,
     };
   }

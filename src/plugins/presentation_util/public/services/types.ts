@@ -10,16 +10,23 @@ import { PresentationLabsService } from './labs/types';
 import { PresentationDashboardsService } from './dashboards/types';
 import { PresentationCapabilitiesService } from './capabilities/types';
 import { PresentationDataViewsService } from './data_views/types';
+import type { EmbeddableLinksRegistry } from './plugin_services';
+
+interface PresentationEmbeddablesService {
+  registry: EmbeddableLinksRegistry;
+}
 
 export interface PresentationUtilServices {
   dashboards: PresentationDashboardsService;
   dataViews: PresentationDataViewsService;
   capabilities: PresentationCapabilitiesService;
   labs: PresentationLabsService;
+  embeddableLinks: PresentationEmbeddablesService;
 }
 
 export type {
   PresentationCapabilitiesService,
   PresentationDashboardsService,
   PresentationLabsService,
+  PresentationEmbeddablesService,
 };
