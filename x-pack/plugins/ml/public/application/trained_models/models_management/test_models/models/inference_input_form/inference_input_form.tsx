@@ -8,8 +8,8 @@
 import React, { FC } from 'react';
 
 import { INPUT_TYPE } from '../inference_base';
-import { TextInput } from './text_input';
-import { IndexInput } from './index_input';
+import { TextInputForm } from './text_input';
+import { IndexInputForm } from './index_input';
 import { InferrerType } from '..';
 
 interface Props {
@@ -19,8 +19,8 @@ interface Props {
 
 export const InferenceInputForm: FC<Props> = ({ inferrer, inputType }) => {
   return inputType === INPUT_TYPE.TEXT ? (
-    <TextInput inferrer={inferrer} />
+    <TextInputForm inferrer={inferrer} />
   ) : (
-    <IndexInput inferrer={inferrer} />
+    <IndexInputForm inferrer={inferrer} />
   );
 };

@@ -359,7 +359,7 @@ describe('rules_list component with props', () => {
 
   describe('Last response filter', () => {
     beforeEach(() => {
-      (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+      // (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     });
 
     afterEach(() => {
@@ -898,7 +898,7 @@ describe('rules_list component with items', () => {
   describe('render table of rules', () => {
     beforeAll(async () => {
       // Use fake timers so we don't have to wait for the EuiToolTip timeout
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
       await setup();
     });
 
@@ -1029,7 +1029,7 @@ describe('rules_list component with items', () => {
       expect(wrapper.find('[data-test-subj="rulesListAutoRefresh"]').exists()).toBeTruthy();
 
       expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-failed"]').first().text()).toEqual(
-        'Error'
+        'Failed'
       );
       expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-failed"]').last().text()).toEqual(
         'License Error'
@@ -1280,7 +1280,7 @@ describe('rules_list component with items', () => {
   });
 
   it('renders brief', async () => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     await setup();
 
     // ruleLastRunOutcome: {

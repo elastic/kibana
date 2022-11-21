@@ -1130,10 +1130,10 @@ exports[`Overview renders correctly without solutions 1`] = `
 
 exports[`Overview show loading spinner during loading 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-center-row"
 >
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <span
       aria-label="Loading"
