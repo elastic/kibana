@@ -16,7 +16,6 @@ import {
   SearchBar,
   EmptyViewerState,
   ViewerStatus,
-  ListTypeText,
 } from '@kbn/securitysolution-exception-list-components';
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
