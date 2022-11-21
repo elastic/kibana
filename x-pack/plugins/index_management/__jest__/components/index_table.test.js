@@ -421,7 +421,7 @@ describe('index table', () => {
     const rowIndex = 0;
     openMenuAndClickButton(rendered, rowIndex, 'forcemergeIndexMenuButton');
     snapshot(status(rendered, rowIndex));
-    expect(rendered.find('.euiModal').length).toBe(1);
+    expect(rendered.find('.euiModal').length).toBe(2);
 
     let count = 0;
     store.subscribe(() => {
