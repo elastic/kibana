@@ -22,6 +22,7 @@ export const ContentWrapper = styled.div`
 interface UserActionMarkdownProps {
   content: string;
   id: string;
+  caseId: string;
   isEditable: boolean;
   onChangeEditable: (id: string) => void;
   onSaveContent: (content: string) => void;
@@ -34,7 +35,7 @@ export interface UserActionMarkdownRefObject {
 const UserActionMarkdownComponent = forwardRef<
   UserActionMarkdownRefObject,
   UserActionMarkdownProps
->(({ id, content, isEditable, onChangeEditable, onSaveContent }, ref) => {
+>(({ id, content, caseId, isEditable, onChangeEditable, onSaveContent }, ref) => {
   const editorRef = useRef();
   const initialState = { content };
   const { form } = useForm<Content>({
@@ -111,6 +112,7 @@ const UserActionMarkdownComponent = forwardRef<
           'aria-label': 'Cases markdown editor',
           value: content,
           id,
+          caseId,
           bottomRightContent: EditorButtons,
         }}
       />

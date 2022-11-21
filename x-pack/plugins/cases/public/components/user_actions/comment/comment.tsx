@@ -96,6 +96,7 @@ const getCreateCommentUserAction = ({
         isEdit: manageMarkdownEditIds.includes(comment.id),
         commentRefs,
         isLoading: loadingCommentIds.includes(comment.id),
+        caseId: caseData.id,
         handleManageMarkdownEditId,
         handleSaveComment,
         handleManageQuote,
