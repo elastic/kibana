@@ -296,18 +296,24 @@ const subFeatures: SubFeatureConfig[] = [
         groupType: 'mutually_exclusive',
         privileges: [
           {
-            api: [`${APP_ID}-writeTrustedApplications`, `${APP_ID}-readTrustedApplications`],
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeTrustedApplications`,
+              `${APP_ID}-readTrustedApplications`,
+            ],
             id: 'trusted_applications_all',
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: ['exception-list-agnostic'],
               read: [],
             },
             ui: ['writeTrustedApplications', 'readTrustedApplications'],
           },
           {
-            api: [`${APP_ID}-readTrustedApplications`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedApplications`],
             id: 'trusted_applications_read',
             includeIn: 'none',
             name: 'Read',
@@ -341,6 +347,9 @@ const subFeatures: SubFeatureConfig[] = [
         privileges: [
           {
             api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
               `${APP_ID}-writeHostIsolationExceptions`,
               `${APP_ID}-readHostIsolationExceptions`,
             ],
@@ -348,13 +357,13 @@ const subFeatures: SubFeatureConfig[] = [
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: ['exception-list-agnostic'],
               read: [],
             },
             ui: ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
           },
           {
-            api: [`${APP_ID}-readHostIsolationExceptions`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
             id: 'host_isolation_exceptions_read',
             includeIn: 'none',
             name: 'Read',
@@ -384,18 +393,24 @@ const subFeatures: SubFeatureConfig[] = [
         groupType: 'mutually_exclusive',
         privileges: [
           {
-            api: [`${APP_ID}-writeBlocklist`, `${APP_ID}-readBlocklist`],
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeBlocklist`,
+              `${APP_ID}-readBlocklist`,
+            ],
             id: 'blocklist_all',
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: ['exception-list-agnostic'],
               read: [],
             },
             ui: ['writeBlocklist', 'readBlocklist'],
           },
           {
-            api: [`${APP_ID}-readBlocklist`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readBlocklist`],
             id: 'blocklist_read',
             includeIn: 'none',
             name: 'Read',
@@ -425,18 +440,24 @@ const subFeatures: SubFeatureConfig[] = [
         groupType: 'mutually_exclusive',
         privileges: [
           {
-            api: [`${APP_ID}-writeEventFilters`, `${APP_ID}-readEventFilters`],
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeEventFilters`,
+              `${APP_ID}-readEventFilters`,
+            ],
             id: 'event_filters_all',
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: ['exception-list-agnostic'],
               read: [],
             },
             ui: ['writeEventFilters', 'readEventFilters'],
           },
           {
-            api: [`${APP_ID}-readEventFilters`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readEventFilters`],
             id: 'event_filters_read',
             includeIn: 'none',
             name: 'Read',
