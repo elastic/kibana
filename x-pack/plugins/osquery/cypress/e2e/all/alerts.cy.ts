@@ -12,6 +12,7 @@ import {
   findFormFieldByRowsLabelAndType,
   inputQuery,
   submitQuery,
+  typeInECSFieldInput,
 } from '../../tasks/live_query';
 import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
@@ -65,21 +66,92 @@ describe('Alert Event Details', () => {
     cy.contains(RULE_NAME).click();
     cy.contains('Edit rule settings').click();
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
-    cy.contains('Perform no actions').get('select').select('On each rule execution');
     cy.contains('Response actions are run on each rule execution');
     cy.getBySel('.osquery-ResponseActionTypeSelectOption').click();
-    cy.get(LIVE_QUERY_EDITOR);
+    cy.getBySel('response-actions-list-item-0').within(() => {
+      cy.get(LIVE_QUERY_EDITOR);
+    });
     cy.contains('Save changes').click();
-    cy.contains('Query is a required field');
-    inputQuery('select * from uptime');
-    cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
+    cy.getBySel('response-actions-list-item-0').within(() => {
+      cy.contains('Query is a required field');
+      inputQuery('select * from uptime1');
+      cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
+    });
+
+    cy.getBySel('.osquery-ResponseActionTypeSelectOption').click();
+
+    cy.getBySel('response-actions-list-item-1').within(() => {
+      cy.contains('Run a set of queries in a pack').click();
+    });
+    cy.contains('Save changes').click();
+    cy.getBySel('response-actions-error')
+      .within(() => {
+        cy.contains(' Pack is a required field');
+      })
+      .should('exist');
+    cy.contains('Pack is a required field');
+    cy.getBySel('response-actions-list-item-1').within(() => {
+      cy.getBySel('comboBoxInput').type('{downArrow}{enter}');
+    });
+
+    cy.getBySel('.osquery-ResponseActionTypeSelectOption').click();
+
+    cy.getBySel('response-actions-list-item-2').within(() => {
+      cy.get(LIVE_QUERY_EDITOR);
+      cy.contains('Query is a required field');
+      inputQuery('select * from uptime');
+      cy.contains('Advanced').click();
+      typeInECSFieldInput('message{downArrow}{enter}');
+      cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
+      cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
+    });
 
     // getSavedQueriesDropdown().type(`users{downArrow}{enter}`);
     cy.contains('Save changes').click();
     cy.contains(`${RULE_NAME} was saved`).should('exist');
+    cy.getBySel('toastCloseButton').click();
     cy.contains('Edit rule settings').click();
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
     cy.contains('select * from uptime');
+    cy.getBySel('response-actions-list-item-0').within(() => {
+      cy.contains('select * from uptime1');
+    });
+    cy.getBySel('response-actions-list-item-2').within(() => {
+      cy.contains('select * from uptime');
+      cy.contains('Log message optimized for viewing in a log viewer');
+      cy.contains('Days of uptime');
+    });
+    cy.getBySel('response-actions-list-item-1').within(() => {
+      cy.contains('testpack');
+      cy.getBySel('comboBoxInput').type('{backspace}{enter}');
+    });
+    cy.getBySel('response-actions-list-item-0').within(() => {
+      cy.contains('select * from uptime1');
+      cy.getBySel('remove-response-action').click();
+    });
+    cy.getBySel('response-actions-list-item-0').within(() => {
+      cy.contains('Search for a pack to run');
+      cy.contains('Pack is a required field');
+      cy.getBySel('comboBoxInput').type('{downArrow}{enter}');
+    });
+    cy.getBySel('response-actions-list-item-1').within(() => {
+      cy.contains('select * from uptime');
+      cy.contains('Log message optimized for viewing in a log viewer');
+      cy.contains('Days of uptime');
+    });
+    cy.contains('Save changes').click();
+    cy.contains(`${RULE_NAME} was saved`).should('exist');
+    cy.getBySel('toastCloseButton').click();
+    cy.contains('Edit rule settings').click();
+    cy.getBySel('edit-rule-actions-tab').wait(500).click();
+    cy.getBySel('response-actions-list-item-0').within(() => {
+      cy.contains('testpack');
+    });
+    cy.getBySel('response-actions-list-item-1').within(() => {
+      cy.contains('select * from uptime');
+      cy.contains('Log message optimized for viewing in a log viewer');
+      cy.contains('Days of uptime');
+    });
   });
 
   it('should be able to run live query and add to timeline (-depending on the previous test)', () => {

@@ -127,7 +127,12 @@ export const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }
       {uiFieldErrors ? (
         <>
           <FieldErrorsContainer>
-            <EuiCallOut title={FORM_ERRORS_TITLE} color="danger" iconType="alert">
+            <EuiCallOut
+              data-test-subj="response-actions-error"
+              title={FORM_ERRORS_TITLE}
+              color="danger"
+              iconType="alert"
+            >
               <ReactMarkdown>{uiFieldErrors}</ReactMarkdown>
             </EuiCallOut>
           </FieldErrorsContainer>

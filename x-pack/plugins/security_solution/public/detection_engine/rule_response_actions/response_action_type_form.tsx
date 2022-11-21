@@ -69,6 +69,7 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
   const renderExtraContent = useMemo(() => {
     return (
       <EuiButtonIcon
+        data-test-subj="remove-response-action"
         iconType="minusInCircle"
         color="danger"
         className="actAccordionActionForm__extraAction"
