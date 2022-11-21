@@ -96,14 +96,14 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
-export type StatefulBodyProps = OwnProps & PropsFromRedux;
+export type StatefulDataTableProps = OwnProps & PropsFromRedux;
 
 /**
  * The Body component is used everywhere timeline is used within the security application. It is the highest level component
  * that is shared across all implementations of the timeline.
  */
 
-export const DataTableComponent = React.memo<StatefulBodyProps>(
+export const DataTableComponent = React.memo<StatefulDataTableProps>(
   ({
     alertToolbar,
     activePage,

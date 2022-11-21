@@ -744,7 +744,7 @@ const createSuppressedTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {

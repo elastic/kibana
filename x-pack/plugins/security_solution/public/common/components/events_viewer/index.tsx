@@ -139,9 +139,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const {
     filters,
-    input,
     query,
-    globalQueries,
     dataTable: {
       columns,
       defaultColumns,
@@ -422,7 +420,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     }
   }, [isSelectAllChecked, onSelectPage, selectAll]);
 
-  const [leadingTGridControlColumns] = useMemo(() => {
+  const [transformedLeadingControlColumns] = useMemo(() => {
     return [
       showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
     ].map((controlColumns) =>
@@ -577,13 +575,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                           filters={filters}
                           filterStatus={currentFilter}
                           onRuleChange={onRuleChange}
-                          leadingControlColumns={leadingTGridControlColumns}
+                          leadingControlColumns={transformedLeadingControlColumns}
                         />
                       )}
                       {tableView === 'eventRenderedView' && (
                         <EventRenderedView
                           events={events}
-                          leadingControlColumns={leadingTGridControlColumns}
+                          leadingControlColumns={transformedLeadingControlColumns}
                           pageIndex={pageInfo.activePage}
                           pageSize={pageInfo.querySize}
                           pageSizeOptions={itemsPerPageOptions}

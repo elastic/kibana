@@ -12,7 +12,6 @@ import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 
-import type { BulkActionsProp } from '@kbn/timelines-plugin/common/types';
 import type { TableId } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
 import { RowRendererId } from '../../../../common/types/timeline';
@@ -48,6 +47,7 @@ import {
   useGetInitialUrlParamValue,
   useReplaceUrlParams,
 } from '../../utils/global_query_string/helpers';
+import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 

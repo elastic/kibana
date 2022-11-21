@@ -202,6 +202,7 @@ export const PreviewHistogram = ({
           start={startDate}
           sourcererScope={SourcererScopeName.detections}
           indexNames={[`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]}
+          bulkActions={false}
         />
       </FullScreenContainer>
       <DetailsPanel

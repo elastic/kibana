@@ -15,9 +15,9 @@ import {
 } from '../../common/mock';
 import { useTimelineDataFilters } from './use_timeline_data_filters';
 import { createStore } from '../../common/store';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import React from 'react';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { dataTableReducer } from '../../common/store/data_table/reducer';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -48,7 +48,7 @@ const store = createStore(
     },
   },
   SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
+  { dataTable: dataTableReducer },
   kibanaObservable,
   storage
 );

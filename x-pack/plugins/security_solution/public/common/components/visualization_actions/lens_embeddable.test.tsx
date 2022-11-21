@@ -7,7 +7,6 @@
 import { render } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 import React from 'react';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -21,6 +20,7 @@ import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_me
 import { LensEmbeddable } from './lens_embeddable';
 import { useKibana } from '../../lib/kibana';
 import { useActions } from './use_actions';
+import { dataTableReducer } from '../../store/data_table/reducer';
 
 const mockActions = [
   { id: 'inspect' },
@@ -82,7 +82,7 @@ describe('LensEmbeddable', () => {
   const store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
+    { dataTable: dataTableReducer },
     kibanaObservable,
     storage
   );

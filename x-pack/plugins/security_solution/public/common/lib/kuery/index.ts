@@ -28,7 +28,9 @@ export interface CombineQueries {
   kqlMode: string;
 }
 
-export const escapeQueryValue = (val: number | string = ''): string | number => {
+export const escapeQueryValue = (
+  val: string | number | Array<string | number> = ''
+): string | number | Array<string | number> => {
   if (isString(val)) {
     if (isEmpty(val)) {
       return '""';
@@ -66,10 +68,10 @@ export const convertKueryToElasticSearchQuery = (
   }
 };
 
-const isNumber = (value: string | number) => !isNaN(Number(value));
+const isNumber = (value: string | number | Array<string | number>) => !isNaN(Number(value));
 
-const convertDateFieldToQuery = (field: string, value: string | number) =>
-  `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
+const convertDateFieldToQuery = (field: string, value: string | number | Array<string | number>) =>
+  `${field}: ${isNumber(value) ? value : new Date(value.toString()).valueOf()}`;
 
 const getBaseFields = memoizeOne((browserFields: BrowserFields): string[] => {
   const baseFields = get('base', browserFields);
@@ -99,7 +101,7 @@ const checkIfFieldTypeIsDate = (field: string, browserFields: BrowserFields) => 
 
 const convertNestedFieldToQuery = (
   field: string,
-  value: string | number,
+  value: string | number | Array<string | number>,
   browserFields: BrowserFields
 ) => {
   const pathBrowserField = getBrowserFieldPath(field, browserFields);

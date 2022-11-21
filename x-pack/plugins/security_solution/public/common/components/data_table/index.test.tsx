@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import type { StatefulBodyProps } from '.';
+import type { StatefulDataTableProps } from '.';
 import { DataTableComponent } from '.';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { Direction } from '../../../../common/search_strategy';
@@ -87,25 +87,23 @@ export const TestCellRenderer: React.FC<CellValueElementProps> = ({ columnId, da
 
 describe('DataTable', () => {
   const mount = useMountAppended();
-  const props: StatefulBodyProps = {
+  const props: StatefulDataTableProps = {
     activePage: 0,
     browserFields: mockBrowserFields,
-    clearSelected: jest.fn() as unknown as StatefulBodyProps['clearSelected'],
+    clearSelected: jest.fn() as unknown as StatefulDataTableProps['clearSelected'],
     columnHeaders: defaultHeaders,
     data: mockTimelineData,
     defaultCellActions: [],
     disabledCellActions: ['signal.rule.risk_score', 'signal.reason'],
     id: 'timeline-test',
-    isSelectAllChecked: false,
     isLoading: false,
     itemsPerPageOptions: [],
-    loadingEventIds: [],
     loadPage: jest.fn(),
     pageSize: 25,
     renderCellValue: TestCellRenderer,
     rowRenderers: [],
     selectedEventIds: {},
-    setSelected: jest.fn() as unknown as StatefulBodyProps['setSelected'],
+    setSelected: jest.fn() as unknown as StatefulDataTableProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
     tabType: 'query',
@@ -115,6 +113,7 @@ describe('DataTable', () => {
     filterQuery: '',
     refetch: jest.fn(),
     indexNames: [''],
+    defaultColumns: defaultHeaders,
   };
 
   beforeEach(() => {
