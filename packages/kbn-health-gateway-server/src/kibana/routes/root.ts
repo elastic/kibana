@@ -9,10 +9,9 @@
 import https from 'https';
 import { URL } from 'url';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
-import nodeFetch, { Headers, RequestInit, Response } from 'node-fetch';
+import nodeFetch, { RequestInit, Response } from 'node-fetch';
 import type { IConfigService } from '@kbn/config';
 import type { Logger } from '@kbn/logging';
-import type { KibanaConfigType } from '../kibana_config';
 import { KibanaConfig } from '../kibana_config';
 
 const HTTPS = 'https:';
@@ -21,22 +20,24 @@ const GATEWAY_ROOT_ROUTE = '/';
 const KIBANA_ROOT_ROUTE = '/';
 
 interface RootRouteDependencies {
-  log: Logger;
+  logger: Logger;
   config: IConfigService;
 }
 
 type Fetch = (path: string) => Promise<Response>;
 
-export function createRootRoute({ config, log }: RootRouteDependencies) {
-  const kibanaConfig = new KibanaConfig(config.atPathSync<KibanaConfigType>('kibana'));
+export function createRootRoute({ config, logger }: RootRouteDependencies) {
+  const kibanaConfig = new KibanaConfig({ config, logger });
   const fetch = configureFetch(kibanaConfig);
 
   return {
     method: 'GET',
     path: GATEWAY_ROOT_ROUTE,
     handler: async (req: Request, h: ResponseToolkit) => {
-      const responses = await fetchKibanaRoots({ fetch, kibanaConfig, log });
+      const responses = await fetchKibanaRoots({ fetch, kibanaConfig, logger });
       const { body, statusCode } = mergeResponses(responses);
+      logger.debug(`Returning ${statusCode} response with body: ${JSON.stringify(body)}`);
+
       return h.response(body).type('application/json').code(statusCode);
     },
   };
@@ -45,62 +46,71 @@ export function createRootRoute({ config, log }: RootRouteDependencies) {
 async function fetchKibanaRoots({
   fetch,
   kibanaConfig,
-  log,
+  logger,
 }: {
   fetch: Fetch;
   kibanaConfig: KibanaConfig;
-  log: Logger;
+  logger: Logger;
 }) {
-  const requests = await Promise.allSettled(
+  const responses = await Promise.allSettled(
     kibanaConfig.hosts.map(async (host) => {
-      log.debug(`Fetching response from ${host}${KIBANA_ROOT_ROUTE}`);
+      logger.debug(`Fetching response from ${host}${KIBANA_ROOT_ROUTE}`);
       return fetch(`${host}${KIBANA_ROOT_ROUTE}`);
     })
   );
 
-  return requests.map((r, i) => {
-    if (r.status === 'rejected') {
-      log.error(`No response from ${kibanaConfig.hosts[i]}${KIBANA_ROOT_ROUTE}`);
-    } else {
-      log.info(
-        `Got response from ${kibanaConfig.hosts[i]}${KIBANA_ROOT_ROUTE}: ${JSON.stringify(
-          r.value.status
-        )}`
-      );
+  responses.forEach((response, index) => {
+    const host = `${kibanaConfig.hosts[index]}${KIBANA_ROOT_ROUTE}`;
+
+    if (response.status !== 'rejected') {
+      logger.debug(`Got response from ${host}: ${JSON.stringify(response.value.status)}`);
+
+      return;
     }
-    return r;
+
+    if (response.reason instanceof Error) {
+      logger.error(response.reason);
+    }
+
+    if (response.reason instanceof Error && response.reason.name === 'AbortError') {
+      logger.error(`Request timeout for ${host}`);
+
+      return;
+    }
+
+    logger.error(
+      `No response from ${host}: ${
+        response.reason instanceof Error ? response.reason.message : JSON.stringify(response.reason)
+      }`
+    );
   });
+
+  return responses;
 }
 
 function mergeResponses(
   responses: Array<PromiseFulfilledResult<Response> | PromiseRejectedResult>
 ) {
-  let statusCode = 200;
-  for (const response of responses) {
-    if (
-      response.status === 'rejected' ||
-      !isHealthyResponse(response.value.status, response.value.headers)
-    ) {
-      statusCode = 503;
-    }
-  }
+  const hasUnhealthyResponse = responses.some(isUnhealthyResponse);
 
   return {
     body: {}, // The control plane health check ignores the body, so we do the same
-    statusCode,
+    statusCode: hasUnhealthyResponse ? 503 : 200,
   };
 }
 
-function isHealthyResponse(statusCode: number, headers: Headers) {
-  return isSuccess(statusCode) || isUnauthorized(statusCode, headers);
+function isUnhealthyResponse(response: PromiseFulfilledResult<Response> | PromiseRejectedResult) {
+  return (
+    response.status === 'rejected' || !(isSuccess(response.value) || isUnauthorized(response.value))
+  );
 }
 
-function isUnauthorized(statusCode: number, headers: Headers): boolean {
-  return statusCode === 401 && headers.has('www-authenticate');
+function isUnauthorized({ status, headers }: Response): boolean {
+  return status === 401 && headers.has('www-authenticate');
 }
 
-function isSuccess(statusCode: number): boolean {
-  return (statusCode >= 200 && statusCode <= 299) || statusCode === 302;
+function isSuccess({ status }: Response): boolean {
+  return (status >= 200 && status <= 299) || status === 302;
 }
 
 function generateAgentConfig(sslConfig: KibanaConfig['ssl']) {
@@ -149,13 +159,11 @@ function configureFetch(kibanaConfig: KibanaConfig) {
       signal: controller.signal,
       redirect: 'manual',
     };
+
     try {
-      const response = await nodeFetch(url, fetchOptions);
+      return await nodeFetch(url, fetchOptions);
+    } finally {
       clearTimeout(timeoutId);
-      return response;
-    } catch (e) {
-      clearTimeout(timeoutId);
-      throw e;
     }
   };
 }

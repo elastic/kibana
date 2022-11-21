@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const enum InputsModelId {
+export enum InputsModelId {
   global = 'global',
   timeline = 'timeline',
   socTrends = 'socTrends',
