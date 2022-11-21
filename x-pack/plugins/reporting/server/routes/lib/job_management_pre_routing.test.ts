@@ -77,7 +77,7 @@ it(`should return 404 if the docId isn't resolve`, async function () {
   expect(handlerCalled).toBe(false);
 });
 
-it(`should return unauthorized if job type is unrecognized`, async function () {
+it(`should return forbidden if job type is unrecognized`, async function () {
   mockJobsQueryFactory.mockReturnValue({
     get: jest.fn(() => ({ jobtype: 'notARealJobType' })),
   });
@@ -100,7 +100,7 @@ it(`should return unauthorized if job type is unrecognized`, async function () {
     handler
   );
 
-  expect(mockResponseFactory.unauthorized).toBeCalled();
+  expect(mockResponseFactory.forbidden).toBeCalled();
   expect(handlerCalled).toBe(false);
 });
 

@@ -85,8 +85,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('job info', async () => {
-        expect(getUsageCount(initialStats, `get /api/reporting/jobs/info/{docId}`)).to.be(0);
-        expect(getUsageCount(stats, `get /api/reporting/jobs/info/{docId}`)).to.be(CALL_COUNT);
+        expect(
+          getUsageCount(initialStats, `get /api/reporting/jobs/info/{docId}:printable_pdf`)
+        ).to.be(0);
+        expect(getUsageCount(stats, `get /api/reporting/jobs/info/{docId}:printable_pdf`)).to.be(
+          CALL_COUNT
+        );
       });
     });
 

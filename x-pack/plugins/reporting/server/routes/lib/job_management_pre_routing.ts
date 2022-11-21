@@ -20,7 +20,7 @@ import type { Counters } from './get_counter';
 type JobManagementResponseHandler = (doc: ReportApiJSON) => Promise<IKibanaResponse<object>>;
 
 /**
- * Handles the common parts of requests to manage (download and delete) reports
+ * Handles the common parts of requests to manage (view, download and delete) reports
  */
 export const jobManagementPreRouting = async (
   reporting: ReportingCore,
@@ -44,9 +44,9 @@ export const jobManagementPreRouting = async (
 
   const { jobtype } = doc;
   if (!jobTypes.includes(jobtype)) {
-    return res.unauthorized({
+    return res.forbidden({
       body: i18n.translate('xpack.reporting.jobResponse.errorHandler.notAuthorized', {
-        defaultMessage: `Sorry, you are not authorized to download or delete {jobtype} reports`,
+        defaultMessage: `Sorry, you are not authorized to view or delete {jobtype} reports`,
         values: { jobtype },
       }),
     });

@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
 import { promisify } from 'util';
 import { ReportingCore } from '../..';
@@ -128,35 +127,14 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }
 
         const { docId } = req.params;
-        const {
-          management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
-
-        const result = await jobsQuery.get(user, docId);
-
-        if (!result) {
-          return res.notFound();
-        }
-
-        const { jobtype: jobType } = result;
-
-        if (!jobTypes.includes(jobType)) {
-          return res.forbidden({
-            body: i18n.translate('xpack.reporting.jobsQuery.infoError.unauthorizedErrorMessage', {
-              defaultMessage: 'Sorry, you are not authorized to view {jobType} info',
-              values: { jobType },
-            }),
-          });
-        }
-
-        counters.usageCounter();
-
-        return res.ok({
-          body: result,
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
+        return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) =>
+          res.ok({
+            body: doc,
+            headers: {
+              'content-type': 'application/json',
+            },
+          })
+        );
       })
     );
   };
