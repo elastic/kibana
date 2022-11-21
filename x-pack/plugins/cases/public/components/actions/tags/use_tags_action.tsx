@@ -7,7 +7,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { difference } from 'lodash';
+import { difference, isEqual } from 'lodash';
 import type { CaseUpdateRequest } from '../../../../common/ui';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import type { Case } from '../../../../common';
@@ -34,12 +34,8 @@ export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActi
     [onAction]
   );
 
-  const areTagsEqual = (originalTags: string[], tagsToUpdate: Set<string>): boolean => {
-    if (originalTags.length !== tagsToUpdate.size) {
-      return false;
-    }
-
-    return originalTags.every((tag) => tagsToUpdate.has(tag));
+  const areTagsEqual = (originalTags: Set<string>, tagsToUpdate: Set<string>): boolean => {
+    return isEqual(originalTags, tagsToUpdate);
   };
 
   const onSaveTags = useCallback(
@@ -51,7 +47,7 @@ export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActi
         const tagsWithoutUnselectedTags = difference(theCase.tags, tagsSelection.unSelectedTags);
         const uniqueTags = new Set([...tagsWithoutUnselectedTags, ...tagsSelection.selectedTags]);
 
-        if (areTagsEqual(theCase.tags, uniqueTags)) {
+        if (areTagsEqual(new Set([...theCase.tags]), uniqueTags)) {
           return acc;
         }
 
