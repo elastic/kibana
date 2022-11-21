@@ -302,3 +302,17 @@ export const DELETED_CASES = (totalCases: number) =>
     values: { totalCases },
     defaultMessage: 'Deleted {totalCases, plural, =1 {case} other {{totalCases} cases}}',
   });
+
+export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
+  i18n.translate('xpack.cases.configure.addTagCustomOptionLabel', {
+    defaultMessage: 'Add {searchValue} as a tag',
+    values: { searchValue },
+  });
+
+/**
+ * EUI checkbox replace {searchValue} with the current
+ * search value. We need to put the template variable
+ * searchValue in the string but not replace it
+ * with i18n.
+ */
+export const ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX = ADD_TAG_CUSTOM_OPTION_LABEL('{searchValue}');

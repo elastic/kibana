@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-export { CANCEL } from '../../../common/translations';
+export { CANCEL, ADD_TAG_CUSTOM_OPTION_LABEL } from '../../../common/translations';
 
 export const EDIT_TAGS = i18n.translate('xpack.cases.actions.tags.edit', {
   defaultMessage: 'Edit tags',

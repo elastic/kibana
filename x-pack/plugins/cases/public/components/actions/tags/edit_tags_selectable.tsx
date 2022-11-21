@@ -343,7 +343,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
         {
           key: searchValue,
           searchableLabel: searchValue,
-          label: `Add ${searchValue} as a tag`,
+          label: i18n.ADD_TAG_CUSTOM_OPTION_LABEL(searchValue),
           'data-test-subj': 'cases-actions-tags-edit-selectable-add-new-tag',
           data: { tagIcon: 'empty', newItem: true },
         },
@@ -359,8 +359,8 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   ).length;
 
   const showNoMatchText = useMemo(
-    () => !hasPartialMatch(searchValue, options),
-    [options, searchValue]
+    () => !hasPartialMatch(searchValue, options) && Object.keys(state.tags).length > 0,
+    [options, searchValue, state.tags]
   );
 
   return (
@@ -446,6 +446,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
               css={{
                 marginBottom: euiTheme.size.s,
               }}
+              data-test-subj="cases-actions-tags-edit-selectable-no-match-label"
             >
               {i18n.NO_SEARCH_MATCH}
             </EuiText>
