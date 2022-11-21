@@ -71,7 +71,6 @@ import { BackToExternalAppButton } from '../../../components/back_to_external_ap
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
-
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
 
@@ -186,7 +185,7 @@ export const EndpointList = () => {
           id="xpack.securitySolution.endpoint.onboarding.enableFleetAccess"
           defaultMessage="Deploying Agents for the first time requires Fleet access. For more information, "
         />
-        <EuiLink external href={`${services?.docLinks.links.securitySolution.privileges}`}>
+        <EuiLink external href={`${services.docLinks.links.securitySolution.privileges}`}>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyList.onboardingDocsLink"
             defaultMessage="view the Elastic Security documentation"
@@ -194,7 +193,7 @@ export const EndpointList = () => {
         </EuiLink>
       </EuiText>
     );
-  }, [services?.docLinks.links.securitySolution.privileges]);
+  }, [services.docLinks.links.securitySolution.privileges]);
 
   useEffect(() => {
     // if no endpoint policy, skip transform check
@@ -670,7 +669,7 @@ export const EndpointList = () => {
             docsPage: (
               <EuiLink
                 data-test-subj="failed-transform-docs-link"
-                href={services?.docLinks?.links.endpoints.troubleshooting}
+                href={services.docLinks.links.endpoints.troubleshooting}
                 target="_blank"
               >
                 <FormattedMessage
@@ -684,7 +683,7 @@ export const EndpointList = () => {
         <EuiSpacer size="s" />
       </>
     );
-  }, [metadataTransformStats, services?.docLinks?.links.endpoints.troubleshooting]);
+  }, [metadataTransformStats, services.docLinks.links.endpoints.troubleshooting]);
 
   const transformFailedCallout = useMemo(() => {
     if (!showTransformFailedCallout) {
@@ -749,7 +748,7 @@ export const EndpointList = () => {
                       appPath={`#${pagePathGetters.agent_list({
                         kuery: 'packages : "endpoint"',
                       })}`}
-                      href={`${services?.application?.getUrlForApp(
+                      href={`${services.application.getUrlForApp(
                         'fleet'
                       )}#${pagePathGetters.agent_list({
                         kuery: 'packages : "endpoint"',
