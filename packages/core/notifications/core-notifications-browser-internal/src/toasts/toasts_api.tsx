@@ -78,6 +78,14 @@ export class ToastsApi implements IToasts {
     return toast;
   }
 
+  public getByTitle(title: string) {
+    const toasts = this.toasts$.getValue();
+    const idx = toasts.findIndex((toast) => toast.title === title);
+    if (idx !== -1) {
+      return toasts[idx];
+    }
+  }
+
   /**
    * Removes a toast from the current array of toasts if present.
    * @param toastOrId - a {@link Toast} returned by {@link ToastsApi.add} or its id
@@ -166,6 +174,11 @@ export class ToastsApi implements IToasts {
    */
   public addError(error: Error, options: ErrorToastOptions) {
     const message = options.toastMessage || error.message;
+    const existingToast = this.getByTitle(options.title);
+    if (existingToast) {
+      // toast with the same title is already displayed, no reason to display it again
+      return existingToast;
+    }
     return this.add({
       color: 'danger',
       iconType: 'alert',
