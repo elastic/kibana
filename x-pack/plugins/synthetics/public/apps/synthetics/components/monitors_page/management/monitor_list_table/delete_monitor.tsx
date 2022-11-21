@@ -17,13 +17,13 @@ import { kibanaService } from '../../../../../../utils/kibana_service';
 import * as labels from './labels';
 
 export const DeleteMonitor = ({
-  id,
+  configId,
   name,
   reloadPage,
   isProjectMonitor,
   setIsDeleteModalVisible,
 }: {
-  id: string;
+  configId: string;
   name: string;
   reloadPage: () => void;
   isProjectMonitor?: boolean;
@@ -37,9 +37,9 @@ export const DeleteMonitor = ({
 
   const { status: monitorDeleteStatus } = useFetcher(() => {
     if (isDeleting) {
-      return fetchDeleteMonitor({ id });
+      return fetchDeleteMonitor({ id: configId });
     }
-  }, [id, isDeleting]);
+  }, [configId, isDeleting]);
 
   useEffect(() => {
     if (!isDeleting) {
@@ -63,7 +63,7 @@ export const DeleteMonitor = ({
               {i18n.translate(
                 'xpack.synthetics.monitorManagement.monitorDeleteSuccessMessage.name',
                 {
-                  defaultMessage: 'Monitor {name} deleted successfully.',
+                  defaultMessage: 'Deleted "{name}"',
                   values: { name },
                 }
               )}

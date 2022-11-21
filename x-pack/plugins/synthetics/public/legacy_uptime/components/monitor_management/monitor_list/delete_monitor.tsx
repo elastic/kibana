@@ -78,7 +78,7 @@ export const DeleteMonitor = ({
               {i18n.translate(
                 'xpack.synthetics.monitorManagement.monitorDeleteSuccessMessage.name',
                 {
-                  defaultMessage: 'Monitor {name} deleted successfully.',
+                  defaultMessage: 'Deleted "{name}"',
                   values: { name },
                 }
               )}
