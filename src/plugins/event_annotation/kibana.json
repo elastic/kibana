@@ -11,6 +11,9 @@
     "expressions",
     "data"
   ],
+  "requiredBundles": [
+    "savedObjects"
+  ],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-visualizations"

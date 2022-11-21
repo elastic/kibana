@@ -41,6 +41,8 @@ const previouslyRegisteredTypes = [
   'csp-rule-template',
   'csp_rule',
   'dashboard',
+  'event-annotation',
+  'event-annotation-group',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',
   'enterprise_search_telemetry',

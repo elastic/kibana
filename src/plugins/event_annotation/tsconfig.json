@@ -20,5 +20,8 @@
     {
       "path": "../data/tsconfig.json"
     },
+    {
+      "path": "../../../src/plugins/saved_objects/tsconfig.json"
+    },
   ]
 }
