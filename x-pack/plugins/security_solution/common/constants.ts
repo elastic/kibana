@@ -471,3 +471,5 @@ export const RISKY_USERS_DOC_LINK =
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
 export const BULK_ADD_TO_TIMELINE_LIMIT = 2000;
+
+export const SECURITY_SOLUTION_ACTION_TRIGGER = 'test-security-solution-trigger';

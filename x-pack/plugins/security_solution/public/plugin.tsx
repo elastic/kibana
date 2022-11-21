@@ -16,6 +16,7 @@ import type {
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
+  ScopedHistory,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -39,6 +40,7 @@ import {
   APP_PATH,
   APP_ICON_SOLUTION,
   ENABLE_GROUPED_NAVIGATION,
+  SECURITY_SOLUTION_ACTION_TRIGGER,
 } from '../common/constants';
 
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
@@ -58,6 +60,12 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import type { SecurityAppStore } from './common/store/types';
+
+import { createCopyToClipboardAction } from './actions/copy_to_clipboard';
+import { createFilterInAction } from './actions/filter_in';
+import { createFilterOutAction } from './actions/filter_out';
+import { createShowTopNAction } from './actions/show_top_n';
+import { createAddToTimelineAction } from './actions/add_to_timeline';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -164,9 +172,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
+        const services = await startServices(params);
+        this.registerUiActions(coreStart, startPlugins, store, services, params.history);
+
         return renderApp({
           ...params,
-          services: await startServices(params),
+          services,
           store,
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
@@ -210,7 +221,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {
+  public async start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     licenseService.start(plugins.licensing.license$);
@@ -474,5 +485,41 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const filteredLinks = await getFilteredLinks(core, plugins);
       updateAppLinks(filteredLinks, linksPermissions);
     });
+  }
+
+  /**
+   * Register UI Actions.
+   */
+  registerUiActions(
+    core: CoreStart,
+    plugins: StartPlugins,
+    store: SecurityAppStore,
+    services: StartServices,
+    history: ScopedHistory<unknown>
+  ) {
+    const notificationService = core.notifications;
+    const filterManager = plugins.data.query.filterManager;
+
+    const filterInAction = createFilterInAction({
+      filterManager,
+      order: 1,
+    });
+    const filterOutAction = createFilterOutAction({
+      filterManager,
+      order: 2,
+    });
+    const addToTimeline = createAddToTimelineAction({ store, order: 3 });
+    const showTopNAction = createShowTopNAction({ store, services, history, order: 4 });
+    const copyAction = createCopyToClipboardAction({ notificationService, order: 5 });
+
+    plugins.uiActions.registerTrigger({
+      id: SECURITY_SOLUTION_ACTION_TRIGGER,
+    });
+
+    plugins.uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, copyAction);
+    plugins.uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, filterInAction);
+    plugins.uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, filterOutAction);
+    plugins.uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, showTopNAction);
+    plugins.uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, addToTimeline);
   }
 }

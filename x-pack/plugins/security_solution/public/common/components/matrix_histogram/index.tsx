@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import * as i18n from './translations';
 import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
@@ -33,9 +34,8 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { HISTOGRAM_ACTIONS_BUTTON_CLASS, VisualizationActions } from '../visualization_actions';
 import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
-import { SecurityPageName } from '../../../../common/constants';
-import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { useQueryToggle } from '../../containers/query_toggle';
+import { isExplorePage } from '../../../helpers';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -59,6 +59,7 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     subtitle?: string | GetSubTitle;
     scopeId?: string;
     title: string | GetTitle;
+    hideQueryToggle?: boolean;
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -102,8 +103,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   titleSize,
   yTickFormatter,
   skip,
+  hideQueryToggle = false,
 }) => {
   const dispatch = useDispatch();
+  const { pathname } = useLocation();
 
   const handleBrushEnd = useCallback(
     ({ x }) => {
@@ -150,6 +153,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     },
     [defaultStackByOption, stackByOptions]
   );
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(id);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
@@ -179,12 +183,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   };
   const [loading, { data, inspect, totalCount, refetch }] =
     useMatrixHistogramCombined(matrixHistogramRequest);
-  const [{ pageName }] = useRouteSpy();
-
-  const onHostOrNetworkOrUserPage =
-    pageName === SecurityPageName.hosts ||
-    pageName === SecurityPageName.network ||
-    pageName === SecurityPageName.users;
+  const onHostOrNetworkOrUserPage = isExplorePage(pathname);
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -258,7 +257,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             title={titleWithStackByField}
             titleSize={titleSize}
             toggleStatus={toggleStatus}
-            toggleQuery={toggleQuery}
+            toggleQuery={hideQueryToggle ? undefined : toggleQuery}
             subtitle={subtitleWithCounts}
             inspectMultiple
             showInspectButton={showInspectButton || !onHostOrNetworkOrUserPage}
