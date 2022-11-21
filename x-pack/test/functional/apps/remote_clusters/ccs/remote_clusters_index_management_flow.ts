@@ -93,13 +93,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('indexManagement');
         await retry.waitForWithTimeout('indice table to be visible', 15000, async () => {
           return await testSubjects.isDisplayed('indicesList');
+          const indicesList = await pageObjects.indexManagement.getIndexList();
+          const followerIndex = indicesList.filter(
+            (follower) => follower.indexName === followerName
+          );
+          expect(followerIndex[0].indexDocuments).to.eql('1');
         });
-
-        const indicesList = await pageObjects.indexManagement.getIndexList();
-        const followerIndex = indicesList.filter(async (follower) => {
-          return (await follower.indexName) === followerName;
-        });
-        expect(followerIndex[0].indexDocuments).to.eql('1');
       });
     });
 
