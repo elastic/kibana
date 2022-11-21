@@ -20,7 +20,7 @@ import type { Evaluation } from '../../../../../common/types';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page_title';
 import * as TEST_SUBJECTS from '../../test_subjects';
-import { PageTitle, PageTitleText } from '../../layout/findings_layout';
+import { LimitedResultsBar, PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
@@ -39,6 +39,7 @@ import { FindingsSearchBar } from '../../layout/findings_search_bar';
 import { ErrorCallout } from '../../layout/error_callout';
 import { FindingsDistributionBar } from '../../layout/findings_distribution_bar';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../../common/constants';
+import { useLimitProperties } from '../../utils/get_limit_properties';
 
 const getDefaultQuery = ({
   query,
@@ -55,7 +56,7 @@ const BackToResourcesButton = () => (
     <EuiButtonEmpty iconType={'arrowLeft'}>
       <FormattedMessage
         id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
-        defaultMessage="Back to group by resource view"
+        defaultMessage="Back to resources"
       />
     </EuiButtonEmpty>
   </Link>
@@ -115,6 +116,12 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const error = resourceFindings.error || baseEsQuery.error;
 
   const slicedPage = usePageSlice(resourceFindings.data?.page, urlQuery.pageIndex, pageSize);
+
+  const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
+    total: resourceFindings.data?.total,
+    pageIndex: urlQuery.pageIndex,
+    pageSize,
+  });
 
   const handleDistributionClick = (evaluation: Evaluation) => {
     setUrlQuery({
@@ -197,7 +204,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             pagination={getPaginationTableParams({
               pageSize,
               pageIndex: urlQuery.pageIndex,
-              totalItemCount: resourceFindings.data?.total || 0,
+              totalItemCount: limitedTotalItemCount,
             })}
             sorting={{
               sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
@@ -221,6 +228,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           />
         </>
       )}
+      {isLastLimitedPage && <LimitedResultsBar />}
     </div>
   );
 };

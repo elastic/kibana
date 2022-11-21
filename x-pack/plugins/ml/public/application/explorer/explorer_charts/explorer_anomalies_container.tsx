@@ -11,7 +11,6 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-// @ts-expect-error
 import { ExplorerChartsContainer } from './explorer_charts_container';
 import {
   SelectSeverityUI,

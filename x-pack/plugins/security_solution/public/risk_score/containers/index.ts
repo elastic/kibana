@@ -13,12 +13,12 @@ import type {
 export * from './all';
 export * from './kpi';
 
-export const enum UserRiskScoreQueryId {
+export enum UserRiskScoreQueryId {
   USERS_BY_RISK = 'UsersByRisk',
   USER_DETAILS_RISK_SCORE = 'UserDetailsRiskScore',
 }
 
-export const enum HostRiskScoreQueryId {
+export enum HostRiskScoreQueryId {
   DEFAULT = 'HostRiskScore',
   HOST_DETAILS_RISK_SCORE = 'HostDetailsRiskScore',
   OVERVIEW_RISKY_HOSTS = 'OverviewRiskyHosts',
