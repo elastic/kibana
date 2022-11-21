@@ -19,6 +19,7 @@ import {
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
+import { atCapacity, isFlapping } from '@kbn/alerting-plugin/server/lib';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
@@ -44,7 +45,7 @@ import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
 import { getCommonAlertFields } from './get_common_alert_fields';
-import { atCapacity, getFlappingHistory, isFlapping } from './flapping_utils';
+import { getFlappingHistory } from './get_flapping_history';
 import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;

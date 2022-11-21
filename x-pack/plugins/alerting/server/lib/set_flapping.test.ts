@@ -8,7 +8,7 @@
 import { pick } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
-import { atCapacity, setFlapping, isFlapping } from './set_flapping';
+import { setFlapping, isAlertFlapping } from './set_flapping';
 
 describe('setFlapping', () => {
   const flapping = new Array(16).fill(false).concat([true, true, true, true]);
@@ -81,7 +81,7 @@ describe('setFlapping', () => {
     `);
   });
 
-  describe('isFlapping', () => {
+  describe('isAlertFlapping', () => {
     describe('not currently flapping', () => {
       test('returns true if the flap count exceeds the threshold', () => {
         const flappingHistory = [true, true, true, true].concat(new Array(16).fill(false));
@@ -91,7 +91,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory },
           }
         );
-        expect(isFlapping(alert)).toEqual(true);
+        expect(isAlertFlapping(alert)).toEqual(true);
       });
 
       test("returns false the flap count doesn't exceed the threshold", () => {
@@ -102,7 +102,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory },
           }
         );
-        expect(isFlapping(alert)).toEqual(false);
+        expect(isAlertFlapping(alert)).toEqual(false);
       });
 
       test('returns true if not at capacity and the flap count exceeds the threshold', () => {
@@ -113,7 +113,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory },
           }
         );
-        expect(isFlapping(alert)).toEqual(true);
+        expect(isAlertFlapping(alert)).toEqual(true);
       });
     });
 
@@ -126,7 +126,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isFlapping(alert)).toEqual(true);
+        expect(isAlertFlapping(alert)).toEqual(true);
       });
 
       test("returns true if not at capacity and the flap count doesn't exceed the threshold", () => {
@@ -137,7 +137,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isFlapping(alert)).toEqual(true);
+        expect(isAlertFlapping(alert)).toEqual(true);
       });
 
       test('returns true if not at capacity and the flap count exceeds the threshold', () => {
@@ -148,7 +148,7 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isFlapping(alert)).toEqual(true);
+        expect(isAlertFlapping(alert)).toEqual(true);
       });
 
       test("returns false if at capacity and the flap count doesn't exceed the threshold", () => {
@@ -159,34 +159,8 @@ describe('setFlapping', () => {
             meta: { flappingHistory, flapping: true },
           }
         );
-        expect(isFlapping(alert)).toEqual(false);
+        expect(isAlertFlapping(alert)).toEqual(false);
       });
-    });
-  });
-
-  describe('atCapacity', () => {
-    test('returns true if flappingHistory == set capacity', () => {
-      const flappingHistory = new Array(20).fill(false);
-      const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-        meta: { flappingHistory },
-      });
-      expect(atCapacity(alert.getFlappingHistory())).toEqual(true);
-    });
-
-    test('returns true if flappingHistory > set capacity', () => {
-      const flappingHistory = new Array(25).fill(false);
-      const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-        meta: { flappingHistory },
-      });
-      expect(atCapacity(alert.getFlappingHistory())).toEqual(true);
-    });
-
-    test('returns false if flappingHistory < set capacity', () => {
-      const flappingHistory = new Array(15).fill(false);
-      const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-        meta: { flappingHistory },
-      });
-      expect(atCapacity(alert.getFlappingHistory())).toEqual(false);
     });
   });
 });

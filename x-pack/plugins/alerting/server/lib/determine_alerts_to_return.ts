@@ -8,7 +8,7 @@
 import { keys } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, RawAlertInstance } from '../types';
-import { atCapacity } from './set_flapping';
+import { atCapacity } from './flapping_utils';
 
 // determines which alerts to return in the state
 export function determineAlertsToReturn<

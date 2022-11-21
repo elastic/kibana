@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { cloneDeep } from 'lodash';
-import { processAlerts, updateFlappingHistory } from './process_alerts';
+import { processAlerts, updateAlertFlappingHistory } from './process_alerts';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 
@@ -1180,12 +1180,12 @@ describe('processAlerts', () => {
     });
   });
 
-  describe('updateFlappingHistory function', () => {
+  describe('updateAlertFlappingHistory function', () => {
     test('correctly updates flappingHistory', () => {
       const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
         meta: { flappingHistory: [false, false] },
       });
-      updateFlappingHistory(alert, true);
+      updateAlertFlappingHistory(alert, true);
       expect(alert.getFlappingHistory()).toEqual([false, false, true]);
     });
 
@@ -1194,7 +1194,7 @@ describe('processAlerts', () => {
       const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
         meta: { flappingHistory },
       });
-      updateFlappingHistory(alert, true);
+      updateAlertFlappingHistory(alert, true);
       const fh = alert.getFlappingHistory() || [];
       expect(fh.length).toEqual(20);
       const result = new Array(19).fill(false);
@@ -1206,7 +1206,7 @@ describe('processAlerts', () => {
       const alert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
         meta: { flappingHistory },
       });
-      updateFlappingHistory(alert, true);
+      updateAlertFlappingHistory(alert, true);
       const fh = alert.getFlappingHistory() || [];
       expect(fh.length).toEqual(20);
       const result = new Array(19).fill(false);

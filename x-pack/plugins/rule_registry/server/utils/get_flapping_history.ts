@@ -6,48 +6,9 @@
  */
 
 import { RuleTypeState } from '@kbn/alerting-plugin/common';
-import { drop, remove } from 'lodash';
+import { updateFlappingHistory } from '@kbn/alerting-plugin/server/lib';
+import { remove } from 'lodash';
 import { WrappedLifecycleRuleState } from './create_lifecycle_executor';
-
-const MAX_CAPACITY = 20;
-const MAX_FLAP_COUNT = 4;
-
-export function updateFlappingHistory(flappingHistory: boolean[], state: boolean) {
-  if (atCapacity(flappingHistory)) {
-    const diff = getCapacityDiff(flappingHistory);
-    // drop old flapping states to make space for the next state
-    flappingHistory = drop(flappingHistory, diff);
-  }
-  flappingHistory.push(state);
-  return flappingHistory;
-}
-
-export function isFlapping(
-  flappingHistory: boolean[],
-  isCurrentlyFlapping: boolean = false
-): boolean {
-  const numStateChanges = flappingHistory.filter((f) => f).length;
-  if (isCurrentlyFlapping) {
-    // if an alert is currently flapping,
-    // it will return false if the flappingHistory array is at capacity and there are 0 state changes
-    // else it will return true
-    return !(atCapacity(flappingHistory) && numStateChanges === 0);
-  } else {
-    // if an alert is not currently flapping,
-    // it will return true if the number of state changes in flappingHistory array >= the max flapping count
-    return numStateChanges >= MAX_FLAP_COUNT;
-  }
-}
-
-export function atCapacity(flappingHistory: boolean[] = []): boolean {
-  return flappingHistory.length >= MAX_CAPACITY;
-}
-
-export function getCapacityDiff(flappingHistory: boolean[] = []) {
-  const len = flappingHistory.length;
-  // adding + 1 to make space for next the flapping state
-  return len + 1 - MAX_CAPACITY;
-}
 
 export function getFlappingHistory<State extends RuleTypeState = never>(
   alertId: string,

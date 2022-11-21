@@ -9,8 +9,7 @@ import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { cloneDeep } from 'lodash';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
-
-const MAX_CAPACITY = 20;
+import { updateFlappingHistory } from './flapping_utils';
 
 interface ProcessAlertsOpts<
   State extends AlertInstanceState,
@@ -104,7 +103,7 @@ function processAlertsHelper<
               newAlerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
               previouslyRecoveredAlertsIds.delete(id);
             }
-            updateFlappingHistory(newAlerts[id], true);
+            updateAlertFlappingHistory(newAlerts[id], true);
           }
         } else {
           // this alert did exist in previous run
@@ -121,7 +120,7 @@ function processAlertsHelper<
 
           // this alert is still active
           if (setFlapping) {
-            updateFlappingHistory(activeAlerts[id], false);
+            updateAlertFlappingHistory(activeAlerts[id], false);
           }
         }
       } else if (existingAlertIds.has(id)) {
@@ -140,7 +139,7 @@ function processAlertsHelper<
         });
         // this alert has flapped from active to recovered
         if (setFlapping) {
-          updateFlappingHistory(recoveredAlerts[id], true);
+          updateAlertFlappingHistory(recoveredAlerts[id], true);
         }
       }
     }
@@ -150,7 +149,7 @@ function processAlertsHelper<
   for (const id of previouslyRecoveredAlertsIds) {
     recoveredAlerts[id] = previouslyRecoveredAlerts[id];
     if (setFlapping) {
-      updateFlappingHistory(recoveredAlerts[id], false);
+      updateAlertFlappingHistory(recoveredAlerts[id], false);
     }
   }
 
@@ -203,7 +202,7 @@ function processAlertsLimitReached<
 
       // this alert is still active
       if (setFlapping) {
-        updateFlappingHistory(activeAlerts[id], false);
+        updateAlertFlappingHistory(activeAlerts[id], false);
       }
     }
   }
@@ -233,7 +232,7 @@ function processAlertsLimitReached<
             // this alert has flapped from recovered to active
             newAlerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
           }
-          updateFlappingHistory(newAlerts[id], true);
+          updateAlertFlappingHistory(newAlerts[id], true);
         }
 
         if (!hasCapacityForNewAlerts()) {
@@ -245,13 +244,12 @@ function processAlertsLimitReached<
   return { recoveredAlerts: {}, currentRecoveredAlerts: {}, newAlerts, activeAlerts };
 }
 
-export function updateFlappingHistory<
+export function updateAlertFlappingHistory<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>, state: boolean) {
-  const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
-  const updatedFlappingHistory = flappingHistory.concat(state).slice(MAX_CAPACITY * -1);
+  const updatedFlappingHistory = updateFlappingHistory(alert.getFlappingHistory() || [], state);
   alert.setFlappingHistory(updatedFlappingHistory);
 }
