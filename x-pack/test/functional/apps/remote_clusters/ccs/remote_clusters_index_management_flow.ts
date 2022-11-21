@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const remoteEs = getService('remoteEs' as 'es');
   const localEs = getService('es');
 
-  describe('CCS Remote Clusters > Index Management', function () {
+  describe.only('CCS Remote Clusters > Index Management', function () {
     const leaderName = 'my-index';
     const followerName = 'my-follower';
     before(async () => {
@@ -43,10 +43,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           return await testSubjects.isDisplayed('remoteClusterListTable');
         });
         const remotes = await pageObjects.remoteClusters.getRemoteClustersList();
-        const filteredRemotes = remotes.filter(async (remote) => {
-          return remote.remoteName === 'ftr-remote';
-        });
-        expect(remotes.length).to.eql(1);
+        const filteredRemotes = remotes.filter((remote) => remote.remoteName === 'ftr-remote');
+        expect(filteredRemotes.length).to.eql(1);
         expect(filteredRemotes[0].remoteAddress).to.contain('localhost');
         expect(filteredRemotes[0].remoteStatus).to.eql('Connected');
         expect(filteredRemotes[0].remoteConnectionCount).to.eql('1');
