@@ -308,7 +308,7 @@ describe('CaseUserActionService', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
 
   beforeAll(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
   });
 
