@@ -224,8 +224,10 @@ describe('Create case', () => {
       userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalledWith({ ...sampleDataWithoutTags, tags: sampleTags });
+        expect(postCase).toHaveBeenCalled();
       });
+
+      expect(postCase).toBeCalledWith({ ...sampleDataWithoutTags, tags: sampleTags });
     });
 
     it('should post a case on submit click with the selected severity', async () => {
@@ -253,10 +255,12 @@ describe('Create case', () => {
       userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalledWith({
-          ...sampleDataWithoutTags,
-          severity: CaseSeverity.HIGH,
-        });
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        severity: CaseSeverity.HIGH,
       });
     });
 
@@ -307,12 +311,12 @@ describe('Create case', () => {
       userEvent.click(syncAlertsButton);
       userEvent.click(screen.getByTestId('create-case-submit'));
 
-      await waitFor(() =>
-        expect(postCase).toBeCalledWith({
-          ...sampleDataWithoutTags,
-          settings: { syncAlerts: false },
-        })
-      );
+      await waitFor(() => expect(postCase).toHaveBeenCalled());
+
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        settings: { syncAlerts: false },
+      });
     });
 
     it('should set sync alerts to false when the sync feature setting is false', async () => {
@@ -337,12 +341,12 @@ describe('Create case', () => {
 
       userEvent.click(screen.getByTestId('create-case-submit'));
 
-      await waitFor(() =>
-        expect(postCase).toBeCalledWith({
-          ...sampleDataWithoutTags,
-          settings: { syncAlerts: false },
-        })
-      );
+      await waitFor(() => expect(postCase).toHaveBeenCalled());
+
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        settings: { syncAlerts: false },
+      });
     });
 
     it('should select LOW as the default severity', async () => {
@@ -391,23 +395,23 @@ describe('Create case', () => {
 
       userEvent.click(screen.getByTestId('create-case-submit'));
 
-      await waitFor(() =>
-        expect(postCase).toBeCalledWith({
-          ...sampleDataWithoutTags,
-          connector: {
-            fields: {
-              impact: null,
-              severity: null,
-              urgency: null,
-              category: null,
-              subcategory: null,
-            },
-            id: 'servicenow-1',
-            name: 'My Connector',
-            type: '.servicenow',
+      await waitFor(() => expect(postCase).toHaveBeenCalled());
+
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        connector: {
+          fields: {
+            impact: null,
+            severity: null,
+            urgency: null,
+            category: null,
+            subcategory: null,
           },
-        })
-      );
+          id: 'servicenow-1',
+          name: 'My Connector',
+          type: '.servicenow',
+        },
+      });
     });
 
     it('should default to none if the default connector does not exist in connectors', async () => {
@@ -440,9 +444,12 @@ describe('Create case', () => {
       userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalledWith(sampleDataWithoutTags);
+        expect(postCase).toBeCalled();
         expect(pushCaseToExternalService).not.toHaveBeenCalled();
       });
+
+      expect(pushCaseToExternalService).not.toHaveBeenCalled();
+      expect(postCase).toBeCalledWith(sampleDataWithoutTags);
     });
   });
 
@@ -483,34 +490,34 @@ describe('Create case', () => {
       userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalledWith({
-          ...sampleDataWithoutTags,
-          connector: {
-            id: 'jira-1',
-            name: 'Jira',
-            type: '.jira',
-            fields: { issueType: '10007', parent: null, priority: 'Low' },
-          },
-        });
+        expect(postCase).toHaveBeenCalled();
+        expect(pushCaseToExternalService).toHaveBeenCalled();
+        expect(onFormSubmitSuccess).toHaveBeenCalled();
       });
 
-      await waitFor(() => {
-        expect(pushCaseToExternalService).toHaveBeenCalledWith({
-          caseId: sampleId,
-          connector: {
-            id: 'jira-1',
-            name: 'Jira',
-            type: '.jira',
-            fields: { issueType: '10007', parent: null, priority: 'Low' },
-          },
-        });
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        connector: {
+          id: 'jira-1',
+          name: 'Jira',
+          type: '.jira',
+          fields: { issueType: '10007', parent: null, priority: 'Low' },
+        },
       });
 
-      await waitFor(() => {
-        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
-          id: sampleId,
-          ...sampleDataWithoutTags,
-        });
+      expect(pushCaseToExternalService).toHaveBeenCalledWith({
+        caseId: sampleId,
+        connector: {
+          id: 'jira-1',
+          name: 'Jira',
+          type: '.jira',
+          fields: { issueType: '10007', parent: null, priority: 'Low' },
+        },
+      });
+
+      expect(onFormSubmitSuccess).toHaveBeenCalledWith({
+        id: sampleId,
+        ...sampleDataWithoutTags,
       });
     });
 
@@ -554,34 +561,34 @@ describe('Create case', () => {
       userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalledWith({
-          ...sampleDataWithoutTags,
-          connector: {
-            id: 'resilient-2',
-            name: 'My Connector 2',
-            type: '.resilient',
-            fields: { incidentTypes: ['21'], severityCode: '4' },
-          },
-        });
+        expect(postCase).toHaveBeenCalled();
+        expect(pushCaseToExternalService).toHaveBeenCalled();
+        expect(onFormSubmitSuccess).toHaveBeenCalled();
       });
 
-      await waitFor(() => {
-        expect(pushCaseToExternalService).toHaveBeenCalledWith({
-          caseId: sampleId,
-          connector: {
-            id: 'resilient-2',
-            name: 'My Connector 2',
-            type: '.resilient',
-            fields: { incidentTypes: ['21'], severityCode: '4' },
-          },
-        });
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        connector: {
+          id: 'resilient-2',
+          name: 'My Connector 2',
+          type: '.resilient',
+          fields: { incidentTypes: ['21'], severityCode: '4' },
+        },
       });
 
-      await waitFor(() => {
-        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
-          id: sampleId,
-          ...sampleDataWithoutTags,
-        });
+      expect(pushCaseToExternalService).toHaveBeenCalledWith({
+        caseId: sampleId,
+        connector: {
+          id: 'resilient-2',
+          name: 'My Connector 2',
+          type: '.resilient',
+          fields: { incidentTypes: ['21'], severityCode: '4' },
+        },
+      });
+
+      expect(onFormSubmitSuccess).toHaveBeenCalledWith({
+        id: sampleId,
+        ...sampleDataWithoutTags,
       });
     });
 
@@ -620,76 +627,80 @@ describe('Create case', () => {
         onChoicesSuccess(useGetChoicesResponse.choices);
       });
 
+      const severitySelect = screen.getByTestId('severitySelect');
+      const urgencySelect = screen.getByTestId('urgencySelect');
+      const impactSelect = screen.getByTestId('impactSelect');
+
       await waitFor(() => {
-        expect(
-          within(screen.getByTestId('severitySelect')).getByRole('option', { name: '2 - High' })
-        );
-
-        expect(
-          within(screen.getByTestId('urgencySelect')).getByRole('option', { name: '2 - High' })
-        );
-
-        expect(
-          within(screen.getByTestId('impactSelect')).getByRole('option', { name: '2 - High' })
-        );
+        expect(within(severitySelect).getByRole('option', { name: '2 - High' }));
+        expect(within(urgencySelect).getByRole('option', { name: '2 - High' }));
+        expect(within(impactSelect).getByRole('option', { name: '2 - High' }));
 
         expect(screen.getByRole('option', { name: 'Software' }));
       });
 
-      ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
-        userEvent.selectOptions(screen.getByTestId(subj), ['2']);
+      [severitySelect, urgencySelect, impactSelect].forEach((element) => {
+        userEvent.selectOptions(element, ['2']);
       });
 
-      userEvent.selectOptions(screen.getByTestId('categorySelect'), ['software']);
+      const categorySelect = screen.getByTestId('categorySelect');
 
       await waitFor(() => {
-        expect(screen.getByRole('option', { name: 'Operation System' }));
+        expect(within(categorySelect).getByRole('option', { name: 'Software' }));
       });
 
-      userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['os']);
+      userEvent.selectOptions(categorySelect, ['software']);
+
+      const subcategorySelect = screen.getByTestId('subcategorySelect');
+
+      await waitFor(() => {
+        expect(within(subcategorySelect).getByRole('option', { name: 'Operation System' }));
+      });
+
+      userEvent.selectOptions(subcategorySelect, ['os']);
       userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalledWith({
-          ...sampleDataWithoutTags,
-          connector: {
-            id: 'servicenow-1',
-            name: 'My Connector',
-            type: '.servicenow',
-            fields: {
-              impact: '2',
-              severity: '2',
-              urgency: '2',
-              category: 'software',
-              subcategory: 'os',
-            },
-          },
-        });
+        expect(postCase).toHaveBeenCalled();
+        expect(pushCaseToExternalService).toHaveBeenCalled();
+        expect(onFormSubmitSuccess).toHaveBeenCalled();
       });
 
-      await waitFor(() => {
-        expect(pushCaseToExternalService).toHaveBeenCalledWith({
-          caseId: sampleId,
-          connector: {
-            id: 'servicenow-1',
-            name: 'My Connector',
-            type: '.servicenow',
-            fields: {
-              impact: '2',
-              severity: '2',
-              urgency: '2',
-              category: 'software',
-              subcategory: 'os',
-            },
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        connector: {
+          id: 'servicenow-1',
+          name: 'My Connector',
+          type: '.servicenow',
+          fields: {
+            impact: '2',
+            severity: '2',
+            urgency: '2',
+            category: 'software',
+            subcategory: 'os',
           },
-        });
+        },
       });
 
-      await waitFor(() => {
-        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
-          id: sampleId,
-          ...sampleDataWithoutTags,
-        });
+      expect(pushCaseToExternalService).toHaveBeenCalledWith({
+        caseId: sampleId,
+        connector: {
+          id: 'servicenow-1',
+          name: 'My Connector',
+          type: '.servicenow',
+          fields: {
+            impact: '2',
+            severity: '2',
+            urgency: '2',
+            category: 'software',
+            subcategory: 'os',
+          },
+        },
+      });
+
+      expect(onFormSubmitSuccess).toHaveBeenCalledWith({
+        id: sampleId,
+        ...sampleDataWithoutTags,
       });
     });
 
@@ -746,50 +757,50 @@ describe('Create case', () => {
       userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalledWith({
-          ...sampleDataWithoutTags,
-          connector: {
-            id: 'servicenow-sir',
-            name: 'My Connector SIR',
-            type: '.servicenow-sir',
-            fields: {
-              destIp: false,
-              sourceIp: true,
-              malwareHash: true,
-              malwareUrl: true,
-              priority: '1',
-              category: 'Denial of Service',
-              subcategory: '26',
-            },
-          },
-        });
+        expect(postCase).toHaveBeenCalled();
+        expect(pushCaseToExternalService).toHaveBeenCalled();
+        expect(onFormSubmitSuccess).toHaveBeenCalled();
       });
 
-      await waitFor(() => {
-        expect(pushCaseToExternalService).toHaveBeenCalledWith({
-          caseId: sampleId,
-          connector: {
-            id: 'servicenow-sir',
-            name: 'My Connector SIR',
-            type: '.servicenow-sir',
-            fields: {
-              destIp: false,
-              sourceIp: true,
-              malwareHash: true,
-              malwareUrl: true,
-              priority: '1',
-              category: 'Denial of Service',
-              subcategory: '26',
-            },
+      expect(postCase).toBeCalledWith({
+        ...sampleDataWithoutTags,
+        connector: {
+          id: 'servicenow-sir',
+          name: 'My Connector SIR',
+          type: '.servicenow-sir',
+          fields: {
+            destIp: false,
+            sourceIp: true,
+            malwareHash: true,
+            malwareUrl: true,
+            priority: '1',
+            category: 'Denial of Service',
+            subcategory: '26',
           },
-        });
+        },
       });
 
-      await waitFor(() => {
-        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
-          id: sampleId,
-          ...sampleDataWithoutTags,
-        });
+      expect(pushCaseToExternalService).toHaveBeenCalledWith({
+        caseId: sampleId,
+        connector: {
+          id: 'servicenow-sir',
+          name: 'My Connector SIR',
+          type: '.servicenow-sir',
+          fields: {
+            destIp: false,
+            sourceIp: true,
+            malwareHash: true,
+            malwareUrl: true,
+            priority: '1',
+            category: 'Denial of Service',
+            subcategory: '26',
+          },
+        },
+      });
+
+      expect(onFormSubmitSuccess).toHaveBeenCalledWith({
+        id: sampleId,
+        ...sampleDataWithoutTags,
       });
     });
   });
@@ -822,14 +833,16 @@ describe('Create case', () => {
     userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitFor(() => {
-      expect(afterCaseCreated).toHaveBeenCalledWith(
-        {
-          id: sampleId,
-          ...sampleDataWithoutTags,
-        },
-        createAttachments
-      );
+      expect(afterCaseCreated).toHaveBeenCalled();
     });
+
+    expect(afterCaseCreated).toHaveBeenCalledWith(
+      {
+        id: sampleId,
+        ...sampleDataWithoutTags,
+      },
+      createAttachments
+    );
   });
 
   it('should call createAttachments with the attachments after the case is created', async () => {
@@ -876,11 +889,12 @@ describe('Create case', () => {
 
     await waitFor(() => {
       expect(createAttachments).toHaveBeenCalledTimes(1);
-      expect(createAttachments).toHaveBeenCalledWith({
-        caseId: 'case-id',
-        data: attachments,
-        caseOwner: 'securitySolution',
-      });
+    });
+
+    expect(createAttachments).toHaveBeenCalledWith({
+      caseId: 'case-id',
+      data: attachments,
+      caseOwner: 'securitySolution',
     });
   });
 
@@ -1027,7 +1041,9 @@ describe('Create case', () => {
       userEvent.click(await screen.findByText(`${userProfiles[0].user.full_name}`));
       userEvent.click(screen.getByTestId('create-case-submit'));
 
-      await waitForComponentToUpdate();
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
 
       expect(postCase).toBeCalledWith({
         ...sampleDataWithoutTags,
@@ -1047,6 +1063,7 @@ describe('Create case', () => {
 
       await waitForFormToRender(screen);
       await waitForComponentToUpdate();
+
       expect(screen.queryByTestId('createCaseAssigneesComboBox')).toBeNull();
     });
   });
