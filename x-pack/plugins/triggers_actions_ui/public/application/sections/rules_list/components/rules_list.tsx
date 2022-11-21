@@ -103,7 +103,7 @@ import {
   SINGLE_RULE_TITLE,
   MULTIPLE_RULE_TITLE,
 } from '../translations';
-import { useBulkDeleteResponse } from '../../../hooks/use_bulk_delete_response';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_delete_response';
 
 const ENTER_KEY = 13;
 
@@ -778,7 +778,7 @@ export const RulesList = ({
     });
 
     setIsEnablingRules(false);
-    showToast({ errors, total });
+    showToast({ action: 'ENABLE', errors, total });
     await refreshRules();
     onClearSelection();
   }, [http, selectedIds, filter, setIsEnablingRules, toasts]);
@@ -793,7 +793,7 @@ export const RulesList = ({
     });
 
     setIsDisablingRules(false);
-    showToast({ errors, total });
+    showToast({ action: 'DISABLE', errors, total });
     await refreshRules();
     onClearSelection();
   }, [http, selectedIds, filter, setIsDisablingRules, toasts]);
@@ -1063,7 +1063,7 @@ export const RulesList = ({
   useEffect(() => {
     setIsDeleteModalVisibility(rulesToDelete.length > 0 || Boolean(rulesToDeleteFilter));
   }, [rulesToDelete, rulesToDeleteFilter]);
-  const { showToast } = useBulkDeleteResponse({ onSearchPopulate });
+  const { showToast } = useBulkOperationToast({ onSearchPopulate });
 
   const onDeleteCancel = () => {
     setIsDeleteModalVisibility(false);
@@ -1080,7 +1080,7 @@ export const RulesList = ({
     });
 
     setIsDeletingRules(false);
-    showToast({ errors, total });
+    showToast({ action: 'DELETE', errors, total });
     await refreshRules();
     clearRulesToDelete();
     onClearSelection();
