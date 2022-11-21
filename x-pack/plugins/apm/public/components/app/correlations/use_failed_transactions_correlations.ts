@@ -13,7 +13,7 @@ import type {
   ResponseErrorBody,
 } from '@kbn/core-http-browser';
 
-import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
+import { EVENT_OUTCOME } from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
 import {
   DEBOUNCE_INTERVAL,

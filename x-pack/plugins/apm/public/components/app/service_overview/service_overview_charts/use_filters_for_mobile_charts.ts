@@ -16,7 +16,7 @@ import {
   DEVICE_MODEL_NAME,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 
 export function useFiltersForMobileCharts() {
   const {
