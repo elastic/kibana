@@ -61,10 +61,10 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
 
     const countResult = isMonitorsQueryFiltered(request.query)
       ? await savedObjectsClient.find({
-        type: syntheticsMonitorType,
-        perPage: 0,
-        page: 1,
-      })
+          type: syntheticsMonitorType,
+          perPage: 0,
+          page: 1,
+        })
       : queryResult;
 
     const { saved_objects: monitors, per_page: perPageT, ...rest } = queryResult;
