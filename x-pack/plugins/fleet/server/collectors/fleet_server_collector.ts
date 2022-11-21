@@ -93,8 +93,17 @@ export const getFleetServerConfig = async (soClient: SavedObjectsClient): Promis
     perPage: SO_SEARCH_LIMIT,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:fleet_server`,
   });
+  const getInputConfig = (item: any) => {
+    let config = (item.inputs[0] ?? {}).compiled_input;
+    if (config.server) {
+      config = { ...config, server: { ...config.server } };
+      delete config.server.host;
+      delete config.server.port;
+    }
+    return config;
+  };
   const policies = res.items.map((item) => ({
-    input_config: (item.inputs[0] ?? {}).compiled_input,
+    input_config: getInputConfig(item),
   }));
 
   return { policies };
