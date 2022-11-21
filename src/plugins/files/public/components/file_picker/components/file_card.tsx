@@ -37,7 +37,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
       css={css`
         place-self: stretch;
         > * {
-          // TODO: Once content no longer overflows card, remove this style
+          // TODO: Once content no longer overflows card, remove once on @elastic/eui ^70.3.0
           width: 100%;
         }
       `}
