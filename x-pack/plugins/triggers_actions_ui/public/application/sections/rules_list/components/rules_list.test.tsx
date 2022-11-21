@@ -555,6 +555,35 @@ describe('rules_list component with props', () => {
       await setup();
       expect(wrapper.find('ActionTypeFilter')).toHaveLength(1);
     });
+
+    it('filters when the action type filter is changed', async () => {
+      wrapper = mountWithIntl(<RulesList />);
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+      loadRulesWithKueryFilter.mockReset();
+      await setup();
+
+      wrapper.find(`[data-test-subj="actionTypeFilterButton"]`).first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      wrapper.find(`[data-test-subj="actionTypetestFilterOption"]`).first().simulate('click');
+      expect(
+        wrapper.find('[data-test-subj="actionTypetestFilterOption"] EuiIcon[type="check"]').exists()
+      ).toBeTruthy(); // tick icon is being shown
+      expect(
+        wrapper
+          .find('[data-test-subj="actionTypetest2FilterOption"] EuiIcon[type="empty"]')
+          .exists()
+      ).toBeTruthy(); // doesnt have a tick icon
+      expect(
+        wrapper.find('[data-test-subj="actionTypeFilterButton"] .euiNotificationBadge').text()
+      ).toEqual('1'); // badge is being shown
+    });
   });
 
   describe('showCreateRuleButton prop', () => {
