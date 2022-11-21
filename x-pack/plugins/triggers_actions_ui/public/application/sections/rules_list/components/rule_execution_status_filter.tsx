@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiHealth } from '@elastic/eui';
 import { RuleExecutionStatuses, RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import { rulesStatusesTranslationsMapping } from '../translations';
+import { getExecutionStatusHealthColor } from '../../../../common/lib';
 
 interface RuleExecutionStatusFilterProps {
   selectedStatuses: string[];
@@ -66,7 +67,7 @@ export const RuleExecutionStatusFilter: React.FunctionComponent<RuleExecutionSta
     >
       <div className="euiFilterSelect__items">
         {sortedRuleExecutionStatusValues.map((item: RuleExecutionStatuses) => {
-          const healthColor = getHealthColor(item);
+          const healthColor = getExecutionStatusHealthColor(item);
           return (
             <EuiFilterSelectItem
               key={item}
@@ -91,19 +92,4 @@ export const RuleExecutionStatusFilter: React.FunctionComponent<RuleExecutionSta
   );
 };
 
-export function getHealthColor(status: RuleExecutionStatuses) {
-  switch (status) {
-    case 'active':
-      return 'success';
-    case 'error':
-      return 'danger';
-    case 'ok':
-      return 'primary';
-    case 'pending':
-      return 'accent';
-    case 'warning':
-      return 'warning';
-    default:
-      return 'subdued';
-  }
-}
+export { getExecutionStatusHealthColor as getHealthColor };

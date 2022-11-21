@@ -38,6 +38,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm)).toEqual({
       searchTerm,
       tagReferences: [],
+      tagReferencesToExclude: [],
       valid: true,
     });
   });
@@ -48,6 +49,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm)).toEqual({
       searchTerm,
       tagReferences: [],
+      tagReferencesToExclude: [],
       valid: false,
     });
   });
@@ -58,6 +60,18 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { useName: false })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1'), tagRef('id-2')],
+      tagReferencesToExclude: [],
+      valid: true,
+    });
+  });
+
+  it('returns the tag references to exclude matching the tag field clause when using `useName: false`', () => {
+    const searchTerm = '-tag:(id-1 OR id-2) my search term';
+
+    expect(parseSearchQuery(searchTerm, { useName: false })).toEqual({
+      searchTerm: 'my search term',
+      tagReferences: [],
+      tagReferencesToExclude: [tagRef('id-1'), tagRef('id-2')],
       valid: true,
     });
   });
@@ -68,6 +82,18 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { useName: true })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1'), tagRef('id-2')],
+      tagReferencesToExclude: [],
+      valid: true,
+    });
+  });
+
+  it('returns the tag references to exclude matching the tag field clause when using `useName: true`', () => {
+    const searchTerm = '-tag:(name-1 OR name-2) my search term';
+
+    expect(parseSearchQuery(searchTerm, { useName: true })).toEqual({
+      searchTerm: 'my search term',
+      tagReferences: [],
+      tagReferencesToExclude: [tagRef('id-1'), tagRef('id-2')],
       valid: true,
     });
   });
@@ -78,6 +104,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { tagField: 'custom' })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1'), tagRef('id-2')],
+      tagReferencesToExclude: [],
       valid: true,
     });
   });
@@ -88,6 +115,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { useName: true })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1')],
+      tagReferencesToExclude: [],
       valid: true,
     });
   });

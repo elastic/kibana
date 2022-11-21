@@ -78,7 +78,7 @@ describe('SearchLogic', () => {
 
   describe('listeners', () => {
     describe('search', () => {
-      beforeAll(() => jest.useFakeTimers('legacy'));
+      beforeAll(() => jest.useFakeTimers({ legacyFakeTimers: true }));
       afterAll(() => jest.useRealTimers());
 
       it('should make a GET API call with a search query', async () => {

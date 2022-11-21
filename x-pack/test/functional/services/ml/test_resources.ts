@@ -630,39 +630,5 @@ export function MachineLearningTestResourcesProvider(
     async clearAdvancedSettingProperty(propertyName: string) {
       await kibanaServer.uiSettings.unset(propertyName);
     },
-
-    async installKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
-      log.debug(`Installing Kibana sample data '${sampleDataId}'`);
-
-      const { body, status } = await supertest
-        .post(`/api/sample_data/${sampleDataId}`)
-        .set(COMMON_REQUEST_HEADERS);
-      mlApi.assertResponseStatusCode(200, status, body);
-
-      log.debug(` > Installed`);
-    },
-
-    async removeKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
-      log.debug(`Removing Kibana sample data '${sampleDataId}'`);
-
-      const { body, status } = await supertest
-        .delete(`/api/sample_data/${sampleDataId}`)
-        .set(COMMON_REQUEST_HEADERS);
-      mlApi.assertResponseStatusCode(204, status, body);
-
-      log.debug(` > Removed`);
-    },
-
-    async installAllKibanaSampleData() {
-      await this.installKibanaSampleData('ecommerce');
-      await this.installKibanaSampleData('flights');
-      await this.installKibanaSampleData('logs');
-    },
-
-    async removeAllKibanaSampleData() {
-      await this.removeKibanaSampleData('ecommerce');
-      await this.removeKibanaSampleData('flights');
-      await this.removeKibanaSampleData('logs');
-    },
   };
 }
