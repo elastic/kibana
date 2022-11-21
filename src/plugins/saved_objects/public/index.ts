@@ -10,7 +10,7 @@ import { SavedObjectsPublicPlugin } from './plugin';
 
 export type { OnSaveProps, OriginSaveModalProps, SaveModalState, SaveResult } from './save_modal';
 export { SavedObjectSaveModal, SavedObjectSaveModalOrigin, showSaveModal } from './save_modal';
-export type { SavedObjectFinderUiProps, SavedObjectMetaData } from './finder';
+export type { SavedObjectFinderUiProps, SavedObjectMetaData, FinderAttributes } from './finder';
 export { getSavedObjectFinder, SavedObjectFinderUi } from './finder';
 export type {
   SavedObjectDecorator,
