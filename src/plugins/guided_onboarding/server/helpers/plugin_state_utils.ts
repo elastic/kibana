@@ -40,7 +40,14 @@ export const getPluginState = async (savedObjectsClient: SavedObjectsClient) => 
     return pluginState;
   } else {
     // create a SO to keep track of the correct creation date
-    await updatePluginStatus(savedObjectsClient, 'not_started');
+    try {
+      await updatePluginStatus(savedObjectsClient, 'not_started');
+      // @yulia, we need to add a user permissions
+      // check here instead of swallowing this error
+      // see issue: https://github.com/elastic/kibana/issues/145434
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
+
     return {
       status: 'not_started',
       isActivePeriod: true,
