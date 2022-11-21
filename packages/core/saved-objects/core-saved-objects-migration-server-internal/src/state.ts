@@ -286,8 +286,8 @@ export interface RefreshTarget extends PostInitState {
   readonly targetIndex: string;
 }
 
-export interface CompareMappingsState extends PostInitState {
-  readonly controlState: 'COMPARE_MAPPINGS';
+export interface CheckTargetMappingsState extends PostInitState {
+  readonly controlState: 'CHECK_TARGET_MAPPINGS';
   readonly sourceIndexMappings?: IndexMapping;
 }
 
@@ -300,6 +300,15 @@ export interface UpdateTargetMappingsWaitForTaskState extends PostInitState {
   /** Update the mappings of the target index */
   readonly controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK';
   readonly updateTargetMappingsTaskId: string;
+}
+
+export interface UpdateTargetMappingsMeta extends PostInitState {
+  /** Update the mapping _meta information with the hashes of the mappings for each plugin */
+  readonly controlState: 'UPDATE_TARGET_MAPPINGS_META';
+}
+
+export interface CheckVersionIndexReadyActions extends PostInitState {
+  readonly controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS';
 }
 
 export interface OutdatedDocumentsSearchOpenPit extends PostInitState {
@@ -457,9 +466,11 @@ export type State = Readonly<
   | ReindexSourceToTempIndexBulk
   | SetTempWriteBlock
   | CloneTempToSource
-  | CompareMappingsState
+  | CheckTargetMappingsState
   | UpdateTargetMappingsState
   | UpdateTargetMappingsWaitForTaskState
+  | UpdateTargetMappingsMeta
+  | CheckVersionIndexReadyActions
   | OutdatedDocumentsSearchOpenPit
   | OutdatedDocumentsSearchRead
   | OutdatedDocumentsSearchClosePit

@@ -12,32 +12,24 @@ import { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { diffMappings } from '../core/build_active_mappings';
 
 /** @internal */
-export interface CompareMappingsParams {
+export interface CheckTargetMappingsParams {
   sourceIndexMappings?: IndexMapping;
   targetIndexMappings: IndexMapping;
 }
 
 /** @internal */
-export interface SourceMappingsNotFound {
-  type: 'source_mappings_not_found_exception';
-}
-
-/** @internal */
-export interface SourceMappingsCompareResult {
+export interface TargetMappingsCompareResult {
   match: boolean;
 }
 
-export const compareMappings =
+export const checkTargetMappings =
   ({
     sourceIndexMappings,
     targetIndexMappings,
-  }: CompareMappingsParams): TaskEither.TaskEither<
-    SourceMappingsNotFound,
-    SourceMappingsCompareResult
-  > =>
+  }: CheckTargetMappingsParams): TaskEither.TaskEither<never, TargetMappingsCompareResult> =>
   async () => {
     if (!sourceIndexMappings) {
-      return Either.left({ type: 'source_mappings_not_found_exception' as const });
+      return Either.right({ match: false });
     }
     const diff = diffMappings(sourceIndexMappings, targetIndexMappings);
     return Either.right({ match: !diff });

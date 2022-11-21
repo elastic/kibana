@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Either, right } from 'fp-ts/lib/Either';
 import { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 
@@ -78,7 +79,11 @@ export { updateAliases } from './update_aliases';
 export type { CreateIndexParams } from './create_index';
 export { createIndex } from './create_index';
 
-export { compareMappings } from './compare_mappings';
+export { checkTargetMappings } from './check_target_mappings';
+
+export { updateTargetMappingsMeta } from './update_target_mappings_meta';
+
+export const noop = (): Either<never, 'noop'> => right('noop' as const);
 
 export type {
   UpdateAndPickupMappingsResponse,
