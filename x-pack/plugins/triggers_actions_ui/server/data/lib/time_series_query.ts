@@ -178,12 +178,24 @@ export async function timeSeriesQuery(
 
   aggParent = aggParent.aggs.dateAgg;
 
-  // finally, the metric aggregation, if requested
+  // almost finally, the metric aggregation, if requested
   if (!isCountAgg) {
     aggParent.aggs = {
       metricAgg: {
         [aggType]: {
           field: aggField,
+        },
+      },
+    };
+  }
+
+  // finally, a shard delay aggregation, if requested
+  if (queryParams.shardDelay) {
+    aggParent.aggs = {
+      ...aggParent.aggs,
+      delay: {
+        shard_delay: {
+          value: queryParams.shardDelay,
         },
       },
     };

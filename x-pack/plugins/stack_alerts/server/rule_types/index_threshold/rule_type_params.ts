@@ -11,6 +11,7 @@ import {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
 } from '@kbn/triggers-actions-ui-plugin/server';
+import { parseDuration } from '@kbn/alerting-plugin/server';
 import { ComparatorFnNames } from '../lib';
 import { Comparator } from '../../../common/comparator_types';
 import { getComparatorSchemaType } from '../lib/comparator';
@@ -27,6 +28,8 @@ export const ParamsSchema = schema.object(
     // the values to use as the threshold; `between` and `notBetween` require
     // two values, the others require one.
     threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
+
+    shardDelay: schema.maybe(schema.string({ validate: validateDuration })),
   },
   { validate: validateParams }
 );
@@ -61,4 +64,20 @@ function validateComparator(comparator: Comparator): string | undefined {
       comparator,
     },
   });
+}
+
+function validateDuration(duration: string): string | undefined {
+  try {
+    parseDuration(duration);
+  } catch (err) {
+    return i18n.translate(
+      'xpack.triggersActionsUI.data.coreQueryParams.invalidDurationErrorMessage',
+      {
+        defaultMessage: 'invalid duration: "{duration}"',
+        values: {
+          duration,
+        },
+      }
+    );
+  }
 }

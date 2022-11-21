@@ -173,6 +173,7 @@ export function getRuleType(
       timeWindowUnit: params.timeWindowUnit,
       interval: undefined,
       filterKuery: params.filterKuery,
+      shardDelay: params.shardDelay,
     };
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
     const result = await (
