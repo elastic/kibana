@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { TestData } from './types';
+import type { TestDataEsArchive } from './types';
 import { farequoteDataViewTestData } from './test_data';
 
 const ES_INDEX = 'ft_farequote';
@@ -23,7 +23,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   // aiops / Explain Log Rate Spikes lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  function runTests(testData: TestData) {
+  function runTests(testData: TestDataEsArchive) {
     it(`${testData.suiteTitle} loads the source data in explain log rate spikes`, async () => {
       await elasticChart.setNewChartUiDebugFlag(true);
 
@@ -81,7 +81,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // Get the px values for the timestamp we want to move the brush to.
       const { targetPx, intervalPx } = await aiops.explainLogRateSpikesPage.getPxForTimestamp(
-        testData.brushTargetTimestamp
+        testData.brushDeviationTargetTimestamp
       );
 
       // Adjust the right brush handle

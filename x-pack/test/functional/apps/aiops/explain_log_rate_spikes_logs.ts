@@ -5,28 +5,11 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { TestData } from './types';
+import type { TestDataGenerated } from './types';
 import { artificialLogDataViewTestData } from './test_data';
-
-const REFERENCE_TS = 1669018354793;
-const DAY_MS = 86400000;
-const ES_INDEX = 'aiops_frequent_items_test';
-
-const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
-const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
-
-interface SampleDoc {
-  user: string;
-  response_code: string;
-  url: string;
-  version: string;
-  '@timestamp': number;
-}
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const es = getService('es');
@@ -38,7 +21,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   // aiops / Explain Log Rate Spikes lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  function runTests(testData: TestData) {
+  function runTests(testData: TestDataGenerated) {
     it(`${testData.suiteTitle} loads the source data in explain log rate spikes`, async () => {
       await elasticChart.setNewChartUiDebugFlag(true);
 
@@ -96,42 +79,44 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // Get the px values for the timestamp we want to move the brush to.
       const { targetPx, intervalPx } = await aiops.explainLogRateSpikesPage.getPxForTimestamp(
-        DEVIATION_TS + DAY_MS / 2
+        testData.brushDeviationTargetTimestamp
       );
 
       // Adjust the right brush handle
       await aiops.explainLogRateSpikesPage.adjustBrushHandler(
         'aiopsBrushDeviation',
         'handle--e',
-        targetPx + intervalPx * 10
+        targetPx + intervalPx * testData.brushIntervalFactor
       );
 
       // Adjust the left brush handle
       await aiops.explainLogRateSpikesPage.adjustBrushHandler(
         'aiopsBrushDeviation',
         'handle--w',
-        targetPx - intervalPx * 10
+        targetPx - intervalPx * testData.brushIntervalFactor
       );
 
-      // Get the px values for the timestamp we want to move the brush to.
-      const { targetPx: targetBaselinePx } = await aiops.explainLogRateSpikesPage.getPxForTimestamp(
-        BASELINE_TS + DAY_MS / 2
-      );
+      if (testData.brushBaselineTargetTimestamp) {
+        // Get the px values for the timestamp we want to move the brush to.
+        const { targetPx: targetBaselinePx } =
+          await aiops.explainLogRateSpikesPage.getPxForTimestamp(
+            testData.brushBaselineTargetTimestamp
+          );
 
-      // Adjust the right brush handle
-      await aiops.explainLogRateSpikesPage.adjustBrushHandler(
-        'aiopsBrushBaseline',
-        'handle--e',
-        targetBaselinePx + intervalPx * 10
-      );
+        // Adjust the right brush handle
+        await aiops.explainLogRateSpikesPage.adjustBrushHandler(
+          'aiopsBrushBaseline',
+          'handle--e',
+          targetBaselinePx + intervalPx * testData.brushIntervalFactor
+        );
 
-      // Adjust the left brush handle
-      await aiops.explainLogRateSpikesPage.adjustBrushHandler(
-        'aiopsBrushBaseline',
-        'handle--w',
-        targetBaselinePx - intervalPx * 10
-      );
-
+        // Adjust the left brush handle
+        await aiops.explainLogRateSpikesPage.adjustBrushHandler(
+          'aiopsBrushBaseline',
+          'handle--w',
+          targetBaselinePx - intervalPx * testData.brushIntervalFactor
+        );
+      }
       // Get the new brush selection width for later comparison.
       const brushSelectionWidthAfter = await aiops.explainLogRateSpikesPage.getBrushSelectionWidth(
         'aiopsBrushDeviation'
@@ -177,13 +162,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     before(async () => {
       try {
-        await es.indices.delete({ index: ES_INDEX });
+        await es.indices.delete({ index: artificialLogDataViewTestData.sourceIndexOrSavedSearch });
       } catch (e) {
-        log.error(`Error deleting index '${ES_INDEX}' in before() callback`);
+        log.error(
+          `Error deleting index '${artificialLogDataViewTestData.sourceIndexOrSavedSearch}' in before() callback`
+        );
       }
       // Create index with mapping
       await es.indices.create({
-        index: ES_INDEX,
+        index: artificialLogDataViewTestData.sourceIndexOrSavedSearch,
         mappings: {
           properties: {
             user: { type: 'keyword' },
@@ -195,84 +182,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
       });
 
-      const bulkBody: estypes.BulkRequest<SampleDoc, SampleDoc>['body'] = [];
-      const action = { index: { _index: ES_INDEX } };
-      let tsOffset = 0;
-
-      // Creates docs evenly spread across baseline and deviation time frame
-      [BASELINE_TS, DEVIATION_TS].forEach((ts) => {
-        ['Peter', 'Paul', 'Mary'].forEach((user) => {
-          ['200', '404', '500'].forEach((responseCode) => {
-            ['login.php', 'user.php', 'home.php'].forEach((url) => {
-              // Don't add docs that match the exact pattern of the filter we want to base the test queries on
-              if (
-                !(
-                  user === 'Peter' &&
-                  responseCode === '500' &&
-                  (url === 'home.php' || url === 'login.php')
-                )
-              ) {
-                tsOffset = 0;
-                [...Array(100)].forEach(() => {
-                  tsOffset += DAY_MS / 100;
-                  const doc: SampleDoc = {
-                    user,
-                    response_code: responseCode,
-                    url,
-                    version: 'v1.0.0',
-                    '@timestamp': ts + tsOffset,
-                  };
-
-                  bulkBody.push(action);
-                  bulkBody.push(doc);
-                });
-              }
-            });
-          });
-        });
-      });
-
-      // Now let's add items to the dataset to make some specific significant terms being returned as results
-      ['200', '404'].forEach((responseCode) => {
-        ['login.php', 'user.php', 'home.php'].forEach((url) => {
-          tsOffset = 0;
-          [...Array(300)].forEach(() => {
-            tsOffset += DAY_MS / 300;
-            bulkBody.push(action);
-            bulkBody.push({
-              user: 'Peter',
-              response_code: responseCode,
-              url,
-              version: 'v1.0.0',
-              '@timestamp': DEVIATION_TS + tsOffset,
-            });
-          });
-        });
-      });
-
-      ['Paul', 'Mary'].forEach((user) => {
-        ['login.php', 'home.php'].forEach((url) => {
-          tsOffset = 0;
-          [...Array(400)].forEach(() => {
-            tsOffset += DAY_MS / 400;
-            bulkBody.push(action);
-            bulkBody.push({
-              user,
-              response_code: '500',
-              url,
-              version: 'v1.0.0',
-              '@timestamp': DEVIATION_TS + tsOffset,
-            });
-          });
-        });
-      });
-
       await es.bulk({
         refresh: 'wait_for',
-        body: bulkBody,
+        body: artificialLogDataViewTestData.bulkBody,
       });
 
-      await ml.testResources.createIndexPatternIfNeeded(ES_INDEX, '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded(
+        artificialLogDataViewTestData.sourceIndexOrSavedSearch,
+        '@timestamp'
+      );
 
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -281,11 +199,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     after(async () => {
       await elasticChart.setNewChartUiDebugFlag(false);
-      await ml.testResources.deleteIndexPatternByTitle(ES_INDEX);
+      await ml.testResources.deleteIndexPatternByTitle(
+        artificialLogDataViewTestData.sourceIndexOrSavedSearch
+      );
       try {
-        await es.indices.delete({ index: ES_INDEX });
+        await es.indices.delete({ index: artificialLogDataViewTestData.sourceIndexOrSavedSearch });
       } catch (e) {
-        log.error(`Error deleting index '${ES_INDEX}' in after() callback`);
+        log.error(
+          `Error deleting index '${artificialLogDataViewTestData.sourceIndexOrSavedSearch}' in after() callback`
+        );
       }
     });
 
