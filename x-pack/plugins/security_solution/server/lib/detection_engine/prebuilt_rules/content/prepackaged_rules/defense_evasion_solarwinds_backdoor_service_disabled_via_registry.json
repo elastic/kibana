@@ -7,13 +7,14 @@
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-windows.*",
+    "endgame-*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
   "name": "SolarWinds Process Disabling Services via Registry",
   "note": "",
-  "query": "registry where registry.path : \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\Start\" and\n  registry.data.strings : (\"4\", \"0x00000004\") and\n  process.name : (\n      \"SolarWinds.BusinessLayerHost*.exe\",\n      \"ConfigurationWizard*.exe\",\n      \"NetflowDatabaseMaintenance*.exe\",\n      \"NetFlowService*.exe\",\n      \"SolarWinds.Administration*.exe\",\n      \"SolarWinds.Collector.Service*.exe\" ,\n      \"SolarwindsDiagnostics*.exe\")\n",
+  "query": "registry where registry.path : (\n    \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\Start\",\n    \"\\\\REGISTRY\\\\MACHINE\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\Start\"\n  ) and\n  registry.data.strings : (\"4\", \"0x00000004\") and\n  process.name : (\n      \"SolarWinds.BusinessLayerHost*.exe\",\n      \"ConfigurationWizard*.exe\",\n      \"NetflowDatabaseMaintenance*.exe\",\n      \"NetFlowService*.exe\",\n      \"SolarWinds.Administration*.exe\",\n      \"SolarWinds.Collector.Service*.exe\",\n      \"SolarwindsDiagnostics*.exe\")\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2020/12/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor.html"
   ],
@@ -43,7 +44,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Defense Evasion"
+    "Defense Evasion",
+    "Elastic Endgame"
   ],
   "threat": [
     {
@@ -93,5 +95,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 100
+  "version": 101
 }

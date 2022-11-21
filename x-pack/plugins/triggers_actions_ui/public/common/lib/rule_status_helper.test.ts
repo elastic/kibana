@@ -9,6 +9,11 @@ import { getRuleHealthColor, getRuleStatusMessage } from './rule_status_helpers'
 import { RuleTableItem } from '../../types';
 
 import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
+import {
+  ALERT_STATUS_LICENSE_ERROR,
+  rulesLastRunOutcomeTranslationMapping,
+  rulesStatusesTranslationsMapping,
+} from '../../application/sections/rules_list/translations';
 
 jest.mock('../get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
@@ -60,7 +65,7 @@ const licenseErrorRule = {
 } as RuleTableItem;
 
 beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
 });
 
 describe('getRuleHealthColor', () => {
@@ -68,7 +73,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(mockRule);
     expect(color).toEqual('success');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(mockRule);
     expect(color).toEqual('success');
@@ -78,7 +83,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(warningRule);
     expect(color).toEqual('warning');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(warningRule);
     expect(color).toEqual('warning');
@@ -88,7 +93,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(failedRule);
     expect(color).toEqual('danger');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(failedRule);
     expect(color).toEqual('danger');
@@ -97,38 +102,78 @@ describe('getRuleHealthColor', () => {
 
 describe('getRuleStatusMessage', () => {
   it('should get the status message for a successful rule', () => {
-    let statusMessage = getRuleStatusMessage(mockRule);
+    let statusMessage = getRuleStatusMessage({
+      rule: mockRule,
+      licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
+      lastOutcomeTranslations: rulesLastRunOutcomeTranslationMapping,
+      executionStatusTranslations: rulesStatusesTranslationsMapping,
+    });
     expect(statusMessage).toEqual('Succeeded');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
-    statusMessage = getRuleStatusMessage(mockRule);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    statusMessage = getRuleStatusMessage({
+      rule: mockRule,
+      licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
+      lastOutcomeTranslations: rulesLastRunOutcomeTranslationMapping,
+      executionStatusTranslations: rulesStatusesTranslationsMapping,
+    });
     expect(statusMessage).toEqual('Active');
   });
 
   it('should get the status message for a warning rule', () => {
-    let statusMessage = getRuleStatusMessage(warningRule);
+    let statusMessage = getRuleStatusMessage({
+      rule: warningRule,
+      licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
+      lastOutcomeTranslations: rulesLastRunOutcomeTranslationMapping,
+      executionStatusTranslations: rulesStatusesTranslationsMapping,
+    });
     expect(statusMessage).toEqual('Warning');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
-    statusMessage = getRuleStatusMessage(warningRule);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    statusMessage = getRuleStatusMessage({
+      rule: warningRule,
+      licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
+      lastOutcomeTranslations: rulesLastRunOutcomeTranslationMapping,
+      executionStatusTranslations: rulesStatusesTranslationsMapping,
+    });
     expect(statusMessage).toEqual('Warning');
   });
 
   it('should get the status message for a failed rule', () => {
-    let statusMessage = getRuleStatusMessage(failedRule);
+    let statusMessage = getRuleStatusMessage({
+      rule: failedRule,
+      licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
+      lastOutcomeTranslations: rulesLastRunOutcomeTranslationMapping,
+      executionStatusTranslations: rulesStatusesTranslationsMapping,
+    });
     expect(statusMessage).toEqual('Failed');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
-    statusMessage = getRuleStatusMessage(failedRule);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    statusMessage = getRuleStatusMessage({
+      rule: failedRule,
+      licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
+      lastOutcomeTranslations: rulesLastRunOutcomeTranslationMapping,
+      executionStatusTranslations: rulesStatusesTranslationsMapping,
+    });
     expect(statusMessage).toEqual('Error');
   });
 
   it('should get the status message for a license error rule', () => {
-    let statusMessage = getRuleStatusMessage(licenseErrorRule);
+    let statusMessage = getRuleStatusMessage({
+      rule: licenseErrorRule,
+      licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
+      lastOutcomeTranslations: rulesLastRunOutcomeTranslationMapping,
+      executionStatusTranslations: rulesStatusesTranslationsMapping,
+    });
     expect(statusMessage).toEqual('License Error');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
-    statusMessage = getRuleStatusMessage(licenseErrorRule);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    statusMessage = getRuleStatusMessage({
+      rule: licenseErrorRule,
+      licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
+      lastOutcomeTranslations: rulesLastRunOutcomeTranslationMapping,
+      executionStatusTranslations: rulesStatusesTranslationsMapping,
+    });
     expect(statusMessage).toEqual('License Error');
   });
 });
