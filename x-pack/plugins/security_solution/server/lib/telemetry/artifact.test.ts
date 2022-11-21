@@ -14,11 +14,41 @@ jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('telemetry artifact test', () => {
-  test('start should retrieve cluster information', async () => {
+  test('start should set manifest url for snapshot version', async () => {
+    const expectedManifestUrl =
+      'https://artifacts.security.elastic.co/downloads/kibana/manifest/artifacts-8.0.0.zip';
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const artifact = new Artifact();
     await artifact.start(mockTelemetryReceiver);
     expect(mockTelemetryReceiver.fetchClusterInfo).toHaveBeenCalled();
+    expect(artifact.getManifestUrl()).toEqual(expectedManifestUrl);
+  });
+
+  test('start should set manifest url for non-snapshot version', async () => {
+    const expectedManifestUrl =
+      'https://artifacts.security.elastic.co/downloads/kibana/manifest/artifacts-8.0.0.zip';
+    const mockTelemetryReceiver = createMockTelemetryReceiver();
+    const stubClusterInfo = {
+      name: 'Stub-MacBook-Pro.local',
+      cluster_name: 'elasticsearch',
+      cluster_uuid: '5Pr5PXRQQpGJUTn0czAvKQ',
+      version: {
+        number: '8.0.0',
+        build_type: 'tar',
+        build_hash: '38537ab4a726b42ce8f034aad78d8fca4d4f3e51',
+        build_date: new Date().toISOString(),
+        build_snapshot: true,
+        lucene_version: '9.2.0',
+        minimum_wire_compatibility_version: '7.17.0',
+        minimum_index_compatibility_version: '7.0.0',
+      },
+      tagline: 'You Know, for Search',
+    };
+    mockTelemetryReceiver.fetchClusterInfo = jest.fn().mockReturnValue(stubClusterInfo);
+    const artifact = new Artifact();
+    await artifact.start(mockTelemetryReceiver);
+    expect(mockTelemetryReceiver.fetchClusterInfo).toHaveBeenCalled();
+    expect(artifact.getManifestUrl()).toEqual(expectedManifestUrl);
   });
 
   test('getArtifact should throw an error if manifest url is null', async () => {
