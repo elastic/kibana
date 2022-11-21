@@ -21,11 +21,11 @@ export const RulesListErrorBanner = (props: RulesListErrorBannerProps) => {
     props;
 
   const onClick = () => {
-    const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
-    if (isRuleLastRunOutcomeEnabled) {
-      setRuleLastRunOutcomesFilter(['failed']);
-    } else {
+    const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
+    if (isRuleUsingExecutionStatus) {
       setRuleExecutionStatusesFilter(['error']);
+    } else {
+      setRuleLastRunOutcomesFilter(['failed']);
     }
   };
 

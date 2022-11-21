@@ -11,7 +11,7 @@ import {
   METRICSET_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { maybe } from '../../../common/utils/maybe';
 import {
   getDocumentTypeFilterForTransactions,

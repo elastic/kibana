@@ -320,7 +320,11 @@ describe('take action dropdown', () => {
         setAlertDetailsDataMockToEvent();
       });
 
-      test('should enable the "Add Endpoint event filter" button if provided endpoint event', async () => {
+      test('should enable the "Add Endpoint event filter" button if provided endpoint event and has right privileges', async () => {
+        (useUserPrivileges as jest.Mock).mockReturnValue({
+          ...mockInitialUserPrivilegesState(),
+          endpointPrivileges: { loading: false, canWriteEventFilters: true },
+        });
         wrapper = mount(
           <TestProviders>
             <TakeActionDropdown {...defaultProps} />
@@ -334,10 +338,10 @@ describe('take action dropdown', () => {
         });
       });
 
-      test('should disable the "Add Endpoint event filter" button if no endpoint management privileges', async () => {
+      test('should hide the "Add Endpoint event filter" button if no write event filters privileges', async () => {
         (useUserPrivileges as jest.Mock).mockReturnValue({
           ...mockInitialUserPrivilegesState(),
-          endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+          endpointPrivileges: { loading: false, canWriteEventFilters: false },
         });
         wrapper = mount(
           <TestProviders>
@@ -346,9 +350,7 @@ describe('take action dropdown', () => {
         );
         wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
         await waitFor(() => {
-          expect(
-            wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
-          ).toBeDisabled();
+          expect(wrapper.exists('[data-test-subj="add-event-filter-menu-item"]')).toBeFalsy();
         });
       });
 
@@ -473,10 +475,10 @@ describe('take action dropdown', () => {
         });
       });
 
-      it('should not display the button if user is not allowed to manage endpoints', async () => {
+      it('should not display the button if user is not allowed to write event filters', async () => {
         (useUserPrivileges as jest.Mock).mockReturnValue({
           ...mockInitialUserPrivilegesState(),
-          endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+          endpointPrivileges: { loading: false, canWriteEventFilters: false },
         });
         render();
 
