@@ -32152,7 +32152,6 @@
     "xpack.triggersActionsUI.ruleDetails.definition": "定義",
     "xpack.triggersActionsUI.ruleDetails.description": "説明",
     "xpack.triggersActionsUI.ruleDetails.noActions": "アクションなし",
-    "xpack.triggersActionsUI.ruleDetails.notifyWhen": "通知",
     "xpack.triggersActionsUI.ruleDetails.ruleType": "ルールタイプ",
     "xpack.triggersActionsUI.ruleDetails.runsEvery": "次の間隔で実行",
     "xpack.triggersActionsUI.rules.breadcrumbTitle": "ルール",

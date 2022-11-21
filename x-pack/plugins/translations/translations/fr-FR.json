@@ -32178,7 +32178,6 @@
     "xpack.triggersActionsUI.ruleDetails.definition": "Définition",
     "xpack.triggersActionsUI.ruleDetails.description": "Description",
     "xpack.triggersActionsUI.ruleDetails.noActions": "Aucune action",
-    "xpack.triggersActionsUI.ruleDetails.notifyWhen": "Notifier",
     "xpack.triggersActionsUI.ruleDetails.ruleType": "Type de règle",
     "xpack.triggersActionsUI.ruleDetails.runsEvery": "S'exécute toutes les",
     "xpack.triggersActionsUI.rules.breadcrumbTitle": "Règles",

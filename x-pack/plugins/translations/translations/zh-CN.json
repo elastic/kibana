@@ -32189,7 +32189,6 @@
     "xpack.triggersActionsUI.ruleDetails.definition": "定义",
     "xpack.triggersActionsUI.ruleDetails.description": "描述",
     "xpack.triggersActionsUI.ruleDetails.noActions": "无操作",
-    "xpack.triggersActionsUI.ruleDetails.notifyWhen": "通知",
     "xpack.triggersActionsUI.ruleDetails.ruleType": "规则类型",
     "xpack.triggersActionsUI.ruleDetails.runsEvery": "运行间隔",
     "xpack.triggersActionsUI.rules.breadcrumbTitle": "规则",
