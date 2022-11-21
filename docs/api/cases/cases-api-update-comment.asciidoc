@@ -39,9 +39,11 @@ default space is used.
 === {api-request-body-title}
 
 `alertId`::
-(Required*, string or array of strings) The identifier for the alert. It is
-required only when `type` is `alert`. If it is an array, `index` must also be an
-array.preview:[]
+(Required*, string or array of strings) The alert identifiers. It is
+required only when `type` is `alert`. If you are adding multiple alerts to a
+case, use an array of strings; `index` must also be an array with the same
+length or number of elements in that case. Addings multiple alerts in this manner
+is recommended rather than calling the API multiple times.
 
 `comment`::
 (Required*, string) The updated comment. It is required only when `type` is
@@ -52,9 +54,10 @@ array.preview:[]
 <<cases-api-get-comments>>.
 
 `index`::
-(Required*, string or array of strings) The alert index. It is required only
-when `type` is `alert`. If it is an array, `alertId` must also be an array.
-preview:[]
+(Required*, string or array of strings) The alert indices. It is required only
+when `type` is `alert`. If you are adding multiple alerts to a case, use an
+array of strings; `alertId` must also be an array with the same length or number
+of elements. preview:[]
 
 `owner`::
 (Required, string) The application that owns the case. It can be `cases`,

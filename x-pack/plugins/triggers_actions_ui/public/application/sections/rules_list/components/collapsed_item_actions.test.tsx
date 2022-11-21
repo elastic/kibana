@@ -352,7 +352,7 @@ describe('CollapsedItemActions', () => {
     });
 
     test('renders snooze text correctly if the rule is snoozed', async () => {
-      jest.useFakeTimers('modern').setSystemTime(moment('1990-01-01').toDate());
+      jest.useFakeTimers().setSystemTime(moment('1990-01-01').toDate());
       const wrapper = mountWithIntl(
         <CollapsedItemActions
           {...getPropsWithRule({ isSnoozedUntil: moment('1990-02-01').format() })}
