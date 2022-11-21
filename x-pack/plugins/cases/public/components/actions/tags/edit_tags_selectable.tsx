@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useReducer, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import type { EuiSelectableOption, IconType } from '@elastic/eui';
 import {
   EuiSelectable,
@@ -327,25 +327,6 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   const onSearchChange = useCallback((value) => {
     setSearchValue(value);
   }, []);
-
-  /**
-   * TODO: Remove hack when PR https://github.com/elastic/eui/pull/6317
-   * is merged and the new fix is merged into Kibana.
-   *
-   * This is a hack to force a rerender when
-   * the user adds a new tag. There is a bug in
-   * the EuiSelectable where a race condition that's causing the search bar
-   * to not to match terms with the empty string to trigger the reload.
-   * This means that when a user press the button to add a tag the
-   * search bar clears but the options are not shown.
-   */
-  const [_, setRerender] = useState(0);
-
-  useEffect(() => {
-    if (isEmpty(searchValue)) {
-      setRerender((x) => x + 1);
-    }
-  }, [options, setRerender, searchValue]);
 
   /**
    * While the user searches we need to add the ability
