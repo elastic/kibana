@@ -337,14 +337,14 @@ export const CREATE_BUTTON = i18n.translate(
 
 export const getSuccessText = (listName: string) =>
   i18n.translate('xpack.securitySolution.exceptions.createSharedExceptionListSuccessDescription', {
-    defaultMessage: 'list with name ${listName} was created!',
+    defaultMessage: 'List with name {listName} was created!',
     values: { listName },
   });
 
 export const SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.createSharedExceptionListSuccessTitle',
   {
-    defaultMessage: 'created list',
+    defaultMessage: 'Created list',
   }
 );
 
