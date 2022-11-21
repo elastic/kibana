@@ -21,6 +21,7 @@ import {
   getFileKindsRegistry,
   FileKindsRegistryImpl,
 } from '../common/file_kinds_registry';
+import { registerDefaultFileKinds } from '../common/register_default_file_kinds';
 
 import { BlobStorageService } from './blob_storage_service';
 import { FileServiceFactory } from './file_service';
@@ -34,7 +35,6 @@ import type {
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes, registerFileKindRoutes } from './routes';
 import { Counters, registerUsageCollector } from './usage';
-import { registerDefaultFileKinds } from './register_default_file_kind';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
   private static analytics?: AnalyticsServiceStart;

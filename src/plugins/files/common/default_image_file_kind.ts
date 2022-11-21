@@ -14,16 +14,14 @@ const tags = [tag];
 const tenMebiBytes = 1024 * 1024 * 10;
 
 /**
- * A file kind that is available to all plugins to use.
- *
- * @note this file kind has no access controls and so creating a file of this
- * kind is visible to all Kibana users.
+ * A file kind that is available to all plugins to use for uploading images
+ * intended to be reused across Kibana.
  */
 export const defaultImageFileKind: FileKind = {
   id,
   maxSizeBytes: tenMebiBytes,
   blobStoreSettings: {},
-  allowedMimeTypes: ['image/*'],
+  allowedMimeTypes: ['image/png'],
   http: {
     create: { tags },
     delete: { tags },

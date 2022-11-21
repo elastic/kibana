@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getFileKindsRegistry } from '../common/file_kinds_registry';
-import { defaultImageFileKind } from '../common';
+import { getFileKindsRegistry } from './file_kinds_registry';
+import { defaultImageFileKind } from '.';
 
 export function registerDefaultFileKinds() {
   const registry = getFileKindsRegistry();
