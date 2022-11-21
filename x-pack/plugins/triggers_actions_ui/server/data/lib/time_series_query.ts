@@ -16,7 +16,6 @@ import {
   isCountAggregation,
   isGroupAggregation,
 } from '../../../common';
-import { DEFAULT_GROUPS } from '..';
 
 import {
   TimeSeriesQuery,
@@ -103,21 +102,6 @@ export async function timeSeriesQuery(
   const isCountAgg = isCountAggregation(aggType);
   const isGroupAgg = isGroupAggregation(termField);
   const includeConditionInQuery = !!conditionParams;
-
-  // Cap the maximum number of terms returned to the resultLimit if defined
-  // Use resultLimit + 1 because we're using the bucket selector aggregation
-  // to apply the threshold condition to the ES query. We don't seem to be
-  // able to get the true cardinality from the bucket selector (i.e., get
-  // the number of buckets that matched the selector condition without actually
-  // retrieving the bucket data). By using resultLimit + 1, we can count the number
-  // of buckets returned and if the value is greater than resultLimit, we know that
-  // there is additional alert data that we're not returning.
-  let terms = termSize || DEFAULT_GROUPS;
-  terms = includeConditionInQuery
-    ? terms > conditionParams.resultLimit
-      ? conditionParams.resultLimit + 1
-      : terms
-    : terms;
 
   const logPrefix = 'indexThreshold timeSeriesQuery: callCluster';
   logger.debug(`${logPrefix} call: ${JSON.stringify(esQuery)}`);

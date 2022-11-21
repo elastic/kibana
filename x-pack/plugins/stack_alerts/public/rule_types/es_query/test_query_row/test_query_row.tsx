@@ -16,12 +16,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ParsedAggregationGroup } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { useTestQuery } from './use_test_query';
 
 export interface TestQueryRowProps {
   fetch: () => Promise<{
-    testResults: ParsedAggregationGroup[];
+    testResults: ParsedAggregationResults;
     isGrouped: boolean;
     timeWindow: string;
   }>;

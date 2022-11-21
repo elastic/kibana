@@ -79,13 +79,16 @@ describe('parseAggregationResults', () => {
           },
         },
       })
-    ).toEqual([
-      {
-        group: 'all documents',
-        count: 491,
-        hits: [sampleHit],
-      },
-    ]);
+    ).toEqual({
+      results: [
+        {
+          group: 'all documents',
+          count: 491,
+          hits: [sampleHit],
+        },
+      ],
+      truncated: false,
+    });
   });
 
   it('correctly parses results for count over top N termField', () => {
@@ -128,33 +131,36 @@ describe('parseAggregationResults', () => {
           },
         },
       })
-    ).toEqual([
-      {
-        group: 'execute',
-        count: 120,
-        hits: [],
-      },
-      {
-        group: 'execute-start',
-        count: 120,
-        hits: [],
-      },
-      {
-        group: 'active-instance',
-        count: 100,
-        hits: [],
-      },
-      {
-        group: 'execute-action',
-        count: 100,
-        hits: [],
-      },
-      {
-        group: 'new-instance',
-        count: 100,
-        hits: [],
-      },
-    ]);
+    ).toEqual({
+      results: [
+        {
+          group: 'execute',
+          count: 120,
+          hits: [],
+        },
+        {
+          group: 'execute-start',
+          count: 120,
+          hits: [],
+        },
+        {
+          group: 'active-instance',
+          count: 100,
+          hits: [],
+        },
+        {
+          group: 'execute-action',
+          count: 100,
+          hits: [],
+        },
+        {
+          group: 'new-instance',
+          count: 100,
+          hits: [],
+        },
+      ],
+      truncated: false,
+    });
   });
 
   it('correctly parses results for count over top N termField with topHits', () => {
@@ -247,33 +253,36 @@ describe('parseAggregationResults', () => {
           },
         },
       })
-    ).toEqual([
-      {
-        group: 'execute',
-        count: 120,
-        hits: [sampleHit],
-      },
-      {
-        group: 'execute-start',
-        count: 120,
-        hits: [sampleHit],
-      },
-      {
-        group: 'active-instance',
-        count: 100,
-        hits: [sampleHit],
-      },
-      {
-        group: 'execute-action',
-        count: 100,
-        hits: [sampleHit],
-      },
-      {
-        group: 'new-instance',
-        count: 100,
-        hits: [sampleHit],
-      },
-    ]);
+    ).toEqual({
+      results: [
+        {
+          group: 'execute',
+          count: 120,
+          hits: [sampleHit],
+        },
+        {
+          group: 'execute-start',
+          count: 120,
+          hits: [sampleHit],
+        },
+        {
+          group: 'active-instance',
+          count: 100,
+          hits: [sampleHit],
+        },
+        {
+          group: 'execute-action',
+          count: 100,
+          hits: [sampleHit],
+        },
+        {
+          group: 'new-instance',
+          count: 100,
+          hits: [sampleHit],
+        },
+      ],
+      truncated: false,
+    });
   });
 
   it('correctly parses results for aggregate metric over all', () => {
@@ -293,14 +302,17 @@ describe('parseAggregationResults', () => {
           },
         },
       })
-    ).toEqual([
-      {
-        group: 'all documents',
-        hits: [sampleHit],
-        count: 643,
-        value: 3578195238.095238,
-      },
-    ]);
+    ).toEqual({
+      results: [
+        {
+          group: 'all documents',
+          hits: [sampleHit],
+          count: 643,
+          value: 3578195238.095238,
+        },
+      ],
+      truncated: false,
+    });
   });
 
   it('correctly parses results for aggregate metric over top N termField', () => {
@@ -358,38 +370,41 @@ describe('parseAggregationResults', () => {
           },
         },
       })
-    ).toEqual([
-      {
-        group: 'execute-action',
-        count: 120,
-        hits: [],
-        value: null,
-      },
-      {
-        group: 'execute-start',
-        count: 139,
-        hits: [],
-        value: null,
-      },
-      {
-        group: 'starting',
-        count: 1,
-        hits: [],
-        value: null,
-      },
-      {
-        group: 'recovered-instance',
-        count: 120,
-        hits: [],
-        value: 12837500000,
-      },
-      {
-        group: 'execute',
-        count: 139,
-        hits: [],
-        value: 137647482.0143885,
-      },
-    ]);
+    ).toEqual({
+      results: [
+        {
+          group: 'execute-action',
+          count: 120,
+          hits: [],
+          value: null,
+        },
+        {
+          group: 'execute-start',
+          count: 139,
+          hits: [],
+          value: null,
+        },
+        {
+          group: 'starting',
+          count: 1,
+          hits: [],
+          value: null,
+        },
+        {
+          group: 'recovered-instance',
+          count: 120,
+          hits: [],
+          value: 12837500000,
+        },
+        {
+          group: 'execute',
+          count: 139,
+          hits: [],
+          value: 137647482.0143885,
+        },
+      ],
+      truncated: false,
+    });
   });
 
   it('correctly parses results for aggregate metric over top N termField with topHits', () => {
@@ -497,37 +512,106 @@ describe('parseAggregationResults', () => {
           },
         },
       })
-    ).toEqual([
-      {
-        group: 'execute-action',
-        count: 120,
-        hits: [sampleHit],
-        value: null,
-      },
-      {
-        group: 'execute-start',
-        count: 139,
-        hits: [sampleHit],
-        value: null,
-      },
-      {
-        group: 'starting',
-        count: 1,
-        hits: [sampleHit],
-        value: null,
-      },
-      {
-        group: 'recovered-instance',
-        count: 120,
-        hits: [sampleHit],
-        value: 12837500000,
-      },
-      {
-        group: 'execute',
-        count: 139,
-        hits: [sampleHit],
-        value: 137647482.0143885,
-      },
-    ]);
+    ).toEqual({
+      results: [
+        {
+          group: 'execute-action',
+          count: 120,
+          hits: [sampleHit],
+          value: null,
+        },
+        {
+          group: 'execute-start',
+          count: 139,
+          hits: [sampleHit],
+          value: null,
+        },
+        {
+          group: 'starting',
+          count: 1,
+          hits: [sampleHit],
+          value: null,
+        },
+        {
+          group: 'recovered-instance',
+          count: 120,
+          hits: [sampleHit],
+          value: 12837500000,
+        },
+        {
+          group: 'execute',
+          count: 139,
+          hits: [sampleHit],
+          value: 137647482.0143885,
+        },
+      ],
+      truncated: false,
+    });
+  });
+
+  it('correctly returns truncated status when resultLimit is reached', () => {
+    expect(
+      parseAggregationResults({
+        isCountAgg: true,
+        isGroupAgg: true,
+        esResult: {
+          took: 233,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: 643, max_score: null, hits: [] },
+          aggregations: {
+            groupAggCount: {
+              count: 5,
+            },
+            groupAgg: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 103,
+              buckets: [
+                {
+                  key: 'execute',
+                  doc_count: 120,
+                },
+                {
+                  key: 'execute-start',
+                  doc_count: 120,
+                },
+                {
+                  key: 'active-instance',
+                  doc_count: 100,
+                },
+                {
+                  key: 'execute-action',
+                  doc_count: 100,
+                },
+                {
+                  key: 'new-instance',
+                  doc_count: 100,
+                },
+              ],
+            },
+          },
+        },
+        resultLimit: 3,
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'execute',
+          count: 120,
+          hits: [],
+        },
+        {
+          group: 'execute-start',
+          count: 120,
+          hits: [],
+        },
+        {
+          group: 'active-instance',
+          count: 100,
+          hits: [],
+        },
+      ],
+      truncated: true,
+    });
   });
 });

@@ -14,7 +14,10 @@ describe('useTestQuery', () => {
     const { result } = renderHook(useTestQuery, {
       initialProps: () =>
         Promise.resolve({
-          testResults: [{ group: 'all documents', hits: [], count: 1 }],
+          testResults: {
+            results: [{ group: 'all documents', hits: [], count: 1 }],
+            truncated: false,
+          },
           isGrouped: false,
           timeWindow: '1s',
         }),
@@ -32,10 +35,13 @@ describe('useTestQuery', () => {
     const { result } = renderHook(useTestQuery, {
       initialProps: () =>
         Promise.resolve({
-          testResults: [
-            { group: 'a', count: 1, value: 10, hits: [] },
-            { group: 'b', count: 2, value: 20, hits: [] },
-          ],
+          testResults: {
+            results: [
+              { group: 'a', count: 1, value: 10, hits: [] },
+              { group: 'b', count: 2, value: 20, hits: [] },
+            ],
+            truncated: false,
+          },
           isGrouped: true,
           timeWindow: '1s',
         }),

@@ -124,7 +124,12 @@ export async function fetchEsQuery({
   );
 
   return {
-    parsedResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: searchResult }),
+    parsedResults: parseAggregationResults({
+      isCountAgg,
+      isGroupAgg,
+      esResult: searchResult,
+      resultLimit: alertLimit,
+    }),
     dateStart,
     dateEnd,
   };

@@ -49,6 +49,7 @@ const scheduleActions = jest.fn();
 const replaceState = jest.fn(() => ({ scheduleActions }));
 const mockCreateAlert = jest.fn(() => ({ replaceState }));
 const mockGetRecoveredAlerts = jest.fn().mockReturnValue([]);
+const mockSetLimitReached = jest.fn();
 
 const mockNow = jest.getRealSystemTime();
 
@@ -90,7 +91,7 @@ describe('es_query executor', () => {
         create: mockCreateAlert,
         alertLimit: {
           getValue: jest.fn().mockReturnValue(1000),
-          setLimitReached: jest.fn(),
+          setLimitReached: mockSetLimitReached,
         },
         done: () => ({
           getRecoveredAlerts: mockGetRecoveredAlerts,
@@ -124,13 +125,16 @@ describe('es_query executor', () => {
 
     it('should call fetchEsQuery if searchType is esQuery', async () => {
       mockFetchEsQuery.mockResolvedValueOnce({
-        parsedResults: [
-          {
-            group: 'all documents',
-            count: 491,
-            hits: [],
-          },
-        ],
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 491,
+              hits: [],
+            },
+          ],
+          truncated: false,
+        },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
       });
@@ -151,13 +155,16 @@ describe('es_query executor', () => {
 
     it('should call fetchSearchSourceQuery if searchType is searchSource', async () => {
       mockFetchSearchSourceQuery.mockResolvedValueOnce({
-        parsedResults: [
-          {
-            group: 'all documents',
-            count: 491,
-            hits: [],
-          },
-        ],
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 491,
+              hits: [],
+            },
+          ],
+          truncated: false,
+        },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
       });
@@ -180,13 +187,16 @@ describe('es_query executor', () => {
 
     it('should not create alert if compare function returns false for ungrouped alert', async () => {
       mockFetchEsQuery.mockResolvedValueOnce({
-        parsedResults: [
-          {
-            group: 'all documents',
-            count: 491,
-            hits: [],
-          },
-        ],
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 491,
+              hits: [],
+            },
+          ],
+          truncated: false,
+        },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
       });
@@ -197,17 +207,22 @@ describe('es_query executor', () => {
       });
 
       expect(mockCreateAlert).not.toHaveBeenCalled();
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
     });
 
     it('should create alert if compare function returns true for ungrouped alert', async () => {
       mockFetchEsQuery.mockResolvedValueOnce({
-        parsedResults: [
-          {
-            group: 'all documents',
-            count: 491,
-            hits: [],
-          },
-        ],
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 491,
+              hits: [],
+            },
+          ],
+          truncated: false,
+        },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
       });
@@ -234,27 +249,32 @@ describe('es_query executor', () => {
         title: "rule 'test-rule-name' matched query",
         value: 491,
       });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
     });
 
     it('should create as many alerts as number of results in parsedResults for grouped alert', async () => {
       mockFetchEsQuery.mockResolvedValueOnce({
-        parsedResults: [
-          {
-            group: 'host-1',
-            count: 291,
-            hits: [],
-          },
-          {
-            group: 'host-2',
-            count: 477,
-            hits: [],
-          },
-          {
-            group: 'host-3',
-            count: 999,
-            hits: [],
-          },
-        ],
+        parsedResults: {
+          results: [
+            {
+              group: 'host-1',
+              count: 291,
+              hits: [],
+            },
+            {
+              group: 'host-2',
+              count: 477,
+              hits: [],
+            },
+            {
+              group: 'host-3',
+              count: 999,
+              hits: [],
+            },
+          ],
+          truncated: false,
+        },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
       });
@@ -321,6 +341,55 @@ describe('es_query executor', () => {
         title: "rule 'test-rule-name' matched query for group host-3",
         value: 999,
       });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
+    });
+
+    it('should set limit as reached if results are truncated', async () => {
+      mockFetchEsQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'host-1',
+              count: 291,
+              hits: [],
+            },
+            {
+              group: 'host-2',
+              count: 477,
+              hits: [],
+            },
+            {
+              group: 'host-3',
+              count: 999,
+              hits: [],
+            },
+          ],
+          truncated: true,
+        },
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+      });
+      await executor(coreMock, {
+        ...defaultExecutorOptions,
+        // @ts-expect-error
+        params: {
+          ...defaultProps,
+          threshold: [200],
+          thresholdComparator: '>=' as Comparator,
+          groupBy: 'top',
+          termSize: 10,
+          termField: 'host.name',
+        },
+      });
+
+      expect(mockCreateAlert).toHaveBeenCalledTimes(3);
+      expect(mockCreateAlert).toHaveBeenNthCalledWith(1, 'host-1');
+      expect(mockCreateAlert).toHaveBeenNthCalledWith(2, 'host-2');
+      expect(mockCreateAlert).toHaveBeenNthCalledWith(3, 'host-3');
+      expect(scheduleActions).toHaveBeenCalledTimes(3);
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(true);
     });
 
     it('should correctly handle recovered alerts for ungrouped alert', async () => {
@@ -332,13 +401,16 @@ describe('es_query executor', () => {
         },
       ]);
       mockFetchEsQuery.mockResolvedValueOnce({
-        parsedResults: [
-          {
-            group: 'all documents',
-            count: 491,
-            hits: [],
-          },
-        ],
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 491,
+              hits: [],
+            },
+          ],
+          truncated: false,
+        },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
       });
@@ -364,6 +436,8 @@ describe('es_query executor', () => {
         title: "rule 'test-rule-name' recovered",
         value: 0,
       });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
     });
 
     it('should correctly handle recovered alerts for grouped alerts', async () => {
@@ -379,7 +453,7 @@ describe('es_query executor', () => {
         },
       ]);
       mockFetchEsQuery.mockResolvedValueOnce({
-        parsedResults: [],
+        parsedResults: { results: [], truncated: false },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
       });
@@ -426,6 +500,8 @@ describe('es_query executor', () => {
         title: "rule 'test-rule-name' recovered",
         value: 0,
       });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
     });
   });
 

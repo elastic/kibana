@@ -20,16 +20,23 @@ export interface ParsedAggregationGroup {
   value?: number;
 }
 
+export interface ParsedAggregationResults {
+  results: ParsedAggregationGroup[];
+  truncated: boolean;
+}
+
 interface ParseAggregationResultsOpts {
   isCountAgg: boolean;
   isGroupAgg: boolean;
   esResult: SearchResponse<unknown>;
+  resultLimit?: number;
 }
 export const parseAggregationResults = ({
   isCountAgg,
   isGroupAgg,
   esResult,
-}: ParseAggregationResultsOpts): ParsedAggregationGroup[] => {
+  resultLimit,
+}: ParseAggregationResultsOpts): ParsedAggregationResults => {
   const aggregations = esResult?.aggregations || {};
 
   // add a fake 'all documents' group aggregation, if a group aggregation wasn't used
@@ -61,9 +68,14 @@ export const parseAggregationResults = ({
   const groupBuckets = aggregations.groupAgg?.buckets || [];
   // @ts-expect-error specify aggregations type explicitly
   const numGroupsTotal = aggregations.groupAggCount?.count ?? 0;
-  const results: ParsedAggregationGroup[] = [];
+  const results: ParsedAggregationResults = {
+    results: [],
+    truncated: resultLimit ? numGroupsTotal > resultLimit : false,
+  };
 
   for (const groupBucket of groupBuckets) {
+    if (resultLimit && results.results.length === resultLimit) break;
+
     const groupName: string = `${groupBucket?.key}`;
     const groupResult: any = {
       group: groupName,
@@ -71,7 +83,7 @@ export const parseAggregationResults = ({
       hits: groupBucket?.topHitsAgg?.hits?.hits ?? [],
       ...(!isCountAgg ? { value: groupBucket?.metricAgg?.value } : {}),
     };
-    results.push(groupResult);
+    results.results.push(groupResult);
   }
 
   return results;

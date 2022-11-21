@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ParsedAggregationGroup } from '@kbn/triggers-actions-ui-plugin/common';
+import type { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 
 interface TestQueryResponse {
   result: string | null;
@@ -27,7 +27,7 @@ const TEST_QUERY_INITIAL_RESPONSE: TestQueryResponse = {
  */
 export function useTestQuery(
   fetch: () => Promise<{
-    testResults: ParsedAggregationGroup[];
+    testResults: ParsedAggregationResults;
     isGrouped: boolean;
     timeWindow: string;
   }>
@@ -56,7 +56,7 @@ export function useTestQuery(
           result: i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryGroupedResponse', {
             defaultMessage: 'Grouped query matched {groups} groups in the last {window}.',
             values: {
-              groups: testResults.length,
+              groups: testResults.results.length,
               window: timeWindow,
             },
           }),
@@ -64,7 +64,8 @@ export function useTestQuery(
           isLoading: false,
         });
       } else {
-        const ungroupedQueryResponse = testResults.length > 0 ? testResults[0] : { count: 0 };
+        const ungroupedQueryResponse =
+          testResults.results.length > 0 ? testResults.results[0] : { count: 0 };
         setTestQueryResponse({
           result: i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
             defaultMessage: 'Query matched {count} documents in the last {window}.',

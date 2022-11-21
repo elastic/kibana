@@ -85,7 +85,11 @@ describe('RuleCommonExpressions', () => {
         errors={errors}
         hasValidationErrors={hasValidationErrors}
         onTestFetch={async () => {
-          return { testResults: [], isGrouped: false, timeWindow: '1m' };
+          return {
+            testResults: { results: [], truncated: false },
+            isGrouped: false,
+            timeWindow: '1m',
+          };
         }}
         excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRunFn}

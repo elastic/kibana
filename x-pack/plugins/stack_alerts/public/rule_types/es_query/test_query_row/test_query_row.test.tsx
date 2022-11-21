@@ -23,7 +23,10 @@ jest.mock('@elastic/eui', () => {
 const COPIED_QUERY = 'COPIED QUERY';
 const onFetch = () =>
   Promise.resolve({
-    testResults: [{ group: 'all documents', hits: [], count: 42 }],
+    testResults: {
+      results: [{ group: 'all documents', hits: [], count: 42 }],
+      truncated: false,
+    },
     isGrouped: false,
     timeWindow: '5m',
   });

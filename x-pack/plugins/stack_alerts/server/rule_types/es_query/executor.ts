@@ -80,7 +80,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         params as OnlyEsQueryRuleParams
       )}`;
   const unmetGroupValues: Record<string, number> = {};
-  for (const result of parsedResults) {
+  for (const result of parsedResults.results) {
     const alertId = result.group;
     const value = result.value ?? result.count;
 
@@ -133,8 +133,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     }
   }
 
-  alertFactory.alertLimit.setLimitReached(false);
-  // alertFactory.alertLimit.setLimitReached(result.truncated);
+  alertFactory.alertLimit.setLimitReached(parsedResults.truncated);
 
   const { getRecoveredAlerts } = alertFactory.done();
   for (const recoveredAlert of getRecoveredAlerts()) {

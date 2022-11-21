@@ -123,7 +123,11 @@ export const EsQueryExpression: React.FC<
     const isCountAgg = isCountAggregation(aggType);
     const window = `${timeWindowSize}${timeWindowUnit}`;
     if (hasValidationErrors()) {
-      return { testResults: [], isGrouped: isGroupAgg, timeWindow: window };
+      return {
+        testResults: { results: [], truncated: false },
+        isGrouped: isGroupAgg,
+        timeWindow: window,
+      };
     }
     const timeWindow = parseDuration(window);
     const parsedQuery = JSON.parse(esQuery);
