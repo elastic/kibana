@@ -183,7 +183,7 @@ export const UPLOAD_BUTTON = i18n.translate(
 
 export const uploadSuccessMessage = (fileName: string) =>
   i18n.translate('xpack.securitySolution.lists.exceptionListImportSuccess', {
-    defaultMessage: "Exception list '{fileName}' was imported",
+    defaultMessage: 'Exception list {fileName} was imported',
     values: { fileName },
   });
 
