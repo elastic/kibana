@@ -8,7 +8,7 @@
 import { KueryNode } from '@kbn/es-query';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { retryIfBulkConflicts } from './retry_if_bulk_conflicts';
+import { retryIfBulkOperationConflicts } from './retry_if_bulk_operation_conflicts';
 import { RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 
 const mockFilter: KueryNode = {
@@ -51,42 +51,42 @@ const getOperationConflictsTimes = (times: number) => {
 const OperationSuccessful = async () => mockSuccessfulResult;
 const conflictOperationMock = jest.fn();
 
-describe('retryIfBulkConflicts', () => {
+describe('retryIfBulkOperationConflicts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   test('should work when operation is successful', async () => {
-    const result = await retryIfBulkConflicts(
-      'ENABLE',
-      mockLogger,
-      OperationSuccessful,
-      mockFilter
-    );
+    const result = await retryIfBulkOperationConflicts({
+      action: 'ENABLE',
+      logger: mockLogger,
+      bulkOperation: OperationSuccessful,
+      filter: mockFilter,
+    });
 
     expect(result).toEqual(mockSuccessfulResult);
   });
 
   test('should throw error when operation fails', async () => {
     await expect(
-      retryIfBulkConflicts(
-        'ENABLE',
-        mockLogger,
-        async () => {
+      retryIfBulkOperationConflicts({
+        action: 'ENABLE',
+        logger: mockLogger,
+        bulkOperation: async () => {
           throw Error('Test failure');
         },
-        mockFilter
-      )
+        filter: mockFilter,
+      })
     ).rejects.toThrowError('Test failure');
   });
 
   test(`should return conflict errors when number of retries exceeds ${RETRY_IF_CONFLICTS_ATTEMPTS}`, async () => {
-    const result = await retryIfBulkConflicts(
-      'ENABLE',
-      mockLogger,
-      getOperationConflictsTimes(RETRY_IF_CONFLICTS_ATTEMPTS + 1),
-      mockFilter
-    );
+    const result = await retryIfBulkOperationConflicts({
+      action: 'ENABLE',
+      logger: mockLogger,
+      bulkOperation: getOperationConflictsTimes(RETRY_IF_CONFLICTS_ATTEMPTS + 1),
+      filter: mockFilter,
+    });
 
     expect(result.errors).toEqual([error409]);
     expect(mockLogger.warn).toBeCalledWith('Bulk enable rules conflicts, exceeded retries');
@@ -94,12 +94,12 @@ describe('retryIfBulkConflicts', () => {
 
   for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTS; i++) {
     test(`should work when operation conflicts ${i} times`, async () => {
-      const result = await retryIfBulkConflicts(
-        'ENABLE',
-        mockLogger,
-        getOperationConflictsTimes(i),
-        mockFilter
-      );
+      const result = await retryIfBulkOperationConflicts({
+        action: 'ENABLE',
+        logger: mockLogger,
+        bulkOperation: getOperationConflictsTimes(i),
+        filter: mockFilter,
+      });
 
       expect(conflictOperationMock.mock.calls.length).toBe(i + 1);
       expect(result).toStrictEqual(mockSuccessfulResult);

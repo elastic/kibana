@@ -16,22 +16,31 @@ import { RawRule } from '../../types';
 
 const MAX_RULES_IDS_IN_RETRY = 1000;
 
-interface BulkOperationReturn {
+interface BulkOperationResult {
   errors: BulkOperationError[];
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   accList: string[][];
 }
 
-export const retryIfBulkConflicts = async (
-  action: 'DELETE' | 'ENABLE' | 'DISABLE',
-  logger: Logger,
-  bulkOperation: (filter: KueryNode | null) => Promise<BulkOperationReturn>,
-  filter: KueryNode | null,
-  accList?: string[][], // this list can include several accumulators, depends on the type of bulk operation
-  accErrors: BulkOperationError[] = [],
-  accRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [],
-  retries: number = RETRY_IF_CONFLICTS_ATTEMPTS
-): Promise<BulkOperationReturn> => {
+export const retryIfBulkOperationConflicts = async ({
+  action,
+  logger,
+  bulkOperation,
+  filter,
+  accList,
+  accErrors = [],
+  accRules = [],
+  retries = RETRY_IF_CONFLICTS_ATTEMPTS,
+}: {
+  action: 'DELETE' | 'ENABLE' | 'DISABLE';
+  logger: Logger;
+  bulkOperation: (filter: KueryNode | null) => Promise<BulkOperationResult>;
+  filter: KueryNode | null;
+  accList?: string[][]; // this list can include several accumulators, depends on the type of bulk operation
+  accErrors?: BulkOperationError[];
+  accRules?: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+  retries?: number;
+}): Promise<BulkOperationResult> => {
   try {
     const {
       errors: currentErrors,
@@ -93,16 +102,16 @@ export const retryIfBulkConflicts = async (
       await pMap(
         chunk(ruleIdsWithConflictError, MAX_RULES_IDS_IN_RETRY),
         async (queryIds) =>
-          retryIfBulkConflicts(
+          retryIfBulkOperationConflicts({
             action,
             logger,
             bulkOperation,
-            convertRuleIdsToKueryNode(queryIds),
-            newAccList,
-            errors,
-            rules,
-            retries - 1
-          ),
+            filter: convertRuleIdsToKueryNode(queryIds),
+            accList: newAccList,
+            accErrors: errors,
+            accRules: rules,
+            retries: retries - 1,
+          }),
         {
           concurrency: 1,
         }

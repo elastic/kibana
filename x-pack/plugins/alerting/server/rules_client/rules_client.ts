@@ -111,8 +111,7 @@ import {
   validateOperationOnAttributes,
   retryIfBulkEditConflicts,
   retryIfBulkDeleteConflicts,
-  retryIfBulkEnableConflicts,
-  retryIfBulkConflicts,
+  retryIfBulkOperationConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
 } from './lib';
@@ -2653,13 +2652,13 @@ export class RulesClient {
       action: 'ENABLE',
     });
 
-    const { errors, rules, accList } = await retryIfBulkConflicts(
-      'ENABLE',
-      this.logger,
-      (filterKueryNode: KueryNode | null) =>
+    const { errors, rules, accList } = await retryIfBulkOperationConflicts({
+      action: 'ENABLE',
+      logger: this.logger,
+      bulkOperation: (filterKueryNode: KueryNode | null) =>
         this.bulkEnableRulesWithOCC({ filter: filterKueryNode }),
-      kueryNodeFilterWithAuth
-    );
+      filter: kueryNodeFilterWithAuth,
+    });
 
     const [taskIdsToEnable] = accList;
 
