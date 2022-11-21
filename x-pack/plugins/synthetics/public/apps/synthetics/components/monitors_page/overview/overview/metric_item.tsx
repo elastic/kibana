@@ -67,11 +67,13 @@ export const MetricItem = ({
         >
           <Chart>
             <Settings
-              onElementClick={() => monitor.id && locationName && onClick(monitor.id, locationName)}
+              onElementClick={() =>
+                monitor.configId && locationName && onClick(monitor.configId, locationName)
+              }
               baseTheme={DARK_THEME}
             />
             <Metric
-              id={`${monitor.id}-${monitor.location?.id}`}
+              id={`${monitor.configId}-${monitor.location?.id}`}
               data={[
                 [
                   {
