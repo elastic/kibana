@@ -377,6 +377,7 @@ export const MonitorManagementListResultCodec = t.type({
       id: t.string,
       attributes: EncryptedSyntheticsMonitorCodec,
       updated_at: t.string,
+      created_at: t.string,
     })
   ),
   page: t.number,

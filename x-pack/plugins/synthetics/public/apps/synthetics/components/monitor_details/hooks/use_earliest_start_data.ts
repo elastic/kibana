@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemo } from 'react';
 import moment from 'moment';
+import { useSelectedMonitor } from './use_selected_monitor';
 import { useMonitorQueryId } from './use_monitor_query_id';
 
 export const useEarliestStartDate = () => {
@@ -19,17 +20,23 @@ export const useEarliestStartDate = () => {
 
   const { savedObjects } = useKibana().services;
 
-  const { data: dataFromSO, loading } = useFetcher(async () => {
-    return savedObjects?.client?.get('synthetics-monitor', soId);
+  const { monitorSO } = useSelectedMonitor();
+
+  const { data: createdAt, loading } = useFetcher(async () => {
+    if (monitorSO) {
+      return monitorSO.created_at;
+    }
+    const so = await savedObjects?.client?.get('synthetics-monitor', soId);
+    return so?.createdAt;
   }, [monitorId]);
 
   return useMemo(() => {
-    if (dataFromSO?.createdAt) {
-      const diff = moment(dataFromSO?.createdAt).diff(moment().subtract(30, 'day'), 'days');
+    if (createdAt) {
+      const diff = moment(createdAt).diff(moment().subtract(30, 'day'), 'days');
       if (diff > 0) {
-        return { from: dataFromSO?.createdAt, loading };
+        return { from: createdAt, loading };
       }
     }
     return { from: 'now-30d/d', loading };
-  }, [dataFromSO?.createdAt, loading]);
+  }, [createdAt, loading]);
 };

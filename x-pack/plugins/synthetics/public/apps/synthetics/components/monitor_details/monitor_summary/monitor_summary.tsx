@@ -40,7 +40,7 @@ export const MonitorSummary = () => {
   const monitorId = useMonitorQueryId();
 
   if (loading) {
-    return <EuiLoadingSpinner size="xl" />;
+    return <LoadingState />;
   }
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
@@ -134,6 +134,16 @@ export const MonitorSummary = () => {
     </>
   );
 };
+
+function LoadingState({ height }: { height?: string }) {
+  return (
+    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: height ?? '100%' }}>
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
 
 const SUMMARY_LABEL = i18n.translate('xpack.synthetics.detailsPanel.summary', {
   defaultMessage: 'Summary',
