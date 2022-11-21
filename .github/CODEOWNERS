@@ -18,10 +18,15 @@
 /src/plugins/unified_field_list/ @elastic/kibana-data-discovery
 /src/plugins/unified_histogram/ @elastic/kibana-data-discovery
 /src/plugins/saved_objects_finder/ @elastic/kibana-data-discovery
+/src/plugins/data_views/ @elastic/kibana-data-discovery
+/src/plugins/data_view_editor/ @elastic/kibana-data-discovery
+/src/plugins/data_view_field_editor/ @elastic/kibana-data-discovery
+/src/plugins/data_view_management/ @elastic/kibana-data-discovery
 
 # Vis Editors
 /x-pack/plugins/lens/ @elastic/kibana-visualizations
 /src/plugins/charts/ @elastic/kibana-visualizations
+/src/plugins/event_annotation @elastic/kibana-visualizations
 /src/plugins/vis_default_editor/ @elastic/kibana-visualizations
 /src/plugins/vis_types/metric/ @elastic/kibana-visualizations
 /src/plugins/vis_types/table/ @elastic/kibana-visualizations
@@ -60,15 +65,11 @@
 /examples/partial_results_example/ @elastic/kibana-app-services
 /examples/search_examples/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-visualizations  @elastic/kibana-data-discovery
-/src/plugins/data_views/ @elastic/kibana-app-services
 /src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/field_formats/ @elastic/kibana-app-services
-/src/plugins/data_view_editor/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
 /src/plugins/kibana_utils/ @elastic/kibana-app-services
 /src/plugins/navigation/ @elastic/kibana-app-services
-/src/plugins/data_view_field_editor @elastic/kibana-app-services
-/src/plugins/data_view_management/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
@@ -661,8 +662,8 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 
 # Security Solution onboarding tour
-/x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/platform-onboarding
-/x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/platform-onboarding
+/x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/security-threat-hunting-explore
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
@@ -837,6 +838,7 @@ packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
 packages/core/rendering/core-rendering-server-internal @elastic/kibana-core
 packages/core/rendering/core-rendering-server-mocks @elastic/kibana-core
 packages/core/root/core-root-browser-internal @elastic/kibana-core
+packages/core/root/core-root-server-internal @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-browser @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server-internal @elastic/kibana-core

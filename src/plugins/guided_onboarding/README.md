@@ -2,7 +2,7 @@
 
 This plugin contains the code for the Guided Onboarding project. Guided onboarding consists of guides for Solutions (Enterprise Search, Observability, Security) that can be completed as a checklist of steps. The guides help users to ingest their data and to navigate to the correct Solutions pages. 
 
-The guided onboarding plugin includes a client-side code for the UI and the server side code for the internal API. The server-side code is not intended for external use. 
+The guided onboarding plugin includes a client-side code for the UI and the server-side code for the internal API. The server-side code is not intended for external use. 
 
 The client-side code registers a button in the Kibana header that controls the guided onboarding panel (checklist) depending on the current state. There is also an API service exposed from the client-side start contract. The API service is intended for external use by other plugins.
 
@@ -10,9 +10,11 @@ The client-side code registers a button in the Kibana header that controls the g
 
 ## Development
 
-1. Start Kibana with examples `yarn start --run-examples` to be able to see the guidedOnboardingExample plugin. 
+1. Guided onboarding is only enabled on cloud. Update your `kibana.dev.yml` file with `xpack.cloud.id: 'testID'` to imitate the Cloud environment.
 
-2. Navigate to `/app/guidedOnboardingExample` to start a guide and check the button in the header.
+2. Start Kibana with the example plugins enabled: `yarn start --run-examples`. 
+
+3. Navigate to `/app/home#/getting_started` to view the onboarding landing page and start a guide. Alternatively, you can also start a guide within the guided onboarding example plugin at `/app/guidedOnboardingExample`. The example plugin includes a sample guide that showcases the framework's capabilities. It also provides a form to dynamically start a guide at a specific step.
 
 ## API service
 *Also see `KIBANA_FOLDER/examples/guided_onboarding_example` for code examples.*
@@ -71,5 +73,3 @@ await guidedOnboardingApi?.completeGuideStep('security', 'add_data');
 
 ## Guides config
 To use the API service, you need to know a guide ID (one of `search`, `observability`, `security`) and a step ID (for example, `add_data`, `search_experience`, `rules` etc). Refer to guides config files in the folder `./public/constants` for more information. 
-
-
