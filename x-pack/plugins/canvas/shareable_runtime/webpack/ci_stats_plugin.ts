@@ -11,8 +11,6 @@ import Path from 'path';
 
 import webpack from 'webpack';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
-import normalizePath from 'normalize-path';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { isNormalModule, isConcatenatedModule } from '@kbn/optimizer-webpack-helpers';
 
