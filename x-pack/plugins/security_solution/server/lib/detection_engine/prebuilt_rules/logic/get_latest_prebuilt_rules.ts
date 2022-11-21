@@ -27,7 +27,7 @@ export const getLatestPrebuiltRules = async (
 /**
  * Retrieve and validate prebuilt rules that were installed from Fleet as saved objects.
  */
-const getFleetRules = async (
+export const getFleetRules = async (
   client: RuleAssetSavedObjectsClient
 ): Promise<PrebuiltRuleToInstall[]> => {
   const fleetResponse = await client.all();

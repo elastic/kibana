@@ -11,6 +11,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status/route';
 import { installPrebuiltRulesAndTimelinesRoute } from './install_prebuilt_rules_and_timelines/route';
+import { installTestPrebuiltRuleAssetsRoute } from './poc/install_test_assets/route';
 
 export const registerPrebuiltRulesRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -19,4 +20,6 @@ export const registerPrebuiltRulesRoutes = (
 ) => {
   getPrebuiltRulesAndTimelinesStatusRoute(router, config, security);
   installPrebuiltRulesAndTimelinesRoute(router);
+  // TODO: https://github.com/elastic/kibana/pull/144060 Delete before merge
+  installTestPrebuiltRuleAssetsRoute(router);
 };

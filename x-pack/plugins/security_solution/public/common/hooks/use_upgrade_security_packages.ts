@@ -24,6 +24,9 @@ const sendUpgradeSecurityPackages = async (
 ): Promise<BulkInstallPackagesResponse> => {
   return http.post<BulkInstallPackagesResponse>(epmRouteService.getBulkInstallPath(), {
     ...options,
+    query: {
+      prerelease: true,
+    },
     body: JSON.stringify({
       packages: ['endpoint', 'security_detection_engine'],
     }),

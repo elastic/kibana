@@ -1,0 +1,18 @@
+categories:
+  - security
+conditions:
+  kibana.version: ^8.3.0
+description: Prebuilt detection rules (composite)
+format_version: 1.0.0
+icons:
+  - size: 16x16
+    src: /img/sample-logo.svg
+    type: image/svg+xml
+license: basic
+name: security_rules_composite
+owner:
+  github: elastic/protections
+release: ga
+title: Prebuilt detection rules (composite)
+type: integration
+version: 8.3.2
