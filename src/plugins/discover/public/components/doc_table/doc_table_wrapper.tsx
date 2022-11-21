@@ -16,7 +16,7 @@ import { TableHeader } from './components/table_header/table_header';
 import { SHOW_MULTIFIELDS } from '../../../common';
 import { TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { getShouldShowFieldHandler } from '../../utils/get_fields_to_show';
+import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../types';
 

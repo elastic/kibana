@@ -35,7 +35,7 @@ import { usePager } from '../../../../hooks/use_pager';
 import { FieldName } from '../../../../components/field_name/field_name';
 import { SHOW_MULTIFIELDS } from '../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../doc_views_types';
-import { getShouldShowFieldHandler } from '../../../../utils/get_fields_to_show';
+import { getShouldShowFieldHandler } from '../../../../utils/get_should_show_field_handler';
 import { getIgnoredReason } from '../../../../utils/get_ignored_reason';
 import { formatFieldValue } from '../../../../utils/format_value';
 import { isNestedFieldParent } from '../../../../application/main/utils/nested_fields';

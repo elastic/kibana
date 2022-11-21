@@ -13,7 +13,7 @@ import { formatHit } from '../../../utils/format_hit';
 import type { DataTableRecord } from '../../../types';
 
 import './row_formatter.scss';
-import { type ShouldShowFieldInTableHandler } from '../../../utils/get_fields_to_show';
+import { type ShouldShowFieldInTableHandler } from '../../../utils/get_should_show_field_handler';
 
 interface Props {
   defPairs: Array<readonly [string, string]>;

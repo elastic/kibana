@@ -7,7 +7,7 @@
  */
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { getShouldShowFieldHandler } from './get_fields_to_show';
+import { getShouldShowFieldHandler } from './get_should_show_field_handler';
 
 describe('get fields to show', () => {
   let dataView: DataView;

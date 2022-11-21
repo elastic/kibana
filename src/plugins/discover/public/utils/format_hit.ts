@@ -12,7 +12,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord } from '../types';
 import { formatFieldValue } from './format_value';
-import { type ShouldShowFieldInTableHandler } from './get_fields_to_show';
+import { type ShouldShowFieldInTableHandler } from './get_should_show_field_handler';
 
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
 

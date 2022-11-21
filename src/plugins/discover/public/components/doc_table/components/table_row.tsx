@@ -21,7 +21,7 @@ import { DataTableRecord, EsHitRecord } from '../../../types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import { type ShouldShowFieldInTableHandler } from '../../../utils/get_fields_to_show';
+import { type ShouldShowFieldInTableHandler } from '../../../utils/get_should_show_field_handler';
 
 export type DocTableRow = EsHitRecord & {
   isAnchor?: boolean;
