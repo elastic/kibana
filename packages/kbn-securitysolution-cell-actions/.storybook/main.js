@@ -6,5 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './cell_actions';
-export * from './cell_actions/cell_actions_context';
+const defaultConfig = require('@kbn/storybook').defaultConfig;
+
+module.exports = {
+  ...defaultConfig,
+  stories: ['../**/*.stories.tsx'],
+  reactOptions: {
+    strictMode: true,
+  },
+};

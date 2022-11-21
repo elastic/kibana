@@ -6,6 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
+import { CellActionsContext } from './cell_actions_context';
 
-export const CellActions = () => <span>{'TODO CellActions component'}</span>;
+export const CellActions = () => {
+  const context = useContext(CellActionsContext);
+
+  if (!context.getActions) {
+    throw new Error(
+      'No CellActionsContext found. Please wrap the application with CellActionsContextProvider'
+    );
+  }
+
+  const actions = context.getActions('lol');
+
+  return <span>{'TODO CellActions component' + actions}</span>;
+};
