@@ -113,7 +113,7 @@ export const DeleteMonitor = ({
 export const PROJECT_MONITOR_TITLE = i18n.translate(
   'xpack.synthetics.monitorManagement.monitorList.disclaimer.title',
   {
-    defaultMessage: "Deleting this monitor will not remove it from Project's source",
+    defaultMessage: 'Deleting this monitor will not remove it from the project source',
   }
 );
 
@@ -121,7 +121,7 @@ export const ProjectMonitorDisclaimer = () => {
   return (
     <FormattedMessage
       id="xpack.synthetics.monitorManagement.monitorList.disclaimer.label"
-      defaultMessage="Make sure to remove this monitor from Project's source, otherwise it will be recreated the next time you use the push command. For more information, {docsLink} for deleting project monitors."
+      defaultMessage="To delete it completely and stop it from being pushed again in the future, delete it from the project source. {docsLink}."
       values={{
         docsLink: (
           <EuiLink
@@ -129,7 +129,7 @@ export const ProjectMonitorDisclaimer = () => {
             target="_blank"
           >
             {i18n.translate('xpack.synthetics.monitorManagement.projectDelete.docsLink', {
-              defaultMessage: 'read our docs',
+              defaultMessage: 'Learn more',
             })}
           </EuiLink>
         ),
