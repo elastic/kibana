@@ -38,6 +38,7 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
     const { id, title, namespaces, name } = idxPattern;
     const isDefault = defaultIndex === id;
     const tags = getTags(idxPattern, isDefault);
+    const displayName = name ? name : title;
 
     return {
       id,
@@ -48,9 +49,9 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
       tags,
       // the prepending of 0 at the default pattern takes care of prioritization
       // so the sorting will but the default index on top
-      // or on bottom of a the table
-      sort: `${isDefault ? '0' : '1'}${title}`,
-      getName: () => (name ? name : title),
+      // or on bottom of the table
+      sort: `${isDefault ? '0' : '1'}${displayName}`,
+      getName: () => displayName,
     };
   });
 
