@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should drop the last bucket 1`] = `
+exports[`convertBucketsToMetricsApiSeries should drop the last bucket 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -41,7 +41,7 @@ Object {
 }
 `;
 
-exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should just work 1`] = `
+exports[`convertBucketsToMetricsApiSeries should just work 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -86,7 +86,7 @@ Object {
 }
 `;
 
-exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should return empty timeseries for empty metrics 1`] = `
+exports[`convertBucketsToMetricsApiSeries should return empty timeseries for empty metrics 1`] = `
 Object {
   "columns": Array [],
   "id": "example-0",
@@ -97,7 +97,7 @@ Object {
 }
 `;
 
-exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should transform top_metric aggregations 1`] = `
+exports[`convertBucketsToMetricsApiSeries should transform top_metric aggregations 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -137,7 +137,7 @@ Object {
 }
 `;
 
-exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should work with keyed percentiles 1`] = `
+exports[`convertBucketsToMetricsApiSeries should work with keyed percentiles 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -182,7 +182,7 @@ Object {
 }
 `;
 
-exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should work with normalized_values 1`] = `
+exports[`convertBucketsToMetricsApiSeries should work with normalized_values 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -227,7 +227,7 @@ Object {
 }
 `;
 
-exports[`convertHistogramBucketsToTimeseies(keys, options, buckets) should work with percentiles 1`] = `
+exports[`convertBucketsToMetricsApiSeries should work with percentiles 1`] = `
 Object {
   "columns": Array [
     Object {

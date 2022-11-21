@@ -14,7 +14,7 @@ import {
   MetricsAPIRow,
 } from '../../../../common/http_api/metrics_api';
 import {
-  HistogramBucket,
+  Bucket,
   BasicMetricValueRT,
   NormalizedMetricValueRT,
   PercentilesTypeRT,
@@ -68,9 +68,9 @@ const dropOutOfBoundsBuckets =
   (from: number, to: number, bucketSizeInMillis: number) => (row: MetricsAPIRow) =>
     row.timestamp >= from && row.timestamp + bucketSizeInMillis <= to;
 
-const convertBucketsToRows = (
+export const convertBucketsToRows = (
   options: MetricsAPIRequest,
-  buckets: HistogramBucket[]
+  buckets: Bucket[]
 ): MetricsAPIRow[] => {
   return buckets.map((bucket) => {
     const ids = options.metrics.map((metric) => metric.id);
@@ -78,14 +78,15 @@ const convertBucketsToRows = (
       const valueObject = get(bucket, [id]);
       return { ...acc, [id]: ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null };
     }, {} as Record<string, number | null | object[]>);
+
     return { timestamp: bucket.key as number, ...metrics };
   });
 };
 
-export const convertHistogramBucketsToTimeseries = (
+export const convertBucketsToMetricsApiSeries = (
   keys: string[],
   options: MetricsAPIRequest,
-  buckets: HistogramBucket[],
+  buckets: Bucket[],
   bucketSizeInMillis: number
 ): MetricsAPISeries => {
   const id = keys.join(':');
@@ -99,11 +100,14 @@ export const convertHistogramBucketsToTimeseries = (
     type: 'number',
   })) as MetricsAPIColumn[];
   const allRows = convertBucketsToRows(options, buckets);
-  const rows = options.dropPartialBuckets
-    ? allRows.filter(
-        dropOutOfBoundsBuckets(options.timerange.from, options.timerange.to, bucketSizeInMillis)
-      )
-    : allRows;
+
+  const rows =
+    options.dropPartialBuckets && options.includeTimeseries
+      ? allRows.filter(
+          dropOutOfBoundsBuckets(options.timerange.from, options.timerange.to, bucketSizeInMillis)
+        )
+      : allRows;
+
   return {
     id,
     keys,

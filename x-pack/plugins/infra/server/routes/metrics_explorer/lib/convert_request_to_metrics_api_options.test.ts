@@ -31,6 +31,7 @@ const BASE_METRICS_UI_OPTIONS: MetricsAPIRequest = {
   metrics: [
     { id: 'metric_0', aggregations: { metric_0: { avg: { field: 'system.cpu.user.pct' } } } },
   ],
+  includeTimeseries: true,
 };
 
 describe('convertRequestToMetricsAPIOptions', () => {

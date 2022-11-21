@@ -62,7 +62,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     name: i18n.translate('xpack.infra.hostsTable.diskLatencyColumnHeader', {
       defaultMessage: 'Disk Latency (avg.)',
     }),
-    field: 'diskLatency.avg',
+    field: 'diskLatency.value',
     sortable: true,
     render: (avg: number) => <>{formatMetric('diskLatency', avg)}</>,
   },
@@ -70,7 +70,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     name: i18n.translate('xpack.infra.hostsTable.averageTxColumnHeader', {
       defaultMessage: 'TX (avg.)',
     }),
-    field: 'tx.avg',
+    field: 'tx.value',
     sortable: true,
     render: (avg: number) => <>{formatMetric('tx', avg)}</>,
   },
@@ -78,7 +78,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     name: i18n.translate('xpack.infra.hostsTable.averageRxColumnHeader', {
       defaultMessage: 'RX (avg.)',
     }),
-    field: 'rx.avg',
+    field: 'rx.value',
     sortable: true,
     render: (avg: number) => <>{formatMetric('rx', avg)}</>,
   },
@@ -86,7 +86,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     name: i18n.translate('xpack.infra.hostsTable.averageMemoryTotalColumnHeader', {
       defaultMessage: 'Memory total (avg.)',
     }),
-    field: 'memoryTotal.avg',
+    field: 'memoryTotal.value',
     sortable: true,
     render: (avg: number) => <>{formatMetric('memoryTotal', avg)}</>,
   },
@@ -102,7 +102,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     name: i18n.translate('xpack.infra.hostsTable.averageMemoryUsageColumnHeader', {
       defaultMessage: 'Memory usage (avg.)',
     }),
-    field: 'memory.avg',
+    field: 'memory.value',
     sortable: true,
     render: (avg: number) => <>{formatMetric('memory', avg)}</>,
   },
