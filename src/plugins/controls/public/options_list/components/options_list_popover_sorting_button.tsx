@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
+import { css } from '@emotion/css';
 import {
   getCompatibleSortingTypes,
   DEFAULT_SORT,
@@ -33,7 +34,6 @@ import {
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
-import { css } from '@emotion/css';
 
 const SORT_POPOVER_WIDTH = 220;
 
