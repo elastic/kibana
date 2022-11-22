@@ -21,7 +21,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   BooleanRelation,
@@ -39,7 +38,7 @@ import { XJsonLang } from '@kbn/monaco';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { css, cx } from '@emotion/css';
+import { cx } from '@emotion/css';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -49,20 +48,8 @@ import {
 import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import { flattenFilters } from './lib/helpers';
-
-/** The default max-height of the Add/Edit Filter popover used to show "+n More" filters (e.g. `+4 More`) */
-export const DEFAULT_MAX_HEIGHT = '233px';
-
-const filtersBuilderMaxHeight = css`
-  max-height: ${DEFAULT_MAX_HEIGHT};
-`;
-
-/** @todo: should be removed, no hardcoded sizes **/
-const filterBadgeStyle = css`
-  .euiFormRow__fieldWrapper {
-    line-height: 1.5;
-  }
-`;
+import { filterBadgeStyle, filtersBuilderMaxHeight } from './filter_editor.styles';
+import { strings } from './strings';
 
 export interface FilterEditorProps {
   filter: Filter;
@@ -80,33 +67,6 @@ interface State {
   isCustomEditorOpen: boolean;
   localFilter: Filter;
 }
-
-const panelTitleAdd = i18n.translate('unifiedSearch.filter.filterEditor.addFilterPopupTitle', {
-  defaultMessage: 'Add filter',
-});
-const panelTitleEdit = i18n.translate('unifiedSearch.filter.filterEditor.editFilterPopupTitle', {
-  defaultMessage: 'Edit filter',
-});
-
-const addButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.addButtonLabel', {
-  defaultMessage: 'Add filter',
-});
-const updateButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.updateButtonLabel', {
-  defaultMessage: 'Update filter',
-});
-const disableToggleModeTooltip = i18n.translate(
-  'unifiedSearch.filter.filterEditor.disableToggleModeTooltip',
-  {
-    defaultMessage: '"Edit as Query DSL" operation is not supported for combined filters',
-  }
-);
-
-const selectDataViewToolTip = i18n.translate(
-  'unifiedSearch.filter.filterEditor.chooseDataViewFirstToolTip',
-  {
-    defaultMessage: 'You need to select a data view first',
-  }
-);
 
 export class FilterEditor extends Component<FilterEditorProps, State> {
   constructor(props: FilterEditorProps) {
@@ -133,12 +93,14 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
       <div>
         <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
-            <EuiFlexItem>{this.props.mode === 'add' ? panelTitleAdd : panelTitleEdit}</EuiFlexItem>
+            <EuiFlexItem>
+              {this.props.mode === 'add' ? strings.getPanelTitleAdd() : strings.getPanelTitleEdit()}
+            </EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="top"
-                content={shouldDisableToggle ? disableToggleModeTooltip : null}
+                content={shouldDisableToggle ? strings.getDisableToggleModeTooltip() : null}
                 display="block"
               >
                 <EuiButtonEmpty
@@ -173,24 +135,11 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
               : this.renderFiltersBuilderEditor()}
 
             <EuiSpacer size="l" />
-            <EuiFormRow
-              label={i18n.translate(
-                'unifiedSearch.filter.filterEditor.createCustomLabelInputLabel',
-                {
-                  defaultMessage: 'Custom label (optional)',
-                }
-              )}
-              fullWidth
-            >
+            <EuiFormRow label={strings.getCustomLabel()} fullWidth>
               <EuiFieldText
                 value={`${this.state.customLabel}`}
                 onChange={this.onCustomLabelChange}
-                placeholder={i18n.translate(
-                  'unifiedSearch.filter.filterEditor.customLabelPlaceholder',
-                  {
-                    defaultMessage: 'Add a custom label here',
-                  }
-                )}
+                placeholder={strings.getAddCustomLabel()}
                 fullWidth
               />
             </EuiFormRow>
@@ -211,7 +160,9 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
                   isDisabled={!this.isFilterValid()}
                   data-test-subj="saveFilter"
                 >
-                  {this.props.mode === 'add' ? addButtonLabel : updateButtonLabel}
+                  {this.props.mode === 'add'
+                    ? strings.getAddButtonLabel()
+                    : strings.getUpdateButtonLabel()}
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -251,20 +202,10 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
     const { selectedDataView } = this.state;
     return (
       <>
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('unifiedSearch.filter.filterEditor.dateViewSelectLabel', {
-            defaultMessage: 'Data view',
-          })}
-        >
+        <EuiFormRow fullWidth label={strings.getDataView()}>
           <GenericComboBox
             fullWidth
-            placeholder={i18n.translate(
-              'unifiedSearch.filter.filterBar.indexPatternSelectPlaceholder',
-              {
-                defaultMessage: 'Select a data view',
-              }
-            )}
+            placeholder={strings.getSelectDataView()}
             options={this.props.indexPatterns}
             selectedOptions={selectedDataView ? [selectedDataView] : []}
             getLabel={(indexPattern) => indexPattern.getName()}
@@ -299,7 +240,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
         <div role="region" aria-label="" className={cx(filtersBuilderMaxHeight, 'eui-yScroll')}>
           <EuiToolTip
             position="top"
-            content={selectedDataView ? '' : selectDataViewToolTip}
+            content={selectedDataView ? '' : strings.getSelectDataViewToolTip()}
             display="block"
           >
             <FiltersBuilder
@@ -345,12 +286,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
 
   private renderCustomEditor() {
     return (
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('unifiedSearch.filter.filterEditor.queryDslLabel', {
-          defaultMessage: 'Elasticsearch Query DSL',
-        })}
-      >
+      <EuiFormRow fullWidth label={strings.getQueryDslLabel()}>
         <CodeEditor
           languageId={XJsonLang.ID}
           width="100%"
@@ -358,9 +294,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
           value={this.state.queryDsl}
           onChange={this.onQueryDslChange}
           data-test-subj="customEditorInput"
-          aria-label={i18n.translate('unifiedSearch.filter.filterEditor.queryDslAriaLabel', {
-            defaultMessage: 'Elasticsearch Query DSL editor',
-          })}
+          aria-label={strings.getQueryDslAriaLabel()}
         />
       </EuiFormRow>
     );
