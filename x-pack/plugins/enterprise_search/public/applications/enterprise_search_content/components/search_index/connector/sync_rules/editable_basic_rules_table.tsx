@@ -28,6 +28,7 @@ import {
   FilteringRule,
   FilteringRuleRule,
 } from '../../../../../../../common/types/connectors';
+import { docLinks } from '../../../../../shared/doc_links';
 
 import { InlineEditableTable } from '../../../../../shared/tables/inline_editable_table/inline_editable_table';
 import {
@@ -68,7 +69,7 @@ function validateItem(filteringRule: FilteringRule): FormErrors {
   return {};
 }
 
-export const FilteringRulesTable: React.FC = () => {
+export const SyncRulesTable: React.FC = () => {
   const { editableFilteringRules } = useValues(ConnectorFilteringLogic);
   const { indexName } = useValues(IndexViewLogic);
   const { addFilteringRule, deleteFilteringRule, reorderFilteringRules, updateFilteringRule } =
@@ -76,15 +77,15 @@ export const FilteringRulesTable: React.FC = () => {
 
   const description = (
     <EuiText size="s" color="default">
-      {i18n.translate('xpack.enterpriseSearch.content.index.connector.filteringRules.description', {
+      {i18n.translate('xpack.enterpriseSearch.content.index.connector.syncRules.description', {
         defaultMessage:
-          'Add an indexing rule to customize what data is synchronized from {indexName}. Everything is included by default, and documents are validated against the configured set of indexing rules starting from the top listed down.',
+          'Add a sync rule to customize what data is synchronized from {indexName}. Everything is included by default, and documents are validated against the configured set of indexing rules starting from the top listed down.',
         values: { indexName },
       })}
       <EuiSpacer />
-      <EuiLink href={'TODOTODOTODO'} external>
-        {i18n.translate('xpack.enterpriseSearch.content.index.connector.filteringRules.link', {
-          defaultMessage: 'Learn more about customizing your index rules.',
+      <EuiLink href={docLinks.syncRules} external>
+        {i18n.translate('xpack.enterpriseSearch.content.index.connector.syncRules.link', {
+          defaultMessage: 'Learn more about customizing your sync rules.',
         })}
       </EuiLink>
     </EuiText>
@@ -110,34 +111,29 @@ export const FilteringRulesTable: React.FC = () => {
         />
       ),
       field: 'policy',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.index.connector.filtering.basicTable.policyTitle',
-        { defaultMessage: 'Policy' }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.index.connector.rule.basicTable.policyTitle', {
+        defaultMessage: 'Policy',
+      }),
       render: (indexingRule) => (
         <EuiText size="s">{filteringPolicyToText(indexingRule.policy)}</EuiText>
       ),
     },
     {
-      editingRender: (filteringRule, onChange) => (
+      editingRender: (rule, onChange) => (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
-            <EuiFieldText
-              fullWidth
-              value={filteringRule.field}
-              onChange={(e) => onChange(e.target.value)}
-            />
+            <EuiFieldText fullWidth value={rule.field} onChange={(e) => onChange(e.target.value)} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
       field: 'field',
       name: i18n.translate(
-        'xpack.enterpriseSearch.index.connector.filtering.basicTable.fieldTitle',
+        'xpack.enterpriseSearch.index.connector.syncRules.basicTable.fieldTitle',
         { defaultMessage: 'Field' }
       ),
-      render: (indexingRule) => (
+      render: (rule) => (
         <EuiText size="s">
-          <EuiCode>{indexingRule.field}</EuiCode>
+          <EuiCode>{rule.field}</EuiCode>
         </EuiText>
       ),
     },
@@ -155,35 +151,29 @@ export const FilteringRulesTable: React.FC = () => {
       ),
       field: 'rule',
       name: i18n.translate(
-        'xpack.enterpriseSearch.index.connector.filtering.basicTable.ruleTitle',
+        'xpack.enterpriseSearch.index.connector.syncRules.basicTable.ruleTitle',
         { defaultMessage: 'Rule' }
       ),
-      render: (filteringRule) => (
-        <EuiText size="s">{filteringRuleToText(filteringRule.rule)}</EuiText>
-      ),
+      render: (rule) => <EuiText size="s">{filteringRuleToText(rule.rule)}</EuiText>,
     },
     {
-      editingRender: (filteringRule, onChange) => (
+      editingRender: (rule, onChange) => (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
-            <EuiFieldText
-              fullWidth
-              value={filteringRule.value}
-              onChange={(e) => onChange(e.target.value)}
-            />
+            <EuiFieldText fullWidth value={rule.value} onChange={(e) => onChange(e.target.value)} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
       field: 'value',
       name: i18n.translate(
-        'xpack.enterpriseSearch.index.connector.filtering.basicTable.valueTitle',
+        'xpack.enterpriseSearch.index.connector.syncRules.basicTable.valueTitle',
         {
           defaultMessage: 'Value',
         }
       ),
-      render: (indexingRule) => (
+      render: (rule) => (
         <EuiText size="s">
-          <EuiCode>{indexingRule.value}</EuiCode>
+          <EuiCode>{rule.value}</EuiCode>
         </EuiText>
       ),
     },
@@ -192,8 +182,8 @@ export const FilteringRulesTable: React.FC = () => {
   return (
     <InlineEditableTable
       addButtonText={i18n.translate(
-        'xpack.enterpriseSearch.content.index.connector.filtering.table.addRuleLabel',
-        { defaultMessage: 'Add filter rule' }
+        'xpack.enterpriseSearch.content.index.connector.syncRules.table.addRuleLabel',
+        { defaultMessage: 'Add sync rule' }
       )}
       columns={columns}
       defaultItem={{
@@ -227,7 +217,7 @@ export const FilteringRulesTable: React.FC = () => {
       bottomRows={[
         <EuiText size="s">
           {i18n.translate(
-            'xpack.enterpriseSearch.content.sources.filteringRulesTable.includeEverythingMessage',
+            'xpack.enterpriseSearch.content.sources.basicRulesTable.includeEverythingMessage',
             {
               defaultMessage: 'Include everything else from this source',
             }
