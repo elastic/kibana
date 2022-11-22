@@ -9,6 +9,8 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { PackagePolicyRestrictionRelatedError } from '../errors';
+
 import type {
   AgentPolicy,
   FullAgentPolicy,
@@ -169,6 +171,30 @@ describe('agent policy', () => {
 
     it('should run package policy delete external callbacks', async () => {
       await agentPolicyService.delete(soClient, esClient, 'mocked');
+      expect(packagePolicyService.runDeleteExternalCallbacks).toHaveBeenCalledWith([
+        { id: 'package-1' },
+      ]);
+    });
+
+    it('should throw error for agent policy which has managed package poolicy', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          is_managed: true,
+        },
+      ] as any);
+      try {
+        await agentPolicyService.delete(soClient, esClient, 'mocked');
+      } catch (e) {
+        expect(e.message).toEqual(
+          new PackagePolicyRestrictionRelatedError(
+            `Cannot delete agent policy mocked that contains managed package policies`
+          ).message
+        );
+      }
+
+      await agentPolicyService.delete(soClient, esClient, 'mocked', { force: true });
+
       expect(packagePolicyService.runDeleteExternalCallbacks).toHaveBeenCalledWith([
         { id: 'package-1' },
       ]);

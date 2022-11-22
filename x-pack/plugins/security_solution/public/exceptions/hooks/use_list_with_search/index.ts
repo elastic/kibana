@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -68,6 +69,12 @@ export const useListWithSearchComponent = (
       : '';
   }, [list.name, viewerStatus]);
 
+  const emptyViewerButtonText = useMemo(() => {
+    return list.type === ExceptionListTypeEnum.ENDPOINT
+      ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON_ENDPOINT
+      : i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON;
+  }, [list.type]);
+
   // #region Callbacks
 
   const onSearch = useCallback(
@@ -108,6 +115,7 @@ export const useListWithSearchComponent = (
     viewerStatus,
     emptyViewerTitle,
     emptyViewerBody,
+    emptyViewerButtonText,
     ruleReferences: exceptionListReferences,
     showAddExceptionFlyout,
     showEditExceptionFlyout,
