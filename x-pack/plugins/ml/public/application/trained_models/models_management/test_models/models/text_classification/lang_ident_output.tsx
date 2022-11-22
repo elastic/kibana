@@ -20,7 +20,7 @@ export const getLangIdentOutputComponent = (inferrer: LangIdentInference) => (
 );
 
 const LangIdentOutput: FC<{ inferrer: LangIdentInference }> = ({ inferrer }) => {
-  const result = useObservable(inferrer.getInferenceResult$());
+  const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
   }
