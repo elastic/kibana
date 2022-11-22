@@ -83,6 +83,12 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
           },
         },
         {
+          test: /\.peggy$/,
+          use: {
+            loader: '@kbn/peggy-loader',
+          },
+        },
+        {
           test: /\.scss$/,
           exclude: /\.module.(s(a|c)ss)$/,
           use: [

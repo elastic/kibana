@@ -105,17 +105,17 @@ export class Cache {
     }
   }
 
-  update(path: string, file: { mtime: string; code: string; map: any }) {
+  close() {
+    clearTimeout(this.timer);
+  }
+
+  async update(path: string, file: { mtime: string; code: string; map?: any }) {
     const key = this.getKey(path);
 
     this.safePut(this.atimes, key, GLOBAL_ATIME);
     this.safePut(this.mtimes, key, file.mtime);
     this.safePut(this.codes, key, file.code);
-    this.safePut(this.sourceMaps, key, JSON.stringify(file.map));
-  }
-
-  close() {
-    clearTimeout(this.timer);
+    file.map != null ? this.safePut(this.sourceMaps, key, JSON.stringify(file.map)) : null;
   }
 
   private getKey(path: string) {
@@ -124,7 +124,7 @@ export class Cache {
         ? Path.relative(this.pathRoot, path).split(Path.sep).join('/')
         : Path.relative(this.pathRoot, path);
 
-    return `${this.prefix}${normalizedPath}`;
+    return `${this.prefix}:${normalizedPath}`;
   }
 
   private safeGet<V>(db: LmdbStore.Database<V, string>, key: string) {
