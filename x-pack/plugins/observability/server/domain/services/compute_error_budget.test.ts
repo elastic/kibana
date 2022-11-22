@@ -13,8 +13,8 @@ import { computeErrorBudget } from './compute_error_budget';
 import { toDateRange } from './date_range';
 
 describe('computeErrorBudget', () => {
-  describe('for occurrences based SLO', () => {
-    describe('with rolling time window', () => {
+  describe('for rolling time window', () => {
+    describe('for occurrences budgeting method', () => {
       it('computes the error budget', () => {
         const slo = createSLO({
           budgeting_method: 'occurrences',
@@ -36,31 +36,7 @@ describe('computeErrorBudget', () => {
       });
     });
 
-    describe('with calendar aligned time window', () => {
-      it('computes the error budget', () => {
-        const slo = createSLO({
-          budgeting_method: 'occurrences',
-          time_window: weeklyCalendarAligned(twoDaysAgo()),
-          objective: { target: 0.95 },
-        });
-        const dateRange = toDateRange(slo.time_window);
-        const errorBudget = computeErrorBudget(slo, {
-          good: 97,
-          total: 100,
-          date_range: dateRange,
-        });
-
-        expect(errorBudget).toEqual({
-          initial: 0.05,
-          consumed: 0.6,
-          remaining: 0.4,
-        });
-      });
-    });
-  });
-
-  describe('for timeslices based SLO', () => {
-    describe('with rolling time window', () => {
+    describe('for timeslices budgeting method', () => {
       it('computes the error budget', () => {
         const slo = createSLO({
           budgeting_method: 'timeslices',
@@ -82,8 +58,32 @@ describe('computeErrorBudget', () => {
         });
       });
     });
+  });
 
-    describe('with calendar aligned time window', () => {
+  describe('for calendar aligned time window', () => {
+    describe('for occurrences budgeting method', () => {
+      it('computes the error budget', () => {
+        const slo = createSLO({
+          budgeting_method: 'occurrences',
+          time_window: weeklyCalendarAligned(twoDaysAgo()),
+          objective: { target: 0.95 },
+        });
+        const dateRange = toDateRange(slo.time_window);
+        const errorBudget = computeErrorBudget(slo, {
+          good: 97,
+          total: 100,
+          date_range: dateRange,
+        });
+
+        expect(errorBudget).toEqual({
+          initial: 0.05,
+          consumed: 0.6,
+          remaining: 0.4,
+        });
+      });
+    });
+
+    describe('for timeslices budgeting method', () => {
       it('computes the error budget', () => {
         const slo = createSLO({
           budgeting_method: 'timeslices',
@@ -122,7 +122,7 @@ describe('computeErrorBudget', () => {
     });
   });
 
-  it("computes the error budget when 'good > total' events", () => {
+  it("returns default values when 'good >= total' events", () => {
     const slo = createSLO();
     const dateRange = toDateRange(slo.time_window);
     const errorBudget = computeErrorBudget(slo, { good: 9999, total: 9, date_range: dateRange });
