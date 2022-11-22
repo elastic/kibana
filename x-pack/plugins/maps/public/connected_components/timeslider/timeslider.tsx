@@ -8,6 +8,8 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import uuid from 'uuid/v4';
+import { Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
@@ -18,7 +20,6 @@ import {
   CONTROL_GROUP_TYPE,
 } from '@kbn/controls-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import type { TimeRange } from '@kbn/es-query';
 import { getEmbeddableService, getTimeFilter } from '../../kibana_services';
@@ -37,16 +38,23 @@ export class Timeslider extends Component<Props, {}> {
   private _isRendered: boolean = false;
   private _controlGroup?: ControlGroupContainer | undefined;
   private readonly _controlGroupRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
-  private _subscription: Subscription | undefined;
+  private readonly _subscriptions = new Subscription();
 
   componentWillUnmount() {
     this._isMounted = false;
+    this._subscriptions.unsubscribe();
   }
 
   componentDidUpdate() {
     if (!this._isRendered && this._controlGroup && this._controlGroupRef.current) {
       this._isRendered = true;
       this._controlGroup.render(this._controlGroupRef.current);
+    }
+
+    if (this._controlGroup && !_.isEqual(this._controlGroup.getInput().timeRange, this.props.timeRange)) {
+      this._controlGroup.updateInput({
+        timeRange: this.props.timeRange
+      });
     }
   }
 
@@ -85,6 +93,22 @@ export class Timeslider extends Component<Props, {}> {
     if (!this._isMounted) {
       return;
     }
+
+    this._subscriptions.add(
+      this._controlGroup
+        .getOutput$()
+        .pipe(
+          distinctUntilChanged(({ timeslice: timesliceA }, { timeslice: timesliceB }) =>
+            _.isEqual(timesliceA, timesliceB)
+          )
+        )
+        .subscribe(({ timeslice }) => {
+          this.props.setTimeslice({
+            from: timeslice[0],
+            to: timeslice[1],
+          });
+        })
+    );
 
     if (this._controlGroupRef.current) {
       this._controlGroup.render(this._controlGroupRef.current);
