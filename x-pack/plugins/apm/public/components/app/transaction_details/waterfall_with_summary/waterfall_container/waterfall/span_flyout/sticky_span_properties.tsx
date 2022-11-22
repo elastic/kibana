@@ -13,7 +13,7 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_NAME,
   TRANSACTION_NAME,
-} from '../../../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../../../common/es_fields/apm';
 import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
