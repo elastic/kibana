@@ -53,7 +53,7 @@ run(
         cmd: 'node',
         args: ['scripts/es', 'snapshot'],
         cwd: REPO_ROOT,
-        wait: /succ kbn\/es setup complete/,
+        wait: /kbn\/es setup complete/,
       });
 
       log.info(`✅ ES is ready and will run in the background`);
