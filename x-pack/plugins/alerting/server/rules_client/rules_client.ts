@@ -3922,7 +3922,7 @@ export class RulesClient {
     data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertAction[] }
   ): Promise<void> {
     const { actions, notifyWhen } = data;
-    const hasRuleLevelNotifyWhen = Boolean(notifyWhen);
+    const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
 
     if (actions.length === 0) {
       return;

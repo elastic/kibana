@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RuleNotifyWhenType } from '../../types';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 
 export const DEFAULT_FREQUENCY = {
-  notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,
+  notifyWhen: RuleNotifyWhen.CHANGE,
   throttle: null,
   summary: false,
 };

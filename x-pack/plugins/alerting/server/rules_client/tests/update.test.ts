@@ -12,7 +12,7 @@ import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mock
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { IntervalSchedule, RuleNotifyWhenType } from '../../types';
+import { IntervalSchedule, RuleNotifyWhen } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -100,7 +100,7 @@ describe('update()', () => {
           },
           frequency: {
             summary: false,
-            notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,
+            notifyWhen: RuleNotifyWhen.CHANGE,
             throttle: null,
           },
         },

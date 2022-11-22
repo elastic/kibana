@@ -13,7 +13,8 @@ import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { RuleAction, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
@@ -30,7 +31,7 @@ const DEFAULT_ACTION_MESSAGE =
   'Rule {{context.rule.name}} generated {{state.signals_count}} alerts';
 
 const DEFAULT_ACTION_FREQUENCY = {
-  notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,
+  notifyWhen: RuleNotifyWhen.CHANGE,
   throttle: null,
   summary: false,
 };
