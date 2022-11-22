@@ -51,7 +51,6 @@ export const GettingStartedPage = () => {
             <SimpleMonitorForm />
           </>
         }
-        footer={<>{/* TODO: add it back in 8.7*/}</>}
       />
     </Wrapper>
   );
