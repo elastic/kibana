@@ -143,8 +143,7 @@ export const COMMENTS = i18n.translate('xpack.cases.allCases.comments', {
 });
 
 export const TAGS_HELP = i18n.translate('xpack.cases.createCase.fieldTagsHelpText', {
-  defaultMessage:
-    'Separate tags with a line break.',
+  defaultMessage: 'Separate tags with a line break.',
 });
 
 export const TAGS_EMPTY_ERROR = i18n.translate('xpack.cases.createCase.fieldTagsEmptyError', {
