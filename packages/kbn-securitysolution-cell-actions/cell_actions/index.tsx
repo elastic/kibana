@@ -7,9 +7,16 @@
  */
 
 import React, { useContext } from 'react';
-import { CellActionsContext } from './cell_actions_context';
 
-export const CellActions = () => {
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { EuiIcon } from '@elastic/eui';
+import { CellActionsContext } from './cell_actions_context';
+interface CellActionsProps {
+  getActionContext: () => ActionExecutionContext;
+  triggerId: string;
+}
+
+export const CellActions = ({ getActionContext, triggerId }: CellActionsProps) => {
   const context = useContext(CellActionsContext);
 
   if (!context.getActions) {
@@ -18,7 +25,22 @@ export const CellActions = () => {
     );
   }
 
-  const actions = context.getActions('lol');
+  const actions = context.getActions(triggerId);
 
-  return <span>{'TODO CellActions component' + actions}</span>;
+  const actionContext = getActionContext(); // TODO Does it require the triggerId?
+
+  return (
+    <>
+      {actions.map((action) => {
+        const iconType = action.getIconType(actionContext);
+
+        return (
+          <div>
+            {iconType ? <EuiIcon type={iconType} /> : null}
+            {action.getDisplayName(actionContext)}
+          </div>
+        );
+      })}
+    </>
+  );
 };

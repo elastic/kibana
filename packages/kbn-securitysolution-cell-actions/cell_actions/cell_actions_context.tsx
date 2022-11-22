@@ -7,8 +7,9 @@
  */
 
 import React, { createContext, FC } from 'react';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 
-type GetActionsType = undefined | ((trigger: string) => any);
+type GetActionsType = undefined | ((trigger: string) => Action[]);
 
 const initialContext = {
   getActions: undefined,
