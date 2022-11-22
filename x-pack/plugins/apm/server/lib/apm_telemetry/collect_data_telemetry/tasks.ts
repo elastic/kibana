@@ -9,7 +9,7 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
-import { TelemetryTask } from '.';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_NAME,
@@ -53,12 +53,27 @@ import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMPerService, APMTelemetry } from '../types';
+import { APMTelemetry, APMPerService, APMDataTelemetry } from '../types';
+import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
+import { TelemetryClient } from '../telemetry_client';
+
+type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
 const timeout = '5m';
+
+interface TelemetryTask {
+  name: string;
+  executor: (params: TelemetryTaskExecutorParams) => Promise<APMDataTelemetry>;
+}
+
+export interface TelemetryTaskExecutorParams {
+  telemetryClient: TelemetryClient;
+  indices: ApmIndicesConfig;
+  savedObjectsClient: ISavedObjectsClient;
+}
 
 export const tasks: TelemetryTask[] = [
   {

@@ -59,6 +59,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
               `}
               meta={file.meta as FileImageMetadata}
               src={client.getDownloadHref({ id: file.id, fileKind: kind })}
+              loading={'lazy'}
             />
           ) : (
             <div
