@@ -8,7 +8,7 @@
 type NumberOrNull = number | null;
 
 interface RuntimeField {
-  [key: string]: NodeMetric
+  [key: string]: NodeMetric;
 }
 
 interface TopMetric {

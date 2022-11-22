@@ -14,11 +14,13 @@ export const createTopNodesQuery = (
   source: MetricsSourceConfiguration
 ) => {
   const nestedSearchFields: { [key: string]: string } = {
-    'rx': 'rx>bytes',
-    'tx': 'tx>bytes',
-  }
+    rx: 'rx>bytes',
+    tx: 'tx>bytes',
+  };
   const sortByHost = options.sort && options.sort === 'name';
-  const metricsSortField = options.sort ? nestedSearchFields[options.sort] || options.sort : 'uptime';
+  const metricsSortField = options.sort
+    ? nestedSearchFields[options.sort] || options.sort
+    : 'uptime';
   const sortField = sortByHost ? '_key' : metricsSortField;
   const sortDirection = options.sortDirection ?? 'asc';
   return {
@@ -31,8 +33,8 @@ export const createTopNodesQuery = (
           {
             emit((doc[\'host.network.ingress.bytes\'].value/(doc[\'metricset.period\'].value / 1000)));
           }
-            `
-        }
+            `,
+        },
       },
       tx_bytes_per_period: {
         type: 'double',
@@ -42,9 +44,9 @@ export const createTopNodesQuery = (
           {
             emit((doc[\'host.network.egress.bytes\'].value/(doc[\'metricset.period\'].value / 1000)));
           }
-            `
-        }
-      }
+            `,
+        },
+      },
     },
     size: 0,
     query: {
@@ -107,30 +109,30 @@ export const createTopNodesQuery = (
           rx: {
             filter: {
               exists: {
-                field: 'host.network.ingress.bytes'
-              }
+                field: 'host.network.ingress.bytes',
+              },
             },
             aggs: {
               bytes: {
                 avg: {
-                  field: 'rx_bytes_per_period'
-                }
-              }
-            }
+                  field: 'rx_bytes_per_period',
+                },
+              },
+            },
           },
           tx: {
             filter: {
               exists: {
-                field: 'host.network.egress.bytes'
-              }
+                field: 'host.network.egress.bytes',
+              },
             },
             aggs: {
               bytes: {
                 avg: {
-                  field: 'tx_bytes_per_period'
-                }
-              }
-            }
+                  field: 'tx_bytes_per_period',
+                },
+              },
+            },
           },
           timeseries: {
             date_histogram: {
@@ -160,30 +162,30 @@ export const createTopNodesQuery = (
               rx: {
                 filter: {
                   exists: {
-                    field: 'host.network.ingress.bytes'
-                  }
+                    field: 'host.network.ingress.bytes',
+                  },
                 },
                 aggs: {
                   bytes: {
                     avg: {
-                      field: 'rx_bytes_per_period'
-                    }
-                  }
-                }
+                      field: 'rx_bytes_per_period',
+                    },
+                  },
+                },
               },
               tx: {
                 filter: {
                   exists: {
-                    field: 'host.network.egress.bytes'
-                  }
+                    field: 'host.network.egress.bytes',
+                  },
                 },
                 aggs: {
                   bytes: {
                     avg: {
-                      field: 'tx_bytes_per_period'
-                    }
-                  }
-                }
+                      field: 'tx_bytes_per_period',
+                    },
+                  },
+                },
               },
             },
           },
