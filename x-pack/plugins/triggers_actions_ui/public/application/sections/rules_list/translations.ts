@@ -497,7 +497,7 @@ export const getPartialSuccessEnablingNotificationText = (
   multipleTitle: string
 ) =>
   i18n.translate(
-    'xpack.triggersActionsUI.components.disableSelectedIdsPartialSuccessNotification.descriptionText',
+    'xpack.triggersActionsUI.components.enableSelectedIdsPartialSuccessNotification.descriptionText',
     {
       defaultMessage:
         'Enabled {numberOfSuccess, number} {numberOfSuccess, plural, one {{singleTitle}} other {{multipleTitle}}}, {numberOfErrors, number} {numberOfErrors, plural, one {{singleTitle}} other {{multipleTitle}}} encountered errors',
