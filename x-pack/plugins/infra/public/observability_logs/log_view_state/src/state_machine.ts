@@ -182,13 +182,15 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
     }
   );
 
+export interface LogViewStateMachineDependencies {
+  initialContext: LogViewContextWithId;
+  logViews: ILogViewsClient;
+}
+
 export const createLogViewStateMachine = ({
   initialContext,
   logViews,
-}: {
-  initialContext: LogViewContextWithId;
-  logViews: ILogViewsClient;
-}) =>
+}: LogViewStateMachineDependencies) =>
   createPureLogViewStateMachine(initialContext).withConfig({
     services: {
       loadLogView: (context) =>
