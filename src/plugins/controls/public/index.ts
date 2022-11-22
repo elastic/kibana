@@ -51,7 +51,11 @@ export {
 } from './range_slider';
 
 export { LazyControlsCallout, type CalloutProps } from './controls_callout';
-export { LazyControlGroupRenderer, type ControlGroupRendererProps } from './control_group';
+export {
+  LazyControlGroupRenderer,
+  useControlGroupContainerContext,
+  type ControlGroupRendererProps,
+} from './control_group';
 
 export function plugin() {
   return new ControlsPlugin();

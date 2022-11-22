@@ -6,16 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   LazyControlGroupRenderer,
   ControlGroupContainer,
   ControlGroupInput,
+  useControlGroupContainerContext,
+  ControlStyle,
 } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { EuiPanel } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 
 interface Props {
@@ -25,9 +34,64 @@ const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 export const ControlGroupExample = ({ dataView }: Props) => {
   const [myControlGroup, setControlGroup] = useState<ControlGroupContainer>();
+  const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>('oneLine');
+
+  const ControlGroupReduxWrapper = useMemo(() => {
+    if (myControlGroup) return myControlGroup.getReduxEmbeddableTools().Wrapper;
+  }, [myControlGroup]);
+
+  const ButtonControls = () => {
+    const {
+      useEmbeddableDispatch,
+      actions: { setControlStyle },
+    } = useControlGroupContainerContext();
+    const dispatch = useEmbeddableDispatch();
+
+    return (
+      <>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <p>Choose a style for your control group:</p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButtonGroup
+              legend="Text style"
+              options={[
+                {
+                  id: `oneLine`,
+                  label: 'One line',
+                  value: 'oneLine' as ControlStyle,
+                },
+                {
+                  id: `twoLine`,
+                  label: 'Two Lines',
+                  value: 'twoLine' as ControlStyle,
+                },
+              ]}
+              idSelected={currentControlStyle}
+              onChange={(id, value) => {
+                setCurrentControlStyle(value);
+                dispatch(setControlStyle(value));
+              }}
+              type="single"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+      </>
+    );
+  };
 
   return (
     <EuiPanel hasBorder={true}>
+      {ControlGroupReduxWrapper && (
+        <ControlGroupReduxWrapper>
+          <ButtonControls />
+        </ControlGroupReduxWrapper>
+      )}
+
       <ControlGroupRenderer
         onEmbeddableLoad={async (controlGroup) => {
           setControlGroup(controlGroup);

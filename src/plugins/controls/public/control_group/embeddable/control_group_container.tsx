@@ -87,6 +87,10 @@ export class ControlGroupContainer extends Container<
     return this.lastUsedDataViewId ?? this.relevantDataViewId;
   };
 
+  public getReduxEmbeddableTools = () => {
+    return this.reduxEmbeddableTools;
+  };
+
   public closeAllFlyouts() {
     flyoutRef?.close();
     flyoutRef = undefined;

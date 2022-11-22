@@ -23,10 +23,10 @@ interface Props {
 const ControlsExamples = ({ dataView }: Props) => {
   return (
     <KibanaPageTemplate>
-      <KibanaPageTemplate.Header pageTitle="Controls Building Block" />
+      <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
       <KibanaPageTemplate.Section>
         <EuiText>
-          <p>The following showcases how to use the control group as a building block.</p>
+          <p>The following examples showcase how to use the control group as a building block.</p>
         </EuiText>
         <EuiSpacer size="m" />
         <ControlGroupExample dataView={dataView} />

@@ -11,13 +11,20 @@ import useLifecycles from 'react-use/lib/useLifecycles';
 import React, { useMemo, useRef, useState } from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 
 import { pluginServices } from '../services';
 import { ControlPanelState, getDefaultControlGroupInput } from '../../common';
-import { ControlGroupInput, ControlGroupOutput, CONTROL_GROUP_TYPE } from './types';
+import {
+  ControlGroupInput,
+  ControlGroupOutput,
+  ControlGroupReduxState,
+  CONTROL_GROUP_TYPE,
+} from './types';
 import { ControlGroupContainer } from './embeddable/control_group_container';
 import { DataControlInput } from '../types';
 import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
+import { controlGroupReducers } from './state/control_group_reducers';
 
 const ControlGroupInputBuilder = {
   addDataControlFromField: async (
@@ -48,7 +55,6 @@ const ControlGroupInputBuilder = {
         explicitInput: { id: newPanelId, dataViewId, fieldName, title: title ?? fieldName },
       } as ControlPanelState<DataControlInput>,
     };
-    console.log(initialInput);
   },
 };
 
@@ -99,6 +105,9 @@ export const ControlGroupRenderer = ({
 
   return <div ref={controlsRoot} />;
 };
+
+export const useControlGroupContainerContext = () =>
+  useReduxContainerContext<ControlGroupReduxState, typeof controlGroupReducers>();
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
