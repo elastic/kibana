@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  AuditAction,
+  AddAuditEventParams as SavedObjectEventParams,
+} from '@kbn/core-saved-objects-server';
 import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from '@kbn/core/server';
 
 import type { AuthenticationProvider } from '../../common/model';
@@ -224,23 +228,9 @@ export function accessAgreementAcknowledgedEvent({
   };
 }
 
-export enum SavedObjectAction {
-  CREATE = 'saved_object_create',
-  GET = 'saved_object_get',
-  RESOLVE = 'saved_object_resolve',
-  UPDATE = 'saved_object_update',
-  DELETE = 'saved_object_delete',
-  FIND = 'saved_object_find',
-  REMOVE_REFERENCES = 'saved_object_remove_references',
-  OPEN_POINT_IN_TIME = 'saved_object_open_point_in_time',
-  CLOSE_POINT_IN_TIME = 'saved_object_close_point_in_time',
-  COLLECT_MULTINAMESPACE_REFERENCES = 'saved_object_collect_multinamespace_references', // this is separate from 'saved_object_get' because the user is only accessing an object's metadata
-  UPDATE_OBJECTS_SPACES = 'saved_object_update_objects_spaces', // this is separate from 'saved_object_update' because the user is only updating an object's metadata
-}
-
 type VerbsTuple = [string, string, string];
 
-const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
+const savedObjectAuditVerbs: Record<AuditAction, VerbsTuple> = {
   saved_object_create: ['create', 'creating', 'created'],
   saved_object_get: ['access', 'accessing', 'accessed'],
   saved_object_resolve: ['resolve', 'resolving', 'resolved'],
@@ -274,7 +264,7 @@ const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
   ],
 };
 
-const savedObjectAuditTypes: Record<SavedObjectAction, EcsEventType> = {
+const savedObjectAuditTypes: Record<AuditAction, EcsEventType> = {
   saved_object_create: 'creation',
   saved_object_get: 'access',
   saved_object_resolve: 'access',
@@ -287,15 +277,6 @@ const savedObjectAuditTypes: Record<SavedObjectAction, EcsEventType> = {
   saved_object_collect_multinamespace_references: 'access',
   saved_object_update_objects_spaces: 'change',
 };
-
-export interface SavedObjectEventParams {
-  action: SavedObjectAction;
-  outcome?: EcsEventOutcome;
-  savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
-  addToSpaces?: readonly string[];
-  deleteFromSpaces?: readonly string[];
-  error?: Error;
-}
 
 export function savedObjectEvent({
   action,
