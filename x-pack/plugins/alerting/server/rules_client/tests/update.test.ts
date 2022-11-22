@@ -87,8 +87,6 @@ describe('update()', () => {
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
       params: {},
-      throttle: null,
-      notifyWhen: null,
       actions: [
         {
           group: 'default',
@@ -1329,8 +1327,6 @@ describe('update()', () => {
         params: {
           bar: true,
         },
-        throttle: null,
-        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1536,8 +1532,6 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1661,8 +1655,6 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1698,8 +1690,6 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1807,7 +1797,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Actions missing frequency parameters: default"`
+        `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1915,8 +1905,6 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
