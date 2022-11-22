@@ -22,6 +22,7 @@ import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from './test_subjects';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
+import type { IndexDetails } from '../../common/types';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -124,7 +125,7 @@ const IndexTimeout = () => (
   />
 );
 
-const Unprivileged = () => (
+const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }) => (
   <EuiEmptyPrompt
     data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED}
     color="plain"
@@ -150,13 +151,12 @@ const Unprivileged = () => (
         css={css`
           text-align: initial;
         `}
-        children={i18n.translate(
-          'xpack.csp.noFindingsStates.unprivileged.unprivilegedFooterMarkdown',
-          {
+        children={
+          i18n.translate('xpack.csp.noFindingsStates.unprivileged.unprivilegedFooterMarkdown', {
             defaultMessage:
-              'Required Elasticsearch index privilege `read` for the following indices:\n- `logs-cloud_security_posture.findings_latest-*`\n- `logs-cloud_security_posture.scores-*`',
-          }
-        )}
+              'Required Elasticsearch index privilege `read` for the following indices:',
+          }) + unprivilegedIndices.map((idx) => `\n- \`${idx}\``)
+        }
       />
     }
   />
@@ -171,12 +171,20 @@ export const NoFindingsStates = () => {
     options: { refetchInterval: REFETCH_INTERVAL_MS },
   });
   const status = getSetupStatus.data?.status;
+  const indicesStatus = getSetupStatus.data?.indicesDetails;
+  const unprivilegedIndices =
+    indicesStatus &&
+    indicesStatus
+      .filter((idxDetails: IndexDetails) => idxDetails.status === 'unprivileged')
+      .map((idxDetails: IndexDetails) => idxDetails.index)
+      .sort((a, b) => a.localeCompare(b));
 
   const render = () => {
     if (status === 'not-deployed') return <NotDeployed />; // integration installed, but no agents added
     if (status === 'indexing') return <Indexing />; // agent added, index timeout hasn't passed since installation
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
-    if (status === 'unprivileged') return <Unprivileged />; // user has no privileges for our indices
+    if (status === 'unprivileged')
+      return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />; // user has no privileges for our indices
   };
 
   return (

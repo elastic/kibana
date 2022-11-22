@@ -6,18 +6,16 @@
  */
 
 import { ElasticsearchClient, type Logger } from '@kbn/core/server';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS, FINDINGS_INDEX_PATTERN } from '../../common/constants';
+import { IndexStatus } from '../../common/types';
 
-export type FindingsStatus = 'exists' | 'empty' | 'unprivileged';
-
-export const checkForFindingsStatus = async (
+export const checkIndexStatus = async (
   esClient: ElasticsearchClient,
-  latestIndex: boolean,
+  index: string,
   logger: Logger
-): Promise<FindingsStatus> => {
+): Promise<IndexStatus> => {
   try {
     const queryResult = await esClient.search({
-      index: latestIndex ? LATEST_FINDINGS_INDEX_DEFAULT_NS : FINDINGS_INDEX_PATTERN,
+      index,
       query: {
         match_all: {},
       },

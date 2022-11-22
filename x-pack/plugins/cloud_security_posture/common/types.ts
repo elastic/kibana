@@ -59,7 +59,14 @@ export type CspStatusCode =
   | 'not-deployed' // no healthy agents were deployed
   | 'not-installed'; // number of installed csp integrations is 0;
 
+export type IndexStatus = 'exists' | 'empty' | 'unprivileged';
+export interface IndexDetails {
+  index: string;
+  status: IndexStatus;
+}
+
 interface BaseCspSetupStatus {
+  indicesDetails: IndexDetails[];
   latestPackageVersion: string;
   installedPackagePolicies: number;
   healthyAgents: number;
