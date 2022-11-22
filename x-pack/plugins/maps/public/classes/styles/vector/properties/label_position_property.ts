@@ -8,11 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty } from './style_property';
-import {
-  HALF_MAKI_ICON_SIZE,
-  LABEL_POSITIONS,
-  MAKI_ICON_SIZE,
-} from '../../../../../common/constants';
+import { LABEL_POSITIONS } from '../../../../../common/constants';
 import { LabelPositionStylePropertyDescriptor } from '../../../../../common/descriptor_types';
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
 import { DEFAULT_ICON_SIZE, DEFAULT_LABEL_SIZE } from '../vector_style_defaults';
