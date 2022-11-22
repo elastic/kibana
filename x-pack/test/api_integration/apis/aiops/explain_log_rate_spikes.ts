@@ -15,238 +15,243 @@ import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { parseStream } from './parse_stream';
-import { testData } from './test_data';
+import { explainLogRateSpikesTestData } from './test_data';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
+  const esArchiver = getService('esArchiver');
 
   describe('POST /internal/aiops/explain_log_rate_spikes', () => {
-    const esArchiver = getService('esArchiver');
-
-    before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
-    });
-
-    async function requestWithoutStreaming(body: ApiExplainLogRateSpikes['body']) {
-      const resp = await supertest
-        .post(`/internal/aiops/explain_log_rate_spikes`)
-        .set('kbn-xsrf', 'kibana')
-        .send(body)
-        .expect(200);
-
-      // compression is on by default so if the request body is undefined
-      // the response header should include "gzip" and otherwise be "undefined"
-      if (body.compressResponse === undefined) {
-        expect(resp.header['content-encoding']).to.be('gzip');
-      } else if (body.compressResponse === false) {
-        expect(resp.header['content-encoding']).to.be(undefined);
-      }
-
-      expect(Buffer.isBuffer(resp.body)).to.be(true);
-
-      const chunks: string[] = resp.body.toString().split('\n');
-
-      expect(chunks.length).to.be(testData.expected.chunksLength);
-
-      const lastChunk = chunks.pop();
-      expect(lastChunk).to.be('');
-
-      let data: any[] = [];
-
-      expect(() => {
-        data = chunks.map((c) => JSON.parse(c));
-      }).not.to.throwError();
-
-      expect(data.length).to.be(testData.expected.actionsLength);
-      data.forEach((d) => {
-        expect(typeof d.type).to.be('string');
-      });
-
-      const addChangePointsActions = data.filter(
-        (d) => d.type === testData.expected.changePointFilter
-      );
-      expect(addChangePointsActions.length).to.greaterThan(0);
-
-      const changePoints = addChangePointsActions
-        .flatMap((d) => d.payload)
-        .sort(function (a, b) {
-          if (a.fieldName === b.fieldName) {
-            return b.fieldValue - a.fieldValue;
-          }
-          return a.fieldName > b.fieldName ? 1 : -1;
+    explainLogRateSpikesTestData.forEach((testData) => {
+      describe(`with ${testData.testName}`, () => {
+        before(async () => {
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
         });
 
-      expect(changePoints.length).to.equal(testData.expected.changePoints.length);
-      changePoints.forEach((cp, index) => {
-        const ecp = testData.expected.changePoints[index];
-        expect(cp.fieldName).to.equal(ecp.fieldName);
-        expect(cp.fieldValue).to.equal(ecp.fieldValue);
-        expect(cp.doc_count).to.equal(ecp.doc_count);
-        expect(cp.bg_count).to.equal(ecp.bg_count);
-      });
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
+        });
 
-      const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
-      const histograms = histogramActions.flatMap((d) => d.payload);
-      // for each change point we should get a histogram
-      expect(histogramActions.length).to.be(changePoints.length);
-      // each histogram should have a length of 20 items.
-      histograms.forEach((h, index) => {
-        expect(h.histogram.length).to.be(20);
-      });
-    }
+        async function requestWithoutStreaming(body: ApiExplainLogRateSpikes['body']) {
+          const resp = await supertest
+            .post(`/internal/aiops/explain_log_rate_spikes`)
+            .set('kbn-xsrf', 'kibana')
+            .send(body)
+            .expect(200);
 
-    it('should return full data without streaming with compression with flushFix', async () => {
-      await requestWithoutStreaming(testData.requestBody);
-    });
+          // compression is on by default so if the request body is undefined
+          // the response header should include "gzip" and otherwise be "undefined"
+          if (body.compressResponse === undefined) {
+            expect(resp.header['content-encoding']).to.be('gzip');
+          } else if (body.compressResponse === false) {
+            expect(resp.header['content-encoding']).to.be(undefined);
+          }
 
-    it('should return full data without streaming with compression without flushFix', async () => {
-      await requestWithoutStreaming({ ...testData.requestBody, flushFix: false });
-    });
+          expect(Buffer.isBuffer(resp.body)).to.be(true);
 
-    it('should return full data without streaming without compression with flushFix', async () => {
-      await requestWithoutStreaming({ ...testData.requestBody, compressResponse: false });
-    });
+          const chunks: string[] = resp.body.toString().split('\n');
 
-    it('should return full data without streaming without compression without flushFix', async () => {
-      await requestWithoutStreaming({
-        ...testData.requestBody,
-        compressResponse: false,
-        flushFix: false,
-      });
-    });
+          expect(chunks.length).to.be(testData.expected.chunksLength);
 
-    async function requestWithStreaming(body: ApiExplainLogRateSpikes['body']) {
-      const resp = await fetch(`${kibanaServerUrl}/internal/aiops/explain_log_rate_spikes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'kbn-xsrf': 'stream',
-        },
-        body: JSON.stringify(body),
-      });
+          const lastChunk = chunks.pop();
+          expect(lastChunk).to.be('');
 
-      // compression is on by default so if the request body is undefined
-      // the response header should include "gzip" and otherwise be "null"
-      if (body.compressResponse === undefined) {
-        expect(resp.headers.get('content-encoding')).to.be('gzip');
-      } else if (body.compressResponse === false) {
-        expect(resp.headers.get('content-encoding')).to.be(null);
-      }
+          let data: any[] = [];
 
-      expect(resp.ok).to.be(true);
-      expect(resp.status).to.be(200);
+          expect(() => {
+            data = chunks.map((c) => JSON.parse(c));
+          }).not.to.throwError();
 
-      const stream = resp.body;
-
-      expect(stream).not.to.be(null);
-
-      if (stream !== null) {
-        const data: any[] = [];
-        let chunkCounter = 0;
-        const parseStreamCallback = (c: number) => (chunkCounter = c);
-
-        for await (const action of parseStream(stream, parseStreamCallback)) {
-          expect(action.type).not.to.be('error');
-          data.push(action);
-        }
-
-        // If streaming works correctly we should receive more than one chunk.
-        expect(chunkCounter).to.be.greaterThan(1);
-
-        expect(data.length).to.be(testData.expected.actionsLength);
-
-        const addChangePointsActions = data.filter(
-          (d) => d.type === testData.expected.changePointFilter
-        );
-        expect(addChangePointsActions.length).to.greaterThan(0);
-
-        const changePoints = addChangePointsActions
-          .flatMap((d) => d.payload)
-          .sort(function (a, b) {
-            if (a.fieldName === b.fieldName) {
-              return b.fieldValue - a.fieldValue;
-            }
-            return a.fieldName > b.fieldName ? 1 : -1;
+          expect(data.length).to.be(testData.expected.actionsLength);
+          data.forEach((d) => {
+            expect(typeof d.type).to.be('string');
           });
 
-        expect(changePoints.length).to.equal(testData.expected.changePoints.length);
-        changePoints.forEach((cp, index) => {
-          const ecp = testData.expected.changePoints[index];
-          expect(cp.fieldName).to.equal(ecp.fieldName);
-          expect(cp.fieldValue).to.equal(ecp.fieldValue);
-          expect(cp.doc_count).to.equal(ecp.doc_count);
-          expect(cp.bg_count).to.equal(ecp.bg_count);
+          const addChangePointsActions = data.filter(
+            (d) => d.type === testData.expected.changePointFilter
+          );
+          expect(addChangePointsActions.length).to.greaterThan(0);
+
+          const changePoints = addChangePointsActions
+            .flatMap((d) => d.payload)
+            .sort(function (a, b) {
+              if (a.fieldName === b.fieldName) {
+                return b.fieldValue - a.fieldValue;
+              }
+              return a.fieldName > b.fieldName ? 1 : -1;
+            });
+
+          expect(changePoints.length).to.equal(testData.expected.changePoints.length);
+          changePoints.forEach((cp, index) => {
+            const ecp = testData.expected.changePoints[index];
+            expect(cp.fieldName).to.equal(ecp.fieldName);
+            expect(cp.fieldValue).to.equal(ecp.fieldValue);
+            expect(cp.doc_count).to.equal(ecp.doc_count);
+            expect(cp.bg_count).to.equal(ecp.bg_count);
+          });
+
+          const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
+          const histograms = histogramActions.flatMap((d) => d.payload);
+          // for each change point we should get a histogram
+          expect(histogramActions.length).to.be(changePoints.length);
+          // each histogram should have a length of 20 items.
+          histograms.forEach((h, index) => {
+            expect(h.histogram.length).to.be(20);
+          });
+        }
+
+        it('should return full data without streaming with compression with flushFix', async () => {
+          await requestWithoutStreaming(testData.requestBody);
         });
 
-        const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
-        const histograms = histogramActions.flatMap((d) => d.payload);
-        // for each change point we should get a histogram
-        expect(histogramActions.length).to.be(changePoints.length);
-        // each histogram should have a length of 20 items.
-        histograms.forEach((h, index) => {
-          expect(h.histogram.length).to.be(20);
+        it('should return full data without streaming with compression without flushFix', async () => {
+          await requestWithoutStreaming({ ...testData.requestBody, flushFix: false });
         });
-      }
-    }
 
-    it('should return data in chunks with streaming with compression with flushFix', async () => {
-      await requestWithStreaming(testData.requestBody);
-    });
+        it('should return full data without streaming without compression with flushFix', async () => {
+          await requestWithoutStreaming({ ...testData.requestBody, compressResponse: false });
+        });
 
-    it('should return data in chunks with streaming with compression without flushFix', async () => {
-      await requestWithStreaming({ ...testData.requestBody, flushFix: false });
-    });
+        it('should return full data without streaming without compression without flushFix', async () => {
+          await requestWithoutStreaming({
+            ...testData.requestBody,
+            compressResponse: false,
+            flushFix: false,
+          });
+        });
 
-    it('should return data in chunks with streaming without compression with flushFix', async () => {
-      await requestWithStreaming({ ...testData.requestBody, compressResponse: false });
-    });
+        async function requestWithStreaming(body: ApiExplainLogRateSpikes['body']) {
+          const resp = await fetch(`${kibanaServerUrl}/internal/aiops/explain_log_rate_spikes`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'kbn-xsrf': 'stream',
+            },
+            body: JSON.stringify(body),
+          });
 
-    it('should return data in chunks with streaming without compression without flushFix', async () => {
-      await requestWithStreaming({
-        ...testData.requestBody,
-        compressResponse: false,
-        flushFix: false,
+          // compression is on by default so if the request body is undefined
+          // the response header should include "gzip" and otherwise be "null"
+          if (body.compressResponse === undefined) {
+            expect(resp.headers.get('content-encoding')).to.be('gzip');
+          } else if (body.compressResponse === false) {
+            expect(resp.headers.get('content-encoding')).to.be(null);
+          }
+
+          expect(resp.ok).to.be(true);
+          expect(resp.status).to.be(200);
+
+          const stream = resp.body;
+
+          expect(stream).not.to.be(null);
+
+          if (stream !== null) {
+            const data: any[] = [];
+            let chunkCounter = 0;
+            const parseStreamCallback = (c: number) => (chunkCounter = c);
+
+            for await (const action of parseStream(stream, parseStreamCallback)) {
+              expect(action.type).not.to.be('error');
+              data.push(action);
+            }
+
+            // If streaming works correctly we should receive more than one chunk.
+            expect(chunkCounter).to.be.greaterThan(1);
+
+            expect(data.length).to.be(testData.expected.actionsLength);
+
+            const addChangePointsActions = data.filter(
+              (d) => d.type === testData.expected.changePointFilter
+            );
+            expect(addChangePointsActions.length).to.greaterThan(0);
+
+            const changePoints = addChangePointsActions
+              .flatMap((d) => d.payload)
+              .sort(function (a, b) {
+                if (a.fieldName === b.fieldName) {
+                  return b.fieldValue - a.fieldValue;
+                }
+                return a.fieldName > b.fieldName ? 1 : -1;
+              });
+
+            expect(changePoints.length).to.equal(testData.expected.changePoints.length);
+            changePoints.forEach((cp, index) => {
+              const ecp = testData.expected.changePoints[index];
+              expect(cp.fieldName).to.equal(ecp.fieldName);
+              expect(cp.fieldValue).to.equal(ecp.fieldValue);
+              expect(cp.doc_count).to.equal(ecp.doc_count);
+              expect(cp.bg_count).to.equal(ecp.bg_count);
+            });
+
+            const histogramActions = data.filter(
+              (d) => d.type === testData.expected.histogramFilter
+            );
+            const histograms = histogramActions.flatMap((d) => d.payload);
+            // for each change point we should get a histogram
+            expect(histogramActions.length).to.be(changePoints.length);
+            // each histogram should have a length of 20 items.
+            histograms.forEach((h, index) => {
+              expect(h.histogram.length).to.be(20);
+            });
+          }
+        }
+
+        it('should return data in chunks with streaming with compression with flushFix', async () => {
+          await requestWithStreaming(testData.requestBody);
+        });
+
+        it('should return data in chunks with streaming with compression without flushFix', async () => {
+          await requestWithStreaming({ ...testData.requestBody, flushFix: false });
+        });
+
+        it('should return data in chunks with streaming without compression with flushFix', async () => {
+          await requestWithStreaming({ ...testData.requestBody, compressResponse: false });
+        });
+
+        it('should return data in chunks with streaming without compression without flushFix', async () => {
+          await requestWithStreaming({
+            ...testData.requestBody,
+            compressResponse: false,
+            flushFix: false,
+          });
+        });
+
+        it('should return an error for non existing index without streaming', async () => {
+          const resp = await supertest
+            .post(`/internal/aiops/explain_log_rate_spikes`)
+            .set('kbn-xsrf', 'kibana')
+            .send({
+              ...testData.requestBody,
+              index: 'does_not_exist',
+            })
+            .expect(200);
+
+          const chunks: string[] = resp.body.toString().split('\n');
+
+          expect(chunks.length).to.be(testData.expected.noIndexChunksLength);
+
+          const lastChunk = chunks.pop();
+          expect(lastChunk).to.be('');
+
+          let data: any[] = [];
+
+          expect(() => {
+            data = chunks.map((c) => JSON.parse(c));
+          }).not.to.throwError();
+
+          expect(data.length).to.be(testData.expected.noIndexActionsLength);
+          data.forEach((d) => {
+            expect(typeof d.type).to.be('string');
+          });
+
+          const errorActions = data.filter((d) => d.type === testData.expected.errorFilter);
+          expect(errorActions.length).to.be(1);
+
+          expect(errorActions[0].payload).to.be('Failed to fetch index information.');
+        });
       });
-    });
-
-    it('should return an error for non existing index without streaming', async () => {
-      const resp = await supertest
-        .post(`/internal/aiops/explain_log_rate_spikes`)
-        .set('kbn-xsrf', 'kibana')
-        .send({
-          ...testData.requestBody,
-          index: 'does_not_exist',
-        })
-        .expect(200);
-
-      const chunks: string[] = resp.body.toString().split('\n');
-
-      expect(chunks.length).to.be(testData.expected.noIndexChunksLength);
-
-      const lastChunk = chunks.pop();
-      expect(lastChunk).to.be('');
-
-      let data: any[] = [];
-
-      expect(() => {
-        data = chunks.map((c) => JSON.parse(c));
-      }).not.to.throwError();
-
-      expect(data.length).to.be(testData.expected.noIndexActionsLength);
-      data.forEach((d) => {
-        expect(typeof d.type).to.be('string');
-      });
-
-      const errorActions = data.filter((d) => d.type === testData.expected.errorFilter);
-      expect(errorActions.length).to.be(1);
-
-      expect(errorActions[0].payload).to.be('Failed to fetch index information.');
     });
   });
 };

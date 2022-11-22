@@ -19,36 +19,40 @@ const requestBody: ApiExplainLogRateSpikes['body'] = {
   timeFieldName: 'order_date',
 };
 
-export const testData = {
-  requestBody,
-  expected: {
-    chunksLength: 34,
-    actionsLength: 33,
-    noIndexChunksLength: 4,
-    noIndexActionsLength: 3,
-    changePointFilter: 'add_change_points',
-    histogramFilter: 'add_change_points_histogram',
-    errorFilter: 'add_error',
-    changePoints: [
-      {
-        fieldName: 'day_of_week',
-        fieldValue: 'Wednesday',
-        doc_count: 145,
-        bg_count: 142,
-        score: 36.31595998561873,
-        pValue: 1.6911377077437753e-16,
-        normalizedScore: 0.8055203624020835,
-      },
-      {
-        fieldName: 'day_of_week',
-        fieldValue: 'Thursday',
-        doc_count: 157,
-        bg_count: 224,
-        score: 20.366950718358762,
-        pValue: 1.428057484826135e-9,
-        normalizedScore: 0.7661649691018979,
-      },
-    ],
-    histogramLength: 20,
+export const explainLogRateSpikesTestData = [
+  {
+    testName: 'ecommerce',
+    esArchive: 'x-pack/test/functional/es_archives/ml/ecommerce',
+    requestBody,
+    expected: {
+      chunksLength: 34,
+      actionsLength: 33,
+      noIndexChunksLength: 4,
+      noIndexActionsLength: 3,
+      changePointFilter: 'add_change_points',
+      histogramFilter: 'add_change_points_histogram',
+      errorFilter: 'add_error',
+      changePoints: [
+        {
+          fieldName: 'day_of_week',
+          fieldValue: 'Wednesday',
+          doc_count: 145,
+          bg_count: 142,
+          score: 36.31595998561873,
+          pValue: 1.6911377077437753e-16,
+          normalizedScore: 0.8055203624020835,
+        },
+        {
+          fieldName: 'day_of_week',
+          fieldValue: 'Thursday',
+          doc_count: 157,
+          bg_count: 224,
+          score: 20.366950718358762,
+          pValue: 1.428057484826135e-9,
+          normalizedScore: 0.7661649691018979,
+        },
+      ],
+      histogramLength: 20,
+    },
   },
-};
+];
