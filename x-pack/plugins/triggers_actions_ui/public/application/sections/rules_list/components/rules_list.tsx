@@ -103,7 +103,7 @@ import {
   SINGLE_RULE_TITLE,
   MULTIPLE_RULE_TITLE,
 } from '../translations';
-import { useBulkOperationToast } from '../../../hooks/use_bulk_delete_response';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 
 const ENTER_KEY = 13;
 
