@@ -12,6 +12,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { createUICapabilities } from '@kbn/cases-plugin/common';
 
+import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import { APP_ID, CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { savedObjectTypes } from './saved_objects';
 import type { ConfigType } from './config';
@@ -307,7 +308,7 @@ const subFeatures: SubFeatureConfig[] = [
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: ['exception-list-agnostic'],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeTrustedApplications', 'readTrustedApplications'],
@@ -357,7 +358,7 @@ const subFeatures: SubFeatureConfig[] = [
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: ['exception-list-agnostic'],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
@@ -404,7 +405,7 @@ const subFeatures: SubFeatureConfig[] = [
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: ['exception-list-agnostic'],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeBlocklist', 'readBlocklist'],
@@ -451,7 +452,7 @@ const subFeatures: SubFeatureConfig[] = [
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: ['exception-list-agnostic'],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeEventFilters', 'readEventFilters'],
@@ -566,7 +567,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         all: [
           'alert',
           'exception-list',
-          'exception-list-agnostic',
+          EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
           CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
@@ -594,7 +595,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         all: [],
         read: [
           'exception-list',
-          'exception-list-agnostic',
+          EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
           CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
