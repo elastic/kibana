@@ -17,8 +17,11 @@ import { useTourContext } from '../guided_onboarding_tour';
 import { GuidedOnboardingTourStep, SecurityTourStep } from '../guided_onboarding_tour/tour_step';
 import { SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import { Actions } from './actions';
+import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 jest.mock('../guided_onboarding_tour');
+jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
@@ -266,6 +269,12 @@ describe('Actions', () => {
   });
 
   describe('Alert context menu enabled?', () => {
+    beforeEach(() => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: { loading: false, canWriteEventFilters: true },
+      });
+    });
     test('it disables for eventType=raw', () => {
       const wrapper = mount(
         <TestProviders>
