@@ -31,19 +31,21 @@ export const COMPARE_ALL_OPTIONS: FilterCompareOptions = {
   alias: true,
 };
 
+// Combined filters include sub-filters in the `meta` property and the relation type in the `relation` property, so
+// they should never be excluded in the comparison
+const removeRequiredAttributes = (excludedAttributes: string[]) =>
+  excludedAttributes.filter((attribute) => !['meta', 'relation'].includes(attribute));
+
 const mapFilter = (
   filter: Filter,
   comparators: FilterCompareOptions,
   excludedAttributes: string[]
 ) => {
-  // Combined filters include sub-filters in the `meta` property and the relation type in the `relation` property, so
-  // they should never be excluded in the comparison
-  if (isCombinedFilter(filter)) {
-    excludedAttributes = excludedAttributes.filter(
-      (attribute) => !['meta', 'relation'].includes(attribute)
-    );
-  }
-  const cleaned: FilterMeta = omit(filter, excludedAttributes) as FilterMeta;
+  const attrsToExclude = isCombinedFilter(filter)
+    ? removeRequiredAttributes(excludedAttributes)
+    : excludedAttributes;
+
+  const cleaned: FilterMeta = omit(filter, attrsToExclude) as FilterMeta;
 
   if (comparators.index) cleaned.index = filter.meta?.index;
   if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
