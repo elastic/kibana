@@ -29,7 +29,7 @@ export const schema: FormSchema<AboutStepRule> = {
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAuthorHelpText',
       {
         defaultMessage:
-          'Type one or more authors for this rule. Press enter after each author to add a new one.',
+          'Separate tags with a line break.',
       }
     ),
     labelAppend: OptionalFieldLabel,
@@ -259,7 +259,7 @@ export const schema: FormSchema<AboutStepRule> = {
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTagsHelpText',
       {
         defaultMessage:
-          'Type one or more custom identifying tags for this rule. Press enter after each tag to begin a new one.',
+          'Separate tags with a line break.',
       }
     ),
     labelAppend: OptionalFieldLabel,
