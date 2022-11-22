@@ -57,6 +57,9 @@ export function useSyncRulesTableSavedState(): void {
     }
 
     if (Object.keys(savedState).length === 0) {
+      updateUrlParam(null);
+      sessionStorage.remove(RULES_TABLE_STATE_STORAGE_KEY);
+
       return;
     }
 

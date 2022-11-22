@@ -61,24 +61,27 @@ describe('useSyncRulesTableSavedState', () => {
 
   let updateUrlParam: jest.Mock;
   let setStorage: jest.Mock;
+  let removeStorage: jest.Mock;
 
   beforeEach(() => {
     updateUrlParam = jest.fn();
     setStorage = jest.fn();
+    removeStorage = jest.fn();
 
     (useUpdateUrlParam as jest.Mock).mockReturnValue(updateUrlParam);
     (useKibana as jest.Mock).mockReturnValue({
-      services: { sessionStorage: { set: setStorage } },
+      services: { sessionStorage: { set: setStorage, remove: removeStorage } },
     });
   });
 
-  it('does not sync the default state', () => {
+  it('clears the default state when there is nothing to sync', () => {
     (useRulesTableContext as jest.Mock).mockReturnValue({ state: defaultState });
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(updateUrlParam).not.toHaveBeenCalled();
+    expect(updateUrlParam).toHaveBeenCalledWith(null);
     expect(setStorage).not.toHaveBeenCalled();
+    expect(removeStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY);
   });
 
   it('syncs both the url and the storage', () => {
