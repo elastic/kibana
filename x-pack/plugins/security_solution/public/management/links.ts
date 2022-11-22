@@ -276,6 +276,7 @@ export const getManagementFilteredLinks = async (
   const {
     canReadActionsLogManagement,
     canReadHostIsolationExceptions,
+    canReadEndpointList,
     canReadTrustedApplications,
   } = fleetAuthz
     ? calculateEndpointAuthz(
@@ -287,6 +288,10 @@ export const getManagementFilteredLinks = async (
         hasHostIsolationExceptions
       )
     : getEndpointAuthzInitialState();
+
+  if (!canReadEndpointList) {
+    linksToExclude.push(SecurityPageName.endpoints);
+  }
 
   if (!canReadActionsLogManagement) {
     linksToExclude.push(SecurityPageName.responseActionsHistory);
