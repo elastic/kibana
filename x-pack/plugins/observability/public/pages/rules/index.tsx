@@ -13,11 +13,12 @@ import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RulesListVisibleColumns } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
-import { usePluginContext } from '../../hooks/use_plugin_context';
 import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from './state_container';
 
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { RULES_PAGE_TITLE, RULES_BREADCRUMB_TEXT } from './translations';
 
 const RULES_LIST_COLUMNS_KEY = 'observability_rulesListColumns';
@@ -30,15 +31,12 @@ const RULES_LIST_COLUMNS: RulesListVisibleColumns[] = [
 ];
 
 function RulesPage() {
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { http, docLinks, triggersActionsUi } = useKibana().services;
 
   const documentationLink = docLinks.links.observability.createAlerts;
 
-  const filteredRuleTypes = useMemo(
-    () => observabilityRuleTypeRegistry.list(),
-    [observabilityRuleTypeRegistry]
-  );
+  const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const { status, setStatus, lastResponse, setLastResponse } = useRulesPageStateContainer();
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
