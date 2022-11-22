@@ -159,7 +159,7 @@ describe('syncLabelPositionWithMb', () => {
       labelPosition.syncLabelPositionWithMb('layerId', mockMbMap);
       expect(layoutProperties).toEqual({
         'text-anchor': 'bottom',
-        'text-offset': [0, -2.571428571428571],
+        'text-offset': [0, -1.7142857142857142],
       });
     });
 
@@ -185,7 +185,7 @@ describe('syncLabelPositionWithMb', () => {
       labelPosition.syncLabelPositionWithMb('layerId', mockMbMap);
       expect(layoutProperties).toEqual({
         'text-anchor': 'bottom',
-        'text-offset': [0, -6],
+        'text-offset': [0, -3],
       });
     });
 
@@ -279,7 +279,7 @@ describe('syncLabelPositionWithMb', () => {
       labelPosition.syncLabelPositionWithMb('layerId', mockMbMap);
       expect(layoutProperties).toEqual({
         'text-anchor': 'top',
-        'text-offset': [0, 2.571428571428571],
+        'text-offset': [0, 1.7142857142857142],
       });
     });
 

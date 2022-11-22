@@ -23,9 +23,6 @@ import { StaticSizeProperty } from './static_size_property';
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
 import { FIXED_LABEL, BY_VALUE_LABEL } from '../components/style_prop_editor';
 
-const CENTER_ANCHORED_ICON_SCALE = (MAKI_ICON_SIZE + HALF_MAKI_ICON_SIZE) / MAKI_ICON_SIZE;
-const BOTTOM_ANCHORED_ICON_SCALE = 2 + CENTER_ANCHORED_ICON_SCALE;
-
 export class LabelPositionProperty extends AbstractStyleProperty<
   LabelPositionStylePropertyDescriptor['options']
 > {
@@ -151,10 +148,13 @@ export class LabelPositionProperty extends AbstractStyleProperty<
       : 'center';
 
     if (iconAnchor === 'center') {
-      return CENTER_ANCHORED_ICON_SCALE;
+      return 1;
     }
 
-    return this._options.position === LABEL_POSITIONS.TOP ? BOTTOM_ANCHORED_ICON_SCALE : 0;
+    // using scaling factor of 1.75
+    // scaling factor of 1.5 is too small - labels touch top of icon
+    // scaling factor of 2 is too big - labels are too far above icon
+    return this._options.position === LABEL_POSITIONS.TOP ? 1.75 : 0;
   }
 
   _getLabelSize() {
