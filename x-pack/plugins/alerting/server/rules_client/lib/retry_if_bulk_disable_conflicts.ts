@@ -31,11 +31,11 @@ interface ReturnRetry {
 }
 
 /**
- * Retries BulkEnable requests
- * If in response are presents conflicted savedObjects(409 statusCode), this util constructs filter with failed SO ids and retries bulkEnable operation until
+ * Retries BulkDisable requests
+ * If in response are presents conflicted savedObjects(409 statusCode), this util constructs filter with failed SO ids and retries bulkDisable operation until
  * all SO updated or number of retries exceeded
  * @param logger
- * @param bulkEnableOperation
+ * @param bulkDisableOperation
  * @param filter - KueryNode filter
  * @param retries - number of retries left
  * @param accErrors - accumulated conflict errors
@@ -88,7 +88,7 @@ export const retryIfBulkDisableConflicts = async (
     }
 
     if (retries <= 0) {
-      logger.warn('Bulk enable rules conflicts, exceeded retries');
+      logger.warn('Bulk disable rules conflicts, exceeded retries');
 
       return {
         errors,
@@ -99,7 +99,7 @@ export const retryIfBulkDisableConflicts = async (
     }
 
     logger.debug(
-      `Bulk enable rules conflicts, retrying ..., ${ruleIdsWithConflictError.length} saved objects conflicted`
+      `Bulk disable rules conflicts, retrying ..., ${ruleIdsWithConflictError.length} saved objects conflicted`
     );
 
     await waitBeforeNextRetry(retries);
