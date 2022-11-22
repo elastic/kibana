@@ -50,6 +50,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-std",
   "//packages/kbn-ui-shared-deps-npm",
   "//packages/kbn-ui-theme",
+  "//packages/kbn-peggy-loader",
 ]
 
 TYPES_DEPS = [
