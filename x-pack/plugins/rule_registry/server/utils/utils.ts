@@ -34,15 +34,16 @@ export const errorAggregator = (
   ignoreStatusCodes: number[]
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
-    if (item.create?.error?.reason != null && !ignoreStatusCodes.includes(item.create.status)) {
-      if (accum[item.create.error.reason] == null) {
-        accum[item.create.error.reason] = {
+    if (item.create?.error != null && !ignoreStatusCodes.includes(item.create.status)) {
+      const reason = item.create.error.reason ?? 'unknown';
+      if (accum[reason] == null) {
+        accum[reason] = {
           count: 1,
           statusCode: item.create.status,
         };
       } else {
-        accum[item.create.error.reason] = {
-          count: accum[item.create.error.reason].count + 1,
+        accum[reason] = {
+          count: accum[reason].count + 1,
           statusCode: item.create.status,
         };
       }
