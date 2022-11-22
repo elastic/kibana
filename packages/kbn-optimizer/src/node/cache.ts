@@ -115,7 +115,10 @@ export class Cache {
     this.safePut(this.atimes, key, GLOBAL_ATIME);
     this.safePut(this.mtimes, key, file.mtime);
     this.safePut(this.codes, key, file.code);
-    file.map != null ? this.safePut(this.sourceMaps, key, JSON.stringify(file.map)) : null;
+
+    if (file.map != null) {
+      this.safePut(this.sourceMaps, key, JSON.stringify(file.map));
+    }
   }
 
   private getKey(path: string) {
