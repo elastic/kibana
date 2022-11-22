@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiTitle,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -71,6 +72,8 @@ const FieldEditorFlyoutContentComponent = ({
   const isMounted = useRef(false);
   const isEditingExistingField = !!fieldToEdit;
   const { dataView, subfields$ } = useFieldEditorContext();
+
+  const isMobile = useIsWithinMaxBreakpoint('s');
 
   const {
     panel: { isVisible: isPanelVisible },
@@ -198,7 +201,7 @@ const FieldEditorFlyoutContentComponent = ({
     <>
       <FlyoutPanels.Group
         flyoutClassName={euiFlyoutClassname}
-        maxWidth={1180}
+        maxWidth={isMobile ? false : 1180}
         data-test-subj="fieldEditor"
         fixedPanelWidths
       >

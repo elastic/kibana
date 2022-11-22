@@ -85,6 +85,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
       />
       {props.waitForControlOutputConsumersToLoad$ === undefined ? null : (
         <EuiButtonIcon
+          className="timeSlider-playToggle"
           onClick={isPaused ? onPlay : onPause}
           iconType={isPaused ? 'playFilled' : 'pause'}
           size="s"

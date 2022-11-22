@@ -129,7 +129,7 @@ export const installRiskScoreModule = async (settings: InstallRiskScoreModule) =
   }
 };
 
-export const uninstallLegacyRiskScoreModule = async ({
+export const uninstallRiskScoreModule = async ({
   http,
   notifications,
   refetch,
@@ -148,22 +148,39 @@ export const uninstallLegacyRiskScoreModule = async ({
   deleteAll?: boolean;
 }) => {
   const legacyTransformIds = [
+    // transform Ids never changed since 8.3
     utils.getRiskScorePivotTransformId(riskScoreEntity, spaceId),
     utils.getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
   ];
   const legacyRiskScoreHostsScriptIds = [
+    // 8.4
     utils.getLegacyRiskScoreLevelScriptId(RiskScoreEntity.host),
     utils.getLegacyRiskScoreInitScriptId(RiskScoreEntity.host),
     utils.getLegacyRiskScoreMapScriptId(RiskScoreEntity.host),
     utils.getLegacyRiskScoreReduceScriptId(RiskScoreEntity.host),
+    // 8.3 and after 8.5
+    utils.getRiskScoreLevelScriptId(RiskScoreEntity.host, spaceId),
+    utils.getRiskScoreInitScriptId(RiskScoreEntity.host, spaceId),
+    utils.getRiskScoreMapScriptId(RiskScoreEntity.host, spaceId),
+    utils.getRiskScoreReduceScriptId(RiskScoreEntity.host, spaceId),
   ];
   const legacyRiskScoreUsersScriptIds = [
+    // 8.4
     utils.getLegacyRiskScoreLevelScriptId(RiskScoreEntity.user),
     utils.getLegacyRiskScoreMapScriptId(RiskScoreEntity.user),
     utils.getLegacyRiskScoreReduceScriptId(RiskScoreEntity.user),
+    // 8.3 and after 8.5
+    utils.getRiskScoreLevelScriptId(RiskScoreEntity.user, spaceId),
+    utils.getRiskScoreMapScriptId(RiskScoreEntity.user, spaceId),
+    utils.getRiskScoreReduceScriptId(RiskScoreEntity.user, spaceId),
   ];
 
-  const legacyIngestPipelineNames = [utils.getLegacyIngestPipelineName(riskScoreEntity)];
+  const legacyIngestPipelineNames = [
+    // 8.4
+    utils.getLegacyIngestPipelineName(riskScoreEntity),
+    // 8.3 and 8.5
+    utils.getIngestPipelineName(riskScoreEntity, spaceId),
+  ];
 
   await Promise.all([
     /**
@@ -214,7 +231,7 @@ export const uninstallLegacyRiskScoreModule = async ({
      * Intended not to pass notification to deleteStoredScripts.
      * As the only error it can happen is script not found, and
      * that is what deleteStoredScripts wants.
-     * (Before 8.5 once a script was created, it was shared across different spaces.
+     * (In 8.4 once a script was created, it was shared across different spaces.
      * If it has been upgrade in one space, "script not found" will happen when upgrading other spaces.
      * Or it could be users manually deleted the script.)
      */
@@ -243,7 +260,7 @@ export const upgradeHostRiskScoreModule = async ({
   theme,
   timerange,
 }: UpgradeRiskScoreModule) => {
-  await uninstallLegacyRiskScoreModule({
+  await uninstallRiskScoreModule({
     http,
     notifications,
     renderDocLink,
@@ -276,7 +293,7 @@ export const upgradeUserRiskScoreModule = async ({
   theme,
   timerange,
 }: UpgradeRiskScoreModule) => {
-  await uninstallLegacyRiskScoreModule({
+  await uninstallRiskScoreModule({
     http,
     notifications,
     renderDocLink,

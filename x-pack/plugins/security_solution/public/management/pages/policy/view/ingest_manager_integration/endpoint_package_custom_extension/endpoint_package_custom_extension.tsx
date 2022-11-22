@@ -9,7 +9,6 @@ import React, { memo, useMemo } from 'react';
 import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useHttp } from '../../../../../../common/lib/kibana';
-import { useCanSeeHostIsolationExceptionsMenu } from '../../../../host_isolation_exceptions/view/hooks';
 import { TrustedAppsApiClient } from '../../../../trusted_apps/service/api_client';
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
@@ -33,8 +32,8 @@ import { NoPermissions } from '../../../../../components/no_permissons';
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   (props) => {
     const http = useHttp();
-    const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
-    const { loading, canAccessEndpointManagement } = useEndpointPrivileges();
+    const { loading, canAccessEndpointManagement, canReadHostIsolationExceptions } =
+      useEndpointPrivileges();
 
     const trustedAppsApiClientInstance = useMemo(
       () => TrustedAppsApiClient.getInstance(http),
@@ -74,7 +73,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
             labels={EVENT_FILTERS_LABELS}
             data-test-subj="eventFilters"
           />
-          {canSeeHostIsolationExceptions && (
+          {canReadHostIsolationExceptions && (
             <>
               <EuiSpacer />
               <FleetArtifactsCard
@@ -98,7 +97,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       ),
       [
         blocklistsApiClientInstance,
-        canSeeHostIsolationExceptions,
+        canReadHostIsolationExceptions,
         eventFiltersApiClientInstance,
         hostIsolationExceptionsApiClientInstance,
         trustedAppsApiClientInstance,
