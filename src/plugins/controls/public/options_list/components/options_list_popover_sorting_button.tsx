@@ -33,15 +33,16 @@ import {
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
+import { css } from '@emotion/css';
+
+const SORT_POPOVER_WIDTH = 220;
 
 interface OptionsListSortingPopoverProps {
   showOnlySelected: boolean;
 }
-
 type SortByItem = EuiSelectableOption & {
   data: { sortBy: SortBy };
 };
-
 type SortOrderItem = EuiButtonGroupOptionProps & {
   value: Direction;
 };
@@ -120,6 +121,9 @@ export const OptionsListPopoverSortingButton = ({
       isOpen={isSortingPopoverOpen}
       aria-labelledby="optionsList_sortingOptions"
       closePopover={() => setIsSortingPopoverOpen(false)}
+      panelStyle={{
+        width: `${SORT_POPOVER_WIDTH}px`,
+      }}
     >
       <span data-test-subj="optionsListControl__sortingOptionsPopover">
         <EuiPopoverTitle paddingSize="s">
@@ -139,13 +143,15 @@ export const OptionsListPopoverSortingButton = ({
         </EuiPopoverTitle>
         <EuiSelectable
           options={sortByOptions}
-          style={{ width: 300 }}
           singleSelection="always"
           onChange={onSortByChange}
           id="optionsList_sortingOptions"
           listProps={{ bordered: false }}
           data-test-subj="optionsListControl__sortingOptions"
           aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+          css={css`
+            max-width: ${SORT_POPOVER_WIDTH}px !important;
+          `}
         >
           {(list) => list}
         </EuiSelectable>
