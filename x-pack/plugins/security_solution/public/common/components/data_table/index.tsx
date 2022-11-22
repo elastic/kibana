@@ -81,7 +81,6 @@ interface OwnProps {
   tabType: string;
   totalItems: number;
   hasAlertsCrud?: boolean;
-  showCheckboxes?: boolean;
 }
 
 const ES_LIMIT_COUNT = 9999;

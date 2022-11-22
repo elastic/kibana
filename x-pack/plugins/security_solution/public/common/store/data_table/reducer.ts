@@ -75,6 +75,14 @@ export const dataTableReducer = reducerWithInitialState(initialDataTableState)
       }),
     };
   })
+  .case(initializeDataTableSettings, (state, { id, ...dataTableSettingsProps }) => ({
+    ...state,
+    tableById: setInitializeDataTableSettings({
+      id,
+      tableById: state.tableById,
+      dataTableSettingsProps,
+    }),
+  }))
   .case(toggleDetailPanel, (state, action) => ({
     ...state,
     tableById: {
@@ -217,14 +225,6 @@ export const dataTableReducer = reducerWithInitialState(initialDataTableState)
       id,
       itemsPerPageOptions,
       tableById: state.tableById,
-    }),
-  }))
-  .case(initializeDataTableSettings, (state, { id, ...dataTableSettingsProps }) => ({
-    ...state,
-    tableById: setInitializeDataTableSettings({
-      id,
-      tableById: state.tableById,
-      dataTableSettingsProps,
     }),
   }))
   .case(setDataTableSelectAll, (state, { id, selectAll }) => ({

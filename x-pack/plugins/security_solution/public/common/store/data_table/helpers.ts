@@ -135,7 +135,6 @@ export const setInitializeDataTableSettings = ({
   dataTableSettingsProps,
 }: InitializeDataTableParams): TableById => {
   const dataTable = tableById[id];
-
   return !dataTable?.initialized
     ? {
         ...tableById,
@@ -153,7 +152,15 @@ export const setInitializeDataTableSettings = ({
           initialized: true,
         },
       }
-    : tableById;
+    : {
+        ...tableById,
+        [id]: {
+          ...dataTable,
+          ...tableDefaults,
+          ...dataTableSettingsProps,
+          isLoading: false,
+        },
+      };
 };
 
 interface ApplyDeltaToTableColumnWidth {
@@ -430,7 +437,6 @@ export const setSelectedTableEvents = ({
   const selectedEventIds = isSelected
     ? { ...dataTable.selectedEventIds, ...eventIds }
     : omit(Object.keys(eventIds), dataTable.selectedEventIds);
-
   return {
     ...tableById,
     [id]: {

@@ -383,6 +383,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const onRowSelected: OnRowSelected = useCallback(
     ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
+      console.log(isSelected)
       dataTableActions.setSelected({
         id: tableId,
         eventIds: getEventIdToDataMapping(
@@ -554,7 +555,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                               defaultCellActions={defaultCellActions}
                               filterQuery={filterQuery}
                               hasAlertsCrud={hasAlertsCrud}
-                              showCheckboxes={showCheckboxes}
                               filters={filters}
                               filterStatus={currentFilter}
                               onRuleChange={onRuleChange}
