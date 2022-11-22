@@ -8,10 +8,6 @@
 import { draggableKeyDownHandler } from './helpers';
 
 jest.mock('../../../lib/kibana');
-let spy;
-beforeAll(() => {
-  spy = jest.spyOn(document, 'getElementById');
-});
 describe('draggableKeyDownHandler', () => {
   test('it renders against the snapshot', () => {
     const mockElement = document.createElement('div');

@@ -68,6 +68,7 @@ import type { ViewSelection } from './summary_view_select';
 import { RightTopMenu } from './right_top_menu';
 import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+import { StatefulEventContext } from './stateful_event_context';
 
 const storage = new Storage(localStorage);
 
@@ -485,6 +486,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     unit,
   });
 
+  // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
+  const [activeStatefulEventContext] = useState({
+    timelineID: tableId,
+    tabType: 'query',
+    enableHostDetailsFlyout: true,
+    enableIpDetailsFlyout: true,
+  });
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -522,50 +531,52 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                       gutterSize="none"
                     >
                       <ScrollableFlexItem grow={1}>
-                        {tableView === 'gridView' && (
-                          <StatefulDataTableComponent
-                            alertToolbar={alertToolbar}
-                            activePage={pageInfo.activePage}
-                            browserFields={browserFields}
-                            data={nonDeletedEvents}
-                            disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
-                            id={tableId}
-                            indexNames={selectedPatterns}
-                            itemsPerPageOptions={itemsPerPageOptions}
-                            loadPage={loadPage}
-                            pageSize={pageInfo.querySize}
-                            refetch={refetch}
-                            renderCellValue={renderCellValue}
-                            rowRenderers={rowRenderers}
-                            tabType={'query'}
-                            totalItems={totalCountMinusDeleted}
-                            bulkActions={bulkActions}
-                            fieldBrowserOptions={fieldBrowserOptions}
-                            defaultCellActions={defaultCellActions}
-                            filterQuery={filterQuery}
-                            hasAlertsCrud={hasAlertsCrud}
-                            showCheckboxes={showCheckboxes}
-                            filters={filters}
-                            filterStatus={currentFilter}
-                            onRuleChange={onRuleChange}
-                            leadingControlColumns={transformedLeadingControlColumns}
-                          />
-                        )}
-                        {tableView === 'eventRenderedView' && (
-                          <EventRenderedView
-                            events={nonDeletedEvents}
-                            leadingControlColumns={transformedLeadingControlColumns}
-                            pageIndex={pageInfo.activePage}
-                            pageSize={pageInfo.querySize}
-                            pageSizeOptions={itemsPerPageOptions}
-                            rowRenderers={rowRenderers}
-                            scopeId={tableId}
-                            totalItemCount={totalCountMinusDeleted}
-                            onChangePage={onChangePage}
-                            onChangeItemsPerPage={onChangeItemsPerPage}
-                            alertToolbar={alertToolbar}
-                          />
-                        )}
+                        <StatefulEventContext.Provider value={activeStatefulEventContext}>
+                          {tableView === 'gridView' && (
+                            <StatefulDataTableComponent
+                              alertToolbar={alertToolbar}
+                              activePage={pageInfo.activePage}
+                              browserFields={browserFields}
+                              data={nonDeletedEvents}
+                              disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
+                              id={tableId}
+                              indexNames={selectedPatterns}
+                              itemsPerPageOptions={itemsPerPageOptions}
+                              loadPage={loadPage}
+                              pageSize={pageInfo.querySize}
+                              refetch={refetch}
+                              renderCellValue={renderCellValue}
+                              rowRenderers={rowRenderers}
+                              tabType={'query'}
+                              totalItems={totalCountMinusDeleted}
+                              bulkActions={bulkActions}
+                              fieldBrowserOptions={fieldBrowserOptions}
+                              defaultCellActions={defaultCellActions}
+                              filterQuery={filterQuery}
+                              hasAlertsCrud={hasAlertsCrud}
+                              showCheckboxes={showCheckboxes}
+                              filters={filters}
+                              filterStatus={currentFilter}
+                              onRuleChange={onRuleChange}
+                              leadingControlColumns={transformedLeadingControlColumns}
+                            />
+                          )}
+                          {tableView === 'eventRenderedView' && (
+                            <EventRenderedView
+                              events={nonDeletedEvents}
+                              leadingControlColumns={transformedLeadingControlColumns}
+                              pageIndex={pageInfo.activePage}
+                              pageSize={pageInfo.querySize}
+                              pageSizeOptions={itemsPerPageOptions}
+                              rowRenderers={rowRenderers}
+                              scopeId={tableId}
+                              totalItemCount={totalCountMinusDeleted}
+                              onChangePage={onChangePage}
+                              onChangeItemsPerPage={onChangeItemsPerPage}
+                              alertToolbar={alertToolbar}
+                            />
+                          )}
+                        </StatefulEventContext.Provider>
                       </ScrollableFlexItem>
                     </FullWidthFlexGroupTable>
                   )}
