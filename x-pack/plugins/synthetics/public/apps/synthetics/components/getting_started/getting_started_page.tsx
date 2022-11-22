@@ -53,12 +53,13 @@ export const GettingStartedPage = () => {
         }
         footer={
           <>
-            <EuiText size="s" color="subdued" className="eui-displayInlineBlock">
-              {FOR_MORE_INFO_LABEL}
-            </EuiText>{' '}
-            <EuiLink href="#" target="_blank" className="eui-displayInline">
-              {GETTING_STARTED_LABEL}
-            </EuiLink>
+            {/* TODO: add it back in 8.7*/}
+            {/* <EuiText size="s" color="subdued" className="eui-displayInlineBlock">*/}
+            {/*  {FOR_MORE_INFO_LABEL}*/}
+            {/* </EuiText>{' '}*/}
+            {/* <EuiLink href="#" target="_blank" className="eui-displayInline">*/}
+            {/*  {GETTING_STARTED_LABEL}*/}
+            {/* </EuiLink>*/}
           </>
         }
       />
