@@ -19,6 +19,7 @@ describe('fleet usage telemetry', () => {
   let core: any;
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let kbnServer: kbnTestServer.TestKibanaUtils;
+  const registryUrl = 'http://localhost';
 
   const startServers = async () => {
     const { startES } = kbnTestServer.createTestServers({
@@ -37,6 +38,7 @@ describe('fleet usage telemetry', () => {
         {
           xpack: {
             fleet: {
+              registryUrl,
               agentPolicies: [
                 {
                   name: 'Second preconfigured policy',
@@ -229,11 +231,7 @@ describe('fleet usage telemetry', () => {
           updating: 0,
           num_host_urls: 0,
         },
-        packages: [
-          expect.objectContaining({
-            name: 'synthetics',
-          }),
-        ],
+        packages: [],
         agent_versions: ['8.5.1', '8.6.0'],
         agent_checkin_status: { error: 1, degraded: 1 },
         agents_per_policy: [2],
