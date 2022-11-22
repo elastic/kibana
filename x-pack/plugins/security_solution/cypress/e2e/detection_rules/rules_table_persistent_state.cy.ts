@@ -1,4 +1,11 @@
-import { cleanKibana, clearSessionStorage } from '../../tasks/common';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { cleanKibana, resetRulesTableState } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import {
   DETECTIONS_RULE_MANAGEMENT_URL,
@@ -38,7 +45,7 @@ describe('Persistent rules table state', () => {
   });
 
   beforeEach(() => {
-    clearSessionStorage();
+    resetRulesTableState();
   });
 
   it('reloads the state from the url if the storage was cleared', () => {
