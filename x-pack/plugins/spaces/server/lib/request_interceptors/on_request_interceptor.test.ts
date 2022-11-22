@@ -6,8 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { createRoot } from '@kbn/core-test-helpers-kbn-server';
-import { request } from '@kbn/core-test-helpers-kbn-server';
+import { type createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 import type {
   CoreSetup,
   IBasePath,
