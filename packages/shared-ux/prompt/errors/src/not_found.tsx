@@ -44,13 +44,10 @@ export function NotFound({ actions }: NotFoundProps) {
 
   useEffect(() => {
     const loadImage = async () => {
-      if (colorMode === 'LIGHT') {
-        const { default: img } = await import('./assets/404_astronaut_light.png');
-        setErrorImage(img);
-      } else {
-        const { default: img } = await import('./assets/404_astronaut_dark.png');
-        setErrorImage(img);
-      }
+      const { default: img } = await import(
+        `./assets/404_astronaut_${colorMode.toLowerCase()}.png`
+      );
+      setErrorImage(img);
     };
     loadImage();
   }, [colorMode]);
