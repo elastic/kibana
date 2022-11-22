@@ -12,8 +12,8 @@ import numeral from '@elastic/numeral';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiCard, EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FileImage as Image } from '@kbn/shared-ux-file-image';
 import { FileImageMetadata, FileJSON } from '../../../../common';
-import { Image } from '../../image';
 import { isImage } from '../../util';
 import { useFilePickerContext } from '../context';
 
