@@ -37,10 +37,11 @@ export class DashboardPageControls extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly settings = this.ctx.getPageObject('settings');
-  private readonly testSubjects = this.ctx.getService('testSubjects');
 
   /* -----------------------------------------------------------
      General controls functions
@@ -345,8 +346,10 @@ export class DashboardPageControls extends FtrService {
     if (hideExists) await this.testSubjects.click(getSettingTestSubject('hideExists'));
     if (hideSort) await this.testSubjects.click(getSettingTestSubject('hideSort'));
     if (defaultSortType) {
-      await this.testSubjects.click('optionsListControl__chooseSortAdditionalSetting');
-      await this.testSubjects.click(`optionsList__defaultSortBy_${defaultSortType}`);
+      await this.testSubjects.click(`optionsListEditor__sortOrder_${defaultSortType.direction}`);
+      await this.common.sleep(6000);
+      await this.testSubjects.click('optionsListControl__chooseSortBy');
+      await this.testSubjects.click(`optionsListEditor__sortBy_${defaultSortType.by}`);
     }
     if (ignoreTimeout) await this.testSubjects.click(getSettingTestSubject('runPastTimeout'));
   }
@@ -408,11 +411,18 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`select sorting type for suggestions`);
     await this.optionsListPopoverAssertOpen();
 
-    await this.retry.waitFor('sorting popover to open', async () => {
-      await this.testSubjects.click('optionsListControl__sortingOptionsButton');
-      return await this.testSubjects.exists(`optionsListControl__sortingOptionsPopover`);
+    await this.testSubjects.click('optionsListControl__sortingOptionsButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('optionsListControl__sortingOptionsPopover');
     });
-    await this.testSubjects.click(`optionsList__sortBy_${sort}`);
+
+    await this.testSubjects.click(`optionsList__sortOrder_${sort.direction}`);
+    await this.testSubjects.click(`optionsList__sortBy_${sort.by}`);
+
+    await this.testSubjects.click('optionsListControl__sortingOptionsButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail(`optionsListControl__sortingOptionsPopover`);
+    });
   }
 
   public async optionsListPopoverSelectOption(availableOption: string) {

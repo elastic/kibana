@@ -228,7 +228,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           fieldName: 'sound.keyword',
           additionalSettings: {
             hideSort: true,
-            defaultSortType: 'keyAscending',
+            defaultSortType: { by: '_key', direction: 'asc' },
           },
         });
         controlId = (await dashboardControls.getAllControlIds())[1];
@@ -241,11 +241,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can edit default sorting method', async () => {
         await dashboardControls.editExistingControl(controlId);
-        expect(
-          await testSubjects.getVisibleText('optionsListControl__chooseSortAdditionalSetting')
-        ).to.equal('Alphabetical (ascending)');
+        expect(await testSubjects.getVisibleText('optionsListControl__chooseSortBy')).to.equal(
+          'Alphabetically'
+        );
+        const ascendingButtonSelected = await (
+          await testSubjects.find('optionsListEditor__sortOrder_asc')
+        ).elementHasClass('uiButtonGroupButton-isSelected');
+        expect(ascendingButtonSelected).to.be(true);
+        const descendingButtonSelected = await (
+          await testSubjects.find('optionsListEditor__sortOrder_desc')
+        ).elementHasClass('uiButtonGroupButton-isSelected');
+        expect(descendingButtonSelected).to.be(false);
+
         await dashboardControls.optionsListSetAdditionalSettings({
-          defaultSortType: 'keyDescending',
+          defaultSortType: { by: '_key', direction: 'desc' },
         });
         await dashboardControls.controlEditorSave();
 
@@ -274,25 +283,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('sort alphabetically - descending', async () => {
-        await dashboardControls.optionsListPopoverSetSort('keyDescending');
+        await dashboardControls.optionsListPopoverSetSort({ by: '_key', direction: 'desc' });
         await dashboardControls.optionsListWaitForLoading(controlId);
         await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort().reverse(), true);
       });
 
       it('sort alphabetically - ascending', async () => {
-        await dashboardControls.optionsListPopoverSetSort('keyAscending');
+        await dashboardControls.optionsListPopoverSetSort({ by: '_key', direction: 'asc' });
         await dashboardControls.optionsListWaitForLoading(controlId);
         await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort(), true);
       });
 
       it('sort by document count - descending', async () => {
-        await dashboardControls.optionsListPopoverSetSort('docDescending');
+        await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
         await dashboardControls.optionsListWaitForLoading(controlId);
         await ensureAvailableOptionsEql(animalSoundAvailableOptions, true);
       });
 
       it('sort by document count - ascending', async () => {
-        await dashboardControls.optionsListPopoverSetSort('docAscending');
+        await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'asc' });
         await dashboardControls.optionsListWaitForLoading(controlId);
         // ties are broken alphabetically, so can't just reverse `animalSoundAvailableOptions` for this check
         await ensureAvailableOptionsEql(
@@ -306,7 +315,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('returning to default value should remove unsaved changes', async () => {
-        await dashboardControls.optionsListPopoverSetSort('docDescending');
+        await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
         await dashboardControls.optionsListWaitForLoading(controlId);
         await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });

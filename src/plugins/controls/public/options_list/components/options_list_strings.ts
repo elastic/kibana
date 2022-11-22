@@ -158,6 +158,10 @@ export const OptionsListStrings = {
       }),
   },
   editorAndPopover: {
+    getSortDirectionLegend: () =>
+      i18n.translate('controls.optionsList.popover.sortDirections', {
+        defaultMessage: 'Sort directions',
+      }),
     sortBy: {
       _count: {
         getSortByLabel: () =>

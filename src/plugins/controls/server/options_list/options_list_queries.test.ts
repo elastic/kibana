@@ -140,7 +140,7 @@ describe('options list queries', () => {
           fieldName: 'coolTestField.keyword',
           textFieldName: 'coolTestField',
           fieldSpec: { aggregatable: true } as unknown as FieldSpec,
-          sort: 'docAscending',
+          sort: { by: '_count', direction: 'asc' },
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -164,7 +164,7 @@ describe('options list queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         fieldName: 'coolean',
         fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
-        sort: 'keyDescending',
+        sort: { by: '_key', direction: 'desc' },
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
       expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -187,7 +187,7 @@ describe('options list queries', () => {
         fieldName: 'coolNestedField',
         searchString: 'cooool',
         fieldSpec: { subType: { nested: { path: 'path.to.nested' } } } as unknown as FieldSpec,
-        sort: 'keyAscending',
+        sort: { by: '_key', direction: 'asc' },
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
       expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -241,7 +241,7 @@ describe('options list queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           fieldName: 'clientip',
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
-          sort: 'docAscending',
+          sort: { by: '_count', direction: 'asc' },
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -279,7 +279,7 @@ describe('options list queries', () => {
           fieldName: 'clientip',
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: '41.77.243.255',
-          sort: 'keyDescending',
+          sort: { by: '_key', direction: 'desc' },
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -316,7 +316,7 @@ describe('options list queries', () => {
           fieldName: 'clientip',
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: 'f688:fb50:6433:bba2:604:f2c:194a:d3c5',
-          sort: 'keyAscending',
+          sort: { by: '_key', direction: 'asc' },
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -390,7 +390,7 @@ describe('options list queries', () => {
           fieldName: 'clientip',
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: 'cdb6:',
-          sort: 'docDescending',
+          sort: { by: '_count', direction: 'desc' },
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))

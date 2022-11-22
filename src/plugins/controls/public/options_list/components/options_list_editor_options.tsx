@@ -181,17 +181,17 @@ export const OptionsListEditorOptions = ({
                   <EuiButtonGroup
                     buttonSize="compressed"
                     options={sortOrderOptions}
-                    legend="This is a primary group"
                     idSelected={state.sortDirection}
                     onChange={(value) => {
                       onChange({
                         sort: {
-                          ...(initialInput?.sort ?? DEFAULT_SORT),
                           direction: value as Direction,
+                          by: state.sortBy,
                         },
                       });
                       setState((s) => ({ ...s, sortDirection: value as Direction }));
                     }}
+                    legend={OptionsListStrings.editorAndPopover.getSortDirectionLegend()}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -204,13 +204,16 @@ export const OptionsListEditorOptions = ({
                   <EuiSuperSelect
                     onChange={(value) => {
                       onChange({
-                        sort: { ...(initialInput?.sort ?? DEFAULT_SORT), by: value },
+                        sort: {
+                          direction: state.sortDirection,
+                          by: value,
+                        },
                       });
                       setState((s) => ({ ...s, sortBy: value }));
                     }}
                     options={sortByOptions}
                     valueOfSelected={state.sortBy}
-                    data-test-subj={'optionsListControl__chooseSortAdditionalSetting'}
+                    data-test-subj={'optionsListControl__chooseSortBy'}
                     compressed={true}
                   />
                 </EuiFormRow>

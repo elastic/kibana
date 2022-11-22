@@ -115,35 +115,36 @@ export const OptionsListPopoverSortingButton = ({
       isOpen={isSortingPopoverOpen}
       aria-labelledby="optionsList_sortingOptions"
       closePopover={() => setIsSortingPopoverOpen(false)}
-      data-test-subj="optionsListControl__sortingOptionsPopover"
     >
-      <EuiPopoverTitle paddingSize="s">
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem>{OptionsListStrings.popover.getSortPopoverTitle()}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend="Text style"
-              options={sortOrderOptions}
-              buttonSize="compressed"
-              idSelected={sort.direction}
-              onChange={(value) => dispatch(setSort({ direction: value as Direction }))}
-              isIconOnly
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopoverTitle>
-      <EuiSelectable
-        options={sortByOptions}
-        style={{ width: 300 }}
-        singleSelection="always"
-        onChange={onSortByChange}
-        id="optionsList_sortingOptions"
-        listProps={{ bordered: false }}
-        data-test-subj="optionsListControl__sortingOptions"
-        aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-      >
-        {(list) => list}
-      </EuiSelectable>
+      <span data-test-subj="optionsListControl__sortingOptionsPopover">
+        <EuiPopoverTitle paddingSize="s">
+          <EuiFlexGroup alignItems="center" responsive={false}>
+            <EuiFlexItem>{OptionsListStrings.popover.getSortPopoverTitle()}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                isIconOnly
+                buttonSize="compressed"
+                options={sortOrderOptions}
+                idSelected={sort.direction}
+                legend={OptionsListStrings.editorAndPopover.getSortDirectionLegend()}
+                onChange={(value) => dispatch(setSort({ direction: value as Direction }))}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
+        <EuiSelectable
+          options={sortByOptions}
+          style={{ width: 300 }}
+          singleSelection="always"
+          onChange={onSortByChange}
+          id="optionsList_sortingOptions"
+          listProps={{ bordered: false }}
+          data-test-subj="optionsListControl__sortingOptions"
+          aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </span>
     </EuiPopover>
   );
 };

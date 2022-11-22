@@ -188,7 +188,7 @@ describe('Options list popover', () => {
     expect(availableOptionsDiv.children().at(0).text()).toBe('Exists');
   });
 
-  test('when sorting suggestions, show all four sorting types for keyword field', async () => {
+  test('when sorting suggestions, show both sorting types for keyword field', async () => {
     const popover = await mountComponent({
       componentState: {
         field: { name: 'Test keyword field', type: 'keyword' } as OptionsListField,
@@ -199,17 +199,12 @@ describe('Options list popover', () => {
 
     const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
     const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
-    expect(optionsText).toEqual([
-      'Document count (descending) - Checked option.',
-      'Document count (ascending)',
-      'Alphabetical (descending)',
-      'Alphabetical (ascending)',
-    ]);
+    expect(optionsText).toEqual(['By document count - Checked option.', 'Alphabetically']);
   });
 
   test('sorting popover selects appropriate sorting type on load', async () => {
     const popover = await mountComponent({
-      explicitInput: { sort: 'keyDescending' },
+      explicitInput: { sort: { by: '_key', direction: 'asc' } },
       componentState: {
         field: { name: 'Test keyword field', type: 'keyword' } as OptionsListField,
       },
@@ -219,12 +214,12 @@ describe('Options list popover', () => {
 
     const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
     const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
-    expect(optionsText).toEqual([
-      'Document count (descending)',
-      'Document count (ascending)',
-      'Alphabetical (descending) - Checked option.',
-      'Alphabetical (ascending)',
-    ]);
+    expect(optionsText).toEqual(['By document count', 'Alphabetically - Checked option.']);
+
+    const ascendingButton = findTestSubject(popover, 'optionsList__sortOrder_asc').instance();
+    expect(ascendingButton).toHaveClass('euiButtonGroupButton-isSelected');
+    const descendingButton = findTestSubject(popover, 'optionsList__sortOrder_desc').instance();
+    expect(descendingButton).not.toHaveClass('euiButtonGroupButton-isSelected');
   });
 
   test('when sorting suggestions, only show document count sorting for IP fields', async () => {
@@ -236,10 +231,7 @@ describe('Options list popover', () => {
 
     const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
     const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
-    expect(optionsText).toEqual([
-      'Document count (descending) - Checked option.',
-      'Document count (ascending)',
-    ]);
+    expect(optionsText).toEqual(['By document count - Checked option.']);
   });
 
   describe('Test advanced settings', () => {
