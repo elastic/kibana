@@ -72,11 +72,7 @@ export function MobileFilters({
     <EuiFlexGroup justifyContent="flexEnd">
       {data.mobileFilters.map((filter) => {
         return (
-          <EuiFlexItem
-            grow={false}
-            key={filter.key}
-            style={{ minWidth: '225px' }}
-          >
+          <EuiFlexItem grow={false} key={filter.key} style={{ width: '225px' }}>
             <EuiSelect
               prepend={filter.label}
               options={toSelectOptions(filter.options)}
