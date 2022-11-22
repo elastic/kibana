@@ -31,24 +31,4 @@ export interface TopValuesStats {
   topValuesSamplerShardSize?: number;
 }
 
-export interface NumericFieldStats extends TopValuesStats {
-  min: number;
-  max: number;
-  avg: number;
-  median?: number;
-}
-
-export type KeywordFieldStats = TopValuesStats;
-
-export interface BooleanFieldStats {
-  fieldName: string;
-  count: number;
-  [key: string]: number | string;
-}
-
-export type FieldStats =
-  | NumericFieldStats
-  | KeywordFieldStats
-  | BooleanFieldStats;
-
 export type FieldValueFieldStats = TopValuesStats;

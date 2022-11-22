@@ -189,8 +189,10 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 export const RootComponent = (dependencies: AppDependencies) => {
   const {
     history,
-    core: { i18n, application, http },
+    core: { i18n, application, http, executionContext },
   } = dependencies.services;
+
+  executionContext.set({ type: 'application', page: 'upgradeAssistant' });
 
   return (
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>

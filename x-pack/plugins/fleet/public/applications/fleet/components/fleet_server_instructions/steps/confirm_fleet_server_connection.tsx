@@ -47,6 +47,7 @@ const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
 
   const handleContinueClick = () => {
     fleetStatus.forceDisplayInstructions = false;
+    flyoutContext.closeFleetServerFlyout();
     flyoutContext.openEnrollmentFlyout();
   };
 
@@ -61,7 +62,11 @@ const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
 
       <EuiSpacer size="m" />
 
-      <EuiButton color="primary" onClick={handleContinueClick}>
+      <EuiButton
+        color="primary"
+        onClick={handleContinueClick}
+        data-test-subj="fleetServerFlyoutContinueEnrollingButton"
+      >
         <FormattedMessage
           id="xpack.fleet.fleetServerFlyout.continueEnrollingButton"
           defaultMessage="Continue enrolling Elastic Agent"

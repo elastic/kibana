@@ -71,6 +71,14 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listNamespaceType: 'single',
 };
 
+const SORT_FIELDS: Array<{ field: string; label: string; defaultOrder: 'asc' | 'desc' }> = [
+  {
+    field: 'created_at',
+    label: i18n.SORT_BY_CREATE_AT,
+    defaultOrder: 'desc',
+  },
+];
+
 export const SharedLists = React.memo(() => {
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
@@ -89,15 +97,23 @@ export const SharedLists = React.memo(() => {
   const [filters, setFilters] = useState<ExceptionListFilter | undefined>({
     types: [ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT],
   });
-  const [loadingExceptions, exceptions, pagination, setPagination, refreshExceptions] =
-    useExceptionLists({
-      errorMessage: i18n.ERROR_EXCEPTION_LISTS,
-      filterOptions: filters,
-      http,
-      namespaceTypes: ['single', 'agnostic'],
-      notifications,
-      hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
-    });
+
+  const [
+    loadingExceptions,
+    exceptions,
+    pagination,
+    setPagination,
+    refreshExceptions,
+    sort,
+    setSort,
+  ] = useExceptionLists({
+    errorMessage: i18n.ERROR_EXCEPTION_LISTS,
+    filterOptions: filters,
+    http,
+    namespaceTypes: ['single', 'agnostic'],
+    notifications,
+    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+  });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
   });
@@ -470,6 +486,9 @@ export const SharedLists = React.memo(() => {
             <ExceptionsTableUtilityBar
               totalExceptionLists={exceptionListsWithRuleRefs.length}
               onRefresh={handleRefresh}
+              setSort={setSort}
+              sort={sort}
+              sortFields={SORT_FIELDS}
             />
             {exceptionListsWithRuleRefs.length > 0 && canUserCRUD !== null && canUserREAD !== null && (
               <div data-test-subj="exceptionsTable">

@@ -28,7 +28,7 @@ import { fetchMock, getNextAttemptDateMock } from './fetcher.test.mock';
 import { FetcherTask } from './fetcher';
 
 describe('FetcherTask', () => {
-  beforeEach(() => jest.useFakeTimers('legacy'));
+  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
 
   describe('sendIfDue', () => {
     let getCurrentConfigs: jest.Mock;

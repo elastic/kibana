@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -18,10 +19,12 @@ import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import * as i18n from '../../translations';
 import { useListExceptionItems } from '..';
 
-export const useListWithSearchComponent = (list: ExceptionListSchema) => {
+export const useListWithSearchComponent = (
+  list: ExceptionListSchema,
+  refreshExceptions?: boolean
+) => {
   const [showAddExceptionFlyout, setShowAddExceptionFlyout] = useState(false);
   const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
-
   const [exceptionToEdit, setExceptionToEdit] = useState<ExceptionListItemSchema>();
   const [viewerStatus, setViewerStatus] = useState<ViewerStatus | string>(ViewerStatus.LOADING);
 
@@ -54,7 +57,7 @@ export const useListWithSearchComponent = (list: ExceptionListSchema) => {
 
   useEffect(() => {
     fetchItems(null, ViewerStatus.LOADING);
-  }, [fetchItems]);
+  }, [fetchItems, refreshExceptions]);
 
   const emptyViewerTitle = useMemo(() => {
     return viewerStatus === ViewerStatus.EMPTY ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE : '';
@@ -65,6 +68,12 @@ export const useListWithSearchComponent = (list: ExceptionListSchema) => {
       ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_BODY(list.name)
       : '';
   }, [list.name, viewerStatus]);
+
+  const emptyViewerButtonText = useMemo(() => {
+    return list.type === ExceptionListTypeEnum.ENDPOINT
+      ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON_ENDPOINT
+      : i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON;
+  }, [list.type]);
 
   // #region Callbacks
 
@@ -106,6 +115,7 @@ export const useListWithSearchComponent = (list: ExceptionListSchema) => {
     viewerStatus,
     emptyViewerTitle,
     emptyViewerBody,
+    emptyViewerButtonText,
     ruleReferences: exceptionListReferences,
     showAddExceptionFlyout,
     showEditExceptionFlyout,

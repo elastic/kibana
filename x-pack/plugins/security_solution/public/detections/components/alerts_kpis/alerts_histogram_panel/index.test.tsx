@@ -165,8 +165,8 @@ describe('AlertsHistogramPanel', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
-    ).toHaveClass('euiFlexGroup--alignItemsFlexEnd');
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
+    ).toContain('flexEnd');
   });
 
   describe('inspect button', () => {
@@ -211,9 +211,9 @@ describe('AlertsHistogramPanel', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="panelFlexGroup"]').first().getDOMNode()).toHaveClass(
-      'euiFlexGroup--alignItemsFlexStart'
-    );
+    expect(
+      wrapper.find('[data-test-subj="panelFlexGroup"]').last().getDOMNode().className
+    ).toContain('flexStart');
   });
 
   test('it invokes onFieldSelected when a field is selected', async () => {

@@ -68,7 +68,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       navigateToApp(routeState.onDoneNavigateTo[0], routeState.onDoneNavigateTo[1]);
     }
   }, [routeState, navigateToApp]);
-  const { showRequestDiagnostics } = ExperimentalFeaturesService.get();
+  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
 
   const host = agentData?.item?.local_metadata?.host;
 
@@ -156,7 +156,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         isSelected: tabId === 'logs',
       },
     ];
-    if (showRequestDiagnostics) {
+    if (diagnosticFileUploadEnabled) {
       tabs.push({
         id: 'diagnostics',
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.diagnosticsTab', {
@@ -167,7 +167,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       });
     }
     return tabs;
-  }, [getHref, agentId, tabId, showRequestDiagnostics]);
+  }, [getHref, agentId, tabId, diagnosticFileUploadEnabled]);
 
   return (
     <AgentRefreshContext.Provider

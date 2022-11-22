@@ -19,6 +19,7 @@ import {
   MonitorManagementListResult,
   SourceType,
 } from '../../../../../common/runtime_types';
+import userEvent from '@testing-library/user-event';
 
 describe('<DeleteMonitor />', () => {
   const onUpdate = jest.fn();
@@ -61,7 +62,7 @@ describe('<DeleteMonitor />', () => {
       />
     );
 
-    fireEvent.click(screen.getByLabelText('Delete monitor'));
+    userEvent.click(screen.getByTestId('monitorManagementDeleteMonitor'));
 
     expect(onUpdate).toHaveBeenCalled();
   });

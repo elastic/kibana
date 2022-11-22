@@ -65,8 +65,8 @@ export class AnalyticsService {
     };
   }
 
-  public stop() {
-    this.analyticsClient.shutdown();
+  public async stop() {
+    await this.analyticsClient.shutdown();
   }
 
   /**

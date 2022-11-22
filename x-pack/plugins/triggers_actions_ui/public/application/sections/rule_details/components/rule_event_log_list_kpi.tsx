@@ -14,6 +14,7 @@ import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 
@@ -104,6 +105,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   } = useKibana().services;
 
   const isInitialized = useRef(false);
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [kpi, setKpi] = useState<IExecutionKPIResult>();
@@ -168,7 +170,12 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
             <EuiFlexItem>
               <EuiStat
                 data-test-subj="ruleEventLogKpi-successOutcome"
-                description={getStatDescription(<RuleEventLogListStatus status="success" />)}
+                description={getStatDescription(
+                  <RuleEventLogListStatus
+                    status="success"
+                    useExecutionStatus={isRuleUsingExecutionStatus}
+                  />
+                )}
                 titleSize="s"
                 title={kpi?.success ?? 0}
                 isLoading={isLoadingData}
@@ -177,7 +184,12 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
             <EuiFlexItem>
               <EuiStat
                 data-test-subj="ruleEventLogKpi-warningOutcome"
-                description={getStatDescription(<RuleEventLogListStatus status="warning" />)}
+                description={getStatDescription(
+                  <RuleEventLogListStatus
+                    status="warning"
+                    useExecutionStatus={isRuleUsingExecutionStatus}
+                  />
+                )}
                 titleSize="s"
                 title={kpi?.warning ?? 0}
                 isLoading={isLoadingData}
@@ -186,7 +198,12 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
             <EuiFlexItem>
               <EuiStat
                 data-test-subj="ruleEventLogKpi-failureOutcome"
-                description={getStatDescription(<RuleEventLogListStatus status="failure" />)}
+                description={getStatDescription(
+                  <RuleEventLogListStatus
+                    status="failure"
+                    useExecutionStatus={isRuleUsingExecutionStatus}
+                  />
+                )}
                 titleSize="s"
                 title={kpi?.failure ?? 0}
                 isLoading={isLoadingData}

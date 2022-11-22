@@ -35,7 +35,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ tableListTitle, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, id, inspector, children, }: ",
+          ">({ tableListTitle, tableListDescription, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, id, inspector, children, titleColumnName, additionalRightSideActions, withoutPageTemplateWrapper, }: ",
           "Props",
           "<T>) => JSX.Element | null"
         ],
