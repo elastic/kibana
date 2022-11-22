@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 
-export const bracketColorCss = css`
-  color: ${euiThemeVars.euiColorPrimary};
-`;
+export const strings = {
+  getNotLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterBar.negatedFilterPrefix', {
+      defaultMessage: 'NOT ',
+    }),
+};

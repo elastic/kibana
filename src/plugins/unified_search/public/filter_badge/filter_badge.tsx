@@ -11,10 +11,10 @@ import { EuiBadge, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isCombinedFilter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { FilterBadgeGroup } from './filter_badge_group';
 import type { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
 import { badgePaddingCss, marginLeftLabelCss } from './filter_badge.styles';
+import { strings } from './strings';
 
 export interface FilterBadgeProps {
   filter: Filter;
@@ -23,13 +23,6 @@ export interface FilterBadgeProps {
   hideAlias?: boolean;
   filterLabelStatus: FilterLabelStatus;
 }
-
-const strings = {
-  getNotLabel: () =>
-    i18n.translate('unifiedSearch.filter.filterBar.negatedFilterPrefix', {
-      defaultMessage: 'NOT ',
-    }),
-};
 
 function FilterBadge({
   filter,
@@ -75,7 +68,7 @@ function FilterBadge({
         </>
       ) : (
         <div>
-          {isCombinedFilter(filter) ? prefix : null}
+          {isCombinedFilter(filter) && prefix}
           <FilterBadgeGroup
             filters={[filter]}
             dataViews={dataViews}

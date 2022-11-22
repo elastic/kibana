@@ -15,7 +15,7 @@ import { FilterBadgeGroup } from './filter_badge_group';
 import { FilterContent } from './filter_content';
 import { getBooleanRelationType } from '../utils';
 import { FilterBadgeInvalidPlaceholder } from './filter_badge_invalid';
-import { bracketColorCss } from './filter_badge_expression.styles';
+import { bracketColorCss } from './filter_badge.styles';
 
 export interface FilterBadgeExpressionProps {
   filter: Filter;

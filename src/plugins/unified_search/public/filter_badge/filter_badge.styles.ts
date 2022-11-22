@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { EuiThemeComputed } from '@elastic/eui';
 
 export const badgePaddingCss = (euiTheme: EuiThemeComputed) => css`
@@ -14,4 +15,8 @@ export const badgePaddingCss = (euiTheme: EuiThemeComputed) => css`
 
 export const marginLeftLabelCss = (euiTheme: EuiThemeComputed) => css`
   margin-left: ${euiTheme.size.xs};
+`;
+
+export const bracketColorCss = css`
+  color: ${euiThemeVars.euiColorPrimary};
 `;
