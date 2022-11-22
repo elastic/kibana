@@ -24,7 +24,7 @@ new_archive="x-pack/test/functional/fixtures/kbn_archiver/security_solution/time
 
 testFiles=("x-pack/test/api_integration/apis/security_solution/timeline_migrations.ts")
 
-test_config="x-pack/test/api_integration/config.ts"
+test_config="test/node_roles_functional/basic_feature_test.config.ts"
 
 list_stragglers() {
 
@@ -446,6 +446,18 @@ run_test_extra() {
     --grep="CSV Generation from SearchSource" \
     --include-tag "ciGroup2" \
     --updateSnapshots
+  set +x
+}
+
+run_node_roles_basic_feature_test() {
+  # This fn depends on Docker Desktop (for now)
+  set -x
+   NODE_TLS_REJECT_UNAUTHORIZED=0 \
+     TEST_KIBANA_URL=https://elastic:changeme@localhost:5605 \
+     TEST_ES_URL=http://elastic:changeme@localhost:9205 \
+     node --no-warnings scripts/functional_test_runner \
+     --config "$test_config" \
+     --es-version 8.5.0
   set +x
 }
 
