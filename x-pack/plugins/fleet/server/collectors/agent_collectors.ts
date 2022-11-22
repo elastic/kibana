@@ -7,7 +7,6 @@
 
 import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
 
-import type { FleetConfigType } from '../../common/types';
 import { AGENTS_INDEX } from '../../common';
 import * as AgentService from '../services/agents';
 import { appContextService } from '../services';
@@ -22,7 +21,6 @@ export interface AgentUsage {
 }
 
 export const getAgentUsage = async (
-  config: FleetConfigType,
   soClient?: SavedObjectsClient,
   esClient?: ElasticsearchClient
 ): Promise<AgentUsage> => {
@@ -56,16 +54,13 @@ export interface AgentData {
     error: number;
     degraded: number;
   };
-  agent_checkin_status_last_1h: {
-    error: number;
-    degraded: number;
-  };
+  agents_per_policy: number[];
 }
 
 const DEFAULT_AGENT_DATA = {
   agent_versions: [],
   agent_checkin_status: { error: 0, degraded: 0 },
-  agent_checkin_status_last_1h: { error: 0, degraded: 0 },
+  agents_per_policy: [],
 };
 
 export const getAgentData = async (
@@ -84,6 +79,17 @@ export const getAgentData = async (
     const response = await esClient.search(
       {
         index: AGENTS_INDEX,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  active: 'true',
+                },
+              },
+            ],
+          },
+        },
         size: 0,
         aggs: {
           versions: {
@@ -91,6 +97,9 @@ export const getAgentData = async (
           },
           last_checkin_status: {
             terms: { field: 'last_checkin_status' },
+          },
+          policies: {
+            terms: { field: 'policy_id' },
           },
         },
       },
@@ -101,44 +110,14 @@ export const getAgentData = async (
     );
     const statuses = transformLastCheckinStatusBuckets(response);
 
-    const responseLast1h = await esClient.search(
-      {
-        index: AGENTS_INDEX,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  must: [
-                    {
-                      range: {
-                        last_checkin: {
-                          gte: 'now-1h/h',
-                          lt: 'now/h',
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          last_checkin_status: {
-            terms: { field: 'last_checkin_status' },
-          },
-        },
-      },
-      { signal: abortController.signal }
+    const agentsPerPolicy = ((response?.aggregations?.policies as any).buckets ?? []).map(
+      (bucket: any) => bucket.doc_count
     );
-    const statusesLast1h = transformLastCheckinStatusBuckets(responseLast1h);
 
     return {
       agent_versions: versions,
       agent_checkin_status: statuses,
-      agent_checkin_status_last_1h: statusesLast1h,
+      agents_per_policy: agentsPerPolicy,
     };
   } catch (error) {
     if (error.statusCode === 404) {
