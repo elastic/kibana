@@ -15,7 +15,7 @@ export const getQueryStringFilter = (query: string) => {
   return {
     query_string: {
       query: escape(queryString),
-      fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text', 'monitor.type'],
+      fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
     },
   };
 };
