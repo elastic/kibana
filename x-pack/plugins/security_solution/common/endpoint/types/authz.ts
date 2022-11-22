@@ -24,6 +24,8 @@ export interface EndpointAuthz extends EndpointPermissions {
   canAccessFleet: boolean;
   /** If user has permissions to access Endpoint management (includes check to ensure they also have access to fleet) */
   canAccessEndpointManagement: boolean;
+  /** If user has permissions to access Actions Log management and also has a platinum license (used for endpoint details flyout) */
+  canAccessEndpointActionsLogManagement: boolean;
   /** if user has permissions to create Artifacts by Policy */
   canCreateArtifactsByPolicy: boolean;
   /** if user has write permissions to endpoint list */
