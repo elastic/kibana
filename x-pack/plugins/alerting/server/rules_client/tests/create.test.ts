@@ -15,6 +15,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import { RuleNotifyWhen } from '../../types';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
@@ -165,6 +166,7 @@ describe('create()', () => {
               params: {
                 foo: true,
               },
+              frequency: { summary: false, notifyWhen: RuleNotifyWhen.CHANGE, throttle: null },
             },
           ],
         },
