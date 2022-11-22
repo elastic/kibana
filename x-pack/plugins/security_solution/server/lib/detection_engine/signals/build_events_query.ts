@@ -26,6 +26,7 @@ interface BuildEventsSearchQuery {
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverride | undefined;
   trackTotalHits?: boolean;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
 }
 
 interface BuildEqlSearchRequestParams {
@@ -44,7 +45,7 @@ interface BuildEqlSearchRequestParams {
   exceptionFilter: Filter | undefined;
 }
 
-const buildTimeRangeFilter = ({
+export const buildTimeRangeFilter = ({
   to,
   from,
   primaryTimestamp,
@@ -130,6 +131,7 @@ export const buildEventsSearchQuery = ({
   primaryTimestamp,
   secondaryTimestamp,
   trackTotalHits,
+  additionalFilters,
 }: BuildEventsSearchQuery) => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
@@ -146,7 +148,11 @@ export const buildEventsSearchQuery = ({
     secondaryTimestamp,
   });
 
-  const filterWithTime: estypes.QueryDslQueryContainer[] = [filter, rangeFilter];
+  const filterWithTime: estypes.QueryDslQueryContainer[] = [
+    filter,
+    rangeFilter,
+    ...(additionalFilters ? additionalFilters : []),
+  ];
 
   const sort: estypes.Sort = [];
   sort.push({

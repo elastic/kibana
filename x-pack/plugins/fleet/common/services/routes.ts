@@ -22,6 +22,7 @@ import {
   PRECONFIGURATION_API_ROUTES,
   DOWNLOAD_SOURCE_API_ROUTES,
   FLEET_SERVER_HOST_API_ROUTES,
+  FLEET_PROXY_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -227,6 +228,16 @@ export const outputRoutesService = {
     OUTPUT_API_ROUTES.DELETE_PATTERN.replace('{outputId}', outputId),
   getCreatePath: () => OUTPUT_API_ROUTES.CREATE_PATTERN,
   getCreateLogstashApiKeyPath: () => OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
+};
+
+export const fleetProxiesRoutesService = {
+  getInfoPath: (itemId: string) => FLEET_PROXY_API_ROUTES.INFO_PATTERN.replace('{itemId}', itemId),
+  getUpdatePath: (itemId: string) =>
+    FLEET_PROXY_API_ROUTES.UPDATE_PATTERN.replace('{itemId}', itemId),
+  getListPath: () => FLEET_PROXY_API_ROUTES.LIST_PATTERN,
+  getDeletePath: (itemId: string) =>
+    FLEET_PROXY_API_ROUTES.DELETE_PATTERN.replace('{itemId}', itemId),
+  getCreatePath: () => FLEET_PROXY_API_ROUTES.CREATE_PATTERN,
 };
 
 export const fleetServerHostsRoutesService = {

@@ -18,6 +18,7 @@ import {
   EncryptedSyntheticsSavedMonitor,
   Ping,
   ServiceLocations,
+  SourceType,
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
 
@@ -151,10 +152,11 @@ export function getMonitorListColumns({
       render: (fields: EncryptedSyntheticsSavedMonitor) => (
         <Actions
           euiTheme={euiTheme}
-          id={fields.id}
+          configId={fields[ConfigKey.CONFIG_ID]}
           name={fields[ConfigKey.NAME]}
           canEditSynthetics={canEditSynthetics}
           reloadPage={reloadPage}
+          isProjectMonitor={fields[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT}
         />
       ),
     },

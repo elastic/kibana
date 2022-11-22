@@ -19,6 +19,7 @@ import {
 import {
   isEqlRule,
   isNewTermsRule,
+  isQueryRule,
   isThreatMatchRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
@@ -40,6 +41,7 @@ import {
   THREAT_MATCH_EMPTIES,
   SAVED_QUERY_REQUIRED,
 } from './translations';
+import { OptionalFieldLabel } from '../optional_field_label';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -553,6 +555,44 @@ export const schema: FormSchema<DefineStepRule> = {
               };
             }
           }
+        },
+      },
+    ],
+  },
+  groupByFields: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
+      {
+        defaultMessage: 'Suppress Alerts By',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByFieldHelpText',
+      {
+        defaultMessage: 'Select field(s) to use for suppressing extra alerts',
+      }
+    ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isQueryRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+          return fieldValidators.maxLengthField({
+            length: 3,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.groupByFieldsMax',
+              {
+                defaultMessage: 'Number of grouping fields must be at most 3',
+              }
+            ),
+          })(...args);
         },
       },
     ],

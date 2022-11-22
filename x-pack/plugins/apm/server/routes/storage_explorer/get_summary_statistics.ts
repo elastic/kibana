@@ -22,11 +22,7 @@ import {
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer_types';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import {
-  SERVICE_NAME,
-  TIER,
-  INDEX,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TIER, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,

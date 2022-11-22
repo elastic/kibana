@@ -46,7 +46,7 @@ describe('Test pipeline', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

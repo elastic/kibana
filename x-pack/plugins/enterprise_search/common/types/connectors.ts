@@ -140,18 +140,23 @@ export interface ConnectorSyncJob {
   cancelation_requested_at: string | null;
   canceled_at: string | null;
   completed_at: string | null;
-  connector_id: string;
+  connector: {
+    configuration: ConnectorConfiguration;
+    filtering: FilteringRules | null;
+    id: string;
+    index_name: string;
+    language: string;
+    pipeline: IngestPipelineParams | null;
+    service_type: string;
+  };
   created_at: string;
   deleted_document_count: number;
   error: string | null;
-  filtering: FilteringRules | null;
   id: string;
-  index_name: string;
   indexed_document_count: number;
   indexed_document_volume: number;
   last_seen: string;
   metadata: Record<string, unknown>;
-  pipeline: IngestPipelineParams | null;
   started_at: string;
   status: SyncStatus;
   trigger_method: TriggerMethod;

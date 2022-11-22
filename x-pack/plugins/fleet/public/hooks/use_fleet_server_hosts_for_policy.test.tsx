@@ -9,11 +9,17 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { useFleetServerHostsForPolicy } from './use_fleet_server_hosts_for_policy';
 import { useGetFleetServerHosts } from './use_request/fleet_server_hosts';
+import { useGetFleetProxies } from './use_request/fleet_proxies';
 
 jest.mock('./use_request/fleet_server_hosts');
+jest.mock('./use_request/fleet_proxies');
 
 const mockedUseGetFleetServerHosts = useGetFleetServerHosts as jest.MockedFunction<
   typeof useGetFleetServerHosts
+>;
+
+const mockedUseGetFleetProxies = useGetFleetProxies as jest.MockedFunction<
+  typeof useGetFleetProxies
 >;
 
 describe('useFleetServerHostsForPolicy', () => {
@@ -41,6 +47,13 @@ describe('useFleetServerHostsForPolicy', () => {
         page: 1,
         perPage: 100,
         total: 2,
+      },
+    } as any);
+    mockedUseGetFleetProxies.mockReturnValue({
+      isInitialRequest: false,
+      isLoading: false,
+      data: {
+        items: [],
       },
     } as any);
   });

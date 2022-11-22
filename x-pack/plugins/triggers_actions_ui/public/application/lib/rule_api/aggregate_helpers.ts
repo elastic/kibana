@@ -15,6 +15,7 @@ export interface RuleTagsAggregations {
 
 export const rewriteBodyRes: RewriteRequestCase<RuleAggregations> = ({
   rule_execution_status: ruleExecutionStatus,
+  rule_last_run_outcome: ruleLastRunOutcome,
   rule_enabled_status: ruleEnabledStatus,
   rule_muted_status: ruleMutedStatus,
   rule_snoozed_status: ruleSnoozedStatus,
@@ -26,6 +27,7 @@ export const rewriteBodyRes: RewriteRequestCase<RuleAggregations> = ({
   ruleEnabledStatus,
   ruleMutedStatus,
   ruleSnoozedStatus,
+  ruleLastRunOutcome,
   ruleTags,
 });
 
@@ -41,6 +43,7 @@ export interface LoadRuleAggregationsProps {
   typesFilter?: string[];
   actionTypesFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
+  ruleLastRunOutcomesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
   tagsFilter?: string[];
 }

@@ -18,7 +18,7 @@ describe('combineFiltersAndUserSearch', () => {
 
   it('returns merged filters and user search if neither is empty', () => {
     expect(combineFiltersAndUserSearch('monitor.id:foo', 'monitor.name:bar')).toEqual(
-      '(monitor.id:foo) and (monitor.name:bar)'
+      '(monitor.id:foo) AND (monitor.name:bar)'
     );
   });
 });

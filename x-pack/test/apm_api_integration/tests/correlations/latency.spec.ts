@@ -220,28 +220,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         }
 
-        const failedtransactionsFieldStats = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations/field_stats/transactions',
-          params: {
-            body: {
-              ...getOptions(),
-              fieldsToSample: [...fieldsToSample],
-            },
-          },
-        });
-
         const finalRawResponse: LatencyCorrelationsResponse = {
           ccsWarning,
           percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
           overallHistogram: overallDistributionResponse.body?.overallHistogram,
           latencyCorrelations,
-          fieldStats: failedtransactionsFieldStats.body?.stats,
         };
 
         // Fetched 95th percentile value of 1309695.875 based on 1244 documents.
         expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
         expect(finalRawResponse?.overallHistogram?.length).to.be(101);
-        expect(finalRawResponse?.fieldStats?.length).to.be(fieldsToSample.size);
 
         // Identified 13 significant correlations out of 379 field/value pairs.
         expect(finalRawResponse?.latencyCorrelations?.length).to.eql(
@@ -258,13 +246,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(correlation?.correlation).to.be(0.6275246559191225);
         expect(correlation?.ksTest).to.be(4.806503252860024e-13);
         expect(correlation?.histogram?.length).to.be(101);
-
-        const fieldStats = finalRawResponse?.fieldStats?.[0];
-        expect(typeof fieldStats).to.be('object');
-        expect(
-          Array.isArray(fieldStats?.topValues) && fieldStats?.topValues?.length
-        ).to.greaterThan(0);
-        expect(fieldStats?.topValuesSampleSize).to.greaterThan(0);
       });
     }
   );

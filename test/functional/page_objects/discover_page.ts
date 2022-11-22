@@ -247,6 +247,10 @@ export class DiscoverPageObject extends FtrService {
     return parseInt(await this.getHitCount(), 10);
   }
 
+  public async getSavedSearchDocumentCount() {
+    return await this.testSubjects.getVisibleText('savedSearchTotalDocuments');
+  }
+
   public async getDocHeader() {
     const table = await this.getDocTable();
     const docHeader = await table.getHeaders();

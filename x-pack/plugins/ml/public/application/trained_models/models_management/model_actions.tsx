@@ -20,7 +20,7 @@ import { getAnalysisType } from '../../../../common/util/analytics_utils';
 import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constants/trained_models';
-import { isTestable, isTestEnabled } from './test_models';
+import { isTestable } from './test_models';
 import { ModelItem } from './models_list';
 
 export function useModelActions({
@@ -31,7 +31,7 @@ export function useModelActions({
   fetchModels,
 }: {
   isLoading: boolean;
-  onTestAction: (model: ModelItem) => void;
+  onTestAction: (model: string) => void;
   onModelsDeleteRequest: (modelsIds: string[]) => void;
   onLoading: (isLoading: boolean) => void;
   fetchModels: () => void;
@@ -360,8 +360,8 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         available: isTestable,
-        onClick: onTestAction,
-        enabled: (item) => canTestTrainedModels && isTestEnabled(item),
+        onClick: (item) => onTestAction(item.model_id),
+        enabled: (item) => canTestTrainedModels && isTestable(item, true),
       },
     ],
     [
