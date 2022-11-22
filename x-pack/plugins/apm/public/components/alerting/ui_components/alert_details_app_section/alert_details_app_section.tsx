@@ -12,12 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  ALERT_DURATION,
-  ALERT_END,
-} from '@kbn/rule-data-utils';
+import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
@@ -41,7 +36,11 @@ import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
-import { AlertDetailsAppSectionProps } from './types';
+import {
+  AlertDetailsAppSectionProps,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from './types';
 import { getAggsTypeFromRule } from './helpers';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';

@@ -19,9 +19,6 @@ const EVENT_ACTION = 'event.action' as const;
 const EVENT_KIND = 'event.kind' as const;
 const EVENT_MODULE = 'event.module' as const;
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
-// TODO: SERVICE_NAME and TRANSACTION_TYPE are APM fields and need to be moved and parsed in initializeIndex
-const SERVICE_NAME = 'service.name' as const;
-const TRANSACTION_TYPE = 'transaction.type' as const;
 const TAGS = 'tags' as const;
 const TIMESTAMP = '@timestamp' as const;
 const VERSION = `${KIBANA_NAMESPACE}.version` as const;
@@ -118,8 +115,6 @@ const fields = {
   EVENT_KIND,
   EVENT_ACTION,
   EVENT_MODULE,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
   TAGS,
   TIMESTAMP,
   ALERT_ACTION_GROUP,
@@ -262,9 +257,7 @@ export {
   ALERT_SUPPRESSION_DOCS_COUNT,
   TAGS,
   TIMESTAMP,
-  TRANSACTION_TYPE,
   SPACE_IDS,
-  SERVICE_NAME,
   VERSION,
 };
 
