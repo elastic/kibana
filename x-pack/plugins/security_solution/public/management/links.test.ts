@@ -96,6 +96,7 @@ describe('links', () => {
         canUnIsolateHost: false,
         canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -114,6 +115,7 @@ describe('links', () => {
         canUnIsolateHost: true,
         canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
@@ -133,6 +135,7 @@ describe('links', () => {
         canUnIsolateHost: true,
         canAccessEndpointManagement: false,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 1 });
 
@@ -166,6 +169,7 @@ describe('links', () => {
         canIsolateHost: false,
         canUnIsolateHost: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
@@ -184,6 +188,7 @@ describe('links', () => {
         canIsolateHost: false,
         canUnIsolateHost: true,
         canReadActionsLogManagement: false,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
@@ -198,6 +203,23 @@ describe('links', () => {
             link.id !== SecurityPageName.hostIsolationExceptions &&
             link.id !== SecurityPageName.responseActionsHistory
         ),
+      });
+    });
+  });
+  describe('Endpoint List', () => {
+    it('should return all but endpoints link when no Endpoint List READ access', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadEndpointList: false,
+        })
+      );
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+      expect(filteredLinks).toEqual({
+        ...links,
+        links: links.links?.filter((link) => link.id !== SecurityPageName.endpoints),
       });
     });
   });
