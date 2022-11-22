@@ -3838,6 +3838,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-file-util@link:bazel-bin/packages/shared-ux/file/util":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-link-redirect-app-mocks@link:bazel-bin/packages/shared-ux/link/redirect_app/mocks":
   version "0.0.0"
   uid ""
