@@ -15,54 +15,12 @@ import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { parseStream } from './parse_stream';
+import { testData } from './test_data';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
-
-  const requestBody: ApiExplainLogRateSpikes['body'] = {
-    baselineMax: 1561719083292,
-    baselineMin: 1560954147006,
-    deviationMax: 1562254538692,
-    deviationMin: 1561986810992,
-    end: 2147483647000,
-    index: 'ft_ecommerce',
-    searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
-    start: 0,
-    timeFieldName: 'order_date',
-  };
-
-  const expected = {
-    chunksLength: 34,
-    actionsLength: 33,
-    noIndexChunksLength: 4,
-    noIndexActionsLength: 3,
-    changePointFilter: 'add_change_points',
-    histogramFilter: 'add_change_points_histogram',
-    errorFilter: 'add_error',
-    changePoints: [
-      {
-        fieldName: 'day_of_week',
-        fieldValue: 'Wednesday',
-        doc_count: 145,
-        bg_count: 142,
-        score: 36.31595998561873,
-        pValue: 1.6911377077437753e-16,
-        normalizedScore: 0.8055203624020835,
-      },
-      {
-        fieldName: 'day_of_week',
-        fieldValue: 'Thursday',
-        doc_count: 157,
-        bg_count: 224,
-        score: 20.366950718358762,
-        pValue: 1.428057484826135e-9,
-        normalizedScore: 0.7661649691018979,
-      },
-    ],
-    histogramLength: 20,
-  };
 
   describe('POST /internal/aiops/explain_log_rate_spikes', () => {
     const esArchiver = getService('esArchiver');
@@ -94,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const chunks: string[] = resp.body.toString().split('\n');
 
-      expect(chunks.length).to.be(expected.chunksLength);
+      expect(chunks.length).to.be(testData.expected.chunksLength);
 
       const lastChunk = chunks.pop();
       expect(lastChunk).to.be('');
@@ -105,12 +63,14 @@ export default ({ getService }: FtrProviderContext) => {
         data = chunks.map((c) => JSON.parse(c));
       }).not.to.throwError();
 
-      expect(data.length).to.be(expected.actionsLength);
+      expect(data.length).to.be(testData.expected.actionsLength);
       data.forEach((d) => {
         expect(typeof d.type).to.be('string');
       });
 
-      const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
+      const addChangePointsActions = data.filter(
+        (d) => d.type === testData.expected.changePointFilter
+      );
       expect(addChangePointsActions.length).to.greaterThan(0);
 
       const changePoints = addChangePointsActions
@@ -122,16 +82,16 @@ export default ({ getService }: FtrProviderContext) => {
           return a.fieldName > b.fieldName ? 1 : -1;
         });
 
-      expect(changePoints.length).to.equal(expected.changePoints.length);
+      expect(changePoints.length).to.equal(testData.expected.changePoints.length);
       changePoints.forEach((cp, index) => {
-        const ecp = expected.changePoints[index];
+        const ecp = testData.expected.changePoints[index];
         expect(cp.fieldName).to.equal(ecp.fieldName);
         expect(cp.fieldValue).to.equal(ecp.fieldValue);
         expect(cp.doc_count).to.equal(ecp.doc_count);
         expect(cp.bg_count).to.equal(ecp.bg_count);
       });
 
-      const histogramActions = data.filter((d) => d.type === expected.histogramFilter);
+      const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
       const histograms = histogramActions.flatMap((d) => d.payload);
       // for each change point we should get a histogram
       expect(histogramActions.length).to.be(changePoints.length);
@@ -142,19 +102,23 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     it('should return full data without streaming with compression with flushFix', async () => {
-      await requestWithoutStreaming(requestBody);
+      await requestWithoutStreaming(testData.requestBody);
     });
 
     it('should return full data without streaming with compression without flushFix', async () => {
-      await requestWithoutStreaming({ ...requestBody, flushFix: false });
+      await requestWithoutStreaming({ ...testData.requestBody, flushFix: false });
     });
 
     it('should return full data without streaming without compression with flushFix', async () => {
-      await requestWithoutStreaming({ ...requestBody, compressResponse: false });
+      await requestWithoutStreaming({ ...testData.requestBody, compressResponse: false });
     });
 
     it('should return full data without streaming without compression without flushFix', async () => {
-      await requestWithoutStreaming({ ...requestBody, compressResponse: false, flushFix: false });
+      await requestWithoutStreaming({
+        ...testData.requestBody,
+        compressResponse: false,
+        flushFix: false,
+      });
     });
 
     async function requestWithStreaming(body: ApiExplainLogRateSpikes['body']) {
@@ -195,9 +159,11 @@ export default ({ getService }: FtrProviderContext) => {
         // If streaming works correctly we should receive more than one chunk.
         expect(chunkCounter).to.be.greaterThan(1);
 
-        expect(data.length).to.be(expected.actionsLength);
+        expect(data.length).to.be(testData.expected.actionsLength);
 
-        const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
+        const addChangePointsActions = data.filter(
+          (d) => d.type === testData.expected.changePointFilter
+        );
         expect(addChangePointsActions.length).to.greaterThan(0);
 
         const changePoints = addChangePointsActions
@@ -209,16 +175,16 @@ export default ({ getService }: FtrProviderContext) => {
             return a.fieldName > b.fieldName ? 1 : -1;
           });
 
-        expect(changePoints.length).to.equal(expected.changePoints.length);
+        expect(changePoints.length).to.equal(testData.expected.changePoints.length);
         changePoints.forEach((cp, index) => {
-          const ecp = expected.changePoints[index];
+          const ecp = testData.expected.changePoints[index];
           expect(cp.fieldName).to.equal(ecp.fieldName);
           expect(cp.fieldValue).to.equal(ecp.fieldValue);
           expect(cp.doc_count).to.equal(ecp.doc_count);
           expect(cp.bg_count).to.equal(ecp.bg_count);
         });
 
-        const histogramActions = data.filter((d) => d.type === expected.histogramFilter);
+        const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
         const histograms = histogramActions.flatMap((d) => d.payload);
         // for each change point we should get a histogram
         expect(histogramActions.length).to.be(changePoints.length);
@@ -230,19 +196,23 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     it('should return data in chunks with streaming with compression with flushFix', async () => {
-      await requestWithStreaming(requestBody);
+      await requestWithStreaming(testData.requestBody);
     });
 
     it('should return data in chunks with streaming with compression without flushFix', async () => {
-      await requestWithStreaming({ ...requestBody, flushFix: false });
+      await requestWithStreaming({ ...testData.requestBody, flushFix: false });
     });
 
     it('should return data in chunks with streaming without compression with flushFix', async () => {
-      await requestWithStreaming({ ...requestBody, compressResponse: false });
+      await requestWithStreaming({ ...testData.requestBody, compressResponse: false });
     });
 
     it('should return data in chunks with streaming without compression without flushFix', async () => {
-      await requestWithStreaming({ ...requestBody, compressResponse: false, flushFix: false });
+      await requestWithStreaming({
+        ...testData.requestBody,
+        compressResponse: false,
+        flushFix: false,
+      });
     });
 
     it('should return an error for non existing index without streaming', async () => {
@@ -250,14 +220,14 @@ export default ({ getService }: FtrProviderContext) => {
         .post(`/internal/aiops/explain_log_rate_spikes`)
         .set('kbn-xsrf', 'kibana')
         .send({
-          ...requestBody,
+          ...testData.requestBody,
           index: 'does_not_exist',
         })
         .expect(200);
 
       const chunks: string[] = resp.body.toString().split('\n');
 
-      expect(chunks.length).to.be(expected.noIndexChunksLength);
+      expect(chunks.length).to.be(testData.expected.noIndexChunksLength);
 
       const lastChunk = chunks.pop();
       expect(lastChunk).to.be('');
@@ -268,12 +238,12 @@ export default ({ getService }: FtrProviderContext) => {
         data = chunks.map((c) => JSON.parse(c));
       }).not.to.throwError();
 
-      expect(data.length).to.be(expected.noIndexActionsLength);
+      expect(data.length).to.be(testData.expected.noIndexActionsLength);
       data.forEach((d) => {
         expect(typeof d.type).to.be('string');
       });
 
-      const errorActions = data.filter((d) => d.type === expected.errorFilter);
+      const errorActions = data.filter((d) => d.type === testData.expected.errorFilter);
       expect(errorActions.length).to.be(1);
 
       expect(errorActions[0].payload).to.be('Failed to fetch index information.');
