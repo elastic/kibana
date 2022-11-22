@@ -28,7 +28,6 @@ export const StepScreenshotDetails = ({ stepIndex }: { stepIndex: number }) => {
             initialStepNo={stepIndex}
             stepStatus={'up'}
             allStepsLoaded={true}
-            stepLabels={[]}
             retryFetchOnRevisit={false}
             asThumbnail={false}
             size="m"

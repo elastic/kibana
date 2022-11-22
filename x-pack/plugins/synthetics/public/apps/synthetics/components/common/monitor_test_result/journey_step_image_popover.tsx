@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
 import { EuiImage, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -172,12 +172,16 @@ export const JourneyStepImagePopover: React.FC<StepImagePopoverProps> = ({
     }
   }, [imgSrc, imageData]);
 
+  useEffect(() => {
+    setImageData(undefined);
+  }, [imgRef]);
+
   const setImageDataCallback = React.useCallback(
     (newImageData: string | undefined) => setImageData(newImageData),
     [setImageData]
   );
 
-  const isImageLoading = isLoading || (!!imgRef && !imageData);
+  const isImageLoading = isLoading || !imgRef || !imageData;
 
   const thumbnailS = asThumbnail ? thumbnailStyle : null;
 
