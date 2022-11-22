@@ -76,7 +76,7 @@ export const MonitorDetailsLocation: React.FC = () => {
                   onClick={() => {
                     closeLocationList();
                     services.application!.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
-                      path: `/monitor/${monitor.id}?locationId=${fullLocation.id}`,
+                      path: `/monitor/${monitor.config_id}?locationId=${fullLocation.id}`,
                     });
                   }}
                 >
