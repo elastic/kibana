@@ -135,7 +135,8 @@ export const setInitializeDataTableSettings = ({
   dataTableSettingsProps,
 }: InitializeDataTableParams): TableById => {
   const dataTable = tableById[id];
-  return !dataTable || !dataTable.initialized
+
+  return !dataTable?.initialized
     ? {
         ...tableById,
         [id]: {

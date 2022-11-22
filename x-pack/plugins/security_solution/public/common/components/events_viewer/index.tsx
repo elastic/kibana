@@ -25,7 +25,7 @@ import type {
   SetEventsLoading,
   TableId,
 } from '../../../../common/types';
-import { dataTableActions, dataTableSelectors } from '../../store/data_table';
+import { dataTableActions } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -68,7 +68,6 @@ import type { ViewSelection } from './summary_view_select';
 import { RightTopMenu } from './right_top_menu';
 import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 const storage = new Storage(localStorage);
 
@@ -130,7 +129,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     query,
     dataTable: {
       columns,
-      // defaultColumns,
+      defaultColumns,
       deletedEventIds,
       graphEventId, // If truthy, the graph viewer (Resolver) is showing
       itemsPerPage,
@@ -138,20 +137,15 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       sessionViewConfig,
       showCheckboxes,
       sort,
-      title,
-      initialized,
+      queryFields,
+      selectAll,
       selectedEventIds,
       isSelectAllChecked,
       loadingEventIds,
-      // queryFields,
-      // selectAll,
+      title,
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
-  const getManageTimeline = useMemo(() => dataTableSelectors.getManageDataTableById(), []);
-  const { queryFields, selectAll, defaultColumns } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, tableId)
-  );
   const { uiSettings, data } = useKibana().services;
 
   const [tableView, setTableView] = useState<ViewSelection>(
@@ -397,10 +391,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           hasAlertsCrud ?? false
         ),
         isSelected,
-        isSelectAllChecked: isSelected && selectedCount + 1 === events.length,
+        isSelectAllChecked: isSelected && selectedCount + 1 === nonDeletedEvents.length,
       });
     },
-    [tableId, nonDeletedEvents, queryFields, hasAlertsCrud, selectedCount, events.length]
+    [tableId, nonDeletedEvents, queryFields, hasAlertsCrud, selectedCount]
   );
 
   const onSelectPage: OnSelectAll = useCallback(
@@ -517,7 +511,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                     loading={loading}
                     tableId={tableId}
                     title={title}
-                    onViewChange={() => setTableView}
+                    onViewChange={(selectedView) => setTableView(selectedView)}
                     additionalFilters={additionalFilters}
                   />
 

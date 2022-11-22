@@ -4,3 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { draggableKeyDownHandler } from './helpers';
+
+jest.mock('../../../lib/kibana');
+let spy;
+beforeAll(() => {
+  spy = jest.spyOn(document, 'getElementById');
+});
+describe('draggableKeyDownHandler', () => {
+  test('it renders against the snapshot', () => {
+    const mockElement = document.createElement('div');
+    const keyboardEvent = new KeyboardEvent('keydown', {
+      ctrlKey: false,
+      key: 'Escape',
+      metaKey: false,
+    }) as unknown as React.KeyboardEvent;
+    const res = draggableKeyDownHandler({
+      closePopover: jest.fn(),
+      openPopover: jest.fn(),
+      beginDrag: jest.fn(),
+      cancelDragActions: jest.fn(),
+      draggableElement: mockElement,
+      dragActions: null,
+      dragToLocation: jest.fn(),
+      endDrag: jest.fn(),
+      keyboardEvent,
+      setDragActions: jest.fn(),
+    });
+    expect(res).toBe({});
+  });
+});
