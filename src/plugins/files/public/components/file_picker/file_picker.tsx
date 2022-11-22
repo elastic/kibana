@@ -16,8 +16,10 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiFlexGroup,
+  useEuiTheme,
 } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import type { DoneNotification } from '../upload_file';
 import { useBehaviorSubject } from '../use_behavior_subject';
 import { useFilePickerContext, FilePickerContext } from './context';
@@ -29,7 +31,6 @@ import { FileGrid } from './components/file_grid';
 import { SearchField } from './components/search_field';
 import { ModalFooter } from './components/modal_footer';
 
-import './file_picker.scss';
 import { ClearFilterButton } from './components/clear_filter_button';
 import type { FileJSON } from '../../../common';
 
@@ -66,6 +67,7 @@ type InnerProps = Required<Pick<Props, 'onClose' | 'onDone' | 'onUpload' | 'mult
 
 const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, multiple }) => {
   const { state, kind } = useFilePickerContext();
+  const { euiTheme } = useEuiTheme();
 
   const hasFiles = useBehaviorSubject(state.hasFiles$);
   const hasQuery = useBehaviorSubject(state.hasQuery$);
@@ -84,6 +86,12 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
       className="filesFilePicker filesFilePicker--fixed"
       maxWidth="75vw"
       onClose={onClose}
+      css={css`
+        @media screen and (min-width: ${euiTheme.breakpoint.l}px) {
+          width: 75vw;
+          height: 75vh;
+        }
+      `}
     >
       <EuiModalHeader>
         <Title multiple={multiple} />
@@ -92,7 +100,14 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
       {isLoading ? (
         <>
           <EuiModalBody>
-            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
+            <EuiFlexGroup
+              css={css`
+                height: 100%;
+              `}
+              justifyContent="center"
+              alignItems="center"
+              gutterSize="none"
+            >
               <EuiLoadingSpinner data-test-subj="loadingSpinner" size="xl" />
             </EuiFlexGroup>
           </EuiModalBody>
