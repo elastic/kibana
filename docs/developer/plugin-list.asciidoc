@@ -464,6 +464,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/custom_branding/README.md[customBranding]
+|This is a plugin to configure custom branding.
+This plugin is currently under active development; do not use.
+
+
 |<<dashboard-enhanced-plugin>>
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
