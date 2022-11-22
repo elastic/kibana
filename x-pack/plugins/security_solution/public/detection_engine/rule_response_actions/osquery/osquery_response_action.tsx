@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import { isEmpty, map } from 'lodash';
+import React, { useMemo, useRef } from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import type { ResponseActionValidatorRef } from '../response_actions_form';
 import type { ArrayItem, ValidationFunc } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
 import {
@@ -20,9 +20,12 @@ import {
 } from './translations';
 import { UseField } from '../../../shared_imports';
 
-interface IProps {
+interface ResponseActionValidatorRef {
+  validation: Record<string, unknown>;
+}
+
+interface OsqueryResponseActionProps {
   item: ArrayItem;
-  formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 
 const emptyParamsValidator = (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
@@ -37,7 +40,8 @@ const emptyParamsValidator = (...args: Parameters<ValidationFunc>): ReturnType<V
 
 const GhostFormField = () => <></>;
 
-export const OsqueryResponseAction = React.memo((props: IProps) => {
+export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionProps) => {
+  const formRef = useRef<ResponseActionValidatorRef>(null);
   const { osquery, application } = useKibana().services;
   const OsqueryForm = useMemo(
     () => osquery?.OsqueryResponseActionTypeForm,
@@ -75,12 +79,10 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
             body={
               <p>
                 <FormattedMessage
-                  id="xpack.securitySolution.osquery.action.missingPrivilleges"
+                  id="xpack.securitySolution.osquery.action.missingPrivileges"
                   defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
                   values={{
-                    // TODO fix error
-                    // eslint-disable-next-line react/jsx-no-literals
-                    osquery: <EuiCode>osquery</EuiCode>,
+                    osquery: <EuiCode>{'osquery'}</EuiCode>,
                   }}
                 />
               </p>
@@ -114,7 +116,32 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
       );
     }
     if (isMounted() && OsqueryForm) {
-      return <OsqueryForm {...props} />;
+      return (
+        <UseField
+          path={`${props.item.path}.params`}
+          component={() => <OsqueryForm {...props} formRef={formRef} />}
+          validationDataProvider={() => formRef.current}
+          config={{
+            validations: [
+              {
+                validator: (payload) => {
+                  const errors = payload.customData.provider().validation;
+
+                  if (!isEmpty(errors)) {
+                    return {
+                      message: map(
+                        errors,
+                        (value) => value.message
+                      ).join('/n'),
+                    };
+                  }
+                },
+              },
+            ],
+          }}
+          readDefaultValueOnForm={!props.item.isNew}
+        />
+      );
     }
   }
 

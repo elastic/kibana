@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { isEmpty, map } from 'lodash';
+import { map, reduce, upperFirst } from 'lodash';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
-import type { ValidationError } from '@kbn/osquery-plugin/public/shared_imports';
-import { getCustomErrorMessage, validateForEmptyParams } from './validations';
 import { FORM_ERRORS_TITLE } from '../../detections/components/rules/rule_actions_field/translations';
 import { ResponseActionsHeader } from './response_actions_header';
 import { ResponseActionsList } from './response_actions_list';
@@ -26,105 +24,73 @@ const FieldErrorsContainer = styled.div`
   }
 `;
 
-export interface ResponseActionValidatorRef {
-  validation: {
-    [key: string]: () => Promise<{ errors: ValidationError<string>; path: string }>;
-  };
-}
-
-interface IProps {
+interface ResponseActionsFormProps {
   items: ArrayItem[];
   addItem: () => void;
   removeItem: (id: number) => void;
-  saveClickRef: React.RefObject<{
-    onSaveClick?: () => void;
-  }>;
 }
 
-export const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }: IProps) => {
-  const responseActionsValidationRef = useRef<ResponseActionValidatorRef>({ validation: {} });
+export const ResponseActionsForm = ({ items, addItem, removeItem }: ResponseActionsFormProps) => {
   const supportedResponseActionTypes = useSupportedResponseActionTypes();
   const [uiFieldErrors, setUIFieldErrors] = useState<string | null>(null);
   const [formData] = useFormData();
-  const { getFields, validate } = useFormContext();
+  const { getFields, getErrors } = useFormContext();
   const fields = getFields();
-
-  // connect the custom response action validation with the wrapping form
-  const validateResponseActions = useCallback(async () => {
-    await validate();
-    if (formData?.responseActions?.length) {
-      // if the specific response action has a validation function, call it
-      if (!isEmpty(responseActionsValidationRef.current?.validation)) {
-        await Promise.all(
-          map(responseActionsValidationRef.current?.validation, async (validation) => {
-            const response = await validation();
-            const paramsErrors: Array<ValidationError<string>> = [];
-
-            if (isEmpty(response.errors)) {
-              fields[`${response.path}.params`]?.clearErrors('field');
-            } else {
-              map(response.errors, (error) => {
-                if (!isEmpty(error)) {
-                  const message = !isEmpty(error.message)
-                    ? error.message
-                    : getCustomErrorMessage(error.ref.name);
-                  const errorObject = {
-                    code: 'ERR_FIELD_MISSING',
-                    path: `${response.path}.params`,
-                    message: `**ResponseActions:** \n ${message}\n `,
-                  };
-
-                  fields[`${response.path}.params`]?.setErrors([errorObject]);
-                  paramsErrors.push(errorObject);
-                  const errorsString = paramsErrors
-                    ?.map((paramsError) => paramsError?.message)
-                    .join('\n');
-                  setUIFieldErrors(errorsString);
-                } else {
-                  setUIFieldErrors(null);
-                }
-              });
-            }
-          })
-        );
-      } else {
-        // Response Action Item created in UseArray, but not yet initialized (has no params) - eg. Osquery response action without permissions
-        const errorStrings = validateForEmptyParams(formData.responseActions, fields);
-
-        setUIFieldErrors(errorStrings);
-      }
-    } else {
-      setUIFieldErrors(null);
-    }
-  }, [fields, formData.responseActions, validate]);
-  useEffect(() => {
-    if (saveClickRef && saveClickRef.current) {
-      saveClickRef.current.onSaveClick = () => {
-        return validateResponseActions();
-      };
-    }
-  }, [saveClickRef, validateResponseActions]);
+  const errors = getErrors();
 
   const form = useMemo(() => {
     if (!supportedResponseActionTypes?.length) {
       return null;
     }
+
     return (
       <ResponseActionsList
         items={items}
         removeItem={removeItem}
         supportedResponseActionTypes={supportedResponseActionTypes}
         addItem={addItem}
-        formRef={responseActionsValidationRef}
       />
     );
-  }, [addItem, responseActionsValidationRef, items, removeItem, supportedResponseActionTypes]);
+  }, [addItem, items, removeItem, supportedResponseActionTypes]);
+
+  useEffect(() => {
+    setUIFieldErrors(() => {
+      const fieldErrors = reduce(
+        map(items, 'path'),
+        (acc, path) => {
+          if (fields[`${path}.params`]?.errors?.length) {
+            acc.push({
+              type: upperFirst(fields[`${path}.actionTypeId`].value.substring(1)),
+              errors: map(fields[`${path}.params`].errors, 'message'),
+            });
+            return acc;
+          }
+
+          return acc;
+        },
+        []
+      );
+
+      return reduce(
+        fieldErrors,
+        (acc, error) => {
+          acc.push(`**${error.type}:**\n`);
+          error.errors.forEach((err) => {
+            acc.push(`- ${err}\n`);
+          });
+
+          return acc;
+        },
+        []
+      ).join('\n');
+    });
+  }, [fields, errors, items]);
 
   return (
     <>
       <EuiSpacer size="xxl" data-test-subj={'response-actions-form'} />
       <ResponseActionsHeader />
-      {uiFieldErrors ? (
+      {uiFieldErrors?.length ? (
         <>
           <FieldErrorsContainer>
             <EuiCallOut

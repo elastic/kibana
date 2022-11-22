@@ -80,7 +80,7 @@ export const useOsqueryTab = ({
         titleSize="xs"
         body={
           <FormattedMessage
-            id="xpack.securitySolution.osquery.results.missingPrivilleges"
+            id="xpack.securitySolution.osquery.results.missingPrivileges"
             defaultMessage="To access these results, ask your administrator for {osquery} Kibana
               privileges."
             values={{

@@ -17,11 +17,10 @@ import {
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
 import type { FC } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ValidationError } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
@@ -144,15 +143,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [getFields, onSubmit]
   );
 
-  const saveClickRef = useRef<{
-    onSaveClick: () => Promise<{ errors: ValidationError<string>; index: number }> | null;
-  }>({
-    onSaveClick: () => null,
-  });
-
   const getData = useCallback(async () => {
-    await saveClickRef.current.onSaveClick();
-
     const result = await submit();
     return result?.isValid
       ? result
@@ -215,7 +206,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     if (isQueryRule(ruleType)) {
       return (
         <UseArray path="responseActions" initialNumberOfItems={0}>
-          {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
+          {ResponseActionsForm}
         </UseArray>
       );
     }

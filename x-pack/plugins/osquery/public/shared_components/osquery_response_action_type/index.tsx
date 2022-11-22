@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useImperativeHandle,
+} from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
+import type { UseFormReturn } from 'react-hook-form';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { get, map, omit } from 'lodash';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import { useFormContext, useFormData } from '../../shared_imports';
-import type { ArrayItem, ValidationError } from '../../shared_imports';
+import type { ArrayItem } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
 import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
 import { PackFieldWrapper } from './pack_field_wrapper';
@@ -26,10 +34,8 @@ interface OsqueryResponseActionsParamsFormProps {
   item: ArrayItem;
 }
 
-interface ResponseActionValidatorRef {
-  validation: {
-    [key: string]: () => Promise<{ errors: ValidationError<string>; path: string }>;
-  };
+export interface ResponseActionValidatorRef {
+  validation: UseFormReturn<OsqueryResponseActionsParamsFormFields>['formState']['errors'];
 }
 
 interface OsqueryResponseActionsParamsFormFields {
@@ -66,7 +72,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
         },
   });
 
-  const { watch, register, formState, handleSubmit, reset, trigger } = hooksForm;
+  const { watch, register, formState, handleSubmit, reset } = hooksForm;
   const { errors } = formState;
 
   const watchedValues = watch();
@@ -108,20 +114,13 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
     [updateFieldValues, item.path, packData, queryType]
   );
 
-  useEffect(() => {
-    // @ts-expect-error update types
-    if (ref && ref.current) {
-      // @ts-expect-error update types
-      ref.current.validation[item.id] = async () => {
-        await trigger();
-
-        return {
-          errors,
-          path: item.path,
-        };
-      };
-    }
-  }, [errors, item.id, item.path, trigger, ref]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      validation: errors,
+    }),
+    [errors]
+  );
 
   useEffect(() => {
     register('savedQueryId');

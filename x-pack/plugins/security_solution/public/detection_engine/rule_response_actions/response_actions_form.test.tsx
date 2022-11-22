@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { render } from '@testing-library/react';
 
 import { ResponseActionsForm } from './response_actions_form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type {
-  ArrayItem,
-  ValidationError,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 const renderWithContext = (Element: React.ReactElement) => {
@@ -23,19 +20,9 @@ const renderWithContext = (Element: React.ReactElement) => {
 describe('ResponseActionsForm', () => {
   const Component = (props: { items: ArrayItem[] }) => {
     const { form } = useForm();
-    const saveClickRef = useRef<{
-      onSaveClick: () => Promise<{ errors: ValidationError<string>; index: number }> | null;
-    }>({
-      onSaveClick: () => null,
-    });
     return (
       <Form form={form}>
-        <ResponseActionsForm
-          addItem={jest.fn()}
-          removeItem={jest.fn()}
-          saveClickRef={saveClickRef}
-          {...props}
-        />
+        <ResponseActionsForm addItem={jest.fn()} removeItem={jest.fn()} {...props} />
       </Form>
     );
   };
