@@ -462,6 +462,39 @@ export const buildOSSFeatures = ({
       },
     },
     {
+      id: 'filesSharedImage',
+      name: i18n.translate('xpack.features.filesSharedImagesFeatureName', {
+        defaultMessage: 'Shared images',
+      }),
+      order: 1600,
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: ['kibana'],
+      catalogue: [],
+      privilegesTooltip: i18n.translate('xpack.features.filesSharedImagesPrivilegesTooltip', {
+        defaultMessage: 'Upload to or view the global set of images stored in Kibana',
+      }),
+      privileges: {
+        all: {
+          app: ['kibana'],
+          savedObject: {
+            all: ['files'],
+            read: [],
+          },
+          ui: [],
+          api: ['files:defaultImage'],
+        },
+        read: {
+          app: ['kibana'],
+          savedObject: {
+            all: [],
+            read: ['files'],
+          },
+          ui: [],
+          api: ['files:defaultImage'],
+        },
+      },
+    },
+    {
       id: 'savedObjectsManagement',
       name: i18n.translate('xpack.features.savedObjectsManagementFeatureName', {
         defaultMessage: 'Saved Objects Management',
