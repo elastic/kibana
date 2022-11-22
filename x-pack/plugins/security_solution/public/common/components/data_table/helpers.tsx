@@ -22,12 +22,12 @@ import type { ColumnHeaderOptions, SortDirection } from '../../../../common/type
  * @param fieldsToKeep
  */
 export const getEventIdToDataMapping = (
-  data: TimelineItem[],
+  timelineData: TimelineItem[],
   eventIds: string[],
   fieldsToKeep: string[],
   hasAlertsCrud: boolean
 ): Record<string, TimelineNonEcsData[]> =>
-  data.reduce((acc, v) => {
+  timelineData.reduce((acc, v) => {
     const fvm =
       hasAlertsCrud && eventIds.includes(v._id)
         ? { [v._id]: v.data.filter((ti) => fieldsToKeep.includes(ti.field)) }

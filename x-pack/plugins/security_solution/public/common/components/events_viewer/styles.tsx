@@ -11,6 +11,13 @@ import type { ViewSelection } from './summary_view_select';
 export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
 export const EVENTS_TABLE_CLASS_NAME = 'siemEventsTable';
 
+export const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
+  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
+  flex: 1 1 auto;
+  display: flex;
+  width: 100%;
+`;
+
 export const FullWidthFlexGroupTable = styled(EuiFlexGroup)<{ $visible: boolean }>`
   overflow: hidden;
   margin: 0;
