@@ -441,7 +441,7 @@ export const buildOSSFeatures = ({
             kibana: ['filesManagement'],
           },
           savedObject: {
-            all: ['files'],
+            all: ['file', 'fileShare'],
             read: [],
           },
           ui: [],
@@ -454,7 +454,7 @@ export const buildOSSFeatures = ({
           },
           savedObject: {
             all: [],
-            read: ['files'],
+            read: ['file', 'fileShare'],
           },
           ui: [],
           api: ['files:manageFiles', 'files:defaultImage'],
@@ -471,13 +471,13 @@ export const buildOSSFeatures = ({
       app: ['kibana'],
       catalogue: [],
       privilegesTooltip: i18n.translate('xpack.features.filesSharedImagesPrivilegesTooltip', {
-        defaultMessage: 'Upload to or view the global set of images stored in Kibana',
+        defaultMessage: 'Control access to the global set of images stored in Kibana',
       }),
       privileges: {
         all: {
           app: ['kibana'],
           savedObject: {
-            all: ['files'],
+            all: ['file'],
             read: [],
           },
           ui: [],
@@ -487,7 +487,7 @@ export const buildOSSFeatures = ({
           app: ['kibana'],
           savedObject: {
             all: [],
-            read: ['files'],
+            read: ['file'],
           },
           ui: [],
           api: ['files:defaultImage'],
