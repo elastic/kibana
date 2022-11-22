@@ -10,8 +10,6 @@ import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/u
 import { render } from '../../../utils/test_helper';
 import { AlertSummary } from './alert_summary';
 import { asDuration } from '../../../../common/utils/formatters';
-// import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-// import { useKibana } from '../../../utils/kibana_react';
 import { alertWithTags, alertWithNoData, tags } from '../mock/alert';
 
 jest.mock('react-router-dom', () => ({
@@ -21,16 +19,6 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../../../utils/kibana_react');
 
-// const useKibanaMock = useKibana as jest.Mock;
-
-// const mockKibana = () => {
-//   useKibanaMock.mockReturnValue({
-//     services: {
-//       ...kibanaStartMock.startContract(),
-//     },
-//   });
-// };
-
 describe('Alert summary', () => {
   jest
     .spyOn(useUiSettingHook, 'useUiSetting')
@@ -38,7 +26,6 @@ describe('Alert summary', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // mockKibana();
   });
 
   it('should show alert data', async () => {
