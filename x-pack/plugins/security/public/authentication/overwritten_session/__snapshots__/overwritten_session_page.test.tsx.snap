@@ -34,7 +34,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
     class="secAuthenticationStatePage__content eui-textCenter"
   >
     <a
-      class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
       href="/mock-base-path/"
       rel="noreferrer"
     >

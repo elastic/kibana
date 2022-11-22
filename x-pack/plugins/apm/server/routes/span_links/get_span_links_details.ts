@@ -20,7 +20,7 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
   AGENT_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
 import { SpanLinkDetails } from '../../../common/span_links';
 import { SpanLink } from '../../../typings/es_schemas/raw/fields/span_links';

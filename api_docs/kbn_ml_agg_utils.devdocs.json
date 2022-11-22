@@ -442,6 +442,39 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.getSampleProbability",
+        "type": "Function",
+        "tags": [],
+        "label": "getSampleProbability",
+        "description": [],
+        "signature": [
+          "(totalDocCount: number) => number"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/get_sample_probability.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.getSampleProbability.$1",
+            "type": "number",
+            "tags": [],
+            "label": "totalDocCount",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/get_sample_probability.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-server.getSamplerAggregationsResponsePath",
         "type": "Function",
         "tags": [],
@@ -1346,6 +1379,21 @@
           "; }"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.RANDOM_SAMPLER_SEED",
+        "type": "number",
+        "tags": [],
+        "label": "RANDOM_SAMPLER_SEED",
+        "description": [],
+        "signature": [
+          "3867412"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

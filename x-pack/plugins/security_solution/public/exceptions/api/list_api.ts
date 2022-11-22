@@ -10,6 +10,7 @@ import { fetchExceptionLists, updateExceptionList } from '@kbn/securitysolution-
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { getFilters } from '@kbn/securitysolution-list-utils';
 import type { List, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { asyncForEach } from '@kbn/std';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
 import type {
   FetchListById,
@@ -50,6 +51,10 @@ export const getListRules = async (listId: string) => {
     const abortCtrl = new AbortController();
     const { data: rules } = await fetchRules({
       signal: abortCtrl.signal,
+      pagination: {
+        page: 1,
+        perPage: 10000,
+      },
     });
     abortCtrl.abort();
     return rules.reduce((acc: Rule[], rule, index) => {
@@ -80,12 +85,13 @@ export const updateList = async ({ list, http }: UpdateExceptionList) => {
 
 export const unlinkListFromRules = async ({ rules, listId }: UnlinkListFromRules) => {
   try {
+    if (!rules.length) return;
     const abortCtrl = new AbortController();
-    rules.map((rule) => {
+    await asyncForEach(rules, async (rule) => {
       const exceptionLists: ListArray | [] = (rule.exceptions_list ?? []).filter(
         ({ list_id: id }) => id !== listId
       );
-      return patchRule({
+      await patchRule({
         ruleProperties: {
           rule_id: rule.rule_id,
           exceptions_list: exceptionLists,
@@ -106,8 +112,9 @@ export const linkListToRules = async ({
   listNamespaceType,
 }: LinkListToRules) => {
   try {
+    if (!rules.length) return;
     const abortCtrl = new AbortController();
-    rules.map((rule) => {
+    await asyncForEach(rules, async (rule) => {
       const newExceptionList: List = {
         list_id: listId,
         id,
@@ -115,7 +122,7 @@ export const linkListToRules = async ({
         namespace_type: listNamespaceType,
       };
       const exceptionLists: ListArray | [] = [...(rule.exceptions_list ?? []), newExceptionList];
-      return patchRule({
+      await patchRule({
         ruleProperties: {
           rule_id: rule.rule_id,
           exceptions_list: exceptionLists,
