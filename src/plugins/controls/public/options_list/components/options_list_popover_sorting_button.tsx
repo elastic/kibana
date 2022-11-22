@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   EuiButtonGroupOptionProps,
@@ -62,6 +62,7 @@ export const OptionsListPopoverSortingButton = ({
   const sort = select((state) => state.explicitInput.sort ?? DEFAULT_SORT);
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
+
   const [sortByOptions, setSortByOptions] = useState<SortByItem[]>(() => {
     return getCompatibleSortingTypes(field?.type).map((key) => {
       return {
@@ -73,19 +74,23 @@ export const OptionsListPopoverSortingButton = ({
       } as SortByItem;
     });
   });
-  const sortOrderOptions = sortDirections.map((key) => {
-    return {
-      id: key,
-      iconType: `sort${toSentenceCase(key)}ending`,
-      'data-test-subj': `optionsList__sortOrder_${key}`,
-      label: OptionsListStrings.editorAndPopover.sortOrder[key].getSortByLabel(),
-    } as SortOrderItem;
-  });
+
+  const sortOrderOptions = useMemo(
+    () =>
+      sortDirections.map((key) => {
+        return {
+          id: key,
+          iconType: `sort${toSentenceCase(key)}ending`,
+          'data-test-subj': `optionsList__sortOrder_${key}`,
+          label: OptionsListStrings.editorAndPopover.sortOrder[key].getSortByLabel(),
+        } as SortOrderItem;
+      }),
+    []
+  );
 
   const onSortByChange = (updatedOptions: SortByItem[]) => {
     setSortByOptions(updatedOptions);
     const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
-
     if (selectedOption) {
       dispatch(setSort({ by: selectedOption.data.sortBy }));
     }

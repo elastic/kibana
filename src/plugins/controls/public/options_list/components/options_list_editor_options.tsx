@@ -67,6 +67,7 @@ export const OptionsListEditorOptions = ({
   });
 
   useEffect(() => {
+    // when field type changes, ensure that the selected sort type is still valid
     if (!getCompatibleSortingTypes(fieldType).includes(state.sortBy)) {
       onChange({ sort: DEFAULT_SORT });
       setState((s) => ({ ...s, sortBy: DEFAULT_SORT.by, sortDirection: DEFAULT_SORT.direction }));

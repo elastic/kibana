@@ -347,7 +347,6 @@ export class DashboardPageControls extends FtrService {
     if (hideSort) await this.testSubjects.click(getSettingTestSubject('hideSort'));
     if (defaultSortType) {
       await this.testSubjects.click(`optionsListEditor__sortOrder_${defaultSortType.direction}`);
-      await this.common.sleep(6000);
       await this.testSubjects.click('optionsListControl__chooseSortBy');
       await this.testSubjects.click(`optionsListEditor__sortBy_${defaultSortType.by}`);
     }
