@@ -83,15 +83,25 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     values.every((value, i) => expect(value).to.be(sorted[i]));
   };
 
-  const toggleColumnSorting = async (columnName: string) => {
+  const toggleColumnSorting = async (columnName: string, direction: 'asc' | 'desc') => {
     const [_, element] = await getColumnIndex(FINDINGS_TABLE_TESTID, columnName);
     const currentSort = await element.getAttribute('aria-sort');
-    if (currentSort === 'none') await element.click(); // a click is needed to focus on Eui column header
+    if (currentSort === 'none') {
+      // a click is needed to focus on Eui column header
+      await element.click();
+      // default is ascending
+      if (direction === 'asc') return;
+    }
 
-    // Without getting the element again, the click throws an error (stale element reference)
-    const [__, nonStaleElement] = await getColumnIndex(FINDINGS_TABLE_TESTID, columnName);
+    if (
+      (currentSort === 'ascending' && direction === 'desc') ||
+      (currentSort === 'descending' && direction === 'asc')
+    ) {
+      // Without getting the element again, the click throws an error (stale element reference)
+      const [__, nonStaleElement] = await getColumnIndex(FINDINGS_TABLE_TESTID, columnName);
 
-    await nonStaleElement.click();
+      await nonStaleElement.click();
+    }
   };
 
   return {

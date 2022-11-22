@@ -34,14 +34,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       log.debug('CSP plugin is initialized');
     });
 
-  const indexFindings = async () =>
-    Promise.all(
+  const addFindingsIndex = async () => {
+    await waitForPluginInitialized();
+    await Promise.all(
       Array.from({ length: 11 }, (_, id) => {
-        // We only need to index fields that show up in table columns
         return es.index({
           index: FINDINGS_INDEX,
           body: {
-            resource: { id },
+            resource: { id, name: `Resource ${id}` },
             result: { evaluation: 'passed' },
             rule: {
               name: `Rule ${id}`,
@@ -53,14 +53,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       })
     );
+  };
 
   const removeFindingsIndex = () =>
     es.indices.delete({ index: FINDINGS_INDEX, ignore_unavailable: true });
 
   describe('Findings Page', () => {
     before(async () => {
-      await waitForPluginInitialized();
-      await indexFindings();
+      await addFindingsIndex();
       await pageObjects.findings.navigateToFindingsPage();
     });
 
@@ -68,17 +68,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await removeFindingsIndex();
     });
 
-    // Testing only a single column to verify the request we issue results in proper sorting
     describe('Sorting', () => {
       it('Sorts by rule name', async () => {
-        await pageObjects.findings.toggleColumnSorting('Rule');
-        await pageObjects.findings.assertColumnSorting('Rule', 'desc');
-        await pageObjects.findings.toggleColumnSorting('Rule');
+        await pageObjects.findings.toggleColumnSorting('Rule', 'asc');
         await pageObjects.findings.assertColumnSorting('Rule', 'asc');
+      });
+
+      it('Sorts by resource name', async () => {
+        await pageObjects.findings.toggleColumnSorting('Resource Name', 'desc');
+        await pageObjects.findings.assertColumnSorting('Resource Name', 'desc');
       });
     });
 
-    // Testing only page numbers buttons to verify the request we issue results in proper paginating
     describe('Pagination', () => {
       it('Changes rows per page', async () => {
         await pageObjects.findings.assertPageSize(25);
