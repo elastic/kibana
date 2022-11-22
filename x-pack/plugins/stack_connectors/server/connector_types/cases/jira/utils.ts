@@ -6,10 +6,10 @@
  */
 
 // These characters need to be escaped per Jira's search syntax, see for more details: https://confluence.atlassian.com/jirasoftwareserver/search-syntax-for-text-fields-939938747.html
-export const JQL_SPECIAL_CHARACTERS_REGEX = /[!^&*()+\-[\]\\/{}|:?~]/;
+export const JQL_SPECIAL_CHARACTERS_REGEX = /[-!^+&*()[\]\\/{}|:?~]/;
 
 const DOUBLE_BACKSLASH_REGEX = '\\\\$&';
 
 export const escapeJqlSpecialCharacters = (str: string) => {
-  return str.replace(new RegExp(JQL_SPECIAL_CHARACTERS_REGEX, 'g'), DOUBLE_BACKSLASH_REGEX);
+  return str.replaceAll('"','').replaceAll(/\\/g,'\\\\').replaceAll(/'/g,'\\\\').replaceAll(new RegExp(JQL_SPECIAL_CHARACTERS_REGEX, 'g'), DOUBLE_BACKSLASH_REGEX);
 };

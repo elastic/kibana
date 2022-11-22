@@ -12,8 +12,26 @@ describe('escapeJqlSpecialCharacters', () => {
     const str = '[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]';
     const escapedStr = escapeJqlSpecialCharacters(str);
     expect(escapedStr).toEqual(
-      '\\\\[th\\\\!s\\\\^is\\\\(\\\\)a\\\\-te\\\\+st\\\\-\\\\{\\\\~is\\\\*s\\\\&ue\\\\?or\\\\|and\\\\\\bye\\\\:\\\\}\\\\]"\\\\}\\\\]'
+      '\\\\[th\\\\!s\\\\^is\\\\(\\\\)a\\\\-te\\\\+st\\\\-\\\\{\\\\~is\\\\*s\\\\&ue\\\\?or\\\\|and\\\\\\\\\\\\bye\\\\:\\\\}\\\\]\\\\}\\\\]'
     );
+  });
+
+  it('should remove double quotes', () => {
+    const str = '"Hello"';
+    const escapedStr = escapeJqlSpecialCharacters(str);
+    expect(escapedStr).toEqual('Hello');
+  });
+
+  it('should replace single quotes with backslash', () => {
+    const str = 'Javascript\'s beauty is simplicity!';
+    const escapedStr = escapeJqlSpecialCharacters(str);
+    expect(escapedStr).toEqual('Javascript\\\\\\\\\\\\s beauty is simplicity\\\\!');
+  });
+
+  it('should replace single backslash with four backslash', () => {
+    const str = '\\I have one backslash';
+    const escapedStr = escapeJqlSpecialCharacters(str);
+    expect(escapedStr).toEqual('\\\\\\\\\\\\I have one backslash');
   });
 
   it('should not escape other special characters', () => {
@@ -31,7 +49,7 @@ describe('escapeJqlSpecialCharacters', () => {
   it('should not escape unicode spaces', () => {
     const str = 'comm\u2000=\u2001"hello"\u3000';
     const escapedStr = escapeJqlSpecialCharacters(str);
-    expect(escapedStr).toEqual('comm = "hello"　');
+    expect(escapedStr).toEqual('comm = hello　');
   });
 
   it('should not escape non ASCII characters', () => {
