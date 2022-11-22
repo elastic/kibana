@@ -56,11 +56,11 @@ export const OptionsListStrings = {
       }),
     getHideSortingTitle: () =>
       i18n.translate('controls.optionsList.editor.hideSort', {
-        defaultMessage: 'Allow suggestions to be sorted',
+        defaultMessage: 'Allow dynamic sorting of suggestions',
       }),
     getSuggestionsSortingTitle: () =>
       i18n.translate('controls.optionsList.editor.suggestionsSorting', {
-        defaultMessage: 'Sort',
+        defaultMessage: 'Default sort order',
       }),
   },
   popover: {
@@ -143,11 +143,11 @@ export const OptionsListStrings = {
       }),
     getSortPopoverDescription: () =>
       i18n.translate('controls.optionsList.popover.sortDescription', {
-        defaultMessage: 'Select a sorting strategy',
+        defaultMessage: 'Define the sort order',
       }),
     getSortDisabledTooltip: () =>
       i18n.translate('controls.optionsList.popover.sortDisabledTooltip', {
-        defaultMessage: 'Sorting is ignored when "Show only selected" is true',
+        defaultMessage: 'Ignore sorting when “Show only selected” is true.',
       }),
   },
   controlAndPopover: {
