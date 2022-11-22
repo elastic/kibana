@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { Actions, ActionTypes, CaseStatuses } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import type { UserActionParameters } from '../types';
+import type { PersistableUserAction } from '../persistable_user_action';
+import type { UserActionLogBody, UserActionParameters } from '../types';
 
 export class CreateCaseUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'create_case'>): BuilderReturnValue {
+  build(args: UserActionParameters<'create_case'>): PersistableUserAction {
     const { payload, caseId, owner, user } = args;
     const connectorWithoutId = this.extractConnectorId(payload.connector);
-    return {
+    const fields = {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
         action: Actions.create,
@@ -25,5 +27,16 @@ export class CreateCaseUserActionBuilder extends UserActionBuilder {
         ...this.createConnectorReference(payload.connector.id),
       ],
     };
+
+    const createMessage = (id: string) => `Case id: ${caseId} created - user action id: ${id}`;
+
+    const loggerFields: UserActionLogBody = {
+      createMessage,
+      eventAction: 'case_user_action_create_case',
+      entityId: caseId,
+      entityType: CASE_SAVED_OBJECT,
+    };
+
+    return this.createPersistableUserAction(loggerFields, fields);
   }
 }

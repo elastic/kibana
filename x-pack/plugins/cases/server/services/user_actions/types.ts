@@ -116,11 +116,6 @@ export interface LoggerCommonFields {
   auditLogger?: AuditLogger;
 }
 
-// export interface BuilderReturnValue {
-//   attributes: Attributes;
-//   references: SavedObjectReference[];
-// }
-
 export type CommonBuilderArguments = CommonArguments & {
   action: UserAction;
   type: UserActionTypes;

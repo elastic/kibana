@@ -1399,20 +1399,6 @@ describe('CaseUserActionService', () => {
       });
     });
 
-    describe('create', () => {
-      it('creates user actions', async () => {
-        await service.create<{ title: string }>({
-          attributes: { title: 'test' },
-          references: [],
-        });
-        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-          'cases-user-actions',
-          { title: 'test' },
-          { references: [] }
-        );
-      });
-    });
-
     describe('getUniqueConnectors', () => {
       const findResponse = createUserActionFindSO(createConnectorUserAction());
       const aggregationResponse = {

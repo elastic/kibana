@@ -6,11 +6,10 @@
  */
 
 import type { EcsEventType } from '@kbn/logging';
-import type { ActionOperationValues } from '../../../common/api';
+import type { UserAction as Action } from '../../../common/api';
 import type { LoggerCommonFields, PersistableUserActionFields, UserActionLogBody } from './types';
 
-const actionsToEcsType: Record<ActionOperationValues, EcsEventType> = {
-  // TODO: should this be an array of change and creation? or maybe just creation?
+const actionsToEcsType: Record<Action, EcsEventType> = {
   add: 'change',
   delete: 'deletion',
   create: 'creation',
@@ -18,27 +17,27 @@ const actionsToEcsType: Record<ActionOperationValues, EcsEventType> = {
   update: 'change',
 };
 
-export class ConstructedUserAction {
+export class PersistableUserAction {
   private readonly commonFields: LoggerCommonFields;
   private readonly logBody: UserActionLogBody;
-  private readonly _persistableUserAction: PersistableUserActionFields;
+  private readonly _persistableFields: PersistableUserActionFields;
 
   constructor({
     commonFields,
     logBody,
-    persistableUserAction,
+    _persistableFields,
   }: {
     commonFields: LoggerCommonFields;
     logBody: UserActionLogBody;
-    persistableUserAction: PersistableUserActionFields;
+    _persistableFields: PersistableUserActionFields;
   }) {
     this.commonFields = commonFields;
     this.logBody = logBody;
-    this._persistableUserAction = persistableUserAction;
+    this._persistableFields = _persistableFields;
   }
 
-  public get persistableUserAction() {
-    return this._persistableUserAction;
+  public get persistableFields() {
+    return this._persistableFields;
   }
 
   public log(storedUserActionId: string) {
@@ -47,7 +46,7 @@ export class ConstructedUserAction {
       event: {
         action: this.logBody.eventAction,
         category: ['database'],
-        type: [actionsToEcsType[this._persistableUserAction.attributes.action]],
+        type: [actionsToEcsType[this._persistableFields.attributes.action]],
       },
       kibana: {
         saved_object: {

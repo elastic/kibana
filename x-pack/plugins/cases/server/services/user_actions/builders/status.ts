@@ -5,18 +5,32 @@
  * 2.0.
  */
 
+import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import type { UserActionParameters, BuilderReturnValue } from '../types';
+import type { PersistableUserAction } from '../persistable_user_action';
+import type { UserActionLogBody, UserActionParameters } from '../types';
 
 export class StatusUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'status'>): BuilderReturnValue {
-    return this.buildCommonUserAction({
+  build(args: UserActionParameters<'status'>): PersistableUserAction {
+    const fields = this.buildCommonUserAction({
       ...args,
       action: Actions.update,
       valueKey: 'status',
       value: args.payload.status,
       type: ActionTypes.status,
     });
+
+    const createMessage = (id: string) =>
+      `Case id: ${args.caseId} status updated - user action id: ${id}`;
+
+    const loggerFields: UserActionLogBody = {
+      createMessage,
+      eventAction: 'case_user_action_update_case_status',
+      entityId: args.caseId,
+      entityType: CASE_SAVED_OBJECT,
+    };
+
+    return this.createPersistableUserAction(loggerFields, fields);
   }
 }

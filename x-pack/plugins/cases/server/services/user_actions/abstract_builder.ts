@@ -26,7 +26,7 @@ import type {
   UserActionParameters,
 } from './types';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { ConstructedUserAction } from './constructed_user_action';
+import { PersistableUserAction } from './persistable_user_action';
 
 export abstract class UserActionBuilder {
   protected readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
@@ -124,18 +124,18 @@ export abstract class UserActionBuilder {
     };
   };
 
-  protected createConstructedUserAction(
+  protected createPersistableUserAction(
     body: UserActionLogBody,
     persistableUserActionFields: PersistableUserActionFields
-  ): ConstructedUserAction {
-    return new ConstructedUserAction({
+  ): PersistableUserAction {
+    return new PersistableUserAction({
       commonFields: { auditLogger: this.auditLogger },
       logBody: body,
-      persistableUserAction: persistableUserActionFields,
+      _persistableFields: persistableUserActionFields,
     });
   }
 
   public abstract build<T extends keyof BuilderParameters>(
     args: UserActionParameters<T>
-  ): ConstructedUserAction;
+  ): PersistableUserAction;
 }

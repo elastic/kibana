@@ -1,0 +1,116 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PersistableUserAction logs add user action as type change 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "action",
+      "category": Array [
+        "database",
+      ],
+      "type": Array [
+        "change",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "123",
+        "type": "type",
+      },
+    },
+    "message": "id: idParam",
+  },
+]
+`;
+
+exports[`PersistableUserAction logs create user action as type creation 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "action",
+      "category": Array [
+        "database",
+      ],
+      "type": Array [
+        "creation",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "123",
+        "type": "type",
+      },
+    },
+    "message": "id: idParam",
+  },
+]
+`;
+
+exports[`PersistableUserAction logs delete user action as type deletion 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "action",
+      "category": Array [
+        "database",
+      ],
+      "type": Array [
+        "deletion",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "123",
+        "type": "type",
+      },
+    },
+    "message": "id: idParam",
+  },
+]
+`;
+
+exports[`PersistableUserAction logs push_to_service user action as type creation 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "action",
+      "category": Array [
+        "database",
+      ],
+      "type": Array [
+        "creation",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "123",
+        "type": "type",
+      },
+    },
+    "message": "id: idParam",
+  },
+]
+`;
+
+exports[`PersistableUserAction logs update user action as type change 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "action",
+      "category": Array [
+        "database",
+      ],
+      "type": Array [
+        "change",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "123",
+        "type": "type",
+      },
+    },
+    "message": "id: idParam",
+  },
+]
+`;

@@ -6,15 +6,17 @@
  */
 
 import { uniqBy } from 'lodash';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common/constants';
 import { extractPersistableStateReferencesFromSO } from '../../../attachment_framework/so_references';
 import type { CommentUserAction } from '../../../../common/api';
 import { ActionTypes, Actions } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import type { UserActionParameters, BuilderReturnValue } from '../types';
+import type { PersistableUserAction } from '../persistable_user_action';
+import type { UserActionLogBody, UserActionParameters } from '../types';
 import { getAttachmentSOExtractor } from '../../so_references';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'comment'>): BuilderReturnValue {
+  build(args: UserActionParameters<'comment'>): PersistableUserAction {
     const soExtractor = getAttachmentSOExtractor(args.payload.attachment);
     const { transformedFields, references: refsWithExternalRefId } =
       soExtractor.extractFieldsToReferences<CommentUserAction['payload']['comment']>({
@@ -26,20 +28,40 @@ export class CommentUserActionBuilder extends UserActionBuilder {
         persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       });
 
+    const action = args.action ?? Actions.update;
+
     const commentUserAction = this.buildCommonUserAction({
       ...args,
-      action: args.action ?? Actions.update,
+      action,
       valueKey: 'comment',
       value: { ...transformedFields, ...extractedAttributes },
       type: ActionTypes.comment,
     });
 
-    return {
+    const fields = {
       ...commentUserAction,
       references: uniqBy(
         [...commentUserAction.references, ...refsWithExternalRefId, ...extractedReferences],
         'id'
       ),
     };
+
+    const createMessage = (id: string) =>
+      `Case id: ${args.caseId} comment id: ${commentId(
+        args.attachmentId
+      )} ${action} - user action id: ${id}`;
+
+    const loggerFields: UserActionLogBody = {
+      createMessage,
+      eventAction: `case_user_action_${action}_comment`,
+      entityId: args.attachmentId ?? args.caseId,
+      entityType: CASE_COMMENT_SAVED_OBJECT,
+    };
+
+    return this.createPersistableUserAction(loggerFields, fields);
   }
 }
+
+const commentId = (id?: string) => {
+  return id ? id : 'unknown';
+};
