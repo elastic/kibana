@@ -14,7 +14,8 @@ export {
   FilesContext,
   type ScopedFilesClient,
   FilePicker,
-  Image,
 } from '@kbn/files-plugin/public';
+
+export { FileImage as Image } from '@kbn/shared-ux-file-image';
 
 export type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
