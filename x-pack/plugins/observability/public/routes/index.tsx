@@ -19,6 +19,7 @@ import { RulesPage } from '../pages/rules';
 import { RuleDetailsPage } from '../pages/rule_details';
 import { AlertingPages } from '../config';
 import { AlertDetails } from '../pages/alert_details';
+import { DatePickerContextProvider } from '../context/date_picker_context';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -56,7 +57,11 @@ export const routes = {
   },
   '/overview': {
     handler: ({ query }: any) => {
-      return <OverviewPage />;
+      return (
+        <DatePickerContextProvider>
+          <OverviewPage />
+        </DatePickerContextProvider>
+      );
     },
     params: {},
     exact: true,

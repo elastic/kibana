@@ -28,7 +28,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import QueryStringInput from './query_string_input';
 import { unifiedSearchPluginMock } from '../mocks';
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 const startMock = coreMock.createStart();
 
 const noop = () => {

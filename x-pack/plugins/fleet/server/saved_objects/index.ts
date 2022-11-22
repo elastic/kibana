@@ -19,6 +19,7 @@ import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
@@ -136,6 +137,7 @@ const getSavedObjectTypes = (
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
+        proxy_id: { type: 'keyword' },
       },
     },
     migrations: {
@@ -362,6 +364,26 @@ const getSavedObjectTypes = (
         is_default: { type: 'boolean' },
         host_urls: { type: 'keyword', index: false },
         is_preconfigured: { type: 'boolean' },
+        proxy_id: { type: 'keyword' },
+      },
+    },
+  },
+  [FLEET_PROXY_SAVED_OBJECT_TYPE]: {
+    name: FLEET_PROXY_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        name: { type: 'keyword' },
+        url: { type: 'keyword', index: false },
+        proxy_headers: { type: 'text', index: false },
+        certificate_authorities: { type: 'keyword', index: false },
+        certificate: { type: 'keyword', index: false },
+        certificate_key: { type: 'keyword', index: false },
+        is_preconfigured: { type: 'boolean' },
       },
     },
   },
@@ -395,6 +417,7 @@ export function registerEncryptedSavedObjects(
       'config',
       'config_yaml',
       'is_preconfigured',
+      'proxy_id',
     ]),
   });
   // Encrypted saved objects

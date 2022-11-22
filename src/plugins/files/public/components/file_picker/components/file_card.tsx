@@ -36,6 +36,10 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
       title=""
       css={css`
         place-self: stretch;
+        > * {
+          // TODO: Once content no longer overflows card remove, i.e. once on @elastic/eui ^70.3.0
+          width: 100%;
+        }
       `}
       paddingSize="s"
       selectable={{
@@ -59,6 +63,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
               `}
               meta={file.meta as FileImageMetadata}
               src={client.getDownloadHref({ id: file.id, fileKind: kind })}
+              loading={'lazy'}
             />
           ) : (
             <div

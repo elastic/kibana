@@ -5,7 +5,6 @@ exports[`should render 3 tick slider when renderAs is HEX 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Resolution"
@@ -13,7 +12,6 @@ exports[`should render 3 tick slider when renderAs is HEX 1`] = `
   >
     <EuiRange
       compressed={true}
-      fullWidth={false}
       isLoading={false}
       levels={Array []}
       max={3}
@@ -53,7 +51,6 @@ exports[`should render 4 tick slider when renderAs is GRID 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Resolution"
@@ -61,7 +58,6 @@ exports[`should render 4 tick slider when renderAs is GRID 1`] = `
   >
     <EuiRange
       compressed={true}
-      fullWidth={false}
       isLoading={false}
       levels={Array []}
       max={4}
@@ -105,7 +101,6 @@ exports[`should render 4 tick slider when renderAs is HEATMAP 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Resolution"
@@ -113,7 +108,6 @@ exports[`should render 4 tick slider when renderAs is HEATMAP 1`] = `
   >
     <EuiRange
       compressed={true}
-      fullWidth={false}
       isLoading={false}
       levels={Array []}
       max={4}
@@ -157,7 +151,6 @@ exports[`should render 4 tick slider when renderAs is POINT 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Resolution"
@@ -165,7 +158,6 @@ exports[`should render 4 tick slider when renderAs is POINT 1`] = `
   >
     <EuiRange
       compressed={true}
-      fullWidth={false}
       isLoading={false}
       levels={Array []}
       max={4}
