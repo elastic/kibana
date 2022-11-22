@@ -773,6 +773,7 @@ Array [
     "privilege": Object {
       "api": Array [
         "files:manageFiles",
+        "files:defaultImage",
       ],
       "app": Array [
         "kibana",
@@ -796,6 +797,7 @@ Array [
     "privilege": Object {
       "api": Array [
         "files:manageFiles",
+        "files:defaultImage",
       ],
       "app": Array [
         "kibana",
@@ -1332,6 +1334,7 @@ Array [
     "privilege": Object {
       "api": Array [
         "files:manageFiles",
+        "files:defaultImage",
       ],
       "app": Array [
         "kibana",
@@ -1355,6 +1358,7 @@ Array [
     "privilege": Object {
       "api": Array [
         "files:manageFiles",
+        "files:defaultImage",
       ],
       "app": Array [
         "kibana",
