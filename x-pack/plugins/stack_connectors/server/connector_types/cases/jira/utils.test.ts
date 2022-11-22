@@ -23,7 +23,7 @@ describe('escapeJqlSpecialCharacters', () => {
   });
 
   it('should replace single quotes with backslash', () => {
-    const str = 'Javascript\'s beauty is simplicity!';
+    const str = "Javascript's beauty is simplicity!";
     const escapedStr = escapeJqlSpecialCharacters(str);
     expect(escapedStr).toEqual('Javascript\\\\\\\\\\\\s beauty is simplicity\\\\!');
   });
