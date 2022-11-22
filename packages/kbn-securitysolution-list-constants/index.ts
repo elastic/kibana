@@ -98,6 +98,13 @@ export const ENDPOINT_ARTIFACT_LISTS = deepFreeze({
   },
 });
 
+/**
+ * The IDs of all Endpoint artifact lists
+ */
+export const ENDPOINT_ARTIFACT_LIST_IDS = Object.freeze(
+  Object.values(ENDPOINT_ARTIFACT_LISTS).map(({ id }) => id)
+);
+
 /** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
 export const ENDPOINT_TRUSTED_APPS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
 
