@@ -6,7 +6,6 @@ exports[`should render 1`] = `
     describedByIds={Array []}
     display="row"
     error="Data view does not contain any geospatial fields"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={true}
@@ -73,7 +72,6 @@ exports[`should render no index pattern warning when there are no matching index
     describedByIds={Array []}
     display="row"
     error="Data view does not contain any geospatial fields"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={true}

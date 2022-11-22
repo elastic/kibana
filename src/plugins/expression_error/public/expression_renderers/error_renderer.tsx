@@ -18,7 +18,8 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { CoreSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { withSuspense, defaultTheme$ } from '@kbn/presentation-util-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ErrorRendererConfig } from '../../common/types';
 import { LazyErrorRenderComponent } from '../components';
 

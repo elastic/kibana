@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
-import { createConnector, getConnectorByName } from './utils';
+import { getConnectorByName } from './utils';
 import {
   tinesAgentWebhook,
   tinesStory1,
@@ -267,12 +267,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     const createTinesConnector = async (name: string) => {
-      return createConnector({
+      return actions.api.createConnector({
         name,
         config: { url: simulatorUrl },
         secrets: { email: 'test@foo.com', token: 'apiToken' },
         connectorTypeId: '.tines',
-        supertest,
       });
     };
   });

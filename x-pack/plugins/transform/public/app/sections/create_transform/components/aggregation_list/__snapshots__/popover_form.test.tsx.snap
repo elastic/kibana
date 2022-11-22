@@ -13,7 +13,6 @@ exports[`Transform: Aggregation <PopoverForm /> Minimal initialization 1`] = `
     describedByIds={Array []}
     display="row"
     error={false}
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText=""
@@ -31,7 +30,6 @@ exports[`Transform: Aggregation <PopoverForm /> Minimal initialization 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={true}
     labelType="label"
