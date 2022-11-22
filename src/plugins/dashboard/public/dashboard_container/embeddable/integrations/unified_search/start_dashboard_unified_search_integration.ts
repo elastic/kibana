@@ -39,14 +39,14 @@ export function startUnifiedSearchIntegration(
   const { timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
 
+  // apply initial dashboard saved filters, query, and time range to the query bar.
+  applySavedFiltersToUnifiedSearch.bind(this)(initialInput);
+
   // starts syncing `_g` portion of url with query services
   const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
     queryService,
     kbnUrlStateStorage
   );
-
-  // apply initial dashboard saved filters, query, and time range to the query bar.
-  applySavedFiltersToUnifiedSearch.bind(this)(initialInput);
 
   const initialTimeRange = initialInput.timeRestore ? undefined : timefilterService.getTime();
   this.untilInitialized().then(() => {
