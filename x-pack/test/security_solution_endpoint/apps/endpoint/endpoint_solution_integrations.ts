@@ -9,6 +9,7 @@ import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/com
 import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
 import { kibanaPackageJson } from '@kbn/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { IndexedEndpointRuleAlerts } from '../../../security_solution_ftr/services/detections';
 
 /**
  * Test suite is meant to cover usages of endpoint functionality or access to endpoint
@@ -22,9 +23,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'timeline']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/140701
-  describe.skip('App level Endpoint functionality', () => {
+  describe('App level Endpoint functionality', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
+    let indexedAlerts: IndexedEndpointRuleAlerts;
     let endpointAgentId: string;
 
     before(async () => {
@@ -37,20 +38,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await endpointService.waitForUnitedEndpoints([endpointAgentId]);
 
-      // Ensure our Endpoint is for v8.0 (or whatever is running in kibana now)
+      // Ensure our Endpoint is for current version of kibana
       await endpointService.sendEndpointMetadataUpdate(endpointAgentId, {
         agent: { version: kibanaPackageJson.version },
       });
 
-      // start/stop the endpoint rule. This should cause the rule to run immediately
-      // and avoid us having to wait for the interval (of 5 minutes)
-      await detectionsTestService.stopStartEndpointRule();
+      // Load alerts for our endpoint (so that we don't have to wait for the rule to run)
+      indexedAlerts = await detectionsTestService.loadEndpointRuleAlerts(endpointAgentId);
     });
 
     after(async () => {
       if (indexedData) {
         log.info('Cleaning up loaded endpoint data');
         await endpointService.unloadEndpointData(indexedData);
+      }
+
+      if (indexedAlerts) {
+        await indexedAlerts.cleanup();
       }
     });
 

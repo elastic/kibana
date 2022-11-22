@@ -25,12 +25,14 @@ export type ComponentOpts = {
   getFilter: () => KueryNode | null;
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
+  isDeletingRules?: boolean;
   isSnoozingRules?: boolean;
   isUnsnoozingRules?: boolean;
   isSchedulingRules?: boolean;
   isUnschedulingRules?: boolean;
   isUpdatingRuleAPIKeys?: boolean;
   setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
+  setRulesToDeleteFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
   setRulesToUpdateAPIKey: React.Dispatch<React.SetStateAction<string[]>>;
   setRulesToSnooze: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
   setRulesToUnsnooze: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
@@ -71,6 +73,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   getFilter,
   onPerformingAction = noop,
   onActionPerformed = noop,
+  isDeletingRules = false,
   isSnoozingRules = false,
   isUnsnoozingRules = false,
   isSchedulingRules = false,
@@ -79,6 +82,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   enableRules,
   disableRules,
   setRulesToDelete,
+  setRulesToDeleteFilter,
   setRulesToUpdateAPIKey,
   setRulesToSnooze,
   setRulesToUnsnooze,
@@ -96,7 +100,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
 
   const [isEnablingRules, setIsEnablingRules] = useState<boolean>(false);
   const [isDisablingRules, setIsDisablingRules] = useState<boolean>(false);
-  const [isDeletingRules, setIsDeletingRules] = useState<boolean>(false);
 
   const isPerformingAction =
     isEnablingRules ||
@@ -169,13 +172,13 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   async function deleteSelectedItems() {
-    if (isAllSelected) {
-      return;
-    }
     onPerformingAction();
-    setIsDeletingRules(true);
     try {
-      setRulesToDelete(selectedItems.map((selected: any) => selected.id));
+      if (isAllSelected) {
+        setRulesToDeleteFilter(getFilter());
+      } else {
+        setRulesToDelete(selectedItems.map((selected) => selected.id));
+      }
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
@@ -186,7 +189,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         ),
       });
     } finally {
-      setIsDeletingRules(false);
       onActionPerformed();
     }
   }
@@ -416,30 +418,20 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ButtonWithTooltip
-          showTooltip={isAllSelected}
-          tooltip={i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteUnsupported',
-            {
-              defaultMessage: 'Bulk delete is unsupported when selecting all rules.',
-            }
-          )}
+        <EuiButtonEmpty
+          onClick={deleteSelectedItems}
+          isLoading={isDeletingRules}
+          iconType="trash"
+          color="danger"
+          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+          data-test-subj="bulkDelete"
+          className="actBulkActionPopover__deleteAll"
         >
-          <EuiButtonEmpty
-            onClick={deleteSelectedItems}
-            isLoading={isDeletingRules}
-            iconType="trash"
-            color="danger"
-            isDisabled={isPerformingAction || isAllSelected}
-            data-test-subj="deleteAll"
-            className="actBulkActionPopover__deleteAll"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteAllTitle"
-              defaultMessage="Delete"
-            />
-          </EuiButtonEmpty>
-        </ButtonWithTooltip>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteAllTitle"
+            defaultMessage="Delete"
+          />
+        </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -8,6 +8,7 @@
     "target/**/*"
   ],
   "compilerOptions": {
+    "target": "es2015",
     "outDir": "target/types",
     "types": [
       "cypress",
@@ -15,7 +16,7 @@
       "cypress-real-events"
     ]
   },
-  "references": [
+  "kbn_references": [
     { "path": "../../../test/tsconfig.json" },
     { "path": "../../../../test/tsconfig.json" },
     { "path": "../tsconfig.json" },

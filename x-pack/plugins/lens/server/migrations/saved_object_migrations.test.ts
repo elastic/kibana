@@ -2364,6 +2364,49 @@ describe('Lens migrations', () => {
     });
   });
 
+  describe('8.6.0 migrates partition metrics', () => {
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'some title',
+        description: '',
+        visualizationType: 'lnsPie',
+        state: {
+          visualization: {
+            layers: [
+              {
+                metric: 'some-metric',
+              },
+            ],
+          },
+          datasourceStates: {
+            indexpattern: {},
+          },
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('make metric an array', () => {
+      const result = migrations['8.6.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      expect(
+        (result.attributes.state.visualization as { layers: Array<{ metrics: string[] }> })
+          .layers[0]
+      ).toMatchInlineSnapshot(`
+        Object {
+          "metric": undefined,
+          "metrics": Array [
+            "some-metric",
+          ],
+        }
+      `);
+    });
+  });
+
   describe('8.6.0 migrates indexpattern datasource', () => {
     const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {

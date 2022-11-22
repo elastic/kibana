@@ -40,6 +40,7 @@ jest.mock('../metrics', () => ({
 }));
 
 describe('convertToOtherParentPipelineAggColumns', () => {
+  const visType = 'heatmap';
   const field = stubLogstashDataView.fields[0].name;
   const aggs: Array<SchemaConfig<METRIC_TYPES>> = [
     {
@@ -81,6 +82,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.MOVING_FN>,
+          visType,
         },
       ],
       () => {
@@ -95,6 +97,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.MOVING_FN>,
+          visType,
         },
       ],
       () => {
@@ -112,6 +115,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.MOVING_FN>,
+          visType,
         },
       ],
       () => {
@@ -129,6 +133,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.MOVING_FN>,
+          visType,
         },
       ],
       () => {
@@ -147,6 +152,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.MOVING_FN>,
+          visType,
         },
       ],
       () => {
@@ -170,6 +176,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.MOVING_FN>,
+          visType,
         },
       ],
       () => {
@@ -188,6 +195,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.MOVING_FN>,
+          visType,
         },
       ],
       () => {
@@ -229,6 +237,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
 });
 
 describe('convertToCumulativeSumAggColumn', () => {
+  const visType = 'heatmap';
   const field = stubLogstashDataView.fields[0].name;
   const aggs: Array<SchemaConfig<METRIC_TYPES>> = [
     {
@@ -280,6 +289,7 @@ describe('convertToCumulativeSumAggColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: { ...aggs[1], aggParams: undefined } as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>,
+          visType,
         },
       ],
       () => {
@@ -294,6 +304,7 @@ describe('convertToCumulativeSumAggColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>,
+          visType,
         },
       ],
       () => {
@@ -308,6 +319,7 @@ describe('convertToCumulativeSumAggColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>,
+          visType,
         },
       ],
       () => {
@@ -325,6 +337,7 @@ describe('convertToCumulativeSumAggColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>,
+          visType,
         },
       ],
       () => {
@@ -342,6 +355,7 @@ describe('convertToCumulativeSumAggColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>,
+          visType,
         },
       ],
       () => {
@@ -360,6 +374,7 @@ describe('convertToCumulativeSumAggColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>,
+          visType,
         },
       ],
       () => {
@@ -383,6 +398,7 @@ describe('convertToCumulativeSumAggColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>,
+          visType,
         },
       ],
       () => {
@@ -401,6 +417,7 @@ describe('convertToCumulativeSumAggColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           agg: aggs[1] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>,
+          visType,
         },
       ],
       () => {

@@ -43,7 +43,7 @@ function filterHeaders(originalHeaders: object, headersToKeep: string[]): object
   return pick(originalHeaders, headersToKeepNormalized);
 }
 
-function getRequestConfig(
+export function getRequestConfig(
   headers: object,
   esConfig: ESConfigForProxy,
   uri: string,

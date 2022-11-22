@@ -14,6 +14,8 @@ import type {
   ConnectorMappingsService,
   AttachmentService,
 } from '.';
+import type { LicensingService } from './licensing';
+import type { EmailNotificationService } from './notifications/email_notification_service';
 
 export type CaseServiceMock = jest.Mocked<CasesService>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureService>;
@@ -21,9 +23,11 @@ export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsService>
 export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionService>;
 export type AlertServiceMock = jest.Mocked<AlertService>;
 export type AttachmentServiceMock = jest.Mocked<AttachmentService>;
+export type LicensingServiceMock = jest.Mocked<LicensingService>;
+export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
-  const service: PublicMethodsOf<CasesService> = {
+  const service = {
     deleteCase: jest.fn(),
     findCases: jest.fn(),
     getAllCaseComments: jest.fn(),
@@ -117,4 +121,28 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as AttachmentServiceMock;
+};
+
+export const createLicensingServiceMock = (): LicensingServiceMock => {
+  const service: PublicMethodsOf<LicensingService> = {
+    notifyUsage: jest.fn(),
+    getLicenseInformation: jest.fn(),
+    isAtLeast: jest.fn(),
+    isAtLeastPlatinum: jest.fn().mockReturnValue(true),
+    isAtLeastGold: jest.fn(),
+    isAtLeastEnterprise: jest.fn(),
+  };
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as LicensingServiceMock;
+};
+
+export const createNotificationServiceMock = (): NotificationServiceMock => {
+  const service: PublicMethodsOf<EmailNotificationService> = {
+    notifyAssignees: jest.fn(),
+    bulkNotifyAssignees: jest.fn(),
+  };
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as NotificationServiceMock;
 };

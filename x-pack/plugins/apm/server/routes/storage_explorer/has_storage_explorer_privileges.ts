@@ -8,18 +8,18 @@
 import { every } from 'lodash';
 import { uniq } from 'lodash';
 import { ApmPluginRequestHandlerContext } from '../typings';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function hasStorageExplorerPrivileges({
   context,
-  setup,
+  apmEventClient,
 }: {
   context: ApmPluginRequestHandlerContext;
-  setup: Setup;
+  apmEventClient: APMEventClient;
 }) {
   const {
     indices: { transaction, span, metric, error },
-  } = setup;
+  } = apmEventClient;
 
   const names = uniq(
     [transaction, span, metric, error].flatMap((indexPatternString) =>
@@ -28,17 +28,19 @@ export async function hasStorageExplorerPrivileges({
   );
 
   const esClient = (await context.core).elasticsearch.client;
-  const { index } = await esClient.asCurrentUser.security.hasPrivileges({
-    body: {
-      index: [
-        {
-          names,
-          privileges: ['monitor'],
-        },
-      ],
-    },
-  });
+  const { index, cluster } =
+    await esClient.asCurrentUser.security.hasPrivileges({
+      body: {
+        index: [
+          {
+            names,
+            privileges: ['monitor'],
+          },
+        ],
+        cluster: ['monitor'],
+      },
+    });
 
-  const hasPrivileges = every(index, 'monitor');
+  const hasPrivileges = cluster.monitor && every(index, 'monitor');
   return hasPrivileges;
 }

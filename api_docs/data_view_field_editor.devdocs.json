@@ -95,7 +95,7 @@
                 "section": "def-public.FormatEditorState",
                 "text": "FormatEditorState"
               },
-              ") => { error: string | undefined; samples: ",
+              ") => { error: any; samples: ",
               {
                 "pluginId": "dataViewFieldEditor",
                 "scope": "public",
@@ -406,7 +406,13 @@
             "description": [],
             "signature": [
               "(newParams: ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ") => void"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
@@ -421,7 +427,13 @@
                 "label": "newParams",
                 "description": [],
                 "signature": [
-                  "SerializableRecord"
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
+                  }
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
                 "deprecated": false,

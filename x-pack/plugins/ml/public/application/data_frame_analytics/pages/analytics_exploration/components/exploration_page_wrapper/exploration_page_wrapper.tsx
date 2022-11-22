@@ -161,7 +161,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
 
   return (
     <>
-      {typeof jobConfig?.description !== 'undefined' && (
+      {typeof jobConfig?.description !== 'undefined' && jobConfig?.description !== '' && (
         <>
           <EuiText>{jobConfig?.description}</EuiText>
           <EuiSpacer size="m" />

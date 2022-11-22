@@ -6,6 +6,8 @@
  */
 
 /** endpoint data streams that are used for host isolation  */
+import { getFileDataIndexName, getFileMetadataIndexName } from '@kbn/fleet-plugin/common';
+
 /** for index patterns `.logs-endpoint.actions-* and .logs-endpoint.action.responses-*`*/
 export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
 export const ENDPOINT_ACTIONS_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;
@@ -42,8 +44,8 @@ export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
 // File storage indexes supporting endpoint Upload/download
-export const FILE_STORAGE_METADATA_INDEX = '.fleet-files';
-export const FILE_STORAGE_DATA_INDEX = '.fleet-file_data';
+export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
+export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
 
 // Endpoint API routes
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
@@ -73,6 +75,7 @@ export const GET_FILE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/get_file`;
 export const ENDPOINT_ACTION_LOG_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_log/{agent_id}`;
 export const ACTION_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status`;
 export const ACTION_DETAILS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}`;
+export const ACTION_AGENT_FILE_INFO_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/{agent_id}/file`;
 export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/{agent_id}/file/download`;
 export const ENDPOINTS_ACTION_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/action`;
 

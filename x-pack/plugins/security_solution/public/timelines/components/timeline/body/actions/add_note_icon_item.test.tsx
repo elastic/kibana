@@ -39,9 +39,7 @@ describe('AddEventNoteAction', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('timeline-notes-button-small')).toHaveClass(
-        'euiButtonIcon-isDisabled'
-      );
+      expect(screen.getByTestId('timeline-notes-button-small')).toHaveProperty('disabled', true);
     });
 
     test('it enables the add note button when the user has crud privileges', () => {

@@ -7,18 +7,21 @@
 
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { getAllEnvironments } from '../../../environments/get_all_environments';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import { getExistingEnvironmentsForService } from './get_existing_environments_for_service';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMInternalESClient } from '../../../../lib/helpers/create_es_client/create_internal_es_client';
 
 export async function getEnvironments({
   serviceName,
-  setup,
+  internalESClient,
+  apmEventClient,
   searchAggregatedTransactions,
   size,
 }: {
   serviceName: string | undefined;
-  setup: Setup;
+  internalESClient: APMInternalESClient;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   size: number;
 }) {
@@ -27,10 +30,14 @@ export async function getEnvironments({
       getAllEnvironments({
         searchAggregatedTransactions,
         serviceName,
-        setup,
+        apmEventClient,
         size,
       }),
-      getExistingEnvironmentsForService({ serviceName, setup, size }),
+      getExistingEnvironmentsForService({
+        serviceName,
+        internalESClient,
+        size,
+      }),
     ]);
 
     return [ALL_OPTION_VALUE, ...allEnvironments].map((environment) => {

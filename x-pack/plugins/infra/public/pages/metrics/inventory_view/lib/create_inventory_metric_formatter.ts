@@ -30,9 +30,21 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },
+  ['cpuCores']: {
+    formatter: InfraFormatterType.number,
+    template: '{{value}}',
+  },
   ['memory']: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
+  },
+  ['memoryTotal']: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
+  ['diskLatency']: {
+    formatter: InfraFormatterType.number,
+    template: '{{value}} ms',
   },
   ['rx']: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
   ['tx']: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },

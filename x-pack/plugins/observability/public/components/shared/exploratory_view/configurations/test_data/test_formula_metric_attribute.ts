@@ -8,7 +8,7 @@
 import { mockDataView } from '../../rtl_helpers';
 
 export const sampleMetricFormulaAttribute = {
-  description: 'undefined',
+  description: '',
   references: [],
   state: {
     adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },

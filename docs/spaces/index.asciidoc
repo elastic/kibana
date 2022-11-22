@@ -19,8 +19,6 @@ image::images/change-space.png["Change current space menu"]
 
 The `kibana_admin` role or equivalent is required to manage **Spaces**.
 
-TIP: Looking to support multiple tenants? Refer to <<xpack-security-multiple-tenants, the Security documentation>> for more information.
-
 [float]
 [[spaces-managing]]
 === View, create, and delete spaces

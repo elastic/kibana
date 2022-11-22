@@ -17,6 +17,9 @@ import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/c
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { UsersKpiProps } from '../types';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 enum ChartColors {
   authenticationsSuccess = '#54B399',
@@ -65,15 +68,23 @@ const UsersKpiAuthenticationsComponent: React.FC<UsersKpiProps> = ({
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
+
   const [loading, { refetch, id, inspect, ...data }] = useUsersKpiAuthentications({
     filterQuery,
     endDate: to,
     indexNames,
     startDate: from,
     skip: querySkip,
+  });
+
+  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+    inputId: InputsModelId.global,
+    queryId: id,
   });
 
   return (
@@ -86,9 +97,10 @@ const UsersKpiAuthenticationsComponent: React.FC<UsersKpiProps> = ({
       from={from}
       to={to}
       updateDateRange={updateDateRange}
-      refetch={refetch}
+      refetch={isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
+      searchSessionId={isChartEmbeddablesEnabled ? searchSessionId : undefined}
     />
   );
 };

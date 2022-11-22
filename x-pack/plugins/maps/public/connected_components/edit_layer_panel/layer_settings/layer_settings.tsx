@@ -7,6 +7,8 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
+  EuiCallOut,
+  EuiText,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
@@ -242,8 +244,44 @@ export function LayerSettings(props: Props) {
     );
   };
 
+  const renderLayerGroupInstructions = () => {
+    return isLayerGroup(props.layer) ? (
+      <>
+        <EuiCallOut
+          title={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupCalloutTitle', {
+            defaultMessage: 'Drag layers in and out of the group',
+          })}
+          iconType="layers"
+        >
+          <EuiText>
+            <ul>
+              <li>
+                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToFront', {
+                  defaultMessage: 'To add your first layer, drag it onto the group name.',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToPosition', {
+                  defaultMessage:
+                    'To add another layer, drag it anywhere above the last layer in the group.',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupRemove', {
+                  defaultMessage: 'To remove a layer, drag it above or below the group.',
+                })}
+              </li>
+            </ul>
+          </EuiText>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    ) : null;
+  };
+
   return (
     <Fragment>
+      {renderLayerGroupInstructions()}
       <EuiPanel>
         <EuiTitle size="xs">
           <h5>

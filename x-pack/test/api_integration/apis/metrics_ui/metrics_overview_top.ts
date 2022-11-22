@@ -47,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(series.length).to.be(1);
       expect(series[0].id).to.be('demo-stack-mysql-01');
+      expect(series[0].timeseries[1].timestamp - series[0].timeseries[0].timestamp).to.be(300_000);
     });
   });
 }

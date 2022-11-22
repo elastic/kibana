@@ -68,6 +68,19 @@ export function mergeMigrationMappingPropertyHashes(
   };
 }
 
+/**
+ * If `.kibana` and the version specific aliases both exists and
+ * are pointing to the same index. This version's migration has already
+ * been completed.
+ */
+export function versionMigrationCompleted(
+  currentAlias: string,
+  versionAlias: string,
+  aliases: Record<string, string | undefined>
+): boolean {
+  return aliases[currentAlias] != null && aliases[currentAlias] === aliases[versionAlias];
+}
+
 export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): boolean {
   const version = valid(indexVersion(indexName));
   return version != null ? gt(version, kibanaVersion) : false;
@@ -157,16 +170,17 @@ export function getAliases(
   indices: FetchIndexResponse
 ): Either.Either<
   { type: 'multiple_indices_per_alias'; alias: string; indices: string[] },
-  Record<string, string>
+  Record<string, string | undefined>
 > {
-  const aliases = {} as Record<string, string>;
+  const aliases = {} as Record<string, string | undefined>;
   for (const index of Object.getOwnPropertyNames(indices)) {
     for (const alias of Object.getOwnPropertyNames(indices[index].aliases || {})) {
-      if (aliases[alias] != null) {
+      const secondIndexThisAliasPointsTo = aliases[alias];
+      if (secondIndexThisAliasPointsTo != null) {
         return Either.left({
           type: 'multiple_indices_per_alias',
           alias,
-          indices: [aliases[alias], index],
+          indices: [secondIndexThisAliasPointsTo, index],
         });
       }
       aliases[alias] = index;

@@ -325,7 +325,7 @@ export const sampleAttributeWithReferenceLines = {
         isVisible: true,
         position: 'right',
         showSingleSeries: true,
-        legendSize: 'large',
+        legendSize: 'auto',
         shouldTruncate: false,
       },
       preferredSeriesType: 'line',

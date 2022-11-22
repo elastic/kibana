@@ -47,7 +47,21 @@ actionExecutor.initialize({
   actionTypeRegistry,
   encryptedSavedObjectsClient,
   eventLogger,
-  preconfiguredActions: [],
+  preconfiguredActions: [
+    {
+      id: 'preconfigured',
+      name: 'Preconfigured',
+      actionTypeId: 'test',
+      config: {
+        bar: 'preconfigured',
+      },
+      secrets: {
+        apiKey: 'abc',
+      },
+      isPreconfigured: true,
+      isDeprecated: false,
+    },
+  ],
 });
 
 beforeEach(() => {
@@ -177,6 +191,107 @@ test('successfully executes', async () => {
             ],
           },
           "message": "action executed: test:1: 1",
+        },
+      ],
+    ]
+  `);
+});
+
+test('successfully executes with preconfigured connector', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute({ ...executeParams, actionId: 'preconfigured' });
+
+  expect(actionsClient.get).not.toHaveBeenCalled();
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+
+  expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('preconfigured', 'test', {
+    notifyUsage: true,
+  });
+
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: 'preconfigured',
+    services: expect.anything(),
+    config: {
+      bar: 'preconfigured',
+    },
+    secrets: {
+      apiKey: 'abc',
+    },
+    params: { foo: true },
+    logger: loggerMock,
+  });
+
+  expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "preconfigured",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action started: test:preconfigured: Preconfigured",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "preconfigured",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action executed: test:preconfigured: Preconfigured",
         },
       ],
     ]
@@ -507,6 +622,132 @@ test('throws an error when passing isESOCanEncrypt with value of false', async (
   ).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
   );
+});
+
+test('should not throw error if action is preconfigured and isESOCanEncrypt is false', async () => {
+  const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
+  customActionExecutor.initialize({
+    logger: loggingSystemMock.create().get(),
+    spaces: spacesMock,
+    getActionsClientWithRequest,
+    getServices: () => services,
+    actionTypeRegistry,
+    encryptedSavedObjectsClient,
+    eventLogger: eventLoggerMock.create(),
+    preconfiguredActions: [
+      {
+        id: 'preconfigured',
+        name: 'Preconfigured',
+        actionTypeId: 'test',
+        config: {
+          bar: 'preconfigured',
+        },
+        secrets: {
+          apiKey: 'abc',
+        },
+        isPreconfigured: true,
+        isDeprecated: false,
+      },
+    ],
+  });
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute({ ...executeParams, actionId: 'preconfigured' });
+
+  expect(actionsClient.get).not.toHaveBeenCalled();
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+
+  expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('preconfigured', 'test', {
+    notifyUsage: true,
+  });
+
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: 'preconfigured',
+    services: expect.anything(),
+    config: {
+      bar: 'preconfigured',
+    },
+    secrets: {
+      apiKey: 'abc',
+    },
+    params: { foo: true },
+    logger: loggerMock,
+  });
+
+  expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "preconfigured",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action started: test:preconfigured: Preconfigured",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "preconfigured",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action executed: test:preconfigured: Preconfigured",
+        },
+      ],
+    ]
+  `);
 });
 
 test('does not log warning when alert executor succeeds', async () => {

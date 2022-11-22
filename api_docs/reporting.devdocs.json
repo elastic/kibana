@@ -613,7 +613,13 @@
             "text": "LocatorParams"
           },
           "<",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">[]; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/base.ts",
@@ -676,7 +682,13 @@
             "text": "LocatorParams"
           },
           "<",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">[]; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf_v2.ts",

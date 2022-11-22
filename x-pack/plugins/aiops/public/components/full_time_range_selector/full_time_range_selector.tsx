@@ -26,15 +26,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { setFullTimeRange } from './full_time_range_selector_service';
+import {
+  type GetTimeFieldRangeResponse,
+  setFullTimeRange,
+} from './full_time_range_selector_service';
 import { AIOPS_FROZEN_TIER_PREFERENCE, useStorage } from '../../hooks/use_storage';
 
-interface Props {
+export interface FullTimeRangeSelectorProps {
   timefilter: TimefilterContract;
   dataView: DataView;
   disabled: boolean;
   query?: QueryDslQueryContainer;
-  callback?: (a: any) => void;
+  callback?: (a: GetTimeFieldRangeResponse) => void;
 }
 
 const FROZEN_TIER_PREFERENCE = {
@@ -44,7 +47,7 @@ const FROZEN_TIER_PREFERENCE = {
 
 type FrozenTierPreference = typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
 
-export const FullTimeRangeSelector: FC<Props> = ({
+export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = ({
   timefilter,
   dataView,
   query,

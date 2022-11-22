@@ -11,7 +11,6 @@ import Path from 'path';
 import minimatch from 'minimatch';
 import { getRepoFiles } from '@kbn/get-repo-files';
 
-// @ts-expect-error jest-preset is necessarily a JS file
 import { testMatch } from '../../../jest-preset';
 
 const UNIT_CONFIG_NAME = 'jest.config.js';

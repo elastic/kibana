@@ -36,7 +36,7 @@ const argTypes = {
   release: {
     control: {
       type: 'radio',
-      options: ['ga', 'beta', 'experimental'],
+      options: ['ga', 'beta', 'preview', 'rc'],
     },
   },
   isUnverified: {

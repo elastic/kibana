@@ -268,7 +268,7 @@ describe('GET /api/reporting/jobs/download', () => {
         .get('/api/reporting/jobs/download/dank')
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect('content-disposition', 'inline; filename="report.csv"');
+        .expect('content-disposition', 'attachment; filename="report.csv"');
     });
 
     it('succeeds when security is not there or disabled', async () => {
@@ -285,7 +285,7 @@ describe('GET /api/reporting/jobs/download', () => {
         .get('/api/reporting/jobs/download/dope')
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect('content-disposition', 'inline; filename="report.csv"');
+        .expect('content-disposition', 'attachment; filename="report.csv"');
     });
 
     it('forwards job content stream', async () => {

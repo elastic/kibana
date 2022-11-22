@@ -6,6 +6,7 @@
  */
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import type {
   RuleCreateProps,
   RuleResponse,
@@ -15,6 +16,8 @@ import { createRule } from '../api';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchTagsQuery } from './use_fetch_tags_query';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
+
+export const CREATE_RULE_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_URL];
 
 export const useCreateRuleMutation = (
   options?: UseMutationOptions<RuleResponse, Error, RuleCreateProps>
@@ -27,6 +30,7 @@ export const useCreateRuleMutation = (
     (rule: RuleCreateProps) => createRule({ rule: transformOutput(rule) }),
     {
       ...options,
+      mutationKey: CREATE_RULE_MUTATION_KEY,
       onSuccess: (...args) => {
         invalidateFetchPrePackagedRulesStatusQuery();
         invalidateFindRulesQuery();

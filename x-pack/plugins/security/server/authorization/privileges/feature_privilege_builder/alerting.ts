@@ -42,6 +42,8 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'unmuteAlert',
     'snooze',
     'bulkEdit',
+    'bulkDelete',
+    'bulkEnable',
     'unsnooze',
   ],
   alert: ['update'],

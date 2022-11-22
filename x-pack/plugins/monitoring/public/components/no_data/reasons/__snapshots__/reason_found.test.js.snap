@@ -46,24 +46,20 @@ Array [
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton euiButton--primary euiButton--fill"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
         data-test-subj="enableCollectionInterval"
         type="button"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="emotion-euiButtonDisplayContent"
         >
-          <span
-            class="euiButton__text"
-          >
-            Turn on monitoring
-          </span>
+          Turn on monitoring
         </span>
       </button>
     </div>

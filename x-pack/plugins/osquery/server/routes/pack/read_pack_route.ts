@@ -14,6 +14,7 @@ import { PLUGIN_ID } from '../../../common';
 
 import { packSavedObjectType } from '../../../common/types';
 import { convertSOQueriesToPack } from './utils';
+import { convertShardsToObject } from '../utils';
 
 export const readPackRoute = (router: IRouter) => {
   router.get(
@@ -45,6 +46,7 @@ export const readPackRoute = (router: IRouter) => {
             ...rest,
             ...attributes,
             queries: convertSOQueriesToPack(attributes.queries),
+            shards: convertShardsToObject(attributes.shards),
             policy_ids: policyIds,
             read_only: attributes.version !== undefined && osqueryPackAssetReference,
           },

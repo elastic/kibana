@@ -10,17 +10,9 @@ import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { convertRuleIdsToKueryNode } from '../../lib';
-import { BulkEditError } from '../rules_client';
+import { BulkOperationError } from '../rules_client';
 import { RawRule } from '../../types';
-
-// number of times to retry when conflicts occur
-export const RetryForConflictsAttempts = 2;
-
-// milliseconds to wait before retrying when conflicts occur
-// note: we considered making this random, to help avoid a stampede, but
-// with 1 retry it probably doesn't matter, and adding randomness could
-// make it harder to diagnose issues
-const RetryForConflictsDelay = 250;
+import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 
 // max number of failed SO ids in one retry filter
 const MaxIdsNumberInRetryFilter = 1000;
@@ -29,13 +21,13 @@ type BulkEditOperation = (filter: KueryNode | null) => Promise<{
   apiKeysToInvalidate: string[];
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
-  errors: BulkEditError[];
+  errors: BulkOperationError[];
 }>;
 
 interface ReturnRetry {
   apiKeysToInvalidate: string[];
   results: Array<SavedObjectsUpdateResponse<RawRule>>;
-  errors: BulkEditError[];
+  errors: BulkOperationError[];
 }
 
 /**
@@ -57,10 +49,10 @@ export const retryIfBulkEditConflicts = async (
   name: string,
   bulkEditOperation: BulkEditOperation,
   filter: KueryNode | null,
-  retries: number = RetryForConflictsAttempts,
+  retries: number = RETRY_IF_CONFLICTS_ATTEMPTS,
   accApiKeysToInvalidate: string[] = [],
   accResults: Array<SavedObjectsUpdateResponse<RawRule>> = [],
-  accErrors: BulkEditError[] = []
+  accErrors: BulkOperationError[] = []
 ): Promise<ReturnRetry> => {
   // run the operation, return if no errors or throw if not a conflict error
   try {
@@ -154,13 +146,3 @@ export const retryIfBulkEditConflicts = async (
     throw err;
   }
 };
-
-// exponential delay before retry with adding random delay
-async function waitBeforeNextRetry(retries: number): Promise<void> {
-  const exponentialDelayMultiplier = 1 + (RetryForConflictsAttempts - retries) ** 2;
-  const randomDelayMs = Math.floor(Math.random() * 100);
-
-  await new Promise((resolve) =>
-    setTimeout(resolve, RetryForConflictsDelay * exponentialDelayMultiplier + randomDelayMs)
-  );
-}

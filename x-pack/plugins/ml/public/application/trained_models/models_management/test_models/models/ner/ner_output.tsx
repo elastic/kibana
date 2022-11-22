@@ -22,7 +22,8 @@ import {
   useCurrentEuiTheme,
   EuiThemeType,
 } from '../../../../../components/color_range_legend/use_color_range';
-import type { NerInference } from './ner_inference';
+import type { NerInference, NerResponse } from './ner_inference';
+import { INPUT_TYPE } from '../inference_base';
 
 const ICON_PADDING = '2px';
 const PROBABILITY_SIG_FIGS = 3;
@@ -64,13 +65,30 @@ const UNKNOWN_ENTITY_TYPE = {
 export const getNerOutputComponent = (inferrer: NerInference) => <NerOutput inferrer={inferrer} />;
 
 const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
-  const { euiTheme } = useCurrentEuiTheme();
-  const result = useObservable(inferrer.inferenceResult$);
+  const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
 
   if (!result) {
     return null;
   }
 
+  if (inferrer.getInputType() === INPUT_TYPE.INDEX) {
+    return (
+      <>
+        {result.map((r) => (
+          <>
+            <Lines result={r} />
+            <EuiHorizontalRule />
+          </>
+        ))}
+      </>
+    );
+  }
+
+  return <Lines result={result[0]} />;
+};
+
+const Lines: FC<{ result: NerResponse }> = ({ result }) => {
+  const { euiTheme } = useCurrentEuiTheme();
   const lineSplit: JSX.Element[] = [];
   result.response.forEach(({ value, entity }) => {
     if (entity === null) {

@@ -7,7 +7,7 @@
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getIsUsingServiceDestinationMetrics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
@@ -25,7 +25,7 @@ export const timeRangeMetadataRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (resources): Promise<TimeRangeMetadata> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       query: { useSpanName, start, end, kuery },
@@ -33,7 +33,7 @@ export const timeRangeMetadataRoute = createApmServerRoute({
 
     const [isUsingServiceDestinationMetrics] = await Promise.all([
       getIsUsingServiceDestinationMetrics({
-        setup,
+        apmEventClient,
         useSpanName,
         start,
         end,

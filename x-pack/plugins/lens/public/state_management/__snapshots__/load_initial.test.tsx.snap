@@ -5,10 +5,8 @@ Object {
   "lens": Object {
     "activeDatasourceId": "testDatasource",
     "dataViews": Object {
-      "existingFields": Object {},
       "indexPatternRefs": Array [],
       "indexPatterns": Object {},
-      "isFirstExistenceFetch": true,
     },
     "datasourceStates": Object {
       "testDatasource": Object {

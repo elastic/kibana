@@ -24,7 +24,7 @@ import {
   kibanaConfigWriter,
   elasticsearch,
 } from './utils';
-import { Logger } from '../cli_plugin/lib/logger';
+import { Logger } from '../cli/logger';
 
 const program = new Command('bin/kibana-setup');
 

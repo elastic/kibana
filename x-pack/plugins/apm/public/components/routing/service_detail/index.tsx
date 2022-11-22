@@ -21,6 +21,7 @@ import { AlertsOverview } from '../../app/alerts_overview';
 import { ErrorGroupDetails } from '../../app/error_group_details';
 import { ErrorGroupOverview } from '../../app/error_group_overview';
 import { InfraOverview } from '../../app/infra_overview';
+import { InfraTab } from '../../app/infra_overview/infra_tabs/use_tabs';
 import { Metrics } from '../../app/metrics';
 import { MetricsDetails } from '../../app/metrics_details';
 import { ServiceDependencies } from '../../app/service_dependencies';
@@ -149,6 +150,10 @@ export const serviceDetail = {
             pageSize: toNumberRt,
             sortField: t.string,
             sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+            device: t.string,
+            osVersion: t.string,
+            appVersion: t.string,
+            netConnectionType: t.string,
           }),
         }),
       },
@@ -180,6 +185,7 @@ export const serviceDetail = {
                 t.type({
                   transactionName: t.string,
                   comparisonEnabled: toBooleanRt,
+                  showCriticalPath: toBooleanRt,
                 }),
                 t.partial({
                   traceId: t.string,
@@ -188,6 +194,11 @@ export const serviceDetail = {
                 offsetRt,
               ]),
             }),
+            defaults: {
+              query: {
+                showCriticalPath: '',
+              },
+            },
           },
           '/services/{serviceName}/transactions': {
             element: <TransactionOverview />,
@@ -310,18 +321,27 @@ export const serviceDetail = {
           showKueryBar: false,
         },
       }),
-      '/services/{serviceName}/infrastructure': page({
-        tab: 'infrastructure',
-        title: i18n.translate('xpack.apm.views.infra.title', {
-          defaultMessage: 'Infrastructure',
+      '/services/{serviceName}/infrastructure': {
+        ...page({
+          tab: 'infrastructure',
+          title: i18n.translate('xpack.apm.views.infra.title', {
+            defaultMessage: 'Infrastructure',
+          }),
+          element: <InfraOverview />,
+          searchBarOptions: {
+            showKueryBar: false,
+          },
         }),
-        element: <InfraOverview />,
-        searchBarOptions: {
-          showKueryBar: false,
-          showTimeComparison: false,
-          showTransactionTypeSelector: false,
-        },
-      }),
+        params: t.partial({
+          query: t.partial({
+            detailTab: t.union([
+              t.literal(InfraTab.containers),
+              t.literal(InfraTab.pods),
+              t.literal(InfraTab.hosts),
+            ]),
+          }),
+        }),
+      },
       '/services/{serviceName}/alerts': page({
         tab: 'alerts',
         title: i18n.translate('xpack.apm.views.alerts.title', {

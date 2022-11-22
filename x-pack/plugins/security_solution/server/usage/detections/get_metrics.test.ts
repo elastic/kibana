@@ -15,6 +15,8 @@ import {
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
   getMockMlJobSummaryResponse,
+  getMockMlForceStartDatafeedsResponse,
+  getMockMlStopDatafeedsResponse,
   getMockListModulesResponse,
   getMockMlJobDetailsResponse,
   getMockMlJobStatsResponse,
@@ -273,12 +275,18 @@ describe('Detections Usage and Metrics', () => {
     it('returns an ml job telemetry object from anomaly detectors provider', async () => {
       const logger = loggingSystemMock.createLogger();
       const mockJobSummary = jest.fn().mockResolvedValue(getMockMlJobSummaryResponse());
+      const mockForceStartDatafeeds = jest
+        .fn()
+        .mockResolvedValue(getMockMlForceStartDatafeedsResponse());
+      const mockStopDatafeeds = jest.fn().mockResolvedValue(getMockMlStopDatafeedsResponse());
       const mockListModules = jest.fn().mockResolvedValue(getMockListModulesResponse());
       mlClient.modulesProvider.mockReturnValue({
         listModules: mockListModules,
       } as unknown as ReturnType<typeof mlClient.modulesProvider>);
       mlClient.jobServiceProvider.mockReturnValue({
         jobsSummary: mockJobSummary,
+        forceStartDatafeeds: mockForceStartDatafeeds,
+        stopDatafeeds: mockStopDatafeeds,
       });
       const mockJobsResponse = jest.fn().mockResolvedValue(getMockMlJobDetailsResponse());
       const mockJobStatsResponse = jest.fn().mockResolvedValue(getMockMlJobStatsResponse());

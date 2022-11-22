@@ -54,7 +54,7 @@ export async function downloadJobResponseHandler(
       statusCode: payload.statusCode,
       headers: {
         ...payload.headers,
-        'content-type': payload.contentType || '',
+        'content-type': payload.contentType,
       },
     });
   } catch (err) {

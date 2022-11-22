@@ -33,7 +33,7 @@ describe('ElasticV3BrowserShipper', () => {
   let fetchMock: jest.Mock;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     fetchMock = jest.fn().mockResolvedValue({
       status: 200,
@@ -160,6 +160,58 @@ describe('ElasticV3BrowserShipper', () => {
       expect(fetchMock).not.toHaveBeenCalled();
     })
   );
+
+  test(
+    'calls to flush forces the client to send all the pending events',
+    fakeSchedulers(async (advance) => {
+      shipper.optIn(true);
+      shipper.reportEvents(events);
+      const counter = firstValueFrom(shipper.telemetryCounter$);
+      const promise = shipper.flush();
+      advance(0); // bufferWhen requires some sort of fake scheduling to advance (but we are not advancing 1s)
+      await promise;
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://telemetry-staging.elastic.co/v3/send/test-channel',
+        {
+          body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
+          headers: {
+            'content-type': 'application/x-ndjson',
+            'x-elastic-cluster-id': 'UNKNOWN',
+            'x-elastic-stack-version': '1.2.3',
+          },
+          keepalive: true,
+          method: 'POST',
+          query: { debug: true },
+        }
+      );
+      await expect(counter).resolves.toMatchInlineSnapshot(`
+      Object {
+        "code": "200",
+        "count": 1,
+        "event_type": "test-event-type",
+        "source": "elastic_v3_browser",
+        "type": "succeeded",
+      }
+    `);
+    })
+  );
+
+  test('calls to flush resolve immediately if there is nothing to send', async () => {
+    shipper.optIn(true);
+    await shipper.flush();
+    expect(fetchMock).toHaveBeenCalledTimes(0);
+  });
+
+  test('calling flush multiple times does not keep hanging', async () => {
+    await expect(shipper.flush()).resolves.toBe(undefined);
+    await expect(shipper.flush()).resolves.toBe(undefined);
+    await Promise.all([shipper.flush(), shipper.flush()]);
+  });
+
+  test('calling flush after shutdown does not keep hanging', async () => {
+    shipper.shutdown();
+    await expect(shipper.flush()).resolves.toBe(undefined);
+  });
 
   test('calls to reportEvents call `fetch` when shutting down if optIn value is set to true', async () => {
     shipper.reportEvents(events);

@@ -304,11 +304,29 @@
         "description": [],
         "signature": [
           "({\n  def,\n  name,\n  value,\n  isCustom,\n  isOverridden,\n}: { def: ",
-          "PublicUiSettingsParams",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.PublicUiSettingsParams",
+            "text": "PublicUiSettingsParams"
+          },
           " & ",
-          "UserProvidedValues",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UserProvidedValues",
+            "text": "UserProvidedValues"
+          },
           "<any>; name: string; value: ",
-          "SavedObjectAttribute",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttribute",
+            "text": "SavedObjectAttribute"
+          },
           "; isCustom: boolean; isOverridden: boolean; }) => ",
           "FieldSetting"
         ],
@@ -335,9 +353,21 @@
                 "label": "def",
                 "description": [],
                 "signature": [
-                  "PublicUiSettingsParams",
+                  {
+                    "pluginId": "@kbn/core-ui-settings-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                    "section": "def-common.PublicUiSettingsParams",
+                    "text": "PublicUiSettingsParams"
+                  },
                   " & ",
-                  "UserProvidedValues",
+                  {
+                    "pluginId": "@kbn/core-ui-settings-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                    "section": "def-common.UserProvidedValues",
+                    "text": "UserProvidedValues"
+                  },
                   "<any>"
                 ],
                 "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts",
@@ -363,9 +393,21 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "SavedObjectAttributeSingle",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectAttributeSingle",
+                    "text": "SavedObjectAttributeSingle"
+                  },
                   " | ",
-                  "SavedObjectAttributeSingle",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectAttributeSingle",
+                    "text": "SavedObjectAttributeSingle"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts",

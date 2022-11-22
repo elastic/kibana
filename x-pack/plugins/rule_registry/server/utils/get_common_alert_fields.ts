@@ -31,9 +31,9 @@ export const getCommonAlertFields = (
     [ALERT_RULE_NAME]: options.rule.name,
     [ALERT_RULE_PRODUCER]: options.rule.producer,
     [ALERT_RULE_TYPE_ID]: options.rule.ruleTypeId,
-    [ALERT_RULE_UUID]: options.alertId,
+    [ALERT_RULE_UUID]: options.rule.id,
     [SPACE_IDS]: [options.spaceId],
-    [ALERT_RULE_TAGS]: options.tags,
+    [ALERT_RULE_TAGS]: options.rule.tags,
     [TIMESTAMP]: options.startedAt.toISOString(),
   };
 };

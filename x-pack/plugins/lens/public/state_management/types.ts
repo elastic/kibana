@@ -30,10 +30,6 @@ export interface VisualizationState {
 export interface DataViewsState {
   indexPatternRefs: IndexPatternRef[];
   indexPatterns: Record<string, IndexPattern>;
-  existingFields: Record<string, Record<string, boolean>>;
-  isFirstExistenceFetch: boolean;
-  existenceFetchFailed?: boolean;
-  existenceFetchTimeout?: boolean;
 }
 
 export type DatasourceStates = Record<string, { isLoading: boolean; state: unknown }>;

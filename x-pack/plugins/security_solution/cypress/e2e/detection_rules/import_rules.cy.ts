@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TOASTER } from '../../screens/alerts_detection_rules';
+import { RULES_ROW, RULES_TABLE, TOASTER } from '../../screens/alerts_detection_rules';
 import { importRules, importRulesWithOverwriteAll } from '../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -24,14 +24,24 @@ describe('Import rules', () => {
   });
 
   it('Imports a custom rule with exceptions', function () {
+    const expectedNumberOfRules = 1;
+    const expectedImportedRuleName = 'Test Custom Rule';
+
     importRules('7_16_rules.ndjson');
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should(
         'have.text',
-        'Successfully imported 1 ruleSuccessfully imported 2 exceptions.'
+        'Successfully imported 1 ruleSuccessfully imported 1 exception.'
       );
+
+      cy.get(RULES_TABLE).then(($table) => {
+        const rulesRow = cy.wrap($table.find(RULES_ROW));
+
+        rulesRow.should('have.length', expectedNumberOfRules);
+        rulesRow.should('include.text', expectedImportedRuleName);
+      });
     });
   });
 
@@ -65,7 +75,7 @@ describe('Import rules', () => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should(
         'have.text',
-        'Successfully imported 1 ruleSuccessfully imported 2 exceptions.'
+        'Successfully imported 1 ruleSuccessfully imported 1 exception.'
       );
     });
   });

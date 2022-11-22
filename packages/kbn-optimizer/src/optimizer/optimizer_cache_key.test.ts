@@ -23,7 +23,7 @@ jest.mock('@kbn/synthetic-package-map', () => {
 jest.mock('../common/hashes', () => {
   return {
     Hashes: class MockHashes {
-      static ofFiles = jest.fn(() => {
+      static ofFiles: any = jest.fn(() => {
         return new MockHashes();
       });
 

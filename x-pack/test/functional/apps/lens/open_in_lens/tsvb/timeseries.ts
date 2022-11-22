@@ -28,9 +28,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
       await visualBuilder.resetPage();
     });
 
@@ -39,6 +36,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
+      await header.waitUntilLoadingHasFinished();
+
       await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
@@ -50,11 +49,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigates back to TSVB when the Back button is clicked', async () => {
+      await header.waitUntilLoadingHasFinished();
+
       await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
 
       const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
-      goBackBtn.click();
+      await goBackBtn.click();
       await visualBuilder.checkVisualBuilderIsPresent();
       await retry.try(async () => {
         const actualCount = await visualBuilder.getRhythmChartLegendValue();

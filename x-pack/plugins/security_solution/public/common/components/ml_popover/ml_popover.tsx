@@ -165,7 +165,7 @@ export const MlPopover = React.memo(() => {
                           rel="noopener noreferrer"
                           target="_blank"
                         >
-                          {'Anomaly Detection with Machine Learning'}
+                          {i18n.ANOMALY_DETECTION_DOCS}
                         </a>
                       ),
                     }}

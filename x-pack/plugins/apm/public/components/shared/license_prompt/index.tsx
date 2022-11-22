@@ -27,19 +27,22 @@ export function LicensePrompt({
     <EuiCard
       display={showBetaBadge ? undefined : 'plain'}
       paddingSize="l"
-      betaBadgeProps={{
-        label: showBetaBadge
-          ? i18n.translate('xpack.apm.license.betaBadge', {
-              defaultMessage: 'Beta',
-            })
-          : undefined,
-        tooltipContent: showBetaBadge
-          ? i18n.translate('xpack.apm.license.betaTooltipMessage', {
-              defaultMessage:
-                'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
-            })
-          : undefined,
-      }}
+      betaBadgeProps={
+        showBetaBadge
+          ? {
+              label: i18n.translate('xpack.apm.license.betaBadge', {
+                defaultMessage: 'Beta',
+              }),
+              tooltipContent: i18n.translate(
+                'xpack.apm.license.betaTooltipMessage',
+                {
+                  defaultMessage:
+                    'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
+                }
+              ),
+            }
+          : undefined
+      }
       title={i18n.translate('xpack.apm.license.title', {
         defaultMessage: 'Start free 30-day trial',
       })}

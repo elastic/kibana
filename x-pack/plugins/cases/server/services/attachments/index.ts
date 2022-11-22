@@ -20,6 +20,7 @@ import type {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import type {
+  AttachmentTotals,
   AttributesTypeAlerts,
   CommentAttributes as AttachmentAttributes,
   CommentAttributesWithoutRefs as AttachmentAttributesWithoutRefs,
@@ -91,11 +92,6 @@ export type UpdateAttachmentArgs = UpdateArgs & ClientArgs;
 
 interface BulkUpdateAttachmentArgs extends ClientArgs, IndexRefresh {
   comments: UpdateArgs[];
-}
-
-interface CommentStats {
-  nonAlerts: number;
-  alerts: number;
 }
 
 export class AttachmentService {
@@ -463,7 +459,7 @@ export class AttachmentService {
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     caseIds: string[];
-  }): Promise<Map<string, CommentStats>> {
+  }): Promise<Map<string, AttachmentTotals>> {
     if (caseIds.length <= 0) {
       return new Map();
     }
@@ -498,11 +494,11 @@ export class AttachmentService {
     return (
       res.aggregations?.references.caseIds.buckets.reduce((acc, idBucket) => {
         acc.set(idBucket.key, {
-          nonAlerts: idBucket.reverse.comments.doc_count,
+          userComments: idBucket.reverse.comments.doc_count,
           alerts: idBucket.reverse.alerts.value,
         });
         return acc;
-      }, new Map<string, CommentStats>()) ?? new Map()
+      }, new Map<string, AttachmentTotals>()) ?? new Map()
     );
   }
 

@@ -21,6 +21,7 @@ import {
   buildPhraseFilter,
   buildPhrasesFilter,
   COMPARE_ALL_OPTIONS,
+  buildExistsFilter,
 } from '@kbn/es-query';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -128,10 +129,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       map((newInput) => ({
         validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
+        existsSelected: newInput.existsSelected,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
         timeslice: newInput.timeslice,
+        exclude: newInput.exclude,
         filters: newInput.filters,
         query: newInput.query,
       })),
@@ -153,7 +156,14 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
      **/
     this.subscriptions.add(
       this.getInput$()
-        .pipe(distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)))
+        .pipe(
+          distinctUntilChanged(
+            (a, b) =>
+              a.exclude === b.exclude &&
+              a.existsSelected === b.existsSelected &&
+              isEqual(a.selectedOptions, b.selectedOptions)
+          )
+        )
         .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
           const {
             actions: {
@@ -261,7 +271,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     const {
       dispatch,
       getState,
-      actions: { setLoading, updateQueryResults, publishFilters, setSearchString },
+      actions: { setLoading, publishFilters, setSearchString, updateQueryResults },
     } = this.reduxEmbeddableTools;
 
     const previousFieldName = this.field?.name;
@@ -274,9 +284,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     const {
       componentState: { searchString },
-      explicitInput: { selectedOptions, runPastTimeout },
+      explicitInput: { selectedOptions, runPastTimeout, existsSelected },
     } = getState();
-
     dispatch(setLoading(true));
     if (searchString.valid) {
       // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
@@ -313,7 +322,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           this.abortController.signal
         );
       if (
-        !selectedOptions ||
+        (!selectedOptions && !existsSelected) ||
         isEmpty(invalidSelections) ||
         ignoreParentSettings?.ignoreValidations
       ) {
@@ -328,8 +337,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       } else {
         const valid: string[] = [];
         const invalid: string[] = [];
-
-        for (const selectedOption of selectedOptions) {
+        for (const selectedOption of selectedOptions ?? []) {
           if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
@@ -364,21 +372,29 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private buildFilter = async () => {
     const { getState } = this.reduxEmbeddableTools;
     const { validSelections } = getState().componentState ?? {};
+    const { existsSelected } = getState().explicitInput ?? {};
+    const { exclude } = this.getInput();
 
-    if (!validSelections || isEmpty(validSelections)) {
+    if ((!validSelections || isEmpty(validSelections)) && !existsSelected) {
       return [];
     }
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
-    let newFilter: Filter;
-    if (validSelections.length === 1) {
-      newFilter = buildPhraseFilter(field, validSelections[0], dataView);
-    } else {
-      newFilter = buildPhrasesFilter(field, validSelections, dataView);
+    let newFilter: Filter | undefined;
+    if (existsSelected) {
+      newFilter = buildExistsFilter(field, dataView);
+    } else if (validSelections) {
+      if (validSelections.length === 1) {
+        newFilter = buildPhraseFilter(field, validSelections[0], dataView);
+      } else {
+        newFilter = buildPhrasesFilter(field, validSelections, dataView);
+      }
     }
+    if (!newFilter) return [];
 
     newFilter.meta.key = field?.name;
+    if (exclude) newFilter.meta.negate = true;
     return [newFilter];
   };
 

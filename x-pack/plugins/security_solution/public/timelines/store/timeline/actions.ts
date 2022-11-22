@@ -114,7 +114,7 @@ export const dataProviderEdited = actionCreator<{
   id: string;
   operator: QueryOperator;
   providerId: string;
-  value: string | number;
+  value: string | number | Array<string | number>;
 }>('DATA_PROVIDER_EDITED');
 
 export const updateDataProviderType = actionCreator<{
@@ -267,3 +267,7 @@ export const clearEventsLoading = actionCreator<{
 export const clearEventsDeleted = actionCreator<{
   id: string;
 }>('CLEAR_TGRID_EVENTS_DELETED');
+
+export const updateTotalCount = actionCreator<{ id: string; totalCount: number }>(
+  'UPDATE_TOTAL_COUNT'
+);

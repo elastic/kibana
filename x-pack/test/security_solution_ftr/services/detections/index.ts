@@ -8,6 +8,7 @@
 import { Response } from 'superagent';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import {
+  DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
@@ -15,13 +16,23 @@ import {
 import { estypes } from '@elastic/elasticsearch';
 import endpointPrePackagedRule from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json';
 import { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
+import { kibanaPackageJson } from '@kbn/utils';
+import { wrapErrorIfNeeded } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
 import { FtrService } from '../../../functional/ftr_provider_context';
+import { EndpointRuleAlertGenerator } from './endpoint_rule_alert_generator';
+import { getAlertsIndexMappings } from './alerts_security_index_mappings';
+
+export interface IndexedEndpointRuleAlerts {
+  alerts: estypes.WriteResponseBase[];
+  cleanup: () => Promise<void>;
+}
 
 export class DetectionsTestService extends FtrService {
   private readonly supertest = this.ctx.getService('supertest');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly config = this.ctx.getService('config');
+  private readonly esClient = this.ctx.getService('es');
   private readonly defaultTimeout = this.config.get('timeouts.waitFor');
 
   /**
@@ -49,6 +60,36 @@ export class DetectionsTestService extends FtrService {
 
       return res;
     };
+  }
+
+  private async ensureEndpointRuleAlertsIndexExists(): Promise<void> {
+    const indexMappings = getAlertsIndexMappings().value;
+
+    if (indexMappings.mappings?._meta?.kibana.version) {
+      indexMappings.mappings._meta.kibana.version = kibanaPackageJson.version;
+    }
+
+    try {
+      await this.esClient.indices.create({
+        index: indexMappings.index,
+        body: {
+          settings: indexMappings.settings,
+          mappings: indexMappings.mappings,
+          aliases: indexMappings.aliases,
+        },
+      });
+    } catch (error) {
+      // ignore error that indicate index is already created
+      if (
+        ['resource_already_exists_exception', 'invalid_alias_name_exception'].includes(
+          error?.body?.error?.type
+        )
+      ) {
+        return;
+      }
+
+      throw wrapErrorIfNeeded(error);
+    }
   }
 
   /**
@@ -99,10 +140,11 @@ export class DetectionsTestService extends FtrService {
   }
 
   /**
-   * Waits for alerts to have been loaded into `.alerts-security.alerts-default` index
+   * Waits for alerts to have been loaded by continuously calling the alerts api until data shows up
    * @param query
+   * @param timeoutMs
    */
-  async waitForAlerts(query: object = { match_all: {} }, timeoutMs?: number) {
+  async waitForAlerts(query: object = { match_all: {} }, timeoutMs?: number): Promise<void> {
     await this.retry.waitForWithTimeout(
       'Checking alerts index for data',
       timeoutMs ?? this.defaultTimeout,
@@ -127,5 +169,63 @@ export class DetectionsTestService extends FtrService {
         return response;
       }
     );
+  }
+
+  /**
+   * Loads alerts for Endpoint directly into the internal index that the Endpoint Rule
+   * would have written them to for a given endpoint
+   * @param endpointAgentId
+   * @param count
+   */
+  async loadEndpointRuleAlerts(
+    endpointAgentId: string,
+    count: number = 2
+  ): Promise<IndexedEndpointRuleAlerts> {
+    this.log.info(`Loading ${count} endpoint rule alerts`);
+
+    await this.ensureEndpointRuleAlertsIndexExists();
+
+    const alertsGenerator = new EndpointRuleAlertGenerator();
+    const esClient = this.esClient;
+    const indexedAlerts: estypes.IndexResponse[] = [];
+
+    for (let n = 0; n < count; n++) {
+      const alert = alertsGenerator.generate({ agent: { id: endpointAgentId } });
+      const indexedAlert = await esClient.index({
+        index: `${DEFAULT_ALERTS_INDEX}-default`,
+        refresh: 'wait_for',
+        body: alert,
+      });
+
+      indexedAlerts.push(indexedAlert);
+    }
+
+    this.log.info(`Endpoint rule alerts created:`, indexedAlerts);
+
+    return {
+      alerts: indexedAlerts,
+      cleanup: async (): Promise<void> => {
+        if (indexedAlerts.length) {
+          this.log.info('cleaning up loaded endpoint rule alerts');
+
+          await esClient.bulk({
+            body: indexedAlerts.map((indexedDoc) => {
+              return {
+                delete: {
+                  _index: indexedDoc._index,
+                  _id: indexedDoc._id,
+                },
+              };
+            }),
+          });
+
+          this.log.info(
+            `Deleted ${indexedAlerts.length} endpoint rule alerts. Ids: [${indexedAlerts
+              .map((alert) => alert._id)
+              .join()}]`
+          );
+        }
+      },
+    };
   }
 }

@@ -155,7 +155,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(javaSpans.length + goSpans.length).to.eql(spans.length);
 
-          expect(omit(javaSpans[0], 'traceId', 'transactionId')).to.eql({
+          expect(omit(javaSpans[0], 'spanId', 'traceId', 'transactionId')).to.eql({
             '@timestamp': 1609459200000,
             agentName: 'java',
             duration: 100000,
@@ -166,7 +166,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             outcome: 'success',
           });
 
-          expect(omit(goSpans[0], 'traceId', 'transactionId')).to.eql({
+          expect(omit(goSpans[0], 'spanId', 'traceId', 'transactionId')).to.eql({
             '@timestamp': 1609459200000,
             agentName: 'go',
             duration: 50000,
@@ -220,34 +220,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(javaSpans.length).to.be(0);
           expect(goSpans.length).to.be.greaterThan(0);
           expect(goSpans.length).to.eql(spans.length);
-        });
-      });
-
-      describe('when requesting spans without a transaction', () => {
-        it('should return the spans without transaction metadata', async () => {
-          const response = await callApi({
-            dependencyName: 'elasticsearch',
-            spanName: 'without transaction',
-          });
-
-          const { spans } = response.body;
-
-          const spanNames = uniq(spans.map((span) => span.spanName));
-
-          expect(spanNames).to.eql(['without transaction']);
-
-          expect(omit(spans[0], 'traceId')).to.eql({
-            '@timestamp': 1609459200000,
-            agentName: 'java',
-            duration: 200000,
-            serviceName: 'java',
-            spanName: 'without transaction',
-            outcome: 'unknown',
-          });
-
-          expect(spans[0].transactionType).not.to.be.ok();
-          expect(spans[0].transactionId).not.to.be.ok();
-          expect(spans[0].transactionName).not.to.be.ok();
         });
       });
 

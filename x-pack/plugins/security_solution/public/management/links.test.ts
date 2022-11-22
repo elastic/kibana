@@ -15,6 +15,7 @@ import type { StartPlugins } from '../types';
 import { links, getManagementFilteredLinks } from './links';
 import { allowedExperimentalValues } from '../../common/experimental_features';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
+import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 
 jest.mock('../../common/endpoint/service/authz', () => {
   const originalModule = jest.requireActual('../../common/endpoint/service/authz');
@@ -23,6 +24,8 @@ jest.mock('../../common/endpoint/service/authz', () => {
     calculateEndpointAuthz: jest.fn(),
   };
 });
+
+jest.mock('../common/lib/kibana');
 
 describe('links', () => {
   let coreMockStarted: ReturnType<typeof coreMock.createStart>;
@@ -57,11 +60,7 @@ describe('links', () => {
   });
 
   it('should return all links without filtering when having isolate permission', async () => {
-    (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-      canIsolateHost: true,
-      canUnIsolateHost: true,
-      canReadActionsLogManagement: true,
-    });
+    (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
 
     const filteredLinks = await getManagementFilteredLinks(
       coreMockStarted,
@@ -72,11 +71,11 @@ describe('links', () => {
 
   describe('Action Logs', () => {
     it('should return all but response actions link when no actions log access', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-        canIsolateHost: true,
-        canUnIsolateHost: true,
-        canReadActionsLogManagement: false,
-      });
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadActionsLogManagement: false,
+        })
+      );
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -95,7 +94,9 @@ describe('links', () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue({
         canIsolateHost: false,
         canUnIsolateHost: false,
+        canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -112,7 +113,9 @@ describe('links', () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue({
         canIsolateHost: false,
         canUnIsolateHost: true,
+        canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
@@ -126,12 +129,32 @@ describe('links', () => {
       });
     });
 
-    it('should return all when NO isolation permission due to license but HAS at least one host isolation exceptions entry', async () => {
+    it('should return all but HIE when HAS isolation permission AND has HIE entry but not superuser', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue({
         canIsolateHost: false,
         canUnIsolateHost: true,
+        canAccessEndpointManagement: false,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
+      fakeHttpServices.get.mockResolvedValue({ total: 1 });
+
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+      expect(filteredLinks).toEqual({
+        ...links,
+        links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
+      });
+    });
+
+    it('should return all when NO isolation permission due to license but HAS at least one host isolation exceptions entry', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canIsolateHost: false,
+        })
+      );
       fakeHttpServices.get.mockResolvedValue({ total: 1 });
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -146,6 +169,7 @@ describe('links', () => {
         canIsolateHost: false,
         canUnIsolateHost: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
@@ -164,6 +188,7 @@ describe('links', () => {
         canIsolateHost: false,
         canUnIsolateHost: true,
         canReadActionsLogManagement: false,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
@@ -178,6 +203,23 @@ describe('links', () => {
             link.id !== SecurityPageName.hostIsolationExceptions &&
             link.id !== SecurityPageName.responseActionsHistory
         ),
+      });
+    });
+  });
+  describe('Endpoint List', () => {
+    it('should return all but endpoints link when no Endpoint List READ access', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadEndpointList: false,
+        })
+      );
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+      expect(filteredLinks).toEqual({
+        ...links,
+        links: links.links?.filter((link) => link.id !== SecurityPageName.endpoints),
       });
     });
   });

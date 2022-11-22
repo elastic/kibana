@@ -24,5 +24,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./update_alert'));
     loadTestFile(require.resolve('./create_rule'));
     loadTestFile(require.resolve('./lifecycle_executor'));
+    loadTestFile(require.resolve('./get_summarized_alerts'));
   });
 };

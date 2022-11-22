@@ -140,9 +140,7 @@
         "label": "NoDataConfigPageWithSolutionNavBar",
         "description": [],
         "signature": [
-          "{ (props: ",
-          "Props",
-          "<",
+          "{ (props: Props<",
           "_EuiPageOuterProps",
           " & Omit<",
           "_EuiPageInnerProps",
@@ -176,10 +174,16 @@
               "P & Pick<",
               "KibanaPageTemplateProps",
               ", \"pageSideBar\" | \"pageSideBarProps\"> & { children?: React.ReactNode; } & { solutionNav: ",
-              "SolutionNavProps",
+              {
+                "pluginId": "@kbn/shared-ux-page-solution-nav",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPageSolutionNavPluginApi",
+                "section": "def-common.SolutionNavProps",
+                "text": "SolutionNavProps"
+              },
               "; }"
             ],
-            "path": "node_modules/@types/kbn__shared-ux-page-solution-nav/index.d.ts",
+            "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -202,7 +206,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-no-data-config-types/index.d.ts",
+        "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -232,7 +236,7 @@
           "EuiPageSidebarProps",
           " | undefined; }"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-no-data-config-types/index.d.ts",
+        "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -249,7 +253,7 @@
           " & ",
           "RedirectAppLinksServices"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-no-data-config-types/index.d.ts",
+        "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -514,7 +514,7 @@
         "label": "ImportQuerySchema",
         "description": [],
         "signature": [
-          "{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; }"
+          "{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; as_new_list?: boolean | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
@@ -529,7 +529,7 @@
         "label": "ImportQuerySchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; }, \"overwrite\" | \"overwrite_exceptions\"> & { overwrite: boolean; overwrite_exceptions: boolean; }"
+          "Omit<{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; as_new_list?: boolean | undefined; }, \"overwrite\" | \"overwrite_exceptions\" | \"as_new_list\"> & { overwrite: boolean; overwrite_exceptions: boolean; as_new_list: boolean; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
@@ -911,6 +911,8 @@
           "<{ overwrite: ",
           "Type",
           "<boolean, string | boolean | undefined, unknown>; overwrite_exceptions: ",
+          "Type",
+          "<boolean, string | boolean | undefined, unknown>; as_new_list: ",
           "Type",
           "<boolean, string | boolean | undefined, unknown>; }>>"
         ],

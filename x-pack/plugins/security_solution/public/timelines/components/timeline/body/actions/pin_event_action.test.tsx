@@ -41,7 +41,7 @@ describe('PinEventAction', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('pin')).toHaveClass('euiButtonIcon-isDisabled');
+      expect(screen.getByTestId('pin')).toHaveProperty('disabled', true);
     });
 
     test('it enables the pin event button when the user has crud privileges', () => {

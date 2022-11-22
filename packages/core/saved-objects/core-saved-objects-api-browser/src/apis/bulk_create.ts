@@ -9,18 +9,23 @@
 import type { SavedObjectsCreateOptions } from './create';
 
 /**
- * @param type - Create a SavedObject of the given type
- * @param attributes - Create a SavedObject with the given attributes
+ * Per-object parameters for bulk create operation
  *
  * @public
  */
 export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions {
+  /** Create a SavedObject of this type. */
   type: string;
+  /** Attributes for the saved object to be created. */
   attributes: T;
 }
 
-/** @public */
+/**
+ * Options for bulk create operation
+ *
+ * @public
+ * */
 export interface SavedObjectsBulkCreateOptions {
-  /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
+  /** If a document with the given `id` already exists, overwrite its contents (default=false). */
   overwrite?: boolean;
 }

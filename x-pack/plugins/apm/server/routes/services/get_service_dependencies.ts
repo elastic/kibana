@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServiceDependencies({
-  setup,
+  apmEventClient,
   start,
   end,
   serviceName,
@@ -20,7 +20,7 @@ export async function getServiceDependencies({
   environment,
   offset,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   serviceName: string;
@@ -29,7 +29,7 @@ export async function getServiceDependencies({
   offset?: string;
 }) {
   const statsItems = await getConnectionStats({
-    setup,
+    apmEventClient,
     start,
     end,
     numBuckets,

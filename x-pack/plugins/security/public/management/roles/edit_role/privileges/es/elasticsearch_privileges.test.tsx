@@ -66,3 +66,10 @@ test('it renders IndexPrivileges', () => {
     mountWithIntl(<ElasticsearchPrivileges {...getProps()} />).find(IndexPrivileges)
   ).toHaveLength(1);
 });
+
+test('it renders fields as disabled when not editable', () => {
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} editable={false} />);
+  expect(wrapper.find('EuiComboBox').prop('isDisabled')).toBe(true);
+  expect(wrapper.find('ClusterPrivileges').prop('editable')).toBe(false);
+  expect(wrapper.find('IndexPrivileges').prop('editable')).toBe(false);
+});

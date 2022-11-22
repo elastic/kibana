@@ -70,6 +70,17 @@ describe('useBulkActions', () => {
                   "key": "bulk-actions-separator",
                 },
                 Object {
+                  "data-test-subj": "cases-bulk-action-tags",
+                  "disabled": false,
+                  "icon": <EuiIcon
+                    size="m"
+                    type="tag"
+                  />,
+                  "key": "cases-bulk-action-tags",
+                  "name": "Edit tags",
+                  "onClick": [Function],
+                },
+                Object {
                   "data-test-subj": "cases-bulk-action-delete",
                   "disabled": false,
                   "icon": <EuiIcon

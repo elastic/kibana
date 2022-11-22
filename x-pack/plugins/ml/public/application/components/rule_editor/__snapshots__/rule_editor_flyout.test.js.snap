@@ -232,9 +232,11 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
           grow={false}
         >
           <EuiButton
+            color="primary"
             fill={true}
             isDisabled={false}
             onClick={[Function]}
+            size="m"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -491,9 +493,11 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
           grow={false}
         >
           <EuiButton
+            color="primary"
             fill={true}
             isDisabled={false}
             onClick={[Function]}
+            size="m"
           >
             <FormattedMessage
               defaultMessage="Save"
@@ -728,9 +732,11 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
           grow={false}
         >
           <EuiButton
+            color="primary"
             fill={true}
             isDisabled={true}
             onClick={[Function]}
+            size="m"
           >
             <FormattedMessage
               defaultMessage="Save"

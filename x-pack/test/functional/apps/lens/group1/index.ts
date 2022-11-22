@@ -63,7 +63,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     after(async () => {
-      await esArchiver.unload(esArchive);
+      await esNode.unload(esArchive);
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
@@ -79,6 +79,8 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       loadTestFile(require.resolve('./table_dashboard'));
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./text_based_languages'));
+      loadTestFile(require.resolve('./fields_list'));
+      loadTestFile(require.resolve('./layer_actions'));
     }
   });
 };

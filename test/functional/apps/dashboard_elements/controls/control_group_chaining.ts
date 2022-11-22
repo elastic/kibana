@@ -14,26 +14,58 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
-  const { dashboardControls, common, dashboard, timePicker } = getPageObjects([
+  const { common, console, dashboard, dashboardControls, header, timePicker } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
+    'console',
     'common',
+    'header',
   ]);
 
   describe('Dashboard control group hierarchical chaining', () => {
+    const newDocuments: Array<{ index: string; id: string }> = [];
     let controlIds: string[];
 
-    const ensureAvailableOptionsEql = async (controlId: string, expectation: string[]) => {
+    const ensureAvailableOptionsEql = async (
+      controlId: string,
+      expectation: string[],
+      filterOutExists: boolean = true
+    ) => {
       await dashboardControls.optionsListOpenPopover(controlId);
       await retry.try(async () => {
-        expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql(expectation);
+        expect(
+          await dashboardControls.optionsListPopoverGetAvailableOptions(filterOutExists)
+        ).to.eql(expectation);
       });
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
     };
 
+    const addDocument = async (index: string, document: string) => {
+      await console.enterRequest('\nPOST ' + index + '/_doc/ \n{\n ' + document);
+      await console.clickPlay();
+      await header.waitUntilLoadingHasFinished();
+      const response = JSON.parse(await console.getResponse());
+      newDocuments.push({ index, id: response._id });
+    };
+
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
+
+      /* start by adding some incomplete data so that we can test `exists` query */
+      await common.navigateToApp('console');
+      await console.collapseHelp();
+      await console.clearTextArea();
+      await addDocument(
+        'animals-cats-2018-01-01',
+        '"@timestamp": "2018-01-01T16:00:00.000Z", \n"animal": "cat"'
+      );
+      await addDocument(
+        'animals-dogs-2018-01-01',
+        '"@timestamp": "2018-01-01T16:00:00.000Z", \n"name": "Max", \n"sound": "woof"'
+      );
+
+      /* then, create our testing dashboard */
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
@@ -65,6 +97,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await common.navigateToApp('console');
+      await console.collapseHelp();
+      await console.clearTextArea();
+      for (const { index, id } of newDocuments) {
+        await console.enterRequest(`\nDELETE /${index}/_doc/${id}`);
+        await console.clickPlay();
+        await header.waitUntilLoadingHasFinished();
+      }
       await security.testUser.restoreDefaults();
     });
 
@@ -123,6 +163,60 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
     });
 
+    it('Excluding selections in the first control will validate the second and third controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSetIncludeSelections(false);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+
+      await ensureAvailableOptionsEql(controlIds[1], ['Tiger', 'sylvester', 'Max']);
+      await ensureAvailableOptionsEql(controlIds[2], ['meow', 'hiss']);
+    });
+
+    it('Excluding all options of first control removes all options in second and third controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSelectOption('cat');
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+
+      await dashboardControls.optionsListOpenPopover(controlIds[1]);
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+      await dashboardControls.optionsListOpenPopover(controlIds[2]);
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+    });
+
+    it('Creating "does not exist" query from first control filters the second and third controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSelectOption('exists');
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+      await dashboard.waitForRenderComplete();
+
+      await dashboardControls.optionsListOpenPopover(controlIds[1]);
+      await dashboardControls.optionsListPopoverClearSelections();
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql(['Max']);
+
+      await dashboardControls.optionsListOpenPopover(controlIds[2]);
+      await dashboardControls.optionsListPopoverClearSelections();
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql(['woof']);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+    });
+
+    it('Creating "exists" query from first control filters the second and third controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSetIncludeSelections(true);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+      await dashboard.waitForRenderComplete();
+
+      await dashboardControls.optionsListOpenPopover(controlIds[1]);
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.not.contain('Max');
+      await dashboardControls.optionsListOpenPopover(controlIds[2]);
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.not.contain(
+        'woof'
+      );
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+    });
+
     describe('Hierarchical chaining off', async () => {
       before(async () => {
         await dashboardControls.updateChainingSystem('NONE');
@@ -139,6 +233,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'sylvester',
           'Fee Fee',
           'Rover',
+          'Max',
         ]);
         await ensureAvailableOptionsEql(controlIds[2], [
           'hiss',
@@ -149,6 +244,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'growl',
           'grr',
           'bow ow ow',
+          'woof',
         ]);
       });
     });

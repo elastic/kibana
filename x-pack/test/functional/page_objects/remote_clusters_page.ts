@@ -31,5 +31,31 @@ export function RemoteClustersPageProvider({ getService }: FtrProviderContext) {
       await comboBox.setCustom('comboBoxInput', seedNode);
       await testSubjects.click('remoteClusterFormSaveButton');
     },
+    async getRemoteClustersList() {
+      const table = await testSubjects.find('remoteClusterListTable');
+      const rows = await table.findAllByCssSelector('.euiTableRow');
+      return await Promise.all(
+        rows.map(async (row) => {
+          return {
+            remoteLink: await row.findByTestSubject('remoteClustersTableListClusterLink'),
+            remoteName: await (
+              await row.findByTestSubject('remoteClustersTableListClusterLink')
+            ).getVisibleText(),
+            remoteStatus: await (
+              await row.findByTestSubject('remoteClusterConnectionStatusMessage')
+            ).getVisibleText(),
+            remoteMode: await (
+              await row.findByTestSubject('remoteClusterConnectionModeMessage')
+            ).getVisibleText(),
+            remoteAddress: await (
+              await row.findByTestSubject('remoteClusterConnectionAddressMessage')
+            ).getVisibleText(),
+            remoteConnectionCount: await (
+              await row.findByTestSubject('remoteClusterNodeCountMessage')
+            ).getVisibleText(),
+          };
+        })
+      );
+    },
   };
 }

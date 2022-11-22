@@ -84,6 +84,8 @@ function TemplateWithContext({
 
   const tabs = useTabs({ selectedTab });
 
+  const { agentName } = useApmServiceContext();
+
   useBreadcrumb(
     () => ({
       title,
@@ -117,6 +119,11 @@ function TemplateWithContext({
                     end={end}
                   />
                 </EuiFlexItem>
+                {isMobileAgentName(agentName) && (
+                  <EuiFlexItem grow={false}>
+                    <TechnicalPreviewBadge />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
 

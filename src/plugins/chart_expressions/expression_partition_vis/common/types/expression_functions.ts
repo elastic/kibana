@@ -18,6 +18,7 @@ import {
   TREEMAP_VIS_EXPRESSION_NAME,
   MOSAIC_VIS_EXPRESSION_NAME,
   WAFFLE_VIS_EXPRESSION_NAME,
+  PARTITION_LABELS_FUNCTION,
 } from '../constants';
 import {
   RenderValue,
@@ -91,3 +92,10 @@ export enum ChartTypes {
   MOSAIC = 'mosaic',
   WAFFLE = 'waffle',
 }
+
+export type PartitionLabelsExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof PARTITION_LABELS_FUNCTION,
+  Datatable | null,
+  PartitionLabelsArguments,
+  ExpressionValuePartitionLabels
+>;

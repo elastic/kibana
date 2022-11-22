@@ -77,9 +77,9 @@ const OverlayRootContainer = styled.div`
 `;
 
 const PAGE_OVERLAY_CSS_CLASSNAME = 'securitySolution-pageOverlay';
-const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
-const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
-const PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-fullScreen`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-fullScreen`;
 
 const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   body.${PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME} {
@@ -154,7 +154,7 @@ export interface PageOverlayProps {
   isHidden?: boolean;
 
   /**
-   * Setting this to `true` (defualt) will enable scrolling inside of the overlay
+   * Setting this to `true` (default) will enable scrolling inside of the overlay
    */
   enableScrolling?: boolean;
 
@@ -194,7 +194,8 @@ export interface PageOverlayProps {
 
 /**
  * A generic component for taking over the entire Kibana UI main content area (everything below the
- * top header that includes the breadcrumbs).
+ * top header that includes the breadcrumbs). This component adds nothing more than a blank page - its up
+ * to the `children` pass to actually display any type of intractable UI for the user.
  */
 export const PageOverlay = memo<PageOverlayProps>(
   ({

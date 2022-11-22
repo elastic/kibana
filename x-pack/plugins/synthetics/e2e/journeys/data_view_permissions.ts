@@ -48,10 +48,10 @@ journey('DataViewPermissions', async ({ page, params }) => {
   step('Click explore data button', async () => {
     await page.click(byTestId('uptimeExploreDataButton'));
     await waitForLoadingToFinish({ page });
-    await page.waitForSelector(`text=${permissionError}`, TIMEOUT_60_SEC);
-    expect(await page.$(`text=${permissionError}`)).toBeTruthy();
+  });
+
+  step('it renders for viewer user as well', async () => {
+    await page.waitForSelector(`text=browser`, TIMEOUT_60_SEC);
+    expect(await page.$(`text=Monitor duration`)).toBeTruthy();
   });
 });
-
-const permissionError =
-  "Unable to create Data View. You don't have the required permission, please contact your admin.";

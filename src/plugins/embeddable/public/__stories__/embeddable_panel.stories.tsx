@@ -15,7 +15,6 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { ReplaySubject } from 'rxjs';
 import { ThemeContext } from '@emotion/react';
 import { DecoratorFn, Meta } from '@storybook/react';
@@ -251,15 +250,13 @@ DefaultWithError.argTypes = {
 export function DefaultWithCustomError({ message, ...props }: DefaultWithErrorProps) {
   const ref = useRef<React.ComponentRef<typeof HelloWorldEmbeddablePanel>>(null);
 
-  useEffect(
-    () =>
-      ref.current?.embeddable.setErrorRenderer((node, error) => {
-        render(<EuiEmptyPrompt iconColor="warning" iconType="bug" body={error.message} />, node);
-
-        return () => unmountComponentAtNode(node);
-      }),
-    []
-  );
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.embeddable.catchError = (error) => {
+        return <EuiEmptyPrompt iconColor="warning" iconType="bug" body={error.message} />;
+      };
+    }
+  }, []);
   useEffect(
     () => void ref.current?.embeddable.store.dispatch(actions.output.setError(new Error(message))),
     [message]

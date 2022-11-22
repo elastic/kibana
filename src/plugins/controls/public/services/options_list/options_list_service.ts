@@ -82,12 +82,14 @@ class OptionsListService implements ControlsOptionsListService {
     const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
     const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
     const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [])];
+
     return {
       ...passThroughProps,
       filters: esFilters,
       fieldName: field.name,
       fieldSpec: field,
       textFieldName: (field as OptionsListField).textFieldName,
+      runtimeFieldMap: dataView.toSpec().runtimeFieldMap,
     };
   };
 

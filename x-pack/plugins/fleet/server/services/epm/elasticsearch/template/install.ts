@@ -9,8 +9,21 @@ import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+
+import {
+  FILE_STORAGE_INTEGRATION_INDEX_NAMES,
+  FILE_STORAGE_INTEGRATION_NAMES,
+} from '../../../../../common/constants';
+
 import { ElasticsearchAssetType } from '../../../../types';
-import { getPipelineNameForDatastream } from '../../../../../common/services';
+import {
+  getFileWriteIndexName,
+  getFileStorageWriteIndexBody,
+  getPipelineNameForDatastream,
+  getFileDataIndexName,
+  getFileMetadataIndexName,
+} from '../../../../../common/services';
 import type {
   RegistryDataStream,
   IndexTemplateEntry,
@@ -228,9 +241,17 @@ export function buildComponentTemplates(params: {
   templateName: string;
   registryElasticsearch: RegistryElasticsearch | undefined;
   packageName: string;
+  pipelineName?: string;
   defaultSettings: IndexTemplate['template']['settings'];
 }) {
-  const { templateName, registryElasticsearch, packageName, defaultSettings, mappings } = params;
+  const {
+    templateName,
+    registryElasticsearch,
+    packageName,
+    defaultSettings,
+    mappings,
+    pipelineName,
+  } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
 
@@ -256,6 +277,7 @@ export function buildComponentTemplates(params: {
         ...templateSettings,
         index: {
           ...templateSettings.index,
+          ...(pipelineName ? { default_pipeline: pipelineName } : {}),
           mapping: {
             ...templateSettings?.mapping,
             total_fields: {
@@ -332,6 +354,43 @@ export async function ensureDefaultComponentTemplates(
   );
 }
 
+/*
+ * Given a list of integration names, if the integrations support file upload
+ * then ensure that the alias has a matching write index, as we use "plain" indices
+ * not data streams.
+ * e.g .fleet-file-data-agent must have .fleet-file-data-agent-00001 as the write index
+ * before files can be uploaded.
+ */
+export async function ensureFileUploadWriteIndices(opts: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  integrationNames: string[];
+}) {
+  const { esClient, logger, integrationNames } = opts;
+
+  const integrationsWithFileUpload = integrationNames.filter((integration) =>
+    FILE_STORAGE_INTEGRATION_NAMES.includes(integration as any)
+  );
+
+  if (!integrationsWithFileUpload.length) return [];
+
+  const ensure = (aliasName: string) =>
+    ensureAliasHasWriteIndex({
+      esClient,
+      logger,
+      aliasName,
+      writeIndexName: getFileWriteIndexName(aliasName),
+      body: getFileStorageWriteIndexBody(aliasName),
+    });
+
+  return Promise.all(
+    integrationsWithFileUpload.flatMap((integrationName) => {
+      const indexName = FILE_STORAGE_INTEGRATION_INDEX_NAMES[integrationName];
+      return [ensure(getFileDataIndexName(indexName)), ensure(getFileMetadataIndexName(indexName))];
+    })
+  );
+}
+
 export async function ensureComponentTemplate(
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -360,6 +419,37 @@ export async function ensureComponentTemplate(
   }
 
   return { isCreated: !existingTemplate };
+}
+
+export async function ensureAliasHasWriteIndex(opts: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  aliasName: string;
+  writeIndexName: string;
+  body: Omit<IndicesCreateRequest, 'index'>;
+}): Promise<void> {
+  const { esClient, logger, aliasName, writeIndexName, body } = opts;
+  const existingIndex = await retryTransientEsErrors(
+    () =>
+      esClient.indices.exists(
+        {
+          index: [aliasName],
+        },
+        {
+          ignore: [404],
+        }
+      ),
+    { logger }
+  );
+
+  if (!existingIndex) {
+    await retryTransientEsErrors(
+      () => esClient.indices.create({ index: writeIndexName, ...body }, { ignore: [404] }),
+      {
+        logger,
+      }
+    );
+  }
 }
 
 export function prepareTemplate({
@@ -392,12 +482,12 @@ export function prepareTemplate({
     mappings,
     packageName,
     templateName,
+    pipelineName,
     registryElasticsearch: dataStream.elasticsearch,
   });
 
   const template = getTemplate({
     templateIndexPattern,
-    pipelineName,
     packageName,
     composedOfTemplates: Object.keys(componentTemplates),
     templatePriority,

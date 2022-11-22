@@ -141,7 +141,13 @@
             "description": [],
             "signature": [
               "(objects: ",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>[]) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -163,7 +169,13 @@
                 "label": "objects",
                 "description": [],
                 "signature": [
-                  "SavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
                   "<unknown>[]"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
@@ -185,7 +197,13 @@
             ],
             "signature": [
               "(objects: ",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>[], cause: Error) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -207,7 +225,13 @@
                 "label": "objects",
                 "description": [],
                 "signature": [
-                  "SavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
                   "<unknown>[]"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
@@ -463,7 +487,13 @@
             "description": [],
             "signature": [
               "(objects: ",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<unknown>[]) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -485,7 +515,13 @@
                 "label": "objects",
                 "description": [],
                 "signature": [
-                  "SavedObject",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
                   "<unknown>[]"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",

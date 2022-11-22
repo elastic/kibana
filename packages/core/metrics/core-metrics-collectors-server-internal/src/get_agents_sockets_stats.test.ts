@@ -32,7 +32,7 @@ describe('getAgentsSocketsStats()', () => {
       },
     });
 
-    const agent2 = getHttpAgentMock({
+    const agent2 = getHttpsAgentMock({
       sockets: {
         node1: [mockSocket, mockSocket, mockSocket],
         node4: [mockSocket],
@@ -47,101 +47,9 @@ describe('getAgentsSocketsStats()', () => {
 
     const stats = getAgentsSocketsStats(new Set<Agent>([agent1, agent2]));
     expect(stats).toEqual({
-      averageActiveSocketsPerNode: 2.6666666666666665,
-      averageIdleSocketsPerNode: 4.5,
-      connectedNodes: 4,
-      mostActiveNodeSockets: 6,
-      mostIdleNodeSockets: 8,
-      nodesWithActiveSockets: 3,
-      nodesWithIdleSockets: 2,
-      protocol: 'http',
       totalActiveSockets: 8,
       totalIdleSockets: 9,
       totalQueuedRequests: 6,
-    });
-  });
-
-  it('takes into account Agent types to determine the `protocol`', () => {
-    const httpAgent = getHttpAgentMock({
-      sockets: { node1: [mockSocket] },
-      freeSockets: {},
-      requests: {},
-    });
-
-    const httpsAgent = getHttpsAgentMock({
-      sockets: { node1: [mockSocket] },
-      freeSockets: {},
-      requests: {},
-    });
-
-    const noAgents = new Set<Agent>();
-    const httpAgents = new Set<Agent>([httpAgent, httpAgent]);
-    const httpsAgents = new Set<Agent>([httpsAgent, httpsAgent]);
-    const mixedAgents = new Set<Agent>([httpAgent, httpsAgent]);
-
-    expect(getAgentsSocketsStats(noAgents).protocol).toEqual('none');
-    expect(getAgentsSocketsStats(httpAgents).protocol).toEqual('http');
-    expect(getAgentsSocketsStats(httpsAgents).protocol).toEqual('https');
-    expect(getAgentsSocketsStats(mixedAgents).protocol).toEqual('mixed');
-  });
-
-  it('does not take into account those Agents that have not had any connection to any node', () => {
-    const pristineAgentProps = {
-      sockets: {},
-      freeSockets: {},
-      requests: {},
-    };
-    const agent1 = getHttpAgentMock(pristineAgentProps);
-    const agent2 = getHttpAgentMock(pristineAgentProps);
-    const agent3 = getHttpAgentMock(pristineAgentProps);
-
-    const stats = getAgentsSocketsStats(new Set<Agent>([agent1, agent2, agent3]));
-
-    expect(stats).toEqual({
-      averageActiveSocketsPerNode: 0,
-      averageIdleSocketsPerNode: 0,
-      connectedNodes: 0,
-      mostActiveNodeSockets: 0,
-      mostIdleNodeSockets: 0,
-      nodesWithActiveSockets: 0,
-      nodesWithIdleSockets: 0,
-      protocol: 'none',
-      totalActiveSockets: 0,
-      totalIdleSockets: 0,
-      totalQueuedRequests: 0,
-    });
-  });
-
-  it('takes into account those Agents that have hold mappings to one or more nodes, but that do not currently have any pending requests, active connections or idle connections', () => {
-    const emptyAgentProps = {
-      sockets: {
-        node1: [],
-      },
-      freeSockets: {
-        node2: [],
-      },
-      requests: {
-        node3: [],
-      },
-    };
-
-    const agent1 = getHttpAgentMock(emptyAgentProps);
-    const agent2 = getHttpAgentMock(emptyAgentProps);
-
-    const stats = getAgentsSocketsStats(new Set<Agent>([agent1, agent2]));
-
-    expect(stats).toEqual({
-      averageActiveSocketsPerNode: 0,
-      averageIdleSocketsPerNode: 0,
-      connectedNodes: 3,
-      mostActiveNodeSockets: 0,
-      mostIdleNodeSockets: 0,
-      nodesWithActiveSockets: 0,
-      nodesWithIdleSockets: 0,
-      protocol: 'http',
-      totalActiveSockets: 0,
-      totalIdleSockets: 0,
-      totalQueuedRequests: 0,
     });
   });
 });

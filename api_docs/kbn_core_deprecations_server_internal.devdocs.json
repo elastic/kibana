@@ -34,11 +34,29 @@
             ],
             "signature": [
               "(esClient: ",
-              "IScopedClusterClient",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              },
               ", savedObjectsClient: ",
-              "SavedObjectsClientContract",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
               ") => ",
-              "DeprecationsClient"
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-server.DeprecationsClient",
+                "text": "DeprecationsClient"
+              }
             ],
             "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
             "deprecated": false,
@@ -52,7 +70,13 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "IScopedClusterClient"
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-server.IScopedClusterClient",
+                    "text": "IScopedClusterClient"
+                  }
                 ],
                 "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
                 "deprecated": false,
@@ -67,7 +91,13 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  "SavedObjectsClientContract"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
                 "deprecated": false,

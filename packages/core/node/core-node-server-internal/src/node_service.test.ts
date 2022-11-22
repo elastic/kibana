@@ -117,4 +117,62 @@ describe('NodeService', () => {
       });
     });
   });
+  describe('#start()', () => {
+    it('returns default roles values when wildcard is provided', async () => {
+      configService = getMockedConfigService({ roles: ['*'] });
+      coreContext = mockCoreContext.create({ logger, configService });
+
+      service = new NodeService(coreContext);
+      await service.preboot({ loggingSystem: logger });
+      const { roles } = service.start();
+
+      expect(roles.backgroundTasks).toBe(true);
+      expect(roles.ui).toBe(true);
+    });
+
+    it('returns correct roles when node is configured to `background_tasks`', async () => {
+      configService = getMockedConfigService({ roles: ['background_tasks'] });
+      coreContext = mockCoreContext.create({ logger, configService });
+
+      service = new NodeService(coreContext);
+      await service.preboot({ loggingSystem: logger });
+      const { roles } = service.start();
+
+      expect(roles.backgroundTasks).toBe(true);
+      expect(roles.ui).toBe(false);
+    });
+
+    it('returns correct roles when node is configured to `ui`', async () => {
+      configService = getMockedConfigService({ roles: ['ui'] });
+      coreContext = mockCoreContext.create({ logger, configService });
+
+      service = new NodeService(coreContext);
+      await service.preboot({ loggingSystem: logger });
+      const { roles } = service.start();
+
+      expect(roles.backgroundTasks).toBe(false);
+      expect(roles.ui).toBe(true);
+    });
+
+    it('returns correct roles when node is configured to both `background_tasks` and `ui`', async () => {
+      configService = getMockedConfigService({ roles: ['background_tasks', 'ui'] });
+      coreContext = mockCoreContext.create({ logger, configService });
+
+      service = new NodeService(coreContext);
+      await service.preboot({ loggingSystem: logger });
+      const { roles } = service.start();
+
+      expect(roles.backgroundTasks).toBe(true);
+      expect(roles.ui).toBe(true);
+    });
+    it('throws if preboot has not been run', () => {
+      configService = getMockedConfigService({ roles: ['background_tasks', 'ui'] });
+      coreContext = mockCoreContext.create({ logger, configService });
+
+      service = new NodeService(coreContext);
+      expect(() => service.start()).toThrowErrorMatchingInlineSnapshot(
+        `"NodeService#start() can only be called after NodeService#preboot()"`
+      );
+    });
+  });
 });

@@ -30,6 +30,7 @@ import {
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  SEARCH_EXPERIENCES_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
@@ -54,6 +55,7 @@ import { registerConfigDataRoute } from './routes/enterprise_search/config_data'
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerCreateAPIKeyRoute } from './routes/enterprise_search/create_api_key';
+import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -110,6 +112,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       ANALYTICS_PLUGIN.ID,
       APP_SEARCH_PLUGIN.ID,
       WORKPLACE_SEARCH_PLUGIN.ID,
+      SEARCH_EXPERIENCES_PLUGIN.ID,
     ];
 
     if (customIntegrations) {
@@ -158,6 +161,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
+          searchExperiences: showEnterpriseSearch,
         },
         catalogue: {
           enterpriseSearch: showEnterpriseSearch,
@@ -166,6 +170,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
+          searchExperiences: showEnterpriseSearch,
         },
       };
     });
@@ -185,6 +190,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
     registerAnalyticsRoutes(dependencies);
+    registerStatsRoutes(dependencies);
 
     getStartServices().then(([, { security: securityStart }]) => {
       registerCreateAPIKeyRoute(dependencies, securityStart);

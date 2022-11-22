@@ -16,7 +16,7 @@ import {
 } from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { SLO } from '../../types/models';
+import { SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
 
 export class UpdateSLO {

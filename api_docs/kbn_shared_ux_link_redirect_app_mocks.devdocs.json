@@ -34,7 +34,13 @@
             "text": "StorybookMock"
           },
           " extends ",
-          "AbstractStorybookMock",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
           "<",
           "RedirectAppLinksProps",
           ", {}, {}, {}>"

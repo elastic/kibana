@@ -32,7 +32,7 @@ const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, indexPattern
   // Use a rounded timerange so that memoizing works properly
   const roundedTimerange = {
     from: dateMath.parse(timeRange.from)!.startOf('minute').toISOString(),
-    to: dateMath.parse(timeRange.to)!.endOf('minute').toISOString(),
+    to: dateMath.parse(timeRange.to, { roundUp: true })!.endOf('minute').toISOString(),
   };
   return timefilter.createFilter(indexPattern, roundedTimerange);
 };

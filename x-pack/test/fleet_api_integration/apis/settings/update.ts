@@ -18,7 +18,8 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const esArchiver = getService('esArchiver');
 
-  describe('Settings - update', async function () {
+  // Skipped as the Fleet Server hosts settings values are no longer used as of https://github.com/elastic/kibana/issues/137785
+  describe.skip('Settings - update', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');

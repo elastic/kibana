@@ -11,12 +11,12 @@ import { UserProfilesPopover } from '@kbn/user-profile-components';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import { MAX_ASSIGNEES_PER_CASE } from '../../../../common/constants';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import type { AssigneeWithProfile } from '../../user_profiles/types';
 import * as i18n from '../translations';
 import { bringCurrentUserToFrontAndSort } from '../../user_profiles/sort';
-import { SelectedStatusMessage } from '../../user_profiles/selected_status_message';
 import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
 import type { CurrentUserProfile } from '../../types';
@@ -79,12 +79,12 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   );
 
   const selectedStatusMessage = useCallback(
-    (selectedCount: number) => (
-      <SelectedStatusMessage
-        selectedCount={selectedCount}
-        message={i18n.TOTAL_USERS_ASSIGNED(selectedCount)}
-      />
-    ),
+    (selectedCount: number) => i18n.TOTAL_USERS_ASSIGNED(selectedCount),
+    []
+  );
+
+  const limitReachedMessage = useCallback(
+    (limit: number) => i18n.MAX_SELECTED_ASSIGNEES(limit),
     []
   );
 
@@ -131,6 +131,8 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
         selectedOptions: selectedUsers ?? selectedProfiles,
         isLoading: isLoadingData,
         height: 'full',
+        limit: MAX_ASSIGNEES_PER_CASE,
+        limitReachedMessage,
         searchPlaceholder: i18n.SEARCH_USERS,
         clearButtonLabel: i18n.REMOVE_ASSIGNEES,
         emptyMessage: <EmptyMessage />,

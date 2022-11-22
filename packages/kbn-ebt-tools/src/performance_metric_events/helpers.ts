@@ -28,7 +28,7 @@ export function registerPerformanceMetricEventType(
 /**
  * Report a `performance_metric` event type.
  * @param analytics The {@link AnalyticsClient} to report the events.
- * @param eventData The data to send, conforming the structure of a {@link MetricEvent}.
+ * @param eventData The data to send, conforming the structure of a {@link PerformanceMetricEvent}.
  */
 export function reportPerformanceMetricEvent(
   analytics: Pick<AnalyticsClient, 'reportEvent'>,

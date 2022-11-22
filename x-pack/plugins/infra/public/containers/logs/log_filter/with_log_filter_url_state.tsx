@@ -9,24 +9,33 @@ import * as rt from 'io-ts';
 import React from 'react';
 import { Query } from '@kbn/es-query';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
-import { useLogFilterStateContext } from './log_filter_state';
+import { useLogFilterStateContext, DEFAULT_QUERY } from './log_filter_state';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const WithLogFilterUrlState: React.FC = () => {
-  const { filterQuery, applyLogFilterQuery } = useLogFilterStateContext();
+  const {
+    data: {
+      query: { queryString },
+    },
+  } = useKibanaContextForPlugin().services;
+
+  const { queryStringQuery } = useLogFilterStateContext();
 
   return (
     <UrlStateContainer
-      urlState={filterQuery?.originalQuery}
+      urlState={queryStringQuery}
       urlStateKey="logFilter"
       mapToUrlState={mapToFilterQuery}
       onChange={(urlState) => {
         if (urlState) {
-          applyLogFilterQuery(urlState);
+          queryString.setQuery(urlState);
         }
       }}
       onInitialize={(urlState) => {
         if (urlState) {
-          applyLogFilterQuery(urlState);
+          queryString.setQuery(urlState);
+        } else {
+          queryString.setQuery(DEFAULT_QUERY);
         }
       }}
     />

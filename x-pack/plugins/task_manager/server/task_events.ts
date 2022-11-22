@@ -7,8 +7,6 @@
 
 import { monitorEventLoopDelay } from 'perf_hooks';
 
-import { Option } from 'fp-ts/lib/Option';
-
 import { ConcreteTaskInstance } from './task';
 
 import { Result, Err } from './lib/result_type';
@@ -32,12 +30,6 @@ export enum TaskEventType {
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
   EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY = 'EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY',
-}
-
-export enum TaskClaimErrorType {
-  CLAIMED_BY_ID_OUT_OF_CAPACITY = 'CLAIMED_BY_ID_OUT_OF_CAPACITY',
-  CLAIMED_BY_ID_NOT_RETURNED = 'CLAIMED_BY_ID_NOT_RETURNED',
-  CLAIMED_BY_ID_NOT_IN_CLAIMING_STATUS = 'CLAIMED_BY_ID_NOT_IN_CLAIMING_STATUS',
 }
 
 export interface TaskTiming {
@@ -82,14 +74,10 @@ export interface RanTask {
 export type ErroredTask = RanTask & {
   error: Error;
 };
-export interface ClaimTaskErr {
-  task: Option<ConcreteTaskInstance>;
-  errorType: TaskClaimErrorType;
-}
 
 export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRun = TaskEvent<RanTask, ErroredTask>;
-export type TaskClaim = TaskEvent<ConcreteTaskInstance, ClaimTaskErr>;
+export type TaskClaim = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 export type EphemeralTaskRejectedDueToCapacity = TaskEvent<EphemeralTaskInstanceRequest, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
@@ -137,7 +125,7 @@ export function asTaskRunEvent(
 
 export function asTaskClaimEvent(
   id: string,
-  event: Result<ConcreteTaskInstance, ClaimTaskErr>,
+  event: Result<ConcreteTaskInstance, Error>,
   timing?: TaskTiming
 ): TaskClaim {
   return {

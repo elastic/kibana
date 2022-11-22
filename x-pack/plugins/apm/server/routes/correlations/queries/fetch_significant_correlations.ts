@@ -15,7 +15,6 @@ import type {
 } from '../../../../common/correlations/types';
 
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { Setup } from '../../../lib/helpers/setup_request';
 import {
   computeExpectationsAndRanges,
   splitAllSettledPromises,
@@ -26,9 +25,10 @@ import { fetchDurationFractions } from './fetch_duration_fractions';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchDurationRanges } from './fetch_duration_ranges';
 import { getEventType } from '../utils';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchSignificantCorrelations = async ({
-  setup,
+  apmEventClient,
   start,
   end,
   environment,
@@ -38,7 +38,7 @@ export const fetchSignificantCorrelations = async ({
   durationMaxOverride,
   fieldValuePairs,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   durationMinOverride?: number;
   durationMaxOverride?: number;
   fieldValuePairs: FieldValuePair[];
@@ -50,7 +50,7 @@ export const fetchSignificantCorrelations = async ({
   const eventType = getEventType(chartType, searchMetrics);
 
   const { percentiles: percentilesRecords } = await fetchDurationPercentiles({
-    setup,
+    apmEventClient,
     chartType,
     start,
     end,
@@ -69,7 +69,7 @@ export const fetchSignificantCorrelations = async ({
   const { expectations, ranges } = computeExpectationsAndRanges(percentiles);
 
   const { fractions, totalDocCount } = await fetchDurationFractions({
-    setup,
+    apmEventClient,
     eventType,
     start,
     end,
@@ -80,7 +80,7 @@ export const fetchSignificantCorrelations = async ({
   });
 
   const { rangeSteps } = await fetchDurationHistogramRangeSteps({
-    setup,
+    apmEventClient,
     chartType,
     start,
     end,
@@ -96,7 +96,7 @@ export const fetchSignificantCorrelations = async ({
     await Promise.allSettled(
       fieldValuePairs.map((fieldValuePair) =>
         fetchDurationCorrelationWithHistogram({
-          setup,
+          apmEventClient,
           chartType,
           start,
           end,
@@ -142,7 +142,7 @@ export const fetchSignificantCorrelations = async ({
   if (latencyCorrelations.length === 0 && fallbackResult) {
     const { fieldName, fieldValue } = fallbackResult;
     const { durationRanges: histogram } = await fetchDurationRanges({
-      setup,
+      apmEventClient,
       chartType,
       start,
       end,
@@ -165,7 +165,8 @@ export const fetchSignificantCorrelations = async ({
     }
   }
 
-  const index = setup.indices[eventType as keyof typeof setup.indices];
+  const index =
+    apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
 
   const ccsWarning = rejected.length > 0 && index.includes(':');
 

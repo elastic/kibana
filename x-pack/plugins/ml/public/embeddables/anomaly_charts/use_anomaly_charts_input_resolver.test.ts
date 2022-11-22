@@ -48,7 +48,7 @@ describe('useAnomalyChartsInputResolver', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const jobIds = ['test-job'];
     embeddableInput = new BehaviorSubject({

@@ -6,22 +6,6 @@ The Elastic Stack comes with the `kibana_admin` {ref}/built-in-roles.html[built-
 
 When you assign a user multiple roles, the user receives a union of the roles’ privileges. Therefore, assigning the `kibana_admin` role in addition to a custom role that grants {kib} privileges is ineffective because `kibana_admin` has access to all the features in all spaces.
 
-[[xpack-security-multiple-tenants]]
-==== Supporting multiple tenants
-
-There are two approaches to supporting multi-tenancy in {kib}:
-
-1. *Recommended:* Create a space and a limited role for each tenant, and configure each user with the appropriate role. See
-<<tutorial-secure-access-to-kibana, Securing access to {kib}>> for more details.
-2. deprecated:[7.13.0,"In 8.0 and later, the `kibana.index` setting will no longer be supported."] Set up separate {kib} instances to work
-with a single {es} cluster by changing the `kibana.index` setting in your `kibana.yml` file.
-+
-NOTE: When using multiple {kib} instances this way, you cannot use the `kibana_admin` role to grant access. You must create custom roles
-that authorize the user for each specific instance.
-
-Whichever approach you use, be careful when granting cluster privileges and index privileges. Both of these approaches share the same {es}
-cluster, and {kib} spaces do not prevent you from granting users of two different tenants access to the same index.
-
 [role="xpack"]
 [[kibana-role-management]]
 === {kib} role management

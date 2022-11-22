@@ -19,13 +19,13 @@ import {
 } from '../../../../common/correlations/constants';
 
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { fetchDurationCorrelation } from './fetch_duration_correlation';
 import { fetchDurationRanges } from './fetch_duration_ranges';
 import { getEventType } from '../utils';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function fetchDurationCorrelationWithHistogram({
-  setup,
+  apmEventClient,
   chartType,
   start,
   end,
@@ -39,7 +39,7 @@ export async function fetchDurationCorrelationWithHistogram({
   totalDocCount,
   fieldValuePair,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   chartType: LatencyDistributionChartType;
   expectations: number[];
   ranges: estypes.AggregationsAggregationRange[];
@@ -60,7 +60,7 @@ export async function fetchDurationCorrelationWithHistogram({
   };
 
   const { correlation, ksTest } = await fetchDurationCorrelation({
-    setup,
+    apmEventClient,
     eventType,
     start,
     end,
@@ -76,7 +76,7 @@ export async function fetchDurationCorrelationWithHistogram({
   if (correlation !== null && ksTest !== null && !isNaN(ksTest)) {
     if (correlation > CORRELATION_THRESHOLD && ksTest < KS_TEST_THRESHOLD) {
       const { durationRanges: histogram } = await fetchDurationRanges({
-        setup,
+        apmEventClient,
         chartType,
         start,
         end,
