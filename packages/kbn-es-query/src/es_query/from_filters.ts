@@ -13,7 +13,7 @@ import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
 import { BoolQuery, DataViewBase } from './types';
 import { handleNestedFilter } from './handle_nested_filter';
-import { handleCombinedFilter } from './handle_combined_filter';
+import { fromCombinedFilter } from './handle_combined_filter';
 
 /**
  * Create a filter that can be reversed for filters with negate set
@@ -94,7 +94,7 @@ export const buildQueryFromFilters = (
           ignoreUnmapped: nestedIgnoreUnmapped,
         });
       })
-      .map((filter) => handleCombinedFilter(filter, inputDataViews, options))
+      .map((filter) => fromCombinedFilter(filter, inputDataViews, options))
       .map(cleanFilter)
       .map(translateToQuery);
   };
