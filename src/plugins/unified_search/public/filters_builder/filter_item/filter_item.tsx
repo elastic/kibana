@@ -18,7 +18,7 @@ import {
   EuiPanel,
   useEuiTheme,
 } from '@elastic/eui';
-import type { FieldFilter, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter, getFilterParams, BooleanRelation } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -101,7 +101,7 @@ export function FilterItem({
   let params: Filter['meta']['params'] | undefined;
 
   if (!conditionalOperationType) {
-    field = getFieldFromFilter(filter as FieldFilter, dataView!);
+    field = getFieldFromFilter(filter, dataView!);
     if (field) {
       operator = getOperatorFromFilter(filter);
       params = getFilterParams(filter);

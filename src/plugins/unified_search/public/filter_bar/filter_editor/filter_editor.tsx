@@ -28,7 +28,6 @@ import {
   buildCustomFilter,
   buildEmptyFilter,
   cleanFilter,
-  FieldFilter,
   Filter,
   getFilterParams,
   isCombinedFilter,
@@ -230,7 +229,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
         (flattenedFilters.length === 1 &&
           isFilterValid(
             selectedDataView,
-            getFieldFromFilter(flattenedFilters[0] as FieldFilter, selectedDataView),
+            getFieldFromFilter(flattenedFilters[0], selectedDataView),
             getOperatorFromFilter(flattenedFilters[0]),
             getFilterParams(flattenedFilters[0])
           )));
@@ -333,7 +332,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
     return flattenFilters([localFilter]).every((f) =>
       isFilterValid(
         selectedDataView,
-        getFieldFromFilter(f as FieldFilter, selectedDataView),
+        getFieldFromFilter(f, selectedDataView),
         getOperatorFromFilter(f),
         getFilterParams(f)
       )
