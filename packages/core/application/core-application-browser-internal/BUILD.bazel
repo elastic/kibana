@@ -49,6 +49,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-i18n",
   "//packages/kbn-i18n-react",
   "//packages/core/application/core-application-common",
+  "//packages/core/chrome/core-chrome-browser"
 ]
 
 TYPES_DEPS = [
