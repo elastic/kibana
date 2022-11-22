@@ -50,9 +50,10 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//@elastic/eui",
   "@npm//react",
-  "//packages/kbn-shared-ux-utility",
   "@npm//@emotion/react",
   "@npm//@emotion/css",
+  "//packages/shared-ux/file/util",
+  "//packages/kbn-shared-ux-utility",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -70,7 +71,8 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/react",
   "//packages/kbn-ambient-ui-types",
-  "//packages/shared-ux/file/image/types",
+  "//packages/shared-ux/file/util:npm_module_types",
+  "//packages/shared-ux/file/image/types:npm_module_types",
 ]
 
 jsts_transpiler(

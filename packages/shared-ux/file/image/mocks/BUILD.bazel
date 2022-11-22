@@ -45,14 +45,7 @@ NPM_MODULE_EXTRA_FILES = [
 #  To reference a NPM package use:
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
-RUNTIME_DEPS = [
-  "@npm//@storybook/addon-actions",
-  "@npm//deepmerge",
-  "@npm//lodash",
-  "@npm//react",
-  "//packages/shared-ux/link/redirect_app/mocks",
-  "//packages/shared-ux/storybook/mock",
-]
+RUNTIME_DEPS = [ ]
 
 # In this array place dependencies necessary to build the types, which will include the
 # :npm_module_types target of other packages and packages from NPM, including @types/*
@@ -64,11 +57,7 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "@npm//@storybook/addon-actions",
   "@npm//@types/node",
-  "@npm//@types/react",
-  "@npm//@types/jest",
-  "//packages/kbn-ambient-ui-types",
 ]
 
 jsts_transpiler(
