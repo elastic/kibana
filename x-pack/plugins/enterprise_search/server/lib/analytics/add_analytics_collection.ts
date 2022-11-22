@@ -15,6 +15,10 @@ import { isAlphaNumericOrUnderscore } from '../../../common/utils/is_alphanumeri
 import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
 import { setupAnalyticsCollectionIndex } from './setup_indices';
 
+interface AddAnalyticsCollectionRequestBody {
+  name: string
+};
+
 const createAnalyticsCollection = async (
   client: IScopedClusterClient,
   document: AnalyticsCollectionDocument
@@ -43,14 +47,27 @@ const createAnalyticsCollection = async (
   };
 };
 
+const getDataStreamName = ({ name: collectionName }: AnalyticsCollection) => {
+  return `elastic_analytics-events-${collectionName}`
+};
+
+const createDataView = async(dataViewsService: DataViewsService, dataStreamName: string) => {
+  return dataViewsService.createAndSave({
+    title: dataStreamName,
+    namespaces: [dataStreamName],
+    allowNoIndex: true,
+    timeFieldName: '@timestamp',
+  });
+};
+
 export const addAnalyticsCollection = async (
   client: IScopedClusterClient,
   dataViewsService: DataViewsService,
-  input: { name: string }
+  { name: collectionName }:  AddAnalyticsCollectionRequestBody
 ): Promise<AnalyticsCollection> => {
   const document: AnalyticsCollectionDocument = {
     event_retention_day_length: 180,
-    name: input.name,
+    name: collectionName,
   };
 
   const analyticsCollectionIndexExists = await client.asCurrentUser.indices.exists({
@@ -61,5 +78,11 @@ export const addAnalyticsCollection = async (
     await setupAnalyticsCollectionIndex(client.asCurrentUser);
   }
 
-  return await createAnalyticsCollection(client, document);
+  const analyticsCollection =  await createAnalyticsCollection(client, document);
+
+  // Creating the data view if it does not exists yet.
+  const dataStreamName = getDataStreamName(analyticsCollection);
+  await createDataView(dataViewsService, dataStreamName);
+
+  return analyticsCollection;
 };

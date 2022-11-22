@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { KibanaResponseFactory } from '@kbn/core-http-server';
 import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
