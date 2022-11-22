@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Operator } from '../../filter_bar/filter_editor';
 import { getOperatorOptions, GenericComboBox } from '../../filter_bar/filter_editor';
-import { FiltersBuilderContextType } from '../filters_builder_context';
+import { FiltersBuilderContextType } from '../context';
 
 interface OperatorInputProps<TParams = unknown> {
   field: DataViewField | undefined;

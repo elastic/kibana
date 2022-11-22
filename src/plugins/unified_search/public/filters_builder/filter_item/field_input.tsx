@@ -19,7 +19,7 @@ import {
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { getFilterableFields } from '../../filter_bar/filter_editor';
-import { FiltersBuilderContextType } from '../filters_builder_context';
+import { FiltersBuilderContextType } from '../context';
 
 interface FieldInputProps {
   dataView: DataView;

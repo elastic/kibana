@@ -15,7 +15,7 @@ import {
   removeFilter,
   moveFilter,
   normalizeFilters,
-} from './filters_builder_utils';
+} from './filters_builder';
 import { getBooleanRelationType } from '../../utils';
 
 import {
@@ -25,7 +25,7 @@ import {
   getFiltersMock,
 } from '../__mock__/filters';
 
-describe('filters_builder_utils', () => {
+describe('filters_builder', () => {
   let filters: Filter[];
   beforeAll(() => {
     filters = getFiltersMock();
@@ -210,9 +210,15 @@ describe('filters_builder_utils', () => {
     const emptyFilter = buildEmptyFilter(false);
 
     test('should add filter into filters after zero element', () => {
-      const enlargedFilters = addFilter(filters, emptyFilter, '0', BooleanRelation.AND, {
-        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-      } as DataView);
+      const enlargedFilters = addFilter(
+        filters,
+        emptyFilter,
+        { index: 1, path: '0' },
+        BooleanRelation.AND,
+        {
+          id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        } as DataView
+      );
       expect(getFilterByPath(enlargedFilters, '1')).toMatchInlineSnapshot(`
         Object {
           "$state": Object {
@@ -233,7 +239,7 @@ describe('filters_builder_utils', () => {
     test('should remove filter from filters', () => {
       const path = '1.1';
       const filterBeforeRemoved = getFilterByPath(filters, path);
-      const filtersAfterRemoveFilter = removeFilter(filters, path);
+      const filtersAfterRemoveFilter = removeFilter(filters, { index: 1, path });
       const filterObtainedAfterFilterRemovalFromFilters = getFilterByPath(
         filtersAfterRemoveFilter,
         path
@@ -246,9 +252,15 @@ describe('filters_builder_utils', () => {
   describe('moveFilter', () => {
     test('should move filter from "0" path to "2" path into filters', () => {
       const filterBeforeMoving = getFilterByPath(filters, '0');
-      const filtersAfterMovingFilter = moveFilter(filters, '0', '2', BooleanRelation.AND, {
-        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-      } as DataView);
+      const filtersAfterMovingFilter = moveFilter(
+        filters,
+        { path: '0', index: 1 },
+        { path: '2', index: 3 },
+        BooleanRelation.AND,
+        {
+          id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        } as DataView
+      );
       const filterObtainedAfterFilterMovingFilters = getFilterByPath(filtersAfterMovingFilter, '2');
       expect(filterBeforeMoving).toEqual(filterObtainedAfterFilterMovingFilters);
     });

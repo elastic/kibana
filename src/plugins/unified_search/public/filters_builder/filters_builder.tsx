@@ -11,9 +11,11 @@ import { EuiDragDropContext, DragDropContextProps, useEuiPaddingSize } from '@el
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { type Filter, BooleanRelation } from '@kbn/es-query';
 import { css } from '@emotion/css';
-import { FiltersBuilderContextType } from './filters_builder_context';
-import { FilterGroup } from './filters_builder_filter_group';
-import { FiltersBuilderReducer } from './filters_builder_reducer';
+import { FiltersBuilderContextType } from './context';
+import { FilterGroup } from './filter_group';
+import { FiltersBuilderReducer } from './reducer';
+import { getPathInArray } from './utils';
+import { FilterLocation } from './types';
 
 export interface FiltersBuilderProps {
   filters: Filter[];
@@ -74,16 +76,16 @@ function FiltersBuilder({
   }, [onChange, state.filters]);
 
   const handleMoveFilter = useCallback(
-    (pathFrom: string, pathTo: string, booleanRelation: BooleanRelation) => {
-      if (pathFrom === pathTo) {
+    (from: FilterLocation, to: FilterLocation, booleanRelation: BooleanRelation) => {
+      if (from.path === to.path) {
         return null;
       }
 
       dispatch({
         type: 'moveFilter',
         payload: {
-          pathFrom,
-          pathTo,
+          from,
+          to,
           booleanRelation,
           dataView,
         },
@@ -92,13 +94,23 @@ function FiltersBuilder({
     [dataView]
   );
 
-  const onDragEnd: DragDropContextProps['onDragEnd'] = ({ combine, source, destination }) => {
+  const onDragEnd: DragDropContextProps['onDragEnd'] = (args) => {
+    const { combine, source, destination } = args;
     if (source && destination) {
-      handleMoveFilter(source.droppableId, destination.droppableId, BooleanRelation.AND);
+      handleMoveFilter(
+        { path: source.droppableId, index: source.index },
+        { path: destination.droppableId, index: destination.index },
+        BooleanRelation.AND
+      );
     }
 
     if (source && combine) {
-      handleMoveFilter(source.droppableId, combine.droppableId, BooleanRelation.OR);
+      const path = getPathInArray(combine.droppableId);
+      handleMoveFilter(
+        { path: source.droppableId, index: source.index },
+        { path: combine.droppableId, index: path.at(-1) ?? 0 },
+        BooleanRelation.OR
+      );
     }
     setDropTarget('');
   };

@@ -8,3 +8,9 @@
 
 /** @internal **/
 export type Path = string;
+
+/** @internal **/
+export interface FilterLocation {
+  path: string;
+  index: number;
+}

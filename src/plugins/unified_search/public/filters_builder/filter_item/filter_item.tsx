@@ -27,13 +27,13 @@ import { cx, css } from '@emotion/css';
 import add from '../assets/add.svg';
 import or from '../assets/or.svg';
 
-import { FieldInput } from './filters_builder_filter_item_field_input';
-import { OperatorInput } from './filters_builder_filter_item_operator_input';
-import { ParamsEditor } from './filters_builder_filter_item_params_editor';
+import { FieldInput } from './field_input';
+import { OperatorInput } from './operator_input';
+import { ParamsEditor } from './params_editor';
 import { getBooleanRelationType } from '../../utils';
-import { FiltersBuilderContextType } from '../filters_builder_context';
-import { FilterGroup } from '../filters_builder_filter_group';
-import type { Path } from '../filters_builder_types';
+import { FiltersBuilderContextType } from '../context';
+import { FilterGroup } from '../filter_group';
+import type { Path } from '../types';
 import { getFieldFromFilter, getOperatorFromFilter } from '../../filter_bar/filter_editor';
 import { Operator } from '../../filter_bar/filter_editor';
 
@@ -112,64 +112,64 @@ export function FilterItem({
     (selectedField: DataViewField) => {
       dispatch({
         type: 'updateFilter',
-        payload: { path, field: selectedField },
+        payload: { dest: { path, index }, field: selectedField },
       });
     },
-    [dispatch, path]
+    [dispatch, path, index]
   );
 
   const onHandleOperator = useCallback(
     (selectedOperator: Operator) => {
       dispatch({
         type: 'updateFilter',
-        payload: { path, field, operator: selectedOperator },
+        payload: { dest: { path, index }, field, operator: selectedOperator },
       });
     },
-    [dispatch, path, field]
+    [dispatch, path, index, field]
   );
 
   const onHandleParamsChange = useCallback(
     (selectedParams: string) => {
       dispatch({
         type: 'updateFilter',
-        payload: { path, field, operator, params: selectedParams },
+        payload: { dest: { path, index }, field, operator, params: selectedParams },
       });
     },
-    [dispatch, path, field, operator]
+    [dispatch, path, index, field, operator]
   );
 
   const onHandleParamsUpdate = useCallback(
     (value: Filter['meta']['params']) => {
       dispatch({
         type: 'updateFilter',
-        payload: { path, params: [value, ...(params || [])] },
+        payload: { dest: { path, index }, params: [value, ...(params || [])] },
       });
     },
-    [dispatch, path, params]
+    [dispatch, path, index, params]
   );
 
   const onRemoveFilter = useCallback(() => {
     dispatch({
       type: 'removeFilter',
       payload: {
-        path,
+        dest: { path, index },
       },
     });
-  }, [dispatch, path]);
+  }, [dispatch, path, index]);
 
   const onAddFilter = useCallback(
     (booleanRelation: BooleanRelation) => {
       dispatch({
         type: 'addFilter',
         payload: {
-          path,
+          dest: { path, index: index + 1 },
           filter: buildEmptyFilter(false, dataView?.id),
           booleanRelation,
           dataView,
         },
       });
     },
-    [dispatch, dataView, path]
+    [dispatch, dataView, path, index]
   );
 
   const onAddButtonClick = useCallback(() => onAddFilter(BooleanRelation.AND), [onAddFilter]);

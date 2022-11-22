@@ -9,9 +9,9 @@
 import type { Reducer } from 'react';
 import type { Filter, BooleanRelation } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { Path } from './filters_builder_types';
-import { addFilter, moveFilter, removeFilter, updateFilters } from './filters_builder_utils';
+import { addFilter, moveFilter, removeFilter, updateFilters } from './utils';
 import type { Operator } from '../filter_bar/filter_editor';
+import { FilterLocation } from './types';
 
 /** @internal **/
 export interface FiltersBuilderState {
@@ -25,7 +25,7 @@ export interface UpdateFiltersPayload {
 
 /** @internal **/
 export interface AddFilterPayload {
-  path: Path;
+  dest: FilterLocation;
   filter: Filter;
   booleanRelation: BooleanRelation;
   dataView: DataView;
@@ -33,7 +33,7 @@ export interface AddFilterPayload {
 
 /** @internal **/
 export interface UpdateFilterPayload {
-  path: string;
+  dest: FilterLocation;
   field?: DataViewField;
   operator?: Operator;
   params?: Filter['meta']['params'];
@@ -41,13 +41,13 @@ export interface UpdateFilterPayload {
 
 /** @internal **/
 export interface RemoveFilterPayload {
-  path: Path;
+  dest: FilterLocation;
 }
 
 /** @internal **/
 export interface MoveFilterPayload {
-  pathFrom: Path;
-  pathTo: Path;
+  from: FilterLocation;
+  to: FilterLocation;
   booleanRelation: BooleanRelation;
   dataView: DataView;
 }
@@ -76,7 +76,7 @@ export const FiltersBuilderReducer: Reducer<FiltersBuilderState, FiltersBuilderA
         filters: addFilter(
           state.filters,
           action.payload.filter,
-          action.payload.path,
+          action.payload.dest,
           action.payload.booleanRelation,
           action.payload.dataView
         ),
@@ -84,15 +84,15 @@ export const FiltersBuilderReducer: Reducer<FiltersBuilderState, FiltersBuilderA
     case 'removeFilter':
       return {
         ...state,
-        filters: removeFilter(state.filters, action.payload.path),
+        filters: removeFilter(state.filters, action.payload.dest),
       };
     case 'moveFilter':
       return {
         ...state,
         filters: moveFilter(
           state.filters,
-          action.payload.pathFrom,
-          action.payload.pathTo,
+          action.payload.from,
+          action.payload.to,
           action.payload.booleanRelation,
           action.payload.dataView
         ),
@@ -102,7 +102,7 @@ export const FiltersBuilderReducer: Reducer<FiltersBuilderState, FiltersBuilderA
         ...state,
         filters: updateFilters(
           state.filters,
-          action.payload.path,
+          action.payload.dest,
           action.payload.field,
           action.payload.operator,
           action.payload.params

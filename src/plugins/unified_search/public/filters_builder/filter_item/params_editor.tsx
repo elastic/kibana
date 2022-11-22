@@ -18,7 +18,7 @@ import {
   isRangeParams,
 } from '../../filter_bar/filter_editor';
 import { getFieldValidityAndErrorMessage } from '../../filter_bar/filter_editor/lib';
-import { FiltersBuilderContextType } from '../filters_builder_context';
+import { FiltersBuilderContextType } from '../context';
 
 interface ParamsEditorProps<TParams = unknown> {
   dataView: DataView;

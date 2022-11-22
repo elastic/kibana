@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 import { type Filter, BooleanRelation } from '@kbn/es-query';
 import { css, cx } from '@emotion/css';
-import type { Path } from './filters_builder_types';
+import type { Path } from './types';
 import { getBooleanRelationType } from '../utils';
-import { FilterItem } from './filters_builder_filter_item';
-import { FiltersBuilderContextType } from './filters_builder_context';
-import { getPathInArray } from './filters_builder_utils';
+import { FilterItem } from './filter_item';
+import { FiltersBuilderContextType } from './context';
+import { getPathInArray } from './utils';
 
 export interface FilterGroupProps {
   filters: Filter[];
