@@ -16,6 +16,10 @@ import { VIEW_MODE } from './constants';
 import { SHOW_FIELD_STATISTICS } from '../../../common';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
+const betaBadgeCss = css`
+  vertical-align: middle;
+`;
+
 export const DocumentViewModeToggle = ({
   viewMode,
   setDiscoverViewMode,
@@ -28,10 +32,6 @@ export const DocumentViewModeToggle = ({
   const tabsCss = css`
     padding: 0 ${useEuiPaddingSize('s')};
     background-color: ${euiThemeVars.euiPageBackgroundColor};
-  `;
-
-  const betaBadgeCss = css`
-    vertical-align: middle;
   `;
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
