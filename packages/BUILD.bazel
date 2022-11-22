@@ -680,7 +680,6 @@ filegroup(
     "//packages/shared-ux/card/no_data/mocks:build_types",
     "//packages/shared-ux/file/image/impl:build_types",
     "//packages/shared-ux/file/image/mocks:build_types",
-    "//packages/shared-ux/file/image/types:build_types",
     "//packages/shared-ux/file/util:build_types",
     "//packages/shared-ux/link/redirect_app/impl:build_types",
     "//packages/shared-ux/link/redirect_app/mocks:build_types",
