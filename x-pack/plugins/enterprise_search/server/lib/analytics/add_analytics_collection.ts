@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { IScopedClusterClient } from '@kbn/core/server';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { AnalyticsCollectionDocument, AnalyticsCollection } from '../../../common/types/analytics';
@@ -44,6 +45,7 @@ const createAnalyticsCollection = async (
 
 export const addAnalyticsCollection = async (
   client: IScopedClusterClient,
+  dataViewsService: DataViewsService,
   input: { name: string }
 ): Promise<AnalyticsCollection> => {
   const document: AnalyticsCollectionDocument = {

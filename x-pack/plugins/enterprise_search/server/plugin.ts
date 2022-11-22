@@ -67,6 +67,8 @@ import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
 import { ConfigType } from '.';
 
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security: SecurityPluginSetup;
@@ -79,6 +81,7 @@ interface PluginsSetup {
 interface PluginsStart {
   spaces: SpacesPluginStart;
   security: SecurityPluginStart;
+  data: DataPluginStart;
 }
 
 export interface RouteDependencies {
@@ -189,8 +192,12 @@ export class EnterpriseSearchPlugin implements Plugin {
     // Enterprise Search Routes
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
-    registerAnalyticsRoutes(dependencies);
     registerStatsRoutes(dependencies);
+
+    // Analytics Routes (stand-alone product)
+    getStartServices().then(([coreStart, { data }]) => {
+      registerAnalyticsRoutes({ ...dependencies, data, savedObjects: coreStart.savedObjects });
+    });
 
     getStartServices().then(([, { security: securityStart }]) => {
       registerCreateAPIKeyRoute(dependencies, securityStart);
