@@ -70,7 +70,10 @@ TYPES_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@types/node",
   "@npm//@types/react",
-  "//packages/shared-ux/file/image/types",
+  "@npm//@types/jest",
+  "@npm//blurhash",
+  "//packages/kbn-ambient-ui-types",
+  "//packages/shared-ux/file/image/types:npm_module_types",
 ]
 
 jsts_transpiler(

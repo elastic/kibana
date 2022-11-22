@@ -49,9 +49,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//react-use",
   "@npm//react",
-  "@npm//rxjs",
   "//packages/kbn-shared-ux-utility",
   "@npm//@emotion/react",
   "@npm//@emotion/css",
@@ -68,8 +66,10 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@elastic/eui",
+  "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
+  "//packages/kbn-ambient-ui-types",
   "//packages/shared-ux/file/image/types",
 ]
 

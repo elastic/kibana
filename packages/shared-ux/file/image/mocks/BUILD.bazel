@@ -66,6 +66,9 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@storybook/addon-actions",
   "@npm//@types/node",
+  "@npm//@types/react",
+  "@npm//@types/jest",
+  "//packages/kbn-ambient-ui-types",
 ]
 
 jsts_transpiler(
