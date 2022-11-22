@@ -23,14 +23,17 @@ const ControlGroupInputBuilder = {
   addDataControlFromField: async (
     initialInput: Partial<ControlGroupInput>,
     newPanelInput: {
-      dataViewId: string;
-      fieldName: string;
-      panelId?: string;
       title?: string;
-    }
+      panelId?: string;
+      fieldName: string;
+      dataViewId: string;
+    } & Partial<ControlPanelState>
   ) => {
     const { defaultControlGrow, defaultControlWidth } = getDefaultControlGroupInput();
-    const { panelId, dataViewId, fieldName, title } = newPanelInput;
+    const controlGrow = initialInput.defaultControlGrow ?? defaultControlGrow;
+    const controlWidth = initialInput.defaultControlWidth ?? defaultControlWidth;
+
+    const { panelId, dataViewId, fieldName, title, grow, width } = newPanelInput;
     const newPanelId = panelId || uuid.v4();
     const nextOrder = getNextPanelOrder(initialInput);
     const controlType = await getCompatibleControlType({ dataViewId, fieldName });
@@ -38,13 +41,14 @@ const ControlGroupInputBuilder = {
     initialInput.panels = {
       ...initialInput.panels,
       [newPanelId]: {
-        explicitInput: { id: newPanelId, dataViewId, fieldName, title: title ?? fieldName },
-        grow: initialInput.defaultControlGrow || defaultControlGrow,
         order: nextOrder,
         type: controlType,
-        width: initialInput.defaultControlWidth || defaultControlWidth,
+        grow: grow ?? controlGrow,
+        width: width ?? controlWidth,
+        explicitInput: { id: newPanelId, dataViewId, fieldName, title: title ?? fieldName },
       } as ControlPanelState<DataControlInput>,
     };
+    console.log(initialInput);
   },
 };
 

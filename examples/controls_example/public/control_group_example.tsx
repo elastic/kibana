@@ -33,7 +33,10 @@ export const ControlGroupExample = ({ dataView }: Props) => {
           setControlGroup(controlGroup);
         }}
         getCreationOptions={async (controlGroupInputBuilder) => {
-          const initialInput: Partial<ControlGroupInput> = getDefaultControlGroupInput();
+          const initialInput: Partial<ControlGroupInput> = {
+            ...getDefaultControlGroupInput(),
+            defaultControlWidth: 'small',
+          };
           await controlGroupInputBuilder.addDataControlFromField(initialInput, {
             dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
             fieldName: 'customer_first_name.keyword',
@@ -41,6 +44,9 @@ export const ControlGroupExample = ({ dataView }: Props) => {
           await controlGroupInputBuilder.addDataControlFromField(initialInput, {
             dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
             fieldName: 'customer_last_name.keyword',
+            width: 'medium',
+            grow: false,
+            title: 'Last Name',
           });
           return initialInput;
         }}
