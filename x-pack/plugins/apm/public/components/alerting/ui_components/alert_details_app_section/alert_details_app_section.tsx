@@ -26,14 +26,12 @@ import { useServiceTransactionTypesFetcher } from '../../../../context/apm_servi
 import { asPercent } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getDurationFormatter } from '../../../../../common/utils/formatters/duration';
-import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
-import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -176,8 +174,6 @@ export function AlertDetailsAppSection({
 
   const latencyMaxY = getMaxY(timeseriesLatency);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
-  const preferredAnomalyTimeseriesLatency =
-    usePreferredServiceAnomalyTimeseries(ApmMlDetectorType.txLatency);
 
   /* Latency Chart */
 
@@ -231,8 +227,7 @@ export function AlertDetailsAppSection({
         ]
       : []),
   ];
-  const preferredAnomalyTimeseriesThroughput =
-    usePreferredServiceAnomalyTimeseries(ApmMlDetectorType.txThroughput);
+
   /* Throughput Chart */
 
   /* Error Rate */
@@ -282,10 +277,8 @@ export function AlertDetailsAppSection({
     [environment, serviceName, start, end, transactionType]
   );
 
-  const {
-    currentPeriodColor: currentPeriodColorErrorRate,
-    previousPeriodColor: previousPeriodColorErrorRate,
-  } = getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
+  const { currentPeriodColor: currentPeriodColorErrorRate } =
+    getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
 
   const timeseriesErrorRate = [
     {
@@ -298,11 +291,7 @@ export function AlertDetailsAppSection({
     },
   ];
 
-  const preferredAnomalyTimeseriesErrorRate =
-    usePreferredServiceAnomalyTimeseries(ApmMlDetectorType.txFailureRate);
   /* Error Rate */
-
-  const anomalyTimeseriesColor = previousPeriod?.color as string;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -332,14 +321,6 @@ export function AlertDetailsAppSection({
               customTheme={comparisonChartTheme}
               timeseries={timeseriesLatency}
               yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-              anomalyTimeseries={
-                preferredAnomalyTimeseriesThroughput
-                  ? {
-                      ...preferredAnomalyTimeseriesThroughput,
-                      color: anomalyTimeseriesColor,
-                    }
-                  : undefined
-              }
               timeZone={timeZone}
             />
           </EuiPanel>
@@ -388,14 +369,6 @@ export function AlertDetailsAppSection({
                   customTheme={comparisonChartTheme}
                   timeseries={timeseriesThroughput}
                   yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-                  anomalyTimeseries={
-                    preferredAnomalyTimeseriesLatency
-                      ? {
-                          ...preferredAnomalyTimeseriesLatency,
-                          color: anomalyTimeseriesColor,
-                        }
-                      : undefined
-                  }
                   timeZone={timeZone}
                 />
               </EuiPanel>
@@ -432,14 +405,6 @@ export function AlertDetailsAppSection({
                   yDomain={{ min: 0, max: 1 }}
                   comparisonEnabled={false}
                   customTheme={comparisonChartTheme}
-                  anomalyTimeseries={
-                    preferredAnomalyTimeseriesErrorRate
-                      ? {
-                          ...preferredAnomalyTimeseriesErrorRate,
-                          color: previousPeriodColorErrorRate,
-                        }
-                      : undefined
-                  }
                   timeZone={timeZone}
                 />
               </EuiPanel>
