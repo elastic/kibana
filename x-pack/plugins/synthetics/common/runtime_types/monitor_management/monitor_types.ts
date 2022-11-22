@@ -392,6 +392,7 @@ export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListR
 export const MonitorOverviewItemCodec = t.interface({
   name: t.string,
   id: t.string,
+  configId: t.string,
   location: MonitorServiceLocationCodec,
   isEnabled: t.boolean,
 });
