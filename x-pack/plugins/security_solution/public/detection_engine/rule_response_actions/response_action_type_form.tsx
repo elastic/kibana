@@ -90,7 +90,9 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
       id={item.id.toString()}
       onToggle={setIsOpen}
       paddingSize="l"
-      className="actAccordionActionForm"
+      // this className is responsible to add the background Color from below - but I can't get it working, thus the color is hardcoded
+      // className="actAccordionActionForm"
+      css={{ backgroundColor: '#F5F7FA' }}
       buttonContentClassName="actAccordionActionForm__button"
       data-test-subj={`alertActionAccordion`}
       buttonContent={renderButtonContent}
