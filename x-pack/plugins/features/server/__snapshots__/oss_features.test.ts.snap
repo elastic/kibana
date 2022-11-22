@@ -793,7 +793,8 @@ Array [
       },
       "savedObject": Object {
         "all": Array [
-          "files",
+          "file",
+          "fileShare",
         ],
         "read": Array [],
       },
@@ -818,7 +819,8 @@ Array [
       "savedObject": Object {
         "all": Array [],
         "read": Array [
-          "files",
+          "file",
+          "fileShare",
         ],
       },
       "ui": Array [],
@@ -840,7 +842,7 @@ Array [
       ],
       "savedObject": Object {
         "all": Array [
-          "files",
+          "file",
         ],
         "read": Array [],
       },
@@ -859,7 +861,7 @@ Array [
       "savedObject": Object {
         "all": Array [],
         "read": Array [
-          "files",
+          "file",
         ],
       },
       "ui": Array [],
@@ -1395,7 +1397,8 @@ Array [
       },
       "savedObject": Object {
         "all": Array [
-          "files",
+          "file",
+          "fileShare",
         ],
         "read": Array [],
       },
@@ -1420,7 +1423,8 @@ Array [
       "savedObject": Object {
         "all": Array [],
         "read": Array [
-          "files",
+          "file",
+          "fileShare",
         ],
       },
       "ui": Array [],
@@ -1442,7 +1446,7 @@ Array [
       ],
       "savedObject": Object {
         "all": Array [
-          "files",
+          "file",
         ],
         "read": Array [],
       },
@@ -1461,7 +1465,7 @@ Array [
       "savedObject": Object {
         "all": Array [],
         "read": Array [
-          "files",
+          "file",
         ],
       },
       "ui": Array [],
