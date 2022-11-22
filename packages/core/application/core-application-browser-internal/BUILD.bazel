@@ -75,6 +75,8 @@ TYPES_DEPS = [
   "//packages/core/capabilities/core-capabilities-browser-internal:npm_module_types",
   "//packages/core/application/core-application-common:npm_module_types",
   "//packages/core/application/core-application-browser:npm_module_types",
+  "//packages/core/chrome/core-chrome-browser:npm_module_types",
+
 ]
 
 jsts_transpiler(
