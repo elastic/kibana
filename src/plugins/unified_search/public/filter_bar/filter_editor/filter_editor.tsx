@@ -48,7 +48,7 @@ import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import { flattenFilters } from './lib/helpers';
 import { filterBadgeStyle, filtersBuilderMaxHeight } from './filter_editor.styles';
-import { strings } from './strings';
+import { strings } from './i18n';
 
 export interface FilterEditorProps {
   filter: Filter;

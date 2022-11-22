@@ -14,7 +14,7 @@ import { isCombinedFilter } from '@kbn/es-query';
 import { FilterBadgeGroup } from './filter_badge_group';
 import type { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
 import { badgePaddingCss, marginLeftLabelCss } from './filter_badge.styles';
-import { strings } from './strings';
+import { strings } from './i18n';
 
 export interface FilterBadgeProps {
   filter: Filter;
