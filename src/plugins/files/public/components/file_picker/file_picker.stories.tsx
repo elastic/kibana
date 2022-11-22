@@ -39,7 +39,10 @@ export default {
       <FilesContext
         client={
           {
-            create: () => Promise.reject(new Error('not so fast buster!')),
+            create: () =>
+              new Promise((res, rej) =>
+                setTimeout(() => rej(new Error('not so fast buster!')), 3000)
+              ),
             list: async (): Promise<FilesClientResponses['list']> => ({
               files: [],
               total: 0,

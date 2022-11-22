@@ -107,6 +107,10 @@ export interface Props<Kind extends string = string> {
    * @default false
    */
   multiple?: boolean;
+  /**
+   * Class name that is passed to the container element
+   */
+  className?: string;
 }
 
 /**
@@ -129,6 +133,7 @@ export const UploadFile = <Kind extends string = string>({
   initialPromptText,
   immediate = false,
   allowRepeatedUploads = false,
+  className,
 }: Props<Kind>): ReturnType<FunctionComponent> => {
   const { registry, client } = useFilesContext();
   const ref = useRef<null | EuiFilePicker>(null);
@@ -175,6 +180,7 @@ export const UploadFile = <Kind extends string = string>({
         fullWidth={fullWidth}
         initialFilePromptText={initialPromptText}
         multiple={multiple}
+        className={className}
       />
     </context.Provider>
   );
