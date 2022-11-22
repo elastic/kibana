@@ -14,45 +14,45 @@ import { createTelemetryTimelineTaskConfig } from './timelines';
 import { createTelemetrySecurityListTaskConfig } from './security_lists';
 import { createTelemetryPrebuiltRuleAlertsTaskConfig } from './prebuilt_rule_alerts';
 
-describe('security telemetry task', () => {
+describe('security telemetry - ', () => {
   const stubBatchNumber = 0;
 
-  test('configuration interval is set to 1h', async () => {
+  test('configuration artifact task interval is set to 1h', async () => {
     const taskConfig = createTelemetryConfigurationTaskConfig();
     expect(taskConfig.interval).toEqual('1h');
   });
 
-  test('detection rule lists interval is set to 24h', async () => {
+  test('detection rule lists task interval is set to 24h', async () => {
     const taskConfig = createTelemetryDetectionRuleListsTaskConfig(stubBatchNumber);
     expect(taskConfig.interval).toEqual('24h');
   });
 
-  test('diagnostic interval is set to 5m', async () => {
+  test('diagnostic alerts task interval is set to 5m', async () => {
     const taskConfig = createTelemetryDiagnosticsTaskConfig();
     expect(taskConfig.interval).toEqual('5m');
   });
 
-  test('endpoint metadata interval is set to 24h', async () => {
+  test('endpoint metadata task interval is set to 24h', async () => {
     const taskConfig = createTelemetryEndpointTaskConfig(stubBatchNumber);
     expect(taskConfig.interval).toEqual('24h');
   });
 
-  test('filterlists are set to 45m', async () => {
+  test('filterlists task is set to 45m', async () => {
     const taskConfig = createTelemetryFilterListArtifactTaskConfig();
     expect(taskConfig.interval).toEqual('45m');
   });
 
-  test('prebuilt rule alerts (detection rules) are set to 1h', async () => {
+  test('prebuilt rule alerts (detection rules) task are set to 1h', async () => {
     const taskConfig = createTelemetryPrebuiltRuleAlertsTaskConfig(stubBatchNumber);
     expect(taskConfig.interval).toEqual('1h');
   });
 
-  test('security lists are set to 24h', async () => {
+  test('security lists task is set to 24h', async () => {
     const taskConfig = createTelemetrySecurityListTaskConfig(stubBatchNumber);
     expect(taskConfig.interval).toEqual('24h');
   });
 
-  test('timelines are set to 3h', async () => {
+  test('timelines task is set to 3h', async () => {
     const taskConfig = createTelemetryTimelineTaskConfig();
     expect(taskConfig.interval).toEqual('3h');
   });
