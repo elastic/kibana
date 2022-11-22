@@ -8,7 +8,7 @@
 
 import { fields } from '../filters/stubs';
 import { DataViewBase } from './types';
-import { fromCombinedFilter } from './handle_combined_filter';
+import { fromCombinedFilter } from './from_combined_filter';
 import {
   BooleanRelation,
   buildCombinedFilter,
