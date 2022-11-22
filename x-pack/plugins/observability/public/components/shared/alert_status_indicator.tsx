@@ -13,7 +13,7 @@ import { LIGHT_THEME } from '@elastic/charts';
 
 interface AlertStatusIndicatorProps {
   alertStatus: AlertStatus;
-  textSize: 'xs' | 's' | 'm' | 'inherit';
+  textSize?: 'xs' | 's' | 'm' | 'inherit';
 }
 
 export function AlertStatusIndicator({ alertStatus, textSize = 'xs' }: AlertStatusIndicatorProps) {
