@@ -96,7 +96,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
     () =>
       sortBy(rules, [
         (rule) => {
-          return initiallySelectedRules?.find((initRule) => initRule.rule_id === rule.rule_id);
+          return initiallySelectedRules?.find((initRule) => initRule.id === rule.id);
         },
       ]),
     [initiallySelectedRules, rules]
@@ -109,7 +109,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
         <EuiInMemoryTable<Rule>
           tableCaption="Rules table"
           items={sortedRulesBySelection}
-          itemId="rule_id"
+          itemId="id"
           loading={!isFetched}
           columns={getRulesTableColumn()}
           pagination={{
