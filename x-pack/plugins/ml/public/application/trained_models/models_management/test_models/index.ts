@@ -6,4 +6,4 @@
  */
 
 export { TestTrainedModelFlyout } from './test_flyout';
-export { isTestable, isTestEnabled } from './utils';
+export { isTestable } from './utils';

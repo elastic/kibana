@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ConditionalToolTip } from './conditional_tooltip';
 import { InfraWaffleMapNode } from '../../../../../lib/lib';
@@ -102,7 +101,7 @@ describe('ConditionalToolTip', () => {
       </EuiThemeProvider>
     );
     const tooltip = wrapper.find('[data-test-subj~="conditionalTooltipContent-host-01"]');
-    expect(toJson(tooltip)).toMatchSnapshot();
+    expect(tooltip.render()).toMatchSnapshot();
 
     expect(mockedUseSnapshot).toBeCalledWith(
       expectedQuery,
