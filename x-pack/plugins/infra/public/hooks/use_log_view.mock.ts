@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { interpret } from 'xstate';
 import { createLogViewMock } from '../../common/log_views/log_view.mock';
 import { createResolvedLogViewMockFromAttributes } from '../../common/log_views/resolved_log_view.mock';
+import { createPureLogViewStateMachine } from '../observability_logs/log_view_state/src';
 import { useLogView } from './use_log_view';
 
 type UseLogView = typeof useLogView;
@@ -35,7 +37,7 @@ export const createUninitializedUseLogViewMock =
     logViewStatus: undefined,
     resolvedLogView: undefined,
     update: jest.fn(),
-    logViewStateService: {}, // TODO: fix this
+    logViewStateService: interpret(createPureLogViewStateMachine({ logViewId })),
   });
 
 export const createLoadingUseLogViewMock =
