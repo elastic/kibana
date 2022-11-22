@@ -15,7 +15,7 @@ import * as labels from './labels';
 
 interface Props {
   euiTheme: EuiThemeComputed;
-  id: string;
+  configId: string;
   name: string;
   canEditSynthetics: boolean;
   isProjectMonitor?: boolean;
@@ -24,7 +24,7 @@ interface Props {
 
 export const Actions = ({
   euiTheme,
-  id,
+  configId,
   name,
   reloadPage,
   canEditSynthetics,
@@ -96,7 +96,7 @@ export const Actions = ({
       key="xpack.synthetics.editMonitor"
       icon="pencil"
       onClick={closePopover}
-      href={`${basePath}/app/synthetics/edit-monitor/${id}`}
+      href={`${basePath}/app/synthetics/edit-monitor/${configId}`}
       disabled={!canEditSynthetics}
     >
       {labels.EDIT_LABEL}
@@ -115,7 +115,7 @@ export const Actions = ({
   return (
     <>
       <EuiPopover
-        id={`xpack.synthetics.${id}`}
+        id={`xpack.synthetics.${configId}`}
         button={menuButton}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
@@ -127,7 +127,7 @@ export const Actions = ({
 
       {isDeleteModalVisible && (
         <DeleteMonitor
-          id={id}
+          configId={configId}
           name={name}
           reloadPage={reloadPage}
           isProjectMonitor={isProjectMonitor}

@@ -16,7 +16,7 @@ import { TableHeader } from './components/table_header/table_header';
 import { SHOW_MULTIFIELDS } from '../../../common';
 import { TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { getFieldsToShow } from '../../utils/get_fields_to_show';
+import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../types';
 
@@ -142,9 +142,9 @@ export const DocTableWrapper = forwardRef(
       bottomMarker!.blur();
     }, [rows]);
 
-    const fieldsToShow = useMemo(
+    const shouldShowFieldHandler = useMemo(
       () =>
-        getFieldsToShow(
+        getShouldShowFieldHandler(
           dataView.fields.map((field: DataViewField) => field.name),
           dataView,
           showMultiFields
@@ -178,7 +178,7 @@ export const DocTableWrapper = forwardRef(
             dataView={dataView}
             row={current}
             useNewFieldsApi={useNewFieldsApi}
-            fieldsToShow={fieldsToShow}
+            shouldShowFieldHandler={shouldShowFieldHandler}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
           />
@@ -191,7 +191,7 @@ export const DocTableWrapper = forwardRef(
         onFilter,
         dataView,
         useNewFieldsApi,
-        fieldsToShow,
+        shouldShowFieldHandler,
         onAddColumn,
         onRemoveColumn,
       ]
