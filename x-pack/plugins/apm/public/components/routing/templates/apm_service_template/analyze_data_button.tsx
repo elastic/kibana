@@ -19,7 +19,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,

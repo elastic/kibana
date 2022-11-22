@@ -254,7 +254,7 @@ describe('<CustomFields />', () => {
     const zip = screen.getByTestId('syntheticsSourceTab__zipUrl');
     fireEvent.click(zip);
 
-    getAllByLabelText('Zip URL').forEach((node) => {
+    getAllByLabelText('Zip URL').forEach((node: any) => {
       expect(node).toBeInTheDocument();
     });
     expect(
