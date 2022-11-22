@@ -26,7 +26,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FilterContent } from '../filter_badge/filter_content';
+import { FilterContent } from '../filter_badge';
 
 interface Props {
   filters: Filter[];
