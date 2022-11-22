@@ -49,12 +49,7 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
     [kibanaDataViewsDefined, dataViewId, kibanaDataViews]
   );
   const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    !selectedDataViewNotFound &&
-      dataViewId != null &&
-      dataViewId !== '' &&
-      kibanaDataViews != null &&
-      kibanaDataViews[dataViewId]?.id != null &&
-      kibanaDataViews[dataViewId]?.title != null
+    !selectedDataViewNotFound && dataViewId != null && dataViewId !== ''
       ? [{ id: kibanaDataViews[dataViewId].id, label: kibanaDataViews[dataViewId].title }]
       : []
   );
@@ -62,13 +57,7 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
   const [showDataViewAlertsOnAlertsWarning, setShowDataViewAlertsOnAlertsWarning] = useState(false);
 
   useEffect(() => {
-    if (
-      !selectedDataViewNotFound &&
-      dataViewId &&
-      kibanaDataViews != null &&
-      kibanaDataViews[dataViewId]?.id != null &&
-      kibanaDataViews[dataViewId]?.title != null
-    ) {
+    if (!selectedDataViewNotFound && dataViewId) {
       const dataViewsTitle = kibanaDataViews[dataViewId].title;
       const dataViewsId = kibanaDataViews[dataViewId].id;
 
