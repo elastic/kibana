@@ -123,7 +123,6 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
           }
           selection={ruleSelectionValue}
           search={searchOptions}
-          //  sorting
           isSelectable
           data-test-subj="addExceptionToRulesTable"
         />
