@@ -42,7 +42,7 @@ describe('SearchBar', () => {
   it('auto suggests fields from the data view and auto completes available field values', () => {
     openKqlQueryBar();
     cy.get(AUTO_SUGGEST_AGENT_NAME).should('be.visible');
-    fillKqlQueryBar();
+    fillKqlQueryBar(`host.name:`);
     cy.get(AUTO_SUGGEST_HOST_NAME_VALUE).should('be.visible');
   });
 });

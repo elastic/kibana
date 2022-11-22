@@ -30,9 +30,9 @@ export const openKqlQueryBar = () => {
   cy.get(GLOBAL_KQL_INPUT).click();
 };
 
-export const fillKqlQueryBar = () => {
+export const fillKqlQueryBar = (query: string) => {
   cy.get(GLOBAL_KQL_INPUT).should('be.visible');
-  cy.get(GLOBAL_KQL_INPUT).type(`host.name:`);
+  cy.get(GLOBAL_KQL_INPUT).type(query);
 };
 
 export const fillAddFilterForm = ({ key, value, operator }: SearchBarFilter) => {
