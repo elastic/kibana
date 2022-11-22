@@ -69,10 +69,7 @@ export function AlertDetailsAppSection({
   const comparisonEnabled = false;
   const offset = '1d';
   const ruleWindowSizeMS = moment
-    .duration(
-      rule.params.windowSize as unknown as number,
-      rule.params.windowUnit as unknown as any
-    )
+    .duration(rule.params.windowSize, rule.params.windowUnit)
     .asMilliseconds();
 
   const TWENTY_TIMES_RULE_WINDOW_MS = 20 * ruleWindowSizeMS;
