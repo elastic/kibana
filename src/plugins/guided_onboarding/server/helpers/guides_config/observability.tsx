@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiLink } from '@elastic/eui';
-import type { GuideConfig } from '../../types';
+import type { GuideConfig } from '../../../common/types';
 
 export const observabilityConfig: GuideConfig = {
   title: i18n.translate('guidedOnboarding.observabilityGuide.title', {

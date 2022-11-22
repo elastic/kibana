@@ -7,33 +7,19 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { GuideId } from '@kbn/guided-onboarding';
 import { API_BASE_PATH } from '../../common/constants';
-import { getGuideConfig } from '../helpers';
+import { guidesConfig } from '../helpers/guides_config';
 
 export const registerGetConfigRoute = (router: IRouter) => {
   // Fetch the config of the guide
   router.get(
     {
-      path: `${API_BASE_PATH}/config`,
-      validate: {
-        body: schema.object({
-          guideId: schema.string(),
-        }),
-      },
+      path: `${API_BASE_PATH}/configs`,
+      validate: false,
     },
     async (context, request, response) => {
-      const { guideId } = request.body;
-
-      const guideConfig = getGuideConfig(guideId as GuideId);
-      if (!guideConfig) {
-        const error = new Error('Unable to find the guide config.');
-        return response.notFound({ body: error });
-      }
-
       return response.ok({
-        body: { config: guideConfig },
+        body: { configs: guidesConfig },
       });
     }
   );

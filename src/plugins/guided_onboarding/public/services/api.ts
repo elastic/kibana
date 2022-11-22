@@ -7,23 +7,29 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { BehaviorSubject, map, Observable, firstValueFrom, concat, of } from 'rxjs';
+import {
+  BehaviorSubject,
+  map,
+  Observable,
+  firstValueFrom,
+  concatMap,
+  of,
+  concat,
+  from,
+} from 'rxjs';
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '@kbn/guided-onboarding';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { PluginState, PluginStatus } from '../../common/types';
 import { GuidedOnboardingApi } from '../types';
 import {
-  getGuideConfig,
   getInProgressStepId,
-  getStepConfig,
   getUpdatedSteps,
-  getGuideStatusOnStepCompletion,
-  isIntegrationInGuideStep,
   isStepInProgress,
   isStepReadyToComplete,
   isGuideActive,
 } from './helpers';
+import { ConfigService } from './config_service';
 
 export class ApiService implements GuidedOnboardingApi {
   private isCloudEnabled: boolean | undefined;
@@ -31,12 +37,14 @@ export class ApiService implements GuidedOnboardingApi {
   private pluginState$!: BehaviorSubject<PluginState | undefined>;
   private isPluginStateLoading: boolean | undefined;
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private configService = new ConfigService();
 
   public setup(httpClient: HttpSetup, isCloudEnabled: boolean) {
     this.isCloudEnabled = isCloudEnabled;
     this.client = httpClient;
     this.pluginState$ = new BehaviorSubject<PluginState | undefined>(undefined);
     this.isGuidePanelOpen$ = new BehaviorSubject<boolean>(false);
+    this.configService.setup(httpClient);
   }
 
   private createGetPluginStateObservable(): Observable<PluginState | undefined> {
@@ -175,7 +183,7 @@ export class ApiService implements GuidedOnboardingApi {
     }
 
     // If this is the 1st-time attempt, we need to create the default state
-    const guideConfig = getGuideConfig(guideId);
+    const guideConfig = await this.configService.getGuideConfig(guideId);
 
     if (guideConfig) {
       const updatedSteps: GuideStep[] = guideConfig.steps.map((step, stepIndex) => {
@@ -335,7 +343,7 @@ export class ApiService implements GuidedOnboardingApi {
     const isCurrentStepInProgress = isStepInProgress(activeGuide, guideId, stepId);
     const isCurrentStepReadyToComplete = isStepReadyToComplete(activeGuide, guideId, stepId);
 
-    const stepConfig = getStepConfig(activeGuide!.guideId, stepId);
+    const stepConfig = await this.configService.getStepConfig(activeGuide!.guideId, stepId);
     const isManualCompletion = stepConfig ? !!stepConfig.manualCompletion : false;
 
     if (isCurrentStepInProgress || isCurrentStepReadyToComplete) {
@@ -347,10 +355,15 @@ export class ApiService implements GuidedOnboardingApi {
         isManualCompletion && isCurrentStepInProgress
       );
 
+      const status = await this.configService.getGuideStatusOnStepCompletion(
+        activeGuide,
+        guideId,
+        stepId
+      );
       const currentGuide: GuideState = {
         guideId,
         isActive: true,
-        status: getGuideStatusOnStepCompletion(activeGuide, guideId, stepId),
+        status,
         steps: updatedSteps,
       };
 
@@ -377,7 +390,9 @@ export class ApiService implements GuidedOnboardingApi {
    */
   public isGuidedOnboardingActiveForIntegration$(integration?: string): Observable<boolean> {
     return this.fetchPluginState$().pipe(
-      map((state) => isIntegrationInGuideStep(state?.activeGuide, integration))
+      concatMap((state) =>
+        from(this.configService.isIntegrationInGuideStep(state?.activeGuide, integration))
+      )
     );
   }
 
@@ -396,7 +411,10 @@ export class ApiService implements GuidedOnboardingApi {
     const { activeGuide } = pluginState!;
     const inProgressStepId = getInProgressStepId(activeGuide!);
     if (!inProgressStepId) return undefined;
-    const isIntegrationStepActive = isIntegrationInGuideStep(activeGuide!, integration);
+    const isIntegrationStepActive = await this.configService.isIntegrationInGuideStep(
+      activeGuide!,
+      integration
+    );
     if (isIntegrationStepActive) {
       return await this.completeGuideStep(activeGuide!.guideId, inProgressStepId);
     }

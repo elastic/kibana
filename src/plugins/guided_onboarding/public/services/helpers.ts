@@ -6,40 +6,36 @@
  * Side Public License, v 1.
  */
 
-import type {
-  GuideId,
-  GuideStepIds,
-  GuideState,
-  GuideStep,
-  GuideStatus,
-} from '@kbn/guided-onboarding';
-import { guidesConfig } from '../constants/guides_config';
-import { GuideConfig, StepConfig } from '../types';
-import type { PluginState } from '../../common/types';
+import type { GuideId, GuideStepIds, GuideState, GuideStep } from '@kbn/guided-onboarding';
+import type { GuidesConfig, PluginState, GuideConfig, StepConfig } from '../../common/types';
 
-export const getGuideConfig = (guideId?: GuideId): GuideConfig | undefined => {
-  if (guideId && Object.keys(guidesConfig).includes(guideId)) {
+export const findGuideConfigByGuideId = (
+  guidesConfig?: GuidesConfig,
+  guideId?: GuideId
+): GuideConfig | undefined => {
+  if (guidesConfig && guideId && Object.keys(guidesConfig).includes(guideId)) {
     return guidesConfig[guideId];
   }
 };
 
-export const getStepConfig = (guideId: GuideId, stepId: GuideStepIds): StepConfig | undefined => {
-  const guideConfig = getGuideConfig(guideId);
-  return guideConfig?.steps.find((step) => step.id === stepId);
-};
-
-const getStepIndex = (guideId: GuideId, stepId: GuideStepIds): number => {
-  const guide = getGuideConfig(guideId);
-  if (guide) {
-    return guide.steps.findIndex((step: StepConfig) => step.id === stepId);
+const getStepIndex = (
+  guideConfig: GuideConfig | undefined,
+  guideId: GuideId,
+  stepId: GuideStepIds
+): number => {
+  if (guideConfig) {
+    return guideConfig.steps.findIndex((step: StepConfig) => step.id === stepId);
   }
   return -1;
 };
 
-export const isLastStep = (guideId: GuideId, stepId: GuideStepIds): boolean => {
-  const guide = getGuideConfig(guideId);
-  const activeStepIndex = getStepIndex(guideId, stepId);
-  const stepsNumber = guide?.steps.length || 0;
+export const isLastStep = (
+  guideConfig: GuideConfig | undefined,
+  guideId: GuideId,
+  stepId: GuideStepIds
+): boolean => {
+  const activeStepIndex = getStepIndex(guideConfig, guideId, stepId);
+  const stepsNumber = guideConfig?.steps.length || 0;
   if (stepsNumber > 0) {
     return activeStepIndex === stepsNumber - 1;
   }
@@ -51,24 +47,16 @@ export const getInProgressStepId = (state: GuideState): GuideStepIds | undefined
   return inProgressStep ? inProgressStep.id : undefined;
 };
 
-const getInProgressStepConfig = (state: GuideState): StepConfig | undefined => {
+export const getInProgressStepConfig = (
+  guideConfig: GuideConfig | undefined,
+  state: GuideState
+): StepConfig | undefined => {
   const inProgressStepId = getInProgressStepId(state);
   if (inProgressStepId) {
-    const config = getGuideConfig(state.guideId);
-    if (config) {
-      return config.steps.find((step) => step.id === inProgressStepId);
+    if (guideConfig) {
+      return guideConfig.steps.find((step) => step.id === inProgressStepId);
     }
   }
-};
-
-export const isIntegrationInGuideStep = (
-  guideState?: GuideState,
-  integration?: string
-): boolean => {
-  if (!guideState || !guideState.isActive) return false;
-
-  const stepConfig = getInProgressStepConfig(guideState);
-  return stepConfig ? stepConfig.integration === integration : false;
 };
 
 export const isGuideActive = (pluginState?: PluginState, guideId?: GuideId): boolean => {
@@ -140,28 +128,4 @@ export const getUpdatedSteps = (
     // All other steps return as-is
     return step;
   });
-};
-
-export const getGuideStatusOnStepCompletion = (
-  guideState: GuideState | undefined,
-  guideId: GuideId,
-  stepId: GuideStepIds
-): GuideStatus => {
-  const stepConfig = getStepConfig(guideId, stepId);
-  const isManualCompletion = stepConfig?.manualCompletion || false;
-  const isLastStepInGuide = isLastStep(guideId, stepId);
-  const isCurrentStepReadyToComplete = isStepReadyToComplete(guideState, guideId, stepId);
-
-  // We want to set the guide status to 'ready_to_complete' if the current step is the last step in the guide
-  // and the step is not configured for manual completion
-  // or if the current step is configured for manual completion and the last step is ready to complete
-  if (
-    (isLastStepInGuide && !isManualCompletion) ||
-    (isLastStepInGuide && isManualCompletion && isCurrentStepReadyToComplete)
-  ) {
-    return 'ready_to_complete';
-  }
-
-  // Otherwise the guide is still in progress
-  return 'in_progress';
 };
