@@ -1561,6 +1561,23 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.useTimeZone",
+        "type": "Function",
+        "tags": [],
+        "label": "useTimeZone",
+        "description": [],
+        "signature": [
+          "() => string"
+        ],
+        "path": "x-pack/plugins/observability/public/hooks/use_time_zone.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.useTrackMetric",
         "type": "Function",
         "tags": [],
@@ -2483,6 +2500,20 @@
             "tags": [],
             "label": "intervalString",
             "description": [],
+            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.FetchDataParams.timeZone",
+            "type": "string",
+            "tags": [],
+            "label": "timeZone",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
