@@ -8,8 +8,16 @@
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
 import { ILogViewsClient } from '../../../services/log_views';
-import { createTypestateHelpers } from '../../xstate_helpers';
-import { LogViewContext, LogViewContextWithId, LogViewEvent, LogViewTypestate } from './types';
+import {
+  LogViewContext,
+  LogViewContextWithError,
+  LogViewContextWithId,
+  LogViewContextWithLogView,
+  LogViewContextWithResolvedLogView,
+  LogViewContextWithStatus,
+  LogViewEvent,
+  LogViewTypestate,
+} from './types';
 
 export const createPureLogViewStateMachine = (initialContext: LogViewContextWithId) =>
   createMachine<LogViewContext, LogViewEvent, LogViewTypestate>(
@@ -98,11 +106,31 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             },
           },
         },
+        updating: {
+          invoke: {
+            src: 'updateLogView',
+          },
+          entry: 'notifyLoadingStarted',
+          on: {
+            updatingSucceeded: {
+              target: 'resolving',
+              actions: 'storeLogView',
+            },
+            updatingFailed: {
+              target: 'updatingFailed',
+              actions: 'storeError',
+            },
+          },
+        },
+        updatingFailed: {},
       },
       on: {
         logViewIdChanged: {
           target: '.loading',
           actions: 'storeLogViewId',
+        },
+        update: {
+          target: '.updating',
         },
       },
       context: initialContext,
@@ -114,43 +142,41 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         notifyLoadingStarted: actions.pure(() => undefined),
         notifyLoadingSucceeded: actions.pure(() => undefined),
         notifyLoadingFailed: actions.pure(() => undefined),
-        storeLogViewId: logViewStateMachineHelpers.assignOnTransition(
-          null,
-          'loading',
-          'logViewIdChanged',
-          (_context, event) => ({
-            logViewId: event.logViewId,
-          })
+        storeLogViewId: assign((context, event) =>
+          'logViewId' in event
+            ? ({
+                logViewId: event.logViewId,
+              } as LogViewContextWithId)
+            : {}
         ),
-        storeLogView: logViewStateMachineHelpers.assignOnTransition(
-          'loading',
-          'resolving',
-          'loadingSucceeded',
-          (context, event) => ({
-            ...context,
-            logView: event.logView,
-          })
+        storeLogView: assign((context, event) =>
+          'logView' in event
+            ? ({
+                logView: event.logView,
+              } as LogViewContextWithLogView)
+            : {}
         ),
-        storeResolvedLogView: logViewStateMachineHelpers.assignOnTransition(
-          'resolving',
-          'checkingStatus',
-          'resolutionSucceeded',
-          (context, event) => ({
-            ...context,
-            resolvedLogView: event.resolvedLogView,
-          })
+        storeResolvedLogView: assign((context, event) =>
+          'resolvedLogView' in event
+            ? ({
+                resolvedLogView: event.resolvedLogView,
+              } as LogViewContextWithResolvedLogView)
+            : {}
         ),
-        storeStatus: logViewStateMachineHelpers.assignOnTransition(
-          'checkingStatus',
-          'resolved',
-          'checkingStatusSucceeded',
-          (context, event) => ({
-            ...context,
-            status: event.status,
-          })
+        storeStatus: assign((context, event) =>
+          'status' in event
+            ? ({
+                ...context,
+                status: event.status,
+              } as LogViewContextWithStatus)
+            : {}
         ),
         storeError: assign((context, event) =>
-          'error' in event ? { ...context, error: event.error } : context
+          'error' in event
+            ? ({
+                error: event.error,
+              } as LogViewContextWithError)
+            : {}
         ),
       },
     }
@@ -180,6 +206,30 @@ export const createLogViewStateMachine = ({
           catchError((error) =>
             of<LogViewEvent>({
               type: 'loadingFailed',
+              error,
+            })
+          )
+        ),
+      updateLogView: (context, event) =>
+        from(
+          'logViewId' in context && event.type === 'update'
+            ? logViews.putLogView(context.logViewId, event.attributes)
+            : throwError(
+                () =>
+                  new Error(
+                    'Failed to update log view: Not invoked by update event with matching id.'
+                  )
+              )
+        ).pipe(
+          map(
+            (logView): LogViewEvent => ({
+              type: 'updatingSucceeded',
+              logView,
+            })
+          ),
+          catchError((error) =>
+            of<LogViewEvent>({
+              type: 'updatingFailed',
               error,
             })
           )
@@ -228,5 +278,3 @@ export const createLogViewStateMachine = ({
         ),
     },
   });
-
-const logViewStateMachineHelpers = createTypestateHelpers<LogViewTypestate, LogViewEvent>();

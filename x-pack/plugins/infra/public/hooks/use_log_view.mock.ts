@@ -29,11 +29,13 @@ export const createUninitializedUseLogViewMock =
     isUninitialized: true,
     latestLoadLogViewFailures: [],
     load: jest.fn(),
+    retry: jest.fn(),
     logView: undefined,
     logViewId,
     logViewStatus: undefined,
     resolvedLogView: undefined,
     update: jest.fn(),
+    logViewStateService: {}, // TODO: fix this
   });
 
 export const createLoadingUseLogViewMock =

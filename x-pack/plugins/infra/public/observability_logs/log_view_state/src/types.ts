@@ -6,7 +6,12 @@
  */
 
 import { ActorRef } from 'xstate';
-import { LogView, LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
+import {
+  LogView,
+  LogViewAttributes,
+  LogViewStatus,
+  ResolvedLogView,
+} from '../../../../common/log_views';
 
 export interface LogViewContextWithId {
   logViewId: string;
@@ -53,11 +58,23 @@ export type LogViewTypestate =
         LogViewContextWithStatus;
     }
   | {
+      value: 'updating';
+      context: LogViewContextWithId;
+    }
+  | {
       value: 'loadingFailed';
       context: LogViewContextWithId & LogViewContextWithError;
     }
   | {
+      value: 'updatingFailed';
+      context: LogViewContextWithId & LogViewContextWithError;
+    }
+  | {
       value: 'resolutionFailed';
+      context: LogViewContextWithId & LogViewContextWithLogView & LogViewContextWithError;
+    }
+  | {
+      value: 'checkingStatusFailed';
       context: LogViewContextWithId & LogViewContextWithLogView & LogViewContextWithError;
     };
 
@@ -81,6 +98,18 @@ export type LogViewEvent =
   | {
       type: 'resolutionSucceeded';
       resolvedLogView: ResolvedLogView;
+    }
+  | {
+      type: 'update';
+      attributes: Partial<LogViewAttributes>;
+    }
+  | {
+      type: 'updatingSucceeded';
+      logView: LogView;
+    }
+  | {
+      type: 'updatingFailed';
+      error: Error;
     }
   | {
       type: 'resolutionFailed';
