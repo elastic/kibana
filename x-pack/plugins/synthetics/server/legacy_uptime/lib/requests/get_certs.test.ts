@@ -86,8 +86,7 @@ describe('getCerts', () => {
   it('parses query result and returns expected values', async () => {
     const dateMathSpy = jest.spyOn(DateMath, 'parse');
 
-    dateMathSpy.mockReturnValueOnce(moment(10000));
-    dateMathSpy.mockReturnValueOnce(moment(10001));
+    dateMathSpy.mockReturnValue(moment(10000));
     const { esClient, uptimeEsClient } = getUptimeESMockClient();
 
     esClient.search.mockResponseOnce({
@@ -185,7 +184,7 @@ describe('getCerts', () => {
                       "range": Object {
                         "monitor.timespan": Object {
                           "gte": 10000,
-                          "lte": 10001,
+                          "lte": 10000,
                         },
                       },
                     },
@@ -196,7 +195,7 @@ describe('getCerts', () => {
                           Object {
                             "range": Object {
                               "tls.certificate_not_valid_after": Object {
-                                "lte": "now+100d",
+                                "lte": 10000,
                               },
                             },
                           },
