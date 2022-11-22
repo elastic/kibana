@@ -19,8 +19,6 @@ export function getTestAlertData(overwrites = {}) {
     rule_type_id: 'test.noop',
     consumer: 'alerts',
     schedule: { interval: '1m' },
-    throttle: '1m',
-    notify_when: 'onThrottleInterval',
     actions: [],
     params: {},
     ...overwrites,

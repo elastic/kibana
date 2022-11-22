@@ -3924,8 +3924,9 @@ export class RulesClient {
     alertType: UntypedNormalizedRuleType,
     data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertAction[] }
   ): Promise<void> {
-    const { actions, notifyWhen } = data;
+    const { actions, notifyWhen, throttle } = data;
     const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
+    const hasRuleLevelThrottle = Boolean(throttle);
 
     if (actions.length === 0) {
       return;
@@ -3970,16 +3971,13 @@ export class RulesClient {
       );
     }
 
-    // check for actions using frequency params if the rule has rule-level frequency params defined
-    // ONLY CHECK if rule-level notifyWhen is defined. We need to maintain backwards compatibility for
-    // cases where a rule-level throttle is still stored, but rule-level notifyWhen is null or undefined
-    if (hasRuleLevelNotifyWhen) {
+    if (hasRuleLevelNotifyWhen || hasRuleLevelThrottle) {
       const actionsWithFrequency = actions.filter((action) => Boolean(action.frequency));
       if (actionsWithFrequency.length) {
         throw Boom.badRequest(
           i18n.translate('xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams', {
             defaultMessage:
-              'Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: {groups}',
+              'Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: {groups}',
             values: {
               groups: actionsWithFrequency.map((a) => a.group).join(', '),
             },
