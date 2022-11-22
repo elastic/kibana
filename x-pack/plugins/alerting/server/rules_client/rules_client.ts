@@ -111,7 +111,7 @@ import {
   validateOperationOnAttributes,
   retryIfBulkEditConflicts,
   retryIfBulkDeleteConflicts,
-  retryIfBulkEnableConflicts,
+  retryIfBulkOperationConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
 } from './lib';
@@ -2652,12 +2652,15 @@ export class RulesClient {
       action: 'ENABLE',
     });
 
-    const { errors, rules, taskIdsToEnable } = await retryIfBulkEnableConflicts(
-      this.logger,
-      (filterKueryNode: KueryNode | null) =>
+    const { errors, rules, accListSpecificForBulkOperation } = await retryIfBulkOperationConflicts({
+      action: 'ENABLE',
+      logger: this.logger,
+      bulkOperation: (filterKueryNode: KueryNode | null) =>
         this.bulkEnableRulesWithOCC({ filter: filterKueryNode }),
-      kueryNodeFilterWithAuth
-    );
+      filter: kueryNodeFilterWithAuth,
+    });
+
+    const [taskIdsToEnable] = accListSpecificForBulkOperation;
 
     const taskIdsFailedToBeEnabled: string[] = [];
     if (taskIdsToEnable.length > 0) {
@@ -2819,7 +2822,7 @@ export class RulesClient {
         });
       }
     });
-    return { errors, rules, taskIdsToEnable };
+    return { errors, rules, accListSpecificForBulkOperation: [taskIdsToEnable] };
   };
 
   private apiKeyAsAlertAttributes(

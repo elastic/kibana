@@ -45,7 +45,7 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listNamespaceType: 'single',
 };
 
-export const useExceptionListDetails = () => {
+export const useListDetailsView = () => {
   const toasts = useToasts();
   const { services } = useKibana();
   const { http, notifications } = services;
@@ -53,8 +53,8 @@ export const useExceptionListDetails = () => {
 
   const { exportExceptionList, deleteExceptionList } = useApi(http);
 
-  const { exceptionListId } = useParams<{
-    exceptionListId: string;
+  const { detailName: exceptionListId } = useParams<{
+    detailName: string;
   }>();
 
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
@@ -114,7 +114,10 @@ export const useExceptionListDetails = () => {
         id: exceptionListId,
         http,
       });
-      if (!result || !isAnExceptionListItem(result)) return setInvalidListId(true);
+      if (!result || !isAnExceptionListItem(result)) {
+        setIsLoading(false);
+        return setInvalidListId(true);
+      }
 
       setList(result);
       await initializeListRules(result);
@@ -144,6 +147,7 @@ export const useExceptionListDetails = () => {
               type: list.type,
               name: listDetails.name,
               description: listDetails.description || list.description,
+              namespace_type: list.namespace_type,
             },
           });
       } catch (error) {
