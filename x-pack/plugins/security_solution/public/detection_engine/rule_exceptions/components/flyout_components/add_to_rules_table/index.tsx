@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import type { CriteriaWithPagination } from '@elastic/eui';
+// import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiInMemoryTable, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -112,15 +112,15 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
           itemId="id"
           loading={!isFetched}
           columns={getRulesTableColumn()}
-          pagination={{
-            ...pagination,
-            itemsPerPage: 5,
-            showPerPageOptions: false,
-          }}
+          // pagination={{
+          //   ...pagination,
+          //   itemsPerPage: 5,
+          //   showPerPageOptions: false,
+          // }}
           message={message}
-          onTableChange={({ page: { index } }: CriteriaWithPagination<never>) =>
-            setPagination({ pageIndex: index })
-          }
+          // onTableChange={({ page: { index } }: CriteriaWithPagination<never>) =>
+          //   setPagination({ pageIndex: index })
+          // }
           selection={ruleSelectionValue}
           search={searchOptions}
           isSelectable
