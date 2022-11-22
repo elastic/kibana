@@ -30,10 +30,12 @@ export class RevertToBasic extends React.PureComponent {
     return (
       <EuiConfirmModal
         title={
-          <FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModalTitle"
-            defaultMessage="Confirm Revert to Basic License"
-          />
+          <div>
+            <FormattedMessage
+              id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModalTitle"
+              defaultMessage="Confirm Revert to Basic License"
+            />
+          </div>
         }
         onCancel={cancelStartBasicLicense}
         onConfirm={() => startBasicLicense(licenseType, true)}
