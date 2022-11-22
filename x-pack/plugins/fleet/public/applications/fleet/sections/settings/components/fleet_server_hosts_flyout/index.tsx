@@ -90,7 +90,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
         >
           <FormattedMessage
             id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutDescription"
-            defaultMessage="Invalid settings can break the connection betwen agent and Fleet server, if this happens you will have to re-enroll your agents."
+            defaultMessage="Invalid settings can break the connection between Elastic Agent and Fleet Server. If this happens, you will need to re-enroll your agents."
           />
         </EuiCallOut>
         <EuiSpacer size="m" />
