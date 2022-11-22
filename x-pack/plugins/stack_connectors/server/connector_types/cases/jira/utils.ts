@@ -11,5 +11,9 @@ export const JQL_SPECIAL_CHARACTERS_REGEX = /[-!^+&*()[\]\\/{}|:?~]/;
 const DOUBLE_BACKSLASH_REGEX = '\\\\$&';
 
 export const escapeJqlSpecialCharacters = (str: string) => {
-  return str.replaceAll('"','').replaceAll(/\\/g,'\\\\').replaceAll(/'/g,'\\\\').replaceAll(new RegExp(JQL_SPECIAL_CHARACTERS_REGEX, 'g'), DOUBLE_BACKSLASH_REGEX);
+  return str
+    .replaceAll('"', '')
+    .replaceAll(/\\/g, '\\\\')
+    .replaceAll(/'/g, '\\\\')
+    .replaceAll(new RegExp(JQL_SPECIAL_CHARACTERS_REGEX, 'g'), DOUBLE_BACKSLASH_REGEX);
 };
