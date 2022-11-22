@@ -1,32 +1,18 @@
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("@npm//peggy:index.bzl", "peggy")
 load("//src/dev/bazel:index.bzl", "pkg_npm")
 
 PKG_DIRNAME = "kbn-timelion-grammar"
 PKG_REQUIRE_NAME = "@kbn/timelion-grammar"
 
 NPM_MODULE_EXTRA_FILES = [
+  "index.js",
+  "chain.peggy",
   "package.json",
 ]
 
-peggy(
-  name = "grammar",
-  data = [
-    ":grammar/chain.peggy"
-  ],
-  output_dir = True,
-  args = [
-    "-o",
-    "$(@D)/built_grammar.js",
-    "./%s/grammar/chain.peggy" % package_name()
-  ],
-)
-
 js_library(
   name = PKG_DIRNAME,
-  srcs = NPM_MODULE_EXTRA_FILES + [
-    ":grammar"
-  ],
+  srcs = NPM_MODULE_EXTRA_FILES,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
