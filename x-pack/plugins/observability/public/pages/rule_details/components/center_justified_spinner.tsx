@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { EuiLoadingSpinnerSize } from '@elastic/eui/src/components/loading/loading_spinner';
 
 interface Props {
@@ -18,7 +17,9 @@ export function CenterJustifiedSpinner({ size }: Props) {
   return (
     <EuiFlexGroup data-test-subj="centerJustifiedSpinner" justifyContent="center">
       <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size={size || 'xl'} />
+        <EuiSpacer size="xxl" />
+        <EuiLoadingSpinner size={size || 'xxl'} />
+        <EuiSpacer size="xxl" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
