@@ -170,6 +170,10 @@ Array [
     "subFeatures": undefined,
   },
   Object {
+    "id": "filesSharedImage",
+    "subFeatures": undefined,
+  },
+  Object {
     "id": "savedObjectsManagement",
     "subFeatures": undefined,
   },
@@ -455,6 +459,10 @@ Array [
   },
   Object {
     "id": "filesManagement",
+    "subFeatures": undefined,
+  },
+  Object {
+    "id": "filesSharedImage",
     "subFeatures": undefined,
   },
   Object {
@@ -807,6 +815,47 @@ Array [
           "filesManagement",
         ],
       },
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "files",
+        ],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a basic license returns the filesSharedImage feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "savedObject": Object {
+        "all": Array [
+          "files",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
       "savedObject": Object {
         "all": Array [],
         "read": Array [
@@ -1368,6 +1417,47 @@ Array [
           "filesManagement",
         ],
       },
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "files",
+        ],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the filesSharedImage feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "savedObject": Object {
+        "all": Array [
+          "files",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
       "savedObject": Object {
         "all": Array [],
         "read": Array [
