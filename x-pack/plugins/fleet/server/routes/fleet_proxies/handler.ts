@@ -8,6 +8,7 @@
 import type { RequestHandler } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import pMap from 'p-map';
 
 import {
   listFleetProxies,
@@ -22,6 +23,8 @@ import type {
   PostFleetProxyRequestSchema,
   PutFleetProxyRequestSchema,
 } from '../../types';
+import { listFleetServerHostsForProxyId } from '../../services/fleet_server_host';
+import { agentPolicyService, outputService } from '../../services';
 
 export const postFleetProxyHandler: RequestHandler<
   undefined,
@@ -50,15 +53,47 @@ export const putFleetProxyHandler: RequestHandler<
   TypeOf<typeof PutFleetProxyRequestSchema.body>
 > = async (context, request, response) => {
   try {
+    const proxyId = request.params.itemId;
     const coreContext = await await context.core;
     const soClient = coreContext.savedObjects.client;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-    const item = await updateFleetProxy(soClient, request.params.itemId, request.body);
+    const item = await updateFleetProxy(soClient, proxyId, request.body);
     const body = {
       item,
     };
 
-    // TODO bump policies on update
+    // Bump all the agent policy that use that proxy
+    const [{ items: fleetServerHosts }, { items: outputs }] = await Promise.all([
+      listFleetServerHostsForProxyId(soClient, proxyId),
+      outputService.listAllForProxyId(soClient, proxyId),
+    ]);
+    if (
+      fleetServerHosts.some((host) => host.is_default) ||
+      outputs.some((output) => output.is_default || output.is_default_monitoring)
+    ) {
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    } else {
+      await pMap(
+        outputs,
+        (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id),
+        {
+          concurrency: 20,
+        }
+      );
+      await pMap(
+        fleetServerHosts,
+        (fleetServerHost) =>
+          agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(
+            soClient,
+            esClient,
+            fleetServerHost.id
+          ),
+        {
+          concurrency: 20,
+        }
+      );
+    }
 
     return response.ok({ body });
   } catch (error) {
