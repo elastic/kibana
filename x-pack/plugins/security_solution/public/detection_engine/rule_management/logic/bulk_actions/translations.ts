@@ -62,6 +62,8 @@ export function explainBulkEditSuccess(
   editPayload: BulkActionEditPayload[],
   summary: BulkActionSummary
 ): string {
+  const dataViewSkipDetail =
+    summary.skipped > 0 ? ` ${i18n.RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL}` : null;
   if (
     editPayload.some(
       (x) =>
@@ -70,9 +72,10 @@ export function explainBulkEditSuccess(
         x.type === BulkActionEditType.delete_index_patterns
     )
   ) {
-    return `${i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded, summary.skipped)}${
-      summary.skipped > 0 ? ` ${i18n.RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL}` : ''
-    }`;
+    return `${i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(
+      summary.succeeded,
+      summary.skipped
+    )}${dataViewSkipDetail}`;
   }
 
   return i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded, summary.skipped);
