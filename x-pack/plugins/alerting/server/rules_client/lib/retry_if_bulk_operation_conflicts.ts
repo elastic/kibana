@@ -27,6 +27,28 @@ export const retryIfBulkOperationConflicts = async ({
   logger,
   bulkOperation,
   filter,
+  retries = RETRY_IF_CONFLICTS_ATTEMPTS,
+}: {
+  action: 'DELETE' | 'ENABLE' | 'DISABLE';
+  logger: Logger;
+  bulkOperation: (filter: KueryNode | null) => Promise<BulkOperationResult>;
+  filter: KueryNode | null;
+  retries?: number;
+}): Promise<BulkOperationResult> => {
+  return handler({
+    action,
+    logger,
+    bulkOperation,
+    filter,
+    retries,
+  });
+};
+
+const handler = async ({
+  action,
+  logger,
+  bulkOperation,
+  filter,
   accListSpecificForBulkOperation, // this list can include several accumulators, depends on the type of bulk operation
   accErrors = [],
   accRules = [],
@@ -108,7 +130,7 @@ export const retryIfBulkOperationConflicts = async ({
       await pMap(
         chunk(ruleIdsWithConflictError, MAX_RULES_IDS_IN_RETRY),
         async (queryIds) =>
-          retryIfBulkOperationConflicts({
+          handler({
             action,
             logger,
             bulkOperation,
