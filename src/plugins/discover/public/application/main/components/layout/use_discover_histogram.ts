@@ -8,10 +8,7 @@
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import {
-  getVisualizeInformation,
-  triggerVisualizeActions,
-} from '@kbn/unified-field-list-plugin/public';
+import { getVisualizeInformation } from '@kbn/unified-field-list-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   UnifiedHistogramFetchStatus,
@@ -19,8 +16,8 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { getUiActions } from '../../../../kibana_services';
-import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
 import type { SavedSearchData } from '../../hooks/use_saved_search';
@@ -55,28 +52,7 @@ export const useDiscoverHistogram = ({
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
 }) => {
-  const { storage, data } = useDiscoverServices();
-
-  /**
-   * Breakdown
-   */
-
-  const onBreakdownFieldChange = useCallback(
-    (breakdownField: DataViewField | undefined) => {
-      stateContainer.setAppState({ breakdownField: breakdownField?.name });
-    },
-    [stateContainer]
-  );
-
-  const field = useMemo(
-    () => (state.breakdownField ? dataView.getFieldByName(state.breakdownField) : undefined),
-    [dataView, state.breakdownField]
-  );
-
-  const breakdown = useMemo(
-    () => (isPlainRecord || !isTimeBased ? undefined : { field }),
-    [field, isPlainRecord, isTimeBased]
-  );
+  const { storage, data, lens } = useDiscoverServices();
 
   /**
    * Visualize
@@ -100,19 +76,19 @@ export const useDiscoverHistogram = ({
     });
   }, [dataView, savedSearch.columns, timeField]);
 
-  const onEditVisualization = useCallback(() => {
-    if (!timeField) {
-      return;
-    }
-    triggerVisualizeActions(
-      getUiActions(),
-      timeField,
-      savedSearch.columns || [],
-      PLUGIN_ID,
-      dataView,
-      breakdown?.field
-    );
-  }, [breakdown?.field, dataView, savedSearch.columns, timeField]);
+  const onEditVisualization = useCallback(
+    (lensAttributes: TypedLensByValueInput['attributes']) => {
+      if (!timeField) {
+        return;
+      }
+      lens.navigateToPrefilledEditor({
+        id: '',
+        timeRange: data.query.timefilter.timefilter.getTime(),
+        attributes: lensAttributes,
+      });
+    },
+    [data.query.timefilter.timefilter, lens, timeField]
+  );
 
   /**
    * Height
@@ -258,6 +234,27 @@ export const useDiscoverHistogram = ({
     setChartHidden(state.hideChart);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchSessionId]);
+
+  /**
+   * Breakdown
+   */
+
+  const onBreakdownFieldChange = useCallback(
+    (breakdownField: DataViewField | undefined) => {
+      stateContainer.setAppState({ breakdownField: breakdownField?.name });
+    },
+    [stateContainer]
+  );
+
+  const field = useMemo(
+    () => (state.breakdownField ? dataView.getFieldByName(state.breakdownField) : undefined),
+    [dataView, state.breakdownField]
+  );
+
+  const breakdown = useMemo(
+    () => (isPlainRecord || !isTimeBased ? undefined : { field }),
+    [field, isPlainRecord, isTimeBased]
+  );
 
   // Don't render the unified histogram layout until the first search has been requested
   return searchSessionId

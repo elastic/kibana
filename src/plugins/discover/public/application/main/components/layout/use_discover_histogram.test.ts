@@ -36,7 +36,8 @@ import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
-import { InspectorAdapters } from '../../hooks/use_inspector';
+import type { InspectorAdapters } from '../../hooks/use_inspector';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 const mockData = dataPluginMock.createStartContract();
 
@@ -47,6 +48,10 @@ mockData.query.timefilter.timefilter.calculateBounds = (timeRange) => {
   return calculateBounds(timeRange);
 };
 
+const mockLens = {
+  navigateToPrefilledEditor: jest.fn(),
+};
+
 let mockStorage = new LocalStorageMock({}) as unknown as Storage;
 let mockCanVisualize = true;
 
@@ -54,7 +59,7 @@ jest.mock('../../../../hooks/use_discover_services', () => {
   const originalModule = jest.requireActual('../../../../hooks/use_discover_services');
   return {
     ...originalModule,
-    useDiscoverServices: () => ({ storage: mockStorage, data: mockData }),
+    useDiscoverServices: () => ({ storage: mockStorage, data: mockData, lens: mockLens }),
   };
 });
 
@@ -206,6 +211,17 @@ describe('useDiscoverHistogram', () => {
     it('returns undefined for onEditVisualization when the data view cannot be visualized', async () => {
       const { result } = await renderUseDiscoverHistogram({ canVisualize: false });
       expect(result.current?.onEditVisualization).toBeUndefined();
+    });
+
+    it('should call lens.navigateToPrefilledEditor when onEditVisualization is called', async () => {
+      const { result } = await renderUseDiscoverHistogram();
+      const attributes = { title: 'test' } as TypedLensByValueInput['attributes'];
+      result.current?.onEditVisualization!(attributes);
+      expect(mockLens.navigateToPrefilledEditor).toHaveBeenCalledWith({
+        id: '',
+        timeRange: mockData.query.timefilter.timefilter.getTime(),
+        attributes,
+      });
     });
   });
 

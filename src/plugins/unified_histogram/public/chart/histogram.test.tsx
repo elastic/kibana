@@ -22,6 +22,18 @@ const mockBucketInterval = { description: '1 minute', scale: undefined, scaled: 
 jest.spyOn(buildBucketInterval, 'buildBucketInterval').mockReturnValue(mockBucketInterval);
 jest.spyOn(useTimeRange, 'useTimeRange');
 
+const getMockLensAttributes = () =>
+  getLensAttributes({
+    filters: [],
+    query: {
+      language: 'kuery',
+      query: '',
+    },
+    dataView: dataViewWithTimefieldMock,
+    timeInterval: 'auto',
+    breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+  });
+
 function mountComponent() {
   const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -43,21 +55,14 @@ function mountComponent() {
       hidden: false,
       timeInterval: 'auto',
     },
-    breakdown: {
-      field: dataViewWithTimefieldMock.getFieldByName('extension'),
-    },
     timefilterUpdateHandler,
     dataView: dataViewWithTimefieldMock,
-    filters: [],
-    query: {
-      language: 'kuery',
-      query: '',
-    },
     timeRange: {
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
     },
     lastReloadRequestTime: 42,
+    lensAttributes: getMockLensAttributes(),
     onTotalHitsChange: jest.fn(),
     onChartLoad: jest.fn(),
   };
@@ -81,13 +86,7 @@ describe('Histogram', () => {
     let lensProps = component.find(embeddable).props();
     const originalProps = getLensProps({
       timeRange: props.timeRange,
-      attributes: getLensAttributes({
-        filters: props.filters,
-        query: props.query,
-        dataView: props.dataView,
-        timeInterval: props.chart.timeInterval,
-        breakdownField: props.breakdown.field,
-      }),
+      attributes: getMockLensAttributes(),
       request: props.request,
       lastReloadRequestTime: props.lastReloadRequestTime,
       onLoad: lensProps.onLoad,

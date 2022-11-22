@@ -402,8 +402,7 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T,
     indexPatternId: string,
     fieldName: string,
-    indexPatterns: IndexPatternMap,
-    breakdownField?: string
+    indexPatterns: IndexPatternMap
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (
     state: T,

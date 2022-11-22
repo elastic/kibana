@@ -363,15 +363,13 @@ export function getDatasourceSuggestionsForVisualizeField(
   state: FormBasedPrivateState,
   indexPatternId: string,
   fieldName: string,
-  indexPatterns: IndexPatternMap,
-  breakdownField?: string
+  indexPatterns: IndexPatternMap
 ): IndexPatternSuggestion[] {
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
   // Identify the field by the indexPatternId and the fieldName
   const indexPattern = indexPatterns[indexPatternId];
   const field = indexPattern?.getFieldByName(fieldName);
-  const breakdown = breakdownField ? indexPattern?.getFieldByName(breakdownField) : undefined;
 
   if (layerIds.length !== 0 || !field) return [];
   const newId = generateId();
@@ -380,16 +378,14 @@ export function getDatasourceSuggestionsForVisualizeField(
     newId,
     indexPatternId,
     field,
-    indexPatterns,
-    breakdown
+    indexPatterns
   ).concat(
     getEmptyLayerSuggestionsForField(
       { ...state, layers: {} },
       newId,
       indexPatternId,
       field,
-      indexPatterns,
-      breakdown
+      indexPatterns
     )
   );
 }
@@ -522,19 +518,13 @@ function getEmptyLayerSuggestionsForField(
   layerId: string,
   indexPatternId: string,
   field: IndexPatternField,
-  indexPatterns: IndexPatternMap,
-  breakdownField?: IndexPatternField
+  indexPatterns: IndexPatternMap
 ): IndexPatternSuggestion[] {
   const indexPattern = indexPatterns[indexPatternId];
   let newLayer: FormBasedLayer | undefined;
   const bucketOperation = getBucketOperation(field);
   if (bucketOperation) {
-    newLayer = createNewLayerWithBucketAggregation(
-      indexPattern,
-      field,
-      bucketOperation,
-      breakdownField
-    );
+    newLayer = createNewLayerWithBucketAggregation(indexPattern, field, bucketOperation);
   } else if (indexPattern.timeFieldName && getOperationTypesForField(field).length > 0) {
     newLayer = createNewLayerWithMetricAggregation(indexPattern, field);
   }
@@ -564,36 +554,14 @@ function getEmptyLayerSuggestionsForField(
 function createNewLayerWithBucketAggregation(
   indexPattern: IndexPattern,
   field: IndexPatternField,
-  operation: OperationType,
-  breakdownField?: IndexPatternField
+  operation: OperationType
 ): FormBasedLayer {
-  const countColumnId = generateId();
-
-  const getBreakdownColumn = () => {
-    const splitColumnId = generateId();
-    return insertNewColumn({
-      op: 'terms',
-      layer: {
-        indexPatternId: indexPattern.id,
-        columns: {},
-        columnOrder: [],
-        splitAccessor: splitColumnId,
-      },
-      columnId: splitColumnId,
-      field: breakdownField,
-      indexPattern,
-      visualizationGroups: [],
-    });
-  };
-
   return insertNewColumn({
     op: operation,
     layer: insertNewColumn({
       op: 'count',
-      layer: breakdownField
-        ? getBreakdownColumn()
-        : { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
-      columnId: countColumnId,
+      layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
+      columnId: generateId(),
       field: documentField,
       indexPattern,
       visualizationGroups: [],

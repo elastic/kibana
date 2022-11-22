@@ -12,6 +12,7 @@ import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
 import type {
@@ -76,7 +77,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * Callback to invoke when the user clicks the edit visualization button -- leave undefined to hide the button
    */
-  onEditVisualization?: () => void;
+  onEditVisualization?: (lensAttributes: TypedLensByValueInput['attributes']) => void;
   /**
    * Callback to hide or show the chart -- should set {@link UnifiedHistogramChartContext.hidden} to chartHidden
    */

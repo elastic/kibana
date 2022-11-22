@@ -8,17 +8,16 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
-import type { AggregateQuery, Query, Filter, TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import {
-  UnifiedHistogramBreakdownContext,
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
   UnifiedHistogramFetchStatus,
@@ -27,7 +26,6 @@ import {
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
 } from '../types';
-import { getLensAttributes } from './get_lens_attributes';
 import { buildBucketInterval } from './build_bucket_interval';
 import { useTimeRange } from './use_time_range';
 import { REQUEST_DEBOUNCE_MS } from './consts';
@@ -39,10 +37,8 @@ export interface HistogramProps {
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
-  breakdown?: UnifiedHistogramBreakdownContext;
-  filters: Filter[];
-  query: Query | AggregateQuery;
   timeRange: TimeRange;
+  lensAttributes: TypedLensByValueInput['attributes'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
 }
@@ -54,17 +50,11 @@ export function Histogram({
   request,
   hits,
   chart: { timeInterval },
-  breakdown: { field: breakdownField } = {},
-  filters,
-  query,
   timeRange,
+  lensAttributes: attributes,
   onTotalHitsChange,
   onChartLoad,
 }: HistogramProps) {
-  const attributes = useMemo(
-    () => getLensAttributes({ filters, query, dataView, timeInterval, breakdownField }),
-    [breakdownField, dataView, filters, query, timeInterval]
-  );
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,

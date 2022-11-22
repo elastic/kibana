@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
@@ -36,6 +37,7 @@ import { useRequestParams } from './use_request_params';
 import { useChartStyles } from './use_chart_styles';
 import { useChartActions } from './use_chart_actions';
 import { useRefetchId } from './use_refetch_id';
+import { getLensAttributes } from './get_lens_attributes';
 
 export interface ChartProps {
   className?: string;
@@ -48,7 +50,7 @@ export interface ChartProps {
   breakdown?: UnifiedHistogramBreakdownContext;
   appendHitsCounter?: ReactElement;
   appendHistogram?: ReactElement;
-  onEditVisualization?: () => void;
+  onEditVisualization?: (lensAttributes: TypedLensByValueInput['attributes']) => void;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -70,7 +72,7 @@ export function Chart({
   breakdown,
   appendHitsCounter,
   appendHistogram,
-  onEditVisualization,
+  onEditVisualization: originalOnEditVisualization,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -156,6 +158,28 @@ export function Chart({
     breakdownFieldSelectorItemCss,
     chartToolButtonCss,
   } = useChartStyles(chartVisible);
+
+  const lensAttributes = useMemo(
+    () =>
+      getLensAttributes({
+        filters,
+        query,
+        dataView,
+        timeInterval: chart?.timeInterval,
+        breakdownField: breakdown?.field,
+      }),
+    [breakdown?.field, chart?.timeInterval, dataView, filters, query]
+  );
+
+  const onEditVisualization = useMemo(
+    () =>
+      originalOnEditVisualization
+        ? () => {
+            originalOnEditVisualization(lensAttributes);
+          }
+        : undefined,
+    [lensAttributes, originalOnEditVisualization]
+  );
 
   return (
     <EuiFlexGroup
@@ -261,10 +285,8 @@ export function Chart({
               request={request}
               hits={hits}
               chart={chart}
-              breakdown={breakdown}
-              filters={filters}
-              query={query}
               timeRange={timeRange}
+              lensAttributes={lensAttributes}
               onTotalHitsChange={onTotalHitsChange}
               onChartLoad={onChartLoad}
             />

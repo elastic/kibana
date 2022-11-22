@@ -20,6 +20,7 @@ import { HitsCounter } from '../hits_counter';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
+import { Histogram } from './histogram';
 
 async function mountComponent({
   noChart,
@@ -84,7 +85,7 @@ async function mountComponent({
     instance = mountWithIntl(<Chart {...props} />);
     // wait for initial async loading to complete
     await new Promise((r) => setTimeout(r, 0));
-    await instance.update();
+    instance.update();
   });
   return instance;
 }
@@ -137,13 +138,13 @@ describe('Chart', () => {
     const fn = jest.fn();
     const component = await mountComponent({ onEditVisualization: fn });
     await act(async () => {
-      await component
+      component
         .find('[data-test-subj="unifiedHistogramEditVisualization"]')
         .first()
         .simulate('click');
     });
-
-    expect(fn).toHaveBeenCalled();
+    const lensAttributes = component.find(Histogram).prop('lensAttributes');
+    expect(fn).toHaveBeenCalledWith(lensAttributes);
   });
 
   it('should render HitsCounter when hits is defined', async () => {

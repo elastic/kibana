@@ -49,14 +49,12 @@ export function triggerVisualizeActions(
   field: DataViewField,
   contextualFields: string[] = [],
   originatingApp: string,
-  dataView?: DataView,
-  breakdownField?: DataViewField
+  dataView?: DataView
 ) {
   if (!dataView) return;
   const trigger = getTriggerConstant(field.type);
   const triggerOptions = {
     dataViewSpec: dataView.toSpec(false),
-    breakdownField: breakdownField?.name,
     fieldName: field.name,
     contextualFields,
     originatingApp,

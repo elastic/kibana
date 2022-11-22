@@ -99,7 +99,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const breakdownLabel = await testSubjects.find(
-          'lnsDragDrop_draggable-Top 5 values of extension.raw'
+          'lnsDragDrop_draggable-Top 3 values of extension.raw'
         );
 
         const lnsWorkspace = await testSubjects.find('lnsWorkspace');
@@ -108,8 +108,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           list.map((elem: WebElementWrapper) => elem.getVisibleText())
         );
 
-        expect(await breakdownLabel.getVisibleText()).to.eql('Top 5 values of extension.raw');
-        expect(values).to.eql(['php', 'gif', 'png', 'css', 'jpg']);
+        expect(await breakdownLabel.getVisibleText()).to.eql('Top 3 values of extension.raw');
+        expect(values).to.eql(['Other', 'png', 'css', 'jpg']);
       });
     });
 
