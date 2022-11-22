@@ -5,4 +5,18 @@
  * 2.0.
  */
 
-export { PageTitle } from './page_title';
+import { CenterJustifiedSpinner } from './center_justified_spinner';
+import { DeleteConfirmationModal } from './delete_confirmation_modal';
+import { HeaderActions } from './header_actions';
+import { PageTitle } from './page_title';
+import { RuleDetailTabs } from './rule_detail_tabs';
+import { RuleLoadingError } from './rule_loading_error';
+
+export {
+  CenterJustifiedSpinner,
+  DeleteConfirmationModal,
+  HeaderActions,
+  PageTitle,
+  RuleDetailTabs,
+  RuleLoadingError,
+};
