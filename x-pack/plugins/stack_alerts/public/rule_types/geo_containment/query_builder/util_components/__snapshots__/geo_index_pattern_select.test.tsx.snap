@@ -6,7 +6,6 @@ exports[`should render with error when data view does not have geo_point field 1
     describedByIds={Array []}
     display="row"
     error="Data view does not contain any allowed geospatial fields. Must have one of type geo_point."
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={true}
@@ -37,7 +36,6 @@ exports[`should render without error after mounting 1`] = `
     describedByIds={Array []}
     display="row"
     error=""
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}

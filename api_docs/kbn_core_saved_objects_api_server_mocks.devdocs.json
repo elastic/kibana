@@ -87,6 +87,116 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
+        "id": "def-server.savedObjectsExtensionsMock",
+        "type": "Object",
+        "tags": [],
+        "label": "savedObjectsExtensionsMock",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
+            "id": "def-server.savedObjectsExtensionsMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExtensions",
+                "text": "SavedObjectsExtensions"
+              },
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
+            "id": "def-server.savedObjectsExtensionsMock.createEncryptionExtension",
+            "type": "Function",
+            "tags": [],
+            "label": "createEncryptionExtension",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsEncryptionExtension",
+                "text": "ISavedObjectsEncryptionExtension"
+              },
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
+            "id": "def-server.savedObjectsExtensionsMock.createSecurityExtension",
+            "type": "Function",
+            "tags": [],
+            "label": "createSecurityExtension",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsSecurityExtension",
+                "text": "ISavedObjectsSecurityExtension"
+              },
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
+            "id": "def-server.savedObjectsExtensionsMock.createSpacesExtension",
+            "type": "Function",
+            "tags": [],
+            "label": "createSpacesExtension",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsSpacesExtension",
+                "text": "ISavedObjectsSpacesExtension"
+              },
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
         "id": "def-server.savedObjectsRepositoryMock",
         "type": "Object",
         "tags": [],

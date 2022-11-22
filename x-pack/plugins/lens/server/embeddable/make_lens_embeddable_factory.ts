@@ -32,6 +32,7 @@ import {
   getLensDataViewMigrations,
   commonMigrateMetricIds,
   commonMigratePartitionChartGroups,
+  commonMigratePartitionMetrics,
   commonMigrateIndexPatternDatasource,
 } from '../migrations/common_migrations';
 import {
@@ -160,12 +161,15 @@ export const makeLensEmbeddableFactory =
               '8.6.0': (state) => {
                 const lensState = state as unknown as SavedObject<LensDocShape850<VisState850>>;
 
-                const migratedLensState = commonMigrateIndexPatternDatasource(lensState.attributes);
+                let migratedLensState = commonMigrateIndexPatternDatasource(lensState.attributes);
+                migratedLensState = commonMigratePartitionMetrics(migratedLensState);
                 return {
                   ...lensState,
                   attributes: migratedLensState,
                 } as unknown as SerializableRecord;
               },
+              // FOLLOW THESE GUIDELINES IF YOU ARE ADDING A NEW MIGRATION!
+              // 1. Make sure you are applying migrations for a given version in the same order here as they are applied in x-pack/plugins/lens/server/migrations/saved_object_migrations.ts
             }),
             getLensCustomVisualizationMigrations(customVisualizationMigrations)
           ),

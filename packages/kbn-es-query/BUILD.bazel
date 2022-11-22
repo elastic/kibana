@@ -1,5 +1,4 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config")
-load("@npm//peggy:index.bzl", "peggy")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
@@ -9,6 +8,8 @@ PKG_REQUIRE_NAME = "@kbn/es-query"
 SOURCE_FILES = glob(
   [
     "**/*.ts",
+    "**/grammar.peggy.config.json",
+    "**/grammar.peggy",
   ],
   exclude = [
     "**/*.config.js",
@@ -51,6 +52,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
+  "//packages/kbn-ambient-common-types:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//tslib",
   "@npm//@types/jest",
@@ -59,25 +61,14 @@ TYPES_DEPS = [
   "@npm//@types/node",
 ]
 
-peggy(
-  name = "grammar",
-  data = [
-    ":grammar/grammar.peggy"
-  ],
-  output_dir = True,
-  args = [
-    "--allowed-start-rules",
-    "start,Literal",
-    "-o",
-    "$(@D)/built_grammar.js",
-    "./%s/grammar/grammar.peggy" % package_name()
-  ],
-)
-
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 jsts_transpiler(
@@ -85,6 +76,10 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   web = True,
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(
@@ -109,7 +104,7 @@ ts_project(
 
 js_library(
   name = PKG_DIRNAME,
-  srcs = NPM_MODULE_EXTRA_FILES + [":grammar"],
+  srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
@@ -117,7 +112,7 @@ js_library(
 
 js_library(
   name = "npm_module_types",
-  srcs = NPM_MODULE_EXTRA_FILES + [":grammar"],
+  srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],

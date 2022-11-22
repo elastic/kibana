@@ -15,6 +15,7 @@ interface ExceptionListsTableSearchProps {
   onSearch: (args: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]) => void;
 }
 
+// TODO replace this component with the @Kbn/securitysolution-exception-list-components
 export const EXCEPTIONS_SEARCH_SCHEMA = {
   strict: true,
   fields: {
@@ -36,7 +37,7 @@ export const EXCEPTIONS_SEARCH_SCHEMA = {
   },
 };
 
-export const ExceptionsSearchBar = React.memo<ExceptionListsTableSearchProps>(({ onSearch }) => {
+export const ListsSearchBar = React.memo<ExceptionListsTableSearchProps>(({ onSearch }) => {
   return (
     <EuiSearchBar
       data-test-subj="exceptionsHeaderSearch"
@@ -52,4 +53,4 @@ export const ExceptionsSearchBar = React.memo<ExceptionListsTableSearchProps>(({
   );
 });
 
-ExceptionsSearchBar.displayName = 'ExceptionsSearchBar';
+ListsSearchBar.displayName = 'ListsSearchBar';

@@ -12,15 +12,16 @@ import React from 'react';
 import { useBehaviorSubject } from '../../use_behavior_subject';
 import { useFilePickerContext } from '../context';
 import { i18nTexts } from '../i18n_texts';
+import type { FileJSON } from '../../../../common';
 
 export interface Props {
-  onClick: (selectedFiles: string[]) => void;
+  onClick: (selectedFiles: FileJSON[]) => void;
 }
 
 export const SelectButton: FunctionComponent<Props> = ({ onClick }) => {
   const { state } = useFilePickerContext();
   const isUploading = useBehaviorSubject(state.isUploading$);
-  const selectedFiles = useBehaviorSubject(state.selectedFileIds$);
+  const selectedFiles = useBehaviorSubject(state.selectedFiles$);
   return (
     <EuiButton
       data-test-subj="selectButton"

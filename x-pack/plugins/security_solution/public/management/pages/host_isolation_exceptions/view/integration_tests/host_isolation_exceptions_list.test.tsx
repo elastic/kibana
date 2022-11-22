@@ -77,7 +77,7 @@ describe('When on the host isolation exceptions page', () => {
     );
   });
 
-  it('should hide the Create and Edit actions when host isolation authz is not allowed', async () => {
+  it('should hide the Create and Edit actions when host isolation exceptions write authz is not allowed, but HIE entries exist', async () => {
     // Use case: license downgrade scenario, where user still has entries defined, but no longer
     // able to create or edit them (only Delete them)
     const existingPrivileges = useUserPrivilegesMock();
@@ -86,6 +86,9 @@ describe('When on the host isolation exceptions page', () => {
       endpointPrivileges: {
         ...existingPrivileges.endpointPrivileges,
         canIsolateHost: false,
+        canWriteHostIsolationExceptions: false,
+        canReadHostIsolationExceptions: true,
+        canDeleteHostIsolationExceptions: true,
       },
     });
 

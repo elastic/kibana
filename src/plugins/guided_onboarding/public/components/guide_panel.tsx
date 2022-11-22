@@ -28,13 +28,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from '@kbn/core/public';
+import { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
 import { GuideId } from '@kbn/guided-onboarding';
-import type { GuideConfig, StepConfig } from '../types';
+import type { GuideConfig, GuidedOnboardingApi, StepConfig } from '../types';
 
-import type { ApiService } from '../services/api';
+import type { PluginState } from '../../common/types';
 import { getGuideConfig } from '../services/helpers';
 
 import { GuideStep } from './guide_panel_step';
@@ -43,8 +43,9 @@ import { getGuidePanelStyles } from './guide_panel.styles';
 import { GuideButton } from './guide_button';
 
 interface GuidePanelProps {
-  api: ApiService;
+  api: GuidedOnboardingApi;
   application: ApplicationStart;
+  notifications: NotificationsStart;
 }
 
 const getProgress = (state?: GuideState): number => {
@@ -61,7 +62,7 @@ const getProgress = (state?: GuideState): number => {
 
 // Temporarily provide a different guide ID for telemetry purposes
 // Should not be necessary once https://github.com/elastic/kibana/issues/144452 is addressed
-const getTelemetryGuideId = (guideId: GuideId) => {
+const getTelemetryGuideId = (guideId?: GuideId) => {
   switch (guideId) {
     case 'security':
       return 'siem';
@@ -73,11 +74,11 @@ const getTelemetryGuideId = (guideId: GuideId) => {
   }
 };
 
-export const GuidePanel = ({ api, application }: GuidePanelProps) => {
+export const GuidePanel = ({ api, application, notifications }: GuidePanelProps) => {
   const { euiTheme } = useEuiTheme();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isQuitGuideModalOpen, setIsQuitGuideModalOpen] = useState(false);
-  const [guideState, setGuideState] = useState<GuideState | undefined>(undefined);
+  const [pluginState, setPluginState] = useState<PluginState | undefined>(undefined);
 
   const styles = getGuidePanelStyles(euiTheme);
 
@@ -86,25 +87,35 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   };
 
   const handleStepButtonClick = async (step: GuideStepStatus, stepConfig: StepConfig) => {
-    if (guideState) {
+    if (pluginState) {
       const { id, status } = step;
+      const guideId: GuideId = pluginState!.activeGuide!.guideId!;
 
-      if (status === 'ready_to_complete') {
-        return await api.completeGuideStep(guideState?.guideId, id);
-      }
+      try {
+        if (status === 'ready_to_complete') {
+          return await api.completeGuideStep(guideId, id);
+        }
 
-      if (status === 'active' || status === 'in_progress') {
-        await api.startGuideStep(guideState!.guideId, id);
+        if (status === 'active' || status === 'in_progress') {
+          await api.startGuideStep(guideId, id);
 
-        if (stepConfig.location) {
-          await application.navigateToApp(stepConfig.location.appID, {
-            path: stepConfig.location.path,
-          });
+          if (stepConfig.location) {
+            await application.navigateToApp(stepConfig.location.appID, {
+              path: stepConfig.location.path,
+            });
 
-          if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
-            await api.completeGuideStep(guideState.guideId, id);
+            if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
+              await api.completeGuideStep(guideId, id);
+            }
           }
         }
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('guidedOnboarding.dropdownPanel.stepHandlerError', {
+            defaultMessage: 'Unable to update the guide. Wait a moment and try again.',
+          }),
+          text: error.message,
+        });
       }
     }
   };
@@ -117,11 +128,20 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const completeGuide = async (
     completedGuideRedirectLocation: GuideConfig['completedGuideRedirectLocation']
   ) => {
-    await api.completeGuide(guideState!.guideId);
+    try {
+      await api.completeGuide(pluginState!.activeGuide!.guideId!);
 
-    if (completedGuideRedirectLocation) {
-      const { appID, path } = completedGuideRedirectLocation;
-      application.navigateToApp(appID, { path });
+      if (completedGuideRedirectLocation) {
+        const { appID, path } = completedGuideRedirectLocation;
+        application.navigateToApp(appID, { path });
+      }
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('guidedOnboarding.dropdownPanel.completeGuideError', {
+          defaultMessage: 'Unable to update the guide. Wait a moment and try again.',
+        }),
+        text: error.message,
+      });
     }
   };
 
@@ -137,8 +157,8 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   };
 
   useEffect(() => {
-    const subscription = api.fetchActiveGuideState$().subscribe((newGuideState) => {
-      setGuideState(newGuideState);
+    const subscription = api.fetchPluginState$().subscribe((newPluginState) => {
+      setPluginState(newPluginState);
     });
     return () => subscription.unsubscribe();
   }, [api]);
@@ -150,25 +170,22 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     return () => subscription.unsubscribe();
   }, [api]);
 
-  const guideConfig = getGuideConfig(guideState?.guideId);
+  const guideConfig = getGuideConfig(pluginState?.activeGuide?.guideId)!;
 
-  // TODO handle loading, error state
-  // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
-  if (!guideConfig || !guideState || !guideState.isActive) {
-    // TODO button show/hide logic https://github.com/elastic/kibana/issues/141129
-    return null;
-  }
+  // TODO handle loading state
+  // https://github.com/elastic/kibana/issues/139799
 
-  const stepsCompleted = getProgress(guideState);
-  const isGuideReadyToComplete = guideState?.status === 'ready_to_complete';
-  const telemetryGuideId = getTelemetryGuideId(guideState.guideId);
+  const stepsCompleted = getProgress(pluginState?.activeGuide);
+  const isGuideReadyToComplete = pluginState?.activeGuide?.status === 'ready_to_complete';
+  const telemetryGuideId = getTelemetryGuideId(pluginState?.activeGuide?.guideId);
 
   return (
     <>
       <GuideButton
-        guideState={guideState!}
+        pluginState={pluginState}
         toggleGuidePanel={toggleGuide}
         isGuidePanelOpen={isGuideOpen}
+        navigateToLandingPage={navigateToLandingPage}
       />
 
       {isGuideOpen && (
@@ -270,7 +287,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
 
               {guideConfig?.steps.map((step, index) => {
                 const accordionId = htmlIdGenerator(`accordion${index}`)();
-                const stepState = guideState?.steps[index];
+                const stepState = pluginState?.activeGuide?.steps[index];
 
                 if (stepState) {
                   return (
@@ -281,7 +298,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                       stepNumber={index + 1}
                       handleButtonClick={() => handleStepButtonClick(stepState, step)}
                       key={accordionId}
-                      telemetryGuideId={telemetryGuideId}
+                      telemetryGuideId={telemetryGuideId!}
                     />
                   );
                 }
@@ -374,8 +391,9 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
       {isQuitGuideModalOpen && (
         <QuitGuideModal
           closeModal={closeQuitGuideModal}
-          currentGuide={guideState!}
-          telemetryGuideId={telemetryGuideId}
+          currentGuide={pluginState!.activeGuide!}
+          telemetryGuideId={telemetryGuideId!}
+          notifications={notifications}
         />
       )}
     </>

@@ -3772,6 +3772,20 @@
         "children": [
           {
             "parentPluginId": "lens",
+            "id": "def-public.SharedPieLayerState.metrics",
+            "type": "Array",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.SharedPieLayerState.primaryGroups",
             "type": "Array",
             "tags": [],
@@ -3800,13 +3814,13 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.SharedPieLayerState.metric",
-            "type": "string",
+            "id": "def-public.SharedPieLayerState.allowMultipleMetrics",
+            "type": "CompoundType",
             "tags": [],
-            "label": "metric",
+            "label": "allowMultipleMetrics",
             "description": [],
             "signature": [
-              "string | undefined"
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -5295,10 +5309,8 @@
               "\nreturns a list of custom actions supported by the visualization layer.\nDefault actions like delete/clear are not included in this list and are managed by the editor frame"
             ],
             "signature": [
-              "((layerId: string, state: T, setState: ",
-              "StateSetter",
-              "<T, unknown>, openLayerSettings?: (() => void) | undefined) => ",
-              "LayerAction",
+              "((layerId: string, state: T) => ",
+              "LayerActionFromVisualization",
               "[]) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -5334,17 +5346,35 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.onLayerAction",
+            "type": "Function",
+            "tags": [],
+            "label": "onLayerAction",
+            "description": [
+              "\nPerform state mutations in response to a layer action"
+            ],
+            "signature": [
+              "((layerId: string, actionId: string, state: T) => T) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.getSupportedActionsForLayer.$3",
-                "type": "Function",
+                "id": "def-public.Visualization.onLayerAction.$1",
+                "type": "string",
                 "tags": [],
-                "label": "setState",
+                "label": "layerId",
                 "description": [],
                 "signature": [
-                  "StateSetter",
-                  "<T, unknown>"
+                  "string"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -5353,18 +5383,33 @@
               },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.getSupportedActionsForLayer.$4",
-                "type": "Function",
+                "id": "def-public.Visualization.onLayerAction.$2",
+                "type": "string",
                 "tags": [],
-                "label": "openLayerSettings",
+                "label": "actionId",
                 "description": [],
                 "signature": [
-                  "(() => void) | undefined"
+                  "string"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onLayerAction.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -11974,6 +12019,20 @@
         "children": [
           {
             "parentPluginId": "lens",
+            "id": "def-common.SharedPieLayerState.metrics",
+            "type": "Array",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-common.SharedPieLayerState.primaryGroups",
             "type": "Array",
             "tags": [],
@@ -12002,13 +12061,13 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-common.SharedPieLayerState.metric",
-            "type": "string",
+            "id": "def-common.SharedPieLayerState.allowMultipleMetrics",
+            "type": "CompoundType",
             "tags": [],
-            "label": "metric",
+            "label": "allowMultipleMetrics",
             "description": [],
             "signature": [
-              "string | undefined"
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,

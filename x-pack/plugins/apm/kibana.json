@@ -21,6 +21,7 @@
     "unifiedSearch",
     "dataViews",
     "advancedSettings",
+    "unifiedFieldList",
     "lens",
     "maps"
   ],
@@ -28,8 +29,10 @@
     "actions",
     "alerting",
     "cases",
+    "charts",
     "cloud",
     "fleet",
+    "fieldFormats",
     "home",
     "ml",
     "security",

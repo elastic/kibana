@@ -42,9 +42,9 @@ import type {
   CheckUnknownDocumentsState,
   CalculateExcludeFiltersState,
 } from '../state';
-import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
-import { AliasAction, RetryableEsClientError } from '../actions';
-import { ResponseType } from '../next';
+import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
+import type { AliasAction, RetryableEsClientError } from '../actions';
+import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
 

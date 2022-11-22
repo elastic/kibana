@@ -26,7 +26,7 @@ import { useTriggerUiActionServices } from '../es_query/util';
 import { EsQueryRuleMetaData } from '../es_query/types';
 
 export interface DataViewSelectPopoverProps {
-  dataView: DataView;
+  dataView?: DataView;
   metadata?: EsQueryRuleMetaData;
   onSelectDataView: (selectedDataView: DataView) => void;
   onChangeMetaData: (metadata: EsQueryRuleMetaData) => void;
@@ -150,7 +150,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             defaultMessage: 'data view',
           })}
           value={
-            dataView.getName() ??
+            dataView?.getName() ??
             i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewPlaceholder', {
               defaultMessage: 'Select a data view',
             })
@@ -159,7 +159,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           onClick={() => {
             setDataViewPopoverOpen(true);
           }}
-          isInvalid={!dataView.id}
+          isInvalid={!dataView?.id}
         />
       }
       isOpen={dataViewPopoverOpen}
@@ -191,7 +191,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           </EuiFlexGroup>
         </EuiPopoverTitle>
         <DataViewSelector
-          currentDataViewId={dataView.id}
+          currentDataViewId={dataView?.id}
           dataViewsList={allDataViewItems}
           setPopoverIsOpen={setDataViewPopoverOpen}
           onChangeDataView={onChangeDataView}

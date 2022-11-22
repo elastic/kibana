@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       const modifiedMonitor = {
-        ...newMonitor,
+        ...savedMonitor,
         ...updates,
         [ConfigKey.METADATA]: {
           ...newMonitor[ConfigKey.METADATA],

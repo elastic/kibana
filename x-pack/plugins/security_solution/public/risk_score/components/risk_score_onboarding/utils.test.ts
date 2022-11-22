@@ -7,6 +7,7 @@
 import type { HttpSetup } from '@kbn/core/public';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import {
+  getIngestPipelineName,
   getLegacyIngestPipelineName,
   getRiskScoreLatestTransformId,
   getRiskScorePivotTransformId,
@@ -20,7 +21,7 @@ import * as api from '../../containers/onboarding/api';
 import {
   installRiskScoreModule,
   restartRiskScoreTransforms,
-  uninstallLegacyRiskScoreModule,
+  uninstallRiskScoreModule,
 } from './utils';
 
 jest.mock('../../containers/onboarding/api');
@@ -70,12 +71,12 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
 );
 
 describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])(
-  'uninstallLegacyRiskScoreModule - %s',
+  'uninstallRiskScoreModule - %s',
   (riskScoreEntity) => {
     beforeAll(async () => {
-      await uninstallLegacyRiskScoreModule({
+      await uninstallRiskScoreModule({
         http: mockHttp,
-        spaceId: 'customSpace',
+        spaceId: mockSpaceId,
         riskScoreEntity,
       });
     });
@@ -99,28 +100,38 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])(
 
     it('Delete legacy ingest pipelines', () => {
       expect((api.deleteIngestPipelines as jest.Mock).mock.calls[0][0].names).toEqual(
-        getLegacyIngestPipelineName(riskScoreEntity)
+        [
+          getLegacyIngestPipelineName(riskScoreEntity),
+          getIngestPipelineName(riskScoreEntity, mockSpaceId),
+        ].join(',')
       );
     });
 
     it('Delete legacy stored scripts', () => {
       if (riskScoreEntity === RiskScoreEntity.user) {
         expect((api.deleteStoredScripts as jest.Mock).mock.calls[0][0].ids).toMatchInlineSnapshot(`
-      Array [
-        "ml_userriskscore_levels_script",
-        "ml_userriskscore_map_script",
-        "ml_userriskscore_reduce_script",
-      ]
-    `);
+          Array [
+            "ml_userriskscore_levels_script",
+            "ml_userriskscore_map_script",
+            "ml_userriskscore_reduce_script",
+            "ml_userriskscore_levels_script_customSpace",
+            "ml_userriskscore_map_script_customSpace",
+            "ml_userriskscore_reduce_script_customSpace",
+          ]
+        `);
       } else {
         expect((api.deleteStoredScripts as jest.Mock).mock.calls[0][0].ids).toMatchInlineSnapshot(`
-      Array [
-        "ml_hostriskscore_levels_script",
-        "ml_hostriskscore_init_script",
-        "ml_hostriskscore_map_script",
-        "ml_hostriskscore_reduce_script",
-      ]
-    `);
+          Array [
+            "ml_hostriskscore_levels_script",
+            "ml_hostriskscore_init_script",
+            "ml_hostriskscore_map_script",
+            "ml_hostriskscore_reduce_script",
+            "ml_hostriskscore_levels_script_customSpace",
+            "ml_hostriskscore_init_script_customSpace",
+            "ml_hostriskscore_map_script_customSpace",
+            "ml_hostriskscore_reduce_script_customSpace",
+          ]
+        `);
       }
     });
   }

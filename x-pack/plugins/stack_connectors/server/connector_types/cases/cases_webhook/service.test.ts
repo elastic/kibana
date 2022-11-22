@@ -65,7 +65,7 @@ describe('Cases webhook service', () => {
       logger,
       configurationUtilities
     );
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(mockTime);
   });
 

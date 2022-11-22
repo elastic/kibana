@@ -41,7 +41,7 @@ export const deleteMonitorBulk = async ({
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       monitors.map((normalizedMonitor) => ({
         ...normalizedMonitor.attributes,
-        id: normalizedMonitor.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || normalizedMonitor.id,
+        id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
       })) as EncryptedSyntheticsMonitorWithId[],
       request,
       savedObjectsClient,

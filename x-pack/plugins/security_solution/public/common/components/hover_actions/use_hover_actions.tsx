@@ -80,6 +80,20 @@ export const useHoverActions = ({
 
   const { closeTopN, toggleTopN, isShowingTopN } = useTopNPopOver(handleClosePopOverTrigger);
 
+  const values = useMemo(() => {
+    const val = dataProvider.queryMatch.value;
+
+    if (typeof val === 'number') {
+      return val.toString();
+    }
+
+    if (Array.isArray(val)) {
+      return val.map((item) => String(item));
+    }
+
+    return val;
+  }, [dataProvider.queryMatch.value]);
+
   const hoverContent = useMemo(() => {
     // display links as additional content in the hover menu to enable keyboard
     // navigation of links (when the draggable contains them):
@@ -110,11 +124,7 @@ export const useHoverActions = ({
         showTopN={isShowingTopN}
         scopeId={id}
         toggleTopN={toggleTopN}
-        values={
-          typeof dataProvider.queryMatch.value !== 'number'
-            ? dataProvider.queryMatch.value
-            : `${dataProvider.queryMatch.value}`
-        }
+        values={values}
       />
     );
   }, [
@@ -131,6 +141,7 @@ export const useHoverActions = ({
     onFilterAdded,
     id,
     toggleTopN,
+    values,
   ]);
 
   const setContainerRef = useCallback((e: HTMLDivElement) => {

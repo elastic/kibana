@@ -105,7 +105,7 @@ describe('Modal Inspect', () => {
         </ThemeProvider>
       );
 
-      wrapper.find('.euiTab').first().simulate('click');
+      wrapper.find('button.euiTab').first().simulate('click');
       wrapper.update();
 
       expect(
@@ -144,7 +144,7 @@ describe('Modal Inspect', () => {
         </ThemeProvider>
       );
 
-      wrapper.find('.euiTab').at(2).simulate('click');
+      wrapper.find('button.euiTab').at(2).simulate('click');
       wrapper.update();
 
       expect(JSON.parse(wrapper.find('EuiCodeBlock').first().text())).toEqual({
@@ -211,7 +211,7 @@ describe('Modal Inspect', () => {
         </ThemeProvider>
       );
 
-      wrapper.find('.euiTab').at(1).simulate('click');
+      wrapper.find('button.euiTab').at(1).simulate('click');
       wrapper.update();
 
       expect(JSON.parse(wrapper.find('EuiCodeBlock').first().text())).toEqual({

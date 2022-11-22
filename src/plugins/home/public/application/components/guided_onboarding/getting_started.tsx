@@ -8,10 +8,12 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  EuiButton,
   EuiFlexGrid,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPageTemplate,
   EuiPanel,
   EuiSpacer,
@@ -33,7 +35,7 @@ import { KEY_ENABLE_WELCOME } from '../home';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 const gettingStartedBreadcrumb = i18n.translate('home.breadcrumbs.gettingStartedTitle', {
-  defaultMessage: 'Guided setup',
+  defaultMessage: 'Setup guides',
 });
 const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionTitle', {
   defaultMessage: 'What would you like to do first?',
@@ -49,6 +51,8 @@ export const GettingStarted = () => {
   const { application, trackUiMetric, chrome, guidedOnboardingService, http, uiSettings, cloud } =
     getServices();
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isError, setIsError] = useState<boolean>(false);
   const history = useHistory();
 
   useEffect(() => {
@@ -68,9 +72,17 @@ export const GettingStarted = () => {
   }, [chrome, trackUiMetric]);
 
   const fetchGuidesState = useCallback(async () => {
-    const allGuides = await guidedOnboardingService?.fetchAllGuidesState();
-    if (allGuides) {
-      setGuidesState(allGuides.state);
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const allGuides = await guidedOnboardingService?.fetchAllGuidesState();
+      setIsLoading(false);
+      if (allGuides) {
+        setGuidesState(allGuides.state);
+      }
+    } catch (error) {
+      setIsLoading(false);
+      setIsError(true);
     }
   }, [guidedOnboardingService]);
 
@@ -84,7 +96,13 @@ export const GettingStarted = () => {
     }
   }, [cloud, history]);
 
-  const onSkip = () => {
+  const onSkip = async () => {
+    try {
+      await guidedOnboardingService?.skipGuidedOnboarding();
+    } catch (error) {
+      // if the state update fails, it's safe to ignore the error
+    }
+
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
     // disable welcome screen on the home page
     localStorage.setItem(KEY_ENABLE_WELCOME, JSON.stringify(false));
@@ -97,14 +115,80 @@ export const GettingStarted = () => {
 
   const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
   const activateGuide = async (useCase: UseCase, guideState?: GuideState) => {
-    await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
-    // TODO error handling https://github.com/elastic/kibana/issues/139798
+    try {
+      await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
+    } catch (err) {
+      getServices().toastNotifications.addDanger({
+        title: i18n.translate('home.guidedOnboarding.gettingStarted.activateGuide.errorMessage', {
+          defaultMessage: 'Unable to start the guide. Wait a moment and try again.',
+        }),
+        text: err.message,
+      });
+    }
   };
+
+  if (isLoading) {
+    return (
+      <KibanaPageTemplate.EmptyPrompt
+        title={<EuiLoadingSpinner size="xl" />}
+        body={
+          <EuiText color="subdued">
+            {i18n.translate('home.guidedOnboarding.gettingStarted.loadingIndicator', {
+              defaultMessage: 'Loading the guide state...',
+            })}
+          </EuiText>
+        }
+        data-test-subj="onboarding--loadingIndicator"
+      />
+    );
+  }
+
+  if (isError) {
+    return (
+      <KibanaPageTemplate.EmptyPrompt
+        iconType="alert"
+        color="danger"
+        title={
+          <h2>
+            {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionTitle', {
+              defaultMessage: 'Unable to load the guide state',
+            })}
+          </h2>
+        }
+        body={
+          <>
+            <EuiText color="subdued">
+              {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionDescription', {
+                defaultMessage: `The guide couldn't be loaded. Wait a moment and try again.`,
+              })}
+            </EuiText>
+            <EuiSpacer />
+            <EuiButton
+              iconSide="right"
+              onClick={fetchGuidesState}
+              iconType="refresh"
+              color="danger"
+            >
+              {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionRefreshButton', {
+                defaultMessage: 'Refresh',
+              })}
+            </EuiButton>
+          </>
+        }
+        data-test-subj="onboarding--errorSection"
+      />
+    );
+  }
 
   return (
     <KibanaPageTemplate panelled={false} grow>
       <EuiPageTemplate.Section alignment="center">
-        <EuiPanel color="plain" hasShadow css={paddingCss}>
+        <EuiPanel
+          color="plain"
+          hasShadow
+          css={paddingCss}
+          data-test-subj="onboarding--landing-page"
+        >
           <EuiTitle size="l" className="eui-textCenter">
             <h1>{title}</h1>
           </EuiTitle>

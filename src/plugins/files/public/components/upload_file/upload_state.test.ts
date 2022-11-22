@@ -96,8 +96,8 @@ describe('UploadState', () => {
           { file: file2, status: 'uploading' },
         ],
         c: [
-          { file: file1, status: 'uploaded', id: 'test' },
-          { file: file2, status: 'uploaded', id: 'test' },
+          { file: file1, status: 'uploaded', id: 'test', fileJSON: { id: 'test' } },
+          { file: file2, status: 'uploaded', id: 'test', fileJSON: { id: 'test' } },
         ],
       });
 
