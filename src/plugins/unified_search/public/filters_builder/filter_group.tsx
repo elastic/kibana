@@ -105,33 +105,36 @@ export const FilterGroup = ({
 
   const color = reverseBackground ? 'plain' : 'subdued';
 
-  const renderedFilters = filters.map((filter, index, acc) => (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize={shouldNormalizeFirstLevel ? 'none' : 'xs'}
-      responsive={false}
-    >
-      <EuiFlexItem>
-        <FilterItem
-          filter={filter}
-          path={`${path}${path ? '.' : ''}${index}`}
-          reverseBackground={reverseBackground}
-          disableOr={orDisabled}
-          disableAnd={andDisabled}
-          disableRemove={removeDisabled}
-          color={color}
-          index={index}
-          renderedLevel={renderedLevel}
-        />
-      </EuiFlexItem>
-
-      {booleanRelation && index + 1 < acc.length ? (
+  const renderedFilters = filters.map((filter, index, acc) => {
+    const showDelimiter = booleanRelation && index + 1 < acc.length;
+    return (
+      <EuiFlexGroup
+        direction="column"
+        gutterSize={shouldNormalizeFirstLevel ? 'none' : 'xs'}
+        responsive={false}
+      >
         <EuiFlexItem>
-          <Delimiter color={color} booleanRelation={booleanRelation} />
+          <FilterItem
+            filter={filter}
+            path={`${path}${path ? '.' : ''}${index}`}
+            reverseBackground={reverseBackground}
+            disableOr={orDisabled}
+            disableAnd={andDisabled}
+            disableRemove={removeDisabled}
+            color={color}
+            index={index}
+            renderedLevel={renderedLevel}
+          />
         </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
-  ));
+
+        {showDelimiter && (
+          <EuiFlexItem>
+            <Delimiter color={color} booleanRelation={booleanRelation} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  });
 
   return shouldNormalizeFirstLevel ? (
     <>{renderedFilters}</>
