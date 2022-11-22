@@ -6,9 +6,15 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Client } from '@elastic/elasticsearch';
 
-export interface TestDataEsArchive {
+import { ToolingLog } from '@kbn/tooling-log';
+
+export interface TestData {
   suiteTitle: string;
+  esArchive?: string;
+  bulkBody?: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'];
+  postProcessIndex?: (es: Client, td: TestData, log: ToolingLog) => Promise<void>;
   isSavedSearch?: boolean;
   sourceIndexOrSavedSearch: string;
   rowsPerPage?: 10 | 25 | 50;
@@ -35,8 +41,4 @@ export interface GeneratedDoc {
   url: string;
   version: string;
   '@timestamp': number;
-}
-
-export interface TestDataGenerated extends TestDataEsArchive {
-  bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'];
 }

@@ -6,16 +6,53 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Client } from '@elastic/elasticsearch';
 
-import type { GeneratedDoc, TestDataEsArchive, TestDataGenerated } from './types';
+import { ToolingLog } from '@kbn/tooling-log';
 
-export const farequoteDataViewTestData: TestDataEsArchive = {
+import type { GeneratedDoc, TestData } from './types';
+
+export const farequoteDataViewTestData: TestData = {
   suiteTitle: 'farequote index pattern',
+  esArchive: 'x-pack/test/functional/es_archives/ml/farequote',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'ft_farequote',
   brushDeviationTargetTimestamp: 1455033600000,
   brushIntervalFactor: 1,
   chartClickCoordinates: [0, 0],
+  postProcessIndex: async (es: Client, td: TestData, log: ToolingLog) => {
+    try {
+      await es.updateByQuery({
+        index: td.sourceIndexOrSavedSearch,
+        body: {
+          script: {
+            // @ts-expect-error
+            inline: 'ctx._source.custom_field = "default"',
+            lang: 'painless',
+          },
+        },
+      });
+
+      await es.bulk({
+        refresh: 'wait_for',
+        body: [...Array(100)].flatMap((i) => {
+          return [
+            { index: { _index: td.sourceIndexOrSavedSearch } },
+            {
+              '@timestamp': '2016-02-09T16:19:59.000Z',
+              '@version': i,
+              airline: 'UAL',
+              custom_field: 'deviation',
+              responsetime: 10,
+              type: 'farequote',
+            },
+          ];
+        }),
+      });
+    } catch (e) {
+      log.error(`Failed to do index post processing: ${e}`);
+    }
+  },
   expected: {
     totalDocCountFormatted: '86,374',
     analysisGroupsTable: [
@@ -44,7 +81,7 @@ const ES_INDEX = 'aiops_frequent_items_test';
 const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
 const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
-export const artificialLogDataViewTestData: TestDataGenerated = {
+export const artificialLogDataViewTestData: TestData = {
   suiteTitle: 'artificial index pattern',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'aiops_frequent_items_test',
@@ -56,20 +93,25 @@ export const artificialLogDataViewTestData: TestDataGenerated = {
   expected: {
     totalDocCountFormatted: '8,400',
     analysisGroupsTable: [
-      { group: 'user: Peter', docCount: '2081' },
-      { group: 'response_code: 500url: login.php', docCount: '834' },
+      { group: 'user: Peter', docCount: '1981' },
+      { group: 'response_code: 500url: login.php', docCount: '792' },
     ],
     analysisTable: [
       {
         fieldName: 'user',
         fieldValue: 'Peter',
         logRate: 'Chart type:bar chart',
-        pValue: '2.78e-22',
+        pValue: '2.75e-21',
         impact: 'High',
       },
     ],
   },
 };
+
+export const explainLogRateSpikesTestData: TestData[] = [
+  farequoteDataViewTestData,
+  artificialLogDataViewTestData,
+];
 
 function getArtificialLogsBulkBody() {
   const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'] = [];
