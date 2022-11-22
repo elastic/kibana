@@ -51,6 +51,10 @@ export const getListRules = async (listId: string) => {
     const abortCtrl = new AbortController();
     const { data: rules } = await fetchRules({
       signal: abortCtrl.signal,
+      pagination: {
+        page: 1,
+        perPage: 10000,
+      },
     });
     abortCtrl.abort();
     return rules.reduce((acc: Rule[], rule, index) => {
