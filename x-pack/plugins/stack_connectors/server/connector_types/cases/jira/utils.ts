@@ -6,7 +6,7 @@
  */
 
 // These characters need to be escaped per Jira's search syntax, see for more details: https://confluence.atlassian.com/jirasoftwareserver/search-syntax-for-text-fields-939938747.html
-export const JQL_SPECIAL_CHARACTERS_REGEX = /[-!^+&*()[\]\\/{}|:?~]/;
+export const JQL_SPECIAL_CHARACTERS_REGEX = /[-!^+&*()[\]/{}|:?~]/;
 
 const DOUBLE_BACKSLASH_REGEX = '\\\\$&';
 

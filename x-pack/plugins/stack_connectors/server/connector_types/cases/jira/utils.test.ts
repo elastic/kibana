@@ -12,7 +12,7 @@ describe('escapeJqlSpecialCharacters', () => {
     const str = '[th!s^is()a-te+st-{~is*s&ue?or|and\\bye:}]"}]';
     const escapedStr = escapeJqlSpecialCharacters(str);
     expect(escapedStr).toEqual(
-      '\\\\[th\\\\!s\\\\^is\\\\(\\\\)a\\\\-te\\\\+st\\\\-\\\\{\\\\~is\\\\*s\\\\&ue\\\\?or\\\\|and\\\\\\\\\\\\bye\\\\:\\\\}\\\\]\\\\}\\\\]'
+      '\\\\[th\\\\!s\\\\^is\\\\(\\\\)a\\\\-te\\\\+st\\\\-\\\\{\\\\~is\\\\*s\\\\&ue\\\\?or\\\\|and\\\\bye\\\\:\\\\}\\\\]\\\\}\\\\]'
     );
   });
 
@@ -25,13 +25,13 @@ describe('escapeJqlSpecialCharacters', () => {
   it('should replace single quotes with backslash', () => {
     const str = "Javascript's beauty is simplicity!";
     const escapedStr = escapeJqlSpecialCharacters(str);
-    expect(escapedStr).toEqual('Javascript\\\\\\\\\\\\s beauty is simplicity\\\\!');
+    expect(escapedStr).toEqual('Javascript\\\\s beauty is simplicity\\\\!');
   });
 
   it('should replace single backslash with four backslash', () => {
     const str = '\\I have one backslash';
     const escapedStr = escapeJqlSpecialCharacters(str);
-    expect(escapedStr).toEqual('\\\\\\\\\\\\I have one backslash');
+    expect(escapedStr).toEqual('\\\\I have one backslash');
   });
 
   it('should not escape other special characters', () => {
