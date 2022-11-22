@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import { Boom } from '@hapi/boom';
-import type { SavedObjectsBulkDeleteObject, SavedObjectsFindResponse } from '@kbn/core/server';
-import type { CommentAttributes } from '../../../common/api';
+import type { SavedObjectsBulkDeleteObject } from '@kbn/core/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-  MAX_CONCURRENT_SEARCHES,
 } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
