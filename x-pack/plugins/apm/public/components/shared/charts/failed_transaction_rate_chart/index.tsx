@@ -49,6 +49,10 @@ const INITIAL_STATE: ErrorRate = {
   },
 };
 
+export const errorRateI18n = i18n.translate('xpack.apm.errorRate.tip', {
+  defaultMessage:
+    "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+});
 export function FailedTransactionRateChart({
   height,
   showAnnotations = true,
@@ -154,13 +158,7 @@ export function FailedTransactionRateChart({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiIconTip
-            content={i18n.translate('xpack.apm.errorRate.tip', {
-              defaultMessage:
-                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
-            })}
-            position="right"
-          />
+          <EuiIconTip content={errorRateI18n} position="right" />
         </EuiFlexItem>
       </EuiFlexGroup>
 

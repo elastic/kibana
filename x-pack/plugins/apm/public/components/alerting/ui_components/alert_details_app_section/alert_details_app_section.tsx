@@ -46,6 +46,7 @@ import {
 import { AlertDetailsAppSectionProps } from './types';
 import { getAggsTypeFromRule } from './helpers';
 import { filterNil } from '../../../shared/charts/latency_chart';
+import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 
 export function AlertDetailsAppSection({
   rule,
@@ -417,13 +418,7 @@ export function AlertDetailsAppSection({
                   </EuiFlexItem>
 
                   <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      content={i18n.translate('xpack.apm.errorRate.tip', {
-                        defaultMessage:
-                          "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
-                      })}
-                      position="right"
-                    />
+                    <EuiIconTip content={errorRateI18n} position="right" />
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
