@@ -202,7 +202,6 @@ describe('syncLabelPositionWithMb', () => {
         return false;
       };
       labelPosition.syncLabelPositionWithMb('layerId', mockMbMap);
-      // console.log(JSON.stringify(layoutProperties['text-offset'], null, ' '));
       expect(layoutProperties).toEqual({
         'text-anchor': 'bottom',
         'text-offset': [
@@ -323,7 +322,6 @@ describe('syncLabelPositionWithMb', () => {
         return false;
       };
       labelPosition.syncLabelPositionWithMb('layerId', mockMbMap);
-      // console.log(JSON.stringify(layoutProperties['text-offset'], null, ' '));
       expect(layoutProperties).toEqual({
         'text-anchor': 'top',
         'text-offset': [
