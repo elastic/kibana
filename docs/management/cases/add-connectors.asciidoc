@@ -20,7 +20,7 @@ appropriate {kib} feature privileges. Refer to <<setup-cases>>.
 [[create-case-connectors]]
 == Create connectors
 
-You can create connectors in *Management > {stack-manage-app} > {rules-ui}*, as
+You can create connectors in *Management > {stack-manage-app} > {rac-ui}*, as
 described in <<action-types>>. Alternatively, you can create them in
 *Management > {stack-manage-app} > Cases*:
 
