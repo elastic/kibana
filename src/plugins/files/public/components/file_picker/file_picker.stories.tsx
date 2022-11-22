@@ -9,7 +9,7 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { base64dLogo } from './file_picker.stories.constants';
+import { base64dLogo } from '@kbn/shared-ux-file-image-mocks';
 import type { FileJSON, FileImageMetadata } from '../../../common';
 import { FilesClient, FilesClientResponses } from '../../types';
 import { register } from '../stories_shared';

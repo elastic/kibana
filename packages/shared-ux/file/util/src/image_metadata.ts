@@ -7,7 +7,7 @@
  */
 
 import * as bh from 'blurhash';
-import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
+import type { FileImageMetadata } from '@kbn/shared-ux-file-image-types';
 
 export function isImage(file: { type?: string }): boolean {
   return Boolean(file.type?.startsWith('image/'));
