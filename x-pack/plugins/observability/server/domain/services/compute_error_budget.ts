@@ -63,7 +63,7 @@ function computeForCalendarAlignedWithOccurrences(slo: SLO, sliData: IndicatorDa
 
   const consumedErrorBudget =
     (total - good) / (totalEventsEstimatedAtPeriodEnd * initialErrorBudget);
-  return toErrorBudget(initialErrorBudget, consumedErrorBudget);
+  return toErrorBudget(initialErrorBudget, consumedErrorBudget, true);
 }
 
 function computeForCalendarAlignedWithTimeslices(slo: SLO, sliData: IndicatorData) {
@@ -80,10 +80,15 @@ function computeForCalendarAlignedWithTimeslices(slo: SLO, sliData: IndicatorDat
   return toErrorBudget(initialErrorBudget, consumedErrorBudget);
 }
 
-function toErrorBudget(initial: number, consumed: number): ErrorBudget {
+function toErrorBudget(
+  initial: number,
+  consumed: number,
+  isEstimated: boolean = false
+): ErrorBudget {
   return {
     initial: toHighPrecision(initial),
     consumed: toHighPrecision(consumed),
     remaining: Math.max(toHighPrecision(1 - consumed), 0),
+    is_estimated: isEstimated,
   };
 }

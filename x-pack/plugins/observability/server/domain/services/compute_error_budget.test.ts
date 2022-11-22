@@ -32,6 +32,7 @@ describe('computeErrorBudget', () => {
           initial: 0.05,
           consumed: 0.6,
           remaining: 0.4,
+          is_estimated: false,
         });
       });
     });
@@ -55,6 +56,7 @@ describe('computeErrorBudget', () => {
           initial: 0.05,
           consumed: 0.184524,
           remaining: 0.815476,
+          is_estimated: false,
         });
       });
     });
@@ -79,6 +81,7 @@ describe('computeErrorBudget', () => {
           initial: 0.05,
           consumed: 0.171429,
           remaining: 0.828571,
+          is_estimated: true,
         });
       });
     });
@@ -105,6 +108,7 @@ describe('computeErrorBudget', () => {
           initial: 0.05,
           consumed: 0.113095,
           remaining: 0.886905,
+          is_estimated: false,
         });
       });
     });
@@ -119,6 +123,7 @@ describe('computeErrorBudget', () => {
       initial: 0.001, // 0.1%
       consumed: 0, // 0% consumed
       remaining: 1, // 100% remaining
+      is_estimated: false,
     });
   });
 
@@ -131,6 +136,7 @@ describe('computeErrorBudget', () => {
       initial: 0.001,
       consumed: 0,
       remaining: 1,
+      is_estimated: false,
     });
   });
 
@@ -143,6 +149,7 @@ describe('computeErrorBudget', () => {
       initial: 0.001,
       consumed: 0,
       remaining: 1,
+      is_estimated: false,
     });
   });
 
@@ -155,6 +162,7 @@ describe('computeErrorBudget', () => {
       initial: 0.001,
       consumed: 1,
       remaining: 0,
+      is_estimated: false,
     });
   });
 
@@ -167,6 +175,7 @@ describe('computeErrorBudget', () => {
       initial: 0.001,
       consumed: 571.428571, // i.e. 57,142% consumed
       remaining: 0,
+      is_estimated: false,
     });
   });
 
@@ -179,6 +188,7 @@ describe('computeErrorBudget', () => {
       initial: 0.001,
       consumed: 1000, // i.e. 100,000% consumed
       remaining: 0,
+      is_estimated: false,
     });
   });
 });
