@@ -47,7 +47,7 @@ export class Cache {
       overlappingSync: false,
       noSync: true,
       noMetaSync: true,
-      noMemInit: true
+      noMemInit: true,
     });
 
     // TODO: redundant 'name' syntax is necessary because of a bug that I have yet to fix
