@@ -14,7 +14,6 @@ import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../..
 import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getTrailingBreadcrumbs as geExceptionsBreadcrumbs } from '../../../../exceptions/utils/pages.utils';
-import { getTrailingBreadcrumbs as getCSPBreadcrumbs } from '../../../../cloud_security_posture/breadcrumbs';
 import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
 import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
 import { getTrailingBreadcrumbs as getAlertDetailBreadcrumbs } from '../../../../detections/pages/alert_details/utils/breadcrumbs';
@@ -136,10 +135,6 @@ const getTrailingBreadcrumbsForRoutes = (
     return getAlertDetailBreadcrumbs(spyState, getSecuritySolutionUrl);
   }
 
-  if (isCloudSecurityPostureBenchmarksRoutes(spyState)) {
-    return getCSPBreadcrumbs(spyState, getSecuritySolutionUrl);
-  }
-
   return [];
 };
 
@@ -166,9 +161,6 @@ const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRoute
 
 const isExceptionRoutes = (spyState: RouteSpyState) =>
   spyState.pageName === SecurityPageName.exceptions;
-
-const isCloudSecurityPostureBenchmarksRoutes = (spyState: RouteSpyState) =>
-  spyState.pageName === SecurityPageName.cloudSecurityPostureBenchmarks;
 
 const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
   const leadingBreadCrumbs = breadcrumbs.slice(0, -1);
