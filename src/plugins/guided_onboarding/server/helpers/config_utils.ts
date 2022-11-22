@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-export {
-  findActiveGuide,
-  findAllGuides,
-  findGuideById,
-  updateGuideState,
-} from './guide_state_utils';
-export { updatePluginStatus, calculateIsActivePeriod, getPluginState } from './plugin_state_utils';
-export { getGuideConfig } from './config_utils';
+import { GuideId } from '@kbn/guided-onboarding';
+import { GuideConfig } from '../../common/types';
+import { guidesConfig } from './guides_config';
+
+export const getGuideConfig = (guideId?: GuideId): GuideConfig | undefined => {
+  if (guideId && Object.keys(guidesConfig).includes(guideId)) {
+    return guidesConfig[guideId];
+  }
+};
