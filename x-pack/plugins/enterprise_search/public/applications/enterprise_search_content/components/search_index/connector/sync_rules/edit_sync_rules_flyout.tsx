@@ -15,12 +15,13 @@ import {
   EuiText,
   EuiTabbedContent,
   EuiTabbedContentTab,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AdvancedFilteringRules } from './advanced_filtering_rules';
-import { EditFilteringTab } from './edit_filtering_tab';
-import { FilteringRulesTable } from './editable_filtering_rules_table';
+import { AdvancedSyncRules } from './advanced_sync_rules';
+import { EditSyncRulesTab } from './edit_sync_rules_tab';
+import { SyncRulesTable } from './editable_basic_rules_table';
 
 interface EditFilteringFlyoutProps {
   hasAdvancedFilteringFeature: boolean;
@@ -35,7 +36,7 @@ enum FilteringTabs {
   ADVANCED = 'advanced',
 }
 
-export const EditFilteringFlyout: React.FC<EditFilteringFlyoutProps> = ({
+export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
   hasAdvancedFilteringFeature,
   hasBasicFilteringFeature,
   revertLocalFilteringRules,
@@ -47,15 +48,15 @@ export const EditFilteringFlyout: React.FC<EditFilteringFlyoutProps> = ({
       ? [
           {
             content: (
-              <EditFilteringTab revertAction={revertLocalFilteringRules}>
-                <FilteringRulesTable />
-              </EditFilteringTab>
+              <EditSyncRulesTab revertAction={revertLocalFilteringRules}>
+                <SyncRulesTable />
+              </EditSyncRulesTab>
             ),
             id: FilteringTabs.BASIC,
             name: i18n.translate(
-              'xpack.enterpriseSearch.content.index.connector.filtering.basicTabTitle',
+              'xpack.enterpriseSearch.content.index.connector.syncRules.basicTabTitle',
               {
-                defaultMessage: 'Basic filters',
+                defaultMessage: 'Basic rules',
               }
             ),
           },
@@ -65,15 +66,15 @@ export const EditFilteringFlyout: React.FC<EditFilteringFlyoutProps> = ({
       ? [
           {
             content: (
-              <EditFilteringTab revertAction={revertLocalAdvancedFiltering}>
-                <AdvancedFilteringRules />
-              </EditFilteringTab>
+              <EditSyncRulesTab revertAction={revertLocalAdvancedFiltering}>
+                <AdvancedSyncRules />
+              </EditSyncRulesTab>
             ),
             id: FilteringTabs.ADVANCED,
             name: i18n.translate(
-              'xpack.enterpriseSearch.content.index.connector.filtering.advancedTabTitle',
+              'xpack.enterpriseSearch.content.index.connector.syncRules.advancedTabTitle',
               {
-                defaultMessage: 'Advanced filters',
+                defaultMessage: 'Advanced rules',
               }
             ),
           },
@@ -82,28 +83,24 @@ export const EditFilteringFlyout: React.FC<EditFilteringFlyoutProps> = ({
   ];
 
   return (
-    <EuiFlyout
-      ownFocus
-      onClose={() => setIsEditing(false)}
-      aria-labelledby="filteringFlyout"
-      size="l"
-    >
+    <EuiFlyout ownFocus onClose={() => setIsEditing(false)} aria-labelledby="rulesFlyout" size="l">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2 id="filteringFlyout">
+          <h2 id="rulesFlyout">
             {i18n.translate(
-              'xpack.enterpriseSearch.content.index.connector.filtering.flyout.title',
+              'xpack.enterpriseSearch.content.index.connector.syncRules.flyout.title',
               {
                 defaultMessage: 'Draft rules',
               }
             )}
           </h2>
         </EuiTitle>
+        <EuiSpacer />
         <EuiText size="s">
           {i18n.translate(
-            'xpack.enterpriseSearch.content.index.connector.filtering.flyout.description',
+            'xpack.enterpriseSearch.content.index.connector.syncRules.flyout.description',
             {
-              defaultMessage: 'Plan and edit filters here before applying them to the next sync.',
+              defaultMessage: 'Plan and edit rules here before applying them to the next sync.',
             }
           )}
         </EuiText>

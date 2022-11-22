@@ -189,7 +189,12 @@ function renderPopoverContent({
   );
   if (useTopLevelObjectColumns || field?.type === '_source') {
     return (
-      <EuiFlexGroup gutterSize="none" direction="column" justifyContent="flexEnd">
+      <EuiFlexGroup
+        gutterSize="none"
+        direction="column"
+        justifyContent="flexEnd"
+        className="dscDiscoverGrid__cellPopover"
+      >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
             <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>

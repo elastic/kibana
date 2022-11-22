@@ -15,23 +15,23 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 
-export const AdvancedFilteringRules: React.FC = () => {
+export const AdvancedSyncRules: React.FC = () => {
   const { hasJsonValidationError: hasError, localAdvancedSnippet } =
     useValues(ConnectorFilteringLogic);
   const { setLocalAdvancedSnippet } = useActions(ConnectorFilteringLogic);
   return (
     <EuiFormRow
       label={i18n.translate(
-        'xpack.enterpriseSearch.content.indices.connector.filtering.advancedRules.title',
+        'xpack.enterpriseSearch.content.indices.connector.syncRules.advancedRules.title',
         {
-          defaultMessage: 'Advanced filtering rules',
+          defaultMessage: 'Advanced rules',
         }
       )}
       isInvalid={hasError}
       error={
         hasError
           ? i18n.translate(
-              'xpack.enterpriseSearch.content.indices.connector.filtering.advancedRules.error',
+              'xpack.enterpriseSearch.content.indices.connector.syncRules.advancedRules.error',
               {
                 defaultMessage: 'JSON format is invalid',
               }
