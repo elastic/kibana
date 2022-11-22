@@ -41,26 +41,16 @@ export const CREATED_WORD = i18n.translate('xpack.observability.ruleDetails.crea
   defaultMessage: 'Created',
 });
 
-export const confirmModalText = (
-  numIdsToDelete: number,
-  singleTitle: string,
-  multipleTitle: string
-) =>
+export const confirmDeleteModalText = (title: string) =>
   i18n.translate('xpack.observability.rules.deleteSelectedIdsConfirmModal.descriptionText', {
-    defaultMessage:
-      "You can't recover {numIdsToDelete, plural, one {a deleted {singleTitle}} other {deleted {multipleTitle}}}.",
-    values: { numIdsToDelete, singleTitle, multipleTitle },
+    defaultMessage: "You can't recover {title} after deleting.",
+    values: { title },
   });
 
-export const confirmButtonText = (
-  numIdsToDelete: number,
-  singleTitle: string,
-  multipleTitle: string
-) =>
+export const confirmDeleteButtonText = (title: string) =>
   i18n.translate('xpack.observability.rules.deleteSelectedIdsConfirmModal.deleteButtonLabel', {
-    defaultMessage:
-      'Delete {numIdsToDelete, plural, one {{singleTitle}} other {# {multipleTitle}}} ',
-    values: { numIdsToDelete, singleTitle, multipleTitle },
+    defaultMessage: 'Delete {title}',
+    values: { title },
   });
 
 export const cancelButtonText = i18n.translate(
@@ -70,22 +60,16 @@ export const cancelButtonText = i18n.translate(
   }
 );
 
-export const deleteSuccessText = (
-  numSuccesses: number,
-  singleTitle: string,
-  multipleTitle: string
-) =>
+export const deleteSuccessText = (title: string) =>
   i18n.translate('xpack.observability.rules.deleteSelectedIdsSuccessNotification.descriptionText', {
-    defaultMessage:
-      'Deleted {numSuccesses, number} {numSuccesses, plural, one {{singleTitle}} other {{multipleTitle}}}',
-    values: { numSuccesses, singleTitle, multipleTitle },
+    defaultMessage: 'Deleted {title}',
+    values: { title },
   });
 
-export const deleteErrorText = (numErrors: number, singleTitle: string, multipleTitle: string) =>
+export const deleteErrorText = (title: string) =>
   i18n.translate('xpack.observability.rules.deleteSelectedIdsErrorNotification.descriptionText', {
-    defaultMessage:
-      'Failed to delete {numErrors, number} {numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}',
-    values: { numErrors, singleTitle, multipleTitle },
+    defaultMessage: 'Failed to delete {title}',
+    values: { title },
   });
 export const ALERT_STATUS_LICENSE_ERROR = i18n.translate(
   'xpack.observability.ruleDetails.ruleStatusLicenseError',
