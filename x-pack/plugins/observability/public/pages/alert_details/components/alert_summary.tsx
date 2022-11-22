@@ -162,7 +162,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
             {tags && tags.length > 0 ? (
               <EuiBadgeGroup>
                 {tags.map((tag, index) => (
-                  <EuiBadge data-test-subj={`ruleTagBadgeItem-${tag}`} key={index} color="hollow">
+                  <EuiBadge data-test-subj={`ruleTagBadge-${tag}`} key={index} color="hollow">
                     <EuiText size="s">{tag}</EuiText>
                   </EuiBadge>
                 ))}
