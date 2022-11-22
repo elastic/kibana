@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { handleNestedFilter } from './handle_nested_filter';
+import { fromNestedFilter } from './handle_nested_filter';
 import { fields } from '../filters/stubs';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
 import { DataViewBase } from './types';
 
-describe('handleNestedFilter', function () {
+describe('fromNestedFilter', function () {
   const indexPattern: DataViewBase = {
     id: 'logstash-*',
     fields,
@@ -21,7 +21,7 @@ describe('handleNestedFilter', function () {
   it("should return the filter's query wrapped in nested query if the target field is nested", () => {
     const field = getField('nestedField.child');
     const filter = buildPhraseFilter(field!, 'foo', indexPattern);
-    const result = handleNestedFilter(filter, indexPattern);
+    const result = fromNestedFilter(filter, indexPattern);
     expect(result).toEqual({
       meta: {
         index: 'logstash-*',
@@ -42,7 +42,7 @@ describe('handleNestedFilter', function () {
   it('should allow to configure ignore_unmapped', () => {
     const field = getField('nestedField.child');
     const filter = buildPhraseFilter(field!, 'foo', indexPattern);
-    const result = handleNestedFilter(filter, indexPattern, { ignoreUnmapped: true });
+    const result = fromNestedFilter(filter, indexPattern, { ignoreUnmapped: true });
     expect(result).toEqual({
       meta: {
         index: 'logstash-*',
@@ -64,7 +64,7 @@ describe('handleNestedFilter', function () {
   it('should return filter untouched if it does not target a nested field', () => {
     const field = getField('extension');
     const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
-    const result = handleNestedFilter(filter, indexPattern);
+    const result = fromNestedFilter(filter, indexPattern);
     expect(result).toBe(filter);
   });
 
@@ -75,14 +75,14 @@ describe('handleNestedFilter', function () {
       name: 'notarealfield',
     };
     const filter = buildPhraseFilter(unrealField, 'jpg', indexPattern);
-    const result = handleNestedFilter(filter, indexPattern);
+    const result = fromNestedFilter(filter, indexPattern);
     expect(result).toBe(filter);
   });
 
   it('should return filter untouched if no index pattern is provided', () => {
     const field = getField('extension');
     const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
-    const result = handleNestedFilter(filter);
+    const result = fromNestedFilter(filter);
     expect(result).toBe(filter);
   });
 
@@ -97,7 +97,7 @@ describe('handleNestedFilter', function () {
       'logstash-*',
       'foo'
     );
-    const result = handleNestedFilter(filter);
+    const result = fromNestedFilter(filter);
     expect(result).toBe(filter);
   });
 

@@ -11,7 +11,7 @@ import { DataViewBase } from './types';
 import { getDataViewFieldSubtypeNested } from '../utils';
 
 /** @internal */
-export const handleNestedFilter = (
+export const fromNestedFilter = (
   filter: Filter,
   indexPattern?: DataViewBase,
   config: { ignoreUnmapped?: boolean } = {}
