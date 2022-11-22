@@ -67,6 +67,13 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
+  taskManager.bulkEnable.mockImplementation(
+    async () =>
+      ({
+        tasks: [],
+        errors: [],
+      } as unknown as BulkUpdateTaskResult)
+  );
   (auditLogger.log as jest.Mock).mockClear();
 });
 
@@ -366,7 +373,7 @@ describe('bulkEnableRules', () => {
       taskManager.bulkEnable.mockImplementation(
         async () =>
           ({
-            tasks: [{ id: 'id1' }, { id: 'id2' }],
+            tasks: [{ id: 'id1' }],
             errors: [
               {
                 task: {
@@ -388,6 +395,9 @@ describe('bulkEnableRules', () => {
       expect(logger.debug).toBeCalledWith(
         'Successfully enabled schedules for underlying tasks: id1'
       );
+      expect(logger.error).toBeCalledTimes(1);
+      expect(logger.error).toBeCalledWith('Failure to enable schedules for underlying tasks: id2');
+
       expect(result).toStrictEqual({
         errors: [],
         rules: [updatedRule1, updatedRule2],
@@ -410,6 +420,7 @@ describe('bulkEnableRules', () => {
       expect(logger.error).toBeCalledWith(
         'Failure to enable schedules for underlying tasks: id1, id2. TaskManager bulkEnable failed with Error: UPS'
       );
+
       expect(result).toStrictEqual({
         errors: [],
         rules: [updatedRule1, updatedRule2],
@@ -448,10 +459,24 @@ describe('bulkEnableRules', () => {
         saved_objects: [successfulSavedObject1],
       });
 
+      taskManager.bulkEnable.mockImplementation(
+        async () =>
+          ({
+            tasks: [{ id: 'id1' }],
+            errors: [],
+          } as unknown as BulkUpdateTaskResult)
+      );
+
       await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
 
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1']);
+
+      expect(logger.debug).toBeCalledTimes(1);
+      expect(logger.debug).toBeCalledWith(
+        'Successfully enabled schedules for underlying tasks: id1'
+      );
+      expect(logger.error).toBeCalledTimes(0);
     });
   });
 

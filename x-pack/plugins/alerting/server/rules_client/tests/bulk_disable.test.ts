@@ -414,10 +414,21 @@ describe('bulkDisableRules', () => {
         saved_objects: [successfulSavedObject1, savedObjectWith500Error],
       });
 
+      taskManager.bulkDisable.mockResolvedValue({
+        tasks: [{ id: 'id1' }],
+        errors: [],
+      } as unknown as BulkUpdateTaskResult);
+
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
+
+      expect(logger.debug).toBeCalledTimes(1);
+      expect(logger.debug).toBeCalledWith(
+        'Successfully disabled schedules for underlying tasks: id1'
+      );
+      expect(logger.error).toBeCalledTimes(0);
     });
 
     test('should disable one task if one rule was successfully disabled and one was disabled from beginning', async () => {

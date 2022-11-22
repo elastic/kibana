@@ -2674,11 +2674,20 @@ export class RulesClient {
         resultFromEnablingTasks?.errors?.forEach((error) => {
           taskIdsFailedToBeEnabled.push(error.task.id);
         });
-        this.logger.debug(
-          `Successfully enabled schedules for underlying tasks: ${taskIdsToEnable
-            .filter((id) => !taskIdsFailedToBeEnabled.includes(id))
-            .join(', ')}`
-        );
+        if (resultFromEnablingTasks.tasks.length) {
+          this.logger.debug(
+            `Successfully enabled schedules for underlying tasks: ${resultFromEnablingTasks.tasks
+              .map((task) => task.id)
+              .join(', ')}`
+          );
+        }
+        if (resultFromEnablingTasks.errors.length) {
+          this.logger.error(
+            `Failure to enable schedules for underlying tasks: ${resultFromEnablingTasks.errors
+              .map((error) => error.task.id)
+              .join(', ')}`
+          );
+        }
       } catch (error) {
         taskIdsFailedToBeEnabled.push(...taskIdsToEnable);
         this.logger.error(
@@ -2902,16 +2911,20 @@ export class RulesClient {
     if (taskIdsToDisable.length > 0) {
       try {
         const resultFromDisablingTasks = await this.taskManager.bulkDisable(taskIdsToDisable);
-        this.logger.debug(
-          `Successfully disabled schedules for underlying tasks: ${resultFromDisablingTasks.tasks
-            .map((task) => task.id)
-            .join(', ')}`
-        );
-        this.logger.error(
-          `Failure to disable schedules for underlying tasks: ${resultFromDisablingTasks.errors
-            .map((error) => error.task.id)
-            .join(', ')}`
-        );
+        if (resultFromDisablingTasks.tasks.length) {
+          this.logger.debug(
+            `Successfully disabled schedules for underlying tasks: ${resultFromDisablingTasks.tasks
+              .map((task) => task.id)
+              .join(', ')}`
+          );
+        }
+        if (resultFromDisablingTasks.errors.length) {
+          this.logger.error(
+            `Failure to disable schedules for underlying tasks: ${resultFromDisablingTasks.errors
+              .map((error) => error.task.id)
+              .join(', ')}`
+          );
+        }
       } catch (error) {
         this.logger.error(
           `Failure to disable schedules for underlying tasks: ${taskIdsToDisable.join(
@@ -2934,14 +2947,20 @@ export class RulesClient {
             taskIdsFailedToBeDeleted.push(status.id);
           }
         });
-        this.logger.debug(
-          `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
-            ', '
-          )}`
-        );
-        this.logger.error(
-          `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(', ')}`
-        );
+        if (taskIdsSuccessfullyDeleted.length) {
+          this.logger.debug(
+            `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
+              ', '
+            )}`
+          );
+        }
+        if (taskIdsFailedToBeDeleted.length) {
+          this.logger.error(
+            `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(
+              ', '
+            )}`
+          );
+        }
       } catch (error) {
         this.logger.error(
           `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
