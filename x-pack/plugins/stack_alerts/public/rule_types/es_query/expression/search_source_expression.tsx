@@ -38,7 +38,9 @@ export const SearchSourceExpression = ({
     savedQueryId,
     searchConfiguration,
     aggType,
+    aggField,
     groupBy,
+    termField,
     termSize,
     excludeHitsFromPreviousRun,
   } = ruleParams;
@@ -77,7 +79,9 @@ export const SearchSourceExpression = ({
         thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
         size: size ?? DEFAULT_VALUES.SIZE,
         aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
+        aggField,
         groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
+        termField,
         termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
         excludeHitsFromPreviousRun:
           excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
