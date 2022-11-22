@@ -74,7 +74,7 @@ export const useBulkActions = ({
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
-    actions: { setLoadingRules, clearRulesSelection, setIsPreflightInProgress },
+    actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
 
   const getBulkItemsPopoverContent = useCallback(
