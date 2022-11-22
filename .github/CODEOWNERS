@@ -64,7 +64,7 @@
 /examples/field_formats_example/ @elastic/kibana-app-services
 /examples/partial_results_example/ @elastic/kibana-app-services
 /examples/search_examples/ @elastic/kibana-app-services
-/src/plugins/data/ @elastic/kibana-visualizations  @elastic/kibana-data-discovery
+/src/plugins/data/ @elastic/kibana-visualizations @elastic/kibana-data-discovery
 /src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/field_formats/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
