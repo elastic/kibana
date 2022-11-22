@@ -10,7 +10,8 @@ import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 export interface TestData {
   testName: string;
-  esArchive: string;
+  esArchive?: string;
+  dataGenerator?: string;
   requestBody: ApiExplainLogRateSpikes['body'];
   expected: {
     chunksLength: number;
@@ -18,6 +19,7 @@ export interface TestData {
     noIndexChunksLength: number;
     noIndexActionsLength: number;
     changePointFilter: 'add_change_points';
+    groupFilter: 'add_group';
     histogramFilter: 'add_change_points_histogram';
     errorFilter: 'add_error';
     changePoints: ChangePoint[];

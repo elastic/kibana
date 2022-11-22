@@ -18,6 +18,7 @@ import { parseStream } from './parse_stream';
 import { explainLogRateSpikesTestData } from './test_data';
 
 export default ({ getService }: FtrProviderContext) => {
+  const aiops = getService('aiops');
   const supertest = getService('supertest');
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
@@ -27,11 +28,21 @@ export default ({ getService }: FtrProviderContext) => {
     explainLogRateSpikesTestData.forEach((testData) => {
       describe(`with ${testData.testName}`, () => {
         before(async () => {
-          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
+          if (testData.esArchive) {
+            await esArchiver.loadIfNeeded(testData.esArchive);
+          } else if (testData.dataGenerator) {
+            await aiops.explainLogRateSpikesDataGenerator.generateData(testData.dataGenerator);
+          }
         });
 
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
+          if (testData.esArchive) {
+            await esArchiver.unload(testData.esArchive);
+          } else if (testData.dataGenerator) {
+            await aiops.explainLogRateSpikesDataGenerator.removeGeneratedData(
+              testData.dataGenerator
+            );
+          }
         });
 
         async function requestWithoutStreaming(body: ApiExplainLogRateSpikes['body']) {
