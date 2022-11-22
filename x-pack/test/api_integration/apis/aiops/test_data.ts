@@ -7,6 +7,8 @@
 
 import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
 
+import type { TestData } from './types';
+
 const requestBody: ApiExplainLogRateSpikes['body'] = {
   baselineMax: 1561719083292,
   baselineMin: 1560954147006,
@@ -19,7 +21,7 @@ const requestBody: ApiExplainLogRateSpikes['body'] = {
   timeFieldName: 'order_date',
 };
 
-export const explainLogRateSpikesTestData = [
+export const explainLogRateSpikesTestData: TestData[] = [
   {
     testName: 'ecommerce',
     esArchive: 'x-pack/test/functional/es_archives/ml/ecommerce',
@@ -41,6 +43,8 @@ export const explainLogRateSpikesTestData = [
           score: 36.31595998561873,
           pValue: 1.6911377077437753e-16,
           normalizedScore: 0.8055203624020835,
+          total_doc_count: 0,
+          total_bg_count: 0,
         },
         {
           fieldName: 'day_of_week',
@@ -50,6 +54,8 @@ export const explainLogRateSpikesTestData = [
           score: 20.366950718358762,
           pValue: 1.428057484826135e-9,
           normalizedScore: 0.7661649691018979,
+          total_doc_count: 0,
+          total_bg_count: 0,
         },
       ],
       histogramLength: 20,
