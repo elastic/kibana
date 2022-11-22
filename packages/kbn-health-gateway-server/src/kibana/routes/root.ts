@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { chain, memoize, pick } from 'lodash';
+import { capitalize, chain, memoize, pick } from 'lodash';
 import { Agent, AgentOptions } from 'https';
 import { URL } from 'url';
 import type { Request, ResponseObject, ResponseToolkit, ServerRoute } from '@hapi/hapi';
@@ -84,11 +84,12 @@ export class RootRoute implements ServerRoute {
 
     try {
       const response = await this.fetch(url);
-      this.logger.debug(`Healthy response from ${url} with code ${response.status}`);
+      const status = RootRoute.isHealthy(response) ? 'healthy' : 'unhealthy';
+      this.logger.debug(`${capitalize(status)} response from ${url} with code ${response.status}`);
 
       return {
         host,
-        status: RootRoute.isHealthy(response) ? 'healthy' : 'unhealthy',
+        status,
         code: response.status,
       };
     } catch (error) {
