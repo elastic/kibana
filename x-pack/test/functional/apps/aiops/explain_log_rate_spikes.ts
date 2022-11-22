@@ -12,12 +12,9 @@ import type { TestData } from './types';
 import { explainLogRateSpikesTestData } from './test_data';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
-  const es = getService('es');
   const headerPage = getPageObject('header');
   const elasticChart = getService('elasticChart');
-  const esArchiver = getService('esArchiver');
   const aiops = getService('aiops');
-  const log = getService('log');
 
   // aiops / Explain Log Rate Spikes lives in the ML UI so we need some related services.
   const ml = getService('ml');
@@ -162,51 +159,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
   }
 
-  describe('explain log rate spikes', function () {
-    this.tags(['aiops']);
-    explainLogRateSpikesTestData.forEach((testData) => {
+  describe('explain log rate spikes', async function () {
+    for (const testData of explainLogRateSpikesTestData) {
       describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {
-          if (testData.esArchive) {
-            await esArchiver.loadIfNeeded(testData.esArchive);
-          } else if (testData.bulkBody) {
-            try {
-              await es.indices.delete({
-                index: testData.sourceIndexOrSavedSearch,
-              });
-            } catch (e) {
-              log.error(
-                `Error deleting index '${testData.sourceIndexOrSavedSearch}' in before() callback`
-              );
-            }
-
-            // Create index with mapping
-            await es.indices.create({
-              index: testData.sourceIndexOrSavedSearch,
-              mappings: {
-                properties: {
-                  user: { type: 'keyword' },
-                  response_code: { type: 'keyword' },
-                  url: { type: 'keyword' },
-                  version: { type: 'keyword' },
-                  '@timestamp': { type: 'date' },
-                },
-              },
-            });
-
-            await es.bulk({
-              refresh: 'wait_for',
-              body: testData.bulkBody,
-            });
-          } else {
-            log.error(
-              `Could not preprare source data, either 'esArchive' or 'bulkBody' needs to be defined.`
-            );
-          }
-
-          if (testData.postProcessIndex) {
-            await testData.postProcessIndex(es, testData, log);
-          }
+          await aiops.explainLogRateSpikesDataGenerator.generateData(testData.dataGenerator);
 
           await ml.testResources.createIndexPatternIfNeeded(
             testData.sourceIndexOrSavedSearch,
@@ -222,23 +179,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           await elasticChart.setNewChartUiDebugFlag(false);
           await ml.testResources.deleteIndexPatternByTitle(testData.sourceIndexOrSavedSearch);
 
-          if (testData.esArchive) {
-            await esArchiver.unload(testData.esArchive);
-          } else if (testData.bulkBody) {
-            try {
-              await es.indices.delete({
-                index: testData.sourceIndexOrSavedSearch,
-              });
-            } catch (e) {
-              log.error(
-                `Error deleting index '${testData.sourceIndexOrSavedSearch}' in after() callback`
-              );
-            }
-          } else {
-            log.error(
-              `Could not clean up source data, either 'esArchive' or 'bulkBody' needs to be defined.`
-            );
-          }
+          await aiops.explainLogRateSpikesDataGenerator.removeGeneratedData(testData.dataGenerator);
         });
 
         it(`${testData.suiteTitle} loads the explain log rate spikes page`, async () => {
@@ -249,6 +190,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
         runTests(testData);
       });
-    });
+    }
   });
 }
