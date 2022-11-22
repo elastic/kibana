@@ -7,7 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { METRICSET_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export async function getSearchServiceMetrics({

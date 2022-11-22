@@ -644,7 +644,7 @@ export const RulesList = ({
         key="action-type-filter"
         actionTypes={actionTypes}
         onChange={setActionTypesFilter}
-        filters={typesFilter}
+        filters={actionTypesFilter}
       />
     ),
     ...getRuleOutcomeOrStatusFilter(),
