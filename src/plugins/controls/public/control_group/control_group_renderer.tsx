@@ -8,7 +8,7 @@
 
 import uuid from 'uuid';
 import useLifecycles from 'react-use/lib/useLifecycles';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 
@@ -17,28 +17,32 @@ import { ControlPanelState, getDefaultControlGroupInput } from '../../common';
 import { ControlGroupInput, ControlGroupOutput, CONTROL_GROUP_TYPE } from './types';
 import { ControlGroupContainer } from './embeddable/control_group_container';
 import { DataControlInput } from '../types';
+import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
 
 const ControlGroupInputBuilder = {
-  addDataControlFromField: (
+  addDataControlFromField: async (
     initialInput: Partial<ControlGroupInput>,
     newPanelInput: {
-      panelId?: string;
       dataViewId: string;
       fieldName: string;
+      panelId?: string;
       title?: string;
     }
   ) => {
+    const { defaultControlGrow, defaultControlWidth } = getDefaultControlGroupInput();
     const { panelId, dataViewId, fieldName, title } = newPanelInput;
-    console.log('here');
-    const newPanelId = panelId ?? uuid.v4();
+    const newPanelId = panelId || uuid.v4();
+    const nextOrder = getNextPanelOrder(initialInput);
+    const controlType = await getCompatibleControlType({ dataViewId, fieldName });
+
     initialInput.panels = {
       ...initialInput.panels,
       [newPanelId]: {
         explicitInput: { id: newPanelId, dataViewId, fieldName, title: title ?? fieldName },
-        grow: true,
-        order: 0,
-        type: 'optionsListControl',
-        width: 'medium',
+        grow: initialInput.defaultControlGrow || defaultControlGrow,
+        order: nextOrder,
+        type: controlType,
+        width: initialInput.defaultControlWidth || defaultControlWidth,
       } as ControlPanelState<DataControlInput>,
     };
   },
@@ -47,7 +51,9 @@ const ControlGroupInputBuilder = {
 export interface ControlGroupRendererProps {
   // input?: Partial<Pick<ControlGroupInput, 'viewMode' | 'executionContext'>>;
   onEmbeddableLoad: (controlGroupContainer: ControlGroupContainer) => void;
-  getCreationOptions: (builder: typeof ControlGroupInputBuilder) => Partial<ControlGroupInput>;
+  getCreationOptions: (
+    builder: typeof ControlGroupInputBuilder
+  ) => Promise<Partial<ControlGroupInput>>;
 }
 
 export const ControlGroupRenderer = ({
@@ -72,7 +78,7 @@ export const ControlGroupRenderer = ({
         const container = (await factory?.create({
           id,
           ...getDefaultControlGroupInput(),
-          ...getCreationOptions(ControlGroupInputBuilder),
+          ...(await getCreationOptions(ControlGroupInputBuilder)),
         })) as ControlGroupContainer;
 
         if (controlsRoot.current) {

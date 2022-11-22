@@ -16,6 +16,7 @@ import {
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel } from '@elastic/eui';
+import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 
 interface Props {
   dataView: DataView;
@@ -31,13 +32,16 @@ export const ControlGroupExample = ({ dataView }: Props) => {
         onEmbeddableLoad={async (controlGroup) => {
           setControlGroup(controlGroup);
         }}
-        getCreationOptions={(controlGroupInputBuilder) => {
-          const initialInput: Partial<ControlGroupInput> = { controlStyle: 'twoLine' };
-          controlGroupInputBuilder.addDataControlFromField(initialInput, {
+        getCreationOptions={async (controlGroupInputBuilder) => {
+          const initialInput: Partial<ControlGroupInput> = getDefaultControlGroupInput();
+          await controlGroupInputBuilder.addDataControlFromField(initialInput, {
             dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
             fieldName: 'customer_first_name.keyword',
           });
-          console.log(initialInput);
+          await controlGroupInputBuilder.addDataControlFromField(initialInput, {
+            dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
+            fieldName: 'customer_last_name.keyword',
+          });
           return initialInput;
         }}
       />

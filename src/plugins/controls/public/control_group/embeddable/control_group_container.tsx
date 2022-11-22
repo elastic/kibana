@@ -44,7 +44,7 @@ import { ControlEmbeddable, ControlInput, ControlOutput, DataControlInput } from
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
 import { TIME_SLIDER_CONTROL } from '../../time_slider';
-import { getDataControlFieldRegistry } from '../editor/data_control_editor_tools';
+import { getCompatibleControlType, getNextPanelOrder } from './control_group_helpers';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -103,11 +103,7 @@ export class ControlGroupContainer extends Container<
     fieldName: string;
     title?: string;
   }) {
-    console.log('before', this.input);
-    const dataView = await pluginServices.getServices().dataViews.get(dataViewId);
-    const fieldRegistry = await getDataControlFieldRegistry(dataView);
-    const field = fieldRegistry[fieldName];
-    return this.addNewEmbeddable(field.compatibleControlTypes[0], {
+    return this.addNewEmbeddable(await getCompatibleControlType({ dataViewId, fieldName }), {
       id: uuid,
       dataViewId,
       fieldName,
@@ -317,14 +313,7 @@ export class ControlGroupContainer extends Container<
     partial: Partial<TEmbeddableInput> = {}
   ): ControlPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
-    let nextOrder = 0;
-    if (Object.keys(this.getInput().panels).length > 0) {
-      nextOrder =
-        Object.values(this.getInput().panels).reduce((highestSoFar, panel) => {
-          if (panel.order > highestSoFar) highestSoFar = panel.order;
-          return highestSoFar;
-        }, 0) + 1;
-    }
+    const nextOrder = getNextPanelOrder(this.getInput());
     return {
       order: nextOrder,
       width:
