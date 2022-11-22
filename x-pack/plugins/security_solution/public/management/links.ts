@@ -273,16 +273,21 @@ export const getManagementFilteredLinks = async (
     );
   }
 
-  const { canReadActionsLogManagement, canReadHostIsolationExceptions } = fleetAuthz
-    ? calculateEndpointAuthz(
-        licenseService,
-        fleetAuthz,
-        currentUser.roles,
-        isEndpointRbacEnabled,
-        endpointPermissions,
-        hasHostIsolationExceptions
-      )
-    : getEndpointAuthzInitialState();
+  const { canReadActionsLogManagement, canReadHostIsolationExceptions, canReadEndpointList } =
+    fleetAuthz
+      ? calculateEndpointAuthz(
+          licenseService,
+          fleetAuthz,
+          currentUser.roles,
+          isEndpointRbacEnabled,
+          endpointPermissions,
+          hasHostIsolationExceptions
+        )
+      : getEndpointAuthzInitialState();
+
+  if (!canReadEndpointList) {
+    linksToExclude.push(SecurityPageName.endpoints);
+  }
 
   if (!canReadActionsLogManagement) {
     linksToExclude.push(SecurityPageName.responseActionsHistory);
