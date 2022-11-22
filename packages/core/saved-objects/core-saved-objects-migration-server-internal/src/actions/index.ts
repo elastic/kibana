@@ -83,7 +83,7 @@ export { checkTargetMappings } from './check_target_mappings';
 
 export { updateTargetMappingsMeta } from './update_target_mappings_meta';
 
-export const noop = (): Either<never, 'noop'> => right('noop' as const);
+export const noop = async (): Promise<Either<never, 'noop'>> => right('noop' as const);
 
 export type {
   UpdateAndPickupMappingsResponse,
