@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -19,24 +19,29 @@ import {
   EuiSuperSelect,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiButtonGroup,
+  toSentenceCase,
+  Direction,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import {
-  DEFAULT_SORT,
   getCompatibleSortingTypes,
-  SortingType,
+  sortDirections,
+  DEFAULT_SORT,
+  SortBy,
 } from '../../../common/options_list/suggestions_sorting';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 
 interface OptionsListEditorState {
-  selectedSort: SortingType;
+  sortDirection: Direction;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
   hideSort?: boolean;
+  sortBy: SortBy;
 }
 
 interface SwitchProps {
@@ -44,7 +49,7 @@ interface SwitchProps {
   onChange: (event: EuiSwitchEvent) => void;
 }
 
-type SortItem = EuiSuperSelectOption<SortingType>;
+type SortItem = EuiSuperSelectOption<SortBy>;
 
 export const OptionsListEditorOptions = ({
   initialInput,
@@ -52,23 +57,43 @@ export const OptionsListEditorOptions = ({
   fieldType,
 }: ControlEditorProps<OptionsListEmbeddableInput>) => {
   const [state, setState] = useState<OptionsListEditorState>({
-    singleSelect: initialInput?.singleSelect,
+    sortDirection: initialInput?.sort?.direction ?? DEFAULT_SORT.direction,
+    sortBy: initialInput?.sort?.by ?? DEFAULT_SORT.by,
     runPastTimeout: initialInput?.runPastTimeout,
+    singleSelect: initialInput?.singleSelect,
     hideExclude: initialInput?.hideExclude,
     hideExists: initialInput?.hideExists,
     hideSort: initialInput?.hideSort,
-    selectedSort: initialInput?.sort ?? DEFAULT_SORT,
   });
 
-  const options: SortItem[] = useMemo(() => {
-    return getCompatibleSortingTypes(fieldType).map((key: SortingType) => {
+  useEffect(() => {
+    if (!getCompatibleSortingTypes(fieldType).includes(state.sortBy)) {
+      onChange({ sort: DEFAULT_SORT });
+      setState((s) => ({ ...s, sortBy: DEFAULT_SORT.by, sortDirection: DEFAULT_SORT.direction }));
+    }
+  }, [fieldType, onChange, state.sortBy]);
+
+  const sortByOptions: SortItem[] = useMemo(() => {
+    return getCompatibleSortingTypes(fieldType).map((key: SortBy) => {
       return {
         value: key,
         inputDisplay: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),
-        'data-test-subj': `optionsList__defaultSortBy_${key}`,
+        'data-test-subj': `optionsListEditor__sortBy_${key}`,
       };
     });
   }, [fieldType]);
+
+  const sortOrderOptions = useMemo(() => {
+    return sortDirections.map((key) => {
+      return {
+        id: key,
+        value: key,
+        iconType: `sort${toSentenceCase(key)}ending`,
+        'data-test-subj': `optionsListEditor__sortOrder_${key}`,
+        label: OptionsListStrings.editorAndPopover.sortOrder[key].getSortByLabel(),
+      };
+    });
+  }, []);
 
   const SwitchWithTooltip = ({
     switchProps,
@@ -140,8 +165,8 @@ export const OptionsListEditorOptions = ({
             label={OptionsListStrings.editor.getHideSortingTitle()}
             checked={!state.hideSort}
             onChange={() => {
-              onChange({ hideSort: !state.hideSort, sort: DEFAULT_SORT });
-              setState((s) => ({ ...s, hideSort: !s.hideSort, selectedSort: DEFAULT_SORT }));
+              onChange({ hideSort: !state.hideSort });
+              setState((s) => ({ ...s, hideSort: !s.hideSort }));
             }}
             data-test-subj={'optionsListControl__hideSortAdditionalSetting'}
           />
@@ -149,19 +174,47 @@ export const OptionsListEditorOptions = ({
             <EuiForm className="optionsList--hiddenEditorForm">
               <>
                 <EuiSpacer size="s" />
-                <EuiFormRow label={OptionsListStrings.editor.getSuggestionsSortingTitle()}>
+                <EuiFormRow
+                  display={'rowCompressed'}
+                  label={OptionsListStrings.editor.getSuggestionsSortingTitle()}
+                >
+                  <EuiButtonGroup
+                    buttonSize="compressed"
+                    options={sortOrderOptions}
+                    legend="This is a primary group"
+                    idSelected={state.sortDirection}
+                    onChange={(value) => {
+                      onChange({
+                        sort: {
+                          ...(initialInput?.sort ?? DEFAULT_SORT),
+                          direction: value as Direction,
+                        },
+                      });
+                      setState((s) => ({ ...s, sortDirection: value as Direction }));
+                    }}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  display={'rowCompressed'}
+                  css={css`
+                    margin-top: 8px !important;
+                  `}
+                  hasEmptyLabelSpace={false}
+                >
                   <EuiSuperSelect
                     onChange={(value) => {
                       onChange({
-                        sort: value,
+                        sort: { ...(initialInput?.sort ?? DEFAULT_SORT), by: value },
                       });
-                      setState((s) => ({ ...s, selectedSort: value }));
+                      setState((s) => ({ ...s, sortBy: value }));
                     }}
-                    options={options}
-                    valueOfSelected={state.selectedSort}
+                    options={sortByOptions}
+                    valueOfSelected={state.sortBy}
                     data-test-subj={'optionsListControl__chooseSortAdditionalSetting'}
+                    compressed={true}
                   />
                 </EuiFormRow>
+
                 <EuiSpacer size="s" />
               </>
             </EuiForm>

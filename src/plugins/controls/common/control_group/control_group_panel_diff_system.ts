@@ -65,7 +65,7 @@ export const ControlPanelDiffSystems: {
         Boolean(singleSelectA) === Boolean(singleSelectB) &&
         Boolean(existsSelectedA) === Boolean(existsSelectedB) &&
         Boolean(runPastTimeoutA) === Boolean(runPastTimeoutB) &&
-        (sortA ?? DEFAULT_SORT) === (sortB ?? DEFAULT_SORT) &&
+        deepEqual(sortA ?? DEFAULT_SORT, sortB ?? DEFAULT_SORT) &&
         isEqual(selectedA ?? [], selectedB ?? []) &&
         deepEqual(inputA, inputB)
       );

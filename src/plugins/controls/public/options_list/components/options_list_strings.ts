@@ -60,7 +60,7 @@ export const OptionsListStrings = {
       }),
     getSuggestionsSortingTitle: () =>
       i18n.translate('controls.optionsList.editor.suggestionsSorting', {
-        defaultMessage: 'Suggestions sorting',
+        defaultMessage: 'Sort',
       }),
   },
   popover: {
@@ -159,28 +159,30 @@ export const OptionsListStrings = {
   },
   editorAndPopover: {
     sortBy: {
-      docDescending: {
+      _count: {
         getSortByLabel: () =>
-          i18n.translate('controls.optionsList.popover.sortBy.desc_docCount', {
-            defaultMessage: 'Document count (descending)',
+          i18n.translate('controls.optionsList.popover.sortBy.docCount', {
+            defaultMessage: 'By document count',
           }),
       },
-      docAscending: {
+      _key: {
         getSortByLabel: () =>
-          i18n.translate('controls.optionsList.popover.sortBy.asc_docCount', {
-            defaultMessage: 'Document count (ascending)',
+          i18n.translate('controls.optionsList.popover.sortBy.alphabetical', {
+            defaultMessage: 'Alphabetically',
           }),
       },
-      keyDescending: {
+    },
+    sortOrder: {
+      asc: {
         getSortByLabel: () =>
-          i18n.translate('controls.optionsList.popover.sortBy.desc_key', {
-            defaultMessage: 'Alphabetical (descending)',
+          i18n.translate('controls.optionsList.popover.sortOrder.asc', {
+            defaultMessage: 'Ascending',
           }),
       },
-      keyAscending: {
+      desc: {
         getSortByLabel: () =>
-          i18n.translate('controls.optionsList.popover.sortBy.asc_key', {
-            defaultMessage: 'Alphabetical (ascending)',
+          i18n.translate('controls.optionsList.popover.sortOrder.desc', {
+            defaultMessage: 'Descending',
           }),
       },
     },

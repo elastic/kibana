@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import {
   EuiFieldSearch,
@@ -16,31 +16,19 @@ import {
   EuiFormRow,
   EuiToolTip,
   EuiBadge,
-  EuiPopover,
-  EuiSelectable,
-  EuiPopoverTitle,
-  EuiSelectableOption,
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import {
-  DEFAULT_SORT,
-  getCompatibleSortingTypes,
-  SortingType,
-} from '../../../common/options_list/suggestions_sorting';
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
+import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
   setShowOnlySelected: (value: boolean) => void;
   updateSearchString: (newSearchString: string) => void;
 }
-
-type SortItem = EuiSelectableOption & {
-  data: { sortingType: SortingType };
-};
 
 export const OptionsListPopoverActionBar = ({
   showOnlySelected,
@@ -51,7 +39,7 @@ export const OptionsListPopoverActionBar = ({
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { clearSelections, setSort },
+    actions: { clearSelections },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
 
@@ -59,31 +47,8 @@ export const OptionsListPopoverActionBar = ({
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality);
   const searchString = select((state) => state.componentState.searchString);
-  const field = select((state) => state.componentState.field);
 
   const hideSort = select((state) => state.explicitInput.hideSort);
-  const sort = select((state) => state.explicitInput.sort ?? DEFAULT_SORT);
-
-  const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
-  const [options, setOptions] = useState<SortItem[]>(() => {
-    return getCompatibleSortingTypes(field?.type).map((key) => {
-      return {
-        data: { sortingType: key },
-        checked: key === sort ? 'on' : undefined,
-        'data-test-subj': `optionsList__sortBy_${key}`,
-        label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),
-      } as SortItem;
-    });
-  });
-
-  const onSelectChange = (updatedOptions: SortItem[]) => {
-    setOptions(updatedOptions);
-    const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
-    if (selectedOption) {
-      dispatch(setSort(selectedOption.data.sortingType));
-      setIsSortingPopoverOpen(false);
-    }
-  };
 
   return (
     <div className="optionsList__actions">
@@ -127,47 +92,7 @@ export const OptionsListPopoverActionBar = ({
           </EuiFlexItem>
           {!hideSort && (
             <EuiFlexItem grow={false}>
-              <EuiPopover
-                button={
-                  <EuiToolTip
-                    position="top"
-                    content={
-                      showOnlySelected
-                        ? OptionsListStrings.popover.getSortDisabledTooltip()
-                        : OptionsListStrings.popover.getSortPopoverDescription()
-                    }
-                  >
-                    <EuiButtonIcon
-                      iconType="sortable"
-                      disabled={showOnlySelected}
-                      data-test-subj="optionsListControl__sortingOptionsButton"
-                      onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
-                      aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-                    />
-                  </EuiToolTip>
-                }
-                panelPaddingSize="none"
-                isOpen={isSortingPopoverOpen}
-                aria-labelledby="optionsList_sortingOptions"
-                closePopover={() => setIsSortingPopoverOpen(false)}
-                data-test-subj="optionsListControl__sortingOptionsPopover"
-              >
-                <EuiPopoverTitle paddingSize="s">
-                  {OptionsListStrings.popover.getSortPopoverTitle()}
-                </EuiPopoverTitle>
-                <EuiSelectable
-                  options={options}
-                  style={{ width: 300 }}
-                  singleSelection="always"
-                  onChange={onSelectChange}
-                  id="optionsList_sortingOptions"
-                  listProps={{ bordered: false }}
-                  data-test-subj="optionsListControl__sortingOptions"
-                  aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-                >
-                  {(list) => list}
-                </EuiSelectable>
-              </EuiPopover>
+              <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>

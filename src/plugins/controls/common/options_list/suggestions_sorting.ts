@@ -8,32 +8,24 @@
 
 import { Direction } from '@elastic/eui';
 
-export const DEFAULT_SORT: SortingType = 'docDescending';
-export type SortingType = 'docDescending' | 'docAscending' | 'keyDescending' | 'keyAscending';
+export type SortBy = '_count' | '_key';
 
-interface DocumentCountSort {
-  _count: Direction;
+export const DEFAULT_SORT: SortingType = { by: '_count', direction: 'desc' };
+
+export const sortDirections: Readonly<Direction[]> = ['asc', 'desc'] as const;
+export type SortDirection = typeof sortDirections[number];
+export interface SortingType {
+  by: SortBy;
+  direction: SortDirection;
 }
-interface AlphabeticalSort {
-  _key: Direction;
-}
 
-export const OptionsListSortingTypes: {
-  [key in SortingType]: DocumentCountSort | AlphabeticalSort;
-} = {
-  docDescending: { _count: 'desc' },
-  docAscending: { _count: 'asc' },
-  keyDescending: { _key: 'desc' },
-  keyAscending: { _key: 'asc' },
-};
-
-export const getCompatibleSortingTypes = (type?: string): SortingType[] => {
+export const getCompatibleSortingTypes = (type?: string): SortBy[] => {
   switch (type) {
     case 'ip': {
-      return ['docDescending', 'docAscending'];
+      return ['_count'];
     }
     default: {
-      return ['docDescending', 'docAscending', 'keyDescending', 'keyAscending'];
+      return ['_count', '_key'];
     }
   }
 };

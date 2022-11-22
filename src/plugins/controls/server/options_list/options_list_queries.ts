@@ -10,11 +10,7 @@ import { get, isEmpty } from 'lodash';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
-import {
-  DEFAULT_SORT,
-  OptionsListSortingTypes,
-  SortingType,
-} from '../../common/options_list/suggestions_sorting';
+import { DEFAULT_SORT, SortingType } from '../../common/options_list/suggestions_sorting';
 import { OptionsListRequestBody } from '../../common/options_list/types';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 export interface OptionsListAggregationBuilder {
@@ -27,8 +23,8 @@ interface EsBucket {
   doc_count: number;
 }
 
-const getSortType = (sortKey?: SortingType) => {
-  return OptionsListSortingTypes[sortKey ?? DEFAULT_SORT];
+const getSortType = (sort?: SortingType) => {
+  return sort ? { [sort.by]: sort.direction } : { [DEFAULT_SORT.by]: DEFAULT_SORT.direction };
 };
 
 /**
