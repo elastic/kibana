@@ -77,12 +77,12 @@ describe('SLIClient', () => {
 
           const expectedDateRange = toDateRange(slo.time_window);
 
-          expect(result).toMatchObject({
+          expect(result[slo.id]).toMatchObject({
             good: 90,
             total: 100,
           });
-          expect(result.date_range.from).toBeClose(expectedDateRange.from);
-          expect(result.date_range.to).toBeClose(expectedDateRange.to);
+          expect(result[slo.id].date_range.from).toBeClose(expectedDateRange.from);
+          expect(result[slo.id].date_range.to).toBeClose(expectedDateRange.to);
 
           expect(esClientMock.search).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -133,9 +133,9 @@ describe('SLIClient', () => {
 
           const expectedDateRange = toDateRange(slo.time_window);
 
-          expect(result).toMatchObject({ good: 90, total: 100 });
-          expect(result.date_range.from).toBeClose(expectedDateRange.from);
-          expect(result.date_range.to).toBeClose(expectedDateRange.to);
+          expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
+          expect(result[slo.id].date_range.from).toBeClose(expectedDateRange.from);
+          expect(result[slo.id].date_range.to).toBeClose(expectedDateRange.to);
           expect(esClientMock.search).toHaveBeenCalledWith(
             expect.objectContaining({
               index: `${SLO_DESTINATION_INDEX_NAME}*`,
@@ -216,9 +216,9 @@ describe('SLIClient', () => {
           const result = await sliClient.fetchCurrentSLIData(slo);
 
           const expectedDateRange = toDateRange(slo.time_window);
-          expect(result).toMatchObject({ good: 90, total: 100 });
-          expect(result.date_range.from).toBeClose(expectedDateRange.from);
-          expect(result.date_range.to).toBeClose(expectedDateRange.to);
+          expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
+          expect(result[slo.id].date_range.from).toBeClose(expectedDateRange.from);
+          expect(result[slo.id].date_range.to).toBeClose(expectedDateRange.to);
           expect(esClientMock.search).toHaveBeenCalledWith(
             expect.objectContaining({
               index: `${SLO_DESTINATION_INDEX_NAME}*`,
@@ -314,9 +314,9 @@ describe('SLIClient', () => {
           const result = await sliClient.fetchCurrentSLIData(slo);
 
           const expectedDateRange = toDateRange(slo.time_window);
-          expect(result).toMatchObject({ good: 90, total: 100 });
-          expect(result.date_range.from).toBeClose(expectedDateRange.from);
-          expect(result.date_range.to).toBeClose(expectedDateRange.to);
+          expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
+          expect(result[slo.id].date_range.from).toBeClose(expectedDateRange.from);
+          expect(result[slo.id].date_range.to).toBeClose(expectedDateRange.to);
           expect(esClientMock.search).toHaveBeenCalledWith(
             expect.objectContaining({
               index: `${SLO_DESTINATION_INDEX_NAME}*`,

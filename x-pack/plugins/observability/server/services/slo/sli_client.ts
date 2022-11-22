@@ -15,14 +15,14 @@ import { assertNever } from '@kbn/std';
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
-import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
+import { DateRange, Duration, IndicatorData, SLO, SLOId } from '../../domain/models';
 import {
   occurencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 } from '../../types/schema';
 
 export interface SLIClient {
-  fetchCurrentSLIData(slo: SLO): Promise<IndicatorData>;
+  fetchCurrentSLIData(slo: SLO): Promise<Record<SLOId, IndicatorData>>;
   fetchSLIDataFrom(
     slo: SLO,
     lookbackWindows: LookbackWindow[]
@@ -42,7 +42,7 @@ type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
 export class DefaultSLIClient implements SLIClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async fetchCurrentSLIData(slo: SLO): Promise<IndicatorData> {
+  async fetchCurrentSLIData(slo: SLO): Promise<Record<SLOId, IndicatorData>> {
     const dateRange = toDateRange(slo.time_window);
     if (occurencesBudgetingMethodSchema.is(slo.budgeting_method)) {
       const result = await this.esClient.search<unknown, Record<AggKey, AggregationsSumAggregate>>({
@@ -53,7 +53,7 @@ export class DefaultSLIClient implements SLIClient {
         },
       });
 
-      return handleResult(result.aggregations, dateRange);
+      return handleResult(slo, result.aggregations, dateRange);
     }
 
     if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
@@ -98,7 +98,7 @@ export class DefaultSLIClient implements SLIClient {
         },
       });
 
-      return handleResult(result.aggregations, dateRange);
+      return handleResult(slo, result.aggregations, dateRange);
     }
 
     assertNever(slo.budgeting_method);
@@ -160,9 +160,10 @@ function commonQuery(slo: SLO, dateRange: DateRange) {
 }
 
 function handleResult(
+  slo: SLO,
   aggregations: Record<AggKey, AggregationsSumAggregate> | undefined,
   dateRange: DateRange
-): IndicatorData {
+): Record<SLOId, IndicatorData> {
   const good = aggregations?.good;
   const total = aggregations?.total;
   if (good === undefined || good.value === null || total === undefined || total.value === null) {
@@ -170,9 +171,11 @@ function handleResult(
   }
 
   return {
-    date_range: dateRange,
-    good: good.value,
-    total: total.value,
+    [slo.id]: {
+      date_range: dateRange,
+      good: good.value,
+      total: total.value,
+    },
   };
 }
 

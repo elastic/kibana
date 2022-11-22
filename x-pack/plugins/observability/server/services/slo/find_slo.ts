@@ -18,7 +18,7 @@ export class FindSLO {
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
     const pagination: Pagination = toPagination(params);
     const criteria: Criteria = toCriteria(params);
-    const result = await this.repository.find(criteria, pagination);
+    const result: Paginated<SLO> = await this.repository.find(criteria, pagination);
     return this.toResponse(result);
   }
 

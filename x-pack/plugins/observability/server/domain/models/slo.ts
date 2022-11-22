@@ -10,5 +10,6 @@ import { sloSchema } from '../../types/schema';
 
 type SLO = t.TypeOf<typeof sloSchema>;
 type StoredSLO = t.OutputOf<typeof sloSchema>;
+type SLOId = t.TypeOf<typeof sloSchema.props.id>;
 
-export type { SLO, StoredSLO };
+export type { SLO, SLOId, StoredSLO };

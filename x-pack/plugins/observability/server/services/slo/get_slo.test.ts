@@ -28,9 +28,11 @@ describe('GetSLO', () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
       mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce({
-        good: 9999,
-        total: 10000,
-        date_range: toDateRange(slo.time_window),
+        [slo.id]: {
+          good: 9999,
+          total: 10000,
+          date_range: toDateRange(slo.time_window),
+        },
       });
 
       const result = await getSLO.execute(slo.id);
