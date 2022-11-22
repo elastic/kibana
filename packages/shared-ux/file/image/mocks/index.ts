@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { base64dLogo } from './src';
+export { base64dLogo, getImageData } from './src';
