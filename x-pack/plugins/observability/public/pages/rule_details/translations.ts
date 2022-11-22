@@ -42,35 +42,41 @@ export const CREATED_WORD = i18n.translate('xpack.observability.ruleDetails.crea
 });
 
 export const confirmDeleteModalText = (title: string) =>
-  i18n.translate('xpack.observability.rules.deleteSelectedIdsConfirmModal.descriptionText', {
+  i18n.translate('xpack.observability.rules.deleteConfirmationModal.descriptionText', {
     defaultMessage: "You can't recover {title} after deleting.",
     values: { title },
   });
 
 export const confirmDeleteButtonText = (title: string) =>
-  i18n.translate('xpack.observability.rules.deleteSelectedIdsConfirmModal.deleteButtonLabel', {
+  i18n.translate('xpack.observability.rules.deleteConfirmationModal.deleteButtonLabel', {
     defaultMessage: 'Delete {title}',
     values: { title },
   });
 
 export const cancelButtonText = i18n.translate(
-  'xpack.observability.rules.deleteSelectedIdsConfirmModal.cancelButtonLabel',
+  'xpack.observability.rules.deleteConfirmationModal.cancelButtonLabel',
   {
     defaultMessage: 'Cancel',
   }
 );
 
 export const deleteSuccessText = (title: string) =>
-  i18n.translate('xpack.observability.rules.deleteSelectedIdsSuccessNotification.descriptionText', {
-    defaultMessage: 'Deleted {title}',
-    values: { title },
-  });
+  i18n.translate(
+    'xpack.observability.rules.deleteConfirmationModal.successNotification.descriptionText',
+    {
+      defaultMessage: 'Deleted {title}',
+      values: { title },
+    }
+  );
 
 export const deleteErrorText = (title: string) =>
-  i18n.translate('xpack.observability.rules.deleteSelectedIdsErrorNotification.descriptionText', {
-    defaultMessage: 'Failed to delete {title}',
-    values: { title },
-  });
+  i18n.translate(
+    'xpack.observability.rules.deleteConfirmationModal.errorNotification.descriptionText',
+    {
+      defaultMessage: 'Failed to delete {title}',
+      values: { title },
+    }
+  );
 export const ALERT_STATUS_LICENSE_ERROR = i18n.translate(
   'xpack.observability.ruleDetails.ruleStatusLicenseError',
   {
