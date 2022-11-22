@@ -62,7 +62,7 @@ describe('computeErrorBudget', () => {
 
   describe('for calendar aligned time window', () => {
     describe('for occurrences budgeting method', () => {
-      it('computes the error budget', () => {
+      it('computes the error budget with an estimation of total events', () => {
         const slo = createSLO({
           budgeting_method: 'occurrences',
           time_window: weeklyCalendarAligned(twoDaysAgo()),
@@ -77,8 +77,8 @@ describe('computeErrorBudget', () => {
 
         expect(errorBudget).toEqual({
           initial: 0.05,
-          consumed: 0.6,
-          remaining: 0.4,
+          consumed: 0.171429,
+          remaining: 0.828571,
         });
       });
     });

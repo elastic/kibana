@@ -52,10 +52,10 @@ function computeForCalendarAlignedWithOccurrences(slo: SLO, sliData: IndicatorDa
   const initialErrorBudget = 1 - slo.objective.target;
   const now = moment();
 
-  const durationCalendarPeriod = moment(dateRange.to).diff(dateRange.from, 'seconds');
+  const durationCalendarPeriod = moment(dateRange.to).diff(dateRange.from, 'minutes');
   const durationSinceBeginning = now.isAfter(dateRange.to)
     ? durationCalendarPeriod
-    : moment(now).diff(dateRange.from, 'seconds');
+    : moment(now).diff(dateRange.from, 'minutes');
 
   const totalEventsEstimatedAtPeriodEnd = Math.round(
     (total / durationSinceBeginning) * durationCalendarPeriod
