@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext } from 'react';
 import {
   EuiButtonEmpty,
   EuiDraggable,
@@ -21,11 +21,7 @@ import {
 import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter, getFilterParams, BooleanRelation } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { cx, css } from '@emotion/css';
-
-import add from '../assets/add.svg';
-import or from '../assets/or.svg';
+import { cx } from '@emotion/css';
 
 import { FieldInput } from './field_input';
 import { OperatorInput } from './operator_input';
@@ -36,6 +32,14 @@ import { FilterGroup } from '../filter_group';
 import type { Path } from '../types';
 import { getFieldFromFilter, getOperatorFromFilter } from '../../filter_bar/filter_editor';
 import { Operator } from '../../filter_bar/filter_editor';
+import {
+  cursorAddCss,
+  cursorOrCss,
+  fieldAndParamCss,
+  getGrabIconCss,
+  operationCss,
+} from './filter_item.styles';
+import { strings } from './i18n';
 
 export interface FilterItemProps {
   path: Path;
@@ -50,22 +54,6 @@ export interface FilterItemProps {
   renderedLevel: number;
   reverseBackground: boolean;
 }
-
-const cursorAddStyles = css`
-  cursor: url(${add}), auto;
-`;
-
-const cursorOrStyles = css`
-  cursor: url(${or}), auto;
-`;
-
-const fieldAndParamStyle = css`
-  min-width: 162px;
-`;
-
-const operationStyle = css`
-  max-width: 162px;
-`;
 
 export function FilterItem({
   filter,
@@ -88,13 +76,6 @@ export function FilterItem({
   } = useContext(FiltersBuilderContextType);
   const conditionalOperationType = getBooleanRelationType(filter);
   const { euiTheme } = useEuiTheme();
-
-  const grabIconStyles = useMemo(
-    () => css`
-      margin: 0 ${euiTheme.size.xxs};
-    `,
-    [euiTheme.size.xxs]
-  );
 
   let field: DataViewField | undefined;
   let operator: Operator | undefined;
@@ -195,7 +176,7 @@ export function FilterItem({
           droppableId={path}
           spacing="none"
           isCombineEnabled={!disableOr || !hideOr}
-          className={cx({ [cursorAddStyles]: dropTarget === path })}
+          className={cx({ [cursorAddCss]: dropTarget === path })}
           isDropDisabled={disableAnd}
         >
           <EuiDraggable
@@ -220,20 +201,15 @@ export function FilterItem({
                       gutterSize="s"
                       justifyContent="center"
                       className={cx({
-                        [cursorOrStyles]: dropTarget === path && !hideOr,
+                        [cursorOrCss]: dropTarget === path && !hideOr,
                       })}
                     >
                       <EuiFlexItem
                         grow={false}
-                        aria-label={i18n.translate(
-                          'unifiedSearch.filter.filtersBuilder.dragFilterAriaLabel',
-                          {
-                            defaultMessage: 'Drag filter',
-                          }
-                        )}
+                        aria-label={strings.getDragFilterAriaLabel()}
                         {...provided.dragHandleProps}
                       >
-                        <EuiIcon type="grab" size="s" className={grabIconStyles} />
+                        <EuiIcon type="grab" size="s" className={getGrabIconCss(euiTheme)} />
                       </EuiFlexItem>
                       <EuiFlexItem grow={true}>
                         <EuiFlexGroup
@@ -243,7 +219,7 @@ export function FilterItem({
                           justifyContent="center"
                           wrap
                         >
-                          <EuiFlexItem className={fieldAndParamStyle}>
+                          <EuiFlexItem className={fieldAndParamCss}>
                             <EuiFormRow>
                               <FieldInput
                                 field={field}
@@ -252,7 +228,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem className={operationStyle}>
+                          <EuiFlexItem className={operationCss}>
                             <EuiFormRow>
                               <OperatorInput
                                 field={field}
@@ -262,7 +238,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem className={fieldAndParamStyle}>
+                          <EuiFlexItem className={fieldAndParamCss}>
                             <EuiFormRow>
                               <div data-test-subj="filterParams">
                                 <ParamsEditor
@@ -293,12 +269,7 @@ export function FilterItem({
                               isDisabled={disableRemove || disabled}
                               size="s"
                               color="danger"
-                              aria-label={i18n.translate(
-                                'unifiedSearch.filter.filtersBuilder.deleteFilterGroupButtonIcon',
-                                {
-                                  defaultMessage: 'Delete filter group',
-                                }
-                              )}
+                              aria-label={strings.getDeleteFilterGroupButtonIconLabel()}
                             />
                           </EuiFlexItem>
                           {!hideOr ? (
@@ -309,19 +280,9 @@ export function FilterItem({
                                 iconType="plusInCircle"
                                 size="s"
                                 iconSize="s"
-                                aria-label={i18n.translate(
-                                  'unifiedSearch.filter.filtersBuilder.addOrFilterGroupButtonIcon',
-                                  {
-                                    defaultMessage: 'Add filter group with OR',
-                                  }
-                                )}
+                                aria-label={strings.getAddOrFilterGroupButtonIconLabel()}
                               >
-                                {i18n.translate(
-                                  'unifiedSearch.filter.filtersBuilder.addOrFilterGroupButtonLabel',
-                                  {
-                                    defaultMessage: 'OR',
-                                  }
-                                )}
+                                {strings.getAddOrFilterGroupButtonLabel()}
                               </EuiButtonEmpty>
                             </EuiFlexItem>
                           ) : null}
@@ -332,19 +293,9 @@ export function FilterItem({
                               iconType="plusInCircle"
                               size="s"
                               iconSize="s"
-                              aria-label={i18n.translate(
-                                'unifiedSearch.filter.filtersBuilder.addAndFilterGroupButtonIcon',
-                                {
-                                  defaultMessage: 'Add filter group with AND',
-                                }
-                              )}
+                              aria-label={strings.getAddAndFilterGroupButtonIconLabel()}
                             >
-                              {i18n.translate(
-                                'unifiedSearch.filter.filtersBuilder.addAndFilterGroupButtonLabel',
-                                {
-                                  defaultMessage: 'AND',
-                                }
-                              )}
+                              {strings.getAddAndFilterGroupButtonLabel()}
                             </EuiButtonEmpty>
                           </EuiFlexItem>
                         </EuiFlexGroup>

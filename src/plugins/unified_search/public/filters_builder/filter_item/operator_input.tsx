@@ -7,11 +7,11 @@
  */
 
 import React, { useCallback, useContext } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Operator } from '../../filter_bar/filter_editor';
 import { getOperatorOptions, GenericComboBox } from '../../filter_bar/filter_editor';
 import { FiltersBuilderContextType } from '../context';
+import { strings } from './i18n';
 
 interface OperatorInputProps<TParams = unknown> {
   field: DataViewField | undefined;
@@ -43,12 +43,7 @@ export function OperatorInput<TParams = unknown>({
       fullWidth
       compressed
       isDisabled={!field || disabled}
-      placeholder={i18n.translate(
-        'unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderSelect',
-        {
-          defaultMessage: 'Select operator',
-        }
-      )}
+      placeholder={strings.getOperatorSelectPlaceholderSelectLabel()}
       options={operators}
       selectedOptions={operator ? [operator] : []}
       getLabel={({ message }) => message}

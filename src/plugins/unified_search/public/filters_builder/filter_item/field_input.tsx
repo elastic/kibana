@@ -8,7 +8,6 @@
 
 import React, { useCallback, useContext } from 'react';
 import { FieldIcon } from '@kbn/react-field';
-import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import {
@@ -20,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { getFilterableFields } from '../../filter_bar/filter_editor';
 import { FiltersBuilderContextType } from '../context';
+import { strings } from './i18n';
 
 interface FieldInputProps {
   dataView: DataView;
@@ -67,9 +67,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
       selectedOptions={selectedEuiOptions}
       onChange={onComboBoxChange}
       isDisabled={disabled}
-      placeholder={i18n.translate('unifiedSearch.filter.filtersBuilder.fieldSelectPlaceholder', {
-        defaultMessage: 'Select a field',
-      })}
+      placeholder={strings.getFieldSelectPlaceholderLabel()}
       sortMatchesBy="startsWith"
       singleSelection={{ asPlainText: true }}
       isClearable={false}

@@ -9,7 +9,6 @@
 import React, { useCallback, useContext } from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiToolTip, EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { Operator } from '../../filter_bar/filter_editor';
 import {
   PhraseValueInput,
@@ -19,6 +18,7 @@ import {
 } from '../../filter_bar/filter_editor';
 import { getFieldValidityAndErrorMessage } from '../../filter_bar/filter_editor/lib';
 import { FiltersBuilderContextType } from '../context';
+import { strings } from './i18n';
 
 interface ParamsEditorProps<TParams = unknown> {
   dataView: DataView;
@@ -32,15 +32,11 @@ interface ParamsEditorProps<TParams = unknown> {
 
 const getPlaceholderText = (isFieldSelected: boolean, isOperatorSelected: boolean) => {
   if (!isFieldSelected) {
-    return i18n.translate('unifiedSearch.filter.filtersBuilder.selectFieldPlaceholder', {
-      defaultMessage: 'Please select a field first ...',
-    });
+    return strings.getSelectFieldPlaceholderLabel();
   }
 
   if (!isOperatorSelected) {
-    return i18n.translate('unifiedSearch.filter.filtersBuilder.selectOperatorPlaceholder', {
-      defaultMessage: 'Please select operator first ...',
-    });
+    return strings.getSelectOperatorPlaceholderLabel();
   }
 
   return '';
