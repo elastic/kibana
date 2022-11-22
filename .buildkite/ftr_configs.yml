@@ -111,6 +111,7 @@ enabled:
   - test/node_roles_functional/all.config.ts
   - test/node_roles_functional/background_tasks.config.ts
   - test/node_roles_functional/ui.config.ts
+  - test/node_roles_functional/basic_feature_test.config.ts
   - test/plugin_functional/config.ts
   - test/server_integration/http/platform/config.status.ts
   - test/server_integration/http/platform/config.ts
