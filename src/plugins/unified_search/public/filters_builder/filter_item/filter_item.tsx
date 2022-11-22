@@ -110,7 +110,7 @@ export function FilterItem({
   );
 
   const onHandleParamsChange = useCallback(
-    (selectedParams: string) => {
+    (selectedParams: unknown) => {
       dispatch({
         type: 'updateFilter',
         payload: { dest: { path, index }, field, operator, params: selectedParams },
