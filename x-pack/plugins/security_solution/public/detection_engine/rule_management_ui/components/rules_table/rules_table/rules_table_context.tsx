@@ -122,7 +122,6 @@ export type LoadingRuleAction =
 export interface LoadingRules {
   ids: string[];
   action: LoadingRuleAction;
-  isDryRun?: boolean;
 }
 
 export interface RulesTableActions {
