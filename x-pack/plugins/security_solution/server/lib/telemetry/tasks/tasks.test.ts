@@ -44,12 +44,12 @@ describe('security telemetry task', () => {
 
   test('prebuilt rule alerts (detection rules) are set to 1h', async () => {
     const taskConfig = createTelemetryPrebuiltRuleAlertsTaskConfig(stubBatchNumber);
-    expect(taskConfig.interval).isEqual('1h');
+    expect(taskConfig.interval).toEqual('1h');
   });
 
   test('security lists are set to 24h', async () => {
     const taskConfig = createTelemetrySecurityListTaskConfig(stubBatchNumber);
-    expect(taskConfig.interval).isEqual('24h');
+    expect(taskConfig.interval).toEqual('24h');
   });
 
   test('timelines are set to 3h', async () => {
