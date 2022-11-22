@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fromNestedFilter } from './handle_nested_filter';
+import { fromNestedFilter } from './from_nested_filter';
 import { fields } from '../filters/stubs';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
 import { DataViewBase } from './types';
