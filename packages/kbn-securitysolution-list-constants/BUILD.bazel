@@ -36,7 +36,7 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md",
 ]
 
-RUNTIME_DEPS = []
+RUNTIME_DEPS = ["//packages/kbn-std"]
 
 TYPES_DEPS = [
   "@npm//@types/jest",
