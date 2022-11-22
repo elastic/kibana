@@ -373,7 +373,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['host.name'] });
 
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Low');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(20);
