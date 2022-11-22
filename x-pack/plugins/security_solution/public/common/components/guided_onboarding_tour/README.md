@@ -27,7 +27,7 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
       ...defaultConfig,
       step: 1,
       title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.ruleNameStep.tourTitle', {
-        defaultMessage: 'Test alert for practice',
+        defaultMessage: 'Examine the Alerts Table',
       }),
       content: i18n.translate(
         'xpack.securitySolution.guided_onboarding.tour.ruleNameStep.tourContent',

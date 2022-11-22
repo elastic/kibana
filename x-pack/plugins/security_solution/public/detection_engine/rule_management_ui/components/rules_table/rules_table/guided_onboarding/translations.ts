@@ -25,7 +25,7 @@ export const SEARCH_FIRST_RULE_TITLE = (name: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.searchFirstRule.title',
     {
-      defaultMessage: 'Search for "{name}" rule',
+      defaultMessage: 'Using the search, type "{name}" to find the rule.',
       values: { name },
     }
   );
@@ -43,7 +43,7 @@ export const ENABLE_FIRST_RULE_TITLE = (name: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.enableFirstRule.title',
     {
-      defaultMessage: 'Enable "{name}" rule',
+      defaultMessage: 'Click the toggle to enable the "{name}" rule',
       values: { name },
     }
   );

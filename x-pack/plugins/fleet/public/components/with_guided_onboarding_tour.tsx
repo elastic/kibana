@@ -31,7 +31,7 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
         defaultMessage: 'Select Elastic Defend',
       }),
       description: i18n.translate('xpack.fleet.guidedOnboardingTour.endpointCard.description', {
-        defaultMessage: 'The best way to get data quickly in to your SIEM.',
+        defaultMessage: 'The best way to get data quickly into your SIEM.',
       }),
     };
   }

@@ -56,13 +56,13 @@ const constants: GuideCardConstants = {
   security: {
     i18nTexts: {
       title: i18n.translate('guidedOnboardingPackage.gettingStarted.guideCard.security.cardTitle', {
-        defaultMessage: 'Protect my environment',
+        defaultMessage: 'Defend my environment',
       }),
       description: i18n.translate(
         'guidedOnboardingPackage.gettingStarted.guideCard.security.cardDescription',
         {
           defaultMessage:
-            'Defend your environment against threats by unifying SIEM, endpoint security, and cloud security.',
+            'Investigate threats and get your SIEM up and running by installing the Elastic Defend integration',
         }
       ),
     },

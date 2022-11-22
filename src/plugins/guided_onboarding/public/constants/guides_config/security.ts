@@ -32,7 +32,7 @@ export const securityConfig: GuideConfig = {
           defaultMessage: 'Select the Elastic Defend integration to add your data.',
         }),
         i18n.translate('guidedOnboarding.securityGuide.addDataStep.description2', {
-          defaultMessage: 'Make sure your data looks good.',
+          defaultMessage: 'Confirm your incoming data.',
         }),
       ],
       integration: 'endpoint',
@@ -51,7 +51,7 @@ export const securityConfig: GuideConfig = {
           defaultMessage: 'Load the prebuilt rules.',
         }),
         i18n.translate('guidedOnboarding.securityGuide.rulesStep.description2', {
-          defaultMessage: 'Select the rules that you want.',
+          defaultMessage: 'Select and enable rules to generate alerts.',
         }),
       ],
       manualCompletion: {
