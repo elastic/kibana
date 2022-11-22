@@ -37,7 +37,7 @@ export const INDICATORS_TABLE_FIRST_SEEN_COLUMN_HEADER = `[data-test-subj="dataG
 
 export const INDICATORS_TABLE_LAST_SEEN_COLUMN_HEADER = `[data-test-subj="dataGridHeaderCell-threat.indicator.last_seen"]`;
 
-export const TABLE_CONTROLS = '[data-test-sub="dataGridControls"]';
+export const TABLE_CONTROLS = '[data-test-subj="dataGridControls"]';
 
 export const INDICATOR_TYPE_CELL =
   '[role="gridcell"][data-gridcell-column-id="threat.indicator.type"]';
