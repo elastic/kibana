@@ -41,6 +41,7 @@ export interface LabelsParams {
   values: boolean;
   valuesFormat: ValueFormats;
   percentDecimals: number;
+  colorOverrides: Record<string, string>;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
   truncate?: number | null;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
@@ -95,7 +96,8 @@ export interface TreemapVisConfig extends VisCommonConfig {
   nestedLegend: boolean;
 }
 
-export interface MosaicVisConfig extends Omit<VisCommonConfig, 'metrics' | 'metricsToLabels'> {
+export interface MosaicVisConfig
+  extends Omit<VisCommonConfig, 'metrics' | 'metricsToLabels' | 'colorOverrides'> {
   metric: ExpressionValueVisDimension | string;
   nestedLegend: boolean;
 }

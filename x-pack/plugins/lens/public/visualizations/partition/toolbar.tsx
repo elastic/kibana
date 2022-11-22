@@ -15,13 +15,20 @@ import {
   EuiRange,
   EuiHorizontalRule,
   EuiButtonGroup,
+  EuiColorPicker,
+  euiPaletteColorBlind,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../../common';
+import {
+  LegendDisplay,
+  PieLayerState,
+  PieVisualizationState,
+  SharedPieLayerState,
+} from '../../../common';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../../types';
 import {
   ToolbarPopover,
@@ -32,7 +39,7 @@ import {
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { isCollapsed } from './visualization';
+import { getDefaultColorForMultiMetricDimension, isCollapsed } from './visualization';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -303,11 +310,11 @@ const DecimalPlaceSlider = ({
   );
 };
 
-export function DimensionEditor(
-  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
-    paletteService: PaletteRegistry;
-  }
-) {
+type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
+  paletteService: PaletteRegistry;
+};
+
+export function DimensionEditor(props: DimensionEditorProps) {
   const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
 
   if (!currentLayer) {
@@ -317,6 +324,9 @@ export function DimensionEditor(
   const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
     (id) => !isCollapsed(id, currentLayer)
   );
+
+  const showColorPicker =
+    currentLayer.metrics.includes(props.accessor) && currentLayer.allowMultipleMetrics;
 
   return (
     <>
@@ -329,7 +339,78 @@ export function DimensionEditor(
           }}
         />
       )}
+      {showColorPicker && <StaticColorControls {...props} currentLayer={currentLayer} />}
     </>
+  );
+}
+
+function StaticColorControls({
+  state,
+  paletteService,
+  accessor,
+  setState,
+  currentLayer,
+  datasource,
+}: DimensionEditorProps & { currentLayer: PieLayerState }) {
+  const colorLabel = i18n.translate('xpack.lens.pieChart.color', {
+    defaultMessage: 'Color',
+  });
+
+  const defaultColor = getDefaultColorForMultiMetricDimension({
+    layer: currentLayer,
+    columnId: accessor,
+    paletteService,
+    datasource,
+  });
+
+  const setColor = useCallback(
+    (color: string) => {
+      const newColorsByDimension = { ...currentLayer.colorsByDimension };
+
+      if (color) {
+        newColorsByDimension[accessor] = color;
+      } else {
+        delete newColorsByDimension[accessor];
+      }
+
+      setState({
+        ...state,
+        layers: state.layers.map((layer) =>
+          layer.layerId === currentLayer.layerId
+            ? {
+                ...layer,
+                colorsByDimension: newColorsByDimension,
+              }
+            : layer
+        ),
+      });
+    },
+    [accessor, currentLayer.colorsByDimension, currentLayer.layerId, setState, state]
+  );
+
+  const { inputValue: currentColor, handleInputChange: handleColorChange } =
+    useDebouncedValue<string>(
+      {
+        onChange: setColor,
+        value: currentLayer.colorsByDimension?.[accessor] || defaultColor,
+      },
+      { allowFalsyValue: true }
+    );
+
+  return (
+    <EuiFormRow display="columnCompressed" fullWidth label={colorLabel}>
+      <EuiColorPicker
+        fullWidth
+        compressed
+        isClearable={true}
+        placeholder={defaultColor}
+        onChange={(color: string) => handleColorChange(color)}
+        color={currentColor}
+        aria-label={colorLabel}
+        showAlpha={false}
+        swatches={euiPaletteColorBlind()}
+      />
+    </EuiFormRow>
   );
 }
 

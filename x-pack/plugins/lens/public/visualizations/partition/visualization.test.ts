@@ -305,6 +305,8 @@ describe('pie_visualization', () => {
         const state = getExampleState();
         state.layers[0].allowMultipleMetrics = true;
         state.layers[0].metrics = colIds;
+        state.layers[0].colorsByDimension = {};
+        state.layers[0].colorsByDimension[colIds[0]] = 'overridden-color';
 
         const config = pieVisualization.getConfiguration({
           state,
@@ -317,7 +319,7 @@ describe('pie_visualization', () => {
             Array [],
             Array [
               Object {
-                "color": "black",
+                "color": "overridden-color",
                 "columnId": "1",
                 "triggerIcon": "color",
               },
@@ -343,15 +345,6 @@ describe('pie_visualization', () => {
         const palette = paletteServiceMock.get('default');
         expect((palette.getCategoricalColor as jest.Mock).mock.calls).toMatchInlineSnapshot(`
           Array [
-            Array [
-              Array [
-                Object {
-                  "name": "Label for 1",
-                  "rankAtDepth": 0,
-                  "totalSeriesAtDepth": 4,
-                },
-              ],
-            ],
             Array [
               Array [
                 Object {

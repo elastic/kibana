@@ -45,6 +45,7 @@ import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionDataExtraEditor, DimensionEditor, PieToolbar } from './toolbar';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
+import { DatasourcePublicAPI } from '../..';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -76,6 +77,28 @@ const numberMetricOperations = (op: OperationMetadata) =>
 
 export const isCollapsed = (columnId: string, layer: PieLayerState) =>
   Boolean(layer.collapseFns?.[columnId]);
+
+export const getDefaultColorForMultiMetricDimension = ({
+  layer,
+  columnId,
+  paletteService,
+  datasource,
+}: {
+  layer: PieLayerState;
+  columnId: string;
+  paletteService: PaletteRegistry;
+  datasource: DatasourcePublicAPI | undefined;
+}) => {
+  const columnToLabelMap = datasource ? getColumnToLabelMap(layer.metrics, datasource) : {};
+
+  return paletteService.get('default').getCategoricalColor([
+    {
+      name: columnToLabelMap[columnId],
+      rankAtDepth: layer.metrics.indexOf(columnId),
+      totalSeriesAtDepth: layer.metrics.length,
+    },
+  ]) as string;
+};
 
 export const getPieVisualization = ({
   paletteService,
@@ -293,21 +316,20 @@ export const getPieVisualization = ({
     const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => {
       const hasSliceBy = layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0);
 
-      const columnToLabelMap = getColumnToLabelMap(layer.metrics, datasource);
-
       const accessors: AccessorConfig[] = layer.metrics.map<AccessorConfig>((columnId, index) => ({
         columnId,
         ...(layer.allowMultipleMetrics && !hasSliceBy
           ? {
               triggerIcon: 'color',
               color:
-                paletteService.get('default').getCategoricalColor([
-                  {
-                    name: columnToLabelMap[columnId],
-                    rankAtDepth: index,
-                    totalSeriesAtDepth: layer.metrics.length,
-                  },
-                ]) ?? undefined,
+                layer.colorsByDimension?.[columnId] ??
+                getDefaultColorForMultiMetricDimension({
+                  layer,
+                  columnId,
+                  paletteService,
+                  datasource,
+                }) ??
+                undefined,
             }
           : {}),
       }));
