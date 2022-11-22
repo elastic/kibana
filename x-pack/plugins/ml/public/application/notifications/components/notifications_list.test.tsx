@@ -20,7 +20,7 @@ jest.mock('../../components/saved_objects_warning');
 
 describe('NotificationsList', () => {
   beforeEach(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
   });
 
   afterEach(() => {

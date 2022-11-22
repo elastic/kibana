@@ -3116,7 +3116,17 @@
             "section": "def-server.BulkOperationError",
             "text": "BulkOperationError"
           },
-          "[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeSchedule, }: { id: string; snoozeSchedule: ",
+          "[]; rules: (",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Rule",
+            "text": "Rule"
+          },
+          "<never> | ",
+          "RuleWithLegacyId",
+          "<never>)[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeSchedule, }: { id: string; snoozeSchedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
