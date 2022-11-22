@@ -108,21 +108,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('can list source maps', async () => {
         const sourcemaps = await listSourcemaps();
-        expect(sourcemaps).to.not.empty();
+        expect(sourcemaps.length).to.be(15);
       });
 
       it('can paginate source maps', async () => {
         const firstPageItems = await listSourcemaps({ page: 1, perPage: 5 });
         expect(first(firstPageItems)?.identifier).to.eql('my_service-1.0.14');
         expect(last(firstPageItems)?.identifier).to.eql('my_service-1.0.10');
+        expect(firstPageItems.length).to.be(5);
 
         const secondPageItems = await listSourcemaps({ page: 2, perPage: 5 });
         expect(first(secondPageItems)?.identifier).to.eql('my_service-1.0.9');
         expect(last(secondPageItems)?.identifier).to.eql('my_service-1.0.5');
+        expect(secondPageItems.length).to.be(5);
 
         const thirdPageItems = await listSourcemaps({ page: 3, perPage: 5 });
         expect(first(thirdPageItems)?.identifier).to.eql('my_service-1.0.4');
         expect(last(thirdPageItems)?.identifier).to.eql('my_service-1.0.0');
+        expect(thirdPageItems.length).to.be(5);
       });
 
       it('returns newest source maps first', async () => {
