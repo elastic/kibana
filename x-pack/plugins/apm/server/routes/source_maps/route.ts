@@ -12,7 +12,7 @@ import { Artifact } from '@kbn/fleet-plugin/server';
 import {
   createApmArtifact,
   deleteApmArtifact,
-  listArtifacts,
+  listSourceMapArtifacts,
   updateSourceMapsOnFleetPolicies,
   getCleanedBundleFilePath,
   ArtifactSourceMap,
@@ -49,18 +49,19 @@ const listSourceMapRoute = createApmServerRoute({
   async handler({
     params,
     plugins,
-  }): Promise<{ artifacts: ArtifactSourceMap[] } | undefined> {
+  }): Promise<{ artifacts: ArtifactSourceMap[]; total: number } | undefined> {
     const { page, perPage } = params.query;
 
     try {
       const fleetPluginStart = await plugins.fleet?.start();
       if (fleetPluginStart) {
-        const artifacts = await listArtifacts({
+        const { artifacts, total } = await listSourceMapArtifacts({
           fleetPluginStart,
           page,
           perPage,
         });
-        return { artifacts };
+
+        return { artifacts, total };
       }
     } catch (e) {
       throw Boom.internal(

@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       endpoint: 'GET /api/apm/sourcemaps',
       params: { query },
     });
-    return response.body.artifacts;
+    return response.body;
   }
 
   registry.when('source maps', { config: 'basic', archives: [] }, () => {
@@ -82,7 +82,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('list source maps', () => {
+    describe('list source maps', async () => {
       const uploadedSourcemapIds: string[] = [];
       before(async () => {
         const sourcemapCount = times(15);
@@ -98,7 +98,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           });
           uploadedSourcemapIds.push(sourcemap.id);
-          await sleep(50);
         }
       });
 
@@ -106,34 +105,41 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await Promise.all(uploadedSourcemapIds.map((id) => deleteSourcemap(id)));
       });
 
-      it('can list source maps', async () => {
-        const sourcemaps = await listSourcemaps();
-        expect(sourcemaps.length).to.be(15);
+      describe('pagination', () => {
+        it('can retrieve the first page', async () => {
+          const firstPageItems = await listSourcemaps({ page: 1, perPage: 5 });
+          expect(first(firstPageItems.artifacts)?.identifier).to.eql('my_service-1.0.14');
+          expect(last(firstPageItems.artifacts)?.identifier).to.eql('my_service-1.0.10');
+          expect(firstPageItems.artifacts.length).to.be(5);
+          expect(firstPageItems.total).to.be(15);
+        });
+
+        it('can retrieve the second page', async () => {
+          const secondPageItems = await listSourcemaps({ page: 2, perPage: 5 });
+          expect(first(secondPageItems.artifacts)?.identifier).to.eql('my_service-1.0.9');
+          expect(last(secondPageItems.artifacts)?.identifier).to.eql('my_service-1.0.5');
+          expect(secondPageItems.artifacts.length).to.be(5);
+          expect(secondPageItems.total).to.be(15);
+        });
+
+        it('can retrieve the third page', async () => {
+          const thirdPageItems = await listSourcemaps({ page: 3, perPage: 5 });
+          expect(first(thirdPageItems.artifacts)?.identifier).to.eql('my_service-1.0.4');
+          expect(last(thirdPageItems.artifacts)?.identifier).to.eql('my_service-1.0.0');
+          expect(thirdPageItems.artifacts.length).to.be(5);
+          expect(thirdPageItems.total).to.be(15);
+        });
       });
 
-      it('can paginate source maps', async () => {
-        const firstPageItems = await listSourcemaps({ page: 1, perPage: 5 });
-        expect(first(firstPageItems)?.identifier).to.eql('my_service-1.0.14');
-        expect(last(firstPageItems)?.identifier).to.eql('my_service-1.0.10');
-        expect(firstPageItems.length).to.be(5);
-
-        const secondPageItems = await listSourcemaps({ page: 2, perPage: 5 });
-        expect(first(secondPageItems)?.identifier).to.eql('my_service-1.0.9');
-        expect(last(secondPageItems)?.identifier).to.eql('my_service-1.0.5');
-        expect(secondPageItems.length).to.be(5);
-
-        const thirdPageItems = await listSourcemaps({ page: 3, perPage: 5 });
-        expect(first(thirdPageItems)?.identifier).to.eql('my_service-1.0.4');
-        expect(last(thirdPageItems)?.identifier).to.eql('my_service-1.0.0');
-        expect(thirdPageItems.length).to.be(5);
+      it('can list source maps', async () => {
+        const sourcemaps = await listSourcemaps();
+        expect(sourcemaps.artifacts.length).to.be(15);
+        expect(sourcemaps.total).to.be(15);
       });
 
       it('returns newest source maps first', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/sourcemaps',
-        });
-
-        const timestamps = response.body.artifacts.map((a) => new Date(a.created).getTime());
+        const { artifacts } = await listSourcemaps();
+        const timestamps = artifacts.map((a) => new Date(a.created).getTime());
         expect(timestamps[0]).to.be.greaterThan(timestamps[1]);
       });
     });
@@ -152,13 +158,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         await deleteSourcemap(sourcemap.id);
-        const sourcemaps = await listSourcemaps();
-        expect(sourcemaps).to.be.empty();
+        const { artifacts, total } = await listSourcemaps();
+        expect(artifacts).to.be.empty();
+        expect(total).to.be(0);
       });
     });
   });
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
