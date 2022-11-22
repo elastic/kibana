@@ -51,17 +51,7 @@ export const GettingStartedPage = () => {
             <SimpleMonitorForm />
           </>
         }
-        footer={
-          <>
-            {/* TODO: add it back in 8.7*/}
-            {/* <EuiText size="s" color="subdued" className="eui-displayInlineBlock">*/}
-            {/*  {FOR_MORE_INFO_LABEL}*/}
-            {/* </EuiText>{' '}*/}
-            {/* <EuiLink href="#" target="_blank" className="eui-displayInline">*/}
-            {/*  {GETTING_STARTED_LABEL}*/}
-            {/* </EuiLink>*/}
-          </>
-        }
+        footer={<>{/* TODO: add it back in 8.7*/}</>}
       />
     </Wrapper>
   );
@@ -76,21 +66,10 @@ const Wrapper = styled.div`
   }
 `;
 
-const FOR_MORE_INFO_LABEL = i18n.translate('xpack.synthetics.gettingStarted.forMoreInfo', {
-  defaultMessage: 'For more information, read our',
-});
-
 const CREATE_SINGLE_PAGE_LABEL = i18n.translate(
   'xpack.synthetics.gettingStarted.createSinglePageLabel',
   {
     defaultMessage: 'Create a single page browser monitor',
-  }
-);
-
-const GETTING_STARTED_LABEL = i18n.translate(
-  'xpack.synthetics.gettingStarted.gettingStartedLabel',
-  {
-    defaultMessage: 'Getting Started Guide',
   }
 );
 
