@@ -43,6 +43,8 @@ disabled:
   - x-pack/plugins/apm/ftr_e2e/ftr_config_open.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_run.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config.ts
+  # Disabled for now as it needs Docker Desktop to run locally
+  - test/node_roles_functional/basic_feature_test.config.ts
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
@@ -111,7 +113,6 @@ enabled:
   - test/node_roles_functional/all.config.ts
   - test/node_roles_functional/background_tasks.config.ts
   - test/node_roles_functional/ui.config.ts
-  - test/node_roles_functional/basic_feature_test.config.ts
   - test/plugin_functional/config.ts
   - test/server_integration/http/platform/config.status.ts
   - test/server_integration/http/platform/config.ts
