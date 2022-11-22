@@ -6,10 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   getDocumentTypeFilterForTransactions,

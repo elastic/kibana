@@ -111,6 +111,7 @@ export class LayerWizardSelect extends Component<Props, State> {
           key={category}
           isSelected={category === this.state.selectedCategory}
           onClick={() => this._filterByCategory(category)}
+          minWidth={false}
         >
           {getCategoryLabel(category)}
         </EuiFacetButton>
@@ -123,6 +124,7 @@ export class LayerWizardSelect extends Component<Props, State> {
           key="all"
           isSelected={!this.state.selectedCategory}
           onClick={() => this._filterByCategory(null)}
+          minWidth={false}
         >
           <FormattedMessage id="xpack.maps.layerWizardSelect.allCategories" defaultMessage="All" />
         </EuiFacetButton>
