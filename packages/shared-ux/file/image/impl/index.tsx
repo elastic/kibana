@@ -5,3 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+export { Image as FileImage } from './src/image';
+export type { Props as FileImageProps } from './src/image';

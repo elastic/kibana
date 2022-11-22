@@ -68,16 +68,9 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
-  "@npm//rxjs",
-  "@npm//react-use",
-  "//packages/kbn-ambient-ui-types",
   "//packages/shared-ux/file/image/types",
-  "//packages/kbn-shared-ux-utility:npm_module_types",
-  "@npm//@emotion/css",
-  "@npm//@emotion/react",
 ]
 
 jsts_transpiler(
