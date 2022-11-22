@@ -103,6 +103,12 @@ export class Timeslider extends Component<Props, {}> {
           )
         )
         .subscribe(({ timeslice }) => {
+          // use waitForTimesliceToLoad$ observable to wait until next frame loaded
+          // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
+          this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
+            this._controlGroup.anyControlOutputConsumerLoading$.next(false);
+          });
+
           this.props.setTimeslice({
             from: timeslice[0],
             to: timeslice[1],
@@ -120,27 +126,6 @@ export class Timeslider extends Component<Props, {}> {
       this.props.setTimeslice({ from: value[0], to: value[1] });
     }
   }, 300);
-
-  /*_playNextFrame() {
-    // advance to next frame
-    this._onNext();
-
-    // use waitForTimesliceToLoad$ observable to wait until next frame loaded
-    // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
-    this._subscription = this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
-      if (this.state.isPaused) {
-        return;
-      }
-
-      // use timeout to display frame for small time period before moving to next frame
-      this._timeoutId = window.setTimeout(() => {
-        if (this.state.isPaused) {
-          return;
-        }
-        this._playNextFrame();
-      }, 1750);
-    });
-  }*/
 
   render() {
     return this.props.isTimesliderOpen
