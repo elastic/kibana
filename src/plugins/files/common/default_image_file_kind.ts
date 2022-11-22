@@ -10,7 +10,7 @@ import { FileKind } from './types';
 
 const id = 'defaultImage' as const;
 const tag = 'files:defaultImage' as const;
-const tags = [tag];
+const tags = [`access:${tag}`];
 const tenMebiBytes = 1024 * 1024 * 10;
 
 /**
