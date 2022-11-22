@@ -354,9 +354,8 @@ export class ApplicationService {
         );
       },
 
-      setCustomBranding$: (customBranding$: BehaviorSubject<CustomBranding | undefined>) => {
-        this.customBranding$ = customBranding$;
-      },
+      setCustomBranding: (customBranding$: BehaviorSubject<CustomBranding | undefined>) =>
+        (this.customBranding$ = customBranding$),
     };
   }
 

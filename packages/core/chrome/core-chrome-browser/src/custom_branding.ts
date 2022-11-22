@@ -20,12 +20,14 @@ export interface CustomBranding {
    * */
   logo?: string;
   /** Set as string
-   * @example href={`${uiPublicURL}/favicons/favicon.png`
-   * need to support only SVG, PNG, GIF files
+   * link to a file service
    * */
   favicon?: string;
   /** Instead of elastic, Kibana operators can customize the title */
   pageTitle?: string;
-  /** This logo is the loading progress logo that by default is the elastic cluster */
+  /**
+   * equivalent to Elastic Mark
+   * @link packages/core/chrome/core-chrome-browser-internal/src/ui/header/elastic_mark.tsx
+   */
   customizedLogo?: string;
 }
