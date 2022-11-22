@@ -55,7 +55,7 @@ export function ParamsEditor<TParams = unknown>({
   onHandleParamsUpdate,
   timeRangeForSuggestionsOverride,
 }: ParamsEditorProps<TParams>) {
-  const { isDisabled } = useContext(FiltersBuilderContextType);
+  const { disabled } = useContext(FiltersBuilderContextType);
   const onParamsChange = useCallback(
     (selectedParams) => {
       onHandleParamsChange(selectedParams);
@@ -90,8 +90,8 @@ export function ParamsEditor<TParams = unknown>({
           onChange={onParamsChange}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           fullWidth
-          isInvalid={isInvalid}
-          isDisabled={isDisabled}
+          invalid={isInvalid}
+          disabled={disabled}
         />
       );
       break;
@@ -106,7 +106,7 @@ export function ParamsEditor<TParams = unknown>({
           onParamsUpdate={onParamsUpdate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           fullWidth
-          isDisabled={isDisabled}
+          disabled={disabled}
         />
       );
       break;
@@ -118,7 +118,7 @@ export function ParamsEditor<TParams = unknown>({
           value={isRangeParams(params) ? params : undefined}
           onChange={onParamsChange}
           fullWidth
-          isDisabled={isDisabled}
+          disabled={disabled}
         />
       );
       break;

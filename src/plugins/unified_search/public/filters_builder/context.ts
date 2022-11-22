@@ -19,7 +19,7 @@ interface FiltersBuilderContextType {
   };
   dropTarget: string;
   timeRangeForSuggestionsOverride?: boolean;
-  isDisabled: boolean;
+  disabled: boolean;
 }
 
 export const FiltersBuilderContextType = React.createContext<FiltersBuilderContextType>(

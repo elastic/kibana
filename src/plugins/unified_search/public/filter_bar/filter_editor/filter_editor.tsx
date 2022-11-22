@@ -247,7 +247,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
               timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
               dataView={selectedDataView!}
               onChange={this.onLocalFilterChange}
-              isDisabled={!selectedDataView}
+              disabled={!selectedDataView}
             />
           </EuiToolTip>
         </div>

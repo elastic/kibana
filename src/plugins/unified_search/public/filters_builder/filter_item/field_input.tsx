@@ -28,7 +28,7 @@ interface FieldInputProps {
 }
 
 export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) {
-  const { isDisabled } = useContext(FiltersBuilderContextType);
+  const { disabled } = useContext(FiltersBuilderContextType);
   const fields = dataView ? getFilterableFields(dataView) : [];
   const id = useGeneratedHtmlId({ prefix: 'fieldInput' });
 
@@ -66,7 +66,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
       options={euiOptions}
       selectedOptions={selectedEuiOptions}
       onChange={onComboBoxChange}
-      isDisabled={isDisabled}
+      isDisabled={disabled}
       placeholder={i18n.translate('unifiedSearch.filter.filtersBuilder.fieldSelectPlaceholder', {
         defaultMessage: 'Select a field',
       })}

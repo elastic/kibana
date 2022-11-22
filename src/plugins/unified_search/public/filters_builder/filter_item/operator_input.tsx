@@ -26,7 +26,7 @@ export function OperatorInput<TParams = unknown>({
   params,
   onHandleOperator,
 }: OperatorInputProps<TParams>) {
-  const { isDisabled } = useContext(FiltersBuilderContextType);
+  const { disabled } = useContext(FiltersBuilderContextType);
   const operators = field ? getOperatorOptions(field) : [];
 
   const onOperatorChange = useCallback(
@@ -42,7 +42,7 @@ export function OperatorInput<TParams = unknown>({
     <GenericComboBox
       fullWidth
       compressed
-      isDisabled={!field || isDisabled}
+      isDisabled={!field || disabled}
       placeholder={i18n.translate(
         'unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderSelect',
         {

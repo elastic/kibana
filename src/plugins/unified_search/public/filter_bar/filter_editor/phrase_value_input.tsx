@@ -20,8 +20,8 @@ interface PhraseValueInputProps extends PhraseSuggestorProps {
   intl: InjectedIntl;
   fullWidth?: boolean;
   compressed?: boolean;
-  isDisabled?: boolean;
-  isInvalid?: boolean;
+  disabled?: boolean;
+  invalid?: boolean;
 }
 
 class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
@@ -32,7 +32,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
           this.renderWithSuggestions()
         ) : (
           <ValueInputType
-            disabled={this.props.isDisabled}
+            disabled={this.props.disabled}
             compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.intl.formatMessage({
@@ -42,7 +42,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
             value={this.props.value}
             onChange={this.props.onChange}
             field={this.props.field}
-            isInvalid={this.props.isInvalid}
+            isInvalid={this.props.invalid}
           />
         )}
       </>
@@ -57,7 +57,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
     const options = value ? uniq([valueAsStr, ...suggestions]) : suggestions;
     return (
       <StringComboBox
-        isDisabled={this.props.isDisabled}
+        isDisabled={this.props.disabled}
         fullWidth={fullWidth}
         compressed={this.props.compressed}
         placeholder={intl.formatMessage({
