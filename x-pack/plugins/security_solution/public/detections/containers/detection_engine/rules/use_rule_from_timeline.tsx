@@ -15,7 +15,6 @@ import {
 import { useDispatch } from 'react-redux';
 import { EuiLink } from '@elastic/eui';
 
-import { stepDefineDefaultValue } from '../../../pages/detection_engine/rules/utils';
 import type { TimelineModel } from '../../../..';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { getTimelineUrl, useFormatUrl } from '../../../../common/components/link_to';
@@ -45,8 +44,12 @@ interface RuleFromTimeline {
 }
 
 export const initialState = {
-  index: stepDefineDefaultValue.index,
-  queryBar: stepDefineDefaultValue.queryBar,
+  index: [],
+  queryBar: {
+    query: { query: '', language: 'kuery' },
+    filters: [],
+    saved_id: null,
+  },
   updated: false,
 };
 
