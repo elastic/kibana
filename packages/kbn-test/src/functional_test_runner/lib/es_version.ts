@@ -38,6 +38,10 @@ export class EsVersion {
     this.parsed = parsed;
   }
 
+  toJSON() {
+    return this.toString();
+  }
+
   toString() {
     return this.parsed.version;
   }
