@@ -7,6 +7,7 @@
 
 import React, { createContext, ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
+import { History } from 'history';
 import { isRumAgentName } from '../../../common/agent_name';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -61,19 +62,12 @@ export function ApmServiceContextProvider({
     end,
   });
 
-  const currentTransactionType = getTransactionType({
+  const currentTransactionType = getOrRedirectToTransactionType({
     transactionType: query.transactionType,
     transactionTypes,
     agentName,
+    history,
   });
-
-  // Replace transactionType in the URL in case it is not one of the types returned by the API
-  if (
-    currentTransactionType &&
-    currentTransactionType !== query.transactionType
-  ) {
-    replace(history, { query: { transactionType: currentTransactionType } });
-  }
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
@@ -110,7 +104,6 @@ export function getTransactionType({
   if (!agentName || transactionTypes.length === 0) {
     return;
   }
-
   // The default transaction type is "page-load" for RUM agents and "request" for all others
   const defaultTransactionType = isRumAgentName(agentName)
     ? TRANSACTION_PAGE_LOAD
@@ -123,5 +116,28 @@ export function getTransactionType({
     ? defaultTransactionType
     : transactionTypes[0];
 
+  return currentTransactionType;
+}
+
+export function getOrRedirectToTransactionType({
+  transactionType,
+  transactionTypes,
+  agentName,
+  history,
+}: {
+  transactionType?: string;
+  transactionTypes: string[];
+  agentName?: string;
+  history: History;
+}) {
+  const currentTransactionType = getTransactionType({
+    transactionTypes,
+    transactionType,
+    agentName,
+  });
+
+  // Replace transactionType in the URL in case it is not one of the types returned by the API
+  if (!currentTransactionType || currentTransactionType !== transactionType)
+    replace(history, { query: { transactionType: currentTransactionType! } });
   return currentTransactionType;
 }
