@@ -72,7 +72,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     state: {
       rules,
       filterOptions,
-      isActionInProgress,
+      isPreflightInProgress,
       isAllSelected,
       isFetched,
       isLoading,
@@ -229,7 +229,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
 
   const shouldShowLinearProgress = isFetched && isRefetching;
-  const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isActionInProgress;
+  const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
 
   return (
     <>

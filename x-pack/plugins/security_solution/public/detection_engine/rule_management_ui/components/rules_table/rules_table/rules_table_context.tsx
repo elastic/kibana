@@ -60,6 +60,10 @@ export interface RulesTableState {
    */
   isLoading: boolean;
   /**
+   * Is true when a preflight request (dry-run) is in progress.
+   */
+  isPreflightInProgress: boolean;
+  /**
    * Is true whenever a background refetch is in-flight, which does not include initial loading
    */
   isRefetching: boolean;
@@ -126,6 +130,7 @@ export interface RulesTableActions {
   setFilterOptions: (newFilter: Partial<FilterOptions>) => void;
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setIsInMemorySorting: (value: boolean) => void;
+  setIsPreflightInProgress: React.Dispatch<React.SetStateAction<boolean>>;
   /**
    * enable/disable rules table auto refresh
    *
@@ -179,8 +184,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const [loadingRules, setLoadingRules] = useState<LoadingRules>({
     ids: [],
     action: null,
-    isDryRun: false,
   });
+  const [isPreflightInProgress, setIsPreflightInProgress] = useState(false);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
@@ -199,14 +204,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     [storage]
   );
 
-  const isActionInProgress = useMemo(() => {
-    if (loadingRules.ids.length > 0) {
-      return (
-        loadingRules.isDryRun || !['disable', 'enable', 'edit'].includes(loadingRules.action ?? '')
-      );
-    }
-    return false;
-  }, [loadingRules.action, loadingRules.ids.length, loadingRules.isDryRun]);
+  const isActionInProgress = loadingRules.ids.length > 0;
 
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
@@ -269,6 +267,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
           total: isInMemorySorting ? rules.length : total,
         },
         filterOptions,
+        isPreflightInProgress,
         isActionInProgress,
         isAllSelected,
         isFetched,
@@ -294,33 +293,34 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         setPerPage,
         setSelectedRuleIds,
         setSortingOptions,
+        setIsPreflightInProgress,
         clearRulesSelection,
       },
     }),
     [
-      dataUpdatedAt,
+      rulesToDisplay,
+      page,
+      perPage,
+      isInMemorySorting,
+      rules.length,
+      total,
       filterOptions,
-      handleFilterOptionsChange,
+      isPreflightInProgress,
       isActionInProgress,
       isAllSelected,
       isFetched,
       isFetching,
-      isInMemorySorting,
       isLoading,
       isRefetching,
       isRefreshOn,
-      loadingRules.action,
+      dataUpdatedAt,
       loadingRules.ids,
-      page,
-      perPage,
-      refetch,
-      rules.length,
-      rulesToDisplay,
+      loadingRules.action,
       selectedRuleIds,
       sortingOptions,
+      refetch,
+      handleFilterOptionsChange,
       toggleInMemorySorting,
-      setSelectedRuleIds,
-      total,
       clearRulesSelection,
     ]
   );

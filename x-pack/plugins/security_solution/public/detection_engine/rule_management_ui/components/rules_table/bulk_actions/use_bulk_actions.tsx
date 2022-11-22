@@ -74,7 +74,7 @@ export const useBulkActions = ({
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
-    actions: { setLoadingRules, clearRulesSelection },
+    actions: { setLoadingRules, clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
 
   const getBulkItemsPopoverContent = useCallback(
@@ -195,11 +195,7 @@ export const useBulkActions = ({
 
         closePopover();
 
-        setLoadingRules({
-          ids: selectedRuleIds,
-          action: BulkActionType.edit,
-          isDryRun: true,
-        });
+        setIsPreflightInProgress(true);
 
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkActionType.edit,
@@ -209,7 +205,7 @@ export const useBulkActions = ({
           editPayload: computeDryRunEditPayload(bulkEditActionType),
         });
 
-        setLoadingRules?.({ ids: [], action: null, isDryRun: false });
+        setIsPreflightInProgress(false);
 
         // User has cancelled edit action or there are no custom rules to proceed
         const hasActionBeenConfirmed = await showBulkActionConfirmation(
@@ -468,20 +464,20 @@ export const useBulkActions = ({
       isAllSelected,
       loadingRuleIds,
       startTransaction,
-      setLoadingRules,
       hasMlPermissions,
       executeBulkAction,
       filterQuery,
       toasts,
+      showBulkDuplicateConfirmation,
       clearRulesSelection,
       confirmDeletion,
       bulkExport,
       showBulkActionConfirmation,
+      downloadExportedRules,
+      setIsPreflightInProgress,
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
-      downloadExportedRules,
-      showBulkDuplicateConfirmation,
     ]
   );
 
