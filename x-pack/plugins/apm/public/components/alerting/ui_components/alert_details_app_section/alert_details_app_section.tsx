@@ -59,8 +59,7 @@ export function AlertDetailsAppSection({
   );
 
   // duration is us, convert it to MS
-  const alertDurationMS =
-    (alert.fields[ALERT_DURATION] as unknown as number) / 1000;
+  const alertDurationMS = alert.fields[ALERT_DURATION]! / 1000;
 
   const serviceName = String(alert.fields[SERVICE_NAME]);
 
