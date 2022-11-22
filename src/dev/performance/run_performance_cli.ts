@@ -58,6 +58,7 @@ run(
 
       log.info(`✅ ES is ready and will run in the background`);
 
+      process.stdout.write(`--- Running warmup\n`);
       // Set the phase to WARMUP, this will prevent the functional test server from starting Elasticsearch, opt in to telemetry, etc.
       process.env.TEST_PERFORMANCE_PHASE = 'WARMUP';
       await runFunctionalTest(warmupJourney);
@@ -88,7 +89,7 @@ run(
 
     for (const journey of journeys) {
       await startAndWarmupEs();
-      log.info(`--- Running journey ${journey}`);
+      process.stdout.write(`--- Running journey ${journey}\n`);
       await runTest(journey);
       await procRunner.stop('es');
     }
