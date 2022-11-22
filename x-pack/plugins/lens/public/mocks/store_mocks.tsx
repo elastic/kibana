@@ -47,6 +47,7 @@ export const defaultState = {
   query: { language: 'lucene', query: '' },
   resolvedDateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
   isFullscreenDatasource: false,
+  isLoadLibraryVisible: false,
   isSaveable: false,
   isLoading: false,
   isLinkedToOriginatingApp: false,

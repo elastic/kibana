@@ -38,6 +38,7 @@ export const initialState: LensAppState = {
   query: { language: 'kuery', query: '' },
   resolvedDateRange: { fromDate: '', toDate: '' },
   isFullscreenDatasource: false,
+  isLoadLibraryVisible: false,
   isSaveable: false,
   isLoading: false,
   isLinkedToOriginatingApp: false,
@@ -135,6 +136,7 @@ export const switchVisualization = createAction<{
 }>('lens/switchVisualization');
 export const rollbackSuggestion = createAction<void>('lens/rollbackSuggestion');
 export const setToggleFullscreen = createAction<void>('lens/setToggleFullscreen');
+export const setIsLoadLibraryVisible = createAction<boolean>('lens/setIsLoadLibraryVisible');
 export const submitSuggestion = createAction<void>('lens/submitSuggestion');
 export const switchDatasource = createAction<{
   newDatasourceId: string;
@@ -228,6 +230,7 @@ export const lensActions = {
   switchVisualization,
   rollbackSuggestion,
   setToggleFullscreen,
+  setIsLoadLibraryVisible,
   submitSuggestion,
   switchDatasource,
   switchAndCleanDatasource,
@@ -736,6 +739,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     },
     [setToggleFullscreen.type]: (state) => {
       return { ...state, isFullscreenDatasource: !state.isFullscreenDatasource };
+    },
+    [setIsLoadLibraryVisible.type]: (state, { payload }) => {
+      return { ...state, isLoadLibraryVisible: Boolean(payload) };
     },
     [submitSuggestion.type]: (state) => {
       return {

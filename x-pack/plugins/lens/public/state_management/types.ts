@@ -46,6 +46,7 @@ export interface EditorFrameState extends PreviewState {
   applyChangesCounter?: number;
   changesApplied?: boolean;
   isFullscreenDatasource?: boolean;
+  isLoadLibraryVisible?: boolean;
 }
 export interface LensAppState extends EditorFrameState {
   persistedDoc?: Document;
@@ -63,6 +64,7 @@ export interface LensAppState extends EditorFrameState {
   sharingSavedObjectProps?: Omit<SharingSavedObjectProps, 'sourceId'>;
   // Dataview/Indexpattern management has moved in here from datasource
   dataViews: DataViewsState;
+  isLoadLibraryVisible?: boolean;
 }
 
 export type DispatchSetState = (state: Partial<LensAppState>) => {

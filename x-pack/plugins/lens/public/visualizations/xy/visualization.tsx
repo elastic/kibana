@@ -199,10 +199,11 @@ export const getXyVisualization = ({
     };
   },
 
+  // how to implement this for saved object annotations?
   getPersistableState(state) {
     return extractReferences(state);
   },
-
+  // how to implement this for saved object annotations?
   fromPersistableState(state, references, initialContext) {
     return injectReferences(state, references, initialContext);
   },
@@ -254,12 +255,14 @@ export const getXyVisualization = ({
     ];
   },
 
-  getSupportedActionsForLayer(layerId, state) {
+  getSupportedActionsForLayer(layerId, state, setState, isSaveable) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     const actions = [];
     if (isAnnotationsLayer(layer)) {
-      actions.push(...createAnnotationActions({ state, layerIndex, layer }));
+      actions.push(
+        ...createAnnotationActions({ state, layerIndex, layer, setState, core, isSaveable })
+      );
     }
     return actions;
   },

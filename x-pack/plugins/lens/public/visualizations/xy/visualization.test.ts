@@ -74,13 +74,15 @@ function exampleState(): XYState {
 const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
+const core = coreMock.createStart();
+
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
   eventAnnotationService: eventAnnotationServiceMock,
-  core: coreMock.createStart(),
+  core,
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
@@ -2869,27 +2871,31 @@ describe('xy_visualization', () => {
 
   describe('layer actions', () => {
     it('should return no actions for a data layer', () => {
-      expect(xyVisualization.getSupportedActionsForLayer?.('first', exampleState())).toHaveLength(
-        0
-      );
+      expect(
+        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn())
+      ).toHaveLength(0);
     });
 
     it('should return one action for an annotation layer', () => {
       const baseState = exampleState();
       expect(
-        xyVisualization.getSupportedActionsForLayer?.('annotation', {
-          ...baseState,
-          layers: [
-            ...baseState.layers,
-            {
-              layerId: 'annotation',
-              layerType: layerTypes.ANNOTATIONS,
-              annotations: [exampleAnnotation2],
-              ignoreGlobalFilters: true,
-              indexPatternId: 'myIndexPattern',
-            },
-          ],
-        })
+        xyVisualization.getSupportedActionsForLayer?.(
+          'annotation',
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: LayerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
+                indexPatternId: 'myIndexPattern',
+              },
+            ],
+          },
+          jest.fn()
+        )
       ).toEqual([
         expect.objectContaining({
           displayName: 'Keep global filters',

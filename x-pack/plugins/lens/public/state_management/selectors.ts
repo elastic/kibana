@@ -41,6 +41,9 @@ export const selectDataViews = (state: LensState) => state.lens.dataViews;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 
+export const selectIsLoadLibraryVisible = (state: LensState) =>
+  Boolean(state.lens.isLoadLibraryVisible);
+
 let applyChangesCounter: number | undefined;
 export const selectTriggerApplyChanges = (state: LensState) => {
   const shouldApply = state.lens.applyChangesCounter !== applyChangesCounter;

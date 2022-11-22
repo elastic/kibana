@@ -577,14 +577,14 @@ export interface LayerAction {
   id: string;
   displayName: string;
   description?: string;
-  execute: () => void | Promise<void>;
+  execute?: (domElement?: Element) => void | Promise<void>;
   icon: IconType;
   color?: EuiButtonIconProps['color'];
   isCompatible: boolean;
   'data-test-subj'?: string;
 }
 
-export type LayerActionFromVisualization = Omit<LayerAction, 'execute'>;
+export type LayerActionFromVisualization = LayerAction;
 
 interface SharedDimensionProps {
   /** Visualizations can restrict operations based on their own rules.
@@ -1065,7 +1065,12 @@ export interface Visualization<T = unknown, P = unknown> {
    * returns a list of custom actions supported by the visualization layer.
    * Default actions like delete/clear are not included in this list and are managed by the editor frame
    * */
-  getSupportedActionsForLayer?: (layerId: string, state: T) => LayerActionFromVisualization[];
+  getSupportedActionsForLayer?: (
+    layerId: string,
+    state: T,
+    setState: StateSetter<T>,
+    isSaveable?: boolean
+  ) => LayerActionFromVisualization[];
 
   /**
    * Perform state mutations in response to a layer action

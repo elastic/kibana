@@ -139,6 +139,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 framePublicAPI={framePublicAPI}
                 uiActions={props.plugins.uiActions}
                 indexPatternService={props.indexPatternService}
+                eventAnnotationService={props.plugins.eventAnnotation}
               />
             </ErrorBoundary>
           )

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiToolTip,
   EuiButton,
@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LayerType } from '../../../../common';
 import type { FramePublicAPI, Visualization } from '../../../types';
+import { setIsLoadLibraryVisible, useLensDispatch } from '../../../state_management';
 
 interface AddLayerButtonProps {
   visualization: Visualization;
@@ -32,6 +33,8 @@ export function getLayerType(visualization: Visualization, state: unknown, layer
   return visualization.getLayerType(layerId, state) || LayerTypes.DATA;
 }
 
+// TODO: this module becomes too specific to the xy visualization,
+// we should allow the visualizations to use a generic one (old implementation) or a custom one (this implementation but moved to xyVisualization.addLayerButton)
 export function AddLayerButton({
   visualization,
   visualizationState,
@@ -39,6 +42,11 @@ export function AddLayerButton({
   layersMeta,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
+  const dispatchLens = useLensDispatch();
+
+  const setLibraryVisible = useCallback(() => {
+    dispatchLens(setIsLoadLibraryVisible(true));
+  }, [dispatchLens]);
 
   const supportedLayers = useMemo(() => {
     if (!visualization.appendLayer || !visualizationState) {
@@ -52,6 +60,37 @@ export function AddLayerButton({
   if (supportedLayers == null || !supportedLayers.length) {
     return null;
   }
+  const annotationPanel = ({
+    type,
+    label,
+    icon,
+    disabled,
+    toolTipContent,
+  }: typeof supportedLayers[0]) => {
+    return {
+      panel: 1,
+      toolTipContent,
+      disabled,
+      name: (
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <span className="lnsLayerAddButton__label">{label}</span>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiBadge className="lnsLayerAddButton__techBadge" color="hollow" isDisabled={disabled}>
+              {i18n.translate('xpack.lens.configPanel.experimentalLabel', {
+                defaultMessage: 'Technical preview',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      className: 'lnsLayerAddButton',
+      icon: icon && <EuiIcon size="m" type={icon} />,
+      ['data-test-subj']: `lnsLayerAddButton-${type}`,
+    };
+  };
   if (supportedLayers.length === 1) {
     return (
       <EuiToolTip
@@ -117,32 +156,15 @@ export function AddLayerButton({
               defaultMessage: 'Select layer type',
             }),
             width: 300,
-            items: supportedLayers.map(({ type, label, icon, disabled, toolTipContent }) => {
+            items: supportedLayers.map((props) => {
+              const { type, label, icon, disabled, toolTipContent } = props;
+              if (type === LayerTypes.ANNOTATIONS) {
+                return annotationPanel(props);
+              }
               return {
                 toolTipContent,
                 disabled,
-                name:
-                  type === LayerTypes.ANNOTATIONS ? (
-                    <EuiFlexGroup gutterSize="m">
-                      <EuiFlexItem>
-                        <span className="lnsLayerAddButton__label">{label}</span>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge
-                          className="lnsLayerAddButton__techBadge"
-                          color="hollow"
-                          isDisabled={disabled}
-                        >
-                          {i18n.translate('xpack.lens.configPanel.experimentalLabel', {
-                            defaultMessage: 'Technical preview',
-                          })}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ) : (
-                    <span className="lnsLayerAddButtonLabel">{label}</span>
-                  ),
+                name: <span className="lnsLayerAddButtonLabel">{label}</span>,
                 className: 'lnsLayerAddButton',
                 icon: icon && <EuiIcon size="m" type={icon} />,
                 ['data-test-subj']: `lnsLayerAddButton-${type}`,
@@ -152,6 +174,35 @@ export function AddLayerButton({
                 },
               };
             }),
+          },
+          {
+            id: 1,
+            initialFocusedItemIndex: 0,
+            title: i18n.translate('xpack.lens.configPanel.selectAnnotationMethod', {
+              defaultMessage: 'Select annotation method',
+            }),
+            items: [
+              {
+                name: i18n.translate('xpack.lens.configPanel.newAnnotation', {
+                  defaultMessage: 'New annotation',
+                }),
+                icon: 'plusInCircleFilled',
+                onClick: () => {
+                  onAddLayerClick(LayerTypes.ANNOTATIONS);
+                  toggleLayersChoice(false);
+                },
+              },
+              {
+                name: i18n.translate('xpack.lens.configPanel.loadFromLibrary', {
+                  defaultMessage: 'Load from library',
+                }),
+                icon: 'folderOpen',
+                onClick: () => {
+                  setLibraryVisible();
+                  toggleLayersChoice(false);
+                },
+              },
+            ],
           },
         ]}
       />

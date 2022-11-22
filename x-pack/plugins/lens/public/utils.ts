@@ -137,6 +137,8 @@ export function getIndexPatternsIds({
     const { savedObjectReferences } = activeVisualization.getPersistableState(visualizationState);
     references.push(...savedObjectReferences);
   }
+  // TODO: also get index pattern ids from annotations groups SOs
+
   const referencesIds = references
     .filter(({ type }) => type === 'index-pattern')
     .map(({ id }) => id);
