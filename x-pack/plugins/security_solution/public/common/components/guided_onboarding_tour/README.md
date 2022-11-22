@@ -33,7 +33,7 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
         'xpack.securitySolution.guided_onboarding.tour.ruleNameStep.tourContent',
         {
           defaultMessage:
-            'To help you practice triaging alerts, we enabled a rule to create your first alert.',
+            'To help you practice triaging alerts, here is the alert from the rule that we enabled in the previous step.',
         }
       ),
       anchorPosition: 'downCenter',
