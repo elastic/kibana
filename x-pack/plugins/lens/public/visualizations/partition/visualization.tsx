@@ -415,9 +415,13 @@ export const getPieVisualization = ({
     let newLayer = { ...layerToChange };
 
     if (layerToChange.collapseFns?.[columnId]) {
-      const newCollapseFns = { ...layerToChange.collapseFns };
-      delete newCollapseFns[columnId];
-      newLayer.collapseFns = newCollapseFns;
+      newLayer.collapseFns = { ...layerToChange.collapseFns };
+      delete newLayer.collapseFns[columnId];
+    }
+
+    if (layerToChange.colorsByDimension?.[columnId]) {
+      newLayer.colorsByDimension = { ...layerToChange.colorsByDimension };
+      delete newLayer.colorsByDimension[columnId];
     }
 
     newLayer = {

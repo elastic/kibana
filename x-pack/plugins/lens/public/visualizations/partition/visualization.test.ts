@@ -173,6 +173,31 @@ describe('pie_visualization', () => {
 
       expect(newState.layers[0].collapseFns).not.toHaveProperty('3');
     });
+    it('removes corresponding color by dimension if exists', () => {
+      const state = getExampleState();
+
+      const colIds = ['1', '2', '3', '4'];
+
+      state.layers[0].primaryGroups = colIds;
+
+      state.layers[0].colorsByDimension = {
+        '1': 'custom-color1',
+        '3': 'custom-color2',
+      };
+
+      const newState = pieVisualization.removeDimension({
+        layerId: LAYER_ID,
+        columnId: '3',
+        prevState: state,
+        frame: mockFrame(),
+      });
+
+      expect(newState.layers[0].colorsByDimension).toMatchInlineSnapshot(`
+        Object {
+          "1": "custom-color1",
+        }
+      `);
+    });
     it('removes custom palette if removing final slice-by dimension in multi-metric chart', () => {
       const state = getExampleState();
 
