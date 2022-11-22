@@ -44,64 +44,11 @@ export class DefaultSLIClient implements SLIClient {
 
   async fetchCurrentSLIData(slo: SLO): Promise<Record<SLOId, IndicatorData>> {
     const dateRange = toDateRange(slo.time_window);
-    if (occurencesBudgetingMethodSchema.is(slo.budgeting_method)) {
-      const result = await this.esClient.search<unknown, Record<AggKey, AggregationsSumAggregate>>({
-        ...commonQuery(slo, dateRange),
-        aggs: {
-          good: { sum: { field: 'slo.numerator' } },
-          total: { sum: { field: 'slo.denominator' } },
-        },
-      });
-
-      return handleResult(slo, result.aggregations, dateRange);
-    }
-
-    if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
-      const result = await this.esClient.search<unknown, Record<AggKey, AggregationsSumAggregate>>({
-        ...commonQuery(slo, dateRange),
-        aggs: {
-          slices: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: toInterval(slo.objective.timeslice_window),
-            },
-            aggs: {
-              good: { sum: { field: 'slo.numerator' } },
-              total: { sum: { field: 'slo.denominator' } },
-              good_slice: {
-                bucket_script: {
-                  buckets_path: {
-                    good: 'good',
-                    total: 'total',
-                  },
-                  script: `params.good / params.total >= ${slo.objective.timeslice_target} ? 1 : 0`,
-                },
-              },
-              count_slice: {
-                bucket_script: {
-                  buckets_path: {},
-                  script: '1',
-                },
-              },
-            },
-          },
-          good: {
-            sum_bucket: {
-              buckets_path: 'slices>good_slice.value',
-            },
-          },
-          total: {
-            sum_bucket: {
-              buckets_path: 'slices>count_slice.value',
-            },
-          },
-        },
-      });
-
-      return handleResult(slo, result.aggregations, dateRange);
-    }
-
-    assertNever(slo.budgeting_method);
+    const search = generateSearchQuery(slo, dateRange);
+    const result = await this.esClient.search<unknown, Record<AggKey, AggregationsSumAggregate>>(
+      search
+    );
+    return handleResult(slo, dateRange, result.aggregations);
   }
 
   async fetchSLIDataFrom(
@@ -139,6 +86,63 @@ export class DefaultSLIClient implements SLIClient {
   }
 }
 
+function generateSearchQuery(slo: SLO, dateRange: DateRange) {
+  if (occurencesBudgetingMethodSchema.is(slo.budgeting_method)) {
+    return {
+      ...commonQuery(slo, dateRange),
+      aggs: {
+        good: { sum: { field: 'slo.numerator' } },
+        total: { sum: { field: 'slo.denominator' } },
+      },
+    };
+  }
+
+  if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
+    return {
+      ...commonQuery(slo, dateRange),
+      aggs: {
+        slices: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: toInterval(slo.objective.timeslice_window),
+          },
+          aggs: {
+            good: { sum: { field: 'slo.numerator' } },
+            total: { sum: { field: 'slo.denominator' } },
+            good_slice: {
+              bucket_script: {
+                buckets_path: {
+                  good: 'good',
+                  total: 'total',
+                },
+                script: `params.good / params.total >= ${slo.objective.timeslice_target} ? 1 : 0`,
+              },
+            },
+            count_slice: {
+              bucket_script: {
+                buckets_path: {},
+                script: '1',
+              },
+            },
+          },
+        },
+        good: {
+          sum_bucket: {
+            buckets_path: 'slices>good_slice.value',
+          },
+        },
+        total: {
+          sum_bucket: {
+            buckets_path: 'slices>count_slice.value',
+          },
+        },
+      },
+    };
+  }
+
+  assertNever(slo.budgeting_method);
+}
+
 function commonQuery(slo: SLO, dateRange: DateRange) {
   return {
     size: 0,
@@ -161,8 +165,8 @@ function commonQuery(slo: SLO, dateRange: DateRange) {
 
 function handleResult(
   slo: SLO,
-  aggregations: Record<AggKey, AggregationsSumAggregate> | undefined,
-  dateRange: DateRange
+  dateRange: DateRange,
+  aggregations: Record<AggKey, AggregationsSumAggregate> | undefined
 ): Record<SLOId, IndicatorData> {
   const good = aggregations?.good;
   const total = aggregations?.total;
