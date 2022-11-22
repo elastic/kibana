@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 import { getRequestAbortedSignal } from './get_request_aborted_signal';
 
 describe('abortableRequestHandler', () => {
-  jest.useFakeTimers('legacy');
+  jest.useFakeTimers({ legacyFakeTimers: true });
 
   it('should call abort if disconnected', () => {
     const abortedSubject = new Subject<void>();

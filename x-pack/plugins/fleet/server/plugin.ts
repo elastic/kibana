@@ -48,6 +48,8 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
@@ -356,7 +358,7 @@ export class FleetPlugin
             get internalSoClient() {
               return appContextService
                 .getSavedObjects()
-                .getScopedClient(request, { excludedWrappers: ['security'] });
+                .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
             },
           },
           get spaceId() {

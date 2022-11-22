@@ -14,7 +14,7 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_DURATION,
   SERVICE_FRAMEWORK_VERSION,
-} from './elasticsearch_fieldnames';
+} from './es_fields/apm';
 
 describe('service_groups common utils', () => {
   describe('isSupportedField', () => {

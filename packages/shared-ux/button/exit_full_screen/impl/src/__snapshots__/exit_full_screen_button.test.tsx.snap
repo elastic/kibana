@@ -1,407 +1,83 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
-<ExitFullScreenButtonKibanaProvider
-  coreStart={
-    Object {
-      "chrome": Object {
-        "setIsVisible": [MockFunction] {
-          "calls": Array [
-            Array [
-              false,
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
-      },
-    }
-  }
->
-  <ExitFullScreenButton
-    onExit={[MockFunction]}
+<div>
+  <p
+    aria-live="polite"
+    class="emotion-euiScreenReaderOnly"
   >
-    <ExitFullScreenButton
-      css={
-        Object {
-          "map": undefined,
-          "name": "knjqgf",
-          "next": undefined,
-          "styles": "
-    bottom: 8px;
-    left: 8px;
-    position: fixed;
-    z-index: 5;
-  ",
-          "toString": [Function],
-        }
-      }
-      onClick={[Function]}
+    In full screen mode, press ESC to exit.
+  </p>
+  <button
+    class="exitFullScreenButton"
+    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+    data-test-subj="exitFullScreenModeButton"
+  >
+    <span
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
     >
-      <div>
-        <EuiScreenReaderOnly>
-          <p
-            aria-live="polite"
-            css="unknown styles"
-            key="null"
-          >
-            <Insertion
-              cache={
-                Object {
-                  "insert": [Function],
-                  "inserted": Object {
-                    "hus3oj-euiScreenReaderOnly": true,
-                  },
-                  "key": "css",
-                  "nonce": undefined,
-                  "registered": Object {},
-                  "sheet": StyleSheet {
-                    "_alreadyInsertedOrderInsensitiveRule": true,
-                    "_insertTag": [Function],
-                    "before": null,
-                    "container": <head>
-                      <style
-                        data-emotion="css"
-                        data-s=""
-                      >
-                        
-                        .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
-                      </style>
-                      <style
-                        data-styled="active"
-                        data-styled-version="5.1.0"
-                      />
-                      <style
-                        data-styled="active"
-                        data-styled-version="5.1.0"
-                      />
-                    </head>,
-                    "ctr": 1,
-                    "insertionPoint": undefined,
-                    "isSpeedy": false,
-                    "key": "css",
-                    "nonce": undefined,
-                    "prepend": undefined,
-                    "tags": Array [
-                      <style
-                        data-emotion="css"
-                        data-s=""
-                      >
-                        
-                        .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
-                      </style>,
-                    ],
-                  },
-                }
-              }
-              isStringTag={true}
-              serialized={
-                Object {
-                  "map": undefined,
-                  "name": "hus3oj-euiScreenReaderOnly",
-                  "next": undefined,
-                  "styles": ";
-  // Take the element out of the layout
-  position: absolute;
-  // Keep it vertically inline
-  inset-block-start: auto;
-  // Chrome requires a left value, and Selenium (used by Kibana's FTR) requires an off-screen position for its .getVisibleText() to not register SR-only text
-  inset-inline-start: -10000px;
-  // The element must have a size (for some screen readers)
-  
-    inline-size: 1px;
-    block-size: 1px;
-  
-  // But reduce the visible size to nothing
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  // And ensure no overflows occur
-  overflow: hidden;
-  // Chrome requires the negative margin to not cause overflows of parent containers
-  margin: -1px;
-;label:euiScreenReaderOnly;;;;",
-                  "toString": [Function],
-                }
-              }
-            />
-            <p
-              aria-live="polite"
-              className="emotion-euiScreenReaderOnly"
-            >
-              In full screen mode, press ESC to exit.
-            </p>
-          </p>
-        </EuiScreenReaderOnly>
-        <button
-          className="exitFullScreenButton"
-          data-test-subj="exitFullScreenModeButton"
-          onClick={[Function]}
-        >
-          <EuiFlexGroup
-            alignItems="center"
-            component="span"
-            gutterSize="s"
-            responsive={false}
-          >
-            <span
-              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-            >
-              <EuiFlexItem
-                component="span"
-                grow={false}
-              >
-                <span
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  <EuiIcon
-                    size="m"
-                    type="logoElastic"
-                  >
-                    <span
-                      data-euiicon-type="logoElastic"
-                      size="m"
-                    />
-                  </EuiIcon>
-                </span>
-              </EuiFlexItem>
-              <EuiFlexItem
-                component="span"
-                data-test-subj="exitFullScreenModeText"
-                grow={false}
-              >
-                <span
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                  data-test-subj="exitFullScreenModeText"
-                >
-                  Exit full screen
-                </span>
-              </EuiFlexItem>
-              <EuiFlexItem
-                component="span"
-                grow={false}
-              >
-                <span
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  <EuiIcon
-                    size="s"
-                    type="fullScreenExit"
-                  >
-                    <span
-                      data-euiicon-type="fullScreenExit"
-                      size="s"
-                    />
-                  </EuiIcon>
-                </span>
-              </EuiFlexItem>
-            </span>
-          </EuiFlexGroup>
-        </button>
-      </div>
-    </ExitFullScreenButton>
-  </ExitFullScreenButton>
-</ExitFullScreenButtonKibanaProvider>
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          data-euiicon-type="logoElastic"
+        />
+      </span>
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+        data-test-subj="exitFullScreenModeText"
+      >
+        Exit full screen
+      </span>
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          data-euiicon-type="fullScreenExit"
+        />
+      </span>
+    </span>
+  </button>
+</div>
 `;
 
 exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
-<ExitFullScreenButtonProvider
-  setIsFullscreen={
-    [MockFunction] {
-      "calls": Array [
-        Array [
-          true,
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": undefined,
-        },
-      ],
-    }
-  }
->
-  <ExitFullScreenButton
-    onExit={[MockFunction]}
+<div>
+  <p
+    aria-live="polite"
+    class="emotion-euiScreenReaderOnly"
   >
-    <ExitFullScreenButton
-      css={
-        Object {
-          "map": undefined,
-          "name": "knjqgf",
-          "next": undefined,
-          "styles": "
-    bottom: 8px;
-    left: 8px;
-    position: fixed;
-    z-index: 5;
-  ",
-          "toString": [Function],
-        }
-      }
-      onClick={[Function]}
+    In full screen mode, press ESC to exit.
+  </p>
+  <button
+    class="exitFullScreenButton"
+    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+    data-test-subj="exitFullScreenModeButton"
+  >
+    <span
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
     >
-      <div>
-        <EuiScreenReaderOnly>
-          <p
-            aria-live="polite"
-            css="unknown styles"
-            key="null"
-          >
-            <Insertion
-              cache={
-                Object {
-                  "insert": [Function],
-                  "inserted": Object {
-                    "hus3oj-euiScreenReaderOnly": true,
-                  },
-                  "key": "css",
-                  "nonce": undefined,
-                  "registered": Object {},
-                  "sheet": StyleSheet {
-                    "_alreadyInsertedOrderInsensitiveRule": true,
-                    "_insertTag": [Function],
-                    "before": null,
-                    "container": <head>
-                      <style
-                        data-emotion="css"
-                        data-s=""
-                      >
-                        
-                        .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
-                      </style>
-                      <style
-                        data-styled="active"
-                        data-styled-version="5.1.0"
-                      />
-                    </head>,
-                    "ctr": 1,
-                    "insertionPoint": undefined,
-                    "isSpeedy": false,
-                    "key": "css",
-                    "nonce": undefined,
-                    "prepend": undefined,
-                    "tags": Array [
-                      <style
-                        data-emotion="css"
-                        data-s=""
-                      >
-                        
-                        .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
-                      </style>,
-                    ],
-                  },
-                }
-              }
-              isStringTag={true}
-              serialized={
-                Object {
-                  "map": undefined,
-                  "name": "hus3oj-euiScreenReaderOnly",
-                  "next": undefined,
-                  "styles": ";
-  // Take the element out of the layout
-  position: absolute;
-  // Keep it vertically inline
-  inset-block-start: auto;
-  // Chrome requires a left value, and Selenium (used by Kibana's FTR) requires an off-screen position for its .getVisibleText() to not register SR-only text
-  inset-inline-start: -10000px;
-  // The element must have a size (for some screen readers)
-  
-    inline-size: 1px;
-    block-size: 1px;
-  
-  // But reduce the visible size to nothing
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  // And ensure no overflows occur
-  overflow: hidden;
-  // Chrome requires the negative margin to not cause overflows of parent containers
-  margin: -1px;
-;label:euiScreenReaderOnly;;;;",
-                  "toString": [Function],
-                }
-              }
-            />
-            <p
-              aria-live="polite"
-              className="emotion-euiScreenReaderOnly"
-            >
-              In full screen mode, press ESC to exit.
-            </p>
-          </p>
-        </EuiScreenReaderOnly>
-        <button
-          className="exitFullScreenButton"
-          data-test-subj="exitFullScreenModeButton"
-          onClick={[Function]}
-        >
-          <EuiFlexGroup
-            alignItems="center"
-            component="span"
-            gutterSize="s"
-            responsive={false}
-          >
-            <span
-              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-            >
-              <EuiFlexItem
-                component="span"
-                grow={false}
-              >
-                <span
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  <EuiIcon
-                    size="m"
-                    type="logoElastic"
-                  >
-                    <span
-                      data-euiicon-type="logoElastic"
-                      size="m"
-                    />
-                  </EuiIcon>
-                </span>
-              </EuiFlexItem>
-              <EuiFlexItem
-                component="span"
-                data-test-subj="exitFullScreenModeText"
-                grow={false}
-              >
-                <span
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                  data-test-subj="exitFullScreenModeText"
-                >
-                  Exit full screen
-                </span>
-              </EuiFlexItem>
-              <EuiFlexItem
-                component="span"
-                grow={false}
-              >
-                <span
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  <EuiIcon
-                    size="s"
-                    type="fullScreenExit"
-                  >
-                    <span
-                      data-euiicon-type="fullScreenExit"
-                      size="s"
-                    />
-                  </EuiIcon>
-                </span>
-              </EuiFlexItem>
-            </span>
-          </EuiFlexGroup>
-        </button>
-      </div>
-    </ExitFullScreenButton>
-  </ExitFullScreenButton>
-</ExitFullScreenButtonProvider>
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          data-euiicon-type="logoElastic"
+        />
+      </span>
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+        data-test-subj="exitFullScreenModeText"
+      >
+        Exit full screen
+      </span>
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          data-euiicon-type="fullScreenExit"
+        />
+      </span>
+    </span>
+  </button>
+</div>
 `;

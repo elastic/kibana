@@ -26,7 +26,7 @@ export const getTextEmbeddingOutputComponent = (inferrer: TextEmbeddingInference
 const TextEmbeddingOutput: FC<{
   inferrer: TextEmbeddingInference;
 }> = ({ inferrer }) => {
-  const result = useObservable(inferrer.getInferenceResult$());
+  const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
   }
