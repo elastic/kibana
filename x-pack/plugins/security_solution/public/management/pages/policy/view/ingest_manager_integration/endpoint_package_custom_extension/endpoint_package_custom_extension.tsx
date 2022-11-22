@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSpacer, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { NoPrivileges } from '../../../../../../common/components/no_privileges';
 import { useCanAccessSomeArtifacts } from '../hooks/use_can_access_some_artifacts';
@@ -122,7 +122,15 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
 
     const artifactCards: ReactElement = useMemo(() => {
       if (loading) {
-        return <></>;
+        return (
+          <EuiFlexGroup alignItems="center" justifyContent={'spaceAround'}>
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="xl" />
+              <EuiLoadingSpinner size="l" />
+              <EuiSpacer size="xl" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
       }
 
       if (!userCanAccessContent) {
