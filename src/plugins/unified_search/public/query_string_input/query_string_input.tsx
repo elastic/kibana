@@ -24,6 +24,7 @@ import {
   PopoverAnchorPosition,
   toSentenceCase,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
 import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
@@ -51,7 +52,36 @@ import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_butt
 import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getTheme } from '../services';
 import './query_string_input.scss';
-import { strings } from './i18n';
+
+export const strings = {
+  getSearchInputPlaceholderForText: () =>
+    i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholderForText', {
+      defaultMessage: 'Filter your data',
+    }),
+  getSearchInputPlaceholder: (language: string) =>
+    i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
+      defaultMessage: 'Filter your data using {language} syntax',
+      values: { language },
+    }),
+  getQueryBarComboboxAriaLabel: (pageType: string) =>
+    i18n.translate('unifiedSearch.query.queryBar.comboboxAriaLabel', {
+      defaultMessage: 'Search and filter the {pageType} page',
+      values: { pageType },
+    }),
+  getQueryBarSearchInputAriaLabel: (pageType: string) =>
+    i18n.translate('unifiedSearch.query.queryBar.searchInputAriaLabel', {
+      defaultMessage: 'Start typing to search and filter the {pageType} page',
+      values: { pageType },
+    }),
+  getQueryBarClearInputLabel: () =>
+    i18n.translate('unifiedSearch.query.queryBar.clearInputLabel', {
+      defaultMessage: 'Clear input',
+    }),
+  getKQLNestedQuerySyntaxInfoTitle: () =>
+    i18n.translate('unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
+      defaultMessage: 'KQL nested query syntax',
+    }),
+};
 
 export interface QueryStringInputDependencies {
   unifiedSearch: {

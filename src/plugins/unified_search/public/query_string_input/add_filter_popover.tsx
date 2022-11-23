@@ -15,11 +15,18 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import { popoverDragAndDropCss } from './add_filter_popover.styles';
-import { strings } from './i18n';
+
+export const strings = {
+  getAddFilterButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterBar.addFilterButtonLabel', {
+      defaultMessage: 'Add filter',
+    }),
+};
 
 interface AddFilterPopoverProps {
   indexPatterns?: Array<DataView | string>;

@@ -8,11 +8,31 @@
 
 import React from 'react';
 import { ReactElement, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { strings } from './i18n';
 
 const NO_DATA_POPOVER_STORAGE_KEY = 'data.noDataPopover';
+
+export const strings = {
+  getNoDataPopoverContent: () =>
+    i18n.translate('unifiedSearch.noDataPopover.content', {
+      defaultMessage:
+        "This time range doesn't contain any data. Increase or adjust the time range to see more fields and create charts.",
+    }),
+  getNoDataPopoverSubtitle: () =>
+    i18n.translate('unifiedSearch.noDataPopover.subtitle', { defaultMessage: 'Tip' }),
+
+  getNoDataPopoverTitle: () =>
+    i18n.translate('unifiedSearch.noDataPopover.title', {
+      defaultMessage: 'Empty dataset',
+    }),
+
+  getNoDataPopoverDismissAction: () =>
+    i18n.translate('unifiedSearch.noDataPopover.dismissAction', {
+      defaultMessage: "Don't show again",
+    }),
+};
 
 export function NoDataPopover({
   showNoDataPopover,

@@ -18,7 +18,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { DocLinksStart } from '@kbn/core/public';
-import { strings } from './i18n';
+import { i18n } from '@kbn/i18n';
+
+export const strings = {
+  getSwitchLanguageButtonText: () =>
+    i18n.translate('unifiedSearch.switchLanguage.buttonText', {
+      defaultMessage: 'Switch language button.',
+    }),
+};
 
 export interface QueryLanguageSwitcherProps {
   language: string;

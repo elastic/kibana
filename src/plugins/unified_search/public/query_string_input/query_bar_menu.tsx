@@ -16,12 +16,19 @@ import {
   EuiButtonIconProps,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { QueryBarMenuPanels, QueryBarMenuPanelsProps } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
-import { strings } from './i18n';
+
+export const strings = {
+  getFilterSetButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.filterSetButtonLabel', {
+      defaultMessage: 'Saved query menu',
+    }),
+};
 
 export interface QueryBarMenuProps {
   language: string;

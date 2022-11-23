@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
@@ -19,7 +20,13 @@ import {
 } from '@elastic/eui';
 import { getFilterableFields } from '../../filter_bar/filter_editor';
 import { FiltersBuilderContextType } from '../context';
-import { strings } from './i18n';
+
+export const strings = {
+  getFieldSelectPlaceholderLabel: () =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.fieldSelectPlaceholder', {
+      defaultMessage: 'Select a field',
+    }),
+};
 
 interface FieldInputProps {
   dataView: DataView;

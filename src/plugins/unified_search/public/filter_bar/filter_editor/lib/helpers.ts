@@ -7,11 +7,18 @@
  */
 
 import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { Filter, isCombinedFilter } from '@kbn/es-query';
 import { validateParams } from './filter_editor_utils';
-import { strings } from '../i18n';
+
+export const strings = {
+  getInvalidDateFormatProvidedErrorMessage: () =>
+    i18n.translate('unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage', {
+      defaultMessage: 'Invalid date format provided',
+    }),
+};
 
 export const getFieldValidityAndErrorMessage = (
   field: DataViewField,

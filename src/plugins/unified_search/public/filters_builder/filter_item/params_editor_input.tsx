@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiFieldText } from '@elastic/eui';
 import {
@@ -16,7 +17,17 @@ import {
   isRangeParams,
 } from '../../filter_bar/filter_editor';
 import type { Operator } from '../../filter_bar/filter_editor';
-import { strings } from './i18n';
+
+export const strings = {
+  getSelectFieldPlaceholderLabel: () =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.selectFieldPlaceholder', {
+      defaultMessage: 'Please select a field first ...',
+    }),
+  getSelectOperatorPlaceholderLabel: () =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.selectOperatorPlaceholder', {
+      defaultMessage: 'Please select operator first ...',
+    }),
+};
 
 interface ParamsEditorInputProps {
   dataView: DataView;

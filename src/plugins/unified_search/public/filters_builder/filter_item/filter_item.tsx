@@ -18,6 +18,7 @@ import {
   EuiPanel,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter, getFilterParams, BooleanRelation } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
@@ -39,7 +40,33 @@ import {
   getGrabIconCss,
   operationCss,
 } from './filter_item.styles';
-import { strings } from './i18n';
+
+export const strings = {
+  getDragFilterAriaLabel: () =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.dragFilterAriaLabel', {
+      defaultMessage: 'Drag filter',
+    }),
+  getDeleteFilterGroupButtonIconLabel: () =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.deleteFilterGroupButtonIcon', {
+      defaultMessage: 'Delete filter group',
+    }),
+  getAddOrFilterGroupButtonIconLabel: () =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.addOrFilterGroupButtonIcon', {
+      defaultMessage: 'Add filter group with OR',
+    }),
+  getAddOrFilterGroupButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.addOrFilterGroupButtonLabel', {
+      defaultMessage: 'OR',
+    }),
+  getAddAndFilterGroupButtonIconLabel: () =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.addAndFilterGroupButtonIcon', {
+      defaultMessage: 'Add filter group with AND',
+    }),
+  getAddAndFilterGroupButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.addAndFilterGroupButtonLabel', {
+      defaultMessage: 'AND',
+    }),
+};
 
 export interface FilterItemProps {
   path: Path;

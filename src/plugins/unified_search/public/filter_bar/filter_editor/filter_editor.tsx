@@ -33,6 +33,7 @@ import {
   isCombinedFilter,
 } from '@kbn/es-query';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
@@ -48,8 +49,58 @@ import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import { flattenFilters } from './lib/helpers';
 import { filterBadgeStyle, filtersBuilderMaxHeight } from './filter_editor.styles';
-import { strings } from './i18n';
 
+export const strings = {
+  getPanelTitleAdd: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.addFilterPopupTitle', {
+      defaultMessage: 'Add filter',
+    }),
+  getPanelTitleEdit: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.editFilterPopupTitle', {
+      defaultMessage: 'Edit filter',
+    }),
+
+  getAddButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.addButtonLabel', {
+      defaultMessage: 'Add filter',
+    }),
+  getUpdateButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.updateButtonLabel', {
+      defaultMessage: 'Update filter',
+    }),
+  getDisableToggleModeTooltip: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.disableToggleModeTooltip', {
+      defaultMessage: '"Edit as Query DSL" operation is not supported for combined filters',
+    }),
+  getSelectDataViewToolTip: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.chooseDataViewFirstToolTip', {
+      defaultMessage: 'You need to select a data view first',
+    }),
+  getCustomLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.createCustomLabelInputLabel', {
+      defaultMessage: 'Custom label (optional)',
+    }),
+  getAddCustomLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.customLabelPlaceholder', {
+      defaultMessage: 'Add a custom label here',
+    }),
+  getSelectDataView: () =>
+    i18n.translate('unifiedSearch.filter.filterBar.indexPatternSelectPlaceholder', {
+      defaultMessage: 'Select a data view',
+    }),
+  getDataView: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.dateViewSelectLabel', {
+      defaultMessage: 'Data view',
+    }),
+  getQueryDslLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.queryDslLabel', {
+      defaultMessage: 'Elasticsearch Query DSL',
+    }),
+  getQueryDslAriaLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.queryDslAriaLabel', {
+      defaultMessage: 'Elasticsearch Query DSL editor',
+    }),
+};
 export interface FilterEditorProps {
   filter: Filter;
   indexPatterns: DataView[];

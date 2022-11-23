@@ -25,6 +25,7 @@ import {
   pinFilter,
   unpinFilter,
 } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -33,7 +34,6 @@ import type { IUnifiedSearchPluginServices } from '../types';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { FilterPanelOption } from '../types';
-import { strings } from './i18n';
 
 const MAP_ITEMS_TO_FILTER_OPTION: Record<string, FilterPanelOption> = {
   'filter-sets-pinAllFilters': 'pinFilter',
@@ -42,6 +42,98 @@ const MAP_ITEMS_TO_FILTER_OPTION: Record<string, FilterPanelOption> = {
   'filter-sets-disableAllFilters': 'disableFilter',
   'filter-sets-invertAllFilters': 'negateFilter',
   'filter-sets-removeAllFilters': 'deleteFilter',
+};
+
+export const strings = {
+  getLuceneLanguageName: () =>
+    i18n.translate('unifiedSearch.query.queryBar.luceneLanguageName', {
+      defaultMessage: 'Lucene',
+    }),
+  getKqlLanguageName: () =>
+    i18n.translate('unifiedSearch.query.queryBar.kqlLanguageName', {
+      defaultMessage: 'KQL',
+    }),
+  getOptionsAddFilterButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.addFilterButtonLabel', {
+      defaultMessage: 'Add filter',
+    }),
+  getOptionsApplyAllFiltersButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
+      defaultMessage: 'Apply to all',
+    }),
+  getLoadOtherFilterSetLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.loadOtherFilterSetLabel', {
+      defaultMessage: 'Load other saved query',
+    }),
+  getLoadCurrentFilterSetLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
+      defaultMessage: 'Load saved query',
+    }),
+  getSaveAsNewFilterSetLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.saveAsNewFilterSetLabel', {
+      defaultMessage: 'Save as new',
+    }),
+  getSaveFilterSetLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.saveFilterSetLabel', {
+      defaultMessage: 'Save saved query',
+    }),
+  getClearllFiltersButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.clearllFiltersButtonLabel', {
+      defaultMessage: 'Clear all',
+    }),
+  getSavedQueryLabel: () =>
+    i18n.translate('unifiedSearch.search.searchBar.savedQuery', {
+      defaultMessage: 'Saved query',
+    }),
+  getSavedQueryPopoverSaveChangesButtonAriaLabel: (title?: string) =>
+    i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel', {
+      defaultMessage: 'Save changes to {title}',
+      values: { title },
+    }),
+  getSavedQueryPopoverSaveChangesButtonText: () =>
+    i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText', {
+      defaultMessage: 'Save changes',
+    }),
+  getSavedQueryPopoverSaveAsNewButtonAriaLabel: () =>
+    i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel', {
+      defaultMessage: 'Save as new saved query',
+    }),
+  getSavedQueryPopoverSaveAsNewButtonText: () =>
+    i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonText', {
+      defaultMessage: 'Save as new',
+    }),
+  getSaveCurrentFilterSetLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.saveCurrentFilterSetLabel', {
+      defaultMessage: 'Save current saved query',
+    }),
+  getApplyAllFiltersButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
+      defaultMessage: 'Apply to all',
+    }),
+  getEnableAllFiltersButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.enableAllFiltersButtonLabel', {
+      defaultMessage: 'Enable all',
+    }),
+  getDisableAllFiltersButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.disableAllFiltersButtonLabel', {
+      defaultMessage: 'Disable all',
+    }),
+  getInvertNegatedFiltersButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.invertNegatedFiltersButtonLabel', {
+      defaultMessage: 'Invert inclusion',
+    }),
+  getPinAllFiltersButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.pinAllFiltersButtonLabel', {
+      defaultMessage: 'Pin all',
+    }),
+  getUnpinAllFiltersButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.unpinAllFiltersButtonLabel', {
+      defaultMessage: 'Unpin all',
+    }),
+  getFilterLanguageLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.filterLanguageLabel', {
+      defaultMessage: 'Filter language',
+    }),
 };
 
 export interface QueryBarMenuPanelsProps {

@@ -16,6 +16,7 @@ import {
   useEuiBackgroundColor,
   useEuiPaddingSize,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { type Filter, BooleanRelation } from '@kbn/es-query';
 import { cx } from '@emotion/css';
 import type { Path } from './types';
@@ -23,8 +24,17 @@ import { getBooleanRelationType } from '../utils';
 import { FilterItem } from './filter_item';
 import { FiltersBuilderContextType } from './context';
 import { getPathInArray } from './utils';
-import { strings } from './i18n';
 import { delimiterCss } from './filter_group.styles';
+
+export const strings = {
+  getDelimiterLabel: (booleanRelation: BooleanRelation) =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.delimiterLabel', {
+      defaultMessage: '{booleanRelation}',
+      values: {
+        booleanRelation,
+      },
+    }),
+};
 
 export interface FilterGroupProps {
   filters: Filter[];

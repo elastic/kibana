@@ -6,10 +6,45 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { FILTERS } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { strings } from '../i18n';
+
+export const strings = {
+  getIsOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isOperatorOptionLabel', {
+      defaultMessage: 'is',
+    }),
+  getIsNotOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isNotOperatorOptionLabel', {
+      defaultMessage: 'is not',
+    }),
+  getIsOneOfOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isOneOfOperatorOptionLabel', {
+      defaultMessage: 'is one of',
+    }),
+  getIsNotOneOfOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isNotOneOfOperatorOptionLabel', {
+      defaultMessage: 'is not one of',
+    }),
+  getIsBetweenOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isBetweenOperatorOptionLabel', {
+      defaultMessage: 'is between',
+    }),
+  getIsNotBetweenOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel', {
+      defaultMessage: 'is not between',
+    }),
+  getExistsOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.existsOperatorOptionLabel', {
+      defaultMessage: 'exists',
+    }),
+  getDoesNotExistOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.doesNotExistOperatorOptionLabel', {
+      defaultMessage: 'does not exist',
+    }),
+};
 
 export interface Operator {
   message: string;
