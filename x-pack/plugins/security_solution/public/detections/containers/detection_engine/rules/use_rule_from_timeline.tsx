@@ -100,6 +100,10 @@ export const useRuleFromTimeline = (): RuleFromTimeline => {
   const [ogDataView] = useState({ selectedDataView, sourcererScope });
 
   const selectedDataViewBrowserFields = useMemo(() => {
+    if (sourcererScope.selectedDataViewId === '') {
+      // still loading initial state
+      return null;
+    }
     if (selectedDataView == null) {
       // the timeline data view is deleted, user must fix timeline to use with rule
       setLoading(false);
@@ -121,7 +125,7 @@ export const useRuleFromTimeline = (): RuleFromTimeline => {
     }
 
     return selectedDataView.browserFields;
-  }, [selectedDataView, selectedTimeline]);
+  }, [selectedDataView, selectedTimeline, sourcererScope]);
   // end browser field management
 
   // start set rule
