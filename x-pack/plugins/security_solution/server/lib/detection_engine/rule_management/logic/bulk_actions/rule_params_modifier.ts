@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
+import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client';
 import type { IndexPatternRuleParams, RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
@@ -31,13 +32,13 @@ const isDataViewExistsAndNotOverriden = (
 ) => ruleParams.dataViewId != null && !action.overwrite_data_views;
 
 // Check if the index patterns added to the rule already exist in it
-const isAddedIndexPatternsAlreadyExist = (
+const hasIndexPatterns = (
   ruleParams: IndexPatternRuleParams,
   action: BulkActionEditPayloadIndexPatterns
 ) => action.value.every((indexPattern) => ruleParams.index?.includes(indexPattern));
 
 // Check if the index patterns to be deleted don't exist in the rule
-const isDeletedIndexPatternsNonExistent = (
+const hasNotIndexPattern = (
   ruleParams: IndexPatternRuleParams,
   action: BulkActionEditPayloadIndexPatterns
 ) => action.value.every((indexPattern) => !ruleParams.index?.includes(indexPattern));
@@ -51,11 +52,11 @@ const shouldSkipIndexPatternsBulkAction = (
   }
 
   if (action.type === BulkActionEditType.add_index_patterns) {
-    return isAddedIndexPatternsAlreadyExist(ruleParams, action);
+    return hasIndexPatterns(ruleParams, action);
   }
 
   if (action.type === BulkActionEditType.delete_index_patterns) {
-    return isDeletedIndexPatternsNonExistent(ruleParams, action);
+    return hasNotIndexPattern(ruleParams, action);
   }
 
   return false;
@@ -176,7 +177,7 @@ const applyBulkActionEditToRuleParams = (
 export const ruleParamsModifier = (
   existingRuleParams: RuleAlertType['params'],
   actions: BulkActionEditForRuleParams[]
-) => {
+): RuleParamsModifierResult<RuleAlertType['params']> => {
   let isParamsUpdateSkipped = true;
 
   const modifiedParams = actions.reduce((acc, action) => {

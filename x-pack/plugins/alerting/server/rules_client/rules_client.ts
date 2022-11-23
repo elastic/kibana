@@ -296,10 +296,14 @@ export type BulkEditOperation =
       value?: undefined;
     };
 
-type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<{
+export interface RuleParamsModifierResult<Params> {
   modifiedParams: Params;
   isParamsUpdateSkipped: boolean;
-}>;
+}
+
+export type RuleParamsModifier<Params extends RuleTypeParams> = (
+  params: Params
+) => Promise<RuleParamsModifierResult<Params>>;
 
 export interface BulkEditOptionsFilter<Params extends RuleTypeParams> {
   filter?: string | KueryNode;
@@ -3286,12 +3290,9 @@ export class RulesClient {
       if (apiKeysMap.size > 0) {
         await bulkMarkApiKeysForInvalidation(
           {
-            apiKeys: Array.from(apiKeysMap.values()).reduce<string[]>((acc, value) => {
-              if (value.newApiKey) {
-                acc.push(value.newApiKey);
-              }
-              return acc;
-            }, []),
+            apiKeys: Array.from(apiKeysMap.values())
+              .filter((value) => value.newApiKey)
+              .map((value) => value.newApiKey as string),
           },
           this.logger,
           this.unsecuredSavedObjectsClient

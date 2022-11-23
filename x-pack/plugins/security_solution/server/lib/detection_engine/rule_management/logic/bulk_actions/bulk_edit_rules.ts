@@ -8,6 +8,7 @@
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import pMap from 'p-map';
 
+import type { RuleParamsModifier } from '@kbn/alerting-plugin/server/rules_client';
 import {
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -57,7 +58,7 @@ export const bulkEditRules = async ({
   const result = await rulesClient.bulkEdit({
     ...(ids ? { ids } : { filter: enrichFilterWithRuleTypeMapping(filter) }),
     operations,
-    paramsModifier: async (ruleParams: RuleAlertType['params']) => {
+    paramsModifier: (async (ruleParams: RuleAlertType['params']) => {
       await validateBulkEditRule({
         mlAuthz,
         ruleType: ruleParams.type,
@@ -65,7 +66,7 @@ export const bulkEditRules = async ({
         immutable: ruleParams.immutable,
       });
       return ruleParamsModifier(ruleParams, paramsActions);
-    },
+    }) as RuleParamsModifier<RuleAlertType['params']>,
   });
 
   // rulesClient bulkEdit currently doesn't support bulk mute/unmute.

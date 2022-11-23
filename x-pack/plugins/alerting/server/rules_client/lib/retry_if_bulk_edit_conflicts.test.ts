@@ -153,11 +153,11 @@ describe('retryIfBulkEditConflicts', () => {
     });
   }
 
-  test('should not have repeated skip errors when accumulated skip results are passed in', async () => {
+  test('should not return duplicated skip results when the underlying bulkEditOperation is retried multiple times and returns the same skip results on every attempt', async () => {
     const result = await retryIfBulkEditConflicts(
       mockLogger,
       mockOperationName,
-      getOperationConflictsTimes(1),
+      getOperationConflictsTimes(3),
       mockFilter,
       undefined,
       ['apikey1', 'apikey2'],
