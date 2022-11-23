@@ -563,9 +563,10 @@ const createThresholdTimeline = async (
 const getNewTermsData = (ecsData: Ecs | Ecs[]) => {
   const normalizedEcsData: Ecs = Array.isArray(ecsData) ? ecsData[0] : ecsData;
   const originalTimeValue = getField(normalizedEcsData, ALERT_ORIGINAL_TIME);
-  const dataProviderPartials = (
-    (getField(normalizedEcsData, `${ALERT_RULE_PARAMETERS}.new_terms_fields`) as string[]) ?? []
-  ).map((newTermsField, index) => {
+  const newTermsFields: string[] =
+    getField(normalizedEcsData, `${ALERT_RULE_PARAMETERS}.new_terms_fields`) ?? [];
+
+  const dataProviderPartials = newTermsFields.map((newTermsField, index) => {
     const newTermsFieldId = newTermsField.replace('.', '-');
     const newTermsValue = getField(normalizedEcsData, ALERT_NEW_TERMS)[index];
     return {
