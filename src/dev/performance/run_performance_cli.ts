@@ -83,7 +83,7 @@ run(
       }
     }
 
-    const journeyBasePath = 'x-pack/performance/journeys/';
+    const journeyBasePath = Path.resolve(REPO_ROOT, 'x-pack/performance/journeys/');
     const kibanaInstallDir = flagsReader.requiredPath('kibana-install-dir');
     const journeys = await Fsp.readdir(journeyBasePath);
     log.info(`Found ${journeys.length} journeys to run`);
