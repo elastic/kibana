@@ -69,8 +69,8 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
 }
 
 // FIXME: Consolidate this component with ML and AIOps's component
-export const DatePickerWrapper: FC<{ showDatePicker?: boolean; showRefresh?: boolean }> = ({
-  showDatePicker = true,
+export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: boolean }> = ({
+  isAutoRefreshOnly,
   showRefresh,
 }) => {
   const {
@@ -244,23 +244,21 @@ export const DatePickerWrapper: FC<{ showDatePicker?: boolean; showRefresh?: boo
       alignItems="center"
       className="mlNavigationMenu__datePickerWrapper"
     >
-      {showDatePicker ? (
-        <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            start={time.from}
-            end={time.to}
-            isPaused={refreshInterval.pause}
-            isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
-            refreshInterval={refreshInterval.value || DEFAULT_REFRESH_INTERVAL_MS}
-            onTimeChange={updateTimeFilter}
-            onRefresh={updateLastRefresh}
-            onRefreshChange={updateInterval}
-            recentlyUsedRanges={recentlyUsedRanges}
-            dateFormat={dateFormat}
-            commonlyUsedRanges={commonlyUsedRanges}
-          />
-        </EuiFlexItem>
-      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiSuperDatePicker
+          start={time.from}
+          end={time.to}
+          isPaused={refreshInterval.pause}
+          isAutoRefreshOnly={!isTimeRangeSelectorEnabled || isAutoRefreshOnly}
+          refreshInterval={refreshInterval.value || DEFAULT_REFRESH_INTERVAL_MS}
+          onTimeChange={updateTimeFilter}
+          onRefresh={updateLastRefresh}
+          onRefreshChange={updateInterval}
+          recentlyUsedRanges={recentlyUsedRanges}
+          dateFormat={dateFormat}
+          commonlyUsedRanges={commonlyUsedRanges}
+        />
+      </EuiFlexItem>
 
       {showRefresh === true || !isTimeRangeSelectorEnabled ? (
         <EuiFlexItem grow={false}>
