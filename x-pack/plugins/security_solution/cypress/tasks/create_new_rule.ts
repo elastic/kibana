@@ -104,6 +104,7 @@ import {
   NEW_TERMS_INPUT_AREA,
   ACTIONS_THROTTLE_INPUT,
   CONTINUE_BUTTON,
+  CREATE_WITHOUT_ENABLING_BTN,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -121,6 +122,13 @@ import { ruleFields } from '../data/detection_engine';
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
+  cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
+  cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
+};
+
+export const createRuleWithoutEnabling = () => {
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).click({ force: true });
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
   cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
   cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
 };

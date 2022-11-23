@@ -99,7 +99,7 @@ export const SecurityTourStep = ({ children, onClick, step, tourId }: SecurityTo
     ...rest,
     content: (
       <>
-        <EuiText size="xs">
+        <EuiText size="s">
           <p>{content}</p>
         </EuiText>
         {imageConfig && (
