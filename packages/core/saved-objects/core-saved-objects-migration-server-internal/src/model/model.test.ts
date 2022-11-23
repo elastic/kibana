@@ -2055,9 +2055,9 @@ describe('migrations v2 model', () => {
     });
 
     describe('CHECK_TARGET_MAPPINGS', () => {
-      const postInitState: CheckVersionIndexReadyActions = {
+      const checkTargetMappingsState: CheckTargetMappingsState = {
         ...baseState,
-        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
+        controlState: 'CHECK_TARGET_MAPPINGS',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
@@ -2065,13 +2065,13 @@ describe('migrations v2 model', () => {
 
       it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS if mappings do not match', () => {
         const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: false });
-        const newState = model(postInitState, res) as UpdateTargetMappingsState;
+        const newState = model(checkTargetMappingsState, res) as UpdateTargetMappingsState;
         expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS');
       });
 
       it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if mappings match', () => {
         const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: true });
-        const newState = model(postInitState, res) as CheckVersionIndexReadyActions;
+        const newState = model(checkTargetMappingsState, res) as CheckVersionIndexReadyActions;
         expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
       });
     });
