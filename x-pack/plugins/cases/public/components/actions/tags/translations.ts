@@ -53,9 +53,9 @@ export const SELECTED_TAGS = (selectedTags: number) =>
   });
 
 export const NO_TAGS_AVAILABLE = i18n.translate('xpack.cases.actions.tags.noTagsAvailable', {
-  defaultMessage: 'No tags available. Type to add one.',
+  defaultMessage: 'No tags available. To add a tag, enter it in the query bar',
 });
 
 export const NO_SEARCH_MATCH = i18n.translate('xpack.cases.actions.tags.noTagsMatch', {
-  defaultMessage: 'No tags available. To add a tag, type it in the query bar.',
+  defaultMessage: 'No tags match your search',
 });
