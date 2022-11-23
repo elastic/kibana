@@ -43,7 +43,8 @@ import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 
-interface InspectorConfig extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave'> {
+interface InspectorConfig
+  extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
   enabled?: boolean;
 }
 
@@ -186,8 +187,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
   } = useServices();
 
-  const openInspector = useOpenInspector();
-
   const reducer = useMemo(() => {
     return getReducer<T>();
   }, []);
@@ -238,6 +237,46 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
+  const fetchItems = useCallback(async () => {
+    dispatch({ type: 'onFetchItems' });
+
+    try {
+      const idx = ++fetchIdx.current;
+
+      const {
+        searchQuery: searchQueryParsed,
+        references,
+        referencesToExclude,
+      } = searchQueryParser?.(searchQuery.text) ?? {
+        searchQuery: searchQuery.text,
+        references: undefined,
+        referencesToExclude: undefined,
+      };
+
+      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
+
+      if (!isMounted.current) {
+        return;
+      }
+
+      if (idx === fetchIdx.current) {
+        dispatch({
+          type: 'onFetchItemsSuccess',
+          data: {
+            response,
+          },
+        });
+      }
+    } catch (err) {
+      dispatch({
+        type: 'onFetchItemsError',
+        data: err,
+      });
+    }
+  }, [searchQueryParser, findItems, searchQuery.text]);
+
+  const openInspector = useOpenInspector();
+
   const updateQuery = useCallback((query: Query) => {
     dispatch({
       type: 'onSearchQueryChange',
@@ -262,7 +301,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
       });
 
-      openInspector({
+      const close = openInspector({
         item: {
           id: item.id,
           title: item.attributes.title,
@@ -271,9 +310,17 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         },
         entityName,
         ...inspector,
+        onSave:
+          inspector.onSave &&
+          (async (args) => {
+            await inspector.onSave!(args);
+            await fetchItems();
+
+            close();
+          }),
       });
     },
-    [openInspector, inspector, getTagIdsFromReferences, entityName]
+    [getTagIdsFromReferences, openInspector, entityName, inspector, fetchItems]
   );
 
   const tableColumns = useMemo(() => {
@@ -411,42 +458,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   // ------------
   // Callbacks
   // ------------
-  const fetchItems = useCallback(async () => {
-    dispatch({ type: 'onFetchItems' });
-
-    try {
-      const idx = ++fetchIdx.current;
-
-      const {
-        searchQuery: searchQueryParsed,
-        references,
-        referencesToExclude,
-      } = searchQueryParser
-        ? searchQueryParser(searchQuery.text)
-        : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
-
-      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
-
-      if (!isMounted.current) {
-        return;
-      }
-
-      if (idx === fetchIdx.current) {
-        dispatch({
-          type: 'onFetchItemsSuccess',
-          data: {
-            response,
-          },
-        });
-      }
-    } catch (err) {
-      dispatch({
-        type: 'onFetchItemsError',
-        data: err,
-      });
-    }
-  }, [searchQueryParser, searchQuery, findItems]);
-
   const onSortChange = useCallback((field: SortColumnField, direction: Direction) => {
     dispatch({
       type: 'onTableSortChange',
