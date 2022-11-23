@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
-import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -14,6 +14,7 @@ import * as i18n from '../case_view/translations';
 import type { Content } from './schema';
 import { schema } from './schema';
 import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
@@ -38,6 +39,7 @@ const UserActionMarkdownComponent = forwardRef<
 >(({ id, content, caseId, isEditable, onChangeEditable, onSaveContent }, ref) => {
   const editorRef = useRef();
   const initialState = { content };
+  const storage = useMemo(() => new Storage(window.sessionStorage), []);
   const { form } = useForm<Content>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
@@ -45,9 +47,11 @@ const UserActionMarkdownComponent = forwardRef<
   });
 
   const fieldName = 'content';
+  const draftCommentStorageKey = `xpack.cases.caseView.${caseId}.${id}.markdownEditor`
   const { setFieldValue, submit } = form;
 
   const handleCancelAction = useCallback(() => {
+    storage.remove(draftCommentStorageKey);
     onChangeEditable(id);
   }, [id, onChangeEditable]);
 
@@ -57,6 +61,7 @@ const UserActionMarkdownComponent = forwardRef<
     if (isValid && data.content !== content) {
       onSaveContent(data.content);
     }
+    storage.remove(draftCommentStorageKey);
     onChangeEditable(id);
   }, [content, id, onChangeEditable, onSaveContent, submit]);
 
@@ -112,7 +117,7 @@ const UserActionMarkdownComponent = forwardRef<
           'aria-label': 'Cases markdown editor',
           value: content,
           id,
-          caseId,
+          draftCommentStorageKey,
           bottomRightContent: EditorButtons,
         }}
       />

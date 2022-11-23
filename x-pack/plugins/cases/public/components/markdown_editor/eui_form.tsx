@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useEffect, useMemo } from 'react';
+import React, { forwardRef, useEffect, useMemo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
@@ -14,7 +14,7 @@ import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
@@ -25,7 +25,7 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   bottomRightContent?: React.ReactNode;
   caseTitle?: string;
   caseTags?: string[];
-  caseId: string;
+  draftCommentStorageKey?: string;
   disabledUiPlugins?: string[];
 };
 
@@ -46,14 +46,12 @@ export const MarkdownEditorForm = React.memo(
         bottomRightContent,
         caseTitle,
         caseTags,
-        caseId,
+        draftCommentStorageKey,
         disabledUiPlugins,
       },
       ref
     ) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-      const [contentForLocalStorage, setContentForLocalStorage] = useLocalStorage(`${caseId}.${id}.caseView.markdownEditor`, field.value);
-
 
       const commentEditorContextValue = useMemo(
         () => ({
@@ -65,22 +63,21 @@ export const MarkdownEditorForm = React.memo(
         [id, field.value, caseTitle, caseTags]
       );
 
+      const storage = useMemo(() => new Storage(window.sessionStorage), []);
+
       useEffect(() => {
-        console.log('useeffect', contentForLocalStorage, field);
-        if (contentForLocalStorage && field.value !== contentForLocalStorage) {
-          field.setValue(contentForLocalStorage)
+        const storageDraftComment = draftCommentStorageKey && storage.get(draftCommentStorageKey);
+        if(storageDraftComment && storageDraftComment!=='') {
+          field.setValue(storageDraftComment);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
-
-      // console.log('eui_form caseId', caseId, 'field value', field.value, 'field id', id );
-
       
-      const onChange = (value: string) => {
-        console.log('onchange', value)
-        field.setValue(value);
-        setContentForLocalStorage(value);
-      }
+      const onChange = useCallback((value: string) => {
+          field.setValue(value);
+          if (draftCommentStorageKey) {
+            storage.set(draftCommentStorageKey, value);
+          }
+      },[field, storage]);
 
     
       return (

@@ -12,6 +12,7 @@ import React, {
   useImperativeHandle,
   useEffect,
   useState,
+  useMemo,
 } from 'react';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
@@ -28,6 +29,7 @@ import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { Case } from '../../containers/types';
 import type { EuiMarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import * as i18n from './translations';
 import type { AddCommentFormSchema } from './schema';
@@ -66,10 +68,12 @@ export const AddComment = React.memo(
       { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
       ref
     ) => {
+      const storage = useMemo(() => new Storage(window.sessionStorage), []);
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
       const { permissions, owner } = useCasesContext();
       const { isLoading, createAttachments } = useCreateAttachments();
+      const draftCommentStorageKey = `xpack.cases.caseView.${caseId}.${id}.markdownEditor`
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
@@ -116,6 +120,7 @@ export const AddComment = React.memo(
             data: [{ ...data, type: CommentType.user }],
             updateCase: onCommentPosted,
           });
+          storage.remove(draftCommentStorageKey);
           reset();
         }
       }, [submit, onCommentSaving, createAttachments, caseId, owner, onCommentPosted, reset]);
@@ -163,6 +168,7 @@ export const AddComment = React.memo(
                 componentProps={{
                   ref: editorRef,
                   id,
+                  draftCommentStorageKey,
                   idAria: 'caseComment',
                   isDisabled: isLoading,
                   dataTestSubj: 'add-comment',
