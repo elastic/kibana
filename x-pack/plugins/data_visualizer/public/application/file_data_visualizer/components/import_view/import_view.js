@@ -20,6 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ResultsLinks } from '../../../common/components/results_links';
 import { FilebeatConfigFlyout } from '../../../common/components/filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
@@ -206,7 +207,10 @@ export class ImportView extends Component {
                 // mappings, use this field as the time field.
                 // This relies on the field being populated by
                 // the ingest pipeline on ingest
-                if (mappings.properties && mappings.properties[DEFAULT_TIME_FIELD] !== undefined) {
+                if (
+                  isPopulatedObject(mappings.properties) &&
+                  mappings.properties[DEFAULT_TIME_FIELD] !== undefined
+                ) {
                   timeFieldName = DEFAULT_TIME_FIELD;
                   this.setState({ timeFieldName });
                 }
