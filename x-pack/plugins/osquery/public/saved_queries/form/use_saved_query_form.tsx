@@ -41,17 +41,22 @@ interface UseSavedQueryFormProps {
   defaultValue?: SavedQuerySOFormData;
 }
 
-const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
-  id: payload.id,
-  description: payload.description,
-  query: payload.query,
-  interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
-  snapshot: payload.snapshot,
-  removed: payload.removed,
-  platform: payload.platform,
-  version: payload.version ? [payload.version] : [],
-  ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
-});
+const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => {
+  // Way identify prebuilt Saved queries since they do not have nor snapshot nor removed (at the moment)
+  const hasNoResultTypes = payload.snapshot === undefined && payload.removed === undefined;
+
+  return {
+    id: payload.id,
+    description: payload.description,
+    query: payload.query,
+    interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+    snapshot: hasNoResultTypes ? true : payload.snapshot,
+    removed: payload.removed,
+    platform: payload.platform,
+    version: payload.version ? [payload.version] : [],
+    ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
+  };
+};
 
 export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuerySOFormData =>
   // @ts-expect-error update types
@@ -84,6 +89,8 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
 
     return res;
   }, [ids, defaultValue]);
+
+  console.log({ ids, data, defaultValue });
 
   return {
     serializer: savedQueryDataSerializer,
