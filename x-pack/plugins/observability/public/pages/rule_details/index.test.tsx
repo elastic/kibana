@@ -243,24 +243,24 @@ describe('RulesDetailPage', () => {
   describe('when a rule has been loaded', () => {
     it('should render a page template', async () => {
       const wrapper = await setup(ruleLoadedSuccesfully);
-      expect(wrapper.getByTestId('rule-details-page')).toBeInTheDocument();
+      expect(wrapper.getByTestId('ruleDetails')).toBeInTheDocument();
     });
 
     it('should render header actions when the rule is editable', async () => {
       const wrapperRuleNonEditable = await setup({ ...ruleLoadedSuccesfully, ruleEditable: false });
-      expect(wrapperRuleNonEditable.queryByTestId('header-actions-button')).toBeNull();
+      expect(wrapperRuleNonEditable.queryByTestId('actions')).toBeNull();
 
       const wrapperRuleEditable = await setup(ruleLoadedSuccesfully);
-      expect(wrapperRuleEditable.queryByTestId('header-actions-button')).toBeInTheDocument();
+      expect(wrapperRuleEditable.queryByTestId('actions')).toBeInTheDocument();
     });
 
     it('should render a DeleteConfirmationModal when deleting a rule', async () => {
       const wrapper = await setup(ruleLoadedSuccesfully);
 
-      fireEvent.click(wrapper.getByTestId('header-actions-button'));
-      fireEvent.click(wrapper.getByTestId('delete-rule-button'));
+      fireEvent.click(wrapper.getByTestId('actions'));
+      fireEvent.click(wrapper.getByTestId('deleteRuleButton'));
 
-      expect(wrapper.getByTestId('delete-confirmation-modal')).toBeInTheDocument();
+      expect(wrapper.getByTestId('deleteIdsConfirmation')).toBeInTheDocument();
     });
 
     it('should render RuleDetailTabs', async () => {
@@ -276,8 +276,8 @@ describe('RulesDetailPage', () => {
     it('should render an EditAlertFlyout', async () => {
       const wrapper = await setup(ruleLoadedSuccesfully);
 
-      fireEvent.click(wrapper.getByTestId('header-actions-button'));
-      fireEvent.click(wrapper.getByTestId('edit-rule-button'));
+      fireEvent.click(wrapper.getByTestId('actions'));
+      fireEvent.click(wrapper.getByTestId('editRuleButton'));
 
       expect(wrapper.getByTestId('edit-alert-flyout')).toBeInTheDocument();
     });
