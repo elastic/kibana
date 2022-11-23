@@ -42,4 +42,15 @@ export interface CustomBranding {
 
 
 /** @internal */
-export class CustomBrandingService {};
+export class CustomBrandingService {
+
+    async start():Promise<CustomBranding> {
+        return {
+        get: () => {
+            customBranding$.get()
+        },
+        set: () => {
+            
+        }
+    }
+}};

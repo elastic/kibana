@@ -27,4 +27,3 @@ export type {
   ChromeRecentlyAccessedHistoryItem,
 } from './recently_accessed';
 export type { ChromeBadge, ChromeUserBanner } from './types';
-export type { CustomBranding } from './custom_branding';
