@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 function createRootWithRoles(roles: string[]) {
-  return createkbnTestServerRoot({
+  return kbnTestServer.createRoot({
     node: {
       roles,
     },

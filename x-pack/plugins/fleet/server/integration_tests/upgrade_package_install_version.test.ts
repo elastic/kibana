@@ -10,12 +10,7 @@ import Path from 'path';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import {
-  type TestElasticsearchUtils,
-  type TestKibanaUtils,
-  createRootWithCorePlugins,
-  createTestServers,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
@@ -49,13 +44,13 @@ const fakeRequest = {
 const PACKAGES = ['fleet_server', 'system', 'nginx', 'apache'];
 
 describe('Uprade package install version', () => {
-  let esServer: TestElasticsearchUtils;
-  let kbnServer: TestKibanaUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let kbnServer: kbnTestServer.TestKibanaUtils;
 
   const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
-    const { startES } = createTestServers({
+    const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: {
         es: {
@@ -67,7 +62,7 @@ describe('Uprade package install version', () => {
 
     esServer = await startES();
     const startKibana = async () => {
-      const root = createRootWithCorePlugins(
+      const root = kbnTestServer.createRootWithCorePlugins(
         {
           xpack: {
             fleet: {

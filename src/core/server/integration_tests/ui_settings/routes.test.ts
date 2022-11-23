@@ -7,13 +7,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('ui settings service', () => {
   describe('routes', () => {
-    let root: ReturnType<typeof createRoot>;
+    let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeAll(async () => {
-      root = createRoot({
+      root = kbnTestServer.createRoot({
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
       });
@@ -33,7 +33,7 @@ describe('ui settings service', () => {
 
     describe('set', () => {
       it('validates value', async () => {
-        const response = await request
+        const response = await kbnTestServer.request
           .post(root, '/api/kibana/settings/custom')
           .send({ value: 100 })
           .expect(400);
@@ -45,7 +45,7 @@ describe('ui settings service', () => {
     });
     describe('set many', () => {
       it('validates value', async () => {
-        const response = await request
+        const response = await kbnTestServer.request
           .post(root, '/api/kibana/settings')
           .send({ changes: { custom: 100, foo: 'bar' } })
           .expect(400);

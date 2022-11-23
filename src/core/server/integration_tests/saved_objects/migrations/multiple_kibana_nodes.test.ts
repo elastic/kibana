@@ -11,11 +11,7 @@ import del from 'del';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import {
-  createTestServers,
-  createRoot as createkbnTestServerRoot,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
 
@@ -63,7 +59,7 @@ interface CreateRootConfig {
 }
 
 async function createRoot({ logFileName }: CreateRootConfig) {
-  const root = createkbnTestServerRoot({
+  const root = kbnTestServer.createRoot({
     elasticsearch: {
       hosts: [esTestConfig.getUrl()],
       username: kibanaServerTestUser.username,
@@ -107,7 +103,7 @@ async function createRoot({ logFileName }: CreateRootConfig) {
 jest.setTimeout(15 * 60 * 1000);
 
 describe('migration v2', () => {
-  let esServer: TestElasticsearchUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let rootA: Root;
   let rootB: Root;
   let rootC: Root;
@@ -143,7 +139,7 @@ describe('migration v2', () => {
       logFileName: Path.join(__dirname, `${LOG_FILE_PREFIX}_C.log`),
     });
 
-    const { startES } = createTestServers({
+    const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {

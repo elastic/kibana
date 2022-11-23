@@ -13,12 +13,8 @@ import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '@kbn/core-root-server-internal';
-import {
-  createRootWithCorePlugins,
-  createTestServers,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
 
 const logFilePath = Path.join(__dirname, '7_13_unknown_types.log');
 
@@ -28,16 +24,16 @@ async function removeLogFile() {
 }
 
 describe('migration v2', () => {
-  let esServer: TestElasticsearchUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
-  let startES: () => Promise<TestElasticsearchUtils>;
+  let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
 
   beforeAll(async () => {
     await removeLogFile();
   });
 
   beforeEach(() => {
-    ({ startES } = createTestServers({
+    ({ startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -133,7 +129,7 @@ describe('migration v2', () => {
 });
 
 function createRoot(discardUnknownObjects?: string) {
-  return createRootWithCorePlugins(
+  return kbnTestServer.createRootWithCorePlugins(
     {
       migrations: {
         skip: false,
