@@ -172,13 +172,6 @@ export const JourneyStepImagePopover: React.FC<StepImagePopoverProps> = ({
     }
   }, [imgSrc, imageData]);
 
-  useEffect(() => {
-    if (imageData) {
-      setImageData(undefined);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imgRef?.stepName]);
-
   const setImageDataCallback = useCallback(
     (newImageData: string | undefined) => setImageData(newImageData),
     [setImageData]
