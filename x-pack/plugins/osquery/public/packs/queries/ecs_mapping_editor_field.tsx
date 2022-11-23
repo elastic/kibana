@@ -735,7 +735,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
     setValue: setValueRoot,
   } = useFormContext<{ query: string; ecs_mapping: ECSMapping }>();
 
-  const latestErrors = useRef<FieldErrors<ECSMappingArray> | null>(null);
+  const latestErrors = useRef<FieldErrors<ECSMappingArray> | undefined>(undefined);
   const [query, ecsMapping] = watchRoot(['query', 'ecs_mapping']);
   const { control, trigger, watch, formState, resetField, getFieldState } = useForm<{
     ecsMappingArray: ECSMappingArray;
@@ -764,7 +764,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
   useEffect(() => {
     if (!deepEqual(latestErrors.current, formState.errors.ecsMappingArray)) {
       // @ts-expect-error update types
-      latestErrors.current = formState.errors.ecsMappingArray ?? null;
+      latestErrors.current = formState.errors.ecsMappingArray;
       if (formState.errors.ecsMappingArray?.length && formState.errors.ecsMappingArray[0]?.key) {
         setError('ecs_mapping', formState.errors.ecsMappingArray[0].key);
       } else {

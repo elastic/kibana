@@ -23,7 +23,6 @@ export {
   FormDataProvider,
   UseField,
   UseMultiFields,
-  useBehaviorSubject,
   useForm,
   useFormContext,
   useFormData,

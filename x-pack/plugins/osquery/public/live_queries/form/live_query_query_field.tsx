@@ -45,7 +45,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   const [advancedContentState, setAdvancedContentState] =
     useState<EuiAccordionProps['forceState']>('closed');
   const permissions = useKibana().services.application.capabilities.osquery;
-  const [ecsMapping, query] = watch(['ecs_mapping', 'query']);
+  const [ecsMapping] = watch(['ecs_mapping']);
 
   const {
     field: { onChange, value },
