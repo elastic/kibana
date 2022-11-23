@@ -58,7 +58,10 @@ export interface PolicyDetailsState {
   /** artifacts namespace inside policy details page */
   artifacts: PolicyArtifactsState;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
+  agentStatusSummary?: Omit<
+    GetAgentStatusResponse['results'],
+    'updating' | 'inactive' | 'unenrolled'
+  >;
   /** Status of an update to the policy  */
   updateStatus?: {
     success: boolean;
