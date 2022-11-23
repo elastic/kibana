@@ -298,7 +298,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   useEffect(() => {
     const fetchDataViewTitle = async () => {
       if (defineRuleData?.dataViewId != null && defineRuleData?.dataViewId !== '') {
-        console.log('dv get2', defineRuleData?.dataViewId);
         const dataView = await data.dataViews.get(defineRuleData?.dataViewId);
         setDataViewTitle(dataView.title);
       }

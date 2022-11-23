@@ -76,7 +76,6 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     const fetchSingleDataView = async () => {
       if (memoDataViewId) {
         setDataViewLoading(true);
-        console.log('dv get3', memoDataViewId);
         const dv = await data.dataViews.get(memoDataViewId);
         setDataViewLoading(false);
         setDataViewIndexPatterns(dv);

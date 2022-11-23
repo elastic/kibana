@@ -42,16 +42,24 @@ export const getAllFieldsByName = (
 ): { [fieldName: string]: Partial<BrowserField> } =>
   keyBy('name', getAllBrowserFields(browserFields));
 
-export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): DataViewBase =>
+interface TitleIndexPattern extends DataViewBase {
+  type: string;
+  value: string;
+}
+
+export const getTitleIndexPattern = memoizeOne(
+  (title: string, fields: IndexField[]): TitleIndexPattern =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
             pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
           ),
           title,
+          // need these properties for unified search
+          type: 'title',
+          value: title,
         }
-      : { fields: [], title },
+      : { fields: [], title, type: 'title', value: title },
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
@@ -84,7 +92,7 @@ export const getBrowserFields = memoizeOne(
 );
 
 const DEFAULT_BROWSER_FIELDS = {};
-const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
+const DEFAULT_INDEX_PATTERNS = { fields: [], title: '', type: 'title', value: '' };
 interface FetchIndexReturn {
   browserFields: BrowserFields;
   indexes: string[];
@@ -144,7 +152,7 @@ export const useFetchIndex = (
                       browserFields,
                       indexes: response.indicesExist,
                       indexExists: response.indicesExist.length > 0,
-                      indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                      indexPatterns: getTitleIndexPattern(stringifyIndices, response.indexFields),
                     });
 
                     searchSubscription$.current.unsubscribe();

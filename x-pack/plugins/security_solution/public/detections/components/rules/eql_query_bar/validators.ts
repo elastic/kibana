@@ -75,7 +75,6 @@ export const eqlValidator = async (
       dataViewId !== '' &&
       formData.dataSourceType === DataSourceType.DataView
     ) {
-      console.log('dv get4', dataViewId);
       const dataView = await data.dataViews.get(dataViewId);
 
       dataViewTitle = dataView.title;

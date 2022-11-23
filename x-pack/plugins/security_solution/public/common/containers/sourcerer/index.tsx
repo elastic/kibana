@@ -426,6 +426,16 @@ export const useSourcererDataView = (
       indexPattern: {
         fields: sourcererDataView.indexFields,
         title: selectedPatterns.join(','),
+        // need these properties for unified search
+        ...(sourcererDataView.id != null
+          ? {
+              type: 'id',
+              value: sourcererDataView.id,
+            }
+          : {
+              type: 'title',
+              value: selectedPatterns.join(','),
+            }),
       },
       indicesExist,
       loading: loading || sourcererDataView.loading,

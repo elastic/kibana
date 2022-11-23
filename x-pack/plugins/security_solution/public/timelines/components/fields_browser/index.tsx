@@ -64,7 +64,6 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
   );
   useEffect(() => {
     if (selectedDataViewId != null && !missingPatterns.length) {
-      console.log('dv get6', selectedDataViewId);
       dataViews.get(selectedDataViewId).then((dataViewResponse) => {
         setDataView(dataViewResponse);
       });
