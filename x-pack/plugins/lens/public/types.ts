@@ -577,7 +577,7 @@ export interface LayerAction {
   id: string;
   displayName: string;
   description?: string;
-  execute?: (domElement?: Element) => void | Promise<void>;
+  execute?: (mountingPoint?: HTMLDivElement | null) => void | Promise<void>;
   icon: IconType;
   color?: EuiButtonIconProps['color'];
   isCompatible: boolean;
@@ -1193,6 +1193,12 @@ export interface Visualization<T = unknown, P = unknown> {
     hideTooltip?: boolean;
     invalid?: boolean;
     invalidMessage?: string;
+  }) => JSX.Element | null;
+  getAddLayerButtonComponent?: (props: {
+    visualization: Visualization;
+    visualizationState: T;
+    onAddLayerClick: (layerType: LayerType) => void;
+    layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers

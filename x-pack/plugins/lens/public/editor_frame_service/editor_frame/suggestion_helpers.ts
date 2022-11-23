@@ -23,7 +23,6 @@ import type {
 } from '../../types';
 import type { DragDropIdentifier } from '../../drag_drop';
 import type { LayerType } from '../../../common';
-import { getLayerType } from './config_panel/add_layer';
 import {
   LensDispatch,
   switchVisualization,
@@ -77,7 +76,7 @@ export function getSuggestions({
     }
     const layers = datasource.getLayers(datasourceState);
     for (const layerId of layers) {
-      const type = getLayerType(activeVisualization, visualizationState, layerId);
+      const type = activeVisualization.getLayerType(layerId, visualizationState) || LayerTypes.DATA;
       memo[layerId] = type;
     }
     return memo;

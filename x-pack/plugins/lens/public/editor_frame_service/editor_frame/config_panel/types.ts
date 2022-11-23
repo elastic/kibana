@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { EventAnnotationService } from '@kbn/event-annotation-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
@@ -25,7 +23,6 @@ export interface ConfigPanelWrapperProps {
   core: DatasourceDimensionEditorProps['core'];
   indexPatternService: IndexPatternServiceAPI;
   uiActions: UiActionsStart;
-  eventAnnotationService: EventAnnotationService;
 }
 
 export interface LayerPanelProps {
@@ -34,7 +31,6 @@ export interface LayerPanelProps {
   activeVisualization: Visualization;
   framePublicAPI: FramePublicAPI;
   core: DatasourceDimensionEditorProps['core'];
-  eventAnnotationService: EventAnnotationService;
 }
 
 export interface LayerDatasourceDropProps {

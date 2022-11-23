@@ -11,6 +11,7 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -25,7 +26,6 @@ import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } 
 import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
 import type { LayerType } from '../../common/types';
-import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
@@ -38,7 +38,6 @@ export const initialState: LensAppState = {
   query: { language: 'kuery', query: '' },
   resolvedDateRange: { fromDate: '', toDate: '' },
   isFullscreenDatasource: false,
-  isLoadLibraryVisible: false,
   isSaveable: false,
   isLoading: false,
   isLinkedToOriginatingApp: false,
@@ -740,9 +739,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     [setToggleFullscreen.type]: (state) => {
       return { ...state, isFullscreenDatasource: !state.isFullscreenDatasource };
     },
-    [setIsLoadLibraryVisible.type]: (state, { payload }) => {
-      return { ...state, isLoadLibraryVisible: Boolean(payload) };
-    },
     [submitSuggestion.type]: (state) => {
       return {
         ...state,
@@ -1098,7 +1094,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       const activeDatasource = datasourceMap[state.activeDatasourceId];
       const activeVisualization = visualizationMap[state.visualization.activeId];
-      const layerType = getLayerType(activeVisualization, state.visualization.state, layerId);
+      const layerType =
+        activeVisualization.getLayerType(layerId, state.visualization.state) || LayerTypes.DATA;
       const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
         datasourceState: state.datasourceStates[state.activeDatasourceId].state,
         visualizationState: state.visualization.state,

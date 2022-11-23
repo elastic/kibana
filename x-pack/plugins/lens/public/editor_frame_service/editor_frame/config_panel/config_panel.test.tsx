@@ -28,7 +28,6 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LayerType } from '../../../../common';
 import { ReactWrapper } from 'enzyme';
 import { addLayer } from '../../../state_management';
-import { AddLayerButton } from './add_layer';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 
 jest.mock('../../../id_generator');

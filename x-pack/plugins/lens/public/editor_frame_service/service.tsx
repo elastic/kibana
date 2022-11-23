@@ -23,7 +23,6 @@ import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
 import { Document } from '../persistence/saved_object_store';
 import {
   Datasource,
@@ -50,8 +49,6 @@ export interface EditorFrameStartPlugins {
   expressions: ExpressionsStart;
   charts: ChartsPluginSetup;
   dataViews: DataViewsPublicPluginStart;
-  // TODO: This is only passed here to make LoadAnnotationLibraryFlyout work. The flyout should be moved to the xy plugin and this dependency removed
-  eventAnnotation: EventAnnotationPluginStart;
 }
 
 export interface EditorFramePlugins {

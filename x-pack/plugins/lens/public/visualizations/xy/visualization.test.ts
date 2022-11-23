@@ -32,6 +32,7 @@ import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { KEEP_GLOBAL_FILTERS_ACTION_ID } from './annotations/actions';
 import { layerTypes } from '../..';
+import { LayerTypes } from '@kbn/visualizations-plugin/common';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',

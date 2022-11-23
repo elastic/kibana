@@ -19,7 +19,7 @@ import type { XYState, XYAnnotationLayerConfig } from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
 import { getIgnoreFilterAction } from './ignore_filters_action';
 import { getEditDetailsAction } from './edit_details_action';
-import { getRevertAction } from './revert_changes_action';
+// import { getRevertAction } from './revert_changes_action';
 import { getSaveLayerAction } from './save_action';
 export {
   IGNORE_GLOBAL_FILTERS_ACTION_ID,
@@ -39,7 +39,7 @@ export const createAnnotationActions = ({
   layerIndex: number;
   setState: StateSetter<XYState, unknown>;
   core: CoreStart;
-  isSaveable: boolean;
+  isSaveable?: boolean;
 }): LayerActionFromVisualization[] => {
   const actions = [];
 
@@ -49,11 +49,11 @@ export const createAnnotationActions = ({
 
   if (savingToLibraryPermitted) {
     // check if the annotation is saved as a saved object or in inline - same as we check for save modal for visualization
-    const isAnnotationGroupSO = false;
+    const isAnnotationGroupSO = true;
 
     if (isAnnotationGroupSO) {
       // check if Annotation group hasUnsavedChanges to know if we should allow reverting and saving - similar to how we do it for persistedDoc vs currentDoc on app level
-      const hasUnsavedChanges = false;
+      const hasUnsavedChanges = true;
 
       if (hasUnsavedChanges) {
         const saveAction = getSaveLayerAction({

@@ -27,7 +27,7 @@ import { getOpenLayerSettingsAction } from './open_layer_settings';
 export interface LayerActionsProps {
   layerIndex: number;
   actions: LayerAction[];
-  domElement?: Element;
+  mountingPoint?: HTMLDivElement | null | undefined;
 }
 
 /** @internal **/
@@ -130,7 +130,7 @@ const InContextMenuActions = (props: LayerActionsProps) => {
               title={i.displayName}
               onClick={() => {
                 closePopover();
-                i.execute(props.domElement);
+                i.execute?.(props.mountingPoint);
               }}
             >
               <EuiText size={'s'} color={i.color}>
@@ -162,7 +162,7 @@ export const LayerActions = (props: LayerActionsProps) => {
       data-test-subj={dataTestSubj}
       aria-label={displayName}
       title={displayName}
-      onClick={() => execute(props.domElement)}
+      onClick={() => execute?.(props.mountingPoint)}
     />
   );
 };

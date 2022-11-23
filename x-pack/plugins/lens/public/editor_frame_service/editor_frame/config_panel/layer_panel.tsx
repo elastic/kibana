@@ -50,7 +50,6 @@ import {
 import { onDropForVisualization, shouldRemoveSource } from './buttons/drop_targets_utils';
 import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
-import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 
 // hide the random sampling settings from the UI
 const DISPLAY_RANDOM_SAMPLING_SETTINGS = false;
@@ -337,7 +336,6 @@ export function LayerPanel(
           .map((action) => ({
             ...action,
             execute: () => {
-              console.log('execute', action);
               action.execute?.(layerActionsFlyoutRef.current);
               updateVisualization(
                 activeVisualization.onLayerAction?.(layerId, action.id, visualizationState)
@@ -378,7 +376,7 @@ export function LayerPanel(
       isSaveable,
     ]
   );
-  const layerActionsFlyoutRef = useRef<Element>();
+  const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <>
@@ -405,7 +403,7 @@ export function LayerPanel(
                 <LayerActions
                   actions={compatibleActions}
                   layerIndex={layerIndex}
-                  domElement={layerActionsFlyoutRef.current}
+                  mountingPoint={layerActionsFlyoutRef.current}
                 />
                 <div ref={layerActionsFlyoutRef} />
               </EuiFlexItem>
@@ -728,13 +726,6 @@ export function LayerPanel(
             </div>
           </div>
         </FlyoutContainer>
-      )}
-      {activeVisualization && (
-        <LoadAnnotationLibraryFlyout
-          activeVisualization={activeVisualization}
-          layerId={layerId}
-          eventAnnotationService={props.eventAnnotationService}
-        />
       )}
       <DimensionContainer
         panelRef={(el) => (panelRef.current = el)}

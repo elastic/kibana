@@ -100,6 +100,7 @@ import {
   IGNORE_GLOBAL_FILTERS_ACTION_ID,
   KEEP_GLOBAL_FILTERS_ACTION_ID,
 } from './annotations/actions';
+import { AddLayerButton } from './add_layer';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -675,7 +676,9 @@ export const getXyVisualization = ({
       domElement
     );
   },
-
+  getAddLayerButtonComponent: (props) => {
+    return <AddLayerButton {...props} eventAnnotationService={eventAnnotationService} />;
+  },
   toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(
       state,
