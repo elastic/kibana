@@ -17,6 +17,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
+  const retryService = getService('retry');
+
+  const testRoles = {
+    viewer: {
+      cluster: ['all'],
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+          allow_restricted_indices: false,
+        },
+        {
+          names: ['*'],
+          privileges: ['monitor', 'read', 'view_index_metadata', 'read_cross_cluster'],
+          allow_restricted_indices: true,
+        },
+      ],
+      run_as: ['*'],
+    },
+  };
 
   describe('Home page', function () {
     before(async () => {
@@ -60,14 +80,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('when submitting form, close dialog and displays new api key', async () => {
         const apiKeyName = 'Happy API Key';
         await pageObjects.apiKeys.clickOnPromptCreateApiKey();
-        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/create');
+        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
+        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API Key');
 
         await pageObjects.apiKeys.setApiKeyName(apiKeyName);
-        await pageObjects.apiKeys.submitOnCreateApiKey();
+        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
         const newApiKeyCreation = await pageObjects.apiKeys.getNewApiKeyCreation();
 
         expect(await browser.getCurrentUrl()).to.not.contain(
-          'app/management/security/api_keys/create'
+          'app/management/security/api_keys/flyout'
         );
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.isApiKeyModalExists()).to.be(false);
@@ -77,25 +98,210 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('with optional expiration, redirects back and displays base64', async () => {
         const apiKeyName = 'Happy expiration API key';
         await pageObjects.apiKeys.clickOnPromptCreateApiKey();
-        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/create');
+        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
 
         await pageObjects.apiKeys.setApiKeyName(apiKeyName);
         await pageObjects.apiKeys.toggleCustomExpiration();
-        await pageObjects.apiKeys.submitOnCreateApiKey();
+        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
         expect(await pageObjects.apiKeys.getErrorCallOutText()).to.be(
           'Enter a valid duration or disable this option.'
         );
 
         await pageObjects.apiKeys.setApiKeyCustomExpiration('12');
-        await pageObjects.apiKeys.submitOnCreateApiKey();
+        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
         const newApiKeyCreation = await pageObjects.apiKeys.getNewApiKeyCreation();
 
         expect(await browser.getCurrentUrl()).to.not.contain(
-          'app/management/security/api_keys/create'
+          'app/management/security/api_keys/flyout'
         );
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.isApiKeyModalExists()).to.be(false);
         expect(newApiKeyCreation).to.be(`Created API key '${apiKeyName}'`);
+      });
+    });
+
+    describe('Update API key', function () {
+      before(async () => {
+        await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
+        await pageObjects.common.navigateToApp('apiKeys');
+
+        // Delete any API keys created outside these tests
+        await pageObjects.apiKeys.bulkDeleteApiKeys();
+      });
+
+      afterEach(async () => {
+        await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+      });
+
+      after(async () => {
+        await clearAllApiKeys(es, log);
+      });
+
+      it('should create a new API key, click the name of the new row, fill out and submit form, and display success message', async () => {
+        // Create a key to updated
+        const apiKeyName = 'Happy API Key to Update';
+        await pageObjects.apiKeys.clickOnPromptCreateApiKey();
+        await pageObjects.apiKeys.setApiKeyName(apiKeyName);
+        await pageObjects.apiKeys.toggleCustomExpiration();
+        await pageObjects.apiKeys.setApiKeyCustomExpiration('1');
+        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
+
+        log.debug('API key created, moving on to update');
+
+        // Update newly created API Key
+        await pageObjects.apiKeys.clickExistingApiKeyToOpenFlyout(apiKeyName);
+
+        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
+
+        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Update API Key');
+
+        // Verify name input box are disabled
+        const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
+        expect(await apiKeyNameInput.isEnabled()).to.be(false);
+
+        // Verify expiration switch is disabled
+        const apiKeyExpirationSwitch = await pageObjects.apiKeys.getApiKeyCustomExpirationSwitch();
+        expect(await apiKeyExpirationSwitch.isEnabled()).to.be(false);
+
+        const apiKeyExpirationReadonlyInput =
+          await pageObjects.apiKeys.getApiKeyCustomExpirationInput();
+        expect(await apiKeyExpirationReadonlyInput.isEnabled()).to.be(false);
+
+        // Verify metadata is editable
+        const apiKeyMetadataSwitch = await pageObjects.apiKeys.getMetadataSwitch();
+        expect(await apiKeyMetadataSwitch.isEnabled()).to.be(true);
+
+        // Verify restrict privileges is editable
+        const apiKeyRestrictPrivilegesSwitch =
+          await pageObjects.apiKeys.getRestrictPrivilegesSwitch();
+        expect(await apiKeyRestrictPrivilegesSwitch.isEnabled()).to.be(true);
+
+        // Toggle restrict privileges so the code editor shows up
+        await apiKeyRestrictPrivilegesSwitch.click();
+
+        // Toggle metadata switch so the code editor shows up
+        await apiKeyMetadataSwitch.click();
+
+        // Check default value of metadata and set value
+        const restrictPrivilegesCodeEditorValue =
+          await pageObjects.apiKeys.getCodeEditorValueByIndex(0);
+        expect(restrictPrivilegesCodeEditorValue).to.be('{}');
+
+        // Check default value of metadata and set value
+        const metadataCodeEditorValue = await pageObjects.apiKeys.getCodeEditorValueByIndex(1);
+        expect(metadataCodeEditorValue).to.be('{}');
+
+        await pageObjects.apiKeys.setCodeEditorValueByIndex(0, JSON.stringify(testRoles));
+
+        await pageObjects.apiKeys.setCodeEditorValueByIndex(1, '{"name":"metadataTest"}');
+
+        // Submit values to update API key
+        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
+
+        // Wait for processing and flyout to close
+        await retryService.try(async () => {
+          expect(await browser.getCurrentUrl()).to.not.contain(
+            'app/management/security/api_keys/flyout'
+          );
+        });
+
+        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
+        expect(await pageObjects.apiKeys.isApiKeyModalExists()).to.be(false);
+
+        // Get success message
+        const updatedApiKeyMessage = await pageObjects.apiKeys.getNewApiKeyCreation();
+        expect(updatedApiKeyMessage).to.be(`Updated API key '${apiKeyName}'`);
+      });
+    });
+
+    describe('Readonly API key', function () {
+      before(async () => {
+        await security.role.create('read_security_role', {
+          elasticsearch: {
+            cluster: ['read_security'],
+          },
+          kibana: [
+            {
+              feature: {
+                infrastructure: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
+        await pageObjects.common.navigateToApp('apiKeys');
+
+        // Delete any API keys created outside these tests
+        await pageObjects.apiKeys.bulkDeleteApiKeys();
+      });
+
+      afterEach(async () => {
+        await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+      });
+
+      after(async () => {
+        await clearAllApiKeys(es, log);
+      });
+
+      it('should see readonly form elements', async () => {
+        // Create a key to updated
+        const apiKeyName = 'Happy API Key to View';
+        await pageObjects.apiKeys.clickOnPromptCreateApiKey();
+
+        await pageObjects.apiKeys.setApiKeyName(apiKeyName);
+
+        await pageObjects.apiKeys.toggleCustomExpiration();
+        await pageObjects.apiKeys.setApiKeyCustomExpiration('1');
+
+        const apiKeyMetadataSwitch = await pageObjects.apiKeys.getMetadataSwitch();
+        const apiKeyRestrictPrivilegesSwitch =
+          await pageObjects.apiKeys.getRestrictPrivilegesSwitch();
+
+        await apiKeyRestrictPrivilegesSwitch.click();
+        await apiKeyMetadataSwitch.click();
+
+        await pageObjects.apiKeys.setCodeEditorValueByIndex(0, JSON.stringify(testRoles));
+        await pageObjects.apiKeys.setCodeEditorValueByIndex(1, '{"name":"metadataTest"}');
+
+        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
+
+        log.debug('API key created, moving on to view');
+
+        // Set testUsers roles to have the `read_security` cluster privilege
+        await security.testUser.setRoles(['read_security_role']);
+
+        // View newly created API Key
+        await pageObjects.apiKeys.clickExistingApiKeyToOpenFlyout(apiKeyName);
+        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
+        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('View API Key');
+
+        // Verify name input box are disabled
+        const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
+        expect(await apiKeyNameInput.isEnabled()).to.be(false);
+
+        // Verify expiration switch is disabled
+        const apiKeyExpirationSwitch = await pageObjects.apiKeys.getApiKeyCustomExpirationSwitch();
+        expect(await apiKeyExpirationSwitch.isEnabled()).to.be(false);
+
+        // Verify expiration input box is disabled
+        const apiKeyExpirationInput = await pageObjects.apiKeys.getApiKeyCustomExpirationInput();
+        expect(await apiKeyExpirationInput.isEnabled()).to.be(false);
+
+        // Verify metadata and restrict privileges switches are now disabled
+        expect(await apiKeyMetadataSwitch.isEnabled()).to.be(false);
+        expect(await apiKeyRestrictPrivilegesSwitch.isEnabled()).to.be(false);
+
+        // Verify the submit button is disabled
+        const buttonDisabled = await pageObjects.apiKeys.submitButtonOnApiKeyFlyoutDisabled();
+        expect(buttonDisabled).to.be('true');
+
+        // Close flyout with cancel
+        await pageObjects.apiKeys.clickCancelButtonOnApiKeyFlyout();
+
+        // Undo `read_security_role`
+        await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
       });
     });
 
@@ -108,7 +314,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await pageObjects.apiKeys.clickOnPromptCreateApiKey();
         await pageObjects.apiKeys.setApiKeyName('api key 1');
-        await pageObjects.apiKeys.submitOnCreateApiKey();
+        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
       });
 
       it('one by one', async () => {
@@ -121,7 +327,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('by bulk', async () => {
         await pageObjects.apiKeys.clickOnTableCreateApiKey();
         await pageObjects.apiKeys.setApiKeyName('api key 2');
-        await pageObjects.apiKeys.submitOnCreateApiKey();
+        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
 
         await pageObjects.apiKeys.bulkDeleteApiKeys();
         expect(await pageObjects.apiKeys.getApiKeysFirstPromptTitle()).to.be(

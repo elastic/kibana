@@ -13,6 +13,7 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/logging';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
 import type { SecurityLicense } from '../../../common/licensing';
@@ -28,6 +29,7 @@ describe('API Keys', () => {
     typeof elasticsearchServiceMock.createScopedClusterClient
   >;
   let mockLicense: jest.Mocked<SecurityLicense>;
+  let logger: Logger;
 
   beforeEach(() => {
     mockValidateKibanaPrivileges.mockReset().mockReturnValue({ validationErrors: [] });
@@ -39,9 +41,11 @@ describe('API Keys', () => {
     mockLicense = licenseMock.create();
     mockLicense.isEnabled.mockReturnValue(true);
 
+    logger = loggingSystemMock.create().get('api-keys');
+
     apiKeys = new APIKeys({
       clusterClient: mockClusterClient,
-      logger: loggingSystemMock.create().get('api-keys'),
+      logger,
       license: mockLicense,
       applicationName: 'kibana-.kibana',
       kibanaFeatures: [],
@@ -237,11 +241,12 @@ describe('API Keys', () => {
         // The validation errors from descriptor1 and descriptor3 are concatenated into the final error message
         new Error('API key cannot be updated due to validation errors: ["error1","error2"]')
       );
+
       expect(mockValidateKibanaPrivileges).toHaveBeenCalledTimes(3);
       expect(mockScopedClusterClient.asCurrentUser.security.updateApiKey).not.toHaveBeenCalled();
     });
 
-    it('calls `updateApiKey` with proper parameters', async () => {
+    it('calls `updateApiKey` with proper parameters and receives `updated: true` in the response', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.security.updateApiKey.mockResponseOnce({
@@ -258,8 +263,36 @@ describe('API Keys', () => {
         updated: true,
       });
 
+      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Trying to edit an API key');
+      expect(logger.debug).toHaveBeenNthCalledWith(2, 'API key was updated successfully');
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
+      expect(mockScopedClusterClient.asCurrentUser.security.updateApiKey).toHaveBeenCalledWith({
+        id: 'test_id',
+        role_descriptors: { foo: true },
+        metadata: {},
+      });
+    });
 
+    it('calls `updateApiKey` with proper parameters and receives `updated: false` in the response', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      mockScopedClusterClient.asCurrentUser.security.updateApiKey.mockResponseOnce({
+        updated: false,
+      });
+
+      const result = await apiKeys.update(httpServerMock.createKibanaRequest(), {
+        id: 'test_id',
+        role_descriptors: { foo: true },
+        metadata: {},
+      });
+
+      expect(result).toEqual({
+        updated: false,
+      });
+
+      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Trying to edit an API key');
+      expect(logger.debug).toHaveBeenNthCalledWith(2, 'There were no updates to make for API key');
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockScopedClusterClient.asCurrentUser.security.updateApiKey).toHaveBeenCalledWith({
         id: 'test_id',
         role_descriptors: { foo: true },

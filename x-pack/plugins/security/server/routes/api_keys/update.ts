@@ -8,7 +8,8 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
-import { CreateApiKeyValidationError } from '../../authentication/api_keys';
+import type { UpdateAPIKeyResult } from '../../authentication/api_keys/api_keys';
+import { UpdateApiKeyValidationError } from '../../authentication/api_keys/api_keys';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { elasticsearchRoleSchema, getKibanaRoleSchema } from '../../lib';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -58,16 +59,18 @@ export function defineUpdateApiKeyRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const apiKey = await getAuthenticationService().apiKeys.update(request, request.body);
+        const result: UpdateAPIKeyResult | null = await getAuthenticationService().apiKeys.update(
+          request,
+          request.body
+        );
 
-        if (!apiKey) {
-          console.log('In here');
+        if (result === null) {
           return response.badRequest({ body: { message: `API Keys are not available` } });
         }
 
-        return response.ok({ body: apiKey });
+        return response.ok({ body: result });
       } catch (error) {
-        if (error instanceof CreateApiKeyValidationError) {
+        if (error instanceof UpdateApiKeyValidationError) {
           return response.badRequest({ body: { message: error.message } });
         }
         return response.customError(wrapIntoCustomErrorResponse(error));

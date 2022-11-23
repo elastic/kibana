@@ -258,9 +258,9 @@ export class APIKeys {
   }
 
   /**
-   * Tries to edit an API key for the current user.
+   * Attempts update an API key with the provided 'role_descriptors' and 'metadata'
    *
-   * Returns updated API key
+   * Returns `updated`, `true` if the update was successful, `false` if there was nothing to update
    *
    * @param request Request instance.
    * @param updateParams The params to edit an API key
@@ -282,6 +282,9 @@ export class APIKeys {
     // User needs `manage_api_key` privilege to use this API
     let result: UpdateAPIKeyResult;
 
+    console.log(roleDescriptors);
+    console.log(metadata);
+
     try {
       result = await this.clusterClient.asScoped(request).asCurrentUser.security.updateApiKey({
         id,
@@ -289,7 +292,11 @@ export class APIKeys {
         metadata,
       });
 
-      this.logger.debug('API key was updated successfully');
+      if (result.updated) {
+        this.logger.debug('API key was updated successfully');
+      } else {
+        this.logger.debug('There were no updates to make for API key');
+      }
     } catch (e) {
       this.logger.error(`Failed to update API key: ${e.message}`);
       throw e;

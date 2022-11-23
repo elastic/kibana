@@ -42,8 +42,8 @@ import type {
   CreateApiKeyResponse,
   UpdateApiKeyResponse,
 } from '../api_keys_api_client';
+import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
-import { CreateApiKeyFlyout } from './create_api_key_flyout';
 import type { InvalidateApiKeys } from './invalidate_provider';
 import { InvalidateProvider } from './invalidate_provider';
 import { NotEnabled } from './not_enabled';
@@ -66,7 +66,7 @@ interface State {
   selectedItems: ApiKey[];
   error: any;
   createdApiKey?: CreateApiKeyResponse;
-  apiKeyUnderEdit?: ApiKey;
+  selectedApiKey?: ApiKey;
   updatedApiKey?: UpdateApiKeyResponse;
   lastUpdatedApiKeyName?: string;
 }
@@ -89,7 +89,7 @@ export class APIKeysGridPage extends Component<Props, State> {
       apiKeys: undefined,
       selectedItems: [],
       error: undefined,
-      apiKeyUnderEdit: undefined,
+      selectedApiKey: undefined,
       updatedApiKey: undefined,
       lastUpdatedApiKeyName: undefined,
     };
@@ -100,31 +100,34 @@ export class APIKeysGridPage extends Component<Props, State> {
   }
 
   public render() {
+    const breadcrumb = this.determineFlyoutBreadcrumb();
+
     return (
       <>
-        <Route path="/create">
+        <Route path="/flyout">
           <Breadcrumb
             text={i18n.translate('xpack.security.management.apiKeys.createBreadcrumb', {
-              defaultMessage: 'Create',
+              defaultMessage: `${breadcrumb}`,
             })}
-            href="/create"
+            href="/flyout"
           >
-            <CreateApiKeyFlyout
+            <ApiKeyFlyout
               onSuccess={(createdApiKeyResponse, updateApiKeyResponse) => {
                 this.props.history.push({ pathname: '/' });
                 this.reloadApiKeys();
                 this.setState({
                   createdApiKey: createdApiKeyResponse,
                   updatedApiKey: updateApiKeyResponse,
-                  lastUpdatedApiKeyName: this.state.apiKeyUnderEdit?.name,
-                  apiKeyUnderEdit: undefined,
+                  lastUpdatedApiKeyName: this.state.selectedApiKey?.name,
+                  selectedApiKey: undefined,
                 });
               }}
               onCancel={() => {
                 this.props.history.push({ pathname: '/' });
-                this.setState({ apiKeyUnderEdit: undefined });
+                this.setState({ selectedApiKey: undefined });
               }}
-              apiKeyUnderEdit={this.state.apiKeyUnderEdit}
+              selectedApiKey={this.state.selectedApiKey}
+              readonly={this.props.readOnly}
             />
           </Breadcrumb>
         </Route>
@@ -178,7 +181,7 @@ export class APIKeysGridPage extends Component<Props, State> {
         return (
           <ApiKeysEmptyPrompt>
             <EuiButton
-              {...reactRouterNavigate(this.props.history, '/create')}
+              {...reactRouterNavigate(this.props.history, '/flyout')}
               fill
               iconType="plusInCircleFilled"
               data-test-subj="apiKeysCreatePromptButton"
@@ -216,7 +219,7 @@ export class APIKeysGridPage extends Component<Props, State> {
               ? undefined
               : [
                   <EuiButton
-                    {...reactRouterNavigate(this.props.history, '/create')}
+                    {...reactRouterNavigate(this.props.history, '/flyout')}
                     fill
                     iconType="plusInCircleFilled"
                     data-test-subj="apiKeysCreateTableButton"
@@ -503,9 +506,9 @@ export class APIKeysGridPage extends Component<Props, State> {
           return (
             <EuiText color="subdued" size="s">
               <EuiLink
-                data-test-subj="roleRowName"
-                {...reactRouterNavigate(this.props.history, `/create`, () => {
-                  this.setState({ apiKeyUnderEdit: recordAP });
+                data-test-subj={`roleRowName-${recordAP.name}`}
+                {...reactRouterNavigate(this.props.history, `/flyout`, () => {
+                  this.setState({ selectedApiKey: recordAP });
                 })}
               >
                 {name}
@@ -765,6 +768,20 @@ export class APIKeysGridPage extends Component<Props, State> {
             />
           </>
         );
+      }
+    }
+
+    return result;
+  }
+
+  determineFlyoutBreadcrumb(): string {
+    let result = 'Create';
+
+    if (this.state.selectedApiKey) {
+      if (this.props.readOnly) {
+        result = 'View';
+      } else {
+        result = 'Update';
       }
     }
 
