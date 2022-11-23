@@ -10,8 +10,8 @@ import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { convertRuleIdsToKueryNode } from '../../lib';
-import { BulkActionSkipResult, BulkOperationError } from '../rules_client';
-import { RawRule } from '../../types';
+import { BulkOperationError } from '../rules_client';
+import { RawRule, BulkActionSkipResult } from '../../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 
 // max number of failed SO ids in one retry filter

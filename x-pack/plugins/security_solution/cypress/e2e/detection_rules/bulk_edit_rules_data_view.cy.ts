@@ -64,7 +64,7 @@ const defaultRuleData = {
   dataSource: indexDataSource,
 };
 
-describe('Detection rules, bulk edit, data view', () => {
+describe('Bulk editing index patterns of rules with a data view only', () => {
   before(() => {
     cleanKibana();
     login();
@@ -185,7 +185,7 @@ describe('Detection rules, bulk edit, data view', () => {
   });
 });
 
-describe('Detection rules, bulk edit, index pattern and data view', () => {
+describe('Bulk editing index patterns of rules with index patterns and rules with a data view', () => {
   const customRulesNumber = 2;
   before(() => {
     cleanKibana();

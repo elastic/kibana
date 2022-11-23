@@ -364,7 +364,7 @@ describe('Perform bulk action route', () => {
   });
 
   describe('rule skipping', () => {
-    it('returns partial failure error with skipped rules if some but not all errors are expected reasons to skip rule', async () => {
+    it('returns partial failure error with skipped rules if some rule updates fail and others are skipped', async () => {
       clients.rulesClient.bulkEdit.mockResolvedValue({
         rules: [mockRule, mockRule],
         skipped: [
@@ -445,7 +445,6 @@ describe('Perform bulk action route', () => {
       });
     });
 
-    // TODO: Update this behavior to return 200 with updated rules, skipped rules and errors
     it('returns 500 with skipped rules if some rules are skipped, but some errors are reported', async () => {
       clients.rulesClient.bulkEdit.mockResolvedValue({
         rules: [mockRule, mockRule],

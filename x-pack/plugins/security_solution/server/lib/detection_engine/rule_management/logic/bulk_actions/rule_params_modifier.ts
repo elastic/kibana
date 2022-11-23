@@ -74,7 +74,7 @@ const applyBulkActionEditToRuleParams = (
   // we update the following flag to false. As soon as the current function
   // returns this flag as false, at least once, for any action, we know that
   // the rule needs to be marked as having its params updated.
-  let isActionSkipped = true;
+  let isActionSkipped = false;
 
   switch (action.type) {
     // index_patterns actions
@@ -86,6 +86,7 @@ const applyBulkActionEditToRuleParams = (
       );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams, action)) {
+        isActionSkipped = true;
         break;
       }
 
@@ -94,7 +95,6 @@ const applyBulkActionEditToRuleParams = (
       }
 
       ruleParams.index = addItemsToArray(ruleParams.index ?? [], action.value);
-      isActionSkipped = false;
       break;
     }
     case BulkActionEditType.delete_index_patterns: {
@@ -104,6 +104,7 @@ const applyBulkActionEditToRuleParams = (
       );
 
       if (!action.overwrite_data_views && shouldSkipIndexPatternsBulkAction(ruleParams, action)) {
+        isActionSkipped = true;
         break;
       }
 
@@ -114,7 +115,6 @@ const applyBulkActionEditToRuleParams = (
       if (ruleParams.index) {
         ruleParams.index = deleteItemsFromArray(ruleParams.index, action.value);
       }
-      isActionSkipped = false;
       break;
     }
     case BulkActionEditType.set_index_patterns: {
@@ -124,6 +124,7 @@ const applyBulkActionEditToRuleParams = (
       );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams, action)) {
+        isActionSkipped = true;
         break;
       }
 
@@ -132,7 +133,6 @@ const applyBulkActionEditToRuleParams = (
       }
 
       ruleParams.index = action.value;
-      isActionSkipped = false;
       break;
     }
     // timeline actions
@@ -142,7 +142,7 @@ const applyBulkActionEditToRuleParams = (
         timelineId: action.value.timeline_id || undefined,
         timelineTitle: action.value.timeline_title || undefined,
       };
-      isActionSkipped = false;
+
       break;
     }
     // update look-back period in from and meta.from fields
@@ -160,7 +160,7 @@ const applyBulkActionEditToRuleParams = (
         },
         from: `now-${from}s`,
       };
-      isActionSkipped = false;
+
       break;
     }
   }
