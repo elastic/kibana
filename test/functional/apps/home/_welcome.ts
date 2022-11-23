@@ -13,9 +13,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'home']);
+  const deployment = getService('deployment');
 
   describe('Welcome interstitial', () => {
-    before(async () => {
+    beforeEach(async () => {
       // Need to navigate to page first to clear storage before test can be run
       await PageObjects.common.navigateToUrl('home', undefined);
       await browser.clearLocalStorage();
@@ -31,6 +32,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('home', undefined, { disableWelcomePrompt: false });
       expect(await PageObjects.home.isWelcomeInterstitialDisplayed()).to.be(true);
       await PageObjects.common.clickAndValidate('skipWelcomeScreen', 'homeApp');
+    });
+
+    it('redirects to guided onboarding landing page when on Cloud', async () => {
+      const isCloud = await deployment.isCloud();
+      if (isCloud) {
+        await PageObjects.common.navigateToUrl('home', '', { disableWelcomePrompt: false });
+        expect(await PageObjects.home.isGuidedOnboardingLandingDisplayed()).to.be(true);
+      }
     });
   });
 }
