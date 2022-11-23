@@ -2895,7 +2895,7 @@ describe('xy_visualization', () => {
           displayName: 'Keep global filters',
           description:
             'All the dimensions configured in this layer respect filters defined at kibana level.',
-          icon: 'eye',
+          icon: 'filter',
           isCompatible: true,
           'data-test-subj': 'lnsXY_annotationLayer_keepFilters',
         }),
