@@ -64,7 +64,10 @@ export default ({ getService }: FtrProviderContext) => {
 
           const chunks: string[] = resp.body.toString().split('\n');
 
-          expect(chunks.length).to.be(testData.expected.chunksLength);
+          expect(chunks.length).to.eql(
+            testData.expected.chunksLength,
+            `Expected 'chunksLength' to be ${testData.expected.chunksLength}, got ${chunks.length}.`
+          );
 
           const lastChunk = chunks.pop();
           expect(lastChunk).to.be('');
@@ -75,7 +78,10 @@ export default ({ getService }: FtrProviderContext) => {
             data = chunks.map((c) => JSON.parse(c));
           }).not.to.throwError();
 
-          expect(data.length).to.be(testData.expected.actionsLength);
+          expect(data.length).to.eql(
+            testData.expected.actionsLength,
+            `Expected 'actionsLength' to be ${testData.expected.actionsLength}, got ${data.length}.`
+          );
           data.forEach((d) => {
             expect(typeof d.type).to.be('string');
           });
@@ -94,13 +100,16 @@ export default ({ getService }: FtrProviderContext) => {
               return a.fieldName > b.fieldName ? 1 : -1;
             });
 
-          expect(changePoints.length).to.equal(testData.expected.changePoints.length);
+          expect(changePoints.length).to.eql(
+            testData.expected.changePoints.length,
+            `Expected 'changePoints.length' to be ${testData.expected.changePoints.length}, got ${changePoints.length}.`
+          );
           changePoints.forEach((cp, index) => {
             const ecp = testData.expected.changePoints[index];
-            expect(cp.fieldName).to.equal(ecp.fieldName);
-            expect(cp.fieldValue).to.equal(ecp.fieldValue);
-            expect(cp.doc_count).to.equal(ecp.doc_count);
-            expect(cp.bg_count).to.equal(ecp.bg_count);
+            expect(cp.fieldName).to.eql(ecp.fieldName);
+            expect(cp.fieldValue).to.eql(ecp.fieldValue);
+            expect(cp.doc_count).to.eql(ecp.doc_count);
+            expect(cp.bg_count).to.eql(ecp.bg_count);
           });
 
           const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
@@ -171,7 +180,10 @@ export default ({ getService }: FtrProviderContext) => {
             // If streaming works correctly we should receive more than one chunk.
             expect(chunkCounter).to.be.greaterThan(1);
 
-            expect(data.length).to.be(testData.expected.actionsLength);
+            expect(data.length).to.eql(
+              testData.expected.actionsLength,
+              `Expected 'actionsLength' to be ${testData.expected.actionsLength}, got ${data.length}.`
+            );
 
             const addChangePointsActions = data.filter(
               (d) => d.type === testData.expected.changePointFilter
@@ -187,13 +199,16 @@ export default ({ getService }: FtrProviderContext) => {
                 return a.fieldName > b.fieldName ? 1 : -1;
               });
 
-            expect(changePoints.length).to.equal(testData.expected.changePoints.length);
+            expect(changePoints.length).to.eql(
+              testData.expected.changePoints.length,
+              `Expected 'changePoints.length' to be ${testData.expected.changePoints.length}, got ${changePoints.length}.`
+            );
             changePoints.forEach((cp, index) => {
               const ecp = testData.expected.changePoints[index];
-              expect(cp.fieldName).to.equal(ecp.fieldName);
-              expect(cp.fieldValue).to.equal(ecp.fieldValue);
-              expect(cp.doc_count).to.equal(ecp.doc_count);
-              expect(cp.bg_count).to.equal(ecp.bg_count);
+              expect(cp.fieldName).to.eql(ecp.fieldName);
+              expect(cp.fieldValue).to.eql(ecp.fieldValue);
+              expect(cp.doc_count).to.eql(ecp.doc_count);
+              expect(cp.bg_count).to.eql(ecp.bg_count);
             });
 
             const histogramActions = data.filter(
@@ -241,7 +256,10 @@ export default ({ getService }: FtrProviderContext) => {
 
           const chunks: string[] = resp.body.toString().split('\n');
 
-          expect(chunks.length).to.be(testData.expected.noIndexChunksLength);
+          expect(chunks.length).to.eql(
+            testData.expected.noIndexChunksLength,
+            `Expected 'noIndexChunksLength' to be ${testData.expected.noIndexChunksLength}, got ${chunks.length}.`
+          );
 
           const lastChunk = chunks.pop();
           expect(lastChunk).to.be('');
@@ -252,7 +270,10 @@ export default ({ getService }: FtrProviderContext) => {
             data = chunks.map((c) => JSON.parse(c));
           }).not.to.throwError();
 
-          expect(data.length).to.be(testData.expected.noIndexActionsLength);
+          expect(data.length).to.eql(
+            testData.expected.noIndexActionsLength,
+            `Expected 'noIndexActionsLength' to be ${testData.expected.noIndexActionsLength}, got ${data.length}.`
+          );
           data.forEach((d) => {
             expect(typeof d.type).to.be('string');
           });
