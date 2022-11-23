@@ -13,6 +13,10 @@ const offlineTimeoutIntervalCount = 10; // 30s*10 = 5m timeout
 export function getAgentStatus(agent: Agent | FleetServerAgent): AgentStatus {
   const { last_checkin: lastCheckIn } = agent;
 
+  if (agent.unenrolled_at) {
+    return 'unenrolled';
+  }
+
   if (!agent.active) {
     return 'inactive';
   }
@@ -128,7 +132,7 @@ export function buildKueryForUpdatingAgents(path: string = ''): string {
 }
 
 export function buildKueryForInactiveAgents(path: string = '') {
-  return `${path}active:false`;
+  return `(${path}active:false) and not (${path}unenrolled_at:*)`;
 }
 
 function addExclusiveKueryFilter(kueryBuilders: Array<(path?: string) => string>, path?: string) {
