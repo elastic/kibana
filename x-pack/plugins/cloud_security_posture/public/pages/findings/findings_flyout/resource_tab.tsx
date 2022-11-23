@@ -16,9 +16,9 @@ import {
   EuiCopy,
 } from '@elastic/eui';
 import React from 'react';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 
 interface ResourceItem {
   key: string; // flattened dot notation object path for CspFinding['resource'];
