@@ -14,9 +14,6 @@ export type TabId = typeof ALERTS_TAB | typeof EXECUTION_TAB;
 export interface RuleDetailsPathParams {
   ruleId: string;
 }
-export interface PageHeaderProps {
-  rule: Rule;
-}
 
 export interface FetchRuleProps {
   ruleId: string;
