@@ -484,6 +484,8 @@ type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE';
 
 type ApiKeysMap = Map<string, { oldApiKey?: string; newApiKey?: string }>;
 
+type ApiKeyAttributes = Pick<RawRule, 'apiKey' | 'apiKeyOwner'>;
+
 type RuleType = ReturnType<RuleTypeRegistry['get']>;
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
@@ -2454,7 +2456,7 @@ export class RulesClient {
     skipped: BulkActionSkipResult[];
     errors: BulkOperationError[];
     username: string | null;
-  }) {
+  }): (rule: SavedObjectsFindResult<RawRule>) => Promise<void> {
     return async (rule: SavedObjectsFindResult<RawRule>) => {
       try {
         if (rule.attributes.apiKey) {
@@ -2513,7 +2515,7 @@ export class RulesClient {
           validatedMutatedAlertTypeParams
         );
 
-        const { apiKeyAttributes } = await this.createAndCollectApiKeys(
+        const { apiKeyAttributes } = await this.prepareApiKeys(
           rule,
           ruleType,
           apiKeysMap,
@@ -2522,7 +2524,7 @@ export class RulesClient {
           username
         );
 
-        const { updatedAttributes } = this.updateAttributesAndMapParams(
+        const { updatedAttributes } = this.updateAttributes(
           attributes,
           apiKeyAttributes,
           updatedParams,
@@ -2556,16 +2558,17 @@ export class RulesClient {
   private async ensureAuthorizationForBulkUpdate(
     operations: BulkEditOperation[],
     rule: SavedObjectsFindResult<RawRule>
-  ) {
+  ): Promise<void> {
     for (const operation of operations) {
       const { field } = operation;
-      if (field === 'snoozeSchedule' || field === 'apiKey') {
-        if (rule.attributes.actions.length) {
-          try {
-            await this.actionsAuthorization.ensureAuthorized('execute');
-          } catch (error) {
-            throw Error(`Rule not authorized for bulk ${field} update - ${error.message}`);
-          }
+      if (
+        (field === 'snoozeSchedule' || field === 'apiKey') &&
+        rule.attributes.actions.length > 0
+      ) {
+        try {
+          await this.actionsAuthorization.ensureAuthorized('execute');
+        } catch (error) {
+          throw Error(`Rule not authorized for bulk ${field} update - ${error.message}`);
         }
       }
     }
@@ -2675,19 +2678,24 @@ export class RulesClient {
     };
   }
 
-  private validateScheduleInterval(scheduleInterval: string, ruleTypeId: string, ruleId: string) {
-    if (scheduleInterval) {
-      const isIntervalInvalid =
-        parseDuration(scheduleInterval as string) < this.minimumScheduleIntervalInMs;
-      if (isIntervalInvalid && this.minimumScheduleInterval.enforce) {
-        throw Error(
-          `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
-        );
-      } else if (isIntervalInvalid && !this.minimumScheduleInterval.enforce) {
-        this.logger.warn(
-          `Rule schedule interval (${scheduleInterval}) for "${ruleTypeId}" rule type with ID "${ruleId}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
-        );
-      }
+  private validateScheduleInterval(
+    scheduleInterval: string,
+    ruleTypeId: string,
+    ruleId: string
+  ): void {
+    if (!scheduleInterval) {
+      return;
+    }
+    const isIntervalInvalid =
+      parseDuration(scheduleInterval as string) < this.minimumScheduleIntervalInMs;
+    if (isIntervalInvalid && this.minimumScheduleInterval.enforce) {
+      throw Error(
+        `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+      );
+    } else if (isIntervalInvalid && !this.minimumScheduleInterval.enforce) {
+      this.logger.warn(
+        `Rule schedule interval (${scheduleInterval}) for "${ruleTypeId}" rule type with ID "${ruleId}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+      );
     }
   }
 
@@ -3145,18 +3153,17 @@ export class RulesClient {
     return { errors, rules: disabledRules, taskIdsToDisable, taskIdsToDelete };
   };
 
-  private async createAndCollectApiKeys(
+  private async prepareApiKeys(
     rule: SavedObjectsFindResult<RawRule>,
     ruleType: RuleType,
     apiKeysMap: ApiKeysMap,
     attributes: RawRule,
     hasUpdateApiKeyOperation: boolean,
     username: string | null
-  ) {
+  ): Promise<{ apiKeyAttributes: ApiKeyAttributes }> {
     const shouldUpdateApiKey = attributes.enabled || hasUpdateApiKeyOperation;
 
-    // create API key
-    let createdAPIKey = null;
+    let createdAPIKey: CreateAPIKeyResult | null = null;
     try {
       createdAPIKey = shouldUpdateApiKey
         ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, attributes.name))
@@ -3182,7 +3189,7 @@ export class RulesClient {
   private apiKeyAsAlertAttributes(
     apiKey: CreateAPIKeyResult | null,
     username: string | null
-  ): Pick<RawRule, 'apiKey' | 'apiKeyOwner'> {
+  ): ApiKeyAttributes {
     return apiKey && apiKey.apiKeysEnabled
       ? {
           apiKeyOwner: username,
@@ -3194,13 +3201,15 @@ export class RulesClient {
         };
   }
 
-  private updateAttributesAndMapParams(
+  private updateAttributes(
     attributes: RawRule,
-    apiKeyAttributes: Pick<RawRule, 'apiKey' | 'apiKeyOwner'>,
+    apiKeyAttributes: ApiKeyAttributes,
     updatedParams: RuleTypeParams,
     rawAlertActions: RawRuleAction[],
     username: string | null
-  ) {
+  ): {
+    updatedAttributes: RawRule;
+  } {
     // get notifyWhen
     const notifyWhen = getRuleNotifyWhenType(
       attributes.notifyWhen ?? null,
@@ -3232,7 +3241,7 @@ export class RulesClient {
   private async bulkUpdateSchedules(
     operations: BulkEditOperation[],
     updatedRules: Array<Rule | RuleWithLegacyId>
-  ) {
+  ): Promise<void> {
     const scheduleOperation = operations.find(
       (
         operation
@@ -3240,26 +3249,27 @@ export class RulesClient {
         operation.field === 'schedule'
     );
 
-    if (scheduleOperation?.value) {
-      const taskIds = updatedRules.reduce<string[]>((acc, rule) => {
-        if (rule.scheduledTaskId) {
-          acc.push(rule.scheduledTaskId);
-        }
-        return acc;
-      }, []);
-
-      try {
-        await this.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value);
-        this.logger.debug(
-          `Successfully updated schedules for underlying tasks: ${taskIds.join(', ')}`
-        );
-      } catch (error) {
-        this.logger.error(
-          `Failure to update schedules for underlying tasks: ${taskIds.join(
-            ', '
-          )}. TaskManager bulkUpdateSchedules failed with Error: ${error.message}`
-        );
+    if (!scheduleOperation?.value) {
+      return;
+    }
+    const taskIds = updatedRules.reduce<string[]>((acc, rule) => {
+      if (rule.scheduledTaskId) {
+        acc.push(rule.scheduledTaskId);
       }
+      return acc;
+    }, []);
+
+    try {
+      await this.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value);
+      this.logger.debug(
+        `Successfully updated schedules for underlying tasks: ${taskIds.join(', ')}`
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failure to update schedules for underlying tasks: ${taskIds.join(
+          ', '
+        )}. TaskManager bulkUpdateSchedules failed with Error: ${error.message}`
+      );
     }
   }
 
@@ -3544,7 +3554,7 @@ export class RulesClient {
   }: {
     attributes: RawRule;
     username: string | null;
-  }): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner'>> {
+  }): Promise<ApiKeyAttributes> {
     let createdAPIKey = null;
     try {
       createdAPIKey = await this.createAPIKey(
