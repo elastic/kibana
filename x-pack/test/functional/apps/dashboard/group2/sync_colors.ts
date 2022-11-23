@@ -89,10 +89,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.addFilter('geo.src', 'is not', 'CN');
 
       await PageObjects.lens.save('vis2', false, true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.useColorSync(true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+
       const colorMapping1 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(0));
       const colorMapping2 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(1));
+
       expect(Object.keys(colorMapping1)).to.have.length(6);
       expect(Object.keys(colorMapping1)).to.have.length(6);
       const panel1Keys = ['CN'];

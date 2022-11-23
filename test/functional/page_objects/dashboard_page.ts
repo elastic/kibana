@@ -787,8 +787,6 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async getPanelChartDebugState(panelIndex: number) {
-    this.retry.try(async () => {
-      return await this.elasticChart.getChartDebugData(undefined, panelIndex);
-    });
+    return await this.elasticChart.getChartDebugData(undefined, panelIndex);
   }
 }
