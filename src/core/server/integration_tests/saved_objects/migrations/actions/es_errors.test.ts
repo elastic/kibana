@@ -9,11 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
 import type { ElasticsearchClient } from '../../../..';
-import {
-  createRootWithCorePlugins,
-  createTestServers,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import {
   isWriteBlockException,
   isClusterShardLimitExceeded,
@@ -21,7 +17,7 @@ import {
   setWriteBlock,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
-const { startES } = createTestServers({
+const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
 });
 
@@ -29,11 +25,11 @@ describe('Elasticsearch Errors', () => {
   let root: Root;
   let start: InternalCoreStart;
   let client: ElasticsearchClient;
-  let esServer: TestElasticsearchUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
 
   beforeAll(async () => {
     esServer = await startES();
-    root = createRootWithCorePlugins({
+    root = kbnTestServer.createRootWithCorePlugins({
       server: {
         basePath: '/foo',
       },

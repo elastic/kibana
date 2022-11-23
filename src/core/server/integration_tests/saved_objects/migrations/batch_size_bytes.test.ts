@@ -9,11 +9,7 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '@kbn/core-root-server-internal';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Env } from '@kbn/config';
@@ -56,16 +52,16 @@ async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
 const assertMigratedDocuments = (arr: any[], target: any[]) => target.every((v) => arr.includes(v));
 
 describe('migration v2', () => {
-  let esServer: TestElasticsearchUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
-  let startES: () => Promise<TestElasticsearchUtils>;
+  let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
 
   beforeAll(async () => {
     await removeLogFile();
   });
 
   beforeEach(() => {
-    ({ startES } = createTestServers({
+    ({ startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -137,7 +133,7 @@ describe('migration v2', () => {
 });
 
 function createRoot(options: { maxBatchSizeBytes?: number }) {
-  return createRootWithCorePlugins(
+  return kbnTestServer.createRootWithCorePlugins(
     {
       migrations: {
         skip: false,

@@ -9,12 +9,8 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '@kbn/core-root-server-internal';
-import {
-  createRootWithCorePlugins,
-  createTestServers,
-  TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
 
 const logFilePath = Path.join(__dirname, '7_13_failed_action_tasks.log');
 
@@ -24,16 +20,16 @@ async function removeLogFile() {
 }
 
 describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
-  let esServer: TestElasticsearchUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
-  let startES: () => Promise<TestElasticsearchUtils>;
+  let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
 
   beforeAll(async () => {
     await removeLogFile();
   });
 
   beforeEach(() => {
-    ({ startES } = createTestServers({
+    ({ startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -113,7 +109,7 @@ describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
 });
 
 function createRoot() {
-  return createRootWithCorePlugins(
+  return kbnTestServer.createRootWithCorePlugins(
     {
       migrations: {
         skip: false,

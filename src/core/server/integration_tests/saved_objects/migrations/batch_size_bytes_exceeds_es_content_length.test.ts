@@ -9,11 +9,7 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import { Root } from '@kbn/core-root-server-internal';
 
@@ -25,16 +21,16 @@ async function removeLogFile() {
 }
 
 describe('migration v2', () => {
-  let esServer: TestElasticsearchUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
-  let startES: () => Promise<TestElasticsearchUtils>;
+  let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
 
   beforeAll(async () => {
     await removeLogFile();
   });
 
   beforeEach(() => {
-    ({ startES } = createTestServers({
+    ({ startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -88,7 +84,7 @@ describe('migration v2', () => {
 });
 
 function createRoot(options: { maxBatchSizeBytes?: number }) {
-  return createRootWithCorePlugins(
+  return kbnTestServer.createRootWithCorePlugins(
     {
       migrations: {
         skip: false,

@@ -14,11 +14,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
@@ -61,13 +57,13 @@ describe('migrating from the same Kibana version that used v1 migrations', () =>
   const originalIndex = `.kibana_1`; // v1 migrations index
   const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
-  let esServer: TestElasticsearchUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let coreStart: InternalCoreStart;
   let esClient: ElasticsearchClient;
 
   const startServers = async ({ dataArchive, oss }: { dataArchive: string; oss: boolean }) => {
-    const { startES } = createTestServers({
+    const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -77,7 +73,7 @@ describe('migrating from the same Kibana version that used v1 migrations', () =>
       },
     });
 
-    root = createRootWithCorePlugins(
+    root = kbnTestServer.createRootWithCorePlugins(
       {
         migrations: {
           skip: false,

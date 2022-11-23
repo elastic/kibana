@@ -19,7 +19,7 @@ import type { PolicyData } from '../../../../../../../../common/endpoint/types';
 import { getSummaryExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_summary_schema.mock';
 import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
 import { SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
-import { EVENT_FILTERS_LABELS } from '../../endpoint_policy_edit_extension';
+import { EVENT_FILTERS_LABELS } from '../translations';
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 

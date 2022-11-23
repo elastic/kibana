@@ -10,7 +10,7 @@ import { MockElasticsearchClient } from './core_service.test.mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { errors } from '@elastic/elasticsearch';
 import type { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
-import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 const cookieOptions = {
   name: 'sid',
@@ -32,9 +32,9 @@ describe('http service', () => {
   });
 
   describe('auth', () => {
-    let root: ReturnType<typeof createRoot>;
+    let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
-      root = createRoot({
+      root = kbnTestServer.createRoot({
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
       });
@@ -57,7 +57,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
       });
 
       it('returns false if has not been authenticated', async () => {
@@ -73,7 +73,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
       });
 
       it('returns false if no authentication mechanism has been registered', async () => {
@@ -87,7 +87,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
       });
 
       it('returns true if authenticated on a route with "optional" auth', async () => {
@@ -102,7 +102,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
       });
 
       it('returns false if not authenticated on a route with "optional" auth', async () => {
@@ -118,7 +118,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
       });
     });
     describe('#get()', () => {
@@ -140,7 +140,9 @@ describe('http service', () => {
 
         await root.start();
 
-        await request.get(root, '/get-auth').expect(200, { state: user, status: 'authenticated' });
+        await kbnTestServer.request
+          .get(root, '/get-auth')
+          .expect(200, { state: user, status: 'authenticated' });
       });
 
       it('returns correct authentication unknown status', async () => {
@@ -153,7 +155,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await request.get(root, '/get-auth').expect(200, { status: 'unknown' });
+        await kbnTestServer.request.get(root, '/get-auth').expect(200, { status: 'unknown' });
       });
 
       it('returns correct unauthenticated status', async () => {
@@ -170,7 +172,9 @@ describe('http service', () => {
 
         await root.start();
 
-        await request.get(root, '/get-auth').expect(200, { status: 'unauthenticated' });
+        await kbnTestServer.request
+          .get(root, '/get-auth')
+          .expect(200, { status: 'unauthenticated' });
 
         expect(authenticate).not.toHaveBeenCalled();
       });
@@ -178,10 +182,10 @@ describe('http service', () => {
   });
 
   describe('elasticsearch client', () => {
-    let root: ReturnType<typeof createRoot>;
+    let root: ReturnType<typeof kbnTestServer.createRoot>;
 
     beforeEach(async () => {
-      root = createRoot({
+      root = kbnTestServer.createRoot({
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
       });
@@ -226,7 +230,7 @@ describe('http service', () => {
       const coreStart = await root.start();
       elasticsearch = coreStart.elasticsearch;
 
-      const { header } = await request.get(root, '/new-platform/').expect(401);
+      const { header } = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
 
       expect(header['www-authenticate']).toEqual('content');
     });
@@ -262,7 +266,7 @@ describe('http service', () => {
       const coreStart = await root.start();
       elasticsearch = coreStart.elasticsearch;
 
-      const { header } = await request.get(root, '/new-platform/').expect(401);
+      const { header } = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
 
       expect(header['www-authenticate']).toEqual('Basic realm="Authorization Required"');
     });
@@ -309,7 +313,7 @@ describe('http service', () => {
       const coreStart = await root.start();
       elasticsearch = coreStart.elasticsearch;
 
-      const { body } = await request.get(root, '/new-platform/').expect(400);
+      const { body } = await kbnTestServer.request.get(root, '/new-platform/').expect(400);
 
       expect(body.message).toMatch('[error_type]: error_reason');
     });
