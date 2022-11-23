@@ -471,7 +471,7 @@ export const buildOSSFeatures = ({
       app: ['kibana'],
       catalogue: [],
       privilegesTooltip: i18n.translate('xpack.features.filesSharedImagesPrivilegesTooltip', {
-        defaultMessage: 'Control access to the global set of images stored in Kibana',
+        defaultMessage: 'Required to access images stored in Kibana.',
       }),
       privileges: {
         all: {
