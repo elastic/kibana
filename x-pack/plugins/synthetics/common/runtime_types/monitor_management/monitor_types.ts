@@ -349,7 +349,7 @@ export const EncryptedSyntheticsMonitorWithIdCodec = t.intersection([
 // TODO: Remove EncryptedSyntheticsMonitorWithIdCodec (as well as SyntheticsMonitorWithIdCodec if possible) along with respective TypeScript types in favor of EncryptedSyntheticsSavedMonitorCodec
 export const EncryptedSyntheticsSavedMonitorCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
-  t.interface({ id: t.string, updated_at: t.string }),
+  t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
 ]);
 
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;

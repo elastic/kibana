@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-plugin/public';
 
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
-import { useEarliestStartDate } from '../hooks/use_earliest_start_data';
+import { useEarliestStartDate } from '../hooks/use_earliest_start_date';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { DurationSparklines } from './duration_sparklines';

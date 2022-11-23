@@ -19,7 +19,7 @@ import {
 export const useSelectedMonitor = () => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
-  const { loading: monitorListLoading, data: listData } = useSelector(selectMonitorListState);
+  const { loading: monitorListLoading } = useSelector(selectMonitorListState);
 
   const monitorFromList = useMemo(
     () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
@@ -43,17 +43,6 @@ export const useSelectedMonitor = () => {
       dispatch(getMonitorAction.get({ monitorId }));
     }
   }, [dispatch, monitorId, availableMonitor, syntheticsMonitorLoading]);
-
-  if (listData?.monitors && listData?.monitors.length > 0) {
-    const monitorSO = listData.monitors.find(({ id }) => id === monitorId);
-    if (monitorSO) {
-      return {
-        monitorSO,
-        monitor: availableMonitor,
-        loading: syntheticsMonitorLoading || monitorListLoading,
-      };
-    }
-  }
 
   return {
     monitor: availableMonitor,
