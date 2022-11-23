@@ -93,8 +93,6 @@ export const useExistingFieldsFetcher = (
         return;
       }
 
-      // console.log('fetching existence info', dataViewId, fromDate, toDate);
-
       const currentInfo = globalMap$.getValue()?.[dataViewId];
 
       if (!mountedRef.current) {
