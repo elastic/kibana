@@ -83,7 +83,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     clearErrors,
     getFieldState,
     register,
-    control,
     formState: { isSubmitting },
   } = hooksForm;
 
@@ -293,11 +292,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       <FormProvider {...hooksForm}>
         <EuiFlexGroup direction="column">
           {queryField && (
-            <QueryPackSelectable
-              control={control}
-              canRunPacks={canRunPacks}
-              canRunSingleQuery={canRunSingleQuery}
-            />
+            <QueryPackSelectable canRunPacks={canRunPacks} canRunSingleQuery={canRunSingleQuery} />
           )}
           {!hideAgentsField && (
             <EuiFlexItem>

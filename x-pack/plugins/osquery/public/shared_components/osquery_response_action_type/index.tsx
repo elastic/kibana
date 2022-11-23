@@ -75,7 +75,7 @@ const OsqueryResponseActionParamsFormComponent = ({
         },
   });
 
-  const { watch, register, formState, control } = hooksForm;
+  const { watch, register, formState } = hooksForm;
 
   const watchedValues = watch();
   const { data: packData } = usePack({
@@ -92,7 +92,6 @@ const OsqueryResponseActionParamsFormComponent = ({
   useEffect(() => {
     register('savedQueryId');
     register('id');
-    register('queryType');
   }, [register]);
 
   useEffect(() => {
@@ -151,11 +150,7 @@ const OsqueryResponseActionParamsFormComponent = ({
   return (
     <>
       <FormProvider {...hooksForm}>
-        <QueryPackSelectable
-          canRunPacks={canRunPacks}
-          canRunSingleQuery={canRunSingleQuery}
-          control={control}
-        />
+        <QueryPackSelectable canRunPacks={canRunPacks} canRunSingleQuery={canRunSingleQuery} />
         <EuiSpacer size="m" />
         {watchedValues.queryType === 'query' && <LiveQueryQueryField />}
         {watchedValues.queryType === 'pack' && (

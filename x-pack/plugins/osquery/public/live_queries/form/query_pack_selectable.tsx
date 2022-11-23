@@ -9,7 +9,6 @@ import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import type { UseFormReturn } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 const StyledEuiCard = styled(EuiCard)`
@@ -50,25 +49,18 @@ const StyledEuiCard = styled(EuiCard)`
   }
 `;
 
-// TODO update type
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type FormReturn = UseFormReturn<any>;
-
 interface QueryPackSelectableProps {
   canRunSingleQuery: boolean;
   canRunPacks: boolean;
-  control: FormReturn['control'];
 }
 
 export const QueryPackSelectable = ({
   canRunSingleQuery,
   canRunPacks,
-  control,
 }: QueryPackSelectableProps) => {
   const {
     field: { value: queryType, onChange: setQueryType },
   } = useController({
-    control,
     name: 'queryType',
     defaultValue: 'query',
     rules: {
