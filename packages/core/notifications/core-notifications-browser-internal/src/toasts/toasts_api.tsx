@@ -67,23 +67,21 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public add(toastOrTitle: ToastInput) {
+    const normalizedToast = normalizeToast(toastOrTitle);
+    const existingToast = this.getByFingerprintId(normalizedToast?.fingerprintId);
+    if (existingToast) {
+      return existingToast;
+    }
+
     const toast: Toast = {
       id: String(this.idCounter++),
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:info'),
-      ...normalizeToast(toastOrTitle),
+      ...normalizedToast,
     };
 
     this.toasts$.next([...this.toasts$.getValue(), toast]);
 
     return toast;
-  }
-
-  public getByTitle(title: string) {
-    const toasts = this.toasts$.getValue();
-    const idx = toasts.findIndex((toast) => toast.title === title);
-    if (idx !== -1) {
-      return toasts[idx];
-    }
   }
 
   /**
@@ -174,11 +172,6 @@ export class ToastsApi implements IToasts {
    */
   public addError(error: Error, options: ErrorToastOptions) {
     const message = options.toastMessage || error.message;
-    const existingToast = this.getByTitle(options.title);
-    if (existingToast) {
-      // toast with the same title is already displayed, no reason to display it again
-      return existingToast;
-    }
     return this.add({
       color: 'danger',
       iconType: 'alert',
@@ -206,5 +199,21 @@ export class ToastsApi implements IToasts {
     }
 
     return this.overlays.openModal(...args);
+  }
+
+  /**
+   * Chicking return toasts if there's already an existing available using given fingerprint id
+   * @param id
+   * @returns a {@link Toast}
+   */
+  private getByFingerprintId(id: string | undefined) {
+    if (!id) {
+      return;
+    }
+    const toasts = this.toasts$.getValue();
+    const idx = toasts.findIndex((toast) => toast.fingerprintId === id);
+    if (idx !== -1) {
+      return toasts[idx];
+    }
   }
 }

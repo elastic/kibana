@@ -7,6 +7,7 @@
  */
 
 import { memoize, once } from 'lodash';
+import { sha256 } from 'js-sha256';
 import {
   BehaviorSubject,
   EMPTY,
@@ -535,6 +536,7 @@ export class SearchInterceptor {
     } else {
       this.deps.toasts.addError(e, {
         title: 'Search Error',
+        fingerprintId: String(sha256.create().update(JSON.stringify(e))),
       });
     }
   }

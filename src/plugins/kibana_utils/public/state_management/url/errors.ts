@@ -40,11 +40,13 @@ export const withNotifyOnErrors = (toasts: NotificationsStart['toasts']) => {
     onGetError: (error: Error) => {
       toasts.addError(error, {
         title: restoreUrlErrorTitle,
+        fingerprintId: 'stateStorageUrlError',
       });
     },
     onSetError: (error: Error) => {
       toasts.addError(error, {
         title: saveStateInUrlErrorTitle,
+        fingerprintId: 'stateStorageUrlError',
       });
     },
   };

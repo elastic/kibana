@@ -20,6 +20,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 export type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
   title?: string | MountPoint;
   text?: string | MountPoint;
+  fingerprintId?: string;
 };
 
 export type Toast = ToastInputFields & {
@@ -41,6 +42,11 @@ export interface ToastOptions {
    * How long should the toast remain on screen.
    */
   toastLifeTimeMs?: number;
+  /**
+   * ID to prevent multiple toast messages of the same type to be displayed.
+   * This is the "toast storm" pacifier
+   */
+  fingerprintId?: string;
 }
 
 /**
