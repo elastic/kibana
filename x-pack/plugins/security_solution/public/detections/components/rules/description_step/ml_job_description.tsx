@@ -7,7 +7,15 @@
 
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiToolTip,
+  EuiTextColor,
+} from '@elastic/eui';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
@@ -67,7 +75,7 @@ const JobStatusBadgeComponent: React.FC<{ job: MlSummaryJob }> = ({ job }) => {
 
 export const JobStatusBadge = React.memo(JobStatusBadgeComponent);
 
-const JobLink = styled(EuiLink)`
+const StyledJobEuiLInk = styled(EuiLink)`
   margin-right: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
@@ -75,16 +83,12 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-const MlJobDescriptionComponent: React.FC<{
-  job: SecurityJob;
-  loading: boolean;
-  refreshJob: (job: SecurityJob) => void;
-}> = ({ job, loading, refreshJob }) => {
+const JobLink: React.FC<{
+  jobId: string;
+}> = ({ jobId }) => {
   const {
     services: { http, ml },
   } = useKibana();
-  const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
-  const jobId = job.id;
   const jobUrl = useMlHref(ml, http.basePath.get(), {
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     pageState: {
@@ -92,7 +96,20 @@ const MlJobDescriptionComponent: React.FC<{
     },
   });
 
-  const jobIdSpan = <span data-test-subj="machineLearningJobId">{jobId}</span>;
+  return (
+    <StyledJobEuiLInk href={jobUrl} target="_blank">
+      <span data-test-subj="machineLearningJobId">{jobId}</span>
+    </StyledJobEuiLInk>
+  );
+};
+
+const MlAdminJobDescriptionComponent: React.FC<{
+  job: SecurityJob;
+  loading: boolean;
+  refreshJob: (job: SecurityJob) => void;
+}> = ({ job, loading, refreshJob }) => {
+  const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
+  const jobId = job.id;
 
   const handleJobStateChange = useCallback(
     async (_, latestTimestampMs: number, enable: boolean) => {
@@ -102,12 +119,10 @@ const MlJobDescriptionComponent: React.FC<{
     [enableDatafeed, job, refreshJob]
   );
 
-  return job != null ? (
+  return (
     <Wrapper>
       <div>
-        <JobLink href={jobUrl} target="_blank">
-          {jobIdSpan}
-        </JobLink>
+        <JobLink jobId={jobId} />
         <AuditIcon message={job.auditMessage} />
       </div>
       <EuiFlexGroup justifyContent="flexStart">
@@ -126,23 +141,61 @@ const MlJobDescriptionComponent: React.FC<{
         </EuiFlexItem>
       </EuiFlexGroup>
     </Wrapper>
-  ) : (
-    jobIdSpan
   );
 };
 
-export const MlJobDescription = React.memo(MlJobDescriptionComponent);
+export const MlAdminJobDescription = React.memo(MlAdminJobDescriptionComponent);
+
+const MlUserJobDescriptionComponent: React.FC<{
+  jobId: string;
+}> = ({ jobId }) => {
+  return <div data-test-subj="machineLearningJobId">{jobId}</div>;
+};
+
+const MlUserJobDescription = React.memo(MlUserJobDescriptionComponent);
 
 const MlJobsDescription: React.FC<{ jobIds: string[] }> = ({ jobIds }) => {
-  const { loading, jobs, refetch: refreshJobs } = useSecurityJobs();
+  const {
+    loading,
+    jobs,
+    refetch: refreshJobs,
+    isMlAdmin,
+    isMlUser,
+    isLicensed,
+  } = useSecurityJobs();
   const relevantJobs = jobs.filter((job) => jobIds.includes(job.id));
-  return (
-    <>
-      {relevantJobs.map((job) => (
-        <MlJobDescription key={job.id} job={job} loading={loading} refreshJob={refreshJobs} />
-      ))}
-    </>
-  );
+
+  if (isLicensed) {
+    return <EuiTextColor color="subdued">{i18n.ML_JOB_DESCRIPTION_REQUIRED_LICENSE}</EuiTextColor>;
+  }
+
+  if (isMlAdmin) {
+    return (
+      <>
+        {relevantJobs.map((job) => (
+          <MlAdminJobDescription
+            key={job.id}
+            job={job}
+            loading={loading}
+            refreshJob={refreshJobs}
+          />
+        ))}
+      </>
+    );
+  }
+
+  // displaying all jobs ids without fetching rest of the jobs as useSecurity returns only jobs for admin
+  if (isMlUser) {
+    return (
+      <>
+        {jobIds.map((jobId) => (
+          <MlUserJobDescription key={jobId} jobId={jobId} />
+        ))}
+      </>
+    );
+  }
+
+  return null;
 };
 
 export const buildMlJobsDescription = (jobIds: string[], label: string): ListItems => ({

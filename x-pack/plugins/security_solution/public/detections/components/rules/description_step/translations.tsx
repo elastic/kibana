@@ -112,6 +112,13 @@ export const ML_JOB_STOPPED = i18n.translate(
   }
 );
 
+export const ML_JOB_DESCRIPTION_REQUIRED_LICENSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.mlJobPlatinumLicenseRequiredDescription',
+  {
+    defaultMessage: 'Requires Platinum License',
+  }
+);
+
 export const THRESHOLD_RESULTS_ALL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription',
   {
