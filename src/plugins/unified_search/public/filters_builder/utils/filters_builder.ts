@@ -89,14 +89,16 @@ export const normalizeFilters = (filters: Filter[]) => {
   const normalizeCombined = (combinedFilter: Filter) => {
     const combinedFilters = getGroupedFilters(combinedFilter);
     const nonEmptyCombinedFilters = combinedFilters.filter(Boolean);
-    const filter = nonEmptyCombinedFilters.length < 2 ? nonEmptyCombinedFilters[0] : combinedFilter;
+    if (nonEmptyCombinedFilters.length < 2) {
+      return nonEmptyCombinedFilters[0];
+    }
 
-    return filter
+    return combinedFilter
       ? {
-          ...filter,
+          ...combinedFilter,
           meta: {
-            ...filter.meta,
-            params: normalizeRecursively(combinedFilters, filter),
+            ...combinedFilter.meta,
+            params: normalizeRecursively(nonEmptyCombinedFilters, combinedFilter),
           },
         }
       : undefined;
