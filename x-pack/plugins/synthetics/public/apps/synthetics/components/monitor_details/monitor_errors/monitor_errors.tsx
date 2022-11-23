@@ -34,8 +34,8 @@ export const MonitorErrors = () => {
   return (
     <>
       <SyntheticsDatePicker fullWidth={true} />
-      <EuiSpacer />
-      <EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
           <EuiPanel hasBorder>
             <EuiTitle size="xs">
@@ -62,7 +62,8 @@ export const MonitorErrors = () => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={2}>
           <EuiPanel hasBorder>
             <EuiTitle size="xs">
