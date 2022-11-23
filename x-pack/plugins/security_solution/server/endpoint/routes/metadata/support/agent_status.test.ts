@@ -122,7 +122,14 @@ describe('test filtering endpoint hosts by agent status', () => {
     it('correctly builds kuery for inactive status', () => {
       const status = ['inactive'];
       const kuery = buildStatusesKuery(status);
-      const expected = '(united.agent.active:false)';
+      const expected = '((united.agent.active:false) and not (united.agent.unenrolled_at:*))';
+      expect(kuery).toEqual(expected);
+    });
+
+    it('correctly builds kuery for unenrolled status', () => {
+      const status = ['unenrolled'];
+      const kuery = buildStatusesKuery(status);
+      const expected = '(united.agent.unenrolled_at:*)';
       expect(kuery).toEqual(expected);
     });
 
