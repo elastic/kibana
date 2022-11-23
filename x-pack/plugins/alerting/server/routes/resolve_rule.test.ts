@@ -44,6 +44,7 @@ describe('resolveRuleRoute', () => {
         params: {
           foo: true,
         },
+        lastTriggerDate: null,
       },
     ],
     consumer: 'bar',
@@ -97,6 +98,7 @@ describe('resolveRuleRoute', () => {
         id: mockedRule.actions[0].id,
         params: mockedRule.actions[0].params,
         connector_type_id: mockedRule.actions[0].actionTypeId,
+        last_trigger_date: mockedRule.actions[0].lastTriggerDate,
       },
     ],
     outcome: 'aliasMatch',

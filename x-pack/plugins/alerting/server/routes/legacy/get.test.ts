@@ -41,6 +41,7 @@ describe('getAlertRoute', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     actions: [
+      // @ts-ignore
       {
         group: 'default',
         id: '2',

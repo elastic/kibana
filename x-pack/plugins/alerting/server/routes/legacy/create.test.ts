@@ -71,6 +71,7 @@ describe('createAlertRoute', () => {
     updatedAt,
     id: '123',
     actions: [
+      // @ts-ignore
       {
         ...mockedAlert.actions[0],
         actionTypeId: 'test',

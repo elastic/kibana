@@ -48,6 +48,7 @@ describe('updateAlertRoute', () => {
         params: {
           baz: true,
         },
+        lastTriggerDate: null,
       },
     ],
     notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,

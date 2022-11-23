@@ -56,7 +56,10 @@ describe('RuleExecutionStatus', () => {
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
       const emptyRuleRunState = new RuleRunMetricsStore().getMetrics();
-      const { status, metrics } = executionStatusFromState({ metrics: emptyRuleRunState });
+      const { status, metrics } = executionStatusFromState({
+        metrics: emptyRuleRunState,
+        updatedActions: [],
+      });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
@@ -69,6 +72,7 @@ describe('RuleExecutionStatus', () => {
       const { status, metrics } = executionStatusFromState({
         alertInstances: {},
         metrics: executionMetrics,
+        updatedActions: [],
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('ok');
@@ -82,6 +86,7 @@ describe('RuleExecutionStatus', () => {
       const { status, metrics } = executionStatusFromState({
         alertInstances: { a: {} },
         metrics: executionMetrics,
+        updatedActions: [],
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('active');
@@ -95,6 +100,7 @@ describe('RuleExecutionStatus', () => {
       const { status, metrics } = executionStatusFromState({
         alertInstances: { a: {} },
         metrics: { ...executionMetrics, triggeredActionsStatus: ActionsCompletion.PARTIAL },
+        updatedActions: [],
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.warning).toEqual({
@@ -114,6 +120,7 @@ describe('RuleExecutionStatus', () => {
       const { status, metrics } = executionStatusFromState({
         alertInstances: { a: {} },
         metrics: { ...executionMetrics, hasReachedAlertLimit: true },
+        updatedActions: [],
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.warning).toEqual({
