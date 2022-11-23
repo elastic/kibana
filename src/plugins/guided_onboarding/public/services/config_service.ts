@@ -88,7 +88,6 @@ export class ConfigService {
     if (!guideState || !guideState.isActive) return false;
 
     const guideConfig = await this.getGuideConfig(guideState.guideId);
-    console.log({ guideConfig });
     const stepConfig = getInProgressStepConfig(guideConfig, guideState);
     return stepConfig ? stepConfig.integration === integration : false;
   }

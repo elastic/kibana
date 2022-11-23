@@ -29,6 +29,7 @@ import {
   mockPluginStateInProgress,
   mockPluginStateNotStarted,
   testGuideStep3ActiveState,
+  testGuideConfig,
 } from './api.mocks';
 
 describe('GuidedOnboarding ApiService', () => {
@@ -129,9 +130,11 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('activateGuide', () => {
     it('activates a new guide', async () => {
-      // update the mock to no active guides
-      httpClient.get.mockResolvedValue({
-        pluginState: mockPluginStateNotStarted,
+      // mock the get config request
+      httpClient.get.mockResolvedValueOnce({
+        configs: {
+          testGuide: testGuideConfig,
+        },
       });
       apiService.setup(httpClient, true);
 
@@ -305,8 +308,13 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it(`marks the step as 'ready_to_complete' if it's configured for manual completion`, async () => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep2InProgressState },
+      });
+      httpClient.get.mockResolvedValueOnce({
+        configs: {
+          testGuide: testGuideConfig,
+        },
       });
       apiService.setup(httpClient, true);
 
@@ -329,7 +337,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('marks the guide as "ready_to_complete" if the current step is the last step in the guide and configured for manual completion', async () => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: {
           ...mockPluginStateInProgress,
           activeGuide: {
@@ -339,6 +347,11 @@ describe('GuidedOnboarding ApiService', () => {
               { ...testGuideStep3ActiveState.steps[2], status: 'ready_to_complete' },
             ],
           },
+        },
+      });
+      httpClient.get.mockResolvedValueOnce({
+        configs: {
+          testGuide: testGuideConfig,
         },
       });
       apiService.setup(httpClient, true);
@@ -402,8 +415,13 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('isGuidedOnboardingActiveForIntegration$', () => {
     it('returns true if the integration is part of the active step', (done) => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
+      });
+      httpClient.get.mockResolvedValueOnce({
+        configs: {
+          testGuide: testGuideConfig,
+        },
       });
       apiService.setup(httpClient, true);
       subscription = apiService
@@ -449,8 +467,13 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('completeGuidedOnboardingForIntegration', () => {
     it(`completes the step if it's active for the integration`, async () => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
+      });
+      httpClient.get.mockResolvedValueOnce({
+        configs: {
+          testGuide: testGuideConfig,
+        },
       });
       apiService.setup(httpClient, true);
 

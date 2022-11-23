@@ -20,7 +20,7 @@ import {
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '@kbn/guided-onboarding';
 
 import { API_BASE_PATH } from '../../common/constants';
-import { PluginState, PluginStatus } from '../../common/types';
+import { PluginState, PluginStatus, GuideConfig } from '../../common/types';
 import { GuidedOnboardingApi } from '../types';
 import {
   getInProgressStepId,
@@ -427,6 +427,16 @@ export class ApiService implements GuidedOnboardingApi {
    */
   public async skipGuidedOnboarding(): Promise<{ pluginState: PluginState } | undefined> {
     return await this.updatePluginState({ status: 'skipped' }, false);
+  }
+
+  public async getGuideConfig(guideId: GuideId): Promise<GuideConfig | undefined> {
+    if (!this.isCloudEnabled) {
+      return undefined;
+    }
+    if (!this.client) {
+      throw new Error('ApiService has not be initialized.');
+    }
+    return await this.configService.getGuideConfig(guideId);
   }
 }
 
