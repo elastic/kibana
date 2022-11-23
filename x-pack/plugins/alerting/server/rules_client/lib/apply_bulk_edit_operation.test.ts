@@ -111,6 +111,70 @@ describe('applyBulkEditOperation', () => {
       expect(modifiedAttributes).toHaveProperty('tags', ['rewrite-tag']);
       expect(isAttributeModified).toBe(true);
     });
+
+    test('should return isAttributeModified=false when only adding already existing tags', () => {
+      const ruleMock: Partial<Rule> = {
+        tags: ['tag-1', 'tag-2'],
+      };
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'tags',
+          value: ['tag-1', 'tag-2'],
+          operation: 'add',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('tags', ['tag-1', 'tag-2']);
+      expect(isAttributeModified).toBe(false);
+    });
+
+    test('should return isAttributeModified=false when adding no tags', () => {
+      const ruleMock: Partial<Rule> = {
+        tags: ['tag-1', 'tag-2'],
+      };
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'tags',
+          value: [],
+          operation: 'add',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('tags', ['tag-1', 'tag-2']);
+      expect(isAttributeModified).toBe(false);
+    });
+
+    test('should return isAttributeModified=false when deleting no tags', () => {
+      const ruleMock: Partial<Rule> = {
+        tags: ['tag-1', 'tag-2'],
+      };
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'tags',
+          value: [],
+          operation: 'delete',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('tags', ['tag-1', 'tag-2']);
+      expect(isAttributeModified).toBe(false);
+    });
+
+    test('should return isAttributeModified=false when deleting non-existing tags', () => {
+      const ruleMock: Partial<Rule> = {
+        tags: ['tag-1', 'tag-2'],
+      };
+      const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
+        {
+          field: 'tags',
+          value: ['tag-3'],
+          operation: 'delete',
+        },
+        ruleMock
+      );
+      expect(modifiedAttributes).toHaveProperty('tags', ['tag-1', 'tag-2']);
+      expect(isAttributeModified).toBe(false);
+    });
   });
 
   describe('actions operations', () => {
