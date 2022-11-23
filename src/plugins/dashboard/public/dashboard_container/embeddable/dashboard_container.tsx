@@ -235,6 +235,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       ...creationOptions?.overrideInput,
     });
 
+    // set up execution context
+    initialInput.executionContext = {
+      type: 'dashboard',
+      description: initialInput.title,
+    };
+
     // set up unified search integration
     if (
       creationOptions?.useUnifiedSearchIntegration &&
@@ -277,17 +283,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
 
     // start search sessions integration
-    let handleSearchSessionChange;
     if (creationOptions?.useSearchSessionsIntegration) {
-      const {
-        initialSearchSessionId,
-        stopSyncingDashboardSearchSessions,
-        handleSearchSessionChange: sessionChangeFunction,
-      } = startDashboardSearchSessionIntegration.bind(this)(
-        creationOptions?.searchSessionSettings,
-        incomingEmbeddable
-      );
-      handleSearchSessionChange = sessionChangeFunction;
+      const { initialSearchSessionId, stopSyncingDashboardSearchSessions } =
+        startDashboardSearchSessionIntegration.bind(this)(
+          creationOptions?.searchSessionSettings,
+          incomingEmbeddable
+        );
       initialInput.searchSessionId = initialSearchSessionId;
       this.stopSyncingDashboardSearchSessions = stopSyncingDashboardSearchSessions;
     }
@@ -306,7 +307,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     // start diffing dashboard state
     const diffingMiddleware = startDiffingDashboardState.bind(this)({
       initialInput,
-      handleSearchSessionChange,
       initialLastSavedInput: inputFromSavedObject,
       useSessionBackup: creationOptions?.useSessionStorageIntegration,
       setCleanupFunction: (cleanup) => {
@@ -373,9 +373,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public async getExplicitInputIsEqual(lastExplicitInput: DashboardContainerByValueInput) {
+    const currentInput = this.getReduxEmbeddableTools().getState().explicitInput;
     return (
       omit(
-        Object.keys(await getUnsavedChanges.bind(this)(lastExplicitInput)),
+        Object.keys(await getUnsavedChanges.bind(this)(lastExplicitInput, currentInput)),
         keysNotConsideredUnsavedChanges
       ).length > 0
     );

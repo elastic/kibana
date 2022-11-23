@@ -61,7 +61,6 @@ export const DASHBOARD_GRID_COLUMN_COUNT = 48;
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 
 export const CHANGE_CHECK_DEBOUNCE = 100;
-export const CHANGE_APPLY_DEBOUNCE = 50;
 
 // ------------------------------------------------------------------
 // Default State
