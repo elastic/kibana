@@ -63,7 +63,7 @@ describe('deleteAnalyticsCollectionLogic', () => {
       jest.advanceTimersByTime(150);
       await nextTick();
       expect(DeleteAnalyticsCollectionLogic.actions.makeRequest).toHaveBeenCalledWith({
-        name: collectionName,
+        id: collectionName,
       });
     });
   });

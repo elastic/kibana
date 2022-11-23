@@ -11,10 +11,10 @@ import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { addAnalyticsCollection } from './add_analytics_collection';
-import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
+import { fetchAnalyticsCollectionById } from './fetch_analytics_collection';
 import { setupAnalyticsCollectionIndex } from './setup_indices';
 
-jest.mock('./fetch_analytics_collection', () => ({ fetchAnalyticsCollectionByName: jest.fn() }));
+jest.mock('./fetch_analytics_collection', () => ({ fetchAnalyticsCollectionById: jest.fn() }));
 jest.mock('./setup_indices', () => ({
   setupAnalyticsCollectionIndex: jest.fn(),
 }));
@@ -37,27 +37,34 @@ describe('add analytics collection lib function', () => {
   });
 
   it('should add analytics collection', async () => {
-    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
+    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'example' }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
 
     await expect(
       addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
         name: 'example',
       })
-    ).resolves.toEqual({ event_retention_day_length: 180, id: 'fakeId', name: 'example' });
+    ).resolves.toEqual({
+      event_retention_day_length: 180,
+      events_datastream: 'elastic_analytics-events-example',
+      id: 'example',
+      name: 'example',
+    });
 
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
         event_retention_day_length: 180,
+        events_datastream: 'elastic_analytics-events-example',
         name: 'example',
       },
+      id: 'example',
       index: ANALYTICS_COLLECTIONS_INDEX,
     });
   });
 
   it('should reject if index already exists', async () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-    (fetchAnalyticsCollectionByName as jest.Mock).mockImplementation(() => true);
+    (fetchAnalyticsCollectionById as jest.Mock).mockImplementation(() => true);
 
     await expect(
       addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
@@ -67,36 +74,31 @@ describe('add analytics collection lib function', () => {
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
   });
 
-  it('should reject if collection name is invalid', async () => {
-    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-    (fetchAnalyticsCollectionByName as jest.Mock).mockImplementation(() => false);
-
-    await expect(
-      addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
-        name: 'index_name!',
-      })
-    ).rejects.toEqual(new Error(ErrorCode.ANALYTICS_COLLECTION_NAME_INVALID));
-    expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
-  });
-
   it('should create index if no analytics collection index exists', async () => {
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
 
-    (fetchAnalyticsCollectionByName as jest.Mock).mockImplementation(() => undefined);
+    (fetchAnalyticsCollectionById as jest.Mock).mockImplementation(() => undefined);
 
-    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
+    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'example' }));
 
     await expect(
       addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
         name: 'example',
       })
-    ).resolves.toEqual({ event_retention_day_length: 180, id: 'fakeId', name: 'example' });
+    ).resolves.toEqual({
+      event_retention_day_length: 180,
+      events_datastream: 'elastic_analytics-events-example',
+      id: 'example',
+      name: 'example',
+    });
 
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
         event_retention_day_length: 180,
+        events_datastream: 'elastic_analytics-events-example',
         name: 'example',
       },
+      id: 'example',
       index: ANALYTICS_COLLECTIONS_INDEX,
     });
 
@@ -108,7 +110,7 @@ describe('add analytics collection lib function', () => {
       return Promise.reject({ statusCode: 500 });
     });
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => true);
-    (fetchAnalyticsCollectionByName as jest.Mock).mockImplementation(() => false);
+    (fetchAnalyticsCollectionById as jest.Mock).mockImplementation(() => false);
     await expect(
       addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
         name: 'example',

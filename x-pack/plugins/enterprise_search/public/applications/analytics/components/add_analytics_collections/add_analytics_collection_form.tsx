@@ -32,9 +32,7 @@ import { AddAnalyticsCollectionLogic } from './add_analytics_collection_logic';
 
 export const AddAnalyticsCollectionForm = () => {
   const { createAnalyticsCollection, setNameValue } = useActions(AddAnalyticsCollectionLogic);
-  const { name, inputError, hasInputError, isLoading, canSubmit } = useValues(
-    AddAnalyticsCollectionLogic
-  );
+  const { name, isLoading, canSubmit } = useValues(AddAnalyticsCollectionLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
 
   return (
@@ -67,23 +65,8 @@ export const AddAnalyticsCollectionForm = () => {
               }
             }}
           >
-            <EuiFormRow
-              label="Name"
-              helpText={
-                !hasInputError &&
-                i18n.translate(
-                  'xpack.enterpriseSearch.analytics.collectionsCreate.form.collectionName.helpText',
-                  {
-                    defaultMessage:
-                      'Will be used to identify this collection in the API and in the UI.',
-                  }
-                )
-              }
-              error={inputError}
-              isInvalid={hasInputError}
-            >
+            <EuiFormRow label="Name">
               <EuiFieldText
-                isInvalid={hasInputError}
                 name="collection-name"
                 fullWidth
                 autoFocus

@@ -28,17 +28,8 @@ interface AnalyticsCollectionIntegrateProps {
 export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrateProps> = ({
   collection,
 }) => {
-  const analyticsDNSUrl = getEnterpriseSearchUrl(`/analytics/api/collections/${collection.name}`);
+  const analyticsDNSUrl = getEnterpriseSearchUrl(`/analytics/api/collections/${collection.id}`);
   const credentials = [
-    {
-      title: i18n.translate(
-        'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.credentials.collectionName',
-        {
-          defaultMessage: 'Collection name',
-        }
-      ),
-      description: collection.name,
-    },
     {
       title: i18n.translate(
         'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.credentials.collectionDns',
@@ -104,7 +95,7 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
             'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.scriptDescription',
             {
               defaultMessage:
-                'Track individual events, like clicks, by calling the <strong>trackEvent</strong> method.',
+                'Track individual events, like clicks, by calling the trackEvent method.',
             }
           )}
         </p>

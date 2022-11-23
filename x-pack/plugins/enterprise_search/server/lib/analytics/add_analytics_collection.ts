@@ -7,30 +7,28 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
+
 import { AnalyticsCollectionDocument, AnalyticsCollection } from '../../../common/types/analytics';
 import { ErrorCode } from '../../../common/types/error_codes';
-import { isAlphaNumericOrUnderscore } from '../../../common/utils/is_alphanumeric_underscore';
+import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 
-import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
+import { fetchAnalyticsCollectionById } from './fetch_analytics_collection';
 import { setupAnalyticsCollectionIndex } from './setup_indices';
 
 const createAnalyticsCollection = async (
   client: IScopedClusterClient,
-  document: AnalyticsCollectionDocument
+  document: AnalyticsCollectionDocument,
+  id: string
 ): Promise<AnalyticsCollection> => {
-  const analyticsCollection = await fetchAnalyticsCollectionByName(client, document.name);
+  const analyticsCollection = await fetchAnalyticsCollectionById(client, id);
 
   if (analyticsCollection) {
     throw new Error(ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS);
   }
 
-  if (!isAlphaNumericOrUnderscore(document.name)) {
-    throw new Error(ErrorCode.ANALYTICS_COLLECTION_NAME_INVALID);
-  }
-
-  // index the document
   const result = await client.asCurrentUser.index({
     document,
+    id,
     index: ANALYTICS_COLLECTIONS_INDEX,
   });
 
@@ -46,8 +44,12 @@ export const addAnalyticsCollection = async (
   client: IScopedClusterClient,
   input: { name: string }
 ): Promise<AnalyticsCollection> => {
+  const id = toAlphanumeric(input.name);
+  const eventsDataStreamName = `elastic_analytics-events-${id}`;
+
   const document: AnalyticsCollectionDocument = {
     event_retention_day_length: 180,
+    events_datastream: eventsDataStreamName,
     name: input.name,
   };
 
@@ -59,5 +61,5 @@ export const addAnalyticsCollection = async (
     await setupAnalyticsCollectionIndex(client.asCurrentUser);
   }
 
-  return await createAnalyticsCollection(client, document);
+  return await createAnalyticsCollection(client, document, id);
 };

@@ -33,7 +33,7 @@ export const FetchAnalyticsCollectionLogic = kea<
   MakeLogicType<FetchAnalyticsCollectionValues, FetchAnalyticsCollectionActions>
 >({
   actions: {
-    fetchAnalyticsCollection: (name) => ({ name }),
+    fetchAnalyticsCollection: (id) => ({ id }),
   },
   connect: {
     actions: [FetchAnalyticsCollectionAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
@@ -41,8 +41,8 @@ export const FetchAnalyticsCollectionLogic = kea<
   },
   listeners: ({ actions }) => ({
     apiError: (e) => flashAPIErrors(e),
-    fetchAnalyticsCollection: ({ name }) => {
-      actions.makeRequest({ name });
+    fetchAnalyticsCollection: ({ id }) => {
+      actions.makeRequest({ id });
     },
     makeRequest: () => clearFlashMessages(),
   }),
