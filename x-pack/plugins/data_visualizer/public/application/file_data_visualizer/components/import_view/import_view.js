@@ -206,7 +206,7 @@ export class ImportView extends Component {
                 // mappings, use this field as the time field.
                 // This relies on the field being populated by
                 // the ingest pipeline on ingest
-                if (mappings.properties[DEFAULT_TIME_FIELD] !== undefined) {
+                if (mappings.properties && mappings.properties[DEFAULT_TIME_FIELD] !== undefined) {
                   timeFieldName = DEFAULT_TIME_FIELD;
                   this.setState({ timeFieldName });
                 }
