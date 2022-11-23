@@ -299,7 +299,7 @@ export class ChromeService {
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
-    }
+    };
   }
 
   public stop() {
