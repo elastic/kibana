@@ -121,6 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
             subject: 'Test Actions',
             to: ['test@test.com'],
           },
+          lastTriggerDate: null,
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql(null);

@@ -24,6 +24,7 @@ export interface CreateAlertWithActionOpts {
   objectRemover?: ObjectRemover;
   overwrites?: Record<string, any>;
   reference: string;
+  notifyWhen?: string;
 }
 export interface CreateNoopAlertOpts {
   objectRemover?: ObjectRemover;
@@ -203,6 +204,7 @@ export class AlertUtils {
     overwrites = {},
     indexRecordActionId,
     reference,
+    notifyWhen,
   }: CreateAlertWithActionOpts) {
     const objRemover = objectRemover || this.objectRemover;
     const actionId = indexRecordActionId || this.indexRecordActionId;
@@ -220,7 +222,7 @@ export class AlertUtils {
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
     }
-    const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
+    const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId, notifyWhen);
     const response = await request.send({ ...alertBody, ...overwrites });
     if (response.statusCode === 200) {
       objRemover.add(this.space.id, response.body.id, 'rule', 'alerting');
@@ -351,7 +353,11 @@ export function getProducerUnauthorizedErrorMessage(
   return `Unauthorized to ${operation} a "${alertType}" rule by "${producer}"`;
 }
 
-function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {
+function getDefaultAlwaysFiringAlertData(
+  reference: string,
+  actionId: string,
+  notifyWhen = 'onActiveAlert'
+) {
   const messageTemplate = `
 alertId: {{alertId}},
 alertName: {{alertName}},
@@ -374,7 +380,7 @@ instanceStateValue: {{state.instanceStateValue}}
       index: ES_TEST_INDEX_NAME,
       reference,
     },
-    notify_when: 'onActiveAlert',
+    notify_when: notifyWhen,
     actions: [
       {
         group: 'default',

@@ -57,6 +57,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           connector_type_id: '.pagerduty',
           id: 'a6a8ab7a-35cf-445e-ade3-215a029c2ee3',
           group: 'default',
+          last_trigger_date: null,
           params: {
             component: '',
             eventAction: 'trigger',
@@ -67,6 +68,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           connector_type_id: '.pagerduty',
           id: 'a6a8ab7a-35cf-445e-ade3-215a029c2ee3',
           group: 'default',
+          last_trigger_date: null,
           params: {
             component: '',
             dedupKey: '{{alertId}}',
@@ -78,6 +80,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           connector_type_id: '.pagerduty',
           id: 'a6a8ab7a-35cf-445e-ade3-215a029c2ee3',
           group: 'default',
+          last_trigger_date: null,
           params: {
             component: '',
             dedupKey: '{{alertInstanceId}}',
@@ -117,6 +120,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
           connector_type_id: '.servicenow',
           group: 'threshold met',
+          last_trigger_date: null,
           params: {
             subAction: 'pushToService',
             subActionParams: {
@@ -135,6 +139,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
           connector_type_id: '.jira',
           group: 'threshold met',
+          last_trigger_date: null,
           params: {
             subAction: 'pushToService',
             subActionParams: {
@@ -159,6 +164,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
           connector_type_id: '.resilient',
           group: 'threshold met',
+          last_trigger_date: null,
           params: {
             subAction: 'pushToService',
             subActionParams: {

@@ -28,7 +28,7 @@ import {
   RuleActionParam,
   SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
-  RuleAction,
+  RuleAction as CommonRuleAction,
   RuleAggregations as AlertingRuleAggregations,
   RuleTaskState,
   AlertSummary as RuleSummary,
@@ -89,6 +89,8 @@ type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> &
 type RuleAggregations = Omit<AlertingRuleAggregations, 'alertExecutionStatus'> & {
   ruleExecutionStatus: AlertingRuleAggregations['alertExecutionStatus'];
 };
+
+type RuleAction = Omit<CommonRuleAction, 'lastTriggerDate'>;
 
 export type {
   Rule,
