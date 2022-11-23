@@ -15,58 +15,58 @@ export const NATIVE_CONNECTORS: NativeConnector[] = [
   {
     configuration: {
       host: {
-        value: '',
         label: i18n.translate(
           'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.hostLabel',
           {
-            defaultMessage: 'MongoDB host',
+            defaultMessage: 'Host',
           }
         ),
+        value: '',
       },
       user: {
-        value: '',
         label: i18n.translate(
           'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.usernameLabel',
           {
-            defaultMessage: 'MongoDB username',
+            defaultMessage: 'Username',
           }
         ),
+        value: '',
       },
       password: {
-        value: '',
         label: i18n.translate(
           'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.passwordLabel',
           {
-            defaultMessage: 'MongoDB password',
+            defaultMessage: 'Password',
           }
         ),
+        value: '',
       },
       database: {
-        value: '',
         label: i18n.translate(
           'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.databaseLabel',
           {
-            defaultMessage: 'MongoDB database',
+            defaultMessage: 'Database',
           }
         ),
+        value: '',
       },
       collection: {
-        value: '',
         label: i18n.translate(
           'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.collectionLabel',
           {
-            defaultMessage: 'MongoDB collection',
+            defaultMessage: 'Collection',
           }
         ),
+        value: '',
       },
       direct_connection: {
-        value: '',
         label: i18n.translate(
           'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.directConnectionLabel',
           {
-            defaultMessage: 'Use direct connection (true/false)',
+            defaultMessage: 'Direct connection (true/false)',
           }
         ),
+        value: '',
       },
     },
     docsUrl: docLinks.connectorsMongoDB,
@@ -80,49 +80,49 @@ export const NATIVE_CONNECTORS: NativeConnector[] = [
   {
     configuration: {
       host: {
-        value: '',
         label: i18n.translate(
           'xpack.enterpriseSearch.content.nativeConnectors.mysql.configuration.hostLabel',
           {
-            defaultMessage: 'MySQL host',
+            defaultMessage: 'Host',
           }
         ),
+        value: '',
       },
       port: {
-        value: '',
         label: i18n.translate(
           'xpack.enterpriseSearch.content.nativeConnectors.mysql.configuration.portLabel',
           {
-            defaultMessage: 'MySQL port',
+            defaultMessage: 'Port',
           }
         ),
+        value: '',
       },
       user: {
-        value: '',
         label: i18n.translate(
           'xpack.enterpriseSearch.content.nativeConnectors.mysql.configuration.usernameLabel',
           {
-            defaultMessage: 'MySQL username',
+            defaultMessage: 'Username',
           }
         ),
+        value: '',
       },
       password: {
         value: '',
         label: i18n.translate(
           'xpack.enterpriseSearch.content.nativeConnectors.mysql.configuration.passwordLabel',
           {
-            defaultMessage: 'MySQL password',
+            defaultMessage: 'Password',
           }
         ),
       },
       database: {
-        value: '',
         label: i18n.translate(
           'xpack.enterpriseSearch.content.nativeConnectors.mysql.configuration.databasesLabel',
           {
-            defaultMessage: 'List of MySQL databases',
+            defaultMessage: 'Databases',
           }
         ),
+        value: '',
       },
     },
     docsUrl: docLinks.connectorsMySQL,

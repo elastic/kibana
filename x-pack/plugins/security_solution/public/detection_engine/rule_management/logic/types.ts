@@ -30,6 +30,7 @@ import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
 import {
+  AlertSuppression,
   AlertsIndex,
   BuildingBlockType,
   DataViewId,
@@ -191,6 +192,7 @@ export const RuleSchema = t.intersection([
     uuid: t.string,
     version: RuleVersion,
     execution_summary: RuleExecutionSummary,
+    alert_suppression: AlertSuppression,
   }),
 ]);
 

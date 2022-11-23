@@ -21,6 +21,7 @@ exports[`getting started should render getting started component 1`] = `
           "toString": [Function],
         }
       }
+      data-test-subj="onboarding--landing-page"
       hasShadow={true}
     >
       <EuiTitle
@@ -57,7 +58,7 @@ exports[`getting started should render getting started component 1`] = `
         >
           <GuideCard
             activateGuide={[Function]}
-            addBasePath={[MockFunction]}
+            addBasePath={[Function]}
             guides={Array []}
             isDarkTheme={false}
             useCase="search"
@@ -68,7 +69,7 @@ exports[`getting started should render getting started component 1`] = `
         >
           <GuideCard
             activateGuide={[Function]}
-            addBasePath={[MockFunction]}
+            addBasePath={[Function]}
             guides={Array []}
             isDarkTheme={false}
             useCase="observability"
@@ -78,7 +79,7 @@ exports[`getting started should render getting started component 1`] = `
           key="linkCard-observabilityLink"
         >
           <ObservabilityLinkCard
-            addBasePath={[MockFunction]}
+            addBasePath={[Function]}
             isDarkTheme={false}
             navigateToApp={[MockFunction]}
           />
@@ -88,7 +89,7 @@ exports[`getting started should render getting started component 1`] = `
         >
           <GuideCard
             activateGuide={[Function]}
-            addBasePath={[MockFunction]}
+            addBasePath={[Function]}
             guides={Array []}
             isDarkTheme={false}
             useCase="security"

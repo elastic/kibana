@@ -33,7 +33,7 @@ describe('Import rules', () => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should(
         'have.text',
-        'Successfully imported 1 ruleSuccessfully imported 2 exceptions.'
+        'Successfully imported 1 ruleSuccessfully imported 1 exception.'
       );
 
       cy.get(RULES_TABLE).then(($table) => {
@@ -75,7 +75,7 @@ describe('Import rules', () => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should(
         'have.text',
-        'Successfully imported 1 ruleSuccessfully imported 2 exceptions.'
+        'Successfully imported 1 ruleSuccessfully imported 1 exception.'
       );
     });
   });

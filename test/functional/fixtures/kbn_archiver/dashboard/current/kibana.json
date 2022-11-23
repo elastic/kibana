@@ -2651,3 +2651,96 @@
   "updated_at": "2018-04-16T16:57:12.263Z",
   "version": "WzE3NiwxXQ=="
 }
+
+{
+  "id": "2b9247e0-6458-11ed-9957-e76caeeb9f75",
+  "type": "search",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2022-11-14T20:08:56.926Z",
+  "created_at": "2022-11-14T20:08:56.926Z",
+  "version": "WzI1OSwxXQ==",
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "logstash hits",
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "columns": [],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "isTextBasedQuery": false,
+    "timeRestore": true,
+    "timeRange": {
+      "from": "2018-04-09T23:43:13.577Z",
+      "to": "2018-04-14T00:40:42.233Z"
+    },
+    "refreshInterval": {
+      "value": 0,
+      "pause": true
+    }
+  },
+  "references": [
+    {
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern",
+      "id": "0bf35f60-3dc9-11e8-8660-4d65aa086b3c"
+    }
+  ],
+  "migrationVersion": {
+    "search": "8.0.0"
+  },
+  "coreMigrationVersion": "8.6.0"
+}
+
+{
+  "id": "3de3c3b0-6458-11ed-9957-e76caeeb9f75",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2022-11-14T20:09:27.659Z",
+  "created_at": "2022-11-14T20:09:27.659Z",
+  "version": "WzI3NSwxXQ==",
+  "attributes": {
+    "controlGroupInput": {
+      "controlStyle": "oneLine",
+      "chainingSystem": "HIERARCHICAL",
+      "panelsJSON": "{\"18122aef-6a2e-4e01-a6ce-556d2995444a\":{\"order\":0,\"width\":\"large\",\"grow\":true,\"type\":\"timeSlider\",\"explicitInput\":{\"title\":\"Time slider\",\"id\":\"18122aef-6a2e-4e01-a6ce-556d2995444a\",\"enhancements\":{}}}}",
+      "ignoreParentSettingsJSON": "{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false}"
+    },
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "refreshInterval": {
+      "pause": true,
+      "value": 0
+    },
+    "timeRestore": true,
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "description": "",
+    "panelsJSON": "[{\"version\":\"8.6.0\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"3d2c7037-b0af-4b9f-810f-75de6278acf2\"},\"panelIndex\":\"3d2c7037-b0af-4b9f-810f-75de6278acf2\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_3d2c7037-b0af-4b9f-810f-75de6278acf2\"}]",
+    "timeFrom": "2018-04-09T23:43:13.577Z",
+    "title": "timeslider and saved search",
+    "timeTo": "2018-04-14T00:40:42.233Z",
+    "version": 1
+  },
+  "references": [
+    {
+      "name": "3d2c7037-b0af-4b9f-810f-75de6278acf2:panel_3d2c7037-b0af-4b9f-810f-75de6278acf2",
+      "type": "search",
+      "id": "2b9247e0-6458-11ed-9957-e76caeeb9f75"
+    }
+  ],
+  "migrationVersion": {
+    "dashboard": "8.6.0"
+  },
+  "coreMigrationVersion": "8.6.0"
+}

@@ -130,10 +130,10 @@ describe('HeaderSection', () => {
 
     expect(
       wrapper
-        .find('.euiFlexItem--flexGrowZero[data-test-subj="header-section-supplements"]')
-        .first()
-        .exists()
-    ).toBe(false);
+        .find('.euiFlexItem[data-test-subj="header-section-supplements"]')
+        .last()
+        .prop('className')
+    ).not.toContain('growZero');
   });
 
   test('it DOES NOT split the title and supplement areas evenly when split is false', () => {
@@ -147,10 +147,10 @@ describe('HeaderSection', () => {
 
     expect(
       wrapper
-        .find('.euiFlexItem--flexGrowZero[data-test-subj="header-section-supplements"]')
-        .first()
-        .exists()
-    ).toBe(true);
+        .find('.euiFlexItem[data-test-subj="header-section-supplements"]')
+        .last()
+        .prop('className')
+    ).toContain('growZero');
   });
 
   test('it renders an inspect button when an `id` is provided', () => {
@@ -264,8 +264,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').first().getDOMNode()
-    ).not.toHaveClass('euiFlexGroup--alignItemsFlexStart');
+      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').last().getDOMNode().className
+    ).not.toContain('flexStart-flexStart');
   });
 
   test(`it uses the 'column' direction in the outer flex group by default`, () => {
@@ -278,8 +278,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').first().getDOMNode()
-    ).toHaveClass('euiFlexGroup--directionColumn');
+      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').last().getDOMNode().className
+    ).toContain('column');
   });
 
   test('it uses the `outerDirection` prop to specify the direction of the outer flex group when it is provided', () => {
@@ -292,8 +292,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').first().getDOMNode()
-    ).toHaveClass('euiFlexGroup--directionRow');
+      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').last().getDOMNode().className
+    ).toContain('row');
   });
 
   test('it defaults to center alignment in the inner flex group', () => {
@@ -306,8 +306,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
-    ).toHaveClass('euiFlexGroup--alignItemsCenter');
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
+    ).toContain('center');
   });
 
   test('it aligns items using the value of the `alignHeader` prop in the inner flex group when specified', () => {
@@ -320,8 +320,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
-    ).toHaveClass('euiFlexGroup--alignItemsFlexEnd');
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
+    ).toContain('flexEnd');
   });
 
   test('it does NOT default to center alignment in the inner flex group when the `stackHeader` prop is true', () => {
@@ -334,8 +334,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
-    ).not.toHaveClass('euiFlexGroup--alignItemsCenter');
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
+    ).not.toContain('center');
   });
 
   test('it does render everything but title when toggleStatus = true', () => {

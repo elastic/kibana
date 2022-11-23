@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
+import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
@@ -208,6 +209,7 @@ export class ExecutionHandler<
               kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
               alertParams: this.rule.params,
               actionParams: action.params,
+              ruleUrl: this.buildRuleUrl(spaceId),
             }),
           }),
         };
@@ -280,6 +282,28 @@ export class ExecutionHandler<
     }
 
     return executables;
+  }
+
+  private buildRuleUrl(spaceId: string): string | undefined {
+    if (!this.taskRunnerContext.kibanaBaseUrl) {
+      return;
+    }
+
+    try {
+      const ruleUrl = new URL(
+        `${
+          spaceId !== 'default' ? `/s/${spaceId}` : ''
+        }${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`,
+        this.taskRunnerContext.kibanaBaseUrl
+      );
+
+      return ruleUrl.toString();
+    } catch (error) {
+      this.logger.debug(
+        `Rule "${this.rule.id}" encountered an error while constructing the rule.url variable: ${error.message}`
+      );
+      return;
+    }
   }
 
   private async actionRunOrAddToBulk({
@@ -359,7 +383,7 @@ export class ExecutionHandler<
     } = this;
 
     const muted = mutedAlertIdsSet!.has(alertId);
-    const throttled = alert.isThrottled(throttle);
+    const throttled = alert.isThrottled(throttle ?? null);
 
     if (muted) {
       if (

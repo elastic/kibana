@@ -36,7 +36,6 @@ import {
   createMlAlertType,
   createNewTermsAlertType,
   createQueryAlertType,
-  createSavedQueryAlertType,
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
@@ -260,7 +259,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
-        createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+        createQueryAlertType({
+          ...ruleOptions,
+          ...queryRuleAdditionalOptions,
+          id: SAVED_QUERY_RULE_TYPE_ID,
+          name: 'Saved Query Rule',
+        })
       )
     );
     plugins.alerting.registerType(
@@ -269,7 +273,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
-        createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+        createQueryAlertType({
+          ...ruleOptions,
+          ...queryRuleAdditionalOptions,
+          id: QUERY_RULE_TYPE_ID,
+          name: 'Custom Query Rule',
+        })
       )
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));

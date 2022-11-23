@@ -65,6 +65,12 @@ const defaultServices = {
     set: () => {},
     get: () => {},
   },
+  cases: {
+    hooks: {
+      getUseCasesAddToNewCaseFlyout: () => {},
+      getUseCasesAddToExistingCaseModal: () => {},
+    },
+  },
 } as unknown as CoreStart;
 
 /**

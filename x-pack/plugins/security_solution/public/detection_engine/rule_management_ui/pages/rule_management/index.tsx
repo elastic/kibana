@@ -41,7 +41,6 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { RulesManagementTour } from '../../components/guided_onboarding/rules_management_tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -92,7 +91,6 @@ const RulesPageComponent: React.FC = () => {
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
       <MlJobCompatibilityCallout />
-      <RulesManagementTour />
       <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
       <ImportDataModal
         checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}

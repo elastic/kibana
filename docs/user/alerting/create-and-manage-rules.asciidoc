@@ -13,7 +13,7 @@ central place to:
 * Drill down to <<rule-details,rule details>>
 
 [role="screenshot"]
-image:images/rules-and-connectors-ui.png[Example rule listing in {rules-ui}]
+image:images/rules-ui.png[Example rule listing in {rules-ui}]
 
 For more information on alerting concepts and the types of rules and connectors
 available, go to <<alerting-getting-started>>.

@@ -13,6 +13,7 @@ import {
   NOTES_LINK,
   NOTES_TEXT,
   NOTES_TEXT_AREA,
+  MARKDOWN_INVESTIGATE_BUTTON,
 } from '../../screens/timeline';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 
@@ -83,5 +84,12 @@ describe('Timeline notes tab', () => {
     addNotesToTimeline(`[${text}](${link})`);
     cy.get(NOTES_LINK).last().should('have.text', `${text}(opens in a new tab or window)`);
     cy.get(NOTES_LINK).last().click();
+  });
+
+  it('should render insight query from markdown', () => {
+    addNotesToTimeline(
+      `!{insight{"description":"2 top level OR providers, 1 nested AND","label":"test insight", "providers": [[{ "field": "event.id", "value": "kibana.alert.original_event.id", "type": "parameter" }], [{ "field": "event.category", "value": "network", "type": "literal" }, {"field": "process.pid", "value": "process.pid", "type": "parameter"}]]}}`
+    );
+    cy.get(MARKDOWN_INVESTIGATE_BUTTON).should('exist');
   });
 });

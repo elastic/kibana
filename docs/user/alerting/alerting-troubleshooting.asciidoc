@@ -31,7 +31,8 @@ and Task Manager <<task-manager-diagnosing-root-cause,diagnostics endpoints>>.
 [float]
 [[alerting-managment-detail]]
 === Using rules and connectors list for the current state and finding issues
-*{rules-ui}* in *{stack-manage-app}* lists the rules and connectors available in the space you're currently in. When you click a rule name, you are navigated to the <<rule-details,details page>> for the rule, where you can see currently active alerts. 
+
+*{rules-ui}* in *{stack-manage-app}* lists the rules available in the space you're currently in. When you click a rule name, you are navigated to the <<rule-details,details page>> for the rule, where you can see currently active alerts. 
 The start date on this page indicates when a rule is triggered, and for what alerts. In addition, the duration of the condition indicates how long the instance is active.
 [role="screenshot"]
 image::images/rule-details-alerts-inactive.png[Alerting management details]
@@ -64,7 +65,7 @@ curl -X POST -k \
  -d '{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}'
 --------------------------------------------------
 
-experimental[] In addition, there is a command-line client that uses legacy {rules-ui} APIs, which can be easier to use, but must be updated for the new APIs.
+experimental[] In addition, there is a command-line client that uses legacy rule APIs, which can be easier to use, but must be updated for the new APIs.
 CLI tools to list, create, edit, and delete alerts (rules) and actions (connectors) are available in https://github.com/pmuellr/kbn-action[kbn-action], which you can install as follows:
 [source, txt]
 --------------------------------------------------
@@ -83,19 +84,18 @@ The result of this HTTP request (and printed to stdout by https://github.com/pmu
 [[alerting-error-banners]]
 === Look for error banners
 
-The *Rule Management* and *Rule Details* pages contain an error banner, which helps to identify the errors for the rules:
-[role="screenshot"]
-image::images/rules-management-health.png[Rule management page with the errors banner]
+The **{stack-manage-app}** > *{rules-ui}* page contains an error banner that
+helps to identify the errors for the rules:
 
 [role="screenshot"]
-image::images/rules-details-health.png[Rule details page with the errors banner]
+image::images/rules-management-health.png[Rule management page with the errors banner]
 
 [float]
 [[task-manager-diagnostics]]
 === Task Manager diagnostics
 
-Under the hood, {rules-ui} uses a plugin called Task Manager, which handles the scheduling, running, and error handling of the tasks.
-This means that failure cases in {rules-ui} will, at times, be revealed by the Task Manager mechanism, rather than the Rules mechanism.
+Under the hood, the {alert-features} use a plugin called Task Manager, which handles the scheduling, running, and error handling of the tasks.
+This means that failure cases in {alert-features} will, at times, be revealed by the Task Manager mechanism, rather than the Rules mechanism.
 
 Task Manager provides a visible status which can be used to diagnose issues and is very well documented <<task-manager-health-monitoring,health monitoring>> and <<task-manager-troubleshooting,troubleshooting>>. 
 Task Manager uses the `.kibana_task_manager` index, an internal index that contains all the saved objects that represent the tasks in the system.
@@ -192,7 +192,7 @@ In addition to the above methods, refer to the following approaches and common i
 
 * <<alerting-common-issues, Alerting common issues>>
 * <<event-log-index, Querying Event log index>>
-* <<testing-connectors, Testing connectors using Connectors UI and `kbn-action` tool>>
+* <<testing-connectors, Testing connectors using {connectors-ui} UI and `kbn-action` tool>>
 
 [discrete]
 [[alerting-limitations]]

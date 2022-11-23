@@ -24,6 +24,9 @@ import { mockTheme, mockProps, mockTiDataSources, mockCtiLinksResponse } from '.
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
 import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { createKibanaContextProviderMock } from '../../../common/lib/kibana/kibana_react.mock';
+
+const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 jest.mock('../../../common/lib/kibana');
 
@@ -63,7 +66,9 @@ describe('CtiEnabledModule', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiEnabledModule {...mockProps} />
+            <MockKibanaContextProvider>
+              <CtiEnabledModule {...mockProps} />
+            </MockKibanaContextProvider>
           </ThemeProvider>
         </I18nProvider>
       </Provider>

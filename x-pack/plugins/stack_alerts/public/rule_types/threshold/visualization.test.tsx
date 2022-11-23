@@ -81,7 +81,7 @@ describe('ThresholdVisualization', () => {
 
   test('periodically requests visualization data', async () => {
     const refreshRate = 10;
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const wrapper = mountWithIntl(
       <ThresholdVisualization
