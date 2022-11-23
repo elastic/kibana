@@ -69,7 +69,10 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
 }
 
 // FIXME: Consolidate this component with ML and AIOps's component
-export const DatePickerWrapper: FC = () => {
+export const DatePickerWrapper: FC<{ showDatePicker?: boolean; showRefresh?: boolean }> = ({
+  showDatePicker = true,
+  showRefresh,
+}) => {
   const {
     services,
     notifications: { toasts },
@@ -241,23 +244,25 @@ export const DatePickerWrapper: FC = () => {
       alignItems="center"
       className="mlNavigationMenu__datePickerWrapper"
     >
-      <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          start={time.from}
-          end={time.to}
-          isPaused={refreshInterval.pause}
-          isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
-          refreshInterval={refreshInterval.value || DEFAULT_REFRESH_INTERVAL_MS}
-          onTimeChange={updateTimeFilter}
-          onRefresh={updateLastRefresh}
-          onRefreshChange={updateInterval}
-          recentlyUsedRanges={recentlyUsedRanges}
-          dateFormat={dateFormat}
-          commonlyUsedRanges={commonlyUsedRanges}
-        />
-      </EuiFlexItem>
+      {showDatePicker ? (
+        <EuiFlexItem grow={false}>
+          <EuiSuperDatePicker
+            start={time.from}
+            end={time.to}
+            isPaused={refreshInterval.pause}
+            isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
+            refreshInterval={refreshInterval.value || DEFAULT_REFRESH_INTERVAL_MS}
+            onTimeChange={updateTimeFilter}
+            onRefresh={updateLastRefresh}
+            onRefreshChange={updateInterval}
+            recentlyUsedRanges={recentlyUsedRanges}
+            dateFormat={dateFormat}
+            commonlyUsedRanges={commonlyUsedRanges}
+          />
+        </EuiFlexItem>
+      ) : null}
 
-      {isTimeRangeSelectorEnabled ? null : (
+      {showRefresh === true || !isTimeRangeSelectorEnabled ? (
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
@@ -272,7 +277,7 @@ export const DatePickerWrapper: FC = () => {
             />
           </EuiButton>
         </EuiFlexItem>
-      )}
+      ) : null}
     </EuiFlexGroup>
   ) : null;
 };
