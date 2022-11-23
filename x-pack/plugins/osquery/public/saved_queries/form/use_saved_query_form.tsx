@@ -90,8 +90,6 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
     return res;
   }, [ids, defaultValue]);
 
-  console.log({ ids, data, defaultValue });
-
   return {
     serializer: savedQueryDataSerializer,
     idSet,
