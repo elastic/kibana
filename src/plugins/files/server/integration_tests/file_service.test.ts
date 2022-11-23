@@ -10,8 +10,8 @@ import { CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import {
   createTestServers,
   createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+  TestElasticsearchUtils,
+} from '@kbn/core/test_helpers/kbn_server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import { Readable } from 'stream';

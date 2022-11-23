@@ -10,15 +10,15 @@ import type supertest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
+import type { SavedObjectsClientContract, IUiSettingsClient } from '../../..';
 import {
   createTestServers,
+  TestElasticsearchUtils,
+  TestKibanaUtils,
+  TestUtils,
+  HttpMethod,
   getSupertest,
-  type TestElasticsearchUtils,
-  type TestKibanaUtils,
-  type TestUtils,
-  type HttpMethod,
-} from '@kbn/core-test-helpers-kbn-server';
-import type { SavedObjectsClientContract, IUiSettingsClient } from '../../..';
+} from '../../../../test_helpers/kbn_server';
 
 let servers: TestUtils;
 let esServer: TestElasticsearchUtils;

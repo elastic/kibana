@@ -7,17 +7,13 @@
  */
 
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import {
-  createRootWithCorePlugins,
-  createTestServers,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import { Root } from '@kbn/core-root-server-internal';
 
-const { startES } = createTestServers({
+const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
 });
-let esServer: TestElasticsearchUtils;
+let esServer: kbnTestServer.TestElasticsearchUtils;
 
 describe('SavedObjectsRepository', () => {
   let root: Root;
@@ -25,7 +21,7 @@ describe('SavedObjectsRepository', () => {
 
   beforeAll(async () => {
     esServer = await startES();
-    root = createRootWithCorePlugins({
+    root = kbnTestServer.createRootWithCorePlugins({
       server: {
         basePath: '/hello',
       },
