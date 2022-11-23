@@ -60,7 +60,7 @@ export interface Rule {
   name: string;
   id: string;
   rule_id: string;
-  exception_list?: ListArray;
+  exceptions_list?: ListArray;
 }
 
 export interface RuleReference {

@@ -8,7 +8,7 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { SavedServiceGroup } from '../../../common/service_groups';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 

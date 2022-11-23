@@ -11,9 +11,14 @@ import { EuiButton, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { useFetcher, FETCH_STATUS } from '@kbn/observability-plugin/public';
-import { SyntheticsMonitor } from '../types';
+import { DeleteMonitor } from '../../monitors_page/management/monitor_list_table/delete_monitor';
+import { ConfigKey, SourceType, SyntheticsMonitor } from '../types';
 import { format } from './formatter';
-import { createMonitorAPI, updateMonitorAPI } from '../../../state/monitor_management/api';
+import {
+  createMonitorAPI,
+  getMonitorAPI,
+  updateMonitorAPI,
+} from '../../../state/monitor_management/api';
 import { kibanaService } from '../../../../../utils/kibana_service';
 
 import { MONITORS_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';
@@ -28,7 +33,16 @@ export const ActionBar = () => {
     formState: { errors },
   } = useFormContext();
 
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+
   const [monitorData, setMonitorData] = useState<SyntheticsMonitor | undefined>(undefined);
+
+  const { data: monitorObject } = useFetcher(() => {
+    if (isEdit) {
+      return getMonitorAPI({ id: monitorId });
+    }
+    return undefined;
+  }, []);
 
   const { data, status } = useFetcher(() => {
     if (!monitorData) {
@@ -71,26 +85,51 @@ export const ActionBar = () => {
   return status === FETCH_STATUS.SUCCESS ? (
     <Redirect to={MONITORS_ROUTE} />
   ) : (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem>
-        <EuiLink href={history.createHref({ pathname: MONITORS_ROUTE })}>{CANCEL_LABEL}</EuiLink>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isLoading={loading}
-              iconType="plusInCircleFilled"
-              onClick={handleSubmit(formSubmitter)}
-              data-test-subj="syntheticsMonitorConfigSubmitButton"
-            >
-              {isEdit ? UPDATE_MONITOR_LABEL : CREATE_MONITOR_LABEL}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={true}>
+          {isEdit && (
+            <div>
+              <EuiButton
+                color="danger"
+                onClick={() => {
+                  setIsDeleteModalVisible(true);
+                }}
+              >
+                {DELETE_MONITOR_LABEL}
+              </EuiButton>
+            </div>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink href={history.createHref({ pathname: MONITORS_ROUTE })}>{CANCEL_LABEL}</EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            isLoading={loading}
+            iconType="plusInCircleFilled"
+            onClick={handleSubmit(formSubmitter)}
+            data-test-subj="syntheticsMonitorConfigSubmitButton"
+          >
+            {isEdit ? UPDATE_MONITOR_LABEL : CREATE_MONITOR_LABEL}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isDeleteModalVisible && (
+        <DeleteMonitor
+          configId={monitorId}
+          name={monitorObject?.attributes?.[ConfigKey.NAME] ?? ''}
+          reloadPage={() => {
+            history.push(MONITORS_ROUTE);
+          }}
+          isProjectMonitor={
+            monitorObject?.attributes?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
+          }
+          setIsDeleteModalVisible={setIsDeleteModalVisible}
+        />
+      )}
+    </>
   );
 };
 
@@ -102,6 +141,13 @@ const CREATE_MONITOR_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.addEdit.createMonitorLabel',
   {
     defaultMessage: 'Create monitor',
+  }
+);
+
+const DELETE_MONITOR_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.addEdit.deleteMonitorLabel',
+  {
+    defaultMessage: 'Delete monitor',
   }
 );
 

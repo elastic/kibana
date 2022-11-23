@@ -11,6 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
+import _ from 'lodash';
 import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
@@ -292,7 +293,10 @@ export class ControlGroupContainer extends Container<
       }
     });
     // if filters are different, publish them
-    if (!compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS)) {
+    if (
+      !compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS) ||
+      !_.isEqual(this.output.timeslice, timeslice)
+    ) {
       this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
       this.onFiltersPublished$.next(allFilters);
     }

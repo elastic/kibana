@@ -8,7 +8,7 @@
 import React, { FC, ReactNode } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiHorizontalRule } from '@elastic/eui';
 
 import { useCurrentEuiTheme } from '../../../../../components/color_range_legend/use_color_range';
 
@@ -25,15 +25,21 @@ export const getQuestionAnsweringOutputComponent = (inferrer: QuestionAnsweringI
 );
 
 const QuestionAnsweringOutput: FC<{ inferrer: QuestionAnsweringInference }> = ({ inferrer }) => {
-  const result = useObservable(inferrer.inferenceResult$);
-  if (!result || result.response.length === 0) {
+  const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
+  if (!result) {
     return null;
   }
 
-  const bestResult = result.response[0];
-  const { inputText } = result;
-
-  return <>{insertHighlighting(bestResult, inputText)}</>;
+  return (
+    <>
+      {result.map(({ response, inputText }) => (
+        <>
+          <>{insertHighlighting(response[0], inputText)}</>
+          <EuiHorizontalRule />
+        </>
+      ))}
+    </>
+  );
 };
 
 function insertHighlighting(result: FormattedQuestionAnsweringResult, inputText: string) {

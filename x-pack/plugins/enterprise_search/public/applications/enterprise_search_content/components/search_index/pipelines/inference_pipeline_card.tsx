@@ -152,7 +152,10 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <TrainedModelHealth {...pipeline} />
+                  <TrainedModelHealth
+                    modelState={pipeline.modelState}
+                    modelStateReason={pipeline.modelStateReason}
+                  />
                 </EuiFlexItem>
                 {pipeline.modelState === TrainedModelState.NotDeployed && (
                   <EuiFlexItem grow={false} style={{ paddingRight: '1rem' }}>

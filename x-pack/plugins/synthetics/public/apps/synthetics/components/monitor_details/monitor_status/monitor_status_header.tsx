@@ -17,6 +17,7 @@ import {
 import { css } from '@emotion/css';
 import { useHistory } from 'react-router-dom';
 
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import { MONITOR_HISTORY_ROUTE } from '../../../../../../common/constants';
 import { stringifyUrlParams } from '../../../utils/url_params';
 import { useGetUrlParams } from '../../../hooks';
@@ -69,9 +70,12 @@ export const MonitorStatusHeader = ({
         <EuiFlexItem grow={false}>
           <EuiLink
             href={
-              monitor?.id
+              monitor?.[ConfigKey.CONFIG_ID]
                 ? history.createHref({
-                    pathname: MONITOR_HISTORY_ROUTE.replace(':monitorId', monitor?.id),
+                    pathname: MONITOR_HISTORY_ROUTE.replace(
+                      ':monitorId',
+                      monitor[ConfigKey.CONFIG_ID]
+                    ),
                     search: stringifyUrlParams(
                       { ...params, dateRangeStart: 'now-24h', dateRangeEnd: 'now' },
                       true

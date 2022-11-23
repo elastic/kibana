@@ -81,7 +81,7 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
 
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
-  endDate: string;
+  endDate?: string;
   eqlOptions?: EqlOptionsSelected;
   fields: string[];
   filterQuery?: ESQuery | string;
@@ -92,7 +92,7 @@ export interface UseTimelineEventsProps {
   runtimeMappings: MappingRuntimeFields;
   skip?: boolean;
   sort?: TimelineRequestSortField[];
-  startDate: string;
+  startDate?: string;
   timerangeKind?: 'absolute' | 'relative';
 }
 
@@ -360,17 +360,17 @@ export const useTimelineEventsHandler = ({
         ...deStructureEqlOptions(prevEqlRequest),
       };
 
+      const timerange =
+        startDate && endDate
+          ? { timerange: { interval: '12h', from: startDate, to: endDate } }
+          : {};
       const currentSearchParameters = {
         defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         querySize: limit,
         sort,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
         runtimeMappings,
+        ...timerange,
         ...deStructureEqlOptions(eqlOptions),
       };
 
@@ -391,11 +391,7 @@ export const useTimelineEventsHandler = ({
         language,
         runtimeMappings,
         sort,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        ...timerange,
         ...(eqlOptions ? eqlOptions : {}),
       };
 

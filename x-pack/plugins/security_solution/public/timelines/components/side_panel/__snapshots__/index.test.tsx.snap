@@ -41,13 +41,13 @@ Array [
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap c0"
+    class="euiFlexGroup c0 emotion-euiFlexGroup-responsive-wrap-none-spaceBetween-stretch-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     />
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
         aria-label="close"
@@ -107,10 +107,10 @@ Array [
     data-test-subj="side-panel-flyout-footer"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       />
     </div>
   </div>,
@@ -158,10 +158,10 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     class="euiFlyoutHeader emotion-euiFlyoutHeader"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap c0"
+      class="euiFlexGroup c0 emotion-euiFlexGroup-responsive-wrap-none-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       />
     </div>
   </div>
@@ -169,7 +169,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     class="euiFlyoutBody c1 emotion-euiFlyoutBody"
   >
     <div
-      class="euiFlyoutBody__overflow css-1fk8opf-noBanner"
+      class="euiFlyoutBody__overflow css-18yrfj9-noBanner"
       tabindex="0"
     >
       <div
@@ -219,10 +219,10 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     data-test-subj="side-panel-flyout-footer"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       />
     </div>
   </div>
@@ -313,11 +313,11 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c1"
+    class="euiFlexGroup c1 emotion-euiFlexGroup-l-flexStart-stretch-column"
     data-test-subj="host-overview"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
@@ -370,7 +370,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
@@ -421,7 +421,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
@@ -486,7 +486,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
@@ -554,11 +554,11 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       class="c4"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c5"
+        class="euiFlexGroup c5 emotion-euiFlexGroup-s-center-center-column"
         overlay="[object Object]"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
             aria-label="Loading"
@@ -657,10 +657,10 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c1"
+    class="euiFlexGroup c1 emotion-euiFlexGroup-l-flexStart-stretch-column"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
@@ -697,7 +697,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
@@ -736,7 +736,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
@@ -773,7 +773,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
       </dl>
     </div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
         class="euiDescriptionList c2 emotion-euiDescriptionList-row-left"
@@ -826,11 +826,11 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
       class="c4"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c5"
+        class="euiFlexGroup c5 emotion-euiFlexGroup-s-center-center-column"
         overlay="[object Object]"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
             aria-label="Loading"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAPIKeyForSyntheticsService } from './get_api_key';
+import { getAPIKeyForSyntheticsService, syntheticsIndex } from './get_api_key';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -13,6 +13,9 @@ import { syntheticsServiceApiKey } from '../legacy_uptime/lib/saved_objects/serv
 import { KibanaRequest } from '@kbn/core/server';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { getUptimeESMockClient } from '../legacy_uptime/lib/requests/test_helpers';
+import { loggerMock } from '@kbn/logging-mocks';
+
+import * as authUtils from './authentication/check_has_privilege';
 
 describe('getAPIKeyTest', function () {
   const core = coreMock.createStart();
@@ -20,7 +23,20 @@ describe('getAPIKeyTest', function () {
   const encryptedSavedObjects = encryptedSavedObjectsMock.createStart();
   const request = {} as KibanaRequest;
 
+  const logger = loggerMock.create();
+
+  jest.spyOn(authUtils, 'checkHasPrivileges').mockResolvedValue({
+    index: {
+      [syntheticsIndex]: {
+        auto_configure: true,
+        create_doc: true,
+        view_index_metadata: true,
+      },
+    },
+  } as any);
+
   const server = {
+    logger,
     security,
     encryptedSavedObjects,
     savedObjectsClient: core.savedObjects.getScopedClient(request),
@@ -28,6 +44,7 @@ describe('getAPIKeyTest', function () {
   } as unknown as UptimeServerSetup;
 
   security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValue(true);
+  security.authc.apiKeys.validate = jest.fn().mockReturnValue(true);
   security.authc.apiKeys.create = jest.fn().mockReturnValue({
     id: 'test',
     name: 'service-api-key',
@@ -47,7 +64,10 @@ describe('getAPIKeyTest', function () {
       server,
     });
 
-    expect(apiKey).toEqual({ apiKey: 'qwerty', id: 'test', name: 'service-api-key' });
+    expect(apiKey).toEqual({
+      apiKey: { apiKey: 'qwerty', id: 'test', name: 'service-api-key' },
+      isValid: true,
+    });
 
     expect(encryptedSavedObjects.getClient).toHaveBeenCalledTimes(1);
     expect(getObject).toHaveBeenCalledTimes(1);

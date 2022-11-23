@@ -36,15 +36,15 @@ export const MonitorDetailsPanel = () => {
   const { euiTheme } = useEuiTheme();
   const { latestPing } = useMonitorLatestPing();
 
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const { monitorId: configId } = useParams<{ monitorId: string }>();
 
   const dispatch = useDispatch();
 
   const { monitor, loading } = useSelectedMonitor();
 
   if (
-    (latestPing && latestPing?.config_id !== monitorId) ||
-    (monitor && monitor.id !== monitorId)
+    (latestPing && latestPing?.config_id !== configId) ||
+    (monitor && monitor[ConfigKey.CONFIG_ID] !== configId)
   ) {
     return <EuiLoadingContent lines={6} />;
   }
@@ -69,10 +69,10 @@ export const MonitorDetailsPanel = () => {
             {monitor && (
               <MonitorEnabled
                 initialLoading={loading}
-                id={monitorId}
+                configId={configId}
                 monitor={monitor}
                 reloadPage={() => {
-                  dispatch(getMonitorAction.get({ monitorId }));
+                  dispatch(getMonitorAction.get({ monitorId: configId }));
                 }}
               />
             )}

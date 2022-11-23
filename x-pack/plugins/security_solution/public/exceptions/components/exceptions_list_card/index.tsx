@@ -30,8 +30,6 @@ import { TitleBadge } from '../title_badge';
 import * as i18n from '../../translations';
 import { ListExceptionItems } from '../list_exception_items';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
-import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
-import { SecurityPageName } from '../../../../common/constants';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
@@ -98,16 +96,14 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       onAddExceptionClick,
       handleConfirmExceptionFlyout,
       handleCancelExceptionItemFlyout,
+      goToExceptionDetail,
+      emptyViewerTitle,
+      emptyViewerBody,
+      emptyViewerButtonText,
     } = useExceptionsListCard({
       exceptionsList,
       handleExport,
       handleDelete,
-    });
-
-    // routes to x-pack/plugins/security_solution/public/exceptions/routes.tsx
-    const { onClick: goToExceptionDetail } = useGetSecuritySolutionLinkProps()({
-      deepLinkId: SecurityPageName.sharedExceptionListDetails,
-      path: `/exceptions/shared/${exceptionsList.list_id}`,
     });
 
     return (
@@ -194,6 +190,9 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   onPaginationChange={onPaginationChange}
                   onCreateExceptionListItem={onAddExceptionClick}
                   lastUpdated={null}
+                  emptyViewerTitle={emptyViewerTitle}
+                  emptyViewerBody={emptyViewerBody}
+                  emptyViewerButtonText={emptyViewerButtonText}
                 />
               </ExceptionPanel>
             </EuiAccordion>

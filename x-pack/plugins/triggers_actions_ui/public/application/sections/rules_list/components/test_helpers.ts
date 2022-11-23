@@ -36,7 +36,7 @@ export const mockedRulesData = [
       error: null,
     },
     monitoring: {
-      execution: {
+      run: {
         history: [
           {
             success: true,
@@ -57,7 +57,17 @@ export const mockedRulesData = [
           p95: 300000,
           p99: 300000,
         },
+        last_run: {
+          timestamp: '2020-08-20T19:23:38Z',
+          metrics: {
+            duration: 500,
+          },
+        },
       },
+    },
+    lastRun: {
+      outcome: 'succeeded',
+      alertsCount: {},
     },
   },
   {
@@ -83,7 +93,7 @@ export const mockedRulesData = [
       error: null,
     },
     monitoring: {
-      execution: {
+      run: {
         history: [
           {
             success: true,
@@ -100,7 +110,17 @@ export const mockedRulesData = [
           p95: 100000,
           p99: 500000,
         },
+        last_run: {
+          timestamp: '2020-08-20T19:23:38Z',
+          metrics: {
+            duration: 61000,
+          },
+        },
       },
+    },
+    lastRun: {
+      outcome: 'succeeded',
+      alertsCount: {},
     },
   },
   {
@@ -126,10 +146,16 @@ export const mockedRulesData = [
       error: null,
     },
     monitoring: {
-      execution: {
+      run: {
         history: [{ success: false, duration: 100 }],
         calculated_metrics: {
           success_ratio: 0,
+        },
+        last_run: {
+          timestamp: '2020-08-20T19:23:38Z',
+          metrics: {
+            duration: 30234,
+          },
         },
       },
     },
@@ -159,6 +185,11 @@ export const mockedRulesData = [
         message: 'test',
       },
     },
+    lastRun: {
+      outcome: 'failed',
+      outcomeMsg: 'test',
+      warning: RuleExecutionStatusErrorReasons.Unknown,
+    },
   },
   {
     id: '5',
@@ -185,6 +216,11 @@ export const mockedRulesData = [
         message: 'test',
       },
     },
+    lastRun: {
+      outcome: 'failed',
+      outcomeMsg: 'test',
+      warning: RuleExecutionStatusErrorReasons.License,
+    },
   },
   {
     id: '6',
@@ -210,6 +246,11 @@ export const mockedRulesData = [
         reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
         message: 'test',
       },
+    },
+    lastRun: {
+      outcome: 'warning',
+      outcomeMsg: 'test',
+      warning: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
     },
   },
 ];

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '../../../..';
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import { Root } from '@kbn/core-root-server-internal';
+import type { ElasticsearchClient } from '../../../..';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
-import { Root } from '../../../../root';
 import {
   isWriteBlockException,
   isClusterShardLimitExceeded,

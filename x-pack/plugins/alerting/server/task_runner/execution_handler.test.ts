@@ -13,7 +13,7 @@ import {
   renderActionParameterTemplatesDefault,
 } from '@kbn/actions-plugin/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
-import { InjectActionParamsOpts } from './inject_action_params';
+import { InjectActionParamsOpts, injectActionParams } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { ActionsCompletion, RuleTypeParams, RuleTypeState, SanitizedRule } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
@@ -28,6 +28,8 @@ import sinon from 'sinon';
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
 }));
+
+const injectActionParamsMock = injectActionParams as jest.Mock;
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const actionsClient = actionsClientMock.create();
@@ -184,39 +186,39 @@ describe('Execution Handler', () => {
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        Object {
-          "apiKey": "MTIzOmFiYw==",
-          "consumer": "rule-consumer",
-          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-          "id": "1",
-          "params": Object {
-            "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
-            "contextVal": "My  goes here",
-            "foo": true,
-            "stateVal": "My  goes here",
-          },
-          "relatedSavedObjects": Array [
-            Object {
-              "id": "1",
-              "namespace": "test1",
-              "type": "alert",
-              "typeId": "test",
-            },
-          ],
-          "source": Object {
-            "source": Object {
-              "id": "1",
-              "type": "alert",
-            },
-            "type": "SAVED_OBJECT",
-          },
-          "spaceId": "test1",
-        },
-      ],
-    ]
-  `);
+          Array [
+            Array [
+              Object {
+                "apiKey": "MTIzOmFiYw==",
+                "consumer": "rule-consumer",
+                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                "id": "1",
+                "params": Object {
+                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+                  "contextVal": "My  goes here",
+                  "foo": true,
+                  "stateVal": "My  goes here",
+                },
+                "relatedSavedObjects": Array [
+                  Object {
+                    "id": "1",
+                    "namespace": "test1",
+                    "type": "alert",
+                    "typeId": "test",
+                  },
+                ],
+                "source": Object {
+                  "source": Object {
+                    "id": "1",
+                    "type": "alert",
+                  },
+                  "type": "SAVED_OBJECT",
+                },
+                "spaceId": "test1",
+              },
+            ],
+          ]
+      `);
 
     expect(alertingEventLogger.logAction).toHaveBeenCalledTimes(1);
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, {
@@ -308,7 +310,7 @@ describe('Execution Handler', () => {
     ]);
   });
 
-  test('trow error error message when action type is disabled', async () => {
+  test('throw error message when action type is disabled', async () => {
     mockActionsPlugin.preconfiguredActions = [];
     mockActionsPlugin.isActionExecutable.mockReturnValue(false);
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(false);
@@ -370,39 +372,39 @@ describe('Execution Handler', () => {
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        Object {
-          "apiKey": "MTIzOmFiYw==",
-          "consumer": "rule-consumer",
-          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-          "id": "1",
-          "params": Object {
-            "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
-            "contextVal": "My context-val goes here",
-            "foo": true,
-            "stateVal": "My  goes here",
-          },
-          "relatedSavedObjects": Array [
-            Object {
-              "id": "1",
-              "namespace": "test1",
-              "type": "alert",
-              "typeId": "test",
-            },
-          ],
-          "source": Object {
-            "source": Object {
-              "id": "1",
-              "type": "alert",
-            },
-            "type": "SAVED_OBJECT",
-          },
-          "spaceId": "test1",
-        },
-      ],
-    ]
-  `);
+          Array [
+            Array [
+              Object {
+                "apiKey": "MTIzOmFiYw==",
+                "consumer": "rule-consumer",
+                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                "id": "1",
+                "params": Object {
+                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
+                  "contextVal": "My context-val goes here",
+                  "foo": true,
+                  "stateVal": "My  goes here",
+                },
+                "relatedSavedObjects": Array [
+                  Object {
+                    "id": "1",
+                    "namespace": "test1",
+                    "type": "alert",
+                    "typeId": "test",
+                  },
+                ],
+                "source": Object {
+                  "source": Object {
+                    "id": "1",
+                    "type": "alert",
+                  },
+                  "type": "SAVED_OBJECT",
+                },
+                "spaceId": "test1",
+              },
+            ],
+          ]
+      `);
   });
 
   test('state attribute gets parameterized', async () => {
@@ -410,39 +412,39 @@ describe('Execution Handler', () => {
     await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        Object {
-          "apiKey": "MTIzOmFiYw==",
-          "consumer": "rule-consumer",
-          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-          "id": "1",
-          "params": Object {
-            "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
-            "contextVal": "My  goes here",
-            "foo": true,
-            "stateVal": "My state-val goes here",
-          },
-          "relatedSavedObjects": Array [
-            Object {
-              "id": "1",
-              "namespace": "test1",
-              "type": "alert",
-              "typeId": "test",
-            },
-          ],
-          "source": Object {
-            "source": Object {
-              "id": "1",
-              "type": "alert",
-            },
-            "type": "SAVED_OBJECT",
-          },
-          "spaceId": "test1",
-        },
-      ],
-    ]
-  `);
+          Array [
+            Array [
+              Object {
+                "apiKey": "MTIzOmFiYw==",
+                "consumer": "rule-consumer",
+                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                "id": "1",
+                "params": Object {
+                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
+                  "contextVal": "My  goes here",
+                  "foo": true,
+                  "stateVal": "My state-val goes here",
+                },
+                "relatedSavedObjects": Array [
+                  Object {
+                    "id": "1",
+                    "namespace": "test1",
+                    "type": "alert",
+                    "typeId": "test",
+                  },
+                ],
+                "source": Object {
+                  "source": Object {
+                    "id": "1",
+                    "type": "alert",
+                  },
+                  "type": "SAVED_OBJECT",
+                },
+                "spaceId": "test1",
+              },
+            ],
+          ]
+      `);
   });
 
   test(`logs an error when action group isn't part of actionGroups available for the ruleType`, async () => {
@@ -622,39 +624,39 @@ describe('Execution Handler', () => {
     await executionHandler.run(generateAlert({ id: 1, scheduleActions: false }), true);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        Object {
-          "apiKey": "MTIzOmFiYw==",
-          "consumer": "rule-consumer",
-          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-          "id": "1",
-          "params": Object {
-            "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
-            "contextVal": "My  goes here",
-            "foo": true,
-            "stateVal": "My  goes here",
-          },
-          "relatedSavedObjects": Array [
-            Object {
-              "id": "1",
-              "namespace": "test1",
-              "type": "alert",
-              "typeId": "test",
-            },
-          ],
-          "source": Object {
-            "source": Object {
-              "id": "1",
-              "type": "alert",
-            },
-            "type": "SAVED_OBJECT",
-          },
-          "spaceId": "test1",
-        },
-      ],
-    ]
-  `);
+          Array [
+            Array [
+              Object {
+                "apiKey": "MTIzOmFiYw==",
+                "consumer": "rule-consumer",
+                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                "id": "1",
+                "params": Object {
+                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+                  "contextVal": "My  goes here",
+                  "foo": true,
+                  "stateVal": "My  goes here",
+                },
+                "relatedSavedObjects": Array [
+                  Object {
+                    "id": "1",
+                    "namespace": "test1",
+                    "type": "alert",
+                    "typeId": "test",
+                  },
+                ],
+                "source": Object {
+                  "source": Object {
+                    "id": "1",
+                    "type": "alert",
+                  },
+                  "type": "SAVED_OBJECT",
+                },
+                "spaceId": "test1",
+              },
+            ],
+          ]
+      `);
   });
 
   test('does not schedule alerts with recovered actions that are muted', async () => {
@@ -728,5 +730,192 @@ describe('Execution Handler', () => {
       1,
       `skipping scheduling of actions for '1' in rule ${defaultExecutionParams.ruleLabel}: rule is muted`
     );
+  });
+
+  describe('rule url', () => {
+    const ruleWithUrl = {
+      ...rule,
+      actions: [
+        {
+          id: '1',
+          group: 'default',
+          actionTypeId: 'test',
+          params: {
+            val: 'rule url: {{rule.url}}',
+          },
+        },
+      ],
+    } as unknown as SanitizedRule<RuleTypeParams>;
+
+    it('populates the rule.url in the action params when the base url and rule id are specified', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'http://localhost:12345',
+        },
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionParams": Object {
+              "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
+            },
+            "actionTypeId": "test",
+            "ruleId": "1",
+            "spaceId": "test1",
+          },
+        ]
+      `);
+    });
+
+    it('populates the rule.url without the space specifier when the spaceId is the string "default"', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'http://localhost:12345',
+        },
+        taskInstance: {
+          params: { spaceId: 'default', alertId: '1' },
+        } as unknown as ConcreteTaskInstance,
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionParams": Object {
+              "val": "rule url: http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
+            },
+            "actionTypeId": "test",
+            "ruleId": "1",
+            "spaceId": "default",
+          },
+        ]
+      `);
+    });
+
+    it('populates the rule.url in the action params when the base url has a trailing slash and removes the trailing slash', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'http://localhost:12345/',
+        },
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionParams": Object {
+              "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
+            },
+            "actionTypeId": "test",
+            "ruleId": "1",
+            "spaceId": "test1",
+          },
+        ]
+      `);
+    });
+
+    it('does not populate the rule.url when the base url is not specified', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: undefined,
+        },
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionParams": Object {
+              "val": "rule url: ",
+            },
+            "actionTypeId": "test",
+            "ruleId": "1",
+            "spaceId": "test1",
+          },
+        ]
+      `);
+    });
+
+    it('does not populate the rule.url when base url is not a valid url', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'localhost12345',
+        },
+        taskInstance: {
+          params: { spaceId: 'test1', alertId: '1' },
+        } as unknown as ConcreteTaskInstance,
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionParams": Object {
+              "val": "rule url: ",
+            },
+            "actionTypeId": "test",
+            "ruleId": "1",
+            "spaceId": "test1",
+          },
+        ]
+      `);
+    });
+
+    it('does not populate the rule.url when base url is a number', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 1,
+        },
+        taskInstance: {
+          params: { spaceId: 'test1', alertId: '1' },
+        } as unknown as ConcreteTaskInstance,
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionParams": Object {
+              "val": "rule url: ",
+            },
+            "actionTypeId": "test",
+            "ruleId": "1",
+            "spaceId": "test1",
+          },
+        ]
+      `);
+    });
   });
 });

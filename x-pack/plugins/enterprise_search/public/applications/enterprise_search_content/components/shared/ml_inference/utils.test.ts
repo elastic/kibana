@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { nerModel, textClassificationModel } from '../../../__mocks__/ml_models.mock';
 
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
@@ -19,33 +20,23 @@ describe('ml inference utils', () => {
   describe('isSupportedMLModel', () => {
     const makeFakeModel = (
       config: Partial<TrainedModelConfigResponse>
-    ): TrainedModelConfigResponse => ({
-      inference_config: {},
-      input: {
-        field_names: [],
-      },
-      model_id: 'a-model-001',
-      model_type: 'pytorch',
-      tags: [],
-      version: '1',
-      ...config,
-    });
+    ): TrainedModelConfigResponse => {
+      const { inference_config: _throwAway, ...base } = nerModel;
+      return {
+        inference_config: {},
+        ...base,
+        ...config,
+      };
+    };
     it('returns true for expected models', () => {
       const models: TrainedModelConfigResponse[] = [
-        makeFakeModel({
-          inference_config: {
-            ner: {},
-          },
-        }),
-        makeFakeModel({
-          inference_config: {
-            text_classification: {},
-          },
-        }),
+        nerModel,
+        textClassificationModel,
         makeFakeModel({
           inference_config: {
             text_embedding: {},
           },
+          model_id: 'mock-text_embedding',
         }),
         makeFakeModel({
           inference_config: {
@@ -53,16 +44,19 @@ describe('ml inference utils', () => {
               classification_labels: [],
             },
           },
+          model_id: 'mock-zero_shot_classification',
         }),
         makeFakeModel({
           inference_config: {
             question_answering: {},
           },
+          model_id: 'mock-question_answering',
         }),
         makeFakeModel({
           inference_config: {
             fill_mask: {},
           },
+          model_id: 'mock-fill_mask',
         }),
       ];
 

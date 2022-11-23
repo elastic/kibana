@@ -10,6 +10,8 @@ import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, map, Observable, firstValueFrom, concat, of } from 'rxjs';
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '@kbn/guided-onboarding';
 
+import { API_BASE_PATH } from '../../common/constants';
+import { PluginState, PluginStatus } from '../../common/types';
 import { GuidedOnboardingApi } from '../types';
 import {
   getGuideConfig,
@@ -22,8 +24,6 @@ import {
   isStepReadyToComplete,
   isGuideActive,
 } from './helpers';
-import { API_BASE_PATH } from '../../common/constants';
-import { PluginState, PluginStatus } from '../../common/types';
 
 export class ApiService implements GuidedOnboardingApi {
   private isCloudEnabled: boolean | undefined;
@@ -89,9 +89,9 @@ export class ApiService implements GuidedOnboardingApi {
   }
 
   /**
-   * Async operation to fetch state for all guides
+   * Async operation to fetch state for all guides.
    * This is useful for the onboarding landing page,
-   * where all guides are displayed with their corresponding status
+   * where all guides are displayed with their corresponding status.
    */
   public async fetchAllGuidesState(): Promise<{ state: GuideState[] } | undefined> {
     if (!this.isCloudEnabled) {
@@ -104,18 +104,16 @@ export class ApiService implements GuidedOnboardingApi {
     try {
       return await this.client.get<{ state: GuideState[] }>(`${API_BASE_PATH}/guides`);
     } catch (error) {
-      // TODO handle error
-      // eslint-disable-next-line no-console
-      console.error(error);
+      throw error;
     }
   }
 
   /**
-   * Updates the SO with the updated guide state and refreshes the observables
-   * This is largely used internally and for tests
-   * @param {GuideState} newState the updated guide state
+   * Updates the SO with the updated plugin state and refreshes the observables.
+   * This is largely used internally and for tests.
+   * @param {{status?: PluginStatus; guide?: GuideState}} state the updated plugin state
    * @param {boolean} panelState boolean to determine whether the dropdown panel should open or not
-   * @return {Promise} a promise with the updated guide state
+   * @return {Promise} a promise with the updated plugin state or undefined
    */
   public async updatePluginState(
     state: { status?: PluginStatus; guide?: GuideState },
@@ -140,18 +138,16 @@ export class ApiService implements GuidedOnboardingApi {
       this.isGuidePanelOpen$.next(panelState);
       return response;
     } catch (error) {
-      // TODO handle error
-      // eslint-disable-next-line no-console
-      console.error(error);
+      throw error;
     }
   }
 
   /**
-   * Activates a guide by guideId
-   * This is useful for the onboarding landing page, when a user selects a guide to start or continue
+   * Activates a guide by guideId.
+   * This is useful for the onboarding landing page, when a user selects a guide to start or continue.
    * @param {GuideId} guideId the id of the guide (one of search, observability, security)
    * @param {GuideState} guide (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
-   * @return {Promise} a promise with the updated guide state
+   * @return {Promise} a promise with the updated plugin state
    */
   public async activateGuide(
     guideId: GuideId,
@@ -203,10 +199,10 @@ export class ApiService implements GuidedOnboardingApi {
   }
 
   /**
-   * Marks a guide as inactive
-   * This is useful for the dropdown panel, when a user quits a guide
+   * Marks a guide as inactive.
+   * This is useful for the dropdown panel, when a user quits a guide.
    * @param {GuideState} guide the selected guide state
-   * @return {Promise} a promise with the updated guide state
+   * @return {Promise} a promise with the updated plugin state
    */
   public async deactivateGuide(
     guide: GuideState
@@ -224,11 +220,11 @@ export class ApiService implements GuidedOnboardingApi {
   }
 
   /**
-   * Completes a guide
-   * Updates the overall guide status to 'complete', and marks it as inactive
-   * This is useful for the dropdown panel, when the user clicks the "Continue using Elastic" button after completing all steps
+   * Completes a guide.
+   * Updates the overall guide status to 'complete', and marks it as inactive.
+   * This is useful for the dropdown panel, when the user clicks the "Continue using Elastic" button after completing all steps.
    * @param {GuideId} guideId the id of the guide (one of search, observability, security)
-   * @return {Promise} a promise with the updated guide state
+   * @return {Promise} a promise with the updated plugin state
    */
   public async completeGuide(guideId: GuideId): Promise<{ pluginState: PluginState } | undefined> {
     const pluginState = await firstValueFrom(this.fetchPluginState$());
@@ -272,11 +268,11 @@ export class ApiService implements GuidedOnboardingApi {
   }
 
   /**
-   * Updates the selected step to 'in_progress' state
-   * This is useful for the dropdown panel, when the user clicks the "Start" button for the active step
+   * Updates the selected step to 'in_progress' state.
+   * This is useful for the dropdown panel, when the user clicks the "Start" button for the active step.
    * @param {GuideId} guideId the id of the guide (one of search, observability, security)
    * @param {GuideStepIds} stepId the id of the step
-   * @return {Promise} a promise with the updated guide state
+   * @return {Promise} a promise with the updated plugin state
    */
   public async startGuideStep(
     guideId: GuideId,
@@ -379,6 +375,12 @@ export class ApiService implements GuidedOnboardingApi {
     );
   }
 
+  /**
+   * Completes the guide step identified by the integration.
+   * A noop if the active step is not configured with the passed integration.
+   * @param {GuideId} integration the integration (package name) that identifies the active guide step
+   * @return {Promise} a promise with the updated state or undefined if the operation fails
+   */
   public async completeGuidedOnboardingForIntegration(
     integration?: string
   ): Promise<{ pluginState: PluginState } | undefined> {
@@ -394,8 +396,12 @@ export class ApiService implements GuidedOnboardingApi {
     }
   }
 
+  /**
+   * Sets the plugin state to "skipped".
+   * This is used on the landing page when the user clicks the button to skip the guided setup.
+   * @return {Promise} a promise with the updated state or undefined if the operation fails
+   */
   public async skipGuidedOnboarding(): Promise<{ pluginState: PluginState } | undefined> {
-    // TODO error handling and loading state
     return await this.updatePluginState({ status: 'skipped' }, false);
   }
 }

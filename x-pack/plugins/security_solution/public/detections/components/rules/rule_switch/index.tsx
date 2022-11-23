@@ -81,7 +81,7 @@ export const RuleSwitchComponent = ({
   }, [myIsLoading, isLoading]);
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
+    <EuiFlexGroup alignItems="center" justifyContent="spaceAround" id={`rule-switch-${id}`}>
       <EuiFlexItem grow={false}>
         {showLoader ? (
           <EuiLoadingSpinner size="m" data-test-subj="ruleSwitchLoader" />
