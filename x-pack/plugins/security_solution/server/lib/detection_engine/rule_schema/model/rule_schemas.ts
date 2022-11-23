@@ -330,7 +330,6 @@ export type IndexPatternRuleParams =
   | EqlRuleParams
   | ThreatRuleParams
   | QueryRuleParams
-  | QueryRuleParams
   | SavedQueryRuleParams
   | ThresholdRuleParams
   | NewTermsRuleParams;
