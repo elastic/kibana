@@ -120,6 +120,25 @@ export default ({ getService }: FtrProviderContext) => {
           histograms.forEach((h, index) => {
             expect(h.histogram.length).to.be(20);
           });
+
+          const groupActions = data.filter((d) => d.type === testData.expected.groupFilter);
+          const groups = groupActions.flatMap((d) => d.payload);
+
+          expect(groups).to.eql(
+            testData.expected.groups,
+            'Grouping result does not match expected values.'
+          );
+
+          const groupHistogramActions = data.filter(
+            (d) => d.type === testData.expected.groupHistogramFilter
+          );
+          const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
+          // for each change point group we should get a histogram
+          expect(groupHistograms.length).to.be(groups.length);
+          // each histogram should have a length of 20 items.
+          groupHistograms.forEach((h, index) => {
+            expect(h.histogram.length).to.be(20);
+          });
         }
 
         it('should return full data without streaming with compression with flushFix', async () => {
@@ -216,9 +235,28 @@ export default ({ getService }: FtrProviderContext) => {
             );
             const histograms = histogramActions.flatMap((d) => d.payload);
             // for each change point we should get a histogram
-            expect(histogramActions.length).to.be(changePoints.length);
+            expect(histograms.length).to.be(changePoints.length);
             // each histogram should have a length of 20 items.
             histograms.forEach((h, index) => {
+              expect(h.histogram.length).to.be(20);
+            });
+
+            const groupActions = data.filter((d) => d.type === testData.expected.groupFilter);
+            const groups = groupActions.flatMap((d) => d.payload);
+
+            expect(groups).to.eql(
+              testData.expected.groups,
+              'Grouping result does not match expected values.'
+            );
+
+            const groupHistogramActions = data.filter(
+              (d) => d.type === testData.expected.groupHistogramFilter
+            );
+            const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
+            // for each change point group we should get a histogram
+            expect(groupHistograms.length).to.be(groups.length);
+            // each histogram should have a length of 20 items.
+            groupHistograms.forEach((h, index) => {
               expect(h.histogram.length).to.be(20);
             });
           }

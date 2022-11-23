@@ -6,7 +6,7 @@
  */
 
 import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { ChangePoint, ChangePointGroup } from '@kbn/ml-agg-utils';
 
 export interface TestData {
   testName: string;
@@ -19,10 +19,12 @@ export interface TestData {
     noIndexChunksLength: number;
     noIndexActionsLength: number;
     changePointFilter: 'add_change_points';
-    groupFilter: 'add_group';
+    groupFilter: 'add_change_point_group';
+    groupHistogramFilter: 'add_change_point_group_histogram';
     histogramFilter: 'add_change_points_histogram';
     errorFilter: 'add_error';
     changePoints: ChangePoint[];
+    groups: ChangePointGroup[];
     histogramLength: number;
   };
 }
