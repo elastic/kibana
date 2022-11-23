@@ -7,7 +7,9 @@
 
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 
 jest.mock('../../lib/analytics/fetch_analytics_collection', () => ({
   fetchAnalyticsCollectionByName: jest.fn(),
@@ -16,6 +18,7 @@ import { AnalyticsCollection } from '../../../common/types/analytics';
 import { fetchAnalyticsCollectionByName } from '../../lib/analytics/fetch_analytics_collection';
 
 import { registerAnalyticsRoutes } from './analytics';
+
 
 describe('Enterprise Search Analytics API', () => {
   let mockRouter: MockRouter;
@@ -32,8 +35,20 @@ describe('Enterprise Search Analytics API', () => {
       path: '/internal/enterprise_search/analytics/collections/{collection_name}',
     });
 
+    const mockDataPlugin = {
+      indexPatterns: {
+        dataViewsServiceFactory: jest.fn(),
+      }
+    };
+
+    const mockedSavedObjects = {
+      getScopedClient: jest.fn(),
+    };
+
     registerAnalyticsRoutes({
       ...mockDependencies,
+      data: mockDataPlugin as unknown as DataPluginStart,
+      savedObjects: mockedSavedObjects as unknown as SavedObjectsServiceStart,
       router: mockRouter.router,
     });
   });
