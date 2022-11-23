@@ -7,6 +7,7 @@
 
 import { ApmMetric, ApmMetricFields } from '../metrics';
 import { createQuery } from '../create_query';
+import { getBeatDataset } from '../cluster/get_index_patterns';
 
 /**
  * {@code createQuery} for all APM instances.
@@ -27,7 +28,7 @@ export function createApmQuery(options: {
     metric: ApmMetric.getMetricFields(),
     type: 'beats_stats',
     metricset: 'stats',
-    dsDataset: 'beats.stats',
+    dsDataset: getBeatDataset('stats'),
     ...(options ?? {}),
   };
 
