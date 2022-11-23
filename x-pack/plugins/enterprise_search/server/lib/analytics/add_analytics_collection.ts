@@ -47,17 +47,21 @@ const createAnalyticsCollection = async (
   };
 };
 
+const getDataViewName = ({ name: collectionName }: AnalyticsCollection): string => {
+  return `elastic_analytics.events-${collectionName}`
+};
+
 const getDataStreamName = ({ name: collectionName }: AnalyticsCollection): string => {
-  return `elastic_analytics-events-${collectionName}`
+  return `logs-elastic_analytics.events-${collectionName}`
 };
 
 const createDataView = async (
   dataViewsService: DataViewsService,
-  dataStreamName: string
+  analytcisCollection: AnalyticsCollection
 ): Promise<DataView> => {
   return dataViewsService.createAndSave({
-    title: dataStreamName,
-    namespaces: [dataStreamName],
+    title: getDataViewName(analytcisCollection),
+    namespaces: [getDataStreamName(analytcisCollection)],
     allowNoIndex: true,
     timeFieldName: '@timestamp',
   }, true);
@@ -83,8 +87,7 @@ export const addAnalyticsCollection = async (
 
   const analyticsCollection =  await createAnalyticsCollection(client, document);
 
-  const dataStreamName = getDataStreamName(analyticsCollection);
-  await createDataView(dataViewsService, dataStreamName);
+  await createDataView(dataViewsService, analyticsCollection);
 
   return analyticsCollection;
 };

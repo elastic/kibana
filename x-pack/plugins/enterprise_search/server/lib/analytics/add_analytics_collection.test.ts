@@ -64,8 +64,8 @@ describe('add analytics collection lib function', () => {
     });
 
     expect(mockDataViewsService.createAndSave).toHaveBeenCalledWith({
-      title: 'elastic_analytics-events-example',
-      namespaces: ['elastic_analytics-events-example'],
+      title: 'elastic_analytics.events-example',
+      namespaces: ['logs-elastic_analytics.events-example'],
       allowNoIndex: true,
       timeFieldName: '@timestamp',
     }, true);
