@@ -7,21 +7,28 @@
  */
 
 import React, { createContext, FC } from 'react';
+// TODO can't import plugin from package
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
-type GetActionsType = undefined | ((trigger: string) => Action[]);
+type GetActionsType = undefined | ((trigger: string, context: object) => Action[]);
 
 const initialContext = {
-  getActions: undefined,
+  getCompatibleActions: undefined,
 };
 
-export const CellActionsContext = createContext<{ getActions: GetActionsType }>(initialContext);
+export const CellActionsContext = createContext<{ getCompatibleActions: GetActionsType }>(
+  initialContext
+);
 
 interface CellActionsContextProviderProps {
-  getActions: GetActionsType;
+  getCompatibleActions: GetActionsType;
 }
 
 export const CellActionsContextProvider: FC<CellActionsContextProviderProps> = ({
   children,
-  getActions,
-}) => <CellActionsContext.Provider value={{ getActions }}>{children}</CellActionsContext.Provider>;
+  getCompatibleActions,
+}) => (
+  <CellActionsContext.Provider value={{ getCompatibleActions }}>
+    {children}
+  </CellActionsContext.Provider>
+);

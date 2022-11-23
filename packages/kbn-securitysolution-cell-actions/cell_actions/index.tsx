@@ -6,41 +6,44 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import { orderBy } from 'lodash/fp';
+import React, { useContext, useMemo } from 'react';
 
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { EuiIcon } from '@elastic/eui';
 import { CellActionsContext } from './cell_actions_context';
+import { ActionItem } from './cell_action_item';
+
+// TODO Define an shared interface for all actions configuration
+interface CellActionConfig {
+  field: string;
+  value: string;
+}
+
 interface CellActionsProps {
-  getActionContext: () => ActionExecutionContext;
+  config: CellActionConfig;
   triggerId: string;
 }
 
-export const CellActions = ({ getActionContext, triggerId }: CellActionsProps) => {
+export const CellActions = ({ config, triggerId }: CellActionsProps) => {
   const context = useContext(CellActionsContext);
 
-  if (!context.getActions) {
+  if (!context.getCompatibleActions) {
     throw new Error(
       'No CellActionsContext found. Please wrap the application with CellActionsContextProvider'
     );
   }
 
-  const actions = context.getActions(triggerId);
-
-  const actionContext = getActionContext(); // TODO Does it require the triggerId?
-
-  return (
-    <>
-      {actions.map((action) => {
-        const iconType = action.getIconType(actionContext);
-
-        return (
-          <div>
-            {iconType ? <EuiIcon type={iconType} /> : null}
-            {action.getDisplayName(actionContext)}
-          </div>
-        );
-      })}
-    </>
+  // TODO wait for hover before calling getActions
+  const actions = context.getCompatibleActions(triggerId, config);
+  const actionContext = useMemo(
+    () => ({ ...config, trigger: { id: triggerId } }),
+    [config, triggerId]
   );
+
+  const sortedActions = orderBy(['order', 'title'], ['desc', 'asc'], actions);
+
+  const actionItems = sortedActions.map((action) => {
+    return <ActionItem action={action} actionContext={actionContext} />;
+  });
+
+  return <>{actionItems}</>;
 };

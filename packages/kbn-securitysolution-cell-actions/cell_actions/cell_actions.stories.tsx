@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { storiesOf, addDecorator } from '@storybook/react';
+// FIXME can't import plugins from package
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import { CellActionsContextProvider, CellActions } from '..';
@@ -18,7 +19,10 @@ const filterInTestAction: Action = {
   getIconType: () => 'plusInCircle',
   getDisplayName: () => 'Filter in',
   isCompatible: () => Promise.resolve(true),
-  execute: () => Promise.resolve(),
+  execute: () => {
+    alert('Filter in clicked');
+    return Promise.resolve();
+  },
 };
 
 const filterOutTestAction: Action = {
@@ -27,19 +31,22 @@ const filterOutTestAction: Action = {
   getIconType: () => 'minusInCircle',
   getDisplayName: () => 'Filter out',
   isCompatible: () => Promise.resolve(true),
-  execute: () => Promise.resolve(),
+  execute: () => {
+    alert('Filter out clicked');
+    return Promise.resolve();
+  },
 };
 
 const TRIGGER_ID = 'testTriggerId';
 
 addDecorator((storyFn) => (
   <CellActionsContextProvider
-    getActions={(trigger: string) => [filterInTestAction, filterOutTestAction]}
+    getCompatibleActions={() => [filterInTestAction, filterOutTestAction]}
   >
     {storyFn()}
   </CellActionsContextProvider>
 ));
 
 storiesOf('CellAction', module).add('default', () => (
-  <CellActions triggerId={TRIGGER_ID} getActionContext={() => ({ trigger: { id: TRIGGER_ID } })} />
+  <CellActions triggerId={TRIGGER_ID} config={{ field: 'name', value: '123' }} />
 ));
