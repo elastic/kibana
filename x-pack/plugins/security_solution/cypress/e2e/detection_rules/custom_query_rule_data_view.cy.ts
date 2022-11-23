@@ -20,6 +20,11 @@ import {
   RULE_SWITCH,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
+import {
+  ABOUT_CONTINUE_BTN,
+  RULE_DESCRIPTION_INPUT,
+  RULE_NAME_INPUT,
+} from '../../screens/create_new_rule';
 
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
@@ -44,6 +49,7 @@ import {
   TAGS_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
   DATA_VIEW_DETAILS,
+  EDIT_RULE_SETTINGS_LINK,
 } from '../../screens/rule_details';
 
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
@@ -51,6 +57,7 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { postDataView } from '../../tasks/common';
 import {
   createAndEnableRule,
+  createRuleWithoutEnabling,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -157,6 +164,25 @@ describe('Custom query rules', () => {
         .invoke('text')
         .should('match', /^[1-9].+$/);
       cy.get(ALERT_GRID_CELL).contains(this.rule.name);
+    });
+    it('Creates and edits a new rule with a data view', function () {
+      visit(RULE_CREATION);
+      fillDefineCustomRuleAndContinue(this.rule);
+      cy.get(RULE_NAME_INPUT).clear({ force: true }).type(this.rule.name, { force: true });
+      cy.get(RULE_DESCRIPTION_INPUT)
+        .clear({ force: true })
+        .type(this.rule.description, { force: true });
+
+      cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
+
+      fillScheduleRuleAndContinue(this.rule);
+      createRuleWithoutEnabling();
+
+      goToRuleDetails();
+
+      cy.get(EDIT_RULE_SETTINGS_LINK).click({ force: true });
+
+      cy.get(RULE_NAME_HEADER).should('contain', 'Edit rule settings');
     });
   });
 });

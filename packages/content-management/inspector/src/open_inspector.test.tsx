@@ -10,11 +10,12 @@ import React from 'react';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { WithServices, getMockServices } from './__jest__';
 import type { Services } from './services';
+import type { Item } from './types';
 import { InspectorLoader } from './components';
 import { useOpenInspector } from './open_inspector';
 
 describe('useOpenInspector() hook', () => {
-  const savedObjectItem = { title: 'Foo', tags: [] };
+  const savedObjectItem: Item = { id: 'id', title: 'Foo', tags: [] };
 
   const TestComp = () => {
     const openInspector = useOpenInspector();
