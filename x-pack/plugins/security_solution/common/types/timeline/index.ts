@@ -57,7 +57,11 @@ const SavedColumnHeaderRuntimeType = runtimeTypes.partial({
 const SavedDataProviderQueryMatchBasicRuntimeType = runtimeTypes.partial({
   field: unionWithNullType(runtimeTypes.string),
   displayField: unionWithNullType(runtimeTypes.string),
-  value: unionWithNullType(runtimeTypes.string),
+  value: runtimeTypes.union([
+    runtimeTypes.null,
+    runtimeTypes.string,
+    runtimeTypes.array(runtimeTypes.string),
+  ]),
   displayValue: unionWithNullType(runtimeTypes.string),
   operator: unionWithNullType(runtimeTypes.string),
 });
@@ -652,7 +656,7 @@ export interface DataProviderResult {
 export interface QueryMatchResult {
   field?: Maybe<string>;
   displayField?: Maybe<string>;
-  value?: Maybe<string>;
+  value?: Maybe<string | string[]>;
   displayValue?: Maybe<string>;
   operator?: Maybe<string>;
 }

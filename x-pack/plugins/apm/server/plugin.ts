@@ -53,7 +53,7 @@ import {
   TRANSACTION_TYPE,
   AGENT_NAME,
   SERVICE_LANGUAGE_NAME,
-} from '../common/elasticsearch_fieldnames';
+} from '../common/es_fields/apm';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 
@@ -94,7 +94,7 @@ export class APMPlugin
     ) {
       createApmTelemetry({
         core,
-        config$,
+        config: currentConfig,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,

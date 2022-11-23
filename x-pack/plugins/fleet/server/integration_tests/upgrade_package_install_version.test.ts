@@ -12,6 +12,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+
 import { upgradePackageInstallVersion } from '../services/setup/upgrade_package_install_version';
 import {
   FLEET_INSTALL_FORMAT_VERSION,
@@ -154,7 +156,7 @@ describe('Uprade package install version', () => {
 
     beforeAll(async () => {
       soClient = kbnServer.coreStart.savedObjects.getScopedClient(fakeRequest, {
-        excludedWrappers: ['security'],
+        excludedExtensions: [SECURITY_EXTENSION_ID],
       });
 
       const res = await soClient.find<Installation>({

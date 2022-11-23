@@ -39,6 +39,8 @@ import { snoozeRuleRoute } from './snooze_rule';
 import { unsnoozeRuleRoute } from './unsnooze_rule';
 import { runSoonRoute } from './run_soon';
 import { bulkDeleteRulesRoute } from './bulk_delete_rules';
+import { bulkEnableRulesRoute } from './bulk_enable_rules';
+import { bulkDisableRulesRoute } from './bulk_disable_rules';
 import { cloneRuleRoute } from './clone_rule';
 
 export interface RouteOptions {
@@ -79,6 +81,8 @@ export function defineRoutes(opts: RouteOptions) {
   updateRuleApiKeyRoute(router, licenseState);
   bulkEditInternalRulesRoute(router, licenseState);
   bulkDeleteRulesRoute({ router, licenseState });
+  bulkEnableRulesRoute({ router, licenseState });
+  bulkDisableRulesRoute({ router, licenseState });
   snoozeRuleRoute(router, licenseState);
   unsnoozeRuleRoute(router, licenseState);
   runSoonRoute(router, licenseState);

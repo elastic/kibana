@@ -6,6 +6,7 @@
  */
 
 import {
+  IngestRemoveProcessor,
   IngestSetProcessor,
   MlTrainedModelConfig,
   MlTrainedModelStats,
@@ -19,11 +20,12 @@ import {
   BUILT_IN_MODEL_TAG as LOCAL_BUILT_IN_MODEL_TAG,
   generateMlInferencePipelineBody,
   getMlModelTypesForModelConfig,
+  getRemoveProcessorForInferenceType,
   getSetProcessorForInferenceType,
-  SUPPORTED_PYTORCH_TASKS as LOCAL_SUPPORTED_PYTORCH_TASKS,
   parseMlInferenceParametersFromPipeline,
   parseModelStateFromStats,
   parseModelStateReasonFromStats,
+  SUPPORTED_PYTORCH_TASKS as LOCAL_SUPPORTED_PYTORCH_TASKS,
 } from '.';
 
 const mockModel: MlTrainedModelConfig = {
@@ -69,6 +71,38 @@ describe('getMlModelTypesForModelConfig lib function', () => {
   });
 });
 
+describe('getRemoveProcessorForInferenceType lib function', () => {
+  const destinationField = 'dest';
+
+  it('should return expected value for TEXT_CLASSIFICATION', () => {
+    const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
+
+    const expected: IngestRemoveProcessor = {
+      field: destinationField,
+      ignore_missing: true,
+    };
+
+    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
+  });
+
+  it('should return expected value for TEXT_EMBEDDING', () => {
+    const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING;
+
+    const expected: IngestRemoveProcessor = {
+      field: destinationField,
+      ignore_missing: true,
+    };
+
+    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
+  });
+
+  it('should return undefined for unknown inferenceType', () => {
+    const inferenceType = 'wrongInferenceType';
+
+    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toBeUndefined();
+  });
+});
+
 describe('getSetProcessorForInferenceType lib function', () => {
   const destinationField = 'dest';
 
@@ -84,7 +118,7 @@ describe('getSetProcessorForInferenceType lib function', () => {
       description:
         "Copy the predicted_value to 'dest' if the prediction_probability is greater than 0.5",
       field: destinationField,
-      if: 'ctx.ml.inference.dest.prediction_probability > 0.5',
+      if: "ctx?.ml?.inference != null && ctx.ml.inference['dest'] != null && ctx.ml.inference['dest'].prediction_probability > 0.5",
       value: undefined,
     };
 
@@ -98,6 +132,7 @@ describe('getSetProcessorForInferenceType lib function', () => {
       copy_from: 'ml.inference.dest.predicted_value',
       description: "Copy the predicted_value to 'dest'",
       field: destinationField,
+      if: "ctx?.ml?.inference != null && ctx.ml.inference['dest'] != null",
       value: undefined,
     };
 
@@ -192,12 +227,18 @@ describe('generateMlInferencePipelineBody lib function', () => {
         description: expect.any(String),
         processors: expect.arrayContaining([
           expect.objectContaining({
+            remove: {
+              field: 'my-destination-field',
+              ignore_missing: true,
+            },
+          }),
+          expect.objectContaining({
             set: {
               copy_from: 'ml.inference.my-destination-field.predicted_value',
               description:
                 "Copy the predicted_value to 'my-destination-field' if the prediction_probability is greater than 0.5",
               field: 'my-destination-field',
-              if: 'ctx.ml.inference.my-destination-field.prediction_probability > 0.5',
+              if: "ctx?.ml?.inference != null && ctx.ml.inference['my-destination-field'] != null && ctx.ml.inference['my-destination-field'].prediction_probability > 0.5",
             },
           }),
         ]),

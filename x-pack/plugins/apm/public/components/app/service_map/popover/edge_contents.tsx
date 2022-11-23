@@ -19,7 +19,7 @@ import { TransactionTab } from '../../transaction_details/waterfall_with_summary
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 
 export function EdgeContents({ elementData }: ContentsProps) {
   const edgeData = elementData as EdgeDataDefinition;
