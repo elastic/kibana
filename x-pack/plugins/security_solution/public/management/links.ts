@@ -273,7 +273,12 @@ export const getManagementFilteredLinks = async (
     );
   }
 
-  const { canReadActionsLogManagement, canReadHostIsolationExceptions } = fleetAuthz
+  const {
+    canReadActionsLogManagement,
+    canReadHostIsolationExceptions,
+    canReadEndpointList,
+    canReadTrustedApplications,
+  } = fleetAuthz
     ? calculateEndpointAuthz(
         licenseService,
         fleetAuthz,
@@ -284,12 +289,20 @@ export const getManagementFilteredLinks = async (
       )
     : getEndpointAuthzInitialState();
 
+  if (!canReadEndpointList) {
+    linksToExclude.push(SecurityPageName.endpoints);
+  }
+
   if (!canReadActionsLogManagement) {
     linksToExclude.push(SecurityPageName.responseActionsHistory);
   }
 
   if (!canReadHostIsolationExceptions) {
     linksToExclude.push(SecurityPageName.hostIsolationExceptions);
+  }
+
+  if (endpointRbacEnabled && !canReadTrustedApplications) {
+    linksToExclude.push(SecurityPageName.trustedApps);
   }
 
   return excludeLinks(linksToExclude);

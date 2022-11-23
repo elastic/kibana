@@ -24,7 +24,7 @@ import {
   TRANSACTION_SAMPLED,
   AGENT_NAME,
   INDEX,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
