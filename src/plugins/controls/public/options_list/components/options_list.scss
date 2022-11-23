@@ -91,3 +91,7 @@
 .optionsList--hiddenEditorForm {
   margin-left: $euiSizeXXL + $euiSizeM;
 }
+
+.optionsList--sortPopover {
+  width: $euiSizeXL * 7;
+}

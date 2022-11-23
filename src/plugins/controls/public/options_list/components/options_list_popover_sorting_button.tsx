@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { css } from '@emotion/css';
 import {
   getCompatibleSortingTypes,
   DEFAULT_SORT,
@@ -34,8 +33,6 @@ import {
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
-
-const SORT_POPOVER_WIDTH = 220;
 
 interface OptionsListSortingPopoverProps {
   showOnlySelected: boolean;
@@ -121,9 +118,7 @@ export const OptionsListPopoverSortingButton = ({
       isOpen={isSortingPopoverOpen}
       aria-labelledby="optionsList_sortingOptions"
       closePopover={() => setIsSortingPopoverOpen(false)}
-      panelStyle={{
-        width: `${SORT_POPOVER_WIDTH}px`,
-      }}
+      panelClassName={'optionsList--sortPopover'}
     >
       <span data-test-subj="optionsListControl__sortingOptionsPopover">
         <EuiPopoverTitle paddingSize="s">
@@ -149,9 +144,6 @@ export const OptionsListPopoverSortingButton = ({
           listProps={{ bordered: false }}
           data-test-subj="optionsListControl__sortingOptions"
           aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-          css={css`
-            max-width: ${SORT_POPOVER_WIDTH}px !important;
-          `}
         >
           {(list) => list}
         </EuiSelectable>
