@@ -13,11 +13,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
-import {
-  createRootWithCorePlugins,
-  createTestServers,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import {
   declareGetRoute,
   declareDeleteRoute,
@@ -32,7 +28,7 @@ import {
   setProxyInterrupt,
 } from './repository_with_proxy_utils';
 
-let esServer: TestElasticsearchUtils;
+let esServer: kbnTestServer.TestElasticsearchUtils;
 let hapiServer: Hapi.Server;
 
 const registerSOTypes = (setup: InternalCoreSetup) => {
@@ -78,7 +74,7 @@ describe('404s from proxies', () => {
   beforeAll(async () => {
     setProxyInterrupt(null);
 
-    const { startES } = createTestServers({
+    const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
     });
     esServer = await startES();
@@ -114,7 +110,7 @@ describe('404s from proxies', () => {
     await hapiServer.start();
 
     // Setup kibana configured to use proxy as ES backend
-    root = createRootWithCorePlugins({
+    root = kbnTestServer.createRootWithCorePlugins({
       elasticsearch: {
         hosts: [`http://${esHostname}:${proxyPort}`],
       },

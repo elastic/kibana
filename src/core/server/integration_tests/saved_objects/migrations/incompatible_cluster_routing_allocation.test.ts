@@ -9,11 +9,7 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '@kbn/core-root-server-internal';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { LogRecord } from '@kbn/logging';
@@ -28,7 +24,7 @@ async function removeLogFile() {
   await fs.unlink(logFilePath).catch(() => void 0);
 }
 
-const { startES } = createTestServers({
+const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
@@ -43,7 +39,7 @@ const { startES } = createTestServers({
 });
 
 function createKbnRoot() {
-  return createRootWithCorePlugins(
+  return kbnTestServer.createRootWithCorePlugins(
     {
       migrations: {
         skip: false,
@@ -83,7 +79,7 @@ const getClusterRoutingAllocations = (settings: Record<string, any>) => {
     [...routingAllocations].every((s: string) => s === 'all')
   ); // if set, only allow 'all';
 };
-let esServer: TestElasticsearchUtils;
+let esServer: kbnTestServer.TestElasticsearchUtils;
 
 async function updateRoutingAllocations(
   esClient: ElasticsearchClient,

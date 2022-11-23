@@ -10,12 +10,7 @@ import Path from 'path';
 import { range } from 'lodash';
 
 import type { ISavedObjectsRepository } from '@kbn/core/server';
-import type { TestElasticsearchUtils, createRoot } from '@kbn/core-test-helpers-kbn-server';
-import {
-  getSupertest,
-  createRootWithCorePlugins,
-  createTestServers,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 
 import type {
   AgentPolicySOAttributes,
@@ -28,13 +23,13 @@ import { useDockerRegistry } from './helpers';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-type Root = ReturnType<typeof createRoot>;
+type Root = ReturnType<typeof kbnTestServer.createRoot>;
 
 const startAndWaitForFleetSetup = async (root: Root) => {
   const start = await root.start();
 
   const isFleetSetupRunning = async () => {
-    const statusApi = getSupertest(root, 'get', '/api/status');
+    const statusApi = kbnTestServer.getSupertest(root, 'get', '/api/status');
     const resp = await statusApi.send();
     const fleetStatus = resp.body?.status?.plugins?.fleet;
     if (fleetStatus?.meta?.error) {
@@ -52,7 +47,7 @@ const startAndWaitForFleetSetup = async (root: Root) => {
 };
 
 const createAndSetupRoot = async (config?: object) => {
-  const root = createRootWithCorePlugins(
+  const root = kbnTestServer.createRootWithCorePlugins(
     {
       xpack: {
         fleet: config,
@@ -91,14 +86,14 @@ const createAndSetupRoot = async (config?: object) => {
  * Verifies that multiple Kibana instances running in parallel will not create duplicate preconfiguration objects.
  */
 describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
-  let esServer: TestElasticsearchUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   // let esClient: Client;
   let roots: Root[] = [];
 
   const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
-    const { startES } = createTestServers({
+    const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: {
         es: {
