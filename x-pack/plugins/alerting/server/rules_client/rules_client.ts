@@ -2341,11 +2341,13 @@ export class RulesClient {
       qNodeFilterWithAuth
     );
 
-    await bulkMarkApiKeysForInvalidation(
-      { apiKeys: apiKeysToInvalidate },
-      this.logger,
-      this.unsecuredSavedObjectsClient
-    );
+    if (apiKeysToInvalidate.length > 0) {
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: apiKeysToInvalidate },
+        this.logger,
+        this.unsecuredSavedObjectsClient
+      );
+    }
 
     const updatedRules = results.map(({ id, attributes, references }) => {
       return this.getAlertFromRaw<Params>(

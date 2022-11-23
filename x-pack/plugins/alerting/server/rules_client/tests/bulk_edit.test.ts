@@ -351,6 +351,7 @@ describe('bulkEdit()', () => {
       expect(result.skipped[0]).toHaveProperty('skip_reason', 'RULE_NOT_MODIFIED');
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
     });
 
     test('should skip operation when adding no tags', async () => {
@@ -373,6 +374,7 @@ describe('bulkEdit()', () => {
       expect(result.skipped[0]).toHaveProperty('skip_reason', 'RULE_NOT_MODIFIED');
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
     });
 
     test('should skip operation when deleting non existing tags', async () => {
@@ -395,6 +397,7 @@ describe('bulkEdit()', () => {
       expect(result.skipped[0]).toHaveProperty('skip_reason', 'RULE_NOT_MODIFIED');
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
     });
 
     test('should skip operation when deleting no tags', async () => {
@@ -417,6 +420,7 @@ describe('bulkEdit()', () => {
       expect(result.skipped[0]).toHaveProperty('skip_reason', 'RULE_NOT_MODIFIED');
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -574,6 +578,7 @@ describe('bulkEdit()', () => {
       expect(result.skipped[0].id).toBe(existingRule.id);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -1262,6 +1267,7 @@ describe('bulkEdit()', () => {
       expect(result.rules).toHaveLength(0);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
     });
   });
 
