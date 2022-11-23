@@ -169,6 +169,19 @@ const generateRecoveredAlert = ({ id, state }: { id: number; state?: AlertInstan
   return { [id]: alert };
 };
 
+const generateRecoveredAlert = ({ id, state }: { id: number; state?: AlertInstanceState }) => {
+  const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'recovered'>(String(id), {
+    state: state || { test: true },
+    meta: {
+      lastScheduledActions: {
+        date: new Date(),
+        group: 'recovered',
+      },
+    },
+  });
+  return { [id]: alert };
+};
+
 // @ts-ignore
 const generateExecutionParams = (params = {}) => {
   return {
