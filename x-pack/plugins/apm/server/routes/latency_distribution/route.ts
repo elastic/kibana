@@ -17,7 +17,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import {
   latencyDistributionChartTypeRt,
   LatencyDistributionChartType,
