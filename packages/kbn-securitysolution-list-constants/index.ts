@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { deepFreeze } from '@kbn/std';
+
 /**
  * Value list routes
  */
@@ -70,30 +72,76 @@ export const MAXIMUM_SMALL_VALUE_LIST_SIZE = 65536;
 
 export const MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE = 200;
 
-/** ID of trusted apps agnostic list */
-export const ENDPOINT_TRUSTED_APPS_LIST_ID = 'endpoint_trusted_apps';
+/**
+ * List definitions for Endpoint Artifact
+ */
+export const ENDPOINT_ARTIFACT_LISTS = deepFreeze({
+  trustedApps: {
+    id: 'endpoint_trusted_apps',
+    name: 'Endpoint Security Trusted Apps List',
+    description: 'Endpoint Security Trusted Apps List',
+  },
+  eventFilters: {
+    id: 'endpoint_event_filters',
+    name: 'Endpoint Security Event Filters List',
+    description: 'Endpoint Security Event Filters List',
+  },
+  hostIsolationExceptions: {
+    id: 'endpoint_host_isolation_exceptions',
+    name: 'Endpoint Security Host isolation exceptions List',
+    description: 'Endpoint Security Host isolation exceptions List',
+  },
+  blocklists: {
+    id: 'endpoint_blocklists',
+    name: 'Endpoint Security Blocklists List',
+    description: 'Endpoint Security Blocklists List',
+  },
+});
 
-/** Name of trusted apps agnostic list */
-export const ENDPOINT_TRUSTED_APPS_LIST_NAME = 'Endpoint Security Trusted Apps List';
+/**
+ * The IDs of all Endpoint artifact lists
+ */
+export const ENDPOINT_ARTIFACT_LIST_IDS = Object.freeze(
+  Object.values(ENDPOINT_ARTIFACT_LISTS).map(({ id }) => id)
+);
 
-/** Description of trusted apps agnostic list */
-export const ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION = 'Endpoint Security Trusted Apps List';
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
+export const ENDPOINT_TRUSTED_APPS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
 
-/** ID of event filters agnostic list */
-export const ENDPOINT_EVENT_FILTERS_LIST_ID = 'endpoint_event_filters';
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
+export const ENDPOINT_TRUSTED_APPS_LIST_NAME = ENDPOINT_ARTIFACT_LISTS.trustedApps.name;
 
-/** Name of event filters agnostic list */
-export const ENDPOINT_EVENT_FILTERS_LIST_NAME = 'Endpoint Security Event Filters List';
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
+export const ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION =
+  ENDPOINT_ARTIFACT_LISTS.trustedApps.description;
 
-/** Description of event filters agnostic list */
-export const ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION = 'Endpoint Security Event Filters List';
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
+export const ENDPOINT_EVENT_FILTERS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
 
-export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID = 'endpoint_host_isolation_exceptions';
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
+export const ENDPOINT_EVENT_FILTERS_LIST_NAME = ENDPOINT_ARTIFACT_LISTS.eventFilters.name;
+
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
+export const ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION =
+  ENDPOINT_ARTIFACT_LISTS.eventFilters.description;
+
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
+export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID =
+  ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id;
+
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
 export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME =
-  'Endpoint Security Host isolation exceptions List';
-export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION =
-  'Endpoint Security Host isolation exceptions List';
+  ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.name;
 
-export const ENDPOINT_BLOCKLISTS_LIST_ID = 'endpoint_blocklists';
-export const ENDPOINT_BLOCKLISTS_LIST_NAME = 'Endpoint Security Blocklists List';
-export const ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION = 'Endpoint Security Blocklists List';
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
+export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION =
+  ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.description;
+
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
+export const ENDPOINT_BLOCKLISTS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.blocklists.id;
+
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
+export const ENDPOINT_BLOCKLISTS_LIST_NAME = ENDPOINT_ARTIFACT_LISTS.blocklists.name;
+
+/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
+export const ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION = ENDPOINT_ARTIFACT_LISTS.blocklists.description;

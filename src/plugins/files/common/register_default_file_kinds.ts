@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { FieldStatisticsTable, type FieldStatisticsTableProps } from './field_stats_table';
-export { FieldStatisticsTab } from './field_stats_tab';
+import { getFileKindsRegistry } from './file_kinds_registry';
+import { defaultImageFileKind } from '.';
+
+export function registerDefaultFileKinds() {
+  const registry = getFileKindsRegistry();
+  registry.register(defaultImageFileKind);
+}
