@@ -123,7 +123,7 @@ export function SavedQueryManagementList({
 }: SavedQueryManagementListProps) {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
-  const [selectedSavedQuery, setSelectedSavedQuery] = useState(null as SavedQuery | null);
+  const [selectedSavedQuery, setSelectedSavedQuery] = useState(loadedSavedQuery);
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState(null as SavedQuery | null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
@@ -138,7 +138,7 @@ export function SavedQueryManagementList({
         requestGotCancelled = true;
       };
 
-      const { queries: savedQueryItems } = await savedQueryService.findSavedQueries();
+      const savedQueryItems = await savedQueryService.getAllSavedQueries();
 
       if (requestGotCancelled) return;
 
@@ -215,11 +215,7 @@ export function SavedQueryManagementList({
         title: itemTitle(savedQuery.attributes, format),
         'data-test-subj': `load-saved-query-${savedQuery.attributes.title}-button`,
         value: savedQuery.id,
-        checked:
-          (loadedSavedQuery && savedQuery.id === loadedSavedQuery.id) ||
-          (selectedSavedQuery && savedQuery.id === selectedSavedQuery.id)
-            ? 'on'
-            : undefined,
+        checked: selectedSavedQuery && savedQuery.id === selectedSavedQuery.id ? 'on' : undefined,
         data: {
           attributes: savedQuery.attributes,
         },

@@ -10,7 +10,7 @@ import React, { FC, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, HorizontalAlignment, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
-import { FieldDataRowProps } from '../../types';
+import { FieldDataRowProps, isIndexBasedFieldVisConfig } from '../../types';
 import { roundToDecimalPlace } from '../../../utils';
 import { ExpandedRowPanel } from './expanded_row_panel';
 
@@ -46,6 +46,13 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
   )
     return null;
   const { cardinality, count, sampleCount } = config.stats;
+
+  const valueCount =
+    count ?? (isIndexBasedFieldVisConfig(config) && config.existsInDocs === true ? undefined : 0);
+  const docsPercent =
+    valueCount !== undefined && sampleCount !== undefined
+      ? roundToDecimalPlace((valueCount / sampleCount) * 100)
+      : undefined;
   const metaTableItems = [
     {
       function: 'count',
@@ -57,16 +64,20 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
       ),
       value: count,
     },
-    {
-      function: 'percentage',
-      display: (
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.percentageLabel"
-          defaultMessage="percentage"
-        />
-      ),
-      value: `${roundToDecimalPlace((count / sampleCount) * 100)}%`,
-    },
+    ...(docsPercent !== undefined
+      ? [
+          {
+            function: 'percentage',
+            display: (
+              <FormattedMessage
+                id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.documentStatsTable.percentageLabel"
+                defaultMessage="percentage"
+              />
+            ),
+            value: `${docsPercent}%`,
+          },
+        ]
+      : []),
     {
       function: 'distinctValues',
       display: (

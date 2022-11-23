@@ -118,6 +118,8 @@ const apmPerAgentSchema: Pick<
 
 export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
   service_id: keyword,
+  num_service_nodes: long,
+  num_transaction_types: long,
   timed_out: { type: 'boolean' },
   cloud: {
     availability_zones: { type: 'array', items: { type: 'keyword' } },
@@ -225,6 +227,24 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
   integrations: { ml: { all_jobs_count: long } },
 
   indices: {
+    metric: {
+      shards: { total: long },
+      all: {
+        total: {
+          docs: { count: long },
+          store: { size_in_bytes: long },
+        },
+      },
+    },
+    traces: {
+      shards: { total: long },
+      all: {
+        total: {
+          docs: { count: long },
+          store: { size_in_bytes: long },
+        },
+      },
+    },
     shards: { total: long },
     all: {
       total: {

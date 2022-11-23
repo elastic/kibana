@@ -49,6 +49,7 @@ export interface SavedObjectsUpdateObjectsSpacesOptions extends SavedObjectsBase
  * @public
  */
 export interface SavedObjectsUpdateObjectsSpacesResponse {
+  /** array of {@link SavedObjectsUpdateObjectsSpacesResponseObject}  */
   objects: SavedObjectsUpdateObjectsSpacesResponseObject[];
 }
 
