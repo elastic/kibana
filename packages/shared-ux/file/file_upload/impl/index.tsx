@@ -7,4 +7,4 @@
  */
 
 export { FileUpload } from './src';
-export type { UploadFileProps, DoneNotification } from './src';
+export type { FileUploadProps, DoneNotification } from './src';

@@ -6,31 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  of,
-  map,
-  zip,
-  from,
-  race,
-  take,
-  filter,
-  Subject,
-  finalize,
-  forkJoin,
-  mergeMap,
-  switchMap,
-  catchError,
-  shareReplay,
-  ReplaySubject,
-  BehaviorSubject,
-  type Observable,
-  combineLatest,
-  distinctUntilChanged,
-  Subscription,
-} from 'rxjs';
+import Rx from 'rxjs';
+import { ImageMetadataFactory, getImageMetadata, isImage } from '@kbn/shared-ux-file-util';
 import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
-import { ImageMetadataFactory, getImageMetadata, isImage } from '../util';
 import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
@@ -56,18 +35,18 @@ interface UploadOptions {
 }
 
 export class UploadState {
-  private readonly abort$ = new Subject<void>();
-  private readonly files$$ = new BehaviorSubject<Upload[]>([]);
+  private readonly abort$ = new Rx.Subject<void>();
+  private readonly files$$ = new Rx.BehaviorSubject<Upload[]>([]);
 
   public readonly files$ = this.files$$.pipe(
-    switchMap((files$) => (files$.length ? zip(...files$) : of([])))
+    Rx.switchMap((files$) => (files$.length ? Rx.zip(...files$) : Rx.of([])))
   );
-  public readonly clear$ = new Subject<void>();
-  public readonly error$ = new BehaviorSubject<undefined | Error>(undefined);
-  public readonly uploading$ = new BehaviorSubject(false);
-  public readonly done$ = new Subject<undefined | DoneNotification[]>();
+  public readonly clear$ = new Rx.Subject<void>();
+  public readonly error$ = new Rx.BehaviorSubject<undefined | Error>(undefined);
+  public readonly uploading$ = new Rx.BehaviorSubject(false);
+  public readonly done$ = new Rx.Subject<undefined | DoneNotification[]>();
 
-  private subscriptions: Subscription[];
+  private subscriptions: Rx.Subscription[];
 
   constructor(
     private readonly fileKind: FileKind,
@@ -75,31 +54,31 @@ export class UploadState {
     private readonly opts: UploadOptions = { allowRepeatedUploads: false },
     private readonly loadImageMetadata: ImageMetadataFactory = getImageMetadata
   ) {
-    const latestFiles$ = this.files$$.pipe(switchMap((files$) => combineLatest(files$)));
+    const latestFiles$ = this.files$$.pipe(Rx.switchMap((files$) => Rx.combineLatest(files$)));
     this.subscriptions = [
       latestFiles$
         .pipe(
-          map((files) => files.some((file) => file.status === 'uploading')),
-          distinctUntilChanged()
+          Rx.map((files) => files.some((file) => file.status === 'uploading')),
+          Rx.distinctUntilChanged()
         )
         .subscribe(this.uploading$),
 
       latestFiles$
         .pipe(
-          map((files) => {
+          Rx.map((files) => {
             const errorFile = files.find((file) => Boolean(file.error));
             return errorFile ? errorFile.error : undefined;
           }),
-          filter(Boolean)
+          Rx.filter(Boolean)
         )
         .subscribe(this.error$),
 
       latestFiles$
         .pipe(
-          filter(
+          Rx.filter(
             (files) => Boolean(files.length) && files.every((file) => file.status === 'uploaded')
           ),
-          map((files) =>
+          Rx.map((files) =>
             files.map((file) => ({
               id: file.id!,
               kind: this.fileKind.id,
@@ -166,14 +145,14 @@ export class UploadState {
    */
   private uploadFile = (
     file$: SimpleStateSubject<FileState>,
-    abort$: Observable<void>,
+    abort$: Rx.Observable<void>,
     meta?: unknown
-  ): Observable<void | Error> => {
+  ): Rx.Observable<void | Error> => {
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
     const { file, status } = file$.getValue();
     if (!['idle', 'upload_failed'].includes(status)) {
-      return of(undefined);
+      return Rx.of(undefined);
     }
 
     let uploadTarget: undefined | FileJSON;
@@ -184,8 +163,8 @@ export class UploadState {
     const mime = file.type || undefined;
     const _meta = meta as Record<string, unknown>;
 
-    return from(isImage(file) ? this.loadImageMetadata(file) : of(undefined)).pipe(
-      mergeMap((imageMetadata) =>
+    return Rx.from(isImage(file) ? this.loadImageMetadata(file) : Rx.of(undefined)).pipe(
+      Rx.mergeMap((imageMetadata) =>
         this.client.create({
           kind: this.fileKind.id,
           name,
@@ -193,11 +172,11 @@ export class UploadState {
           meta: imageMetadata ? { ...imageMetadata, ..._meta } : _meta,
         })
       ),
-      mergeMap((result) => {
+      Rx.mergeMap((result) => {
         uploadTarget = result.file;
-        return race(
+        return Rx.race(
           abort$.pipe(
-            map(() => {
+            Rx.map(() => {
               abortController.abort();
               throw new Error('Abort!');
             })
@@ -212,32 +191,34 @@ export class UploadState {
           })
         );
       }),
-      map(() => {
+      Rx.map(() => {
         file$.setState({ status: 'uploaded', id: uploadTarget?.id, fileJSON: uploadTarget });
       }),
-      catchError((e) => {
+      Rx.catchError((e) => {
         const isAbortError = e.message === 'Abort!';
         file$.setState({ status: 'upload_failed', error: isAbortError ? undefined : e });
-        return of(isAbortError ? undefined : e);
+        return Rx.of(isAbortError ? undefined : e);
       })
     );
   };
 
-  public upload = (meta?: unknown): Observable<void> => {
+  public upload = (meta?: unknown): Rx.Observable<void> => {
     if (this.isUploading()) {
       throw new Error('Upload already in progress');
     }
-    const abort$ = new ReplaySubject<void>(1);
+    const abort$ = new Rx.ReplaySubject<void>(1);
     const sub = this.abort$.subscribe(abort$);
     const upload$ = this.files$$.pipe(
-      take(1),
-      switchMap((files$) => forkJoin(files$.map((file$) => this.uploadFile(file$, abort$, meta)))),
-      map(() => undefined),
-      finalize(() => {
+      Rx.take(1),
+      Rx.switchMap((files$) =>
+        Rx.forkJoin(files$.map((file$) => this.uploadFile(file$, abort$, meta)))
+      ),
+      Rx.map(() => undefined),
+      Rx.finalize(() => {
         if (this.opts.allowRepeatedUploads) this.clear();
         sub.unsubscribe();
       }),
-      shareReplay()
+      Rx.shareReplay()
     );
 
     upload$.subscribe(); // Kick off the upload
