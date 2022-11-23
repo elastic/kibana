@@ -26,6 +26,7 @@ export enum DataViewType {
 }
 
 export interface KibanaDataViewBase extends DataViewBase {
+  // need these properties for unified search
   type: DataViewType;
   value: string;
 }

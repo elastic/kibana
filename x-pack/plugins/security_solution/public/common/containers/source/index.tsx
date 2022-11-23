@@ -19,11 +19,11 @@ import type {
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import type { KibanaDataViewBase } from '../../types';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { getDataViewStateFromIndexFields } from './use_data_view';
+import type { KibanaDataViewBase } from '../../types';
 import { DataViewType } from '../../types';
 
 export type { BrowserField, BrowserFields };
@@ -43,7 +43,7 @@ export const getAllFieldsByName = (
 ): { [fieldName: string]: Partial<BrowserField> } =>
   keyBy('name', getAllBrowserFields(browserFields));
 
-export const getFieldsAsSpec = memoizeOne(
+export const getIndexFields = memoizeOne(
   (fields: IndexField[]): KibanaDataViewBase['fields'] =>
     fields && fields.length > 0
       ? fields.map((field) =>
@@ -143,7 +143,7 @@ export const useFetchIndex = (
                       indexes: response.indicesExist,
                       indexExists: response.indicesExist.length > 0,
                       indexPatterns: {
-                        fields: getFieldsAsSpec(response.indexFields),
+                        fields: getIndexFields(response.indexFields),
                         title: stringifyIndices,
                         // need these properties for unified search
                         type: DataViewType.title,
