@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
+import { memoize } from 'lodash';
 import type { MlClient } from '../ml_client';
 import { mlLog } from '../log';
 import {
@@ -61,11 +62,16 @@ function disableAdminPrivileges(capabilities: MlCapabilities) {
 export type HasMlCapabilities = (capabilities: MlCapabilitiesKey[]) => Promise<void>;
 
 export function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabilities) {
+  const resolveMlCapabilitiesMemo = memoize(
+    async (request: KibanaRequest) => await resolveMlCapabilities(request),
+    (request: KibanaRequest) => request.id
+  );
+
   return (request: KibanaRequest): HasMlCapabilities => {
     let mlCapabilities: MlCapabilities | null = null;
     return async (capabilities: MlCapabilitiesKey[]) => {
       try {
-        mlCapabilities = await resolveMlCapabilities(request);
+        mlCapabilities = await resolveMlCapabilitiesMemo(request);
       } catch (e) {
         mlLog.error(e);
         throw new UnknownMLCapabilitiesError(`Unable to perform ML capabilities check ${e}`);

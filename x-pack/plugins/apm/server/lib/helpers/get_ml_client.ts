@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import {
+  MlAnomalyDetectors,
+  MlMlSystem,
+  MlModules,
+  MlJobService,
+} from '@kbn/ml-plugin/server';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMRouteHandlerResources } from '../../routes/typings';
 
 export interface MlClient {
-  mlSystem: any;
-  anomalyDetectors: any;
-  modules: any;
+  mlSystem: MlMlSystem;
+  anomalyDetectors: MlAnomalyDetectors;
+  modules: MlModules;
+  jobService: MlJobService;
 }
 
 export async function getMlClient({
@@ -39,6 +46,10 @@ export async function getMlClient({
       coreContext.savedObjects.client
     ),
     modules: mlplugin.setup.modulesProvider(
+      request,
+      coreContext.savedObjects.client
+    ),
+    jobService: mlplugin.setup.jobServiceProvider(
       request,
       coreContext.savedObjects.client
     ),

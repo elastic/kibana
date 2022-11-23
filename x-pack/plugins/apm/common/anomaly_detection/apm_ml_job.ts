@@ -4,15 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
+
+import {
+  MlJobState,
+  MlDatafeedState,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { Environment } from '../environment_rt';
 
 export interface ApmMlJob {
   environment: Environment;
   version: number;
   jobId: string;
-  jobState?: JOB_STATE;
+  jobState?: MlJobState;
   datafeedId?: string;
-  datafeedState?: DATAFEED_STATE;
+  datafeedState?: MlDatafeedState;
   bucketSpan?: string;
 }

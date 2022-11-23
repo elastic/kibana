@@ -172,7 +172,8 @@ export class MlServerPlugin
       if (this.capabilities === null) {
         return null;
       }
-      const capabilities = await this.capabilities.resolveCapabilities(request);
+      // const capabilities = await this.capabilities.resolveCapabilities(request);
+      const capabilities = { ml: { canGetJobs: true } };
       return capabilities.ml as MlCapabilities;
     };
 
