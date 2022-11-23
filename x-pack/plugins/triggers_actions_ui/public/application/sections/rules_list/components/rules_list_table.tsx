@@ -215,7 +215,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
   const [isLoadingMap, setIsLoadingMap] = useState<Record<string, boolean>>({});
 
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
@@ -329,11 +329,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
   }, [isPageSelected, onSelectPage, onSelectRow, isRowSelected]);
 
   const ruleOutcomeColumnField = useMemo(() => {
-    if (isRuleLastRunOutcomeEnabled) {
-      return 'lastRun.outcome';
+    if (isRuleUsingExecutionStatus) {
+      return 'executionStatus.status';
     }
-    return 'executionStatus.status';
-  }, [isRuleLastRunOutcomeEnabled]);
+    return 'lastRun.outcome';
+  }, [isRuleUsingExecutionStatus]);
 
   const getRulesTableColumns = useCallback((): RulesListColumns[] => {
     return [

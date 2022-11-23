@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { syntheticsEditMonitorLocatorID } from '@kbn/observability-plugin/common';
 import { useSyntheticsStartPlugins } from '../../../contexts';
 
-export function useEditMonitorLocator({ monitorId }: { monitorId: string }) {
+export function useEditMonitorLocator({ configId }: { configId: string }) {
   const [editUrl, setEditUrl] = useState<string | undefined>(undefined);
   const locator = useSyntheticsStartPlugins()?.share?.url.locators.get(
     syntheticsEditMonitorLocatorID
@@ -19,12 +19,12 @@ export function useEditMonitorLocator({ monitorId }: { monitorId: string }) {
   useEffect(() => {
     async function generateUrl() {
       const url = await locator?.getUrl({
-        monitorId,
+        configId,
       });
       setEditUrl(url);
     }
     generateUrl();
-  }, [locator, monitorId]);
+  }, [locator, configId]);
 
   return editUrl;
 }

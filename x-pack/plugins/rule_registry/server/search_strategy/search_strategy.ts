@@ -137,7 +137,11 @@ export const ruleRegistrySearchStrategyProvider = (
               query,
             },
           };
-          return (siemRequest ? requestUserEs : internalUserEs).search({ params }, options, deps);
+          return (siemRequest ? requestUserEs : internalUserEs).search(
+            { id: request.id, params },
+            options,
+            deps
+          );
         }),
         map((response) => {
           // Do we have to loop over each hit? Yes.
