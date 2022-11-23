@@ -98,7 +98,7 @@ describe('useTagsAction', () => {
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['one'], unSelectedTags: ['pepsi'] });
+      result.current.onSaveTags({ selectedItems: ['one'], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
@@ -131,7 +131,7 @@ describe('useTagsAction', () => {
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['one', 'one'], unSelectedTags: ['pepsi'] });
+      result.current.onSaveTags({ selectedItems: ['one', 'one'], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
@@ -159,7 +159,7 @@ describe('useTagsAction', () => {
     });
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['one', 'one'], unSelectedTags: ['pepsi'] });
+      result.current.onSaveTags({ selectedItems: ['one', 'one'], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
@@ -184,7 +184,7 @@ describe('useTagsAction', () => {
     });
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['one', 'one'], unSelectedTags: ['pepsi'] });
+      result.current.onSaveTags({ selectedItems: ['one', 'one'], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
@@ -214,7 +214,7 @@ describe('useTagsAction', () => {
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: [], unSelectedTags: ['pepsi'] });
+      result.current.onSaveTags({ selectedItems: [], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
@@ -244,7 +244,7 @@ describe('useTagsAction', () => {
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['2', '1'], unSelectedTags: [] });
+      result.current.onSaveTags({ selectedItems: ['2', '1'], unSelectedItems: [] });
     });
 
     await waitFor(() => {
@@ -274,7 +274,7 @@ describe('useTagsAction', () => {
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['1'], unSelectedTags: [] });
+      result.current.onSaveTags({ selectedItems: ['1'], unSelectedItems: [] });
     });
 
     await waitFor(() => {
@@ -304,7 +304,7 @@ describe('useTagsAction', () => {
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['1'], unSelectedTags: ['1'] });
+      result.current.onSaveTags({ selectedItems: ['1'], unSelectedItems: ['1'] });
     });
 
     await waitFor(() => {
@@ -334,7 +334,7 @@ describe('useTagsAction', () => {
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: [], unSelectedTags: [] });
+      result.current.onSaveTags({ selectedItems: [], unSelectedItems: [] });
     });
 
     await waitFor(() => {

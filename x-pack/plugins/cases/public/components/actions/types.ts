@@ -10,3 +10,8 @@ export interface UseActionProps {
   onActionSuccess: () => void;
   isDisabled: boolean;
 }
+
+export interface ItemsSelectionState {
+  selectedItems: string[];
+  unSelectedItems: string[];
+}
