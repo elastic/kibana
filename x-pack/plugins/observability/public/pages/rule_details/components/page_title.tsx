@@ -7,48 +7,50 @@
 import React from 'react';
 import moment from 'moment';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiSpacer } from '@elastic/eui';
-import { PageHeaderProps } from '../types';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { LAST_UPDATED_MESSAGE, CREATED_WORD, BY_WORD, ON_WORD } from '../translations';
-import { getHealthColor } from '../config';
+import { getHealthColor } from '../helpers/utils';
 
-export function PageTitle({ rule }: PageHeaderProps) {
-  const { triggersActionsUi } = useKibana().services;
+export interface PageTitleProps {
+  rule: Rule;
+}
+
+export function PageTitle({ rule }: PageTitleProps) {
+  const {
+    triggersActionsUi: { getRuleTagBadge: RuleTagBadge },
+  } = useKibana().services;
+
+  const { name, executionStatus, updatedBy, createdBy, updatedAt, createdAt, tags } = rule;
 
   return (
     <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false} data-test-subj="ruleName">
-          {rule.name}
+          {name}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="m" />
         <EuiText size="xs">
-          <EuiBadge color={getHealthColor(rule.executionStatus.status)}>
-            {rule.executionStatus.status.charAt(0).toUpperCase() +
-              rule.executionStatus.status.slice(1)}
+          <EuiBadge color={getHealthColor(executionStatus.status)}>
+            {executionStatus.status.charAt(0).toUpperCase() + executionStatus.status.slice(1)}
           </EuiBadge>
         </EuiText>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
       </EuiFlexItem>
       <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem component="span" grow={false}>
           <EuiText color="subdued" size="xs">
-            <b>{LAST_UPDATED_MESSAGE}</b> {BY_WORD} {rule.updatedBy} {ON_WORD}&nbsp;
-            {moment(rule.updatedAt).format('ll')} &emsp;
-            <b>{CREATED_WORD}</b> {BY_WORD} {rule.createdBy} {ON_WORD}&nbsp;
-            {moment(rule.createdAt).format('ll')}
+            <strong>{LAST_UPDATED_MESSAGE}</strong> {BY_WORD} {updatedBy} {ON_WORD}&nbsp;
+            {moment(updatedAt).format('ll')} &emsp;
+            <strong>{CREATED_WORD}</strong> {BY_WORD} {createdBy} {ON_WORD}&nbsp;
+            {moment(createdAt).format('ll')}
           </EuiText>
         </EuiFlexItem>
         <EuiSpacer size="xs" />
       </EuiFlexGroup>
-      {rule.tags.length > 0 &&
-        triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
-          tagsOutPopover: true,
-          tags: rule.tags,
-        })}
-      <EuiSpacer size="xs" />
+      {tags.length ? <RuleTagBadge tagsOutPopover tags={tags} /> : null}
     </>
   );
 }
