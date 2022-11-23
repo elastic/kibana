@@ -170,7 +170,6 @@ describe('get()', () => {
             "actionRef": "action_0",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -179,7 +178,6 @@ describe('get()', () => {
             "actionRef": "preconfigured:preconfigured",
             "group": "default",
             "id": "preconfigured",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },

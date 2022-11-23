@@ -101,7 +101,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
           id,
           params,
           connector_type_id: actionTypeId,
-          last_trigger_date: lastTriggerDate,
+          ...(lastTriggerDate !== undefined && { last_trigger_date: lastTriggerDate }),
         })),
       }
     : {}),

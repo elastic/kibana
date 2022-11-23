@@ -747,6 +747,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            lastTriggerDate: null,
           },
           {
             group: 'default',
@@ -755,6 +756,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            lastTriggerDate: null,
           },
           {
             group: 'default',
@@ -763,6 +765,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            lastTriggerDate: null,
           },
         ],
       },
@@ -995,7 +998,6 @@ describe('create()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -1005,7 +1007,6 @@ describe('create()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "preconfigured",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -1015,7 +1016,6 @@ describe('create()', () => {
             "actionTypeId": "test2",
             "group": "default",
             "id": "2",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -1149,7 +1149,6 @@ describe('create()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -1326,7 +1325,6 @@ describe('create()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -1502,7 +1500,6 @@ describe('create()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -1666,7 +1663,6 @@ describe('create()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -1801,7 +1797,6 @@ describe('create()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -1936,7 +1931,6 @@ describe('create()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -2111,7 +2105,6 @@ describe('create()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },

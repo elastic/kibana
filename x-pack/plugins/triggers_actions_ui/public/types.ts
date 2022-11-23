@@ -28,7 +28,7 @@ import {
   RuleActionParam,
   SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
-  RuleAction as CommonRuleAction,
+  RuleAction,
   RuleAggregations as AlertingRuleAggregations,
   RuleTaskState,
   AlertSummary as RuleSummary,
@@ -74,21 +74,17 @@ import type {
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
 
-type RuleAction = Omit<CommonRuleAction, 'lastTriggerDate'>;
-
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   AlertingSanitizedRule<Params>,
-  'alertTypeId' | 'actions'
+  'alertTypeId'
 > & {
   ruleTypeId: AlertingSanitizedRule['alertTypeId'];
-  actions: RuleAction[];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
-type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId' | 'actions'> & {
+type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
-  actions: RuleAction[];
 };
 type RuleAggregations = Omit<AlertingRuleAggregations, 'alertExecutionStatus'> & {
   ruleExecutionStatus: AlertingRuleAggregations['alertExecutionStatus'];

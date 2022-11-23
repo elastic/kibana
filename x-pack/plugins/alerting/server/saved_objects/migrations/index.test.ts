@@ -2852,7 +2852,6 @@ function getMockData(
           params: {
             foo: true,
           },
-          lastTriggerDate: null,
         },
       ],
       ...overwrites,

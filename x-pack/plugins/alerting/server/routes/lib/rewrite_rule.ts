@@ -61,7 +61,7 @@ export const rewriteRule = ({
     id,
     params,
     connector_type_id: actionTypeId,
-    last_trigger_date: lastTriggerDate,
+    ...(lastTriggerDate && { last_trigger_date: lastTriggerDate }),
     ...(frequency
       ? {
           frequency: {

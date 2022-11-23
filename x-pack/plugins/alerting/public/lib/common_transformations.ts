@@ -18,7 +18,9 @@ function transformAction(input: AsApiContract<RuleAction>): RuleAction {
   const { connector_type_id: actionTypeId, last_trigger_date: lastTriggerDate, ...rest } = input;
   return {
     actionTypeId,
-    lastTriggerDate: lastTriggerDate ? new Date(lastTriggerDate as unknown as string) : null,
+    ...(lastTriggerDate !== undefined && {
+      lastTriggerDate: lastTriggerDate === null ? null : new Date(lastTriggerDate),
+    }),
     ...rest,
   };
 }

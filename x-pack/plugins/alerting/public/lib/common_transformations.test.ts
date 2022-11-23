@@ -31,7 +31,6 @@ describe('common_transformations', () => {
           group: 'some group',
           id: 'some-connector-id',
           params: { foo: 'car', bar: [1, 2, 3] },
-          last_trigger_date: null,
         },
       ],
       params: { bar: 'foo', numbers: { 1: [2, 3] } } as never,
@@ -100,7 +99,6 @@ describe('common_transformations', () => {
             "actionTypeId": "some-connector-type-id",
             "group": "some group",
             "id": "some-connector-id",
-            "lastTriggerDate": null,
             "params": Object {
               "bar": Array [
                 1,

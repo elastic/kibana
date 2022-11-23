@@ -64,7 +64,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     id,
     params,
     connector_type_id: actionTypeId,
-    last_trigger_date: lastTriggerDate,
+    ...(lastTriggerDate !== undefined && { last_trigger_date: lastTriggerDate }),
   })),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),

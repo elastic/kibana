@@ -75,7 +75,6 @@ import {
   RuleSnooze,
   RuleSnoozeSchedule,
   RawAlertInstance as RawAlert,
-  RawRuleAction,
 } from '../types';
 import {
   validateRuleTypeParams,
@@ -3797,12 +3796,14 @@ export class RulesClient {
     references: SavedObjectReference[]
   ) {
     return actions.map((action) => {
-      const lastTriggerDate = action.lastTriggerDate ? new Date(action.lastTriggerDate) : null;
+      const { lastTriggerDate } = action;
 
       if (action.actionRef.startsWith(preconfiguredConnectorActionRefPrefix)) {
         return {
           ...action,
-          ...(lastTriggerDate !== undefined && { lastTriggerDate }),
+          ...(lastTriggerDate !== undefined && {
+            lastTriggerDate: lastTriggerDate === null ? null : new Date(lastTriggerDate),
+          }),
           id: action.actionRef.replace(preconfiguredConnectorActionRefPrefix, ''),
         };
       }
@@ -3813,7 +3814,9 @@ export class RulesClient {
       }
       return {
         ...action,
-        ...(lastTriggerDate !== undefined && { lastTriggerDate }),
+        ...(lastTriggerDate !== undefined && {
+          lastTriggerDate: lastTriggerDate === null ? null : new Date(lastTriggerDate),
+        }),
         id: reference.id,
       };
     }) as Rule['actions'];
@@ -4106,7 +4109,7 @@ export class RulesClient {
               ...alertAction,
               actionRef: `${preconfiguredConnectorActionRefPrefix}${id}`,
               actionTypeId: actionResultValue.actionTypeId,
-            } as RawRuleAction);
+            });
           } else {
             const actionRef = `action_${i}`;
             references.push({
@@ -4118,14 +4121,14 @@ export class RulesClient {
               ...alertAction,
               actionRef,
               actionTypeId: actionResultValue.actionTypeId,
-            } as RawRuleAction);
+            });
           }
         } else {
           actions.push({
             ...alertAction,
             actionRef: '',
             actionTypeId: '',
-          } as RawRuleAction);
+          });
         }
       });
     }

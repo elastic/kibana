@@ -174,7 +174,6 @@ describe('resolve()', () => {
             "actionRef": "action_0",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -335,7 +334,6 @@ describe('resolve()', () => {
             "actionRef": "action_0",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },

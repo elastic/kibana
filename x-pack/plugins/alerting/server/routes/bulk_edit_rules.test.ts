@@ -41,7 +41,6 @@ describe('bulkEditInternalRulesRoute', () => {
         params: {
           foo: true,
         },
-        lastTriggerDate: null,
       },
     ],
     consumer: 'bar',

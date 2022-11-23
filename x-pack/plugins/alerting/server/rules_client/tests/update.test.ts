@@ -639,7 +639,6 @@ describe('update()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -649,7 +648,6 @@ describe('update()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "preconfigured",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -659,7 +657,6 @@ describe('update()', () => {
             "actionTypeId": "test",
             "group": "custom",
             "id": "preconfigured",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -924,7 +921,6 @@ describe('update()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -1082,7 +1078,6 @@ describe('update()', () => {
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
