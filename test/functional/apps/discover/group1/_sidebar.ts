@@ -6,13 +6,22 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'header',
+    'unifiedSearch',
+  ]);
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
+  const filterBar = getService('filterBar');
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
@@ -33,6 +42,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should reveal and hide the filter form when the toggle is clicked', async function () {
         await PageObjects.discover.openSidebarFieldFilter();
         await PageObjects.discover.closeSidebarFieldFilter();
+      });
+    });
+
+    describe('field stats', function () {
+      it('should work for regular and pinned filters', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const allTermsResult = 'jpg\n65.0%\ncss\n15.4%\npng\n9.8%\ngif\n6.6%\nphp\n3.2%';
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(allTermsResult);
+
+        await filterBar.addFilter('extension', 'is', 'jpg');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const onlyJpgResult = 'jpg\n100%';
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(onlyJpgResult);
+
+        await filterBar.toggleFilterNegated('extension');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const jpgExcludedResult = 'css\n44.1%\npng\n28.0%\ngif\n18.8%\nphp\n9.1%';
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(
+          jpgExcludedResult
+        );
+
+        await filterBar.toggleFilterPinned('extension');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(
+          jpgExcludedResult
+        );
+
+        await browser.refresh();
+
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(
+          jpgExcludedResult
+        );
+
+        await filterBar.toggleFilterEnabled('extension');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(allTermsResult);
       });
     });
 
