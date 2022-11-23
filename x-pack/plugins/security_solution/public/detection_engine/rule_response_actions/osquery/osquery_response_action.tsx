@@ -6,18 +6,14 @@
  */
 
 import { isEmpty, map } from 'lodash';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import type { ArrayItem, ValidationFunc } from '../../../shared_imports';
+import type { ArrayItem, FieldHook } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
 import { NOT_AVAILABLE, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
-import { useBehaviorSubject, UseField } from '../../../shared_imports';
-
-interface ResponseActionValidatorRef {
-  validation: Record<string, unknown>;
-}
+import { UseField } from '../../../shared_imports';
 
 interface OsqueryResponseActionProps {
   item: ArrayItem;
@@ -25,35 +21,28 @@ interface OsqueryResponseActionProps {
 
 const GhostFormField = () => <></>;
 
-const ResponseActionFormField = (props) => {
-  const { setErrors, clearErrors } = props.field;
-  const formRef = useRef<ResponseActionValidatorRef>(null);
-  const { osquery, application } = useKibana().services;
-  const [indices$, nextIndices] = useBehaviorSubject(null);
+const ResponseActionFormField = ({ field }: { field: FieldHook }) => {
+  const { setErrors, clearErrors, value, setValue } = field;
+  const { osquery } = useKibana().services;
 
   const OsqueryForm = useMemo(
     () => osquery?.OsqueryResponseActionTypeForm,
     [osquery?.OsqueryResponseActionTypeForm]
   );
 
-
-  useEffect(() => {
-    indices$.subscribe({
-      next(data) {
-        if (isEmpty(data)) {
-          clearErrors();
-        } else {
-          setErrors(map(data, (value) => ({ message: value.message })));
-        }
-      },
-    });
-  }, [setErrors, clearErrors, indices$]);
-
-
-
-  return (
-    <OsqueryForm defaultParams={props.field.value} nextIndices={nextIndices} formRef={formRef} />
+  const handleError = useCallback(
+    (newErrors) => {
+      if (isEmpty(newErrors)) {
+        clearErrors();
+      } else {
+        setErrors(map(newErrors, (error) => ({ message: error.message })));
+      }
+    },
+    [setErrors, clearErrors]
   );
+
+  // @ts-expect-error update types
+  return <OsqueryForm defaultValues={value} onError={handleError} onChange={setValue} />;
 };
 
 export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionProps) => {

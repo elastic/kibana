@@ -6,27 +6,25 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../query_client';
-import type { ResponseActionValidatorRef } from './osquery_response_action_type';
-
-interface LazyOsqueryActionParamsFormProps {
-  item: ArrayItem;
-  formRef: React.RefObject<ResponseActionValidatorRef>;
-}
+import type { OsqueryResponseActionsParamsFormProps } from './osquery_response_action_type';
 
 const OsqueryResponseActionParamsForm = lazy(() => import('./osquery_response_action_type'));
 
 export const getLazyOsqueryResponseActionTypeForm =
   // eslint-disable-next-line react/display-name
-  () => (props: LazyOsqueryActionParamsFormProps) => {
-    const { item, nextIndices, defaultParams, formRef } = props;
+  () => (props: OsqueryResponseActionsParamsFormProps) => {
+    const { onError, defaultValues, onChange } = props;
 
     return (
       <Suspense fallback={null}>
         <QueryClientProvider client={queryClient}>
-          <OsqueryResponseActionParamsForm item={item} defaultParams={defaultParams} nextIndices={nextIndices} ref={formRef} />
+          <OsqueryResponseActionParamsForm
+            onChange={onChange}
+            defaultValues={defaultValues}
+            onError={onError}
+          />
         </QueryClientProvider>
       </Suspense>
     );
