@@ -54,6 +54,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('field stats', function () {
+      it('should work for regular and pinned filters', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const allTermsResult = 'jpg\n65.0%\ncss\n15.4%\npng\n9.8%\ngif\n6.6%\nphp\n3.2%';
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(allTermsResult);
+
+        await filterBar.addFilter('extension', 'is', 'jpg');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const onlyJpgResult = 'jpg\n100%';
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(onlyJpgResult);
+
+        await filterBar.toggleFilterNegated('extension');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const jpgExcludedResult = 'css\n44.1%\npng\n28.0%\ngif\n18.8%\nphp\n9.1%';
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(
+          jpgExcludedResult
+        );
+
+        await filterBar.toggleFilterPinned('extension');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(
+          jpgExcludedResult
+        );
+
+        await browser.refresh();
+
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(
+          jpgExcludedResult
+        );
+
+        await filterBar.toggleFilterEnabled('extension');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await PageObjects.discover.clickFieldListItem('extension');
+        expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(allTermsResult);
+      });
+    });
+
     describe('collapse expand', function () {
       it('should initially be expanded', async function () {
         await testSubjects.existOrFail('discover-sidebar');

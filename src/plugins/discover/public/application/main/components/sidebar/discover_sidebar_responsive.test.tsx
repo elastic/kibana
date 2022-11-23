@@ -80,6 +80,10 @@ function createMockServices() {
       discover: {
         save: false,
       },
+      getState: () => ({
+        query: { query: '', language: 'lucene' },
+        filters: [],
+      }),
     },
     docLinks: { links: { discover: { fieldTypeHelp: '' } } },
     dataViewEditor: {

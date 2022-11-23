@@ -74,3 +74,9 @@ export {
   type GroupedFieldsParams,
   type GroupedFieldsResult,
 } from './hooks/use_grouped_fields';
+
+export {
+  useQuerySubscriber,
+  type QuerySubscriberResult,
+  type QuerySubscriberParams,
+} from './hooks/use_query_subscriber';

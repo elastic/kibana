@@ -23,20 +23,18 @@ import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
-  FieldStats,
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
-  getResolvedDateRange,
 } from '@kbn/unified-field-list-plugin/public';
+import { DiscoverFieldStats } from './discover_field_stats';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
 import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { type DataDocuments$ } from '../../hooks/use_saved_search';
 
 function wrapOnDot(str?: string) {
@@ -305,11 +303,8 @@ function DiscoverFieldComponent({
   contextualFields,
 }: DiscoverFieldProps) {
   const services = useDiscoverServices();
-  const { data } = services;
   const [infoIsOpen, setOpen] = useState(false);
   const isDocumentRecord = !!onAddFilter;
-  const query = useAppStateSelector((state) => state.query);
-  const filters = useAppStateSelector((state) => state.filters);
 
   const addFilterAndClosePopover: typeof onAddFilter | undefined = useMemo(
     () =>
@@ -410,14 +405,6 @@ function DiscoverFieldComponent({
   }
 
   const renderPopover = () => {
-    const dateRange = data?.query?.timefilter.timefilter
-      ? getResolvedDateRange(data?.query?.timefilter.timefilter)
-      : null;
-    // prioritize an aggregatable multi field if available or take the parent field
-    const fieldForStats =
-      (multiFields?.length &&
-        multiFields.find((multiField) => multiField.field.aggregatable)?.field) ||
-      field;
     const showLegacyFieldStats = services.uiSettings.get(SHOW_LEGACY_FIELD_TOP_VALUES);
 
     return (
@@ -434,21 +421,12 @@ function DiscoverFieldComponent({
             )}
           </>
         ) : (
-          <>
-            {!!dateRange && (
-              <FieldStats
-                services={services}
-                query={query!}
-                filters={filters!}
-                fromDate={dateRange.fromDate}
-                toDate={dateRange.toDate}
-                dataViewOrDataViewId={dataView}
-                field={fieldForStats}
-                data-test-subj="dscFieldStats"
-                onAddFilter={addFilterAndClosePopover}
-              />
-            )}
-          </>
+          <DiscoverFieldStats
+            field={field}
+            multiFields={multiFields}
+            dataView={dataView}
+            onAddFilter={addFilterAndClosePopover}
+          />
         )}
 
         {multiFields && (

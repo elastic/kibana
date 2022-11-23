@@ -44,6 +44,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
     return { from: 'now-15m', to: 'now' };
   });
   dataPlugin.query.timefilter.timefilter.calculateBounds = jest.fn(calculateBounds);
+  dataPlugin.query.getState = jest.fn(() => ({
+    query: { query: '', language: 'lucene' },
+    filters: [],
+  }));
   dataPlugin.dataViews = createDiscoverDataViewsMock();
 
   return {
