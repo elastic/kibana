@@ -5,7 +5,8 @@
     "emitDeclarationOnly": true,
     "outDir": "target_types",
     "types": [
-    ]
+      "node"
+    ],
   },
   "include": [
     "*.d.ts"

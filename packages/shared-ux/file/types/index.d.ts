@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+export { FilesClient } from './file_client';
+
 /* Status of a file.
  *
  * AWAITING_UPLOAD  - A file object has been created but does not have any contents.
