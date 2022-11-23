@@ -45,39 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
           }
         });
 
-        async function requestWithoutStreaming(body: ApiExplainLogRateSpikes['body']) {
-          const resp = await supertest
-            .post(`/internal/aiops/explain_log_rate_spikes`)
-            .set('kbn-xsrf', 'kibana')
-            .send(body)
-            .expect(200);
-
-          // compression is on by default so if the request body is undefined
-          // the response header should include "gzip" and otherwise be "undefined"
-          if (body.compressResponse === undefined) {
-            expect(resp.header['content-encoding']).to.be('gzip');
-          } else if (body.compressResponse === false) {
-            expect(resp.header['content-encoding']).to.be(undefined);
-          }
-
-          expect(Buffer.isBuffer(resp.body)).to.be(true);
-
-          const chunks: string[] = resp.body.toString().split('\n');
-
-          expect(chunks.length).to.eql(
-            testData.expected.chunksLength,
-            `Expected 'chunksLength' to be ${testData.expected.chunksLength}, got ${chunks.length}.`
-          );
-
-          const lastChunk = chunks.pop();
-          expect(lastChunk).to.be('');
-
-          let data: any[] = [];
-
-          expect(() => {
-            data = chunks.map((c) => JSON.parse(c));
-          }).not.to.throwError();
-
+        async function assertAnalysisResult(data: any[]) {
           expect(data.length).to.eql(
             testData.expected.actionsLength,
             `Expected 'actionsLength' to be ${testData.expected.actionsLength}, got ${data.length}.`
@@ -141,6 +109,42 @@ export default ({ getService }: FtrProviderContext) => {
           });
         }
 
+        async function requestWithoutStreaming(body: ApiExplainLogRateSpikes['body']) {
+          const resp = await supertest
+            .post(`/internal/aiops/explain_log_rate_spikes`)
+            .set('kbn-xsrf', 'kibana')
+            .send(body)
+            .expect(200);
+
+          // compression is on by default so if the request body is undefined
+          // the response header should include "gzip" and otherwise be "undefined"
+          if (body.compressResponse === undefined) {
+            expect(resp.header['content-encoding']).to.be('gzip');
+          } else if (body.compressResponse === false) {
+            expect(resp.header['content-encoding']).to.be(undefined);
+          }
+
+          expect(Buffer.isBuffer(resp.body)).to.be(true);
+
+          const chunks: string[] = resp.body.toString().split('\n');
+
+          expect(chunks.length).to.eql(
+            testData.expected.chunksLength,
+            `Expected 'chunksLength' to be ${testData.expected.chunksLength}, got ${chunks.length}.`
+          );
+
+          const lastChunk = chunks.pop();
+          expect(lastChunk).to.be('');
+
+          let data: any[] = [];
+
+          expect(() => {
+            data = chunks.map((c) => JSON.parse(c));
+          }).not.to.throwError();
+
+          await assertAnalysisResult(data);
+        }
+
         it('should return full data without streaming with compression with flushFix', async () => {
           await requestWithoutStreaming(testData.requestBody);
         });
@@ -199,66 +203,7 @@ export default ({ getService }: FtrProviderContext) => {
             // If streaming works correctly we should receive more than one chunk.
             expect(chunkCounter).to.be.greaterThan(1);
 
-            expect(data.length).to.eql(
-              testData.expected.actionsLength,
-              `Expected 'actionsLength' to be ${testData.expected.actionsLength}, got ${data.length}.`
-            );
-
-            const addChangePointsActions = data.filter(
-              (d) => d.type === testData.expected.changePointFilter
-            );
-            expect(addChangePointsActions.length).to.greaterThan(0);
-
-            const changePoints = addChangePointsActions
-              .flatMap((d) => d.payload)
-              .sort(function (a, b) {
-                if (a.fieldName === b.fieldName) {
-                  return b.fieldValue - a.fieldValue;
-                }
-                return a.fieldName > b.fieldName ? 1 : -1;
-              });
-
-            expect(changePoints.length).to.eql(
-              testData.expected.changePoints.length,
-              `Expected 'changePoints.length' to be ${testData.expected.changePoints.length}, got ${changePoints.length}.`
-            );
-            changePoints.forEach((cp, index) => {
-              const ecp = testData.expected.changePoints[index];
-              expect(cp.fieldName).to.eql(ecp.fieldName);
-              expect(cp.fieldValue).to.eql(ecp.fieldValue);
-              expect(cp.doc_count).to.eql(ecp.doc_count);
-              expect(cp.bg_count).to.eql(ecp.bg_count);
-            });
-
-            const histogramActions = data.filter(
-              (d) => d.type === testData.expected.histogramFilter
-            );
-            const histograms = histogramActions.flatMap((d) => d.payload);
-            // for each change point we should get a histogram
-            expect(histograms.length).to.be(changePoints.length);
-            // each histogram should have a length of 20 items.
-            histograms.forEach((h, index) => {
-              expect(h.histogram.length).to.be(20);
-            });
-
-            const groupActions = data.filter((d) => d.type === testData.expected.groupFilter);
-            const groups = groupActions.flatMap((d) => d.payload);
-
-            expect(groups).to.eql(
-              testData.expected.groups,
-              'Grouping result does not match expected values.'
-            );
-
-            const groupHistogramActions = data.filter(
-              (d) => d.type === testData.expected.groupHistogramFilter
-            );
-            const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
-            // for each change point group we should get a histogram
-            expect(groupHistograms.length).to.be(groups.length);
-            // each histogram should have a length of 20 items.
-            groupHistograms.forEach((h, index) => {
-              expect(h.histogram.length).to.be(20);
-            });
+            await assertAnalysisResult(data);
           }
         }
 

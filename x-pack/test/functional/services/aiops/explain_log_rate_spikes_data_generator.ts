@@ -145,7 +145,7 @@ export function ExplainLogRateSpikesDataGeneratorProvider({ getService }: FtrPro
               index: 'artificial_logs_with_spike',
             });
           } catch (e) {
-            log.error(`Error deleting index 'artificial_logs_with_spike' in before() callback`);
+            log.info(`Could not delete index 'artificial_logs_with_spike' in before() callback`);
           }
 
           // Create index with mapping
