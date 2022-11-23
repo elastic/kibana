@@ -52,6 +52,7 @@ RUNTIME_DEPS = [
   "@npm//react",
   "@npm//@emotion/react",
   "@npm//@emotion/css",
+  "@npm//rxjs",
   "//packages/shared-ux/file/util",
   "//packages/kbn-shared-ux-utility",
 ]
