@@ -53,7 +53,7 @@ it('returns undefined until values are set', async () => {
   const log = makeTestLog();
   const cache = makeCache({
     dir: DIR,
-    prefix: 'prefix:',
+    prefix: 'prefix',
     log,
     pathRoot: '/foo/',
   });
