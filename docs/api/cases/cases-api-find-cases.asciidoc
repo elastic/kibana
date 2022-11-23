@@ -33,6 +33,12 @@ default space is used.
 
 === {api-query-parms-title}
 
+`assignees`::
+(Optional, string or array of strings) Filters the returned cases by assignees.
+Valid values are `none` or unique identifiers for the user profiles. These
+identifiers can be found by using the
+{ref}/security-api-suggest-user-profile.html[suggest user profile API].
+
 `defaultSearchOperator`::
 (Optional, string) The default operator to use for the `simple_query_string`.
 Defaults to `OR`.

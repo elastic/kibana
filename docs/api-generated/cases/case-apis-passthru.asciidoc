@@ -1085,7 +1085,9 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Query parameters</h3>
     <div class="field-items">
-      <div class="param">defaultSearchOperator (optional)</div>
+      <div class="param">assignees (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by assignees. Valid values are <code>none</code> or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API. default: null </div><div class="param">defaultSearchOperator (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The default operator to use for the simple_query_string. default: OR </div><div class="param">fields (optional)</div>
 
@@ -1922,8 +1924,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#getCaseStatus_200_response"><code>getCaseStatus_200_response</code> - </a></li>
     <li><a href="#getCasesByAlert_200_response_inner"><code>getCasesByAlert_200_response_inner</code> - </a></li>
     <li><a href="#getCases_200_response"><code>getCases_200_response</code> - </a></li>
+    <li><a href="#getCases_assignees_parameter"><code>getCases_assignees_parameter</code> - </a></li>
     <li><a href="#getCases_owner_parameter"><code>getCases_owner_parameter</code> - </a></li>
-    <li><a href="#getCases_reporters_parameter"><code>getCases_reporters_parameter</code> - </a></li>
     <li><a href="#owners"><code>owners</code> - </a></li>
     <li><a href="#payload_alert_comment"><code>payload_alert_comment</code> - </a></li>
     <li><a href="#payload_alert_comment_comment"><code>payload_alert_comment_comment</code> - </a></li>
@@ -2485,13 +2487,13 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="getCases_owner_parameter"><code>getCases_owner_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="getCases_assignees_parameter"><code>getCases_assignees_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
           </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="getCases_reporters_parameter"><code>getCases_reporters_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="getCases_owner_parameter"><code>getCases_owner_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
           </div>  <!-- field-items -->
