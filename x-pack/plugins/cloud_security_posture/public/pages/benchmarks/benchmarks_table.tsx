@@ -21,7 +21,7 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { TimestampTableCell } from '../../components/timestamp_table_cell';
 import type { Benchmark } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { cloudPosturePages } from '../../common/navigation/constants';
+import { benchmarksNavigation } from '../../common/navigation/constants';
 import * as TEST_SUBJ from './test_subjects';
 import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
 
@@ -54,7 +54,7 @@ const IntegrationButtonLink = ({
   return (
     <EuiLink
       href={application.getUrlForApp('security', {
-        path: generatePath(cloudPosturePages.rules.path, {
+        path: generatePath(benchmarksNavigation.rules.path, {
           packagePolicyId,
           policyId,
         }),

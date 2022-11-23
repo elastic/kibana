@@ -13,44 +13,47 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/142642
-  describe.skip('node detail mb', () => {
-    const archive = 'x-pack/test/api_integration/apis/monitoring/es_archives/logstash_8';
-    const timeRange = {
-      min: '2022-06-17T13:19:00.000Z',
-      max: '2022-06-17T13:25:00.000Z',
-    };
+  describe('node detail - metricbeat and package', () => {
+    ['logstash_8', 'logstash_package'].forEach((source) => {
+      describe(`node detail ${source}`, () => {
+        const archive = `x-pack/test/api_integration/apis/monitoring/es_archives/${source}`;
+        const timeRange = {
+          min: '2022-06-17T13:19:00.000Z',
+          max: '2022-06-17T13:25:00.000Z',
+        };
 
-    before('load archive', () => {
-      return esArchiver.load(archive);
-    });
+        before('load archive', () => {
+          return esArchiver.load(archive);
+        });
 
-    after('unload archive', () => {
-      return esArchiver.unload(archive);
-    });
+        after('unload archive', () => {
+          return esArchiver.unload(archive);
+        });
 
-    it('should summarize the Logstash node with non-advanced chart data metrics', async () => {
-      const { body } = await supertest
-        .post(
-          '/api/monitoring/v1/clusters/__standalone_cluster__/logstash/node/f9efd237-3bbf-4a9b-9ce7-a16141b9d981'
-        )
-        .set('kbn-xsrf', 'xxx')
-        .send({ timeRange, is_advanced: false })
-        .expect(200);
+        it('should summarize the Logstash node with non-advanced chart data metrics', async () => {
+          const { body } = await supertest
+            .post(
+              '/api/monitoring/v1/clusters/__standalone_cluster__/logstash/node/f9efd237-3bbf-4a9b-9ce7-a16141b9d981'
+            )
+            .set('kbn-xsrf', 'xxx')
+            .send({ timeRange, is_advanced: false })
+            .expect(200);
 
-      expect(body).to.eql(nodeDetailFixture);
-    });
+          expect(body).to.eql(nodeDetailFixture);
+        });
 
-    it('should summarize the Logstash node with advanced chart data metrics', async () => {
-      const { body } = await supertest
-        .post(
-          '/api/monitoring/v1/clusters/__standalone_cluster__/logstash/node/f9efd237-3bbf-4a9b-9ce7-a16141b9d981'
-        )
-        .set('kbn-xsrf', 'xxx')
-        .send({ timeRange, is_advanced: true })
-        .expect(200);
+        it('should summarize the Logstash node with advanced chart data metrics', async () => {
+          const { body } = await supertest
+            .post(
+              '/api/monitoring/v1/clusters/__standalone_cluster__/logstash/node/f9efd237-3bbf-4a9b-9ce7-a16141b9d981'
+            )
+            .set('kbn-xsrf', 'xxx')
+            .send({ timeRange, is_advanced: true })
+            .expect(200);
 
-      expect(body).to.eql(nodeDetailAdvancedFixture);
+          expect(body).to.eql(nodeDetailAdvancedFixture);
+        });
+      });
     });
   });
 }
