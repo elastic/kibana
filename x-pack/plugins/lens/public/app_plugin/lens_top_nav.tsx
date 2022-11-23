@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType, getTimeFieldFromTextBasedQuery } from '@kbn/es-query';
 import { useStore } from 'react-redux';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
@@ -908,6 +908,33 @@ export const LensTopNavMenu = ({
       }
     }
   }
+
+  const showDatePicker = useMemo(() => {
+    if (isOnTextBasedMode && query && isOfAggregateQueryType(query)) {
+      const timeField = getTimeFieldFromTextBasedQuery(query);
+      return Boolean(timeField);
+    }
+    return (
+      indexPatterns.some((ip) => ip.isTimeBased()) ||
+      Boolean(
+        allLoaded &&
+          activeDatasourceId &&
+          datasourceMap[activeDatasourceId].isTimeBased(
+            datasourceStates[activeDatasourceId].state,
+            dataViews.indexPatterns
+          )
+      )
+    );
+  }, [
+    activeDatasourceId,
+    allLoaded,
+    dataViews.indexPatterns,
+    datasourceMap,
+    datasourceStates,
+    indexPatterns,
+    isOnTextBasedMode,
+    query,
+  ]);
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
@@ -925,17 +952,7 @@ export const LensTopNavMenu = ({
       indicateNoData={indicateNoData}
       showSearchBar={true}
       dataViewPickerComponentProps={dataViewPickerProps}
-      showDatePicker={
-        indexPatterns.some((ip) => ip.isTimeBased()) ||
-        Boolean(
-          allLoaded &&
-            activeDatasourceId &&
-            datasourceMap[activeDatasourceId].isTimeBased(
-              datasourceStates[activeDatasourceId].state,
-              dataViews.indexPatterns
-            )
-        )
-      }
+      showDatePicker={showDatePicker}
       textBasedLanguageModeErrors={textBasedLanguageModeErrors}
       onTextBasedSavedAndExit={onTextBasedSavedAndExit}
       showFilterBar={true}

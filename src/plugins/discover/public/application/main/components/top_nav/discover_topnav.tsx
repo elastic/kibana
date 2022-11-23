@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
+import { getTimeFieldFromTextBasedQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewListItem, DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_SQL } from '../../../../../common';
@@ -65,10 +66,13 @@ export const DiscoverTopNav = ({
 }: DiscoverTopNavProps) => {
   const history = useHistory();
 
-  const showDatePicker = useMemo(
-    () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
-    [dataView]
-  );
+  const showDatePicker = useMemo(() => {
+    if (isPlainRecord && query && isOfAggregateQueryType(query)) {
+      const timeField = getTimeFieldFromTextBasedQuery(query);
+      return Boolean(timeField);
+    }
+    return dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
+  }, [dataView, isPlainRecord, query]);
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
 

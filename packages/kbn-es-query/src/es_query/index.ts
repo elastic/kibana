@@ -18,6 +18,8 @@ export {
   isOfAggregateQueryType,
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
+  getTimeFieldFromTextBasedQuery,
+  removeCustomFilteringFromQuery,
 } from './es_query_sql';
 export type {
   IFieldSubType,

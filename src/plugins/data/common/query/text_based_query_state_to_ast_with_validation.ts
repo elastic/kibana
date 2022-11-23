@@ -7,9 +7,9 @@
  */
 import {
   isOfAggregateQueryType,
-  getIndexPatternFromSQLQuery,
   Query,
-  AggregateQuery,
+  getTimeFieldFromTextBasedQuery,
+  removeCustomFilteringFromQuery,
 } from '@kbn/es-query';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { QueryState } from '..';
@@ -20,12 +20,6 @@ interface Args extends QueryState {
   inputQuery?: Query;
   timeFieldName?: string;
 }
-
-const getIndexPatternFromAggregateQuery = (query: AggregateQuery) => {
-  if ('sql' in query) {
-    return getIndexPatternFromSQLQuery(query.sql);
-  }
-};
 
 /**
  * Converts QueryState to expression AST
@@ -39,43 +33,19 @@ export async function textBasedQueryStateToAstWithValidation({
   inputQuery,
   time,
   dataViewsService,
-  timeFieldName,
 }: Args) {
   let ast;
   if (query && isOfAggregateQueryType(query)) {
-    // sql query
-    const idxPattern = getIndexPatternFromAggregateQuery(query);
-    const idsTitles = await dataViewsService.getIdsWithTitle();
-    const dataViewIdTitle = idsTitles.find(({ title }) => title === idxPattern);
+    const timeField = getTimeFieldFromTextBasedQuery(query);
+    const finalQuery = removeCustomFilteringFromQuery(query, timeField);
 
-    if (dataViewIdTitle) {
-      const dataView = await dataViewsService.get(dataViewIdTitle.id);
-      const timeField = dataView.timeFieldName;
-
-      ast = textBasedQueryStateToExpressionAst({
-        filters,
-        query,
-        inputQuery,
-        time,
-        timeFieldName: timeField,
-      });
-    } else {
-      // const dataView = await dataViewsService.create({
-      //   title: idxPattern,
-      // });
-      // if (dataView.fields.getByName('@timestamp')?.type === 'date') {
-      //   dataView.timeFieldName = '@timestamp';
-      // }
-      // const timeField = dataView.timeFieldName;
-      // no dataview found but user gave an index pattern
-      ast = textBasedQueryStateToExpressionAst({
-        filters,
-        query,
-        inputQuery,
-        time,
-        timeFieldName,
-      });
-    }
+    ast = textBasedQueryStateToExpressionAst({
+      filters,
+      query: finalQuery,
+      inputQuery,
+      time,
+      timeFieldName: timeField,
+    });
   }
   return ast;
 }

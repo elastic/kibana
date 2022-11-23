@@ -354,12 +354,19 @@ export function ChangeDataView({
         <TextBasedLanguagesList
           textBasedLanguages={textBasedLanguages}
           selectedOption={triggerLabel}
-          onChange={(lang) => {
+          onChange={async (lang) => {
             setTriggerLabel(lang);
             setPopoverIsOpen(false);
             setIsTextBasedLangSelected(true);
+            let queryString = `SELECT * FROM "${trigger.title}"`;
+            if (currentDataViewId) {
+              const dataView = await dataViews.get(currentDataViewId);
+              if (dataView.timeFieldName) {
+                queryString += ` WHERE TIMEFILTER(${dataView.timeFieldName})`;
+              }
+            }
             // also update the query with the sql query
-            onTextLangQuerySubmit?.({ sql: `SELECT * FROM "${trigger.title}"` });
+            onTextLangQuerySubmit?.({ sql: queryString });
           }}
         />
       );

@@ -7,6 +7,7 @@
 
 import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
+import { getTimeFieldFromTextBasedQuery, removeCustomFilteringFromQuery } from '@kbn/es-query';
 import type { OriginalColumn } from '../../../common/types';
 import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
 
@@ -34,9 +35,14 @@ function getExpressionForLayer(layer: TextBasedLayer, refs: IndexPatternRef[]): 
       };
     }
   });
-  const timeFieldName = refs.find((r) => r.id === layer.index)?.timeField ?? layer.timeField;
+  const timeFieldName = layer.query ? getTimeFieldFromTextBasedQuery(layer.query) : undefined;
+  const finalQuery =
+    layer.query && timeFieldName
+      ? removeCustomFilteringFromQuery(layer.query, timeFieldName)
+      : layer.query;
+
   const textBasedQueryToAst = textBasedQueryStateToExpressionAst({
-    query: layer.query,
+    query: finalQuery,
     timeFieldName,
   });
 
