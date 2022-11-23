@@ -282,9 +282,6 @@ export class APIKeys {
     // User needs `manage_api_key` privilege to use this API
     let result: UpdateAPIKeyResult;
 
-    console.log(roleDescriptors);
-    console.log(metadata);
-
     try {
       result = await this.clusterClient.asScoped(request).asCurrentUser.security.updateApiKey({
         id,
