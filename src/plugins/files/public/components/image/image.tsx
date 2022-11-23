@@ -97,6 +97,8 @@ export const Image = ({ src, url, alt, onLoad, onError, meta, ...rest }: Props) 
           onError?.(ev);
         } else {
           // blurhash failed to load, consider it is loaded to start loading the full image
+          // eslint-disable-next-line no-console
+          console.warn(`Failed to load blurhash src`);
           setIsBlurHashLoaded(true);
         }
       }}
