@@ -11,8 +11,8 @@ import {
   createTestServers,
   createRootWithCorePlugins,
   request,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 
 describe('default route provider', () => {
   let esServer: TestElasticsearchUtils;

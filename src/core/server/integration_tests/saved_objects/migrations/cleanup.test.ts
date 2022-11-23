@@ -10,8 +10,11 @@ import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
 import JSON5 from 'json5';
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { Root } from '@kbn/core-root-server-internal';
 import { getMigrationDocLink } from './test_utils';
 

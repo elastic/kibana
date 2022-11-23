@@ -7,12 +7,12 @@
  */
 
 import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   createRoot,
   createTestServers,
   createRootWithCorePlugins,
   request as kbnServerRequest,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 
 import { RequestHandlerContext } from '../..';

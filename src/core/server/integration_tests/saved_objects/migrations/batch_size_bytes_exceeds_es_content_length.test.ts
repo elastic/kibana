@@ -9,8 +9,11 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import { Root } from '@kbn/core-root-server-internal';
 

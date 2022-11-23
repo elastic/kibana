@@ -19,8 +19,8 @@ import { getMigrationDocLink } from './test_utils';
 import {
   createRootWithCorePlugins,
   TestElasticsearchUtils,
+  createTestServers as createkbnServerTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
-import { createTestServers as createkbnServerTestServers } from '@kbn/core-test-helpers-kbn-server';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures.log');

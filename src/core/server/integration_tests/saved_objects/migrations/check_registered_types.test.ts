@@ -9,8 +9,11 @@
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
 import { Root } from '@kbn/core-root-server-internal';
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 
 describe('checking migration metadata changes on all registered SO types', () => {
   let esServer: TestElasticsearchUtils;
