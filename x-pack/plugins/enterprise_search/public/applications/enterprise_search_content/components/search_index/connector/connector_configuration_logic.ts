@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorConfiguration } from '../../../../../../common/types/connectors';
+import { ConnectorConfiguration, ConnectorStatus } from '../../../../../../common/types/connectors';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   clearFlashMessages,
@@ -82,10 +82,18 @@ export const ConnectorConfigurationLogic = kea<
     values: [CachedFetchIndexApiLogic, ['indexData as index']],
   },
   events: ({ actions, values }) => ({
-    afterMount: () =>
+    afterMount: () => {
       actions.setConfigState(
         isConnectorIndex(values.index) ? values.index.connector.configuration : {}
-      ),
+      );
+      if (
+        isConnectorIndex(values.index) &&
+        (values.index.connector.status === ConnectorStatus.CREATED ||
+          values.index.connector.status === ConnectorStatus.NEEDS_CONFIGURATION)
+      ) {
+        actions.setIsEditing(true);
+      }
+    },
   }),
   listeners: ({ actions, values }) => ({
     apiError: (error) => flashAPIErrors(error),

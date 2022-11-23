@@ -69,6 +69,7 @@ export interface IndexViewActions {
 export interface IndexViewValues {
   connector: Connector | undefined;
   connectorId: string | null;
+  error: string | undefined;
   fetchIndexApiData: typeof CachedFetchIndexApiLogic.values.fetchIndexApiData;
   fetchIndexApiStatus: Status;
   hasAdvancedFilteringFeature: boolean;
@@ -206,6 +207,13 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     connectorId: [
       () => [selectors.indexData],
       (index) => (isConnectorViewIndex(index) ? index.connector.id : null),
+    ],
+    error: [
+      () => [selectors.indexData],
+      (index: ElasticsearchViewIndex) =>
+        isConnectorViewIndex(index)
+          ? index.connector.error || index.connector.last_sync_error
+          : null,
     ],
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],

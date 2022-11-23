@@ -32,6 +32,7 @@ import { IndexViewLogic } from './index_view_logic';
 const DEFAULT_VALUES = {
   connector: undefined,
   connectorId: null,
+  error: null,
   fetchIndexApiData: undefined,
   fetchIndexApiStatus: Status.LOADING,
   hasAdvancedFilteringFeature: false,
@@ -244,6 +245,25 @@ describe('IndexViewLogic', () => {
       IndexViewLogic.actions.fetchIndex();
       expect(IndexViewLogic.actions.makeFetchIndexRequest).toHaveBeenCalledWith({
         indexName: 'indexName',
+      });
+    });
+  });
+
+  describe('selectors', () => {
+    describe('error', () => {
+      it('should return connector error if available', () => {
+        IndexViewLogic.actions.fetchIndexApiSuccess({
+          ...CONNECTOR_VALUES.index,
+          connector: { ...connectorIndex.connector, error: 'error' },
+        });
+        expect(IndexViewLogic.values.error).toEqual('error');
+      });
+      it('should return connector last sync error if available and error is undefined', () => {
+        IndexViewLogic.actions.fetchIndexApiSuccess({
+          ...CONNECTOR_VALUES.index,
+          connector: { ...connectorIndex.connector, last_sync_error: 'last sync error' },
+        });
+        expect(IndexViewLogic.values.error).toEqual('last sync error');
       });
     });
   });
