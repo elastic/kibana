@@ -78,6 +78,9 @@ Fixes unexpected suggestions for text/keyword multi-fields {kibana-pull}145177[#
 Discover::
 Fixes % for field stats calculations (edge cases) {kibana-pull}144962[#144962]
 
+Fleet::
+Fixes known issue with adding {fleet-server} integration on Windows by always using posix paths for zip files {kibana-pull}144899[#144899]
+
 Management::
 Fixes autocomplete_entities API crash when response size is too big {kibana-pull}140569[#140569]
 
@@ -88,6 +91,66 @@ Adjust formula for synthetics monitor availability {kibana-pull}144868[#144868]
 == {kib} 8.5.1
 
 Review the following information about the {kib} 8.5.1 release.
+
+[float]
+[[known-issues-8.5.1]]
+=== Known issues
+
+[[known-issue-144880]]
+.Unable to add {fleet-server} integration on Windows
+[%collapsible]
+====
+
+*Details*
+
+We discovered a high severity issue in version 8.5.1 that only affects Windows
+users in self-managed environments. When you attempt to add a {fleet-server},
+{kib} is unable to add the {fleet-server} integration, and the {fleet-server}
+polices are created without the necessary integration. For more information,
+see {kibana-issue}/144880[issue #144880].
+
+*Impact* +
+
+This issue will be resolved in version 8.5.2. We advise Windows users not to
+upgrade to version 8.5.1.
+====
+
+[[known-issue-2383]]
+.Offline {agent}s fail to unenroll after timeout has expired
+[%collapsible]
+====
+
+*Details*
+
+A https://github.com/elastic/fleet-server/issues/2091[known issue] in
+{fleet-server} 8.5.1 prevents offline agents from being automatically unenrolled
+after the unenrollment timeout expires.
+
+*Impact* +
+
+Offline agents will be displayed in the {fleet} Agents list until you explicitly
+force unenroll them. You can do this through the {fleet} UI or by using the API.
+
+To use the API:
+
+. Find agent's ID. Go to *{fleet} > Agents* and click the agent to see its
+details. Copy the Agent ID.
+
+. In a terminal window, run:
++
+[source,shell]
+----
+curl -u <username>:<password> --request POST \
+  --url <kibana_url>/api/fleet/agents/<agentID>/unenroll \
+  --header 'content-type: application/json' \
+  --header 'kbn-xsrf: xx' \
+  --data-raw '{"force":true,"revoke":true}' \
+  --compressed
+----
++
+Where `<agentID>` is the ID you copied in the previous step.
+
+====
 
 [float]
 [[breaking-changes-8.5.1]]
