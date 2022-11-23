@@ -31210,7 +31210,6 @@
     "xpack.synthetics.page_header.manageMonitors": "モニター管理",
     "xpack.synthetics.page_header.settingsLink": "設定",
     "xpack.synthetics.page_header.settingsLink.label": "アップタイム設定ページに移動",
-    "xpack.synthetics.pingHistogram.analyze": "分析",
     "xpack.synthetics.pingList.checkHistoryTitle": "履歴",
     "xpack.synthetics.pingList.collapseRow": "縮小",
     "xpack.synthetics.pingList.columns.failedStep": "失敗したステップ",
