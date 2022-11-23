@@ -97,6 +97,9 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       handleConfirmExceptionFlyout,
       handleCancelExceptionItemFlyout,
       goToExceptionDetail,
+      emptyViewerTitle,
+      emptyViewerBody,
+      emptyViewerButtonText,
     } = useExceptionsListCard({
       exceptionsList,
       handleExport,
@@ -187,6 +190,9 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   onPaginationChange={onPaginationChange}
                   onCreateExceptionListItem={onAddExceptionClick}
                   lastUpdated={null}
+                  emptyViewerTitle={emptyViewerTitle}
+                  emptyViewerBody={emptyViewerBody}
+                  emptyViewerButtonText={emptyViewerButtonText}
                 />
               </ExceptionPanel>
             </EuiAccordion>
