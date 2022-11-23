@@ -85,6 +85,7 @@ describe('SLIClient', () => {
           });
           expect(result[slo.id].date_range.from).toBeClose(expectedDateRange.from);
           expect(result[slo.id].date_range.to).toBeClose(expectedDateRange.to);
+          // @ts-ignore searches not typed properly
           expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
             { index: `${SLO_DESTINATION_INDEX_NAME}*` },
             {
@@ -125,6 +126,7 @@ describe('SLIClient', () => {
           expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
           expect(result[slo.id].date_range.from).toBeClose(expectedDateRange.from);
           expect(result[slo.id].date_range.to).toBeClose(expectedDateRange.to);
+          // @ts-ignore searches not typed properly
           expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
             { index: `${SLO_DESTINATION_INDEX_NAME}*` },
             {
@@ -202,6 +204,7 @@ describe('SLIClient', () => {
           expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
           expect(result[slo.id].date_range.from).toBeClose(expectedDateRange.from);
           expect(result[slo.id].date_range.to).toBeClose(expectedDateRange.to);
+          // @ts-ignore searches not typed properly
           expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
             { index: `${SLO_DESTINATION_INDEX_NAME}*` },
             {
@@ -292,6 +295,7 @@ describe('SLIClient', () => {
           expect(result[slo.id]).toMatchObject({ good: 90, total: 100 });
           expect(result[slo.id].date_range.from).toBeClose(expectedDateRange.from);
           expect(result[slo.id].date_range.to).toBeClose(expectedDateRange.to);
+          // @ts-ignore searches not typed properly
           expect(esClientMock.msearch.mock.calls[0][0].searches).toEqual([
             { index: `${SLO_DESTINATION_INDEX_NAME}*` },
             {
