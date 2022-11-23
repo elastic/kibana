@@ -19,7 +19,7 @@ interface FilteringStatusCalloutsProps {
   state: FilteringValidationState;
 }
 
-export const FilteringStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
+export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
   applyDraft,
   editDraft,
   state,
@@ -36,7 +36,7 @@ export const FilteringStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.index.connector.filtering.validatingTitle',
+                  'xpack.enterpriseSearch.index.connector.syncRules.validatingTitle',
                   {
                     defaultMessage: 'Draft sync rules are validating',
                   }
@@ -48,7 +48,7 @@ export const FilteringStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               {i18n.translate(
-                'xpack.enterpriseSearch.index.connector.filtering.validatingDescription',
+                'xpack.enterpriseSearch.index.connector.syncRules.validatingDescription',
                 {
                   defaultMessage:
                     'Draft rules need to be validated before they can take effect. This may take a few minutes.',
@@ -58,13 +58,13 @@ export const FilteringStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
             <EuiFlexItem>
               <span>
                 <EuiButton
-                  data-telemetry-id="entSearchContent-connector-filtering-validatingCallout-editRules"
+                  data-telemetry-id="entSearchContent-connector-syncRules-validatingCallout-editRules"
                   onClick={editDraft}
                   color="warning"
                   fill
                 >
                   {i18n.translate(
-                    'xpack.enterpriseSearch.index.connector.filtering.validatingCallout.editDraftRulesTitle',
+                    'xpack.enterpriseSearch.index.connector.syncRules.validatingCallout.editDraftRulesTitle',
                     {
                       defaultMessage: 'Edit draft rules',
                     }
@@ -80,14 +80,14 @@ export const FilteringStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
         <EuiCallOut
           color="danger"
           iconType="cross"
-          title={i18n.translate('xpack.enterpriseSearch.index.connector.filtering.invalidTitle', {
+          title={i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.invalidTitle', {
             defaultMessage: 'Draft sync rules are invalid',
           })}
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               {i18n.translate(
-                'xpack.enterpriseSearch.index.connector.filtering.invalidDescription',
+                'xpack.enterpriseSearch.index.connector.syncRules.invalidDescription',
                 {
                   defaultMessage:
                     'Draft rules did not validate. Edit the draft rules before they can take effect.',
@@ -97,13 +97,13 @@ export const FilteringStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
             <EuiFlexItem>
               <span>
                 <EuiButton
-                  data-telemetry-id="entSearchContent-connector-filtering-errorCallout-editRules"
+                  data-telemetry-id="entSearchContent-connector-syncRules-errorCallout-editRules"
                   onClick={editDraft}
                   color="danger"
                   fill
                 >
                   {i18n.translate(
-                    'xpack.enterpriseSearch.index.connector.filtering.errorCallout.editDraftRulesTitle',
+                    'xpack.enterpriseSearch.index.connector.syncRules.errorCallout.editDraftRulesTitle',
                     {
                       defaultMessage: 'Edit draft rules',
                     }
@@ -119,14 +119,14 @@ export const FilteringStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
         <EuiCallOut
           color="success"
           iconType="check"
-          title={i18n.translate('xpack.enterpriseSearch.index.connector.filtering.validatedTitle', {
+          title={i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.validatedTitle', {
             defaultMessage: 'Draft sync rules validated',
           })}
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               {i18n.translate(
-                'xpack.enterpriseSearch.index.connector.filtering.validatedDescription',
+                'xpack.enterpriseSearch.index.connector.syncRules.validatedDescription',
                 {
                   defaultMessage: 'Apply draft rules to take effect on the next sync.',
                 }
@@ -137,13 +137,13 @@ export const FilteringStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
                 <EuiFlexItem grow={false}>
                   <span>
                     <EuiButton
-                      data-telemetry-id="entSearchContent-connector-filtering-successCallout-applyRules"
+                      data-telemetry-id="entSearchContent-connector-syncRules-successCallout-applyRules"
                       onClick={applyDraft}
                       color="success"
                       fill
                     >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.index.connector.filtering.successCallout.applyDraftRulesTitle',
+                        'xpack.enterpriseSearch.index.connector.syncRules.successCallout.applyDraftRulesTitle',
                         {
                           defaultMessage: 'Apply draft rules',
                         }
@@ -154,12 +154,12 @@ export const FilteringStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
                 <EuiFlexItem grow={false}>
                   <span>
                     <EuiButton
-                      data-telemetry-id="entSearchContent-connector-filtering-successCallout-editRules"
+                      data-telemetry-id="entSearchContent-connector-syncRules-successCallout-editRules"
                       onClick={editDraft}
                       color="success"
                     >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.index.connector.filtering.errorCallout.successEditDraftRulesTitle',
+                        'xpack.enterpriseSearch.index.connector.syncRules.errorCallout.successEditDraftRulesTitle',
                         {
                           defaultMessage: 'Edit draft rules',
                         }

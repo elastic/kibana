@@ -144,7 +144,7 @@ export const ConnectorFilteringLogic = kea<
       flashSuccessToast(
         i18n.translate(
           'xpack.enterpriseSearch.content.index.connector.filtering.successToastRules.title',
-          { defaultMessage: 'Filtering rules updated' }
+          { defaultMessage: 'Sync rules updated' }
         )
       );
     },
@@ -161,8 +161,8 @@ export const ConnectorFilteringLogic = kea<
     draftApiSuccess: () => {
       flashSuccessToast(
         i18n.translate(
-          'xpack.enterpriseSearch.content.index.connector.filtering.successToastDraft.title',
-          { defaultMessage: 'Draft saved' }
+          'xpack.enterpriseSearch.content.index.connector.syncRules.successToastDraft.title',
+          { defaultMessage: 'Draft rules saved' }
         )
       );
     },

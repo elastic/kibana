@@ -30895,8 +30895,6 @@
     "xpack.synthetics.fleetIntegration.assets.name": "监测",
     "xpack.synthetics.gettingStarted.createSingle.description": " 要开始使用 Elastic Synthetics 监测",
     "xpack.synthetics.gettingStarted.createSinglePageLabel": "创建单个页面浏览器监测",
-    "xpack.synthetics.gettingStarted.forMoreInfo": "有关更多信息，请阅读我们的",
-    "xpack.synthetics.gettingStarted.gettingStartedLabel": "入门指南",
     "xpack.synthetics.gettingStarted.gettingStartedLabel.selectDifferentMonitor": "选择不同的监测类型",
     "xpack.synthetics.gettingStarted.orLabel": "或",
     "xpack.synthetics.inspectButtonText": "检查",
