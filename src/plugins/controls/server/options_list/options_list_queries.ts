@@ -11,16 +11,11 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
 import { DEFAULT_SORT, SortingType } from '../../common/options_list/suggestions_sorting';
-import { OptionsListRequestBody } from '../../common/options_list/types';
+import { OptionsListRequestBody, OptionsListSuggestion } from '../../common/options_list/types';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 export interface OptionsListAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
-  parse: (response: SearchResponse) => string[];
-}
-
-interface EsBucket {
-  key: string;
-  doc_count: number;
+  parse: (response: SearchResponse) => OptionsListSuggestion[];
 }
 
 const getSortType = (sort?: SortingType) => {
@@ -55,7 +50,9 @@ export const getValidationAggregationBuilder: () => OptionsListAggregationBuilde
     return rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
       ? Object.entries(rawInvalidSuggestions)
           ?.filter(([, value]) => value?.doc_count === 0)
-          ?.map(([key]) => key)
+          ?.map(([key]) => {
+            return { key };
+          })
       : [];
   },
 });
@@ -86,13 +83,17 @@ export const getSuggestionAggregationBuilder = ({
 const getEscapedQuery = (q: string = '') =>
   q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
-const getIpBuckets = (rawEsResult: any, combinedBuckets: EsBucket[], type: 'ipv4' | 'ipv6') => {
+const getIpBuckets = (
+  rawEsResult: any,
+  combinedBuckets: OptionsListSuggestion[],
+  type: 'ipv4' | 'ipv6'
+) => {
   const results = get(
     rawEsResult,
     `aggregations.suggestions.buckets.${type}.filteredSuggestions.buckets`
   );
   if (results) {
-    results.forEach((suggestion: EsBucket) => combinedBuckets.push(suggestion));
+    results.forEach((suggestion: OptionsListSuggestion) => combinedBuckets.push(suggestion));
   }
 };
 
@@ -110,10 +111,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         order: getSortType(sort),
       },
     }),
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.buckets')?.map(
-        (suggestion: { key: string }) => suggestion.key
-      ),
+    parse: (rawEsResult) => get(rawEsResult, 'aggregations.suggestions.buckets'),
   },
 
   /**
@@ -143,10 +141,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         },
       };
     },
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.keywordSuggestions.buckets')?.map(
-        (suggestion: { key: string }) => suggestion.key
-      ),
+    parse: (rawEsResult) => get(rawEsResult, 'aggregations.suggestions.keywordSuggestions.buckets'),
   },
 
   /**
@@ -161,10 +156,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         order: getSortType(sort),
       },
     }),
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.buckets')?.map(
-        (suggestion: { key_as_string: string }) => suggestion.key_as_string
-      ),
+    parse: (rawEsResult) => get(rawEsResult, 'aggregations.suggestions.buckets'),
   },
 
   /**
@@ -217,13 +209,15 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         return [];
       }
 
-      const buckets: EsBucket[] = [];
+      const buckets: OptionsListSuggestion[] = [];
       getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
       getIpBuckets(rawEsResult, buckets, 'ipv6');
       return buckets
-        .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
-        .slice(0, 10) // only return top 10 results
-        .map((bucket: EsBucket) => bucket.key);
+        .sort(
+          (bucketA: OptionsListSuggestion, bucketB: OptionsListSuggestion) =>
+            (bucketB?.doc_count ?? 0) - (bucketA?.doc_count ?? 0)
+        )
+        .slice(0, 10); // only return top 10 results
     },
   },
 
@@ -255,9 +249,6 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         },
       };
     },
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.nestedSuggestions.buckets')?.map(
-        (suggestion: { key: string }) => suggestion.key
-      ),
+    parse: (rawEsResult) => get(rawEsResult, 'aggregations.suggestions.nestedSuggestions.buckets'),
   },
 };

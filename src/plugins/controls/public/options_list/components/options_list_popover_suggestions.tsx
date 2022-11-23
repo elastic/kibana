@@ -8,12 +8,20 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiFilterSelectItem, EuiSpacer, EuiIcon } from '@elastic/eui';
+import {
+  EuiFilterSelectItem,
+  EuiSpacer,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+} from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
+import { OptionsListSuggestion } from '@kbn/controls-plugin/common/options_list/types';
 
 interface OptionsListPopoverSuggestionsProps {
   showOnlySelected: boolean;
@@ -42,12 +50,16 @@ export const OptionsListPopoverSuggestions = ({
   const loading = select((state) => state.output.loading);
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
-  const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
+  const selectedOptionsSet = useMemo(
+    () => new Set<string>(selectedOptions?.map(({ key }) => key)),
+    [selectedOptions]
+  );
   const invalidSelectionsSet = useMemo(
-    () => new Set<string>(invalidSelections),
+    () => new Set<string>(invalidSelections?.map(({ key }) => key)),
     [invalidSelections]
   );
   const suggestions = showOnlySelected ? selectedOptions : availableOptions;
+  console.log(suggestions);
 
   if (
     !loading &&
@@ -91,8 +103,8 @@ export const OptionsListPopoverSuggestions = ({
       )}
       {suggestions?.map((suggestion, index) => (
         <EuiFilterSelectItem
-          data-test-subj={`optionsList-control-selection-${suggestion}`}
-          checked={selectedOptionsSet?.has(suggestion) ? 'on' : undefined}
+          data-test-subj={`optionsList-control-selection-${suggestion.key}`}
+          checked={selectedOptionsSet?.has(suggestion.key) ? 'on' : undefined}
           key={index}
           onClick={() => {
             if (showOnlySelected) {
@@ -103,19 +115,24 @@ export const OptionsListPopoverSuggestions = ({
               dispatch(replaceSelection(suggestion));
               return;
             }
-            if (selectedOptionsSet.has(suggestion)) {
+            if (selectedOptionsSet.has(suggestion.key)) {
               dispatch(deselectOption(suggestion));
               return;
             }
             dispatch(selectOption(suggestion));
           }}
           className={
-            showOnlySelected && invalidSelectionsSet.has(suggestion)
+            showOnlySelected && invalidSelectionsSet.has(suggestion.key)
               ? 'optionsList__selectionInvalid'
               : undefined
           }
         >
-          {`${suggestion}`}
+          <EuiFlexGroup>
+            <EuiFlexItem>{`${suggestion.key}`}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {suggestion.doc_count && <EuiBadge>{`${suggestion.doc_count}`}</EuiBadge>}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFilterSelectItem>
       ))}
     </>

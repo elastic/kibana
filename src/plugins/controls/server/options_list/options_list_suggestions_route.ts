@@ -133,13 +133,14 @@ export const setupOptionsListSuggestionsRoute = (
      * Run ES query
      */
     const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
-
+    console.log(JSON.stringify(body));
     /**
      * Parse ES response into Options List Response
      */
     const totalCardinality = get(rawEsResult, 'aggregations.unique_terms.value');
     const suggestions = suggestionBuilder.parse(rawEsResult);
     const invalidSelections = validationBuilder.parse(rawEsResult);
+    console.log(suggestions, invalidSelections);
     return {
       suggestions,
       totalCardinality,

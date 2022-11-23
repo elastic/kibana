@@ -11,7 +11,7 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 import { Filter } from '@kbn/es-query';
 
 import { OptionsListReduxState, OptionsListComponentState } from './types';
-import { OptionsListField } from '../../common/options_list/types';
+import { OptionsListField, OptionsListSuggestion } from '../../common/options_list/types';
 import { getIpRangeQuery } from '../../common/options_list/ip_search';
 import { DEFAULT_SORT, SortingType } from '../../common/options_list/suggestions_sorting';
 
@@ -20,9 +20,14 @@ export const getDefaultComponentState = (): OptionsListReduxState['componentStat
 });
 
 export const optionsListReducers = {
-  deselectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
+  deselectOption: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<OptionsListSuggestion>
+  ) => {
     if (!state.explicitInput.selectedOptions) return;
-    const itemIndex = state.explicitInput.selectedOptions.indexOf(action.payload);
+    const itemIndex = state.explicitInput.selectedOptions
+      .map(({ key }) => key)
+      .indexOf(action.payload.key);
     if (itemIndex !== -1) {
       const newSelections = [...state.explicitInput.selectedOptions];
       newSelections.splice(itemIndex, 1);
@@ -31,13 +36,14 @@ export const optionsListReducers = {
   },
   deselectOptions: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<string[]>
+    action: PayloadAction<OptionsListSuggestion[]>
   ) => {
+    if (!state.explicitInput.selectedOptions) return;
+    const selectedOptions = state.explicitInput.selectedOptions.map(({ key }) => key) ?? [];
     for (const optionToDeselect of action.payload) {
-      if (!state.explicitInput.selectedOptions) return;
-      const itemIndex = state.explicitInput.selectedOptions.indexOf(optionToDeselect);
+      const itemIndex = selectedOptions.indexOf(optionToDeselect.key);
       if (itemIndex !== -1) {
-        const newSelections = [...state.explicitInput.selectedOptions];
+        const newSelections: OptionsListSuggestion[] = [...state.explicitInput.selectedOptions];
         newSelections.splice(itemIndex, 1);
         state.explicitInput.selectedOptions = newSelections;
       }
@@ -66,14 +72,17 @@ export const optionsListReducers = {
       state.explicitInput.existsSelected = false;
     }
   },
-  selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
+  selectOption: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<OptionsListSuggestion>
+  ) => {
     if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
     state.explicitInput.selectedOptions?.push(action.payload);
   },
   replaceSelection: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<string>
+    action: PayloadAction<OptionsListSuggestion>
   ) => {
     state.explicitInput.selectedOptions = [action.payload];
   },
@@ -90,7 +99,10 @@ export const optionsListReducers = {
   },
   setValidAndInvalidSelections: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<{ validSelections: string[]; invalidSelections: string[] }>
+    action: PayloadAction<{
+      validSelections: OptionsListSuggestion[];
+      invalidSelections: OptionsListSuggestion[];
+    }>
   ) => {
     const { invalidSelections, validSelections } = action.payload;
     state.componentState.invalidSelections = invalidSelections;
