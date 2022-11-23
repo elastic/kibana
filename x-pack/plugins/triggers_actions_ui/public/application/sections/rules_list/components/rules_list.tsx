@@ -780,7 +780,6 @@ export const RulesList = ({
     setIsEnablingRules(false);
     showToast({ action: 'ENABLE', errors, total });
     await refreshRules();
-    onClearSelection();
   }, [http, selectedIds, filter, setIsEnablingRules, toasts]);
 
   const onDisable = useCallback(async () => {
@@ -795,7 +794,6 @@ export const RulesList = ({
     setIsDisablingRules(false);
     showToast({ action: 'DISABLE', errors, total });
     await refreshRules();
-    onClearSelection();
   }, [http, selectedIds, filter, setIsDisablingRules, toasts]);
 
   const table = (
