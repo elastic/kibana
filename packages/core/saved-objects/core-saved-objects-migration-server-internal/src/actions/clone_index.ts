@@ -77,7 +77,7 @@ export const cloneIndex = ({
             // Set an explicit refresh interval so that we don't inherit the
             // value from incorrectly configured index templates (not required
             // after we adopt system indices)
-            refresh_interval: '1s',
+            refresh_interval: '5s',
             // Bump priority so that recovery happens before newer indices
             priority: 10,
             // Increase the fields limit beyond the default of 1000
