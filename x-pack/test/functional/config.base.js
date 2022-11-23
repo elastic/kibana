@@ -170,7 +170,7 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/observability',
       },
       connectors: {
-        pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
+        pathname: '/app/management/insightsAndAlerting/triggersActions/connectors',
       },
     },
 
