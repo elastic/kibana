@@ -8,6 +8,7 @@
 
 import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
+import { Meta, Story } from '@storybook/react';
 import mdx from '../README.mdx';
 
 import { NotFound } from './not_found';
@@ -21,9 +22,12 @@ export default {
       page: mdx,
     },
   },
-};
+  argTypes: {
+    onClick: { action: 'clicked' },
+  },
+} as Meta;
 
-export const EmptyPage = () => {
+export const EmptyPage: Story = () => {
   return (
     <EuiPageTemplate>
       <EuiPageTemplate.Section alignment="center">
@@ -33,7 +37,7 @@ export const EmptyPage = () => {
   );
 };
 
-export const PageWithSidebar = () => {
+export const PageWithSidebar: Story = () => {
   return (
     <EuiPageTemplate panelled>
       <EuiPageTemplate.Sidebar>sidebar</EuiPageTemplate.Sidebar>
@@ -42,16 +46,18 @@ export const PageWithSidebar = () => {
   );
 };
 
-export const CustomActions = () => {
+export const CustomActions: Story = (args) => {
   return (
     <EuiPageTemplate>
       <EuiPageTemplate.Section alignment="center">
         <NotFound
           actions={[
-            <EuiButton fill color="primary" onClick={() => {}}>
+            <EuiButton fill color="primary" onClick={args.onClick}>
               Go home
             </EuiButton>,
-            <EuiButtonEmpty iconType="search">Go to discover</EuiButtonEmpty>,
+            <EuiButtonEmpty iconType="search" onClick={args.onClick}>
+              Go to discover
+            </EuiButtonEmpty>,
           ]}
         />
       </EuiPageTemplate.Section>
