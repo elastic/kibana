@@ -3760,6 +3760,36 @@ export class RulesClient {
     return this.spaceId;
   }
 
+  public getAlertFromRaw<Params extends RuleTypeParams>(
+    id: string,
+    ruleTypeId: string,
+    rawRule: RawRule,
+    references: SavedObjectReference[] | undefined,
+    includeLegacyId: boolean = false,
+    excludeFromPublicApi: boolean = false,
+    includeSnoozeData: boolean = false
+  ): Rule | RuleWithLegacyId {
+    const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
+    // In order to support the partial update API of Saved Objects we have to support
+    // partial updates of an Alert, but when we receive an actual RawRule, it is safe
+    // to cast the result to an Alert
+    const res = this.getPartialRuleFromRaw<Params>(
+      id,
+      ruleType,
+      rawRule,
+      references,
+      includeLegacyId,
+      excludeFromPublicApi,
+      includeSnoozeData
+    );
+    // include to result because it is for internal rules client usage
+    if (includeLegacyId) {
+      return res as RuleWithLegacyId;
+    }
+    // exclude from result because it is an internal variable
+    return omit(res, ['legacyId']) as Rule;
+  }
+
   private async scheduleTask(opts: ScheduleTaskOptions) {
     const { id, consumer, ruleTypeId, schedule, throwOnConflict } = opts;
     const taskInstance = {
@@ -3811,36 +3841,6 @@ export class RulesClient {
         id: reference.id,
       };
     }) as Rule['actions'];
-  }
-
-  private getAlertFromRaw<Params extends RuleTypeParams>(
-    id: string,
-    ruleTypeId: string,
-    rawRule: RawRule,
-    references: SavedObjectReference[] | undefined,
-    includeLegacyId: boolean = false,
-    excludeFromPublicApi: boolean = false,
-    includeSnoozeData: boolean = false
-  ): Rule | RuleWithLegacyId {
-    const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
-    // In order to support the partial update API of Saved Objects we have to support
-    // partial updates of an Alert, but when we receive an actual RawRule, it is safe
-    // to cast the result to an Alert
-    const res = this.getPartialRuleFromRaw<Params>(
-      id,
-      ruleType,
-      rawRule,
-      references,
-      includeLegacyId,
-      excludeFromPublicApi,
-      includeSnoozeData
-    );
-    // include to result because it is for internal rules client usage
-    if (includeLegacyId) {
-      return res as RuleWithLegacyId;
-    }
-    // exclude from result because it is an internal variable
-    return omit(res, ['legacyId']) as Rule;
   }
 
   private getPartialRuleFromRaw<Params extends RuleTypeParams>(
