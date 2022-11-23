@@ -70,7 +70,9 @@ import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
 // import { CompareImagesProvider } from './compare_images';
 import { CasesServiceProvider } from './cases';
+import { ActionsServiceProvider } from './actions';
 import { AiopsProvider } from './aiops';
+import { SampleDataServiceProvider } from './sample_data';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -130,6 +132,8 @@ export const services = {
   searchSessions: SearchSessionsService,
   observability: ObservabilityProvider,
   // compareImages: CompareImagesProvider,
+  actions: ActionsServiceProvider,
   cases: CasesServiceProvider,
   aiops: AiopsProvider,
+  sampleData: SampleDataServiceProvider,
 };
