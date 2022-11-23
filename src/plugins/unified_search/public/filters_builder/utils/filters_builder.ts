@@ -88,7 +88,8 @@ export const normalizeFilters = (filters: Filter[]) => {
 
   const normalizeCombined = (combinedFilter: Filter) => {
     const combinedFilters = getGroupedFilters(combinedFilter);
-    const filter = combinedFilters.length < 2 ? combinedFilters[0] : combinedFilter;
+    const nonEmptyCombinedFilters = combinedFilters.filter(Boolean);
+    const filter = nonEmptyCombinedFilters.length < 2 ? nonEmptyCombinedFilters[0] : combinedFilter;
 
     return filter
       ? {
@@ -182,7 +183,6 @@ export const updateFilters = (
     operator,
     params
   );
-
   const pathInArray = getPathInArray(dest.path);
   const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
   const selector = pathInArray[pathInArray.length - 1];
