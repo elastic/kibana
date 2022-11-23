@@ -103,18 +103,22 @@ describe('When on the trusted applications page', () => {
         render();
 
         await waitFor(() =>
-          expect(renderResult.queryByTestId('trustedAppsListPage-pageAddButton')).toBeNull()
+          expect(renderResult.queryByTestId('trustedAppsListPage-container')).toBeTruthy()
         );
+
+        expect(renderResult.queryByTestId('trustedAppsListPage-pageAddButton')).toBeNull();
       });
 
       it('should disable modifying/deleting entries', async () => {
         render();
 
         await waitFor(() =>
-          expect(
-            renderResult.queryByTestId('trustedAppsListPage-card-header-actions-button')
-          ).toBeNull()
+          expect(renderResult.queryByTestId('trustedAppsListPage-container')).toBeTruthy()
         );
+
+        expect(
+          renderResult.queryByTestId('trustedAppsListPage-card-header-actions-button')
+        ).toBeNull();
       });
     });
   });
