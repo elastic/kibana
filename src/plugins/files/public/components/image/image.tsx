@@ -55,7 +55,8 @@ export const Image = ({ src, url, alt, onLoad, onError, meta, ...rest }: Props) 
       className={classNames(rest.className, { blurhash: currentSrc === blurhashSrc })}
       css={css`
         &.blurhash {
-          // using this animation we make blurhash to not appear instantly, but only when the original image takes a bit of time to load (>0.9s)
+          // Makes blurhash image visually appear after the .9s delay with a .1s transition duration.
+          // This is needed for a nicer UX when the original image loads fast.
           animation-name: imageBlurhashFadeIn;
           animation-duration: 1s;
           @keyframes imageBlurhashFadeIn {
