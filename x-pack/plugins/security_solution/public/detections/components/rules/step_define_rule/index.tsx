@@ -263,6 +263,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     if (dataSourceType === DataSourceType.DataView) {
       const fetchDataView = async () => {
         if (dataView != null) {
+          console.log('dv get1', dataView);
           const dv = await data.dataViews.get(dataView);
           setDataViewTitle(dv.title);
           setIndexPattern(dv);
