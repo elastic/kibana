@@ -21,7 +21,7 @@ export const cancelSyncs = async (
         must: [
           {
             term: {
-              connector_id: connectorId,
+              'connector.id': connectorId,
             },
           },
           {
@@ -45,7 +45,7 @@ export const cancelSyncs = async (
         must: [
           {
             term: {
-              connector_id: connectorId,
+              'connector.id': connectorId,
             },
           },
           {
