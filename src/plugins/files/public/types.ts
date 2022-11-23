@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FileJSON } from '../common';
+import { FileJSON, FileKind } from '../common';
 import type {
   FindFilesHttpEndpoint,
   FileShareHttpEndpoint,
@@ -39,7 +39,10 @@ type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition, ExtraArgs exten
   args: Parameters<UnscopedClientMethodFrom<E>>[0] & { kind: string } & ExtraArgs
 ) => Promise<E['output']>;
 
-interface GlobalEndpoints {
+/**
+ * A client that can be used to manage a specific {@link FileKind}.
+ */
+export interface FilesClient<M = unknown> {
   /**
    * Get metrics of file system, like storage usage.
    *
@@ -65,12 +68,7 @@ interface GlobalEndpoints {
    * @param args - Bulk delete args
    */
   bulkDelete: UnscopedClientMethodFrom<BulkDeleteHttpEndpoint>;
-}
 
-/**
- * A client that can be used to manage a specific {@link FileKind}.
- */
-export interface FilesClient<M = unknown> extends GlobalEndpoints {
   /**
    * Create a new file object with the provided metadata.
    *
@@ -159,6 +157,12 @@ export interface FilesClient<M = unknown> extends GlobalEndpoints {
    * @param args - Get file share arguments
    */
   listShares: ClientMethodFrom<FileListSharesHttpEndpoint>;
+
+  /**
+   * Get a file kind
+   * @param id The id of the file kind
+   */
+  getFileKind: (id: string) => FileKind;
 }
 
 export type FilesClientResponses<M = unknown> = {

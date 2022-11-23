@@ -19,18 +19,19 @@ const rt = {
   }),
 };
 
-interface Result {
-  /**
-   * The files that were deleted
-   */
-  succeeded: string[];
-  /**
-   * Any failed deletions. Only included in the response if there were failures.
-   */
-  failed?: Array<[id: string, reason: string]>;
-}
-
-export type Endpoint = CreateRouteDefinition<typeof rt, Result>;
+export type Endpoint = CreateRouteDefinition<
+  typeof rt,
+  {
+    /**
+     * The files that were deleted
+     */
+    succeeded: string[];
+    /**
+     * Any failed deletions. Only included in the response if there were failures.
+     */
+    failed?: Array<[id: string, reason: string]>;
+  }
+>;
 
 const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const fileService = (await files).fileService.asCurrentUser();
@@ -38,8 +39,8 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
     body: { ids },
   } = req;
 
-  const succeeded: Result['succeeded'] = [];
-  const failed: Result['failed'] = [];
+  const succeeded: string[] = [];
+  const failed: Array<[string, string]> = [];
   for (const id of ids) {
     try {
       await fileService.delete({ id });
