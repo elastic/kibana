@@ -6097,8 +6097,6 @@
     "visualizations.byValue_pageHeading": "{originatingApp}アプリに埋め込まれた{chartType}タイプのビジュアライゼーション",
     "visualizations.confirmModal.overwriteConfirmationMessage": "{title}を上書きしてよろしいですか？",
     "visualizations.confirmModal.overwriteTitle": "{name} を上書きしますか？",
-    "visualizations.confirmModal.saveDuplicateButtonLabel": "{name} を保存",
-    "visualizations.confirmModal.saveDuplicateConfirmationMessage": "「{title}」というタイトルの {name} がすでに存在します。保存しますか？",
     "visualizations.disabledLabVisualizationTitle": "{title} はラボビジュアライゼーションです。",
     "visualizations.embeddable.legacyURLConflict.errorMessage": "このビジュアライゼーションにはレガシーエイリアスと同じURLがあります。このエラーを解決するには、エイリアスを無効にしてください：{json}",
     "visualizations.experimentalVisInfoText": "将来のリリースでは、変更されるか、完全に削除される場合があります。Elasticは最善の努力を講じてすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。フィードバックがある場合は、{githubLink}で問題を報告してください。",
