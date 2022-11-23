@@ -69,5 +69,7 @@ export interface InternalApplicationStart extends ApplicationStart {
    * Internal method to set custom branding interface, exposed only to Core.
    * @param customBranding$
    */
-  setCustomBranding(customBranding$: BehaviorSubject<CustomBranding | undefined>): void;
+  setCustomBranding(
+    customBranding$: BehaviorSubject<CustomBranding | undefined>
+  ): Observable<CustomBranding | undefined>;
 }

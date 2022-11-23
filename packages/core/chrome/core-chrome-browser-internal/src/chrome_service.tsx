@@ -33,6 +33,7 @@ import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { RecentlyAccessedService } from './recently_accessed';
+import { CustomBrandingService } from './custom_branding';
 import { Header } from './ui';
 import type { InternalChromeStart } from './types';
 
@@ -61,6 +62,7 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
+  private readonly customBranding = new CustomBrandingService();
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -117,7 +119,6 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
-    const customBranding$ = new BehaviorSubject<CustomBranding | undefined>(undefined);
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -236,8 +237,6 @@ export class ChromeService {
         />
       ),
 
-      // getCustomBranding$: () => customBranding$.pipe(takeUntil(this.stop$)),
-
       getIsVisible$: () => this.isVisible$,
 
       setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
@@ -301,7 +300,7 @@ export class ChromeService {
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
-    };
+    }
   }
 
   public stop() {
