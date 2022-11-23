@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,7 +14,6 @@ import type { RulesListVisibleColumns } from '@kbn/triggers-actions-ui-plugin/pu
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from './state_container';
-
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -32,18 +31,22 @@ const RULES_LIST_COLUMNS: RulesListVisibleColumns[] = [
 
 function RulesPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { http, docLinks, triggersActionsUi } = useKibana().services;
-
-  const documentationLink = docLinks.links.observability.createAlerts;
-
-  const filteredRuleTypes = useGetFilteredRuleTypes();
+  const {
+    http,
+    docLinks,
+    triggersActionsUi: { getAddAlertFlyout: AddAlertFlyout, getRulesList: RuleList },
+  } = useKibana().services;
 
   const { status, setStatus, lastResponse, setLastResponse } = useRulesPageStateContainer();
-  const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
-  const [refresh, setRefresh] = useState(new Date());
+
+  const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
   });
+
+  const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
+  const [refresh, setRefresh] = useState(new Date());
+
   const authorizedRuleTypes = [...ruleTypes.values()];
 
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
@@ -62,75 +65,26 @@ function RulesPage() {
     },
   ]);
 
-  const CreateRuleFlyout = useMemo(
-    () =>
-      triggersActionsUi.getAddAlertFlyout({
-        consumer: ALERTS_FEATURE_ID,
-        onClose: () => {
-          setCreateRuleFlyoutVisibility(false);
-        },
-        onSave: () => {
-          setRefresh(new Date());
-          return Promise.resolve();
-        },
-        filteredRuleTypes,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filteredRuleTypes]
-  );
-
-  const getRulesTable = useMemo(() => {
-    return (
-      <>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
-            {triggersActionsUi.getRulesList({
-              filteredRuleTypes,
-              showActionFilter: false,
-              showCreateRuleButton: false,
-              ruleDetailsRoute: 'alerts/rules/:ruleId',
-              statusFilter: status,
-              onStatusFilterChange: setStatus,
-              lastResponseFilter: lastResponse,
-              onLastResponseFilterChange: setLastResponse,
-              refresh,
-              rulesListKey: RULES_LIST_COLUMNS_KEY,
-              visibleColumns: RULES_LIST_COLUMNS,
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }, [
-    triggersActionsUi,
-    filteredRuleTypes,
-    status,
-    setStatus,
-    lastResponse,
-    setLastResponse,
-    refresh,
-  ]);
   return (
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: <>{RULES_PAGE_TITLE}</>,
         rightSideItems: [
-          authorizedToCreateAnyRules && (
-            <EuiButton
-              iconType="plusInCircle"
-              key="create-alert"
-              data-test-subj="createRuleButton"
-              fill
-              onClick={() => setCreateRuleFlyoutVisibility(true)}
-            >
-              <FormattedMessage
-                id="xpack.observability.rules.addRuleButtonLabel"
-                defaultMessage="Create rule"
-              />
-            </EuiButton>
-          ),
+          <EuiButton
+            fill
+            key="create-alert"
+            iconType="plusInCircle"
+            data-test-subj="createRuleButton"
+            disabled={!authorizedToCreateAnyRules}
+            onClick={() => setAddRuleFlyoutVisibility(true)}
+          >
+            <FormattedMessage
+              id="xpack.observability.rules.addRuleButtonLabel"
+              defaultMessage="Create rule"
+            />
+          </EuiButton>,
           <EuiButtonEmpty
-            href={documentationLink}
+            href={docLinks.links.observability.createAlerts}
             target="_blank"
             iconType="help"
             data-test-subj="documentationLink"
@@ -143,8 +97,37 @@ function RulesPage() {
         ],
       }}
     >
-      {getRulesTable}
-      {createRuleFlyoutVisibility && CreateRuleFlyout}
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          <RuleList
+            filteredRuleTypes={filteredRuleTypes}
+            showActionFilter={false}
+            showCreateRuleButton={false}
+            ruleDetailsRoute="alerts/rules/:ruleId"
+            statusFilter={status}
+            onStatusFilterChange={setStatus}
+            lastResponseFilter={lastResponse}
+            onLastResponseFilterChange={setLastResponse}
+            refresh={refresh}
+            rulesListKey={RULES_LIST_COLUMNS_KEY}
+            visibleColumns={RULES_LIST_COLUMNS}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {addRuleFlyoutVisibility && (
+        <AddAlertFlyout
+          consumer={ALERTS_FEATURE_ID}
+          filteredRuleTypes={filteredRuleTypes}
+          onClose={() => {
+            setAddRuleFlyoutVisibility(false);
+          }}
+          onSave={() => {
+            setRefresh(new Date());
+            return Promise.resolve();
+          }}
+        />
+      )}
     </ObservabilityPageTemplate>
   );
 }
