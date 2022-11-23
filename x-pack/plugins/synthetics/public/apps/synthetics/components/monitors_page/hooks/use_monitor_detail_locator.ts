@@ -10,10 +10,10 @@ import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/comm
 import { useSyntheticsStartPlugins } from '../../../contexts';
 
 export function useMonitorDetailLocator({
-  monitorId,
+  configId,
   locationId,
 }: {
-  monitorId: string;
+  configId: string;
   locationId?: string;
 }) {
   const [monitorUrl, setMonitorUrl] = useState<string | undefined>(undefined);
@@ -24,13 +24,13 @@ export function useMonitorDetailLocator({
   useEffect(() => {
     async function generateUrl() {
       const url = await locator?.getUrl({
-        monitorId,
+        configId,
         locationId,
       });
       setMonitorUrl(url);
     }
     generateUrl();
-  }, [locator, monitorId, locationId]);
+  }, [locator, configId, locationId]);
 
   return monitorUrl;
 }
