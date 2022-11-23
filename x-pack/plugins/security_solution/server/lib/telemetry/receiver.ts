@@ -109,14 +109,14 @@ export interface ITelemetryReceiver {
 
   fetchPolicyConfigs(id: string): Promise<AgentPolicy | null | undefined>;
 
-  fetchTrustedApplications(): Promise<{
+  fetchTrustedApplications(filter: string): Promise<{
     data: ExceptionListItem[] | undefined;
     total: number;
     page: number;
     per_page: number;
   }>;
 
-  fetchEndpointList(listId: string): Promise<GetEndpointListResponse>;
+  fetchEndpointList(listId: string, filter: string): Promise<GetEndpointListResponse>;
 
   fetchDetectionRules(): Promise<
     TransportResult<
@@ -412,7 +412,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.agentPolicyService?.get(this.soClient, id);
   }
 
-  public async fetchTrustedApplications() {
+  public async fetchTrustedApplications(filter: string) {
     if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
       throw Error('exception list client is unavailable: cannot retrieve trusted applications');
     }
@@ -424,7 +424,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page: 1,
       perPage: 10_000,
-      filter: undefined,
+      filter,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
@@ -438,7 +438,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
   }
 
-  public async fetchEndpointList(listId: string): Promise<GetEndpointListResponse> {
+  public async fetchEndpointList(listId: string, filter: string): Promise<GetEndpointListResponse> {
     if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
       throw Error('exception list client is unavailable: could not retrieve trusted applications');
     }
@@ -450,7 +450,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       listId,
       page: 1,
       perPage: this.maxRecords,
-      filter: undefined,
+      filter,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
@@ -506,6 +506,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                     terms: {
                       'alert.params.immutable': [true],
                     },
+                  },
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: `now-$24h`,
+                    lte: 'now',
                   },
                 },
               },

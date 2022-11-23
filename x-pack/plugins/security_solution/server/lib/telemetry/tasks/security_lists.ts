@@ -10,6 +10,7 @@ import {
   ENDPOINT_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
+import moment from 'moment';
 import {
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
@@ -56,9 +57,11 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             ? licenseInfoPromise.value
             : ({} as ESLicense | undefined);
         const FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS = 24;
+        const searchFromTimestamp = moment().subtract(1, 'day').toISOString();
+        const searchFromFilter = `exception-list-agnostic.attributes.created_at < "now-${searchFromTimestamp}"`;
 
         // Lists Telemetry: Trusted Applications
-        const trustedApps = await receiver.fetchTrustedApplications();
+        const trustedApps = await receiver.fetchTrustedApplications(searchFromFilter);
         if (trustedApps?.data) {
           const trustedAppsJson = templateExceptionList(
             trustedApps.data,
@@ -77,7 +80,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
 
         // Lists Telemetry: Endpoint Exceptions
 
-        const epExceptions = await receiver.fetchEndpointList(ENDPOINT_LIST_ID);
+        const epExceptions = await receiver.fetchEndpointList(ENDPOINT_LIST_ID, searchFromFilter);
         if (epExceptions?.data) {
           const epExceptionsJson = templateExceptionList(
             epExceptions.data,
@@ -96,7 +99,10 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
 
         // Lists Telemetry: Endpoint Event Filters
 
-        const epFilters = await receiver.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
+        const epFilters = await receiver.fetchEndpointList(
+          ENDPOINT_EVENT_FILTERS_LIST_ID,
+          searchFromFilter
+        );
         if (epFilters?.data) {
           const epFiltersJson = templateExceptionList(
             epFilters.data,
