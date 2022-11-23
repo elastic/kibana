@@ -342,7 +342,6 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
       return [
         {
           key: searchValue,
-          searchableLabel: searchValue,
           label: i18n.ADD_TAG_CUSTOM_OPTION_LABEL(searchValue),
           'data-test-subj': 'cases-actions-tags-edit-selectable-add-new-tag',
           data: { tagIcon: 'empty', newItem: true },

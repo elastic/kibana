@@ -151,7 +151,7 @@ export const TAGS_EMPTY_ERROR = i18n.translate('xpack.cases.createCase.fieldTags
 });
 
 export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
-  defaultMessage: 'No tags are added.',
+  defaultMessage: 'No tags are added',
 });
 
 export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldRequiredError', {

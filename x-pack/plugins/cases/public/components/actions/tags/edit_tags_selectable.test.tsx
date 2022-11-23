@@ -300,4 +300,22 @@ describe('EditTagsSelectable', () => {
       result.getByTestId('cases-actions-tags-edit-selectable-no-match-label')
     ).toBeInTheDocument();
   });
+
+  it('shows the no match label and the add new item when there is space in the search term', async () => {
+    const result = appMock.render(<EditTagsSelectable {...props} />);
+
+    await userEvent.type(result.getByPlaceholderText('Search'), 'test tag', { delay: 1 });
+
+    await waitFor(() => {
+      expect(
+        result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+      ).toBeInTheDocument();
+    });
+
+    await waitForComponentToUpdate();
+
+    expect(
+      result.getByTestId('cases-actions-tags-edit-selectable-no-match-label')
+    ).toBeInTheDocument();
+  });
 });
