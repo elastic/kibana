@@ -31,7 +31,7 @@ interface FilterBadgeContentProps {
 }
 
 const FilterBadgeContent = ({ filter, dataViews, filterLabelStatus }: FilterBadgeContentProps) => {
-  const valueLabel = filterLabelStatus ?? getDisplayValueFromFilter(filter, dataViews);
+  const valueLabel = filterLabelStatus || getDisplayValueFromFilter(filter, dataViews);
 
   const fieldLabel = getFieldDisplayValueFromFilter(filter, dataViews);
 
