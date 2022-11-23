@@ -8,10 +8,10 @@
 
 import { isEmpty } from 'lodash';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { Filter, isCombinedFilter } from '@kbn/es-query';
 import { validateParams } from './filter_editor_utils';
+import { strings } from '../i18n';
 
 export const getFieldValidityAndErrorMessage = (
   field: DataViewField,
@@ -38,12 +38,7 @@ const noError = (): { isInvalid: boolean } => {
 const invalidFormatError = (): { isInvalid: boolean; errorMessage?: string } => {
   return {
     isInvalid: true,
-    errorMessage: i18n.translate(
-      'unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage',
-      {
-        defaultMessage: 'Invalid date format provided',
-      }
-    ),
+    errorMessage: strings.getInvalidDateFormatProvidedErrorMessage(),
   };
 };
 

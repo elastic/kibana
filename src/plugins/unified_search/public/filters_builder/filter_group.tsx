@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useContext } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,12 +17,14 @@ import {
   useEuiPaddingSize,
 } from '@elastic/eui';
 import { type Filter, BooleanRelation } from '@kbn/es-query';
-import { css, cx } from '@emotion/css';
+import { cx } from '@emotion/css';
 import type { Path } from './types';
 import { getBooleanRelationType } from '../utils';
 import { FilterItem } from './filter_item';
 import { FiltersBuilderContextType } from './context';
 import { getPathInArray } from './utils';
+import { strings } from './i18n';
+import { delimiterCss } from './filter_group.styles';
 
 export interface FilterGroupProps {
   filters: Filter[];
@@ -46,33 +47,13 @@ const Delimiter = ({
   const xsPadding = useEuiPaddingSize('xs');
   const mPadding = useEuiPaddingSize('m');
   const backgroundColor = useEuiBackgroundColor(color);
-
-  const delimiterStyles = useMemo(
-    () => css`
-      position: relative;
-
-      .filter-builder__delimiter_text {
-        position: absolute;
-        display: block;
-        padding: 0 ${xsPadding};
-        top: 0;
-        left: ${mPadding};
-        background: ${backgroundColor};
-      }
-    `,
-    [backgroundColor, mPadding, xsPadding]
-  );
-
   return (
-    <div className={delimiterStyles}>
+    <div
+      className={delimiterCss({ padding: xsPadding, left: mPadding, background: backgroundColor })}
+    >
       <EuiHorizontalRule margin="xs" />
       <EuiText size="xs" className="filter-builder__delimiter_text">
-        {i18n.translate('unifiedSearch.filter.filtersBuilder.delimiterLabel', {
-          defaultMessage: '{booleanRelation}',
-          values: {
-            booleanRelation,
-          },
-        })}
+        {strings.getDelimiterLabel(booleanRelation)}
       </EuiText>
     </div>
   );

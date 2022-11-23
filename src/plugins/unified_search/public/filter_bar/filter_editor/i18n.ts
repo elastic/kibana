@@ -58,4 +58,40 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.filterEditor.queryDslAriaLabel', {
       defaultMessage: 'Elasticsearch Query DSL editor',
     }),
+  getIsOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isOperatorOptionLabel', {
+      defaultMessage: 'is',
+    }),
+  getIsNotOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isNotOperatorOptionLabel', {
+      defaultMessage: 'is not',
+    }),
+  getIsOneOfOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isOneOfOperatorOptionLabel', {
+      defaultMessage: 'is one of',
+    }),
+  getIsNotOneOfOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isNotOneOfOperatorOptionLabel', {
+      defaultMessage: 'is not one of',
+    }),
+  getIsBetweenOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isBetweenOperatorOptionLabel', {
+      defaultMessage: 'is between',
+    }),
+  getIsNotBetweenOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel', {
+      defaultMessage: 'is not between',
+    }),
+  getExistsOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.existsOperatorOptionLabel', {
+      defaultMessage: 'exists',
+    }),
+  getDoesNotExistOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.doesNotExistOperatorOptionLabel', {
+      defaultMessage: 'does not exist',
+    }),
+  getInvalidDateFormatProvidedErrorMessage: () =>
+    i18n.translate('unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage', {
+      defaultMessage: 'Invalid date format provided',
+    }),
 };
