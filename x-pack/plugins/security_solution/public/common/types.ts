@@ -24,11 +24,15 @@ export enum DataViewType {
   id = 'id',
   title = 'title',
 }
+
+export interface KibanaDataViewBase extends DataViewBase {
+  type: DataViewType;
+  value: string;
+}
+
 /**
  * DataViewBase with enhanced index fields used in timelines
  */
-export interface SecuritySolutionDataViewBase extends DataViewBase {
+export interface SecuritySolutionDataViewBase extends KibanaDataViewBase {
   fields: FieldSpec[];
-  type: DataViewType;
-  value: string;
 }

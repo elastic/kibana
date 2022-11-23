@@ -19,7 +19,7 @@ import type {
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import type { SecuritySolutionDataViewBase } from '../../types';
+import type { KibanaDataViewBase } from '../../types';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
@@ -44,7 +44,7 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getFieldsAsSpec = memoizeOne(
-  (fields: IndexField[]): SecuritySolutionDataViewBase['fields'] =>
+  (fields: IndexField[]): KibanaDataViewBase['fields'] =>
     fields && fields.length > 0
       ? fields.map((field) =>
           pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
@@ -87,7 +87,7 @@ interface FetchIndexReturn {
   browserFields: BrowserFields;
   indexes: string[];
   indexExists: boolean;
-  indexPatterns: SecuritySolutionDataViewBase;
+  indexPatterns: KibanaDataViewBase;
 }
 
 /**
