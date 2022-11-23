@@ -90,7 +90,7 @@ export function ImageViewer({
           src={src}
           // TODO: to enable the blur hash loading uncomment the line, but not sure if we really need the effect
           // until https://github.com/elastic/kibana/issues/145567
-          // meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
+          meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
           alt={imageConfig.altText ?? ''}
           className={classNames(className, { 'visually-hidden': hasFailedToLoad })}
           title={onChange ? 'Click to select a different image' : undefined}
