@@ -20,6 +20,10 @@ export const getColor = (theme: ReturnType<typeof useTheme>, isEnabled: boolean,
   if (!isEnabled) {
     return theme.eui.euiColorLightestShade;
   }
+  if (!ping || typeof ping.summary === 'undefined') {
+    // temp color
+    return '#FFFFFF';
+  }
   return (ping?.summary?.down || 0) > 0
     ? theme.eui.euiColorVis9_behindText
     : theme.eui.euiColorVis0_behindText;
