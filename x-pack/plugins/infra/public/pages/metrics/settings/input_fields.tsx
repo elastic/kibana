@@ -22,6 +22,10 @@ export interface InputFieldProps<
 
 export type FieldErrorMessage = string | JSX.Element;
 
+export type ValidationHandler = (value: React.ReactText) => FieldErrorMessage | false;
+
+export type ValidationHandlerList = ValidationHandler[];
+
 export const createInputFieldProps = <
   Value extends string = string,
   FieldElement extends HTMLInputElement = HTMLInputElement
@@ -83,12 +87,31 @@ export const createInputRangeFieldProps = <
   value,
 });
 
+export const aggregateValidationErrors =
+  (...validationHandlers: ValidationHandlerList) =>
+  (value: React.ReactText) =>
+    validationHandlers.map((validator) => validator(value)).filter(Boolean) as FieldErrorMessage[];
+
 export const validateInputFieldNotEmpty = (value: React.ReactText) =>
-  value === ''
-    ? [
-        <FormattedMessage
-          id="xpack.infra.sourceConfiguration.fieldEmptyErrorMessage"
-          defaultMessage="The field must not be empty"
-        />,
-      ]
-    : [];
+  value === '' && (
+    <FormattedMessage
+      id="xpack.infra.sourceConfiguration.fieldEmptyErrorMessage"
+      defaultMessage="The field must not be empty."
+    />
+  );
+
+export const validateInputFieldHasNotEmptyEntries = (value: React.ReactText) =>
+  value.toString().includes(',,') && (
+    <FormattedMessage
+      id="xpack.infra.sourceConfiguration.fieldContainEmptyEntryErrorMessage"
+      defaultMessage="The field must not include empty comma-separated values."
+    />
+  );
+
+export const validateInputFieldHasNotEmptySpaces = (value: React.ReactText) =>
+  value.toString().includes(' ') && (
+    <FormattedMessage
+      id="xpack.infra.sourceConfiguration.fieldContainSpacesErrorMessage"
+      defaultMessage="The field must not include spaces."
+    />
+  );
