@@ -83,6 +83,7 @@ class DocLinks {
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
   public start: string;
+  public syncRules: string;
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
@@ -195,6 +196,7 @@ class DocLinks {
     this.searchUIAppSearch = '';
     this.searchUIElasticsearch = '';
     this.start = '';
+    this.syncRules = '';
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
@@ -309,6 +311,7 @@ class DocLinks {
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
     this.start = docLinks.links.enterpriseSearch.start;
+    this.syncRules = docLinks.links.enterpriseSearch.syncRules;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;

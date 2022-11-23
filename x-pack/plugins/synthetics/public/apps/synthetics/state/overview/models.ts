@@ -19,7 +19,8 @@ export interface MonitorOverviewPageState {
 }
 
 export type MonitorOverviewFlyoutConfig = {
-  monitorId: string;
+  configId: string;
+  id: string;
   location: string;
 } | null;
 

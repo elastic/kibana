@@ -13,7 +13,7 @@ import {
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 
 describe('List Custom Links', () => {
   let mock: SearchParamsMock;
