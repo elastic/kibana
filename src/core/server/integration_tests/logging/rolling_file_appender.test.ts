@@ -10,14 +10,14 @@ import { join } from 'path';
 import { rm, mkdtemp, readFile, readdir } from 'fs/promises';
 import moment from 'moment-timezone';
 import { getNextRollingTime } from '@kbn/core-logging-server-internal';
-import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 const flushDelay = 250;
 const delay = (waitInMs: number) => new Promise((resolve) => setTimeout(resolve, waitInMs));
 const flush = async () => delay(flushDelay);
 
 function createRoot(appenderConfig: any) {
-  return createkbnTestServerRoot({
+  return kbnTestServer.createRoot({
     logging: {
       appenders: {
         'rolling-file': appenderConfig,

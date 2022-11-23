@@ -10,11 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
-import {
-  createRootWithCorePlugins,
-  createTestServers,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
 import { deterministicallyRegenerateObjectId } from '@kbn/core-saved-objects-migration-server-internal';
@@ -62,7 +58,7 @@ async function fetchDocs(esClient: ElasticsearchClient, index: string) {
 }
 
 function createRoot() {
-  return createRootWithCorePlugins(
+  return kbnTestServer.createRootWithCorePlugins(
     {
       migrations: {
         skip: false,
@@ -94,7 +90,7 @@ function createRoot() {
 
 // FAILING: https://github.com/elastic/kibana/issues/98351
 describe('migration v2', () => {
-  let esServer: TestElasticsearchUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
   beforeAll(async () => {
@@ -114,7 +110,7 @@ describe('migration v2', () => {
 
   it('rewrites id deterministically for SO with namespaceType: "multiple" and "multiple-isolated"', async () => {
     const migratedIndex = `.kibana_${pkg.version}_001`;
-    const { startES } = createTestServers({
+    const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {

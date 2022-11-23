@@ -10,11 +10,7 @@ import Path from 'path';
 import del from 'del';
 import { kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
-import {
-  createTestServers,
-  createRoot as createkbnTestServerRoot,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
 
@@ -63,7 +59,7 @@ interface RootConfig {
 }
 
 function createRoot({ logFileName, hosts }: RootConfig) {
-  return createkbnTestServerRoot({
+  return kbnTestServer.createRoot({
     elasticsearch: {
       hosts,
       username: kibanaServerTestUser.username,
@@ -95,7 +91,7 @@ function createRoot({ logFileName, hosts }: RootConfig) {
 }
 
 describe('migration v2', () => {
-  let esServer: TestElasticsearchUtils;
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   const migratedIndex = `.kibana_${pkg.version}_001`;
 
@@ -118,7 +114,7 @@ describe('migration v2', () => {
   });
 
   it('migrates saved objects normally with multiple ES nodes', async () => {
-    const { startES } = createTestServers({
+    const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {

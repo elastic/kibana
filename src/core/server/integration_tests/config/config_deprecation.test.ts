@@ -8,10 +8,10 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockLoggingSystem } from './config_deprecation.test.mocks';
-import { createRoot } from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('configuration deprecations', () => {
-  let root: ReturnType<typeof createRoot>;
+  let root: ReturnType<typeof kbnTestServer.createRoot>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -24,7 +24,7 @@ describe('configuration deprecations', () => {
   });
 
   it('should not log deprecation warnings for default configuration', async () => {
-    root = createRoot();
+    root = kbnTestServer.createRoot();
 
     await root.preboot();
     await root.setup();

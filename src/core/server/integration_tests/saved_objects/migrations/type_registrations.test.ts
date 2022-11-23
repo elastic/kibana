@@ -7,7 +7,7 @@
  */
 
 import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
-import { createRoot } from '@kbn/core-test-helpers-kbn-server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
@@ -128,7 +128,7 @@ const previouslyRegisteredTypes = [
 
 describe('SO type registrations', () => {
   it('does not remove types from registrations without updating excludeOnUpgradeQuery', async () => {
-    const root = createRoot({}, { oss: false });
+    const root = kbnTestServer.createRoot({}, { oss: false });
     await root.preboot();
     const setup = await root.setup();
     const currentlyRegisteredTypes = setup.savedObjects

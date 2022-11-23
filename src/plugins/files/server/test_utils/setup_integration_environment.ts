@@ -11,7 +11,7 @@ import {
   createRootWithCorePlugins,
   createTestServers,
   request,
-} from '@kbn/core-test-helpers-kbn-server';
+} from '@kbn/core/test_helpers/kbn_server';
 import pRetry from 'p-retry';
 import { FileJSON } from '../../common';
 import { getFileKindsRegistry } from '../../common/file_kinds_registry';
