@@ -60,7 +60,7 @@ export function DeleteConfirmationModal({
   return (
     <EuiConfirmModal
       buttonColor="danger"
-      data-test-subj="delete-confirmation-modal"
+      data-test-subj="deleteIdsConfirmation"
       title={confirmDeleteModalText(title)}
       cancelButtonText={cancelButtonText}
       confirmButtonText={confirmDeleteButtonText(title)}

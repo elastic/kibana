@@ -52,7 +52,7 @@ export function HeaderActions({ loading, ruleId, onDeleteRule, onEditRule }: Hea
           button={
             <EuiButton
               fill
-              data-test-subj="header-actions-button"
+              data-test-subj="actions"
               iconSide="right"
               iconType="arrowDown"
               isLoading={loading}
@@ -68,7 +68,7 @@ export function HeaderActions({ loading, ruleId, onDeleteRule, onEditRule }: Hea
         >
           <EuiFlexGroup direction="column" alignItems="flexStart">
             <EuiButtonEmpty
-              data-test-subj="edit-rule-button"
+              data-test-subj="editRuleButton"
               size="s"
               iconType="pencil"
               onClick={handleEditRule}
@@ -87,7 +87,7 @@ export function HeaderActions({ loading, ruleId, onDeleteRule, onEditRule }: Hea
               iconType="trash"
               color="danger"
               onClick={handleRemoveRule}
-              data-test-subj="delete-rule-button"
+              data-test-subj="deleteRuleButton"
             >
               <EuiText size="s">
                 {i18n.translate('xpack.observability.ruleDetails.deleteRule', {
