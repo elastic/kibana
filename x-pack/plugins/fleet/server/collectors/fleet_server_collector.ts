@@ -94,13 +94,35 @@ export const getFleetServerConfig = async (soClient: SavedObjectsClient): Promis
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:fleet_server`,
   });
   const getInputConfig = (item: any) => {
-    let config = (item.inputs[0] ?? {}).compiled_input;
-    if (config.server) {
-      config = { ...config, server: { ...config.server } };
-      delete config.server.host;
-      delete config.server.port;
+    const config = (item.inputs[0] ?? {}).compiled_input;
+    if (config?.server) {
+      // whitelist only server limits, timeouts and runtime, sometimes fields are coming in "server.limits" format instead of nested object
+      const newConfig = Object.keys(config)
+        .filter((key) => key.startsWith('server'))
+        .reduce((acc: any, curr: string) => {
+          if (curr === 'server') {
+            acc.server = {};
+            Object.keys(config.server)
+              .filter(
+                (key) =>
+                  key.startsWith('limits') ||
+                  key.startsWith('timeouts') ||
+                  key.startsWith('runtime')
+              )
+              .forEach((serverKey: string) => {
+                acc.server[serverKey] = config.server[serverKey];
+                return acc;
+              });
+          } else {
+            acc[curr] = config[curr];
+          }
+          return acc;
+        }, {});
+
+      return newConfig;
+    } else {
+      return {};
     }
-    return config;
   };
   const policies = res.items.map((item) => ({
     input_config: getInputConfig(item),
