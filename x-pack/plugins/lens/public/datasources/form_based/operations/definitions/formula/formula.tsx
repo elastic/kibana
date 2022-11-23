@@ -115,8 +115,13 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
           col.operationType !== 'formula'
         );
       });
+      // What happens when it transition from an error state to a new valid state?
+      // the "hasOtherMetrics" might be false as the formula hasn't had time to
+      // populate all the referenced columns yet. So check if there are managedColumns
+      // (if no error is present, there's at least one other math column present)
+      const hasBeenEvaluated = !errors.length && managedColumns.length;
 
-      if (hasBuckets && !hasOtherMetrics) {
+      if (hasBuckets && !hasOtherMetrics && hasBeenEvaluated) {
         innerErrors.push({
           message: i18n.translate('xpack.lens.indexPattern.noRealMetricError', {
             defaultMessage:
