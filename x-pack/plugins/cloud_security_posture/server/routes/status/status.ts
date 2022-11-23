@@ -74,6 +74,7 @@ const getCspStatus = async ({
   packagePolicyService,
   agentPolicyService,
   agentService,
+  isPluginInitialized,
 }: CspApiRequestHandlerContext): Promise<CspSetupStatus> => {
   const [hasFindings, installation, latestCspPackage, installedPackagePolicies] = await Promise.all(
     [
@@ -110,6 +111,7 @@ const getCspStatus = async ({
       latestPackageVersion: latestCspPackageVersion,
       healthyAgents,
       installedPackagePolicies: installedPackagePoliciesTotal,
+      isPluginInitialized: isPluginInitialized(),
     };
 
   return {
@@ -118,6 +120,7 @@ const getCspStatus = async ({
     healthyAgents,
     installedPackagePolicies: installedPackagePoliciesTotal,
     installedPackageVersion: installation?.install_version,
+    isPluginInitialized: isPluginInitialized(),
   };
 };
 
@@ -144,7 +147,7 @@ export const defineGetCspStatusRoute = (router: CspRouter): void =>
         if (request.query.check === 'init') {
           return response.ok({
             body: {
-              initialized: cspContext.isPluginInitialized(),
+              isPluginInitialized: cspContext.isPluginInitialized(),
             },
           });
         }

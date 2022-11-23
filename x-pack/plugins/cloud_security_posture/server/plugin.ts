@@ -174,6 +174,7 @@ export class CspPlugin
    * Initialization is idempotent and required for (re)creating indices and transforms.
    */
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
+    this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
     await initializeCspIndices(esClient, this.logger);
     await initializeCspTransforms(esClient, this.logger);

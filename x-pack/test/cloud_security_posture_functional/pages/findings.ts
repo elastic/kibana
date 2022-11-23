@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         .get('/internal/cloud_security_posture/status?check=init')
         .expect(200);
 
-      expect(response.body).to.eql({ initialized: true });
+      expect(response.body).to.eql({ isPluginInitialized: true });
 
       log.debug('CSP plugin is initialized');
     });

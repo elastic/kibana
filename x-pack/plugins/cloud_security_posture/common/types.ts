@@ -62,6 +62,7 @@ interface BaseCspSetupStatus {
   latestPackageVersion: string;
   installedPackagePolicies: number;
   healthyAgents: number;
+  isPluginInitialized: boolean;
 }
 
 interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {
