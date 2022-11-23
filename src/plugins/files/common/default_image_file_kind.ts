@@ -22,7 +22,7 @@ export const defaultImageFileKind: FileKind = {
   maxSizeBytes: tenMebiBytes,
   blobStoreSettings: {},
   // tried using "image/*" but it did not work with the HTTP endpoint (got 415 Unsupported Media Type)
-  allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/avif'],
+  allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'],
   http: {
     create: { tags },
     delete: { tags },
