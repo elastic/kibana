@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { parse } from '../../../../grammar/built_grammar.js';
+export { parse } from './grammar.peggy';
