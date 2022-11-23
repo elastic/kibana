@@ -22,11 +22,3 @@ if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
   buildkite-agent artifact upload "**/*fullscreen*.png"
   cd "$KIBANA_DIR"
 fi
-
-# echo "--- report/record failed journeys"
-# if [ "${failedJourneys[*]}" != "" ]; then
-#   buildkite-agent meta-data set "failed-journeys" "$(printf "%s\n" "${failedJourneys[@]}")"
-
-#   echo "failed journeys: ${failedJourneys[*]}"
-#   exit 1
-# fi
