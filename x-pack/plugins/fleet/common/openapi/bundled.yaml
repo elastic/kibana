@@ -749,6 +749,8 @@ paths:
                     type: integer
                   inactive:
                     type: integer
+                  unenrolled:
+                    type: integer
                   offline:
                     type: integer
                   online:
