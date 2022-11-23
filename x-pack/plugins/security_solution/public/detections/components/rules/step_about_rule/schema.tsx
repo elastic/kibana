@@ -28,7 +28,8 @@ export const schema: FormSchema<AboutStepRule> = {
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAuthorHelpText',
       {
-        defaultMessage: 'Separate tags with a line break.',
+        defaultMessage:
+          'Type one or more authors for this rule. Press enter after each author to add a new one.',
       }
     ),
     labelAppend: OptionalFieldLabel,
@@ -257,7 +258,8 @@ export const schema: FormSchema<AboutStepRule> = {
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTagsHelpText',
       {
-        defaultMessage: 'Separate tags with a line break.',
+        defaultMessage:
+          'Type one or more custom identifying tags for this rule. Press enter after each tag to begin a new one.',
       }
     ),
     labelAppend: OptionalFieldLabel,
