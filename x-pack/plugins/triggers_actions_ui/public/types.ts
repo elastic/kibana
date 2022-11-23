@@ -86,8 +86,9 @@ type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   actions: RuleAction[];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
-type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
+type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId' | 'actions'> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
+  actions: RuleAction[];
 };
 type RuleAggregations = Omit<AlertingRuleAggregations, 'alertExecutionStatus'> & {
   ruleExecutionStatus: AlertingRuleAggregations['alertExecutionStatus'];
