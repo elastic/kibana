@@ -346,7 +346,7 @@ exports.Cluster = class Cluster {
       ['ingest.geoip.downloader.enabled', 'false'],
       ['search.check_ccs_compatibility', 'true'],
       // Simulate the interval batching
-      ['indices.write_ack_delay_interval', '5s'],
+      ['indices.write_ack_delay_interval', '1s'],
       // Simulate the S3 call:
       // using 200ms because that's the upper limit according to https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html
       ['indices.write_ack_delay_randomness_bound', '200ms'],
