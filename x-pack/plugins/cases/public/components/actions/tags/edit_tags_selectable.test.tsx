@@ -104,8 +104,8 @@ describe('EditTagsSelectable', () => {
 
     expect(props.onChangeTags).toBeCalledTimes(props.tags.length);
     expect(props.onChangeTags).nthCalledWith(props.tags.length, {
-      selectedTags: ['one', 'two'],
-      unSelectedTags: ['coke', 'pepsi'],
+      selectedItems: ['one', 'two'],
+      unSelectedItems: ['coke', 'pepsi'],
     });
 
     await waitForComponentToUpdate();
@@ -120,8 +120,8 @@ describe('EditTagsSelectable', () => {
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(propsMultipleCases.tags.length);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(propsMultipleCases.tags.length, {
-      selectedTags: ['two', 'three', 'coke', 'pepsi'],
-      unSelectedTags: ['one'],
+      selectedItems: ['two', 'three', 'coke', 'pepsi'],
+      unSelectedItems: ['one'],
     });
 
     await waitForComponentToUpdate();
@@ -147,8 +147,8 @@ describe('EditTagsSelectable', () => {
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(propsMultipleCases.tags.length);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(propsMultipleCases.tags.length, {
-      selectedTags: ['two', 'three', 'coke', 'pepsi'],
-      unSelectedTags: ['one'],
+      selectedItems: ['two', 'three', 'coke', 'pepsi'],
+      unSelectedItems: ['one'],
     });
 
     await waitForComponentToUpdate();
@@ -173,8 +173,8 @@ describe('EditTagsSelectable', () => {
 
     expect(props.onChangeTags).toBeCalledTimes(1);
     expect(props.onChangeTags).nthCalledWith(1, {
-      selectedTags: ['not-exist', 'coke', 'pepsi'],
-      unSelectedTags: [],
+      selectedItems: ['not-exist', 'coke', 'pepsi'],
+      unSelectedItems: [],
     });
   });
 
@@ -186,8 +186,8 @@ describe('EditTagsSelectable', () => {
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
-      selectedTags: propsMultipleCases.tags,
-      unSelectedTags: [],
+      selectedItems: propsMultipleCases.tags,
+      unSelectedItems: [],
     });
 
     await waitForComponentToUpdate();
@@ -201,8 +201,8 @@ describe('EditTagsSelectable', () => {
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
-      selectedTags: [],
-      unSelectedTags: ['one', 'three', 'coke', 'pepsi'],
+      selectedItems: [],
+      unSelectedItems: ['one', 'three', 'coke', 'pepsi'],
     });
 
     await waitForComponentToUpdate();
@@ -232,8 +232,8 @@ describe('EditTagsSelectable', () => {
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
-      selectedTags: [],
-      unSelectedTags: ['one'],
+      selectedItems: [],
+      unSelectedItems: ['one'],
     });
   });
 
@@ -264,8 +264,8 @@ describe('EditTagsSelectable', () => {
 
     expect(props.onChangeTags).toBeCalledTimes(1);
     expect(props.onChangeTags).nthCalledWith(1, {
-      selectedTags: ['on', 'coke', 'pepsi'],
-      unSelectedTags: [],
+      selectedItems: ['on', 'coke', 'pepsi'],
+      unSelectedItems: [],
     });
   });
 
