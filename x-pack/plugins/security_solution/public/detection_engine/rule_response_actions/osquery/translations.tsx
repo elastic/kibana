@@ -25,25 +25,3 @@ export const NOT_AVAILABLE = i18n.translate('xpack.securitySolution.osquery.acti
   defaultMessage:
     'The Osquery Manager integration is not added to the agent policy. To run queries on the host, add the Osquery Manager integration to the agent policy in Fleet.',
 });
-
-export const REQUIRED_ECS_MAPPING = i18n.translate(
-  'xpack.securitySolution.osquery.action.requiredEcsMapping',
-  {
-    defaultMessage: 'ECS mapping is required.',
-  }
-);
-
-export const DEFAULT_CUSTOM_FORM_ERROR = i18n.translate(
-  'xpack.securitySolution.osquery.action.customFormError',
-  {
-    defaultMessage: 'Something is wrong with the form.',
-  }
-);
-
-export const PARAMS_INTEGRATION_NOT_AVAILABLE = i18n.translate(
-  'xpack.securitySolution.osquery.action.paramsUnavailable',
-  {
-    defaultMessage: '**{type}:** Osquery Response Action is not available.',
-    values: { type: 'ResponseActions' },
-  }
-);

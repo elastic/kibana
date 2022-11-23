@@ -31,13 +31,15 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
 `;
 
 export interface LiveQueryQueryFieldProps {
-  disabled?: boolean;
+  queryType: string;
   handleSubmitForm?: () => void;
+  disabled?: boolean;
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   disabled,
   handleSubmitForm,
+  queryType,
 }) => {
   const { watch, resetField } = useFormContext();
   const [advancedContentState, setAdvancedContentState] =
@@ -55,7 +57,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyQueryError', {
           defaultMessage: 'Query is a required field',
         }),
-        value: isEmpty(query),
+        value: queryType !== 'pack',
       },
       maxLength: {
         message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {

@@ -312,7 +312,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           ) : (
             <>
               <EuiFlexItem>
-                <LiveQueryQueryField handleSubmitForm={handleSubmit(onSubmit)} />
+                <LiveQueryQueryField
+                  queryType={queryType}
+                  handleSubmitForm={handleSubmit(onSubmit)}
+                />
               </EuiFlexItem>
               {submitButtonContent}
               <EuiFlexItem>{resultsStepContent}</EuiFlexItem>

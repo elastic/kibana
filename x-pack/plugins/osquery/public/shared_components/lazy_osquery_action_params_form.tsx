@@ -21,12 +21,12 @@ const OsqueryResponseActionParamsForm = lazy(() => import('./osquery_response_ac
 export const getLazyOsqueryResponseActionTypeForm =
   // eslint-disable-next-line react/display-name
   () => (props: LazyOsqueryActionParamsFormProps) => {
-    const { item, formRef } = props;
+    const { item, nextIndices, defaultParams, formRef } = props;
 
     return (
       <Suspense fallback={null}>
         <QueryClientProvider client={queryClient}>
-          <OsqueryResponseActionParamsForm item={item} ref={formRef} />
+          <OsqueryResponseActionParamsForm item={item} defaultParams={defaultParams} nextIndices={nextIndices} ref={formRef} />
         </QueryClientProvider>
       </Suspense>
     );

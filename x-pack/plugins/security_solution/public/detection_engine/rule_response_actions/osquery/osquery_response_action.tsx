@@ -6,19 +6,14 @@
  */
 
 import { isEmpty, map } from 'lodash';
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import type { ArrayItem, ValidationFunc } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  NOT_AVAILABLE,
-  PARAMS_INTEGRATION_NOT_AVAILABLE,
-  PERMISSION_DENIED,
-  SHORT_EMPTY_TITLE,
-} from './translations';
-import { UseField } from '../../../shared_imports';
+import { NOT_AVAILABLE, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
+import { useBehaviorSubject, UseField } from '../../../shared_imports';
 
 interface ResponseActionValidatorRef {
   validation: Record<string, unknown>;
@@ -28,20 +23,40 @@ interface OsqueryResponseActionProps {
   item: ArrayItem;
 }
 
-const emptyParamsValidator = (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
-  const [{ path }] = args;
-
-  return {
-    code: 'ERR_FIELD_MISSING',
-    path,
-    message: PARAMS_INTEGRATION_NOT_AVAILABLE,
-  };
-};
-
 const GhostFormField = () => <></>;
 
-export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionProps) => {
+const ResponseActionFormField = (props) => {
+  const { setErrors, clearErrors } = props.field;
   const formRef = useRef<ResponseActionValidatorRef>(null);
+  const { osquery, application } = useKibana().services;
+  const [indices$, nextIndices] = useBehaviorSubject(null);
+
+  const OsqueryForm = useMemo(
+    () => osquery?.OsqueryResponseActionTypeForm,
+    [osquery?.OsqueryResponseActionTypeForm]
+  );
+
+
+  useEffect(() => {
+    indices$.subscribe({
+      next(data) {
+        if (isEmpty(data)) {
+          clearErrors();
+        } else {
+          setErrors(map(data, (value) => ({ message: value.message })));
+        }
+      },
+    });
+  }, [setErrors, clearErrors, indices$]);
+
+
+
+  return (
+    <OsqueryForm defaultParams={props.field.value} nextIndices={nextIndices} formRef={formRef} />
+  );
+};
+
+export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionProps) => {
   const { osquery, application } = useKibana().services;
   const OsqueryForm = useMemo(
     () => osquery?.OsqueryResponseActionTypeForm,
@@ -61,17 +76,7 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
     if (permissionDenied || disabledOsqueryPermission) {
       return (
         <>
-          <UseField
-            path={`${props.item.path}.params`}
-            component={GhostFormField}
-            config={{
-              validations: [
-                {
-                  validator: emptyParamsValidator,
-                },
-              ],
-            }}
-          />
+          <UseField path={`${props.item.path}.params`} component={GhostFormField} />
           <EuiEmptyPrompt
             title={<h2>{PERMISSION_DENIED}</h2>}
             titleSize="xs"
@@ -95,17 +100,7 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
     if (disabled) {
       return (
         <>
-          <UseField
-            path={`${props.item.path}.params`}
-            component={GhostFormField}
-            config={{
-              validations: [
-                {
-                  validator: emptyParamsValidator,
-                },
-              ],
-            }}
-          />
+          <UseField path={`${props.item.path}.params`} component={GhostFormField} />
           <EuiEmptyPrompt
             iconType="logoOsquery"
             title={<h2>{SHORT_EMPTY_TITLE}</h2>}
@@ -115,30 +110,12 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
         </>
       );
     }
+
     if (isMounted() && OsqueryForm) {
       return (
         <UseField
           path={`${props.item.path}.params`}
-          component={() => <OsqueryForm {...props} formRef={formRef} />}
-          validationDataProvider={() => formRef.current}
-          config={{
-            validations: [
-              {
-                validator: (payload) => {
-                  const errors = payload.customData.provider().validation;
-
-                  if (!isEmpty(errors)) {
-                    return {
-                      message: map(
-                        errors,
-                        (value) => value.message
-                      ).join('/n'),
-                    };
-                  }
-                },
-              },
-            ],
-          }}
+          component={ResponseActionFormField}
           readDefaultValueOnForm={!props.item.isNew}
         />
       );

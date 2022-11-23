@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useImperativeHandle,
-} from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 import type { UseFormReturn } from 'react-hook-form';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
-import { get, map, omit } from 'lodash';
+import { omit } from 'lodash';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
-import { useFormContext, useFormData } from '../../shared_imports';
-import type { ArrayItem } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
 import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
 import { PackFieldWrapper } from './pack_field_wrapper';
@@ -30,9 +21,7 @@ import { usePack } from '../../packs/use_pack';
 
 const OSQUERY_TYPE = '.osquery';
 
-interface OsqueryResponseActionsParamsFormProps {
-  item: ArrayItem;
-}
+// interface OsqueryResponseActionsParamsFormProps {}
 
 export interface ResponseActionValidatorRef {
   validation: UseFormReturn<OsqueryResponseActionsParamsFormFields>['formState']['errors'];
@@ -51,13 +40,11 @@ interface OsqueryResponseActionsParamsFormFields {
   }>;
 }
 
-const OsqueryResponseActionParamsFormComponent = forwardRef<
-  ResponseActionValidatorRef,
-  OsqueryResponseActionsParamsFormProps
->(({ item }, ref) => {
-  const { updateFieldValues } = useFormContext();
-  const [data] = useFormData({ watch: [item.path] });
-  const { params: defaultParams } = get(data, item.path);
+const OsqueryResponseActionParamsFormComponent = ({
+  defaultParams,
+  nextIndices,
+}) => {
+  const lastErrors = useRef(null);
   const uniqueId = useMemo(() => uuid.v4(), []);
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
     defaultValues: defaultParams
@@ -72,7 +59,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
         },
   });
 
-  const { watch, register, formState, handleSubmit, reset } = hooksForm;
+  const { watch, register, formState, handleSubmit, trigger, reset } = hooksForm;
   const { errors } = formState;
 
   const watchedValues = watch();
@@ -82,56 +69,47 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
   });
   const [queryType, setQueryType] = useState<string>(defaultParams?.packId ? 'pack' : 'query');
 
-  const onSubmit = useCallback(
-    async (formData) => {
-      updateFieldValues({
-        [item.path]:
-          queryType === 'pack'
-            ? {
-                actionTypeId: OSQUERY_TYPE,
-                params: {
-                  id: formData.id,
-                  packId: formData?.packId?.length ? formData?.packId[0] : undefined,
-                  queries: packData
-                    ? map(packData.queries, (query, queryId: string) => ({
-                        ...query,
-                        id: queryId,
-                      }))
-                    : formData.queries,
-                },
-              }
-            : {
-                actionTypeId: OSQUERY_TYPE,
-                params: {
-                  id: formData.id,
-                  savedQueryId: formData.savedQueryId,
-                  query: formData.query,
-                  ecsMapping: formData.ecs_mapping,
-                },
-              },
-      });
-    },
-    [updateFieldValues, item.path, packData, queryType]
-  );
+  // const onSubmit = useCallback(
+  //   async (formData) => {
+  //     updateFieldValues({
+  //       [item.path]:
+  //         queryType === 'pack'
+  //           ? {
+  //               actionTypeId: OSQUERY_TYPE,
+  //               params: {
+  //                 id: formData.id,
+  //                 packId: formData?.packId?.length ? formData?.packId[0] : undefined,
+  //                 queries: packData
+  //                   ? map(packData.queries, (query, queryId: string) => ({
+  //                       ...query,
+  //                       id: queryId,
+  //                     }))
+  //                   : formData.queries,
+  //               },
+  //             }
+  //           : {
+  //               actionTypeId: OSQUERY_TYPE,
+  //               params: {
+  //                 id: formData.id,
+  //                 savedQueryId: formData.savedQueryId,
+  //                 query: formData.query,
+  //                 ecsMapping: formData.ecs_mapping,
+  //               },
+  //             },
+  //     });
+  //   },
+  //   [updateFieldValues, item.path, packData, queryType]
+  // );
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      validation: errors,
-    }),
-    [errors]
-  );
+  useEffect(() => {
+    lastErrors.current = formState.errors;
+    nextIndices(formState.errors);
+  }, [nextIndices, formState]);
 
   useEffect(() => {
     register('savedQueryId');
     register('id');
   }, [register]);
-
-  useEffect(() => {
-    const subscription = watch(() => handleSubmit(onSubmit)());
-
-    return () => subscription.unsubscribe();
-  }, [handleSubmit, onSubmit, watch]);
 
   const permissions = useKibana().services.application.capabilities.osquery;
 
@@ -170,7 +148,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
           resetFormFields={reset}
         />
         <EuiSpacer size="m" />
-        {queryType === 'query' && <LiveQueryQueryField />}
+        {queryType === 'query' && <LiveQueryQueryField queryType={queryType} />}
         {queryType === 'pack' && (
           <PackFieldWrapper
             liveQueryDetails={watchedValues.queries && !packData ? queryDetails : undefined}
@@ -179,7 +157,7 @@ const OsqueryResponseActionParamsFormComponent = forwardRef<
       </FormProvider>
     </>
   );
-});
+};
 
 const OsqueryResponseActionParamsForm = React.memo(OsqueryResponseActionParamsFormComponent);
 

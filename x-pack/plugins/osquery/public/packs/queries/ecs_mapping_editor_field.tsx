@@ -40,7 +40,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import type { InternalFieldErrors, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
+import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 import { useForm, useController, useFieldArray, useFormContext } from 'react-hook-form';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
@@ -729,11 +729,13 @@ interface OsqueryColumn {
 
 export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEditorFieldProps) => {
   const {
+    setError,
+    clearErrors,
     watch: watchRoot,
     register: registerRoot,
     setValue: setValueRoot,
-    formState: { errors: errorsRoot },
   } = useFormContext<{ query: string; ecs_mapping: ECSMapping }>();
+  const latestErrors = useRef(null);
 
   const [query, ecsMapping] = watchRoot(['query', 'ecs_mapping']);
   const { control, trigger, watch, formState, resetField, getFieldState } = useForm<{
@@ -757,14 +759,19 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
   const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
 
   useEffect(() => {
-    registerRoot('ecs_mapping', {
-      validate: () => {
-        const nonEmptyErrors = reject(ecsMappingArrayState.error, isEmpty) as InternalFieldErrors[];
+    registerRoot('ecs_mapping');
+  }, [registerRoot]);
 
-        return !nonEmptyErrors.length;
-      },
-    });
-  }, [ecsMappingArrayState.error, errorsRoot, registerRoot]);
+  useEffect(() => {
+    if (!deepEqual(latestErrors.current, formState.errors.ecsMappingArray)) {
+      latestErrors.current = formState.errors.ecsMappingArray;
+      if (formState.errors.ecsMappingArray?.length) {
+        setError('ecs_mapping', formState.errors.ecsMappingArray[0].key);
+      } else {
+        clearErrors('ecs_mapping');
+      }
+    }
+  }, [formState, setError, clearErrors]);
 
   useEffect(() => {
     const subscription = watchRoot((data, payload) => {
@@ -941,8 +948,8 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
               }
 
               /*
-                  select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
-                */
+                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+              */
 
               const [table, column] = selectItem.name.includes('.')
                 ? selectItem.name?.split('.')
@@ -986,18 +993,18 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
             }
 
             /*
-                SELECT pid, uid, name, ROUND((
-                  (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
-                ) * 100, 2) AS percentage
-                FROM processes, (
-                SELECT (
-                  SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
-                  SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
-                  FROM cpu_time
-                ) AS cpu_time
-                ORDER BY user_time+system_time DESC
-                LIMIT 5;
-              */
+              SELECT pid, uid, name, ROUND((
+                (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
+              ) * 100, 2) AS percentage
+              FROM processes, (
+              SELECT (
+                SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
+                SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
+                FROM cpu_time
+              ) AS cpu_time
+              ORDER BY user_time+system_time DESC
+              LIMIT 5;
+            */
 
             if (selectItem.type === 'function' && selectItem.alias) {
               return [

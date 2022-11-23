@@ -15,7 +15,7 @@ import { ResponseActionsHeader } from './response_actions_header';
 import { ResponseActionsList } from './response_actions_list';
 
 import type { ArrayItem } from '../../shared_imports';
-import { useFormContext, useFormData } from '../../shared_imports';
+import { useFormContext } from '../../shared_imports';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
 
 const FieldErrorsContainer = styled.div`
@@ -33,7 +33,6 @@ interface ResponseActionsFormProps {
 export const ResponseActionsForm = ({ items, addItem, removeItem }: ResponseActionsFormProps) => {
   const supportedResponseActionTypes = useSupportedResponseActionTypes();
   const [uiFieldErrors, setUIFieldErrors] = useState<string | null>(null);
-  const [formData] = useFormData();
   const { getFields, getErrors } = useFormContext();
   const fields = getFields();
   const errors = getErrors();
