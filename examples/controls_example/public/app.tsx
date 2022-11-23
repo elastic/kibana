@@ -9,7 +9,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -25,10 +24,6 @@ const ControlsExamples = ({ dataView }: Props) => {
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
       <KibanaPageTemplate.Section>
-        <EuiText>
-          <p>The following examples showcase how to use the control group as a building block.</p>
-        </EuiText>
-        <EuiSpacer size="m" />
         <ControlGroupExample dataView={dataView} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

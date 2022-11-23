@@ -15,25 +15,15 @@ import {
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-
-import img from './pikachu.jpeg';
-
-// import { ControlsPluginStart } from '@kbn/controls-plugin/public';
+import img from './control_group_image.png';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
-  embeddable: EmbeddableSetup;
 }
 
 export interface ControlsExampleStartDeps {
   data: DataPublicPluginStart;
-  embeddable: EmbeddableStart;
 }
-
-// interface StartDeps {
-//   controls: ControlsPluginStart;
-// }
 
 export class ControlsExamplePlugin
   implements Plugin<void, void, SetupDeps, ControlsExampleStartDeps>
@@ -44,7 +34,7 @@ export class ControlsExamplePlugin
       title: 'Controls examples',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const [coreStart, depsStart] = await core.getStartServices();
+        const [, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
         return renderApp(depsStart, params);
       },
@@ -52,8 +42,8 @@ export class ControlsExamplePlugin
 
     developerExamples.register({
       appId: 'controlsExamples',
-      title: 'Controls Building Block',
-      description: `Showcase different ways how to embed dashboard container into your app`,
+      title: 'Controls as a Building Block',
+      description: `Showcases different ways to embed a control group into your app`,
       image: img,
     });
   }

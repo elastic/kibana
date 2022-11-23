@@ -24,6 +24,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 
@@ -85,36 +86,48 @@ export const ControlGroupExample = ({ dataView }: Props) => {
   };
 
   return (
-    <EuiPanel hasBorder={true}>
-      {ControlGroupReduxWrapper && (
-        <ControlGroupReduxWrapper>
-          <ButtonControls />
-        </ControlGroupReduxWrapper>
-      )}
+    <>
+      <EuiTitle>
+        <h2>Basic Redux Example</h2>
+      </EuiTitle>
+      <EuiText>
+        <p>
+          This example uses the redux context from the control group container in order to
+          dynamically change the style of the control group.
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiPanel hasBorder={true}>
+        {ControlGroupReduxWrapper && (
+          <ControlGroupReduxWrapper>
+            <ButtonControls />
+          </ControlGroupReduxWrapper>
+        )}
 
-      <ControlGroupRenderer
-        onEmbeddableLoad={async (controlGroup) => {
-          setControlGroup(controlGroup);
-        }}
-        getCreationOptions={async (controlGroupInputBuilder) => {
-          const initialInput: Partial<ControlGroupInput> = {
-            ...getDefaultControlGroupInput(),
-            defaultControlWidth: 'small',
-          };
-          await controlGroupInputBuilder.addDataControlFromField(initialInput, {
-            dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
-            fieldName: 'customer_first_name.keyword',
-          });
-          await controlGroupInputBuilder.addDataControlFromField(initialInput, {
-            dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
-            fieldName: 'customer_last_name.keyword',
-            width: 'medium',
-            grow: false,
-            title: 'Last Name',
-          });
-          return initialInput;
-        }}
-      />
-    </EuiPanel>
+        <ControlGroupRenderer
+          onEmbeddableLoad={async (controlGroup) => {
+            setControlGroup(controlGroup);
+          }}
+          getCreationOptions={async (controlGroupInputBuilder) => {
+            const initialInput: Partial<ControlGroupInput> = {
+              ...getDefaultControlGroupInput(),
+              defaultControlWidth: 'small',
+            };
+            await controlGroupInputBuilder.addDataControlFromField(initialInput, {
+              dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
+              fieldName: 'customer_first_name.keyword',
+            });
+            await controlGroupInputBuilder.addDataControlFromField(initialInput, {
+              dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
+              fieldName: 'customer_last_name.keyword',
+              width: 'medium',
+              grow: false,
+              title: 'Last Name',
+            });
+            return initialInput;
+          }}
+        />
+      </EuiPanel>
+    </>
   );
 };
