@@ -86,10 +86,6 @@ run(
     const journeyBasePath = 'x-pack/performance/journeys/';
     const kibanaInstallDir = flagsReader.requiredPath('kibana-install-dir');
     const journeys = await Fsp.readdir(journeyBasePath);
-    const warmupIndex = journeys.indexOf('warmup.ts');
-    // const warmupJourney = journeys[warmupIndex];
-    journeys.splice(warmupIndex, 1);
-
     log.info(`Found ${journeys.length} journeys to run`);
 
     setupEnv();
