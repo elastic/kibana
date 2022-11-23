@@ -43,7 +43,7 @@ export const createAnnotationActions = ({
             defaultMessage:
               'All the dimensions configured in this layer respect filters defined at kibana level.',
           }),
-      icon: !layer.ignoreGlobalFilters ? 'eyeClosed' : 'eye',
+      icon: !layer.ignoreGlobalFilters ? 'filterIgnore' : 'filter',
       isCompatible: true,
       'data-test-subj': !layer.ignoreGlobalFilters
         ? 'lnsXY_annotationLayer_ignoreFilters'
