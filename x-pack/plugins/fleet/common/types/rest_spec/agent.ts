@@ -186,6 +186,8 @@ export interface GetAgentStatusResponse {
     offline: number;
     other: number;
     updating: number;
+    inactive: number;
+    unenrolled: number;
   };
 }
 

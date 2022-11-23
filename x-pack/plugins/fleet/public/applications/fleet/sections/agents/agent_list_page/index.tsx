@@ -311,7 +311,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             unhealthy: agentsStatusResponse.data.results.error,
             offline: agentsStatusResponse.data.results.offline,
             updating: agentsStatusResponse.data.results.updating,
-            inactive: agentsResponse.data.totalInactive,
+            inactive: agentsStatusResponse.data.results.inactive,
+            unenrolled: agentsStatusResponse.data.results.unenrolled,
           });
 
           const newAllTags = agentTagsResponse.data.items;

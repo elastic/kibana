@@ -75,18 +75,19 @@ export async function getAgentStatusForAgentPolicy(
       throw error;
     }
   }
-  const [all, allActive, online, error, offline, updating] = await pMap(
+  const [all, allActive, online, error, offline, updating, unenrolled] = await pMap(
     [
-      undefined, // All agents, including inactive
-      undefined, // All active agents
-      AgentStatusKueryHelper.buildKueryForOnlineAgents(),
-      AgentStatusKueryHelper.buildKueryForErrorAgents(),
-      AgentStatusKueryHelper.buildKueryForOfflineAgents(),
-      AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
+      [undefined, true], // All agents, including inactive
+      [undefined], // All active agents
+      [AgentStatusKueryHelper.buildKueryForOnlineAgents()],
+      [AgentStatusKueryHelper.buildKueryForErrorAgents()],
+      [AgentStatusKueryHelper.buildKueryForOfflineAgents()],
+      [AgentStatusKueryHelper.buildKueryForUpdatingAgents()],
+      [AgentStatusKueryHelper.buildKueryForUnenrolledAgents(), true], // unenrolled agents are inactive
     ],
-    (kuery, index) =>
+    ([kuery, showInactive = false]: [kuery?: string, showInactive?: boolean], index) =>
       getAgentsByKuery(esClient, {
-        showInactive: index === 0,
+        showInactive,
         perPage: 0,
         page: 1,
         pitId,
@@ -106,14 +107,14 @@ export async function getAgentStatusForAgentPolicy(
   if (pitId) {
     await closePointInTime(esClient, pitId);
   }
-
   const result = {
     total: allActive.total,
-    inactive: all.total - allActive.total,
+    inactive: all.total - allActive.total - unenrolled.total,
     online: online.total,
     error: error.total,
     offline: offline.total,
     updating: updating.total,
+    unenrolled: unenrolled.total,
     other: all.total - online.total - error.total - offline.total,
     /* @deprecated Agent events do not exists anymore */
     events: 0,
