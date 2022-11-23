@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 interface SyntheticsRefreshContext {
   lastRefresh: number;
@@ -24,14 +24,21 @@ export const SyntheticsRefreshContext = createContext(defaultContext);
 export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
-  const refreshApp = () => {
+  const refreshApp = useCallback(() => {
     const refreshTime = Date.now();
     setLastRefresh(refreshTime);
-  };
+  }, [setLastRefresh]);
 
   const value = useMemo(() => {
     return { lastRefresh, refreshApp };
-  }, [lastRefresh]);
+  }, [lastRefresh, refreshApp]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshApp();
+    }, 1000 * 30);
+    return () => clearInterval(interval);
+  }, [refreshApp]);
 
   return <SyntheticsRefreshContext.Provider value={value} children={children} />;
 };
