@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const getI18nTexts = () => ({
@@ -24,12 +24,15 @@ export const InspectorFlyoutWarningsCallOut = ({
   const i18nTexts = useMemo(() => getI18nTexts(), []);
 
   return warningMessages?.length ? (
-    <EuiCallOut title={i18nTexts.title} color="warning">
-      <ul>
-        {warningMessages.map((message) => (
-          <li>{message}</li>
-        ))}
-      </ul>
-    </EuiCallOut>
+    <>
+      <EuiCallOut title={i18nTexts.title} color="warning">
+        <ul>
+          {warningMessages.map((message) => (
+            <li>{message}</li>
+          ))}
+        </ul>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
   ) : null;
 };

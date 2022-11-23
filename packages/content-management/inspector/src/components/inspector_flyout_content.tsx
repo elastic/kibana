@@ -75,7 +75,7 @@ export const InspectorFlyoutContent: FC<Props> = ({
   const form = useMetadataForm({ item, customValidators });
 
   const onClickSave = useCallback(async () => {
-    if (form.isValid && onSave) {
+    if (form.isValid && onSave && !form.getIsChangingValue()) {
       const id = item.id;
       const title = form.title.value;
 
@@ -155,7 +155,7 @@ export const InspectorFlyoutContent: FC<Props> = ({
                   onClick={onClickSave}
                   data-test-subj="saveButton"
                   fill
-                  disabled={(isSubmitted && !form.isValid) || form.getIsChangingValue()}
+                  disabled={isSubmitted && !form.isValid}
                   isLoading={isSubmitting}
                 >
                   {i18nTexts.saveButtonLabel}
