@@ -29,8 +29,8 @@ export const FilteringPanel: React.FC<FilteringPanelProps> = ({
   return (
     <>
       <FlyoutPanel
-        title={i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.filteringTitle', {
-          defaultMessage: 'Filtering',
+        title={i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.syncRulesTitle', {
+          defaultMessage: 'Sync rules',
         })}
       >
         <FilteringRulesTable filteringRules={filteringRules} showOrder={false} />
@@ -40,9 +40,9 @@ export const FilteringPanel: React.FC<FilteringPanelProps> = ({
           <EuiSpacer />
           <FlyoutPanel
             title={i18n.translate(
-              'xpack.enterpriseSearch.content.index.syncJobs.filteringAdvancedTitle',
+              'xpack.enterpriseSearch.content.index.syncJobs.syncRulesAdvancedTitle',
               {
-                defaultMessage: 'Advanced filtering rules',
+                defaultMessage: 'Advanced sync rules',
               }
             )}
           >

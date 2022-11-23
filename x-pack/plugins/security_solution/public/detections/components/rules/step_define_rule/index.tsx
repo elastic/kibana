@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiButtonGroup,
   EuiText,
@@ -502,7 +503,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const DataViewSelectorMemo = useMemo(() => {
-    return (
+    return kibanaDataViews == null || Object.keys(kibanaDataViews).length === 0 ? (
+      <EuiLoadingSpinner size="l" />
+    ) : (
       <UseField
         key="DataViewSelector"
         path="dataViewId"
