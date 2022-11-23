@@ -19,6 +19,7 @@ import type { PackageUsage } from './package_collectors';
 import { getFleetServerUsage, getFleetServerConfig } from './fleet_server_collector';
 import type { FleetServerUsage } from './fleet_server_collector';
 import { getAgentPoliciesUsage } from './agent_policies';
+import { getAgentLogsTopErrors } from './agent_logs';
 
 export interface Usage {
   agents_enabled: boolean;
@@ -44,6 +45,7 @@ export const fetchFleetUsage = async (
     ...(await getAgentData(esClient, abortController)),
     fleet_server_config: await getFleetServerConfig(soClient),
     agent_policies: await getAgentPoliciesUsage(esClient, abortController),
+    ...(await getAgentLogsTopErrors(esClient)),
   };
   return usage;
 };
