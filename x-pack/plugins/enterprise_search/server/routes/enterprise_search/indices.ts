@@ -40,6 +40,7 @@ import { createAndReferenceMlInferencePipeline } from '../../lib/indices/pipelin
 import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
+import { pauseInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/pause_inference_pipeline';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
@@ -418,6 +419,52 @@ export function registerIndexRoutes({
         },
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/pause',
+      validate: {
+        body: schema.object({
+          pause: schema.boolean(),
+          pipeline_name: schema.string(),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const pipelineName = decodeURIComponent(request.body.pipeline_name);
+      const { client } = (await context.core).elasticsearch;
+
+      try {
+        const pauseResult = await pauseInferencePipeline(
+          indexName,
+          pipelineName,
+          request.body.pause,
+          client.asCurrentUser
+        );
+
+        return response.ok({
+          body: pauseResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if pipeline doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
     })
   );
 

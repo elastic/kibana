@@ -65,6 +65,14 @@ export interface DeleteMlInferencePipelineResponse {
   updated?: string;
 }
 
+/**
+ * Response for pausing and unpausing sub-pipeline within @ml-inference pipeline.
+ * If sub-pipeline was updated successfully, 'paused' field contains its name.
+ */
+export interface PauseMlInferencePipelineResponse {
+  updated?: string;
+}
+
 export interface CreateMlInferencePipelineParameters {
   destination_field?: string;
   model_id: string;
