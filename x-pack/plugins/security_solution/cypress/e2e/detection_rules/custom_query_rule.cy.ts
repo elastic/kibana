@@ -76,7 +76,6 @@ import {
   editFirstRule,
   goToRuleDetails,
   selectNumberOfRules,
-  waitForRulesTableToBeRefreshed,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
@@ -263,7 +262,6 @@ describe('Custom query rules', () => {
             });
 
             deleteFirstRule();
-            waitForRulesTableToBeRefreshed();
 
             cy.get(RULES_TABLE)
               .find(RULES_ROW)
@@ -290,7 +288,6 @@ describe('Custom query rules', () => {
 
             selectNumberOfRules(numberOfRulesToBeDeleted);
             deleteSelectedRules();
-            waitForRulesTableToBeRefreshed();
 
             cy.get(RULES_TABLE)
               .find(RULES_ROW)
