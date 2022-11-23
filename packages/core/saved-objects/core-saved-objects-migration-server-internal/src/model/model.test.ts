@@ -44,6 +44,7 @@ import type {
   PostInitState,
   CheckVersionIndexReadyActions,
   UpdateTargetMappingsMeta,
+  CheckTargetMappingsState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -2046,10 +2047,32 @@ describe('migrations v2 model', () => {
 
       it('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> CHECK_TARGET_MAPPINGS if action succeeded', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT'> = Either.right({});
-        const newState = model(state, res) as UpdateTargetMappingsState;
+        const newState = model(state, res) as CheckTargetMappingsState;
         expect(newState.controlState).toBe('CHECK_TARGET_MAPPINGS');
         // @ts-expect-error pitId shouldn't leak outside
         expect(newState.pitId).toBe(undefined);
+      });
+    });
+
+    describe('CHECK_TARGET_MAPPINGS', () => {
+      const postInitState: CheckVersionIndexReadyActions = {
+        ...baseState,
+        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+      };
+
+      it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS if mappings do not match', () => {
+        const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: false });
+        const newState = model(postInitState, res) as UpdateTargetMappingsState;
+        expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS');
+      });
+
+      it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if mappings match', () => {
+        const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: true });
+        const newState = model(postInitState, res) as CheckVersionIndexReadyActions;
+        expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
       });
     });
 
@@ -2352,6 +2375,24 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
         expect(newState.retryCount).toEqual(2);
         expect(newState.retryDelay).toEqual(4000);
+      });
+    });
+
+    describe('UPDATE_TARGET_MAPPINGS_META', () => {
+      const updateTargetMappingsMetaState: UpdateTargetMappingsMeta = {
+        ...baseState,
+        controlState: 'UPDATE_TARGET_MAPPINGS_META',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+      };
+
+      test('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS if the mapping _meta information is successfully updated', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_META'> = Either.right(
+          'update_mappings_meta_succeeded'
+        );
+        const newState = model(updateTargetMappingsMetaState, res) as CheckVersionIndexReadyActions;
+        expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
       });
     });
 

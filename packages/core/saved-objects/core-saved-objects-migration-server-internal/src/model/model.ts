@@ -1035,7 +1035,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // The md5 of the mappings match, so there's no need to update target mappings
     return {
       ...stateP,
-      controlState: 'DONE',
+      controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
     };
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -1070,13 +1070,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_META') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return model(
-        {
-          ...stateP,
-          controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
-        },
-        resW
-      );
+      return {
+        ...stateP,
+        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
+      };
     } else {
       throwBadResponse(stateP, res as never);
     }
