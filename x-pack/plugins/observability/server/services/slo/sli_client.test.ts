@@ -30,6 +30,19 @@ const commonEsResponse = {
   },
 };
 
+const getMsearchResponse = (good: number = 90, total: number = 100) => ({
+  ...commonEsResponse,
+  responses: [
+    {
+      ...commonEsResponse,
+      aggregations: {
+        good: { value: good },
+        total: { value: total },
+      },
+    },
+  ],
+});
+
 describe('SLIClient', () => {
   let esClientMock: ElasticsearchClientMock;
 
@@ -60,18 +73,7 @@ describe('SLIClient', () => {
       describe('for a rolling time window SLO type', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({ time_window: sevenDaysRolling() });
-          esClientMock.msearch.mockResolvedValueOnce({
-            ...commonEsResponse,
-            responses: [
-              {
-                ...commonEsResponse,
-                aggregations: {
-                  good: { value: 90 },
-                  total: { value: 100 },
-                },
-              },
-            ],
-          });
+          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
           const sliClient = new DefaultSLIClient(esClientMock);
 
           const result = await sliClient.fetchCurrentSLIData([slo]);
@@ -114,18 +116,7 @@ describe('SLIClient', () => {
           const slo = createSLO({
             time_window: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
           });
-          esClientMock.msearch.mockResolvedValueOnce({
-            ...commonEsResponse,
-            responses: [
-              {
-                ...commonEsResponse,
-                aggregations: {
-                  good: { value: 90 },
-                  total: { value: 100 },
-                },
-              },
-            ],
-          });
+          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
           const sliClient = new DefaultSLIClient(esClientMock);
 
           const result = await sliClient.fetchCurrentSLIData([slo]);
@@ -202,19 +193,7 @@ describe('SLIClient', () => {
             },
             time_window: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
           });
-          esClientMock.msearch.mockResolvedValueOnce({
-            ...commonEsResponse,
-            responses: [
-              {
-                ...commonEsResponse,
-                aggregations: {
-                  slices: { buckets: [] },
-                  good: { value: 90 },
-                  total: { value: 100 },
-                },
-              },
-            ],
-          });
+          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
           const sliClient = new DefaultSLIClient(esClientMock);
 
           const result = await sliClient.fetchCurrentSLIData([slo]);
@@ -304,18 +283,7 @@ describe('SLIClient', () => {
             },
             time_window: sevenDaysRolling(),
           });
-          esClientMock.msearch.mockResolvedValueOnce({
-            ...commonEsResponse,
-            responses: [
-              {
-                ...commonEsResponse,
-                aggregations: {
-                  good: { value: 90 },
-                  total: { value: 100 },
-                },
-              },
-            ],
-          });
+          esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
           const sliClient = new DefaultSLIClient(esClientMock);
 
           const result = await sliClient.fetchCurrentSLIData([slo]);
