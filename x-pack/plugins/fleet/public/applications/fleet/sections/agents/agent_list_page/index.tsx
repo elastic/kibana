@@ -183,6 +183,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               return AgentStatusKueryHelper.buildKueryForUpdatingAgents();
             case 'inactive':
               return AgentStatusKueryHelper.buildKueryForInactiveAgents();
+            case 'unenrolled':
+              return AgentStatusKueryHelper.buildKueryForUnenrolledAgents();
           }
 
           return undefined;
@@ -201,7 +203,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [search, selectedAgentPolicies, selectedTags, selectedStatus]);
 
   const showInactive = useMemo(() => {
-    return selectedStatus.includes('inactive');
+    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
 
   const [agents, setAgents] = useState<Agent[]>([]);
