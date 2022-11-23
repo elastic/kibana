@@ -55,7 +55,6 @@ export interface EditConnectorProps {
 
 const MyFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => `
-    margin-top: ${theme.eui.euiSizeM};
     p {
       font-size: ${theme.eui.euiSizeM};
     }

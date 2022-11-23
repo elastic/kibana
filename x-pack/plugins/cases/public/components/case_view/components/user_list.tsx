@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
@@ -88,18 +89,21 @@ export const UserList: React.FC<UserListProps> = React.memo(
     }
 
     return (
-      <EuiText data-test-subj={dataTestSubj}>
-        <h4>{headline}</h4>
-        <EuiHorizontalRule margin="xs" />
-        {loading && (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiLoadingSpinner />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        {renderUsers(validUsers, handleSendEmail)}
-      </EuiText>
+      <EuiFlexItem grow={false}>
+        <EuiText data-test-subj={dataTestSubj}>
+          <h4>{headline}</h4>
+          <EuiHorizontalRule margin="xs" />
+          {loading && (
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiLoadingSpinner />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+          {renderUsers(validUsers, handleSendEmail)}
+        </EuiText>
+        <EuiSpacer size="m" />
+      </EuiFlexItem>
     );
   }
 );

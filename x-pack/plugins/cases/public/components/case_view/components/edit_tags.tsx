@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { isEqual } from 'lodash/fp';
@@ -47,7 +48,6 @@ export interface EditTagsProps {
 const MyFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`
     width: 100%;
-    margin-top: ${theme.eui.euiSizeM};
     p {
       font-size: ${theme.eui.euiSizeM};
     }
@@ -131,6 +131,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
         {!isEditTags && (
           <EuiFlexItem>
             <Tags tags={tags} color="hollow" />
+            <EuiSpacer size="m" />
           </EuiFlexItem>
         )}
         {isEditTags && (
@@ -173,7 +174,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
               </Form>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexGroup alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     color="success"
@@ -197,6 +198,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiSpacer size="m" />
             </EuiFlexItem>
           </ColumnFlexGroup>
         )}
