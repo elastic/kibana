@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiLink, EuiLoadingContent, EuiText } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -22,10 +27,6 @@ import { unit } from '../../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../../shared/item_badge';
 import { ServiceNodeMetricOverviewLink } from '../../../../../shared/links/apm/service_node_metric_overview_link';
-import {
-  ITableColumn,
-  ManagedTable,
-} from '../../../../../shared/managed_table';
 import { PopoverTooltip } from '../../../../../shared/popover_tooltip';
 import { TimestampTooltip } from '../../../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
@@ -45,7 +46,7 @@ export function getInstanceColumns(
   serviceName: string,
   agentName: AgentName,
   agentDocsPageUrl?: string
-): Array<ITableColumn<AgentExplorerInstance>> {
+): Array<EuiBasicTableColumn<AgentExplorerInstance>> {
   return [
     {
       field: AgentExplorerInstanceFieldName.InstanceName,
@@ -190,28 +191,28 @@ export function AgentInstancesDetails({
   items,
   isLoading,
 }: Props) {
-  if (isLoading) {
-    return (
-      <div style={{ width: '50%' }}>
-        <EuiLoadingContent data-test-subj="loadingSpinner" />
-      </div>
-    );
-  }
-
   return (
-    <ManagedTable
-      columns={getInstanceColumns(serviceName, agentName, agentDocsPageUrl)}
-      items={items}
-      noItemsMessage={i18n.translate(
-        'xpack.apm.agentExplorer.table.noResults',
-        {
-          defaultMessage: 'No data found',
+    <>
+      <EuiInMemoryTable
+        items={items}
+        columns={getInstanceColumns(serviceName, agentName, agentDocsPageUrl)}
+        pagination={true}
+        sorting={{
+          sort: {
+            field: AgentExplorerFieldName.AgentVersion,
+            direction: 'desc',
+          },
+        }}
+        message={
+          isLoading
+            ? i18n.translate('xpack.apm.agentInstanceDetails.table.loading', {
+                defaultMessage: 'Loading...',
+              })
+            : i18n.translate('xpack.apm.agentInstanceDetails.table.noResults', {
+                defaultMessage: 'No data found',
+              })
         }
-      )}
-      initialSortField={AgentExplorerFieldName.AgentVersion}
-      initialSortDirection="desc"
-      isLoading={isLoading}
-      initialPageSize={25}
-    />
+      />
+    </>
   );
 }
