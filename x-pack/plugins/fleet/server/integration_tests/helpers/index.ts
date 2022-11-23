@@ -6,9 +6,7 @@
  */
 
 import { adminTestUser } from '@kbn/test';
-import type { createRoot } from '@kbn/core-test-helpers-kbn-server';
-import { getSupertest } from '@kbn/core-test-helpers-kbn-server';
-import type { HttpMethod } from '@kbn/core-test-helpers-kbn-server';
+import { getSupertest, type createRoot, type HttpMethod } from '@kbn/core-test-helpers-kbn-server';
 
 type Root = ReturnType<typeof createRoot>;
 

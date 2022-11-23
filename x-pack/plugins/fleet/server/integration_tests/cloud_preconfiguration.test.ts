@@ -7,8 +7,12 @@
 
 import Path from 'path';
 
-import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import { AGENT_POLICY_INDEX } from '../../common';
 import type { PackagePolicySOAttributes, OutputSOAttributes } from '../../common/types';

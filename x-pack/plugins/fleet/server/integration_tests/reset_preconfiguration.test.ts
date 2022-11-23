@@ -7,8 +7,7 @@
 
 import Path from 'path';
 
-import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import { type TestElasticsearchUtils, type TestKibanaUtils, createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 
 import type { AgentPolicySOAttributes } from '../types';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common';

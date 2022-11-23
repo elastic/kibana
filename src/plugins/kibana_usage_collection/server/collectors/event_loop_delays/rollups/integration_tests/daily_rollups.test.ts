@@ -7,8 +7,12 @@
  */
 
 import type { Logger, ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
-import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
-import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createTestServers,
+  createRootWithCorePlugins,
+} from '@kbn/core-test-helpers-kbn-server';
 import { rollDailyData } from '../daily';
 import { metricsServiceMock } from '@kbn/core/server/mocks';
 

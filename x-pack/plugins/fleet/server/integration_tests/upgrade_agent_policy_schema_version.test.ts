@@ -16,8 +16,12 @@ import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
-import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createTestServers,
+  createRootWithCorePlugins,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE, FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '../constants';
 import { upgradeAgentPolicySchemaVersion } from '../services/setup/upgrade_agent_policy_schema_version';
