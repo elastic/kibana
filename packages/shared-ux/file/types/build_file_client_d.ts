@@ -16,17 +16,16 @@ const fileClientSourceFilePath = path.resolve(
   '../../../../src/plugins/files/public/types.ts'
 );
 const destFile = path.resolve(__dirname, './file_client.d.ts');
-const program = ts.createProgram([fileClientSourceFilePath], {});
-const sourceFile = program.getSourceFile(fileClientSourceFilePath);
-const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
-const checker = program.getTypeChecker();
 
 try {
   fs.unlinkSync(destFile);
 } catch (e) {
   // do nothing
 }
-
+const program = ts.createProgram([fileClientSourceFilePath], {});
+const sourceFile = program.getSourceFile(fileClientSourceFilePath);
+const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
+const checker = program.getTypeChecker();
 const membersToInclude = ['create', 'upload', 'delete', 'getFileKind'];
 
 ts.forEachChild(sourceFile!, (node) => {
