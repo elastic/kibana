@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiSpacer,
 } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
@@ -102,7 +101,6 @@ export const UserList: React.FC<UserListProps> = React.memo(
           )}
           {renderUsers(validUsers, handleSendEmail)}
         </EuiText>
-        <EuiSpacer size="m" />
       </EuiFlexItem>
     );
   }

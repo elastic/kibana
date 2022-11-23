@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEqual, uniq } from 'lodash';
 import { useCasesFeatures } from '../../../common/use_cases_features';
@@ -188,7 +188,7 @@ export const CaseViewActivity = ({
           </EuiFlexGroup>
         )}
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>
+      <EuiFlexGroup direction="column" responsive={false} gutterSize="l">
         {caseAssignmentAuthorized ? (
           <>
             <AssignUsers
@@ -198,7 +198,6 @@ export const CaseViewActivity = ({
               isLoading={isLoadingAssigneeData}
               userProfiles={userProfiles ?? new Map()}
             />
-            <EuiSpacer size="m" />
           </>
         ) : null}
         <SeveritySidebarSelector
@@ -242,7 +241,7 @@ export const CaseViewActivity = ({
             userActions={userActionsData.caseUserActions}
           />
         ) : null}
-      </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };
