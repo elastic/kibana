@@ -57,9 +57,9 @@ export interface OutputFormInputsType {
   sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
   proxyIdInput: ReturnType<typeof useInput>;
   loadBalanceEnabledInput: ReturnType<typeof useSwitchInput>;
-  memQueueSize: ReturnType<typeof useNumberInput>;
+  memQueueEvents: ReturnType<typeof useNumberInput>;
   queueFlushTimeout: ReturnType<typeof useNumberInput>;
-  maxBatchSize: ReturnType<typeof useNumberInput>;
+  maxBatchBytes: ReturnType<typeof useNumberInput>;
 }
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
@@ -157,14 +157,14 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     });
   const compressionLevelInput = useSelectInput(
     options,
-    options[0].value,
+    `${output?.compression_level}` ?? options[0].value,
     !diskQueueCompressionEnabled.value ?? false
   );
 
   // These three parameters are yet tbd
-  const memQueueSize = useNumberInput(output?.mem_queue_size);
+  const memQueueEvents = useNumberInput(output?.mem_queue_events);
   const queueFlushTimeout = useNumberInput(output?.queue_flush_timeout);
-  const maxBatchSize = useNumberInput(output?.max_batch_size);
+  const maxBatchBytes = useNumberInput(output?.max_batch_bytes);
 
   // Logstash inputs
   const logstashHostsInput = useComboInput(
@@ -211,9 +211,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     sslCertificateAuthoritiesInput,
     proxyIdInput,
     loadBalanceEnabledInput,
-    memQueueSize,
+    memQueueEvents,
     queueFlushTimeout,
-    maxBatchSize,
+    maxBatchBytes,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -267,7 +267,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       setIsloading(true);
 
       let shipperParams = {};
-      if (!isLogstash && !isShipperDisabled) {
+      if (!isShipperDisabled) {
         shipperParams = {
           disk_queue_enabled: diskQueueEnabledInput.value,
           disk_queue_path:
@@ -283,9 +283,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
             ? Number(compressionLevelInput.value)
             : 0,
           loadbalance: loadBalanceEnabledInput.value,
-          mem_queue_size: memQueueSize.value ? Number(memQueueSize.value) : 0,
+          mem_queue_events: memQueueEvents.value ? Number(memQueueEvents.value) : 0,
           queue_flush_timeout: queueFlushTimeout.value ? Number(queueFlushTimeout.value) : 0,
-          max_batch_size: maxBatchSize.value ? Number(maxBatchSize.value) : 0,
+          max_batch_bytes: maxBatchBytes.value ? Number(maxBatchBytes.value) : 0,
         };
       }
 
@@ -374,9 +374,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     diskQueueCompressionEnabled.value,
     compressionLevelInput.value,
     loadBalanceEnabledInput.value,
-    memQueueSize.value,
+    memQueueEvents.value,
     queueFlushTimeout.value,
-    maxBatchSize.value,
+    maxBatchBytes.value,
     confirm,
   ]);
 

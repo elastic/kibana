@@ -33,9 +33,9 @@ export interface NewOutput {
   disk_queue_compression_enabled?: boolean;
   compression_level?: number;
   loadbalance?: boolean;
-  mem_queue_size?: number;
+  mem_queue_events?: number;
   queue_flush_timeout?: number;
-  max_batch_size?: number;
+  max_batch_bytes?: number;
 }
 
 export type OutputSOAttributes = NewOutput & {

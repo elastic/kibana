@@ -59,9 +59,9 @@ const OutputBaseSchema = {
   disk_queue_path: schema.maybe(schema.string()),
   disk_queue_max_size: schema.maybe(schema.number()),
   loadbalance: schema.maybe(schema.boolean({ defaultValue: false })),
-  mem_queue_size: schema.maybe(schema.number()),
+  mem_queue_events: schema.maybe(schema.number()),
   queue_flush_timeout: schema.maybe(schema.number()),
-  max_batch_size: schema.maybe(schema.number()),
+  max_batch_bytes: schema.maybe(schema.number()),
 };
 
 export const NewOutputSchema = schema.object({ ...OutputBaseSchema });
@@ -97,9 +97,9 @@ export const UpdateOutputSchema = schema.object({
   disk_queue_compression_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
   compression_level: schema.maybe(schema.number()),
   loadbalance: schema.maybe(schema.boolean({ defaultValue: false })),
-  mem_queue_size: schema.maybe(schema.number()),
+  mem_queue_events: schema.maybe(schema.number()),
   queue_flush_timeout: schema.maybe(schema.number()),
-  max_batch_size: schema.maybe(schema.number()),
+  max_batch_bytes: schema.maybe(schema.number()),
 });
 
 export const OutputSchema = schema.object({

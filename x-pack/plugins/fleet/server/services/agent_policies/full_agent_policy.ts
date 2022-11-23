@@ -203,23 +203,42 @@ export function transformOutputToFullPolicyOutput(
   standalone = false
 ): FullAgentPolicyOutput {
   /* eslint-disable @typescript-eslint/naming-convention */
-  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl } = output;
+  const {
+    config_yaml,
+    type,
+    hosts,
+    ca_sha256,
+    ca_trusted_fingerprint,
+    ssl,
+    loadbalance,
+    compression_level,
+    queue_flush_timeout,
+    max_batch_bytes,
+  } = output;
   /* eslint-enable @typescript-eslint/naming-convention */
 
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
 
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
-  let shipperData = {};
+  let shipperDiskQueueData = {};
   if (!isShipperDisabled) {
-    shipperData = buildShipperQueueData(output);
+    shipperDiskQueueData = buildShipperQueueData(output);
   }
+
+  const generalShipperData = {
+    loadbalance,
+    compression_level,
+    queue_flush_timeout,
+    max_batch_bytes,
+  };
 
   const newOutput: FullAgentPolicyOutput = {
     ...configJs,
-    ...shipperData,
+    ...shipperDiskQueueData,
     type,
     hosts,
+    ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
@@ -281,6 +300,7 @@ function buildShipperQueueData(output: Output) {
     disk_queue_path,
     disk_queue_max_size,
     disk_queue_compression_enabled,
+    // TODO: still missing mem_queue_events parameter, where should it go?
   } = output;
   if (!disk_queue_enabled) return {};
 

@@ -42,7 +42,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
     diskQueueEncryptionEnabled,
     diskQueueCompressionEnabled,
     compressionLevelInput,
-    memQueueSize,
+    memQueueEventsSize,
     queueFlushTimeout,
     maxBatchSize,
   } = inputs;
@@ -112,50 +112,23 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
         <EuiSpacer size="m" />
         <EuiFormRow
           fullWidth
-          {...memQueueSize.formRowProps}
+          {...memQueueEventsSize.formRowProps}
           label={
             <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.memQueueSizeLabel"
-              defaultMessage="Memory Queue Size"
+              id="xpack.fleet.settings.editOutputFlyout.memQueueEventsLabel"
+              defaultMessage="Memory Queue Events"
             />
           }
         >
           <EuiFlexGroup alignItems="flexStart">
             <EuiFlexItem>
-              <EuiFieldNumber {...memQueueSize.props} placeholder="Bytes" min={0} />
+              <EuiFieldNumber {...memQueueEventsSize.props} placeholder="Events" min={0} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
                 <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.memQueueSizeDescription"
-                  defaultMessage="Memory queue is calculated as a function of Maximum Batch Size. However it can also be overwritten. For the best performance it's advisable to have a memory queue larger then the batch size."
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-
-        <EuiHorizontalRule />
-
-        <EuiFormRow fullWidth {...loadBalanceEnabledInput.formRowProps}>
-          <EuiFlexGroup alignItems="flexStart">
-            <EuiFlexItem>
-              <EuiSwitch
-                data-test-subj="editOutputFlyout.loadBalancingSwitch"
-                {...loadBalanceEnabledInput.props}
-                label={
-                  <FormattedMessage
-                    id="xpack.fleet.settings.editOutputFlyout.loadBalancingSwitchLabel"
-                    defaultMessage="Load Balancing"
-                  />
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.loadBalancingDescription"
-                  defaultMessage="Once enabled, the agents will balance the load across all the hosts defined for this output. This will increase the number of connections opened by the agent."
+                  id="xpack.fleet.settings.editOutputFlyout.memQueueEventsSizeDescription"
+                  defaultMessage="Maximum number of events that can be stored in the queue. Default is set to 4096."
                 />
               </EuiText>
             </EuiFlexItem>
@@ -257,6 +230,33 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.diskQueueMaxSizeDescription"
                   defaultMessage="Limits the disk size for spooling of data. If set too low, data may be lost when agent can't write data to the destination."
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+
+        <EuiHorizontalRule />
+
+        <EuiFormRow fullWidth {...loadBalanceEnabledInput.formRowProps}>
+          <EuiFlexGroup alignItems="flexStart">
+            <EuiFlexItem>
+              <EuiSwitch
+                data-test-subj="editOutputFlyout.loadBalancingSwitch"
+                {...loadBalanceEnabledInput.props}
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.loadBalancingSwitchLabel"
+                    defaultMessage="Load Balancing"
+                  />
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.loadBalancingDescription"
+                  defaultMessage="Once enabled, the agents will balance the load across all the hosts defined for this output. This will increase the number of connections opened by the agent."
                 />
               </EuiText>
             </EuiFlexItem>

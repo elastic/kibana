@@ -146,9 +146,9 @@ const getSavedObjectTypes = (
         disk_queue_compression_enabled: { type: 'boolean', index: false },
         compression_level: { type: 'integer', index: false },
         loadbalance: { type: 'boolean' },
-        mem_queue_size: { type: 'integer', index: false },
+        mem_queue_events: { type: 'integer', index: false },
         queue_flush_timeout: { type: 'integer', index: false },
-        max_batch_size: { type: 'integer', index: false },
+        max_batch_bytes: { type: 'integer', index: false },
       },
     },
     migrations: {

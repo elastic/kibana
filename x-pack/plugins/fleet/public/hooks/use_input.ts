@@ -252,7 +252,7 @@ export function useSelectInput(
 ) {
   const [value, setValue] = useState<string>(defaultValue);
 
-  const onChange = useCallback((e) => {
+  const onChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setValue(e.target.value);
   }, []);
 
