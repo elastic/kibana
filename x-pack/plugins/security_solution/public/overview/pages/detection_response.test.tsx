@@ -11,6 +11,7 @@ import { render } from '@testing-library/react';
 import { DetectionResponse } from './detection_response';
 import { TestProviders } from '../../common/mock';
 import { noCasesPermissions, readCasesPermissions } from '../../cases_test_utils';
+import { DataViewType } from '../../common/types';
 
 jest.mock('../components/detection_response/alerts_by_status', () => ({
   AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
@@ -43,7 +44,7 @@ jest.mock('../../common/components/search_bar', () => ({
 const defaultUseSourcererReturn = {
   indicesExist: true,
   loading: false,
-  indexPattern: '',
+  indexPattern: { fields: [], title: '', type: DataViewType.title, value: '' },
 };
 const mockUseSourcererDataView = jest.fn(() => defaultUseSourcererReturn);
 jest.mock('../../common/containers/sourcerer', () => ({

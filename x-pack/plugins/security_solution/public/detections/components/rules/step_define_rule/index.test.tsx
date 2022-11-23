@@ -26,9 +26,10 @@ jest.mock('../../../../common/containers/sourcerer', () => {
   const actual = jest.requireActual('../../../../common/containers/sourcerer');
   return {
     ...actual,
-    useSourcererDataView: jest
-      .fn()
-      .mockReturnValue({ indexPattern: ['fakeindex'], loading: false }),
+    useSourcererDataView: jest.fn().mockReturnValue({
+      indexPattern: { fields: [], title: '', type: 'title', value: '' },
+      loading: false,
+    }),
   };
 });
 jest.mock('react-router-dom', () => {
