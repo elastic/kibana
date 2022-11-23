@@ -17,7 +17,7 @@ import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prom
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 
-export const ConnectorFilteringForm: React.FC = ({ children }) => {
+export const ConnectorSyncRulesForm: React.FC = ({ children }) => {
   const { saveDraftFilteringRules, setIsEditing } = useActions(ConnectorFilteringLogic);
   const { hasJsonValidationError, isEditing, isLoading } = useValues(ConnectorFilteringLogic);
 
@@ -26,7 +26,7 @@ export const ConnectorFilteringForm: React.FC = ({ children }) => {
       <UnsavedChangesPrompt
         hasUnsavedChanges={isEditing}
         messageText={i18n.translate(
-          'xpack.enterpriseSearch.index.connector.filtering.unsavedChanges',
+          'xpack.enterpriseSearch.index.connector.syncRules.unsavedChanges',
           {
             defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
           }
@@ -40,13 +40,13 @@ export const ConnectorFilteringForm: React.FC = ({ children }) => {
           {isEditing && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-telemetry-id="entSearchContent-connector-filtering-editRules-cancelEditing"
+                data-telemetry-id="entSearchContent-connector-syncRules-editRules-cancelEditing"
                 onClick={() => {
                   setIsEditing(!isEditing);
                 }}
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.index.connector.filtering.cancelEditingFilteringDraft',
+                  'xpack.enterpriseSearch.index.connector.syncRules.cancelEditingFilteringDraft',
                   {
                     defaultMessage: 'Cancel',
                   }
@@ -56,13 +56,13 @@ export const ConnectorFilteringForm: React.FC = ({ children }) => {
           )}
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-telemetry-id="entSearchContent-connector-filtering-editRules-saveAndValidate"
+              data-telemetry-id="entSearchContent-connector-syncRules-editRules-saveAndValidate"
               disabled={hasJsonValidationError}
               isLoading={isLoading}
               onClick={saveDraftFilteringRules}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.index.connector.filtering.validateDraftTitle',
+                'xpack.enterpriseSearch.index.connector.syncRules.validateDraftTitle',
                 {
                   defaultMessage: 'Save and validate draft',
                 }

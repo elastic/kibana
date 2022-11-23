@@ -108,7 +108,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
     padding-bottom: 60px;
     position: relative;
 
-    button {
+    & > button {
       position: absolute;
       left: 0;
       right: 0;

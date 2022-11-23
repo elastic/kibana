@@ -23,8 +23,7 @@ import {
 
 jest.mock('../../containers/api');
 
-// FLAKY: https://github.com/elastic/kibana/issues/144660
-describe.skip('useActions', () => {
+describe('useActions', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -97,7 +96,9 @@ describe.skip('useActions', () => {
     });
 
     act(() => {
-      userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`));
+      userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`), undefined, {
+        skipPointerEventsCheck: true,
+      });
     });
 
     await waitFor(() => {

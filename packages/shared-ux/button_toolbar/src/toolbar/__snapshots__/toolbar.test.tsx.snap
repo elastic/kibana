@@ -8,7 +8,7 @@ exports[`<Toolbar /> is rendered 1`] = `
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <button
-      class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
       type="button"
     >
       <span

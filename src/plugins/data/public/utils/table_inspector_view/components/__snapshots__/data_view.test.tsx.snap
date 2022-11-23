@@ -183,7 +183,7 @@ Array [
           class="euiPopover__anchor css-16vtueo-render"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-s-s-base-primary"
+            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
             type="button"
           >
             <span
@@ -523,7 +523,7 @@ Array [
           class="euiPopover__anchor css-16vtueo-render"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-s-s-base-primary"
+            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
             type="button"
           >
             <span

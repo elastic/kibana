@@ -23,14 +23,16 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 import { FilteringRulesTable } from '../../../shared/filtering_rules_table/filtering_rules_table';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
-import { EditFilteringFlyout } from './edit_filtering_flyout';
-import { FilteringStateCallouts } from './filtering_callouts';
+import { EditSyncRulesFlyout } from './edit_sync_rules_flyout';
+import { SyncRulesStateCallouts } from './sync_rules_callouts';
 
-export const ConnectorFiltering: React.FC = () => {
+export const ConnectorSyncRules: React.FC = () => {
   const { indexName, hasAdvancedFilteringFeature, hasBasicFilteringFeature } =
     useValues(IndexViewLogic);
   const { applyDraft, setLocalFilteringRules, setLocalAdvancedSnippet, setIsEditing } =
@@ -41,7 +43,7 @@ export const ConnectorFiltering: React.FC = () => {
   return (
     <>
       {isEditing && (
-        <EditFilteringFlyout
+        <EditSyncRulesFlyout
           hasAdvancedFilteringFeature={hasAdvancedFilteringFeature}
           hasBasicFilteringFeature={hasBasicFilteringFeature}
           revertLocalFilteringRules={() => setLocalFilteringRules(filteringRules)}
@@ -53,7 +55,7 @@ export const ConnectorFiltering: React.FC = () => {
       <EuiFlexGroup direction="column">
         {hasDraft && (
           <EuiFlexItem>
-            <FilteringStateCallouts
+            <SyncRulesStateCallouts
               applyDraft={applyDraft}
               editDraft={() => setIsEditing(true)}
               state={draftState}
@@ -66,15 +68,15 @@ export const ConnectorFiltering: React.FC = () => {
             <EuiFlexItem>
               <EuiTitle size="s">
                 <h3>
-                  {i18n.translate('xpack.enterpriseSearch.index.connector.filtering.title', {
-                    defaultMessage: 'Sync filters ',
+                  {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.title', {
+                    defaultMessage: 'Sync rules ',
                   })}
                 </h3>
               </EuiTitle>
               <EuiSpacer />
               <EuiText size="s">
                 <p>
-                  {i18n.translate('xpack.enterpriseSearch.index.connector.filtering.description', {
+                  {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.description', {
                     defaultMessage: `Include or exclude high level items, file types and (file or folder) paths to
                     synchronize from {indexName}. Everything is included by default. Each document is
                     tested against the reules below and the first rule that matches will be applied.`,
@@ -84,9 +86,9 @@ export const ConnectorFiltering: React.FC = () => {
                   })}
                 </p>
                 <p>
-                  <EuiLink href="TODOTODOTODOTODO" external>
+                  <EuiLink href={docLinks.syncRules} external>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.index.connector.filtering.syncFiltersLabel',
+                      'xpack.enterpriseSearch.index.connector.syncRules.syncRulesLabel',
                       {
                         defaultMessage: 'Learn more about sync rules',
                       }
@@ -97,21 +99,21 @@ export const ConnectorFiltering: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                data-telemetry-id="entSearchContent-connector-filtering-editRules-editDraftRules"
+                data-telemetry-id="entSearchContent-connector-syncRules-editRules-editDraftRules"
                 color="primary"
                 onClick={() => setIsEditing(!isEditing)}
               >
                 {hasDraft
                   ? i18n.translate(
-                      'xpack.enterpriseSearch.index.connector.filtering.editFilterRulesTitle',
+                      'xpack.enterpriseSearch.index.connector.syncRules.editFilterRulesTitle',
                       {
-                        defaultMessage: 'Edit filter rules',
+                        defaultMessage: 'Edit sync rules',
                       }
                     )
                   : i18n.translate(
-                      'xpack.enterpriseSearch.index.connector.filtering.draftNewFilterRulesTitle',
+                      'xpack.enterpriseSearch.index.connector.syncRules.draftNewFilterRulesTitle',
                       {
-                        defaultMessage: 'Draft new filter rules',
+                        defaultMessage: 'Draft new sync rules',
                       }
                     )}
               </EuiButton>
@@ -126,9 +128,9 @@ export const ConnectorFiltering: React.FC = () => {
                   <EuiTitle size="s">
                     <h3>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.index.connector.filtering.basicFiltersTitle',
+                        'xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesTitle',
                         {
-                          defaultMessage: 'Basic filters',
+                          defaultMessage: 'Basic rules',
                         }
                       )}
                     </h3>
@@ -137,7 +139,7 @@ export const ConnectorFiltering: React.FC = () => {
                   <EuiText size="s">
                     <p>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.index.connector.filtering.basicFiltersDescription',
+                        'xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesDescription',
                         {
                           defaultMessage: 'These filters apply to documents in post-processing.',
                         }
@@ -158,9 +160,9 @@ export const ConnectorFiltering: React.FC = () => {
                   <EuiTitle size="s">
                     <h3>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.index.connector.filtering.advancedFiltersTitle',
+                        'xpack.enterpriseSearch.content.index.connector.syncRules.advancedRulesTitle',
                         {
-                          defaultMessage: 'Advanced filters',
+                          defaultMessage: 'Advanced rules',
                         }
                       )}
                     </h3>
@@ -169,16 +171,16 @@ export const ConnectorFiltering: React.FC = () => {
                   <EuiText size="s">
                     <p>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.index.connector.filtering.advancedFiltersDescription',
+                        'xpack.enterpriseSearch.content.index.connector.syncRules.advancedFiltersDescription',
                         {
                           defaultMessage: 'These filters apply to documents at the data source.',
                         }
                       )}
                     </p>
                     <p>
-                      <EuiLink external href="TODOTODOTODODOTO">
+                      <EuiLink external href={docLinks.syncRules}>
                         {i18n.translate(
-                          'xpack.enterpriseSearch.content.index.connector.filtering.advancedFiltersLinkTitle',
+                          'xpack.enterpriseSearch.content.index.connector.syncRules.advancedFiltersLinkTitle',
                           {
                             defaultMessage: 'Learn more about advanced sync rules.',
                           }
