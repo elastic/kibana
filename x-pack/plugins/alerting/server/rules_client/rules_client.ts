@@ -2398,15 +2398,17 @@ export class RulesClient {
     for await (const response of rulesFinder.find()) {
       await pMap(
         response.saved_objects,
-        this.updateRuleAttributesAndParamsInMemory({
-          operations,
-          paramsModifier,
-          apiKeysMap,
-          rules,
-          skipped,
-          errors,
-          username,
-        }),
+        async (rule: SavedObjectsFindResult<RawRule>) =>
+          this.updateRuleAttributesAndParamsInMemory({
+            rule,
+            operations,
+            paramsModifier,
+            apiKeysMap,
+            rules,
+            skipped,
+            errors,
+            username,
+          }),
         {
           concurrency: API_KEY_GENERATE_CONCURRENCY,
         }
@@ -2430,7 +2432,8 @@ export class RulesClient {
     };
   }
 
-  private updateRuleAttributesAndParamsInMemory<Params extends RuleTypeParams>({
+  private async updateRuleAttributesAndParamsInMemory<Params extends RuleTypeParams>({
+    rule,
     operations,
     paramsModifier,
     apiKeysMap,
@@ -2439,6 +2442,7 @@ export class RulesClient {
     errors,
     username,
   }: {
+    rule: SavedObjectsFindResult<RawRule>;
     operations: BulkEditOptions<Params>['operations'];
     paramsModifier: BulkEditOptions<Params>['paramsModifier'];
     apiKeysMap: ApiKeysMap;
@@ -2446,103 +2450,101 @@ export class RulesClient {
     skipped: BulkActionSkipResult[];
     errors: BulkOperationError[];
     username: string | null;
-  }): (rule: SavedObjectsFindResult<RawRule>) => Promise<void> {
-    return async (rule: SavedObjectsFindResult<RawRule>) => {
-      try {
-        if (rule.attributes.apiKey) {
-          apiKeysMap.set(rule.id, { oldApiKey: rule.attributes.apiKey });
-        }
-
-        const ruleType = this.ruleTypeRegistry.get(rule.attributes.alertTypeId);
-
-        this.ensureAuthorizationForBulkUpdate(operations, rule);
-
-        const { attributes, ruleActions, hasUpdateApiKeyOperation, isAttributesUpdateSkipped } =
-          await this.getUpdatedAttributesFromOperations(operations, rule, ruleType);
-
-        this.validateScheduleInterval(
-          attributes.schedule.interval as string,
-          ruleType.id,
-          attributes.id as string
-        );
-
-        const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
-          ? await paramsModifier(attributes.params as Params)
-          : {
-              modifiedParams: attributes.params as Params,
-              isParamsUpdateSkipped: true,
-            };
-
-        // If neither attributes nor parameters were updated, mark
-        // the rule as skipped and continue to the next rule.
-        if (isAttributesUpdateSkipped && isParamsUpdateSkipped) {
-          skipped.push({
-            id: rule.id,
-            name: rule.attributes.name,
-            skip_reason: 'RULE_NOT_MODIFIED',
-          });
-          return;
-        }
-
-        // validate rule params
-        const validatedAlertTypeParams = validateRuleTypeParams(
-          ruleParams,
-          ruleType.validate?.params
-        );
-        const validatedMutatedAlertTypeParams = validateMutatedRuleTypeParams(
-          validatedAlertTypeParams,
-          rule.attributes.params,
-          ruleType.validate?.params
-        );
-
-        const {
-          actions: rawAlertActions,
-          references,
-          params: updatedParams,
-        } = await this.extractReferences(
-          ruleType,
-          ruleActions.actions,
-          validatedMutatedAlertTypeParams
-        );
-
-        const { apiKeyAttributes } = await this.prepareApiKeys(
-          rule,
-          ruleType,
-          apiKeysMap,
-          attributes,
-          hasUpdateApiKeyOperation,
-          username
-        );
-
-        const { updatedAttributes } = this.updateAttributes(
-          attributes,
-          apiKeyAttributes,
-          updatedParams,
-          rawAlertActions,
-          username
-        );
-
-        rules.push({
-          ...rule,
-          references,
-          attributes: updatedAttributes,
-        });
-      } catch (error) {
-        errors.push({
-          message: error.message,
-          rule: {
-            id: rule.id,
-            name: rule.attributes?.name,
-          },
-        });
-        this.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.BULK_EDIT,
-            error,
-          })
-        );
+  }): Promise<void> {
+    try {
+      if (rule.attributes.apiKey) {
+        apiKeysMap.set(rule.id, { oldApiKey: rule.attributes.apiKey });
       }
-    };
+
+      const ruleType = this.ruleTypeRegistry.get(rule.attributes.alertTypeId);
+
+      this.ensureAuthorizationForBulkUpdate(operations, rule);
+
+      const { attributes, ruleActions, hasUpdateApiKeyOperation, isAttributesUpdateSkipped } =
+        await this.getUpdatedAttributesFromOperations(operations, rule, ruleType);
+
+      this.validateScheduleInterval(
+        attributes.schedule.interval as string,
+        ruleType.id,
+        attributes.id as string
+      );
+
+      const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
+        ? await paramsModifier(attributes.params as Params)
+        : {
+            modifiedParams: attributes.params as Params,
+            isParamsUpdateSkipped: true,
+          };
+
+      // If neither attributes nor parameters were updated, mark
+      // the rule as skipped and continue to the next rule.
+      if (isAttributesUpdateSkipped && isParamsUpdateSkipped) {
+        skipped.push({
+          id: rule.id,
+          name: rule.attributes.name,
+          skip_reason: 'RULE_NOT_MODIFIED',
+        });
+        return;
+      }
+
+      // validate rule params
+      const validatedAlertTypeParams = validateRuleTypeParams(
+        ruleParams,
+        ruleType.validate?.params
+      );
+      const validatedMutatedAlertTypeParams = validateMutatedRuleTypeParams(
+        validatedAlertTypeParams,
+        rule.attributes.params,
+        ruleType.validate?.params
+      );
+
+      const {
+        actions: rawAlertActions,
+        references,
+        params: updatedParams,
+      } = await this.extractReferences(
+        ruleType,
+        ruleActions.actions,
+        validatedMutatedAlertTypeParams
+      );
+
+      const { apiKeyAttributes } = await this.prepareApiKeys(
+        rule,
+        ruleType,
+        apiKeysMap,
+        attributes,
+        hasUpdateApiKeyOperation,
+        username
+      );
+
+      const { updatedAttributes } = this.updateAttributes(
+        attributes,
+        apiKeyAttributes,
+        updatedParams,
+        rawAlertActions,
+        username
+      );
+
+      rules.push({
+        ...rule,
+        references,
+        attributes: updatedAttributes,
+      });
+    } catch (error) {
+      errors.push({
+        message: error.message,
+        rule: {
+          id: rule.id,
+          name: rule.attributes?.name,
+        },
+      });
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.BULK_EDIT,
+          error,
+        })
+      );
+    }
   }
 
   private async ensureAuthorizationForBulkUpdate(
