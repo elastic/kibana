@@ -11,7 +11,7 @@ import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
 import { fetchJourneySteps } from '../../../state';
 
-export const useJourneySteps = (checkGroup?: string) => {
+export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
   const { stepIndex } = useParams<{ stepIndex: string }>();
   const { checkGroupId: urlCheckGroup } = useParams<{ checkGroupId: string }>();
 
@@ -23,7 +23,7 @@ export const useJourneySteps = (checkGroup?: string) => {
     }
 
     return fetchJourneySteps({ checkGroup: checkGroupId });
-  }, [checkGroupId]);
+  }, [checkGroupId, lastRefresh]);
 
   const isFailed =
     data?.steps.some(
