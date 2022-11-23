@@ -122,15 +122,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
 
     const artifactCards: ReactElement = useMemo(() => {
       if (loading) {
-        return (
-          <EuiFlexGroup alignItems="center" justifyContent={'spaceAround'}>
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="xl" />
-              <EuiLoadingSpinner size="l" />
-              <EuiSpacer size="xl" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
+        return <></>;
       }
 
       if (!userCanAccessContent) {
@@ -175,7 +167,15 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
     ]);
 
     if (loading) {
-      return <EuiLoadingSpinner data-test-subj="endpointExtensionLoadingSpinner" />;
+      return (
+        <EuiFlexGroup alignItems="center" justifyContent={'spaceAround'}>
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="xl" />
+            <EuiLoadingSpinner size="l" data-test-subj="endpointExtensionLoadingSpinner" />
+            <EuiSpacer size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
     }
 
     return artifactCards;

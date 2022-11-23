@@ -77,7 +77,7 @@ const WrappedPolicyDetailsForm = memo<{
 
   useEffect(() => {
     // Currently, the `onChange` callback provided by the fleet UI extension is regenerated every
-    // time the policy data is updated, which means this will go into a continious loop if we don't
+    // time the policy data is updated, which means this will go into a continuous loop if we don't
     // actually check to see if an update should be reported back to fleet
     setLastUpdatedPolicy((prevState) => {
       if (prevState === updatedPolicy) {

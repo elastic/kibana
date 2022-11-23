@@ -12,7 +12,7 @@ import React from 'react';
 export const BLOCKLISTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
     i18n.translate('xpack.securitySolution.endpoint.fleetIntegrationCard.blocklistsSummary.error', {
-      defaultMessage: 'There was an error trying to fetch blocklists stats: "{error}"',
+      defaultMessage: 'There was an error trying to fetch blocklist stats: "{error}"',
       values: { error },
     }),
   cardTitle: (
@@ -54,7 +54,7 @@ export const HOST_ISOLATION_EXCEPTIONS_LABELS = {
 export const EVENT_FILTERS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
     i18n.translate(
-      'xpack.securitySolution.endpoint.fleetIntegrationCard.eventFiltersSummarySummary.error',
+      'xpack.securitySolution.endpoint.fleetIntegrationCard.eventFiltersSummary.error',
       {
         defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
         values: { error },
@@ -76,7 +76,7 @@ export const EVENT_FILTERS_LABELS = {
 export const TRUSTED_APPS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
     i18n.translate(
-      'xpack.securitySolution.endpoint.fleetIntegrationCard.trustedAppsSummarySummary.error',
+      'xpack.securitySolution.endpoint.fleetIntegrationCard.trustedAppsSummary.error',
       {
         defaultMessage: 'There was an error trying to fetch trusted apps stats: "{error}"',
         values: { error },
