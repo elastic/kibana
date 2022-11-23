@@ -34,6 +34,7 @@ export interface LiveQueryFormFields {
   savedQueryId?: string | null;
   ecs_mapping: ECSMapping;
   packId: string[];
+  queryType: 'query' | 'pack';
 }
 
 interface DefaultLiveQueryFormFields {
@@ -82,6 +83,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     clearErrors,
     getFieldState,
     register,
+    control,
     formState: { isSubmitting },
   } = hooksForm;
 
@@ -95,7 +97,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
-  const [queryType, setQueryType] = useState<string>('query');
   const [isLive, setIsLive] = useState(false);
 
   const queryState = getFieldState('query');
@@ -103,6 +104,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const handleShowSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(true), []);
   const handleCloseSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
+  const { queryType } = watchedValues;
   const {
     data,
     isLoading,
@@ -241,7 +243,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       }
 
       if (defaultValue?.packId && canRunPacks) {
-        setQueryType('pack');
+        setValue('queryType', 'pack');
 
         if (!isPackDataFetched) return;
         const selectedPackOption = find(packsData?.data, ['id', defaultValue.packId]);
@@ -261,11 +263,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       }
 
       if (canRunSingleQuery) {
-        return setQueryType('query');
+        setValue('queryType', 'query');
       }
 
       if (canRunPacks) {
-        return setQueryType('pack');
+        setValue('queryType', 'pack');
       }
     }
   }, [canRunPacks, canRunSingleQuery, defaultValue, isPackDataFetched, packsData?.data, setValue]);
@@ -292,8 +294,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         <EuiFlexGroup direction="column">
           {queryField && (
             <QueryPackSelectable
-              queryType={queryType}
-              setQueryType={setQueryType}
+              control={control}
               canRunPacks={canRunPacks}
               canRunSingleQuery={canRunSingleQuery}
             />
@@ -312,10 +313,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           ) : (
             <>
               <EuiFlexItem>
-                <LiveQueryQueryField
-                  queryType={queryType}
-                  handleSubmitForm={handleSubmit(onSubmit)}
-                />
+                <LiveQueryQueryField handleSubmitForm={handleSubmit(onSubmit)} />
               </EuiFlexItem>
               {submitButtonContent}
               <EuiFlexItem>{resultsStepContent}</EuiFlexItem>

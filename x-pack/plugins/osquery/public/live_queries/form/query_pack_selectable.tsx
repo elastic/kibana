@@ -9,6 +9,8 @@ import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import type { UseFormReturn } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 
 const StyledEuiCard = styled(EuiCard)`
   padding: 16px 92px 16px 16px !important;
@@ -48,29 +50,37 @@ const StyledEuiCard = styled(EuiCard)`
   }
 `;
 
+// TODO update type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type FormReturn = UseFormReturn<any>;
+
 interface QueryPackSelectableProps {
-  queryType: string;
-  setQueryType: (type: string) => void;
   canRunSingleQuery: boolean;
   canRunPacks: boolean;
-  resetFormFields?: () => void;
+  control: FormReturn['control'];
 }
 
 export const QueryPackSelectable = ({
-  queryType,
-  setQueryType,
   canRunSingleQuery,
   canRunPacks,
-  resetFormFields,
+  control,
 }: QueryPackSelectableProps) => {
+  const {
+    field: { value: queryType, onChange: setQueryType },
+  } = useController({
+    control,
+    name: 'queryType',
+    defaultValue: 'query',
+    rules: {
+      deps: ['packId', 'query'],
+    },
+  });
+
   const handleChange = useCallback(
     (type) => {
       setQueryType(type);
-      if (resetFormFields) {
-        resetFormFields();
-      }
     },
-    [resetFormFields, setQueryType]
+    [setQueryType]
   );
   const queryCardSelectable = useMemo(
     () => ({

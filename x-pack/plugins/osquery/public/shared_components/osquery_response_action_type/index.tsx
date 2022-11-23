@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 import type { FieldErrors } from 'react-hook-form';
@@ -43,6 +43,7 @@ interface OsqueryResponseActionsParamsFormFields {
     ecs_mapping: ECSMapping;
     query: string;
   }>;
+  queryType: 'query' | 'pack';
 }
 
 export interface OsqueryResponseActionsParamsFormProps {
@@ -59,26 +60,28 @@ const OsqueryResponseActionParamsFormComponent = ({
   const lastErrors = useRef<FieldErrors<OsqueryResponseActionsParamsFormFields>>(null);
   const uniqueId = useMemo(() => uuid.v4(), []);
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
+    mode: 'all',
     defaultValues: defaultValues
       ? {
           ...omit(defaultValues, ['ecsMapping', 'packId']),
           ecs_mapping: defaultValues.ecsMapping,
           packId: defaultValues.packId ? [defaultValues.packId] : [],
+          queryType: defaultValues.packId ? 'pack' : 'query',
         }
       : {
           ecs_mapping: {},
           id: uniqueId,
+          queryType: 'query',
         },
   });
 
-  const { watch, register, formState, reset } = hooksForm;
+  const { watch, register, formState, control } = hooksForm;
 
   const watchedValues = watch();
   const { data: packData } = usePack({
     packId: watchedValues?.packId?.[0],
     skip: !watchedValues?.packId?.[0],
   });
-  const [queryType, setQueryType] = useState<string>(defaultValues?.packId ? 'pack' : 'query');
 
   useEffect(() => {
     // @ts-expect-error update types
@@ -89,13 +92,14 @@ const OsqueryResponseActionParamsFormComponent = ({
   useEffect(() => {
     register('savedQueryId');
     register('id');
+    register('queryType');
   }, [register]);
 
   useEffect(() => {
     const subscription = watch((formData) => {
       onChange(
         // @ts-expect-error update types
-        queryType === 'pack'
+        formData.queryType === 'pack'
           ? {
               id: formData.id,
               packId: formData?.packId?.length ? formData?.packId[0] : undefined,
@@ -116,7 +120,7 @@ const OsqueryResponseActionParamsFormComponent = ({
     });
 
     return () => subscription.unsubscribe();
-  }, [onChange, packData, queryType, watch]);
+  }, [onChange, packData, watch]);
 
   const permissions = useKibana().services.application.capabilities.osquery;
 
@@ -148,15 +152,13 @@ const OsqueryResponseActionParamsFormComponent = ({
     <>
       <FormProvider {...hooksForm}>
         <QueryPackSelectable
-          queryType={queryType}
-          setQueryType={setQueryType}
           canRunPacks={canRunPacks}
           canRunSingleQuery={canRunSingleQuery}
-          resetFormFields={reset}
+          control={control}
         />
         <EuiSpacer size="m" />
-        {queryType === 'query' && <LiveQueryQueryField queryType={queryType} />}
-        {queryType === 'pack' && (
+        {watchedValues.queryType === 'query' && <LiveQueryQueryField />}
+        {watchedValues.queryType === 'pack' && (
           <PackFieldWrapper
             liveQueryDetails={watchedValues.queries && !packData ? queryDetails : undefined}
           />
