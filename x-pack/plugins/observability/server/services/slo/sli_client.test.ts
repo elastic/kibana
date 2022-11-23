@@ -51,7 +51,7 @@ describe('SLIClient', () => {
   });
 
   describe('fetchCurrentSLIData', () => {
-    describe('for SLO defined with occurrences budgeting method', () => {
+    describe('with occurrences budgeting method', () => {
       it('throws when aggregations failed', async () => {
         const slo = createSLO({ time_window: sevenDaysRolling() });
         esClientMock.msearch.mockResolvedValueOnce({
@@ -70,7 +70,7 @@ describe('SLIClient', () => {
         );
       });
 
-      describe('for a rolling time window SLO type', () => {
+      describe('with a rolling time window', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({ time_window: sevenDaysRolling() });
           esClientMock.msearch.mockResolvedValueOnce(getMsearchResponse());
@@ -111,7 +111,7 @@ describe('SLIClient', () => {
         });
       });
 
-      describe('for a calendar aligned time window SLO type', () => {
+      describe('with a calendar aligned time window', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({
             time_window: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
@@ -155,7 +155,7 @@ describe('SLIClient', () => {
       });
     });
 
-    describe('for SLO defined with timeslices budgeting method', () => {
+    describe('with timeslices budgeting method', () => {
       it('throws when aggregations failed', async () => {
         const slo = createSLO({
           budgeting_method: 'timeslices',
@@ -182,7 +182,7 @@ describe('SLIClient', () => {
         );
       });
 
-      describe('for a calendar aligned time window SLO type', () => {
+      describe('with a calendar aligned time window', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({
             budgeting_method: 'timeslices',
@@ -272,7 +272,7 @@ describe('SLIClient', () => {
         });
       });
 
-      describe('for a rolling time window SLO type', () => {
+      describe('with a rolling time window', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({
             budgeting_method: 'timeslices',
