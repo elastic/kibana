@@ -206,7 +206,7 @@ describe('links', () => {
       });
     });
 
-    it('shows Trusted Applications for non-superuser, too', async () => {
+    it('shows all links for non-superuser, too', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
 
       const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
@@ -223,11 +223,18 @@ describe('links', () => {
       });
     });
 
+    it('shows all links for user with all sub-feature privileges', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+
+      expect(filteredLinks).toEqual(links);
+    });
+
     it('hides Trusted Applications for user without privilege', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadTrustedApplications: false,
-          canReadHostIsolationExceptions: true,
         })
       );
 
@@ -236,12 +243,16 @@ describe('links', () => {
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.trustedApps));
     });
 
-    it('shows Trusted Applications for user with privilege', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
+    it('hides Event Filters for user without privilege', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadEventFilters: false,
+        })
+      );
 
       const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
 
-      expect(filteredLinks).toEqual(links);
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.eventFilters));
     });
   });
   describe('Endpoint List', () => {
